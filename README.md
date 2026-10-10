@@ -18,7 +18,7 @@ bin/vawe dev  films/hello/page.html        # half size, 30 fps, silent: the draf
 bin/vawe ship films/hello/page.html        # full size, 60 fps, subframe blur, audio: the final
 ```
 
-![vawe demo](engine-doctrine/media/vawe-demo.gif)
+![vawe demo](assets/vawe-demo.gif)
 
 ## A film, in one page
 
@@ -55,7 +55,7 @@ the cue lands with the move.
 ## Before you write a page
 
 Read `AGENTS.md` first: the contract, the loop, and the motion rules that are not your defaults. Pick the
-film type in `engine-doctrine/CRAFT/ROUTING.md` and start it with
+film type in `guides/ROUTING.md` and start it with
 `bin/vawe new <name> --from prompts/<template>.md`. Every template stops before code at least once (a
 beat table, a facts list or a SPEC); honour the stop. If your tool loads skills, load `vawe-page` before
 the first line. `bin/vawe new hello` writes `films/hello/page.html`, `directions.html` and `brief.md`.
@@ -102,7 +102,7 @@ A hook (`harness/live/stage-say.mjs`) names the next command for the film you ed
 The critique is run by a session that did not write the page, rejects by default, and names every
 finding as shot + frame + fix (`skills/vawe-critique/SKILL.md`). A reference is matched through
 `SPEC.md` and a KEEP/CHANGE list (`bin/vawe spec <mp4>`, then `bin/vawe coverage <film.mp4> --ref <mp4>` lists the seconds that still differ; `skills/vawe-reference/SKILL.md`). One prompt template per film
-type: the router `engine-doctrine/CRAFT/ROUTING.md`.
+type: the router `guides/ROUTING.md`.
 
 ## Determinism
 
@@ -141,15 +141,15 @@ quality/gates/     page-check.mjs · anim-traps.mjs · judge.mjs · doc-refs.mjs
 prompts/           one template per film type, and prompts/moves/ (moves to copy, with clips)
 skills/            vawe-brief · vawe-page · vawe-critique · vawe-reference (loaded on demand)
 taste/             rules/ (one rule per file) · craft/ · build/ (generated) · README.md (the index)
-engine-doctrine/   CRAFT/ (engine and process guides) · JUDGE.md
+guides/            engine and process guides (ROUTING.md picks a film type) · judge.md · research/ (timing sources)
 films/             <name>/page.html per film
 out/               rendered mp4s (gitignored)
 ```
 
 ## Docs
 
-New here and want to author? This page, then `AGENTS.md` (the house rules). Then `engine-doctrine/CRAFT/ROUTING.md`,
-`prompts/moves/README.md`, `core/motion/README.md`, `taste/README.md` (every taste rule; `taste/build/DIGEST.md` is the first read), and `engine-doctrine/JUDGE.md` (how a film is scored). `bin/vawe --help` prints every command.
+New here and want to author? This page, then `AGENTS.md` (the house rules). Then `guides/ROUTING.md`,
+`prompts/moves/README.md`, `core/motion/README.md`, `taste/README.md` (every taste rule; `taste/build/DIGEST.md` is the first read), and `guides/judge.md` (how a film is scored). `bin/vawe --help` prints every command.
 
 ## Status and license
 

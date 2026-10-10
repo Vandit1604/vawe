@@ -92,7 +92,7 @@ brand is a dark ground `#16151a`, white, the accent `#0a87ff` sparingly, Archivo
 
 ## Launch bars to study
 
-Links only. Look at the live site before you copy a move, and measure it first (`engine-doctrine/CRAFT/REFERENCE-STUDY.md`): a description is not a reference.
+Links only. Look at the live site before you copy a move, and measure it first (`guides/REFERENCE-STUDY.md`): a description is not a reference.
 
 | site | moves worth studying |
 |---|---|

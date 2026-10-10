@@ -393,7 +393,7 @@ function stackImages(files, out, axis, padW, padH, what) {
 
 // ── contact sheet: one row per shot, frames chosen by EVENT (see above), not by position ─────────
 // Same shape as make dev-tool X=beats, and for the same reason: the middle of a shot is the frame that hides the
-// entrance, which is exactly what a study is looking for (engine-doctrine/CRAFT/REFERENCE-STUDY.md).
+// entrance, which is exactly what a study is looking for (guides/REFERENCE-STUDY.md).
 const frames = path.join(dir, 'frames');
 fs.mkdirSync(frames, { recursive: true });
 const tileW = 300, tileH = Math.round((tileW * height) / width);
@@ -677,7 +677,7 @@ where they turn into our film.
 
 Storyboard fields these feed: \`pace:\`, \`threads:\`/\`object:\`, \`spectacle:\`, \`color:\` (the field line,
 not a swatch).
-See \`engine-doctrine/CRAFT/REFERENCE-STUDY.md\`.
+See \`guides/REFERENCE-STUDY.md\`.
 
 ## Write recipe candidates
 

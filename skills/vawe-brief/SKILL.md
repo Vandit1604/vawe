@@ -32,7 +32,7 @@ If the person answers "you decide", or no person is there (hill-climb, CI), run 
 
 ## 1. Pick the template
 
-`engine-doctrine/CRAFT/ROUTING.md` maps the request to a film type and a `prompts/<t>.md`. Two
+`guides/ROUTING.md` maps the request to a film type and a `prompts/<t>.md`. Two
 rules of thumb: a real product from a URL is `brand-launch-from-url`; a song that exists is
 `music-video-beat-synced`; a reference mp4 is `reference-rebuild`; no brief at all is
 `showreel-one-liner`. Under 15 s most types are one continuous action.

@@ -92,7 +92,7 @@ GitHub-release announcement already planned (per the open-source-plan memory). C
 generate from git history, honest by construction, no fabricated claims possible.
 
 **3. Round out the video-type pages to vawe's own finite taxonomy.** vawe already ships
-`/launch-video` and `/product-tour-video`. The engine's own doctrine (`engine-doctrine/CRAFT/ROUTING.md`,
+`/launch-video` and `/product-tour-video`. The engine's own doctrine (`guides/ROUTING.md`,
 the `vawe-type-*` skills) names a bounded set of six real, differently-authored video
 types: launch, demo, explainer, sting/motion-graphic, talking-head, recreation. Four more
 pages (`demo-video`, `explainer-video`, `sting-video`, `talking-head-video`) would each

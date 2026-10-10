@@ -78,4 +78,4 @@ trust`, `curiosity to payoff`). A beat with neither is a frame occupying time: c
 in [story.md](story.md).
 
 Nothing checks these rules by machine except `bin/vawe check page-check` and `anim-traps`. Whether it
-feels right is judged by an eye: yours, then a fresh critic's (`engine-doctrine/CRAFT/SUBAGENTS.md`).
+feels right is judged by an eye: yours, then a fresh critic's (`guides/SUBAGENTS.md`).

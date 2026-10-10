@@ -16,7 +16,7 @@ for f in $(printf '%s\n' "$staged" | grep -E '\.(js|mjs)$' | grep -v '^site/'); 
   node --check "$f" || fail=1
 done
 
-docs="$(printf '%s\n' "$staged" | grep -E '\.md$' | grep -vE '^(site|docs-site|skills/impeccable)/|^engine-doctrine/ROADMAP')"
+docs="$(printf '%s\n' "$staged" | grep -E '\.md$' | grep -vE '^(site|docs-site|skills/impeccable)/')"
 # shellcheck disable=SC2086
 [ -n "$docs" ] && { node quality/gates/doc-refs.mjs $docs; }
 

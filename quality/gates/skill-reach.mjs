@@ -7,11 +7,11 @@
 // registry entry can be found through the search corpus. Neither checked whether a SKILL could be
 // found at all. `vawe-review-loop` carried the judge loop's stopping rule (STOP-done ·
 // STOP-converged · STOP-hand-it-back) and nothing pointed at it: not AGENTS.md's skill router table,
-// not `engine-doctrine/CRAFT/ROUTING.md`, not another skill. A skill nobody routes to is a skill
+// not `guides/ROUTING.md`, not another skill. A skill nobody routes to is a skill
 // nobody loads, which for Claude Code (autoloaded only by description match) or a by-hand reader
 // (who opens a doc only when something told them to) is the same failure as not having written it.
 //
-// WHAT COUNTS AS ROUTED. AGENTS.md, `engine-doctrine/CRAFT/ROUTING.md`, the Makefile, or another
+// WHAT COUNTS AS ROUTED. AGENTS.md, `guides/ROUTING.md`, the Makefile, or another
 // skill's SKILL.md naming the skill's directory. A generated index would not count, because it lists
 // every skill whether or not an agent is told to open it, and the gate could then never fail.
 //
@@ -51,7 +51,7 @@ export function run({ root = ROOT } = {}) {
   // The search surface: AGENTS.md, the routing table, the Makefile, and every skill's own SKILL.md.
   const sources = [
     'AGENTS.md',
-    'engine-doctrine/CRAFT/ROUTING.md',
+    'guides/ROUTING.md',
     'Makefile',
     ...all.map((s) => s.file),
   ];
@@ -70,9 +70,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   const { total, unrouted } = run();
   const f = gateFindings();
   console.log(`── skill reach · ${total} skill(s)\n`);
-  if (!unrouted.length) console.log('✓ every skill is routed from AGENTS.md, engine-doctrine/CRAFT/ROUTING.md, the Makefile, or another skill');
+  if (!unrouted.length) console.log('✓ every skill is routed from AGENTS.md, guides/ROUTING.md, the Makefile, or another skill');
   for (const u of unrouted) {
-    const msg = `${u.dir}: nothing routes to it. Add it to AGENTS.md's skill router table or engine-doctrine/CRAFT/ROUTING.md, or name it from the skill that should hand off to it.`;
+    const msg = `${u.dir}: nothing routes to it. Add it to AGENTS.md's skill router table or guides/ROUTING.md, or name it from the skill that should hand off to it.`;
     console.log(`   ✗ ${u.file}  ${msg}`);
     f.fail('skill-unrouted', msg, { at: u.file });
   }

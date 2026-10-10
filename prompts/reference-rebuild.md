@@ -7,7 +7,7 @@ group: reference
 # Reference rebuild: measurements, KEEP/SWAP, rebuild
 
 **Use when** a reference film exists and the deliverable must match it: its light, its pacing, its
-type, its motion curves. Route 1 in `engine-doctrine/CRAFT/ROUTING.md`. Not for "inspired by";
+type, its motion curves. Route 1 in `guides/ROUTING.md`. Not for "inspired by";
 that is the director's brief.
 
 **Length:** the reference's length. Never longer.

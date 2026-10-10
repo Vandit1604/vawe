@@ -8,7 +8,7 @@ Tracked in git (we may share these):
 - `geo/`, `globe/`: Natural Earth 110m admin-0 (public domain) and us-atlas states (US Census TIGER, public domain).
 - `flags/`: flagcdn.com, public domain per the site's own terms.
 - `icons/ui/`: Lucide static v0.460.0, ISC. `icons/markdown*.svg`: Markdown mark, CC0 (Simple Icons).
-- `icons/vawe-wave.svg`, `icons/ledgerline-mark.svg`, `lottie/`: made in this repo, Apache-2.0.
+- `icons/vawe-wave.svg`, `icons/ledgerline-mark.svg`, `lottie/`, `vawe-demo.gif` (the README demo): made in this repo, Apache-2.0.
 - `vendor/`: see `vendor/README.md`, one licence per file.
 - `brands/*/house-style.md`: our notes, Apache-2.0.
 

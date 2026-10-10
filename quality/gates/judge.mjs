@@ -140,7 +140,7 @@ if (verdictArg) {
     console.error(`✗ ${mp4} has changed since the sheet was made (its content no longer matches). Re-run \`vawe judge ${inp}\` first.`);
     process.exit(1);
   }
-  // The judge is meant for a SEPARATE agent (engine-doctrine/JUDGE.md: "the PASS is not the author's
+  // The judge is meant for a SEPARATE agent (guides/judge.md: "the PASS is not the author's
   // to self-record"), refused by AGENT, not merely by session: see selfRecordCheck above for why a
   // shared session does not mean a shared agent. A FIX still records, since only PASS claims the
   // independent eye agreed.
@@ -153,7 +153,7 @@ if (verdictArg) {
     }
   }
   // --fix <code>@<beat>, repeated: the structured replacement for the free-text --fixes string
-  // (engine-doctrine/JUDGE.md's own complaint: a finding written as a sentence can never become a
+  // (guides/judge.md's own complaint: a finding written as a sentence can never become a
   // rule, because nothing parses it). Each one is a record, {code, beat}, checked against the closed
   // set in harness/lib/judge-codes.mjs so a typo cannot silently mint a new dimension. An unknown code
   // is refused here (a determinism concern), but a FIX verdict still records and the film still ships:
@@ -232,7 +232,7 @@ if (verdictJsonArg) {
     process.exit(1);
   }
   // `overall`: this judge's own holistic 1-10 read of the cut, never averaged with the other judge's
-  // (engine-doctrine/JUDGE.md still refuses to aggregate PER-DIMENSION scores across judges; this is a
+  // (guides/judge.md still refuses to aggregate PER-DIMENSION scores across judges; this is a
   // single judge's own number, compared independently against the other run's own number). `vawe ship`
   // requires both of the two latest fresh structured runs at 7 or above (harness/lib/judge-consensus.mjs).
   const overall = payload.overall;
