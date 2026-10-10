@@ -1,4 +1,4 @@
-// tests/media/lens.test.mjs: the lens (core/surfaces/lens.js) one effect at a time, measured on pixels.
+// The lens (core/surfaces/lens.js) one effect at a time, measured on pixels.
 //   node --test --test-concurrency=1 tests/media/lens.test.mjs
 // tests/fixtures/pages/lens.html films an HTML screen; `?cfg=` turns ONE effect on over an all-off lens and
 // `?only=` shows one feature of the screen. The page is read back with gl.readPixels at a 1920x1080 viewport,

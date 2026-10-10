@@ -110,7 +110,7 @@ const ROWS = {
 
 /**
  * A row whose target is still the house default follows the film's DESIGN.md declaration (harness/lib/design-decls.mjs); the target then
- * names the line it followed. A target the brief changed is the owner's own and stays. Pure.
+ * names the line it followed. A target the brief changed is the owner's own and stays.
  */
 export function followDecls(row, decls) {
   const house = DEFAULT_ROWS.find((r) => r.metric === row.metric);
@@ -176,7 +176,7 @@ export function tableLines(rows, was = null) {
 /** One printed line for a red row: the measure, its worst example and the fix. Pure. */
 export const redLine = (r) => `  ${r.metric}: ${r.measured}${r.detail[0] ? ` (${r.detail[0]})` : ''}${r.detail.length > 1 ? `; ${r.detail.at(-1)}` : ''}`;
 
-/** The one summary line of a draft: green of measured, the rows only ship measures, the rows in all (the ship's denominator), the trend and the extras. Pure. */
+/** The one summary line of a draft: green of measured, the rows only ship measures, the rows in all (the ship's denominator), the trend and the extras. */
 export function summaryLine(rows, was, extras = []) {
   const { green, measured } = acceptanceCounts(rows);
   const atShip = rows.filter((r) => r.atShip).length;

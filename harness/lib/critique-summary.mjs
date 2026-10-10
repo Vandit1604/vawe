@@ -6,7 +6,7 @@ const GLYPH = { error: '✗', warn: '~', info: '·' };
 const SINGLE_MAX = 3;
 const SECONDS_SHOWN = 4;
 
-/** The name of a film from its page or render path: films/<name>/page.html and out/<name>.mp4 both give <name>. Pure. */
+/** The name of a film from its page or render path: films/<name>/page.html and out/<name>.mp4 both give <name>. */
 export function filmKey(input) {
   const base = path.basename(input).replace(/\.[^.]+$/, '');
   return base === 'page' ? path.basename(path.dirname(path.resolve(input))) : base;
@@ -18,7 +18,7 @@ const countByCode = (records) => {
   return counts;
 };
 
-/** Output lines for findings: a rule with up to 3 findings prints each; a rule with more prints one line with the count, the first seconds and the first fix. Pure. */
+/** Output lines for findings: a rule with up to 3 findings prints each; a rule with more prints one line with the count, the first seconds and the first fix. */
 export function groupFindingLines(records, indent = '  ') {
   const counts = countByCode(records);
   const lines = [];
@@ -50,7 +50,6 @@ export function freshImages(dir, sinceMs) {
   return found.sort();
 }
 
-/** The closing lines of critique: findings by rule, then the images to Read. Pure. */
 export function summaryLines(records, images) {
   const counts = [...countByCode(records)].map(([code, n]) => `${code} ${n}`);
   const lines = ['', records.length ? `summary: ${records.length} finding(s): ${counts.join(', ')}` : 'summary: no findings'];

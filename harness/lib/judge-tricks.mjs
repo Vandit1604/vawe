@@ -1,5 +1,5 @@
 // The tricks that turn a check green without making the film better, as the fresh judge is told them, and the owner decisions it must respect.
-// A trick counts only with a cited second and what the judge saw there. Pure.
+// A trick counts only with a cited second and what the judge saw there.
 
 /** Each known trick: id, what to look for on the frames, and the axes it games. */
 export const TRICKS = [
@@ -44,5 +44,4 @@ export function capByTricks(scores, tricks) {
   return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, capped.has(k) ? Math.min(v, 7) : v]));
 }
 
-/** One report line per cited trick. */
 export const trickLines = (tricks = []) => tricks.map((t) => `trick ${t.trick} at ${t.at} s: ${t.evidence}`);

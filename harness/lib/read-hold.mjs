@@ -70,7 +70,7 @@ export const readHoldUnmeasured = (tracks) => groupsOf(tracks).filter((g) => g.h
  * the run's first sample minus half a step, out at its last plus half a step. `block` is the sample's element identity
  * (the nearest block-level ancestor): the texts of one element read as one line, two elements never join. A word of the
  * brief's Words table that the text holds gives the settle time; without one the run's start stands in for it, so the hold
- * is the whole time on screen. Text inside data-chrome or data-ui is not a line to read and has no track. Pure.
+ * is the whole time on screen. Text inside data-chrome or data-ui is not a line to read and has no track.
  */
 export function probeTracks(samples, { step, frameH }, words = []) {
   const tracks = [];

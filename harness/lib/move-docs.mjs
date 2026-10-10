@@ -11,7 +11,7 @@ const WHEN_MAX = 110;
 
 const plain = (s) => ` ${s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()} `;
 
-/** The first sentence after "**Use when**" of a move doc, or null when it has none. Pure. */
+/** The first sentence after "**Use when**" of a move doc, or null when it has none. */
 export function whenToUse(markdown) {
   const m = /\*\*Use when\*\*\s+([\s\S]*?)(?:\.\s|\.$|\n\n)/.exec(markdown);
   if (!m) return null;

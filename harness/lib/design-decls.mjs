@@ -11,7 +11,7 @@ const PCT_MAX = 20;
 
 const section = (text) => /^##[ \t]+Declared[^\n]*\n([\s\S]*?)(?=^##[ \t]|(?![\s\S]))/im.exec(text)?.[1] ?? '';
 
-/** { font, typeScale, uiScale, camera, lines, problems } of a DESIGN.md text. A scale is a percent of the frame height; a bad value is a problem, never a guess. Pure. */
+/** { font, typeScale, uiScale, camera, lines, problems } of a DESIGN.md text. A scale is a percent of the frame height; a bad value is a problem, never a guess. */
 export function parseDecls(text) {
   const out = { font: null, typeScale: null, uiScale: null, camera: null, lines: [], problems: [] };
   for (const raw of section(String(text ?? '')).split('\n')) {
@@ -40,12 +40,12 @@ export function readDecls(pagePath) {
   return parseDecls(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '');
 }
 
-/** The size floors (fractions of the frame height) a film follows: the house `rules` with each declared scale put over its floor. Pure. */
+/** The size floors (fractions of the frame height) a film follows: the house `rules` with each declared scale put over its floor. */
 export function rulesWith(decls, rules) {
   return { ...rules, ...(decls.typeScale != null ? { capFrac: decls.typeScale / 100 } : {}), ...(decls.uiScale != null ? { uiCapFrac: decls.uiScale / 100 } : {}) };
 }
 
-/** The lines the judge reads: what the film declared and what that means for its verdict. [] without a declaration. Pure. */
+/** The lines the judge reads: what the film declared and what that means for its verdict. [] without a declaration. */
 export function judgeLines(decls) {
   if (!decls.lines.length) return [];
   const asks = [

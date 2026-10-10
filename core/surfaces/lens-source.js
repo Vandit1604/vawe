@@ -1,17 +1,6 @@
-// core/surfaces/lens-source.js: the two ways to hand the lens its screen pixels.
-//
-//   canvasSource(canvas, { scale })   a 2D canvas the page draws the screen into (fillText, rects).
-//   htmlSource(element, { scale })    the screen stays HTML and CSS: the element is serialized, with
-//                                     every computed style inlined, into an SVG foreignObject image and
-//                                     uploaded as the texture on each seek.
-//
-// Both return { size: [w, h] in source px, async upload(gl, texture) -> { width, height } }.
-// `scale` is texture px per source px (2 keeps text sharp under a 3x lens zoom).
-//
-// htmlSource limits (an SVG image cannot load anything outside itself): fonts are inlined as data URIs
-// from the page's loaded @font-face rules, <img>, <canvas> and url() backgrounds become data URIs, and
-// ::before / ::after with a text `content` become real spans. Scripts, iframes, video and counters do not
-// carry over. The element is parked behind the lens canvas (fixed, z-index -1) so it still lays out.
+// canvasSource(canvas, { scale }) and htmlSource(element, { scale }) return { size: [w, h] in source px, async upload(gl, texture) }; `scale` is texture px per source px.
+// An SVG image cannot load anything outside itself, so htmlSource inlines fonts, <img>, <canvas> and url() backgrounds as data URIs
+// and turns text `content` of ::before / ::after into spans; scripts, iframes, video and counters do not carry over.
 
 export function canvasSource(canvas, { scale = 1 } = {}) {
   return {

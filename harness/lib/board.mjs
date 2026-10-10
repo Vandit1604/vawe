@@ -64,7 +64,7 @@ export function spectacleOf(html) {
 
 /**
  * The spectacle second the checks read: the Board's, when a filled Board names one, else the page's meta. The meta is the page's copy of the
- * plan, so moving it to the strongest moment cannot change a verdict. Pure.
+ * plan, so moving it to the strongest moment cannot change a verdict.
  */
 export function lockedSpectacle(brief, pageSpectacle) {
   const planned = boardFilled(brief ?? '') === true ? parseBoard(brief).spectacle : null;

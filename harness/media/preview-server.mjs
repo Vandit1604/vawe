@@ -21,7 +21,7 @@ export const stateFile = (final) => scratch('preview-server', `${createHash('sha
 const idleMs = () => Number(process.env.VAWE_PREVIEW_IDLE_MS) || 10 * 60 * 1000;
 const checkEveryMs = () => Math.min(30000, idleMs() / 3);
 
-/** Whether a daemon quits: its state file was last touched more than `idleMs` ago, or its checkout is gone. Pure. */
+/** Whether a daemon quits: its state file was last touched more than `idleMs` ago, or its checkout is gone. */
 export const shouldExit = ({ touchedMs, nowMs, idleMs, rootExists }) => !rootExists || nowMs - touchedMs > idleMs;
 
 function readState(final) {

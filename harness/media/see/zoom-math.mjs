@@ -9,7 +9,7 @@ const EDGE_STEP = 80;
 const BRIGHT = 180;
 const MAX_OUT_W = 4000;
 
-/** { x, y, w, h } from "x,y,w,h" in 1920x1080 coordinates, or null when it is not four numbers inside the frame. Pure. */
+/** { x, y, w, h } from "x,y,w,h" in 1920x1080 coordinates, or null when it is not four numbers inside the frame. */
 export function parseBox(text) {
   const p = String(text ?? '').split(',').map(Number);
   if (p.length !== 4 || p.some((n) => !Number.isFinite(n))) return null;
@@ -18,7 +18,6 @@ export function parseBox(text) {
   return { x, y, w, h };
 }
 
-/** The first problem in the arguments of zoom, or null. Pure. */
 export function zoomProblem({ at, box, auto, scale, vs, atB }) {
   if (at === undefined) return 'missing --at <s> (the moment to look at)';
   if (!(Number.isFinite(Number(at)) && Number(at) >= 0)) return `--at is not a number of seconds: "${at}"`;
@@ -33,7 +32,7 @@ export function zoomProblem({ at, box, auto, scale, vs, atB }) {
   return null;
 }
 
-/** Per-cell counts and coordinate sums of the edges brighter than `bright` in one luma plane. Pure. */
+/** Per-cell counts and coordinate sums of the edges brighter than `bright` in one luma plane. */
 function edgeCells(luma, w, h, bright) {
   const cols = Math.ceil(w / CELL), rows = Math.ceil(h / CELL);
   const count = new Float64Array(cols * rows), sx = new Float64Array(cols * rows), sy = new Float64Array(cols * rows);
@@ -49,7 +48,7 @@ function edgeCells(luma, w, h, bright) {
   return { cols, rows, count, sx, sy };
 }
 
-/** The 3x3 cell neighbourhood around cell `c`: { n, x, y } with the edge count and the mean edge position. Pure. */
+/** The 3x3 cell neighbourhood around cell `c`: { n, x, y } with the edge count and the mean edge position. */
 function neighbourhood({ cols, rows, count, sx, sy }, c) {
   const cx = c % cols, cy = Math.floor(c / cols);
   let n = 0, x = 0, y = 0;
@@ -70,7 +69,7 @@ const boxAround = (p, w, h) => ({
   w: AUTO_BOX.w, h: AUTO_BOX.h,
 });
 
-/** The box (AUTO_BOX size) around the densest cluster of edges brighter than `bright` in a 1920x1080 luma plane, or null when there is none. Pure. */
+/** The box (AUTO_BOX size) around the densest cluster of edges brighter than `bright` in a 1920x1080 luma plane, or null when there is none. */
 export function autoBox(luma, w = FRAME_W, h = FRAME_H, bright = BRIGHT) {
   const cells = edgeCells(luma, w, h, bright);
   let best = null;
@@ -84,7 +83,7 @@ export function autoBox(luma, w = FRAME_W, h = FRAME_H, bright = BRIGHT) {
 
 /**
  * One box with bright edges in both luma planes: the neighbourhood whose weaker plane has the most edges, centred on plane a's edges.
- * Null when the two planes share no such neighbourhood; the caller then takes autoBox of each plane. Pure.
+ * Null when the two planes share no such neighbourhood; the caller then takes autoBox of each plane.
  */
 export function commonBox(lumaA, lumaB, w = FRAME_W, h = FRAME_H, bright = BRIGHT) {
   const a = edgeCells(lumaA, w, h, bright), b = edgeCells(lumaB, w, h, bright);

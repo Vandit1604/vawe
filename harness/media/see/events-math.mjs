@@ -9,7 +9,7 @@ export const REACH_S = 0.3;
 
 const round = (n, d = 3) => +n.toFixed(d);
 
-/** The events of one shot, by second: a tracked part that first shows two frames or more after the shot opened, and each burst of frame energy (a burst that opens within two frames of an appearance is that appearance). Pure. */
+/** The events of one shot, by second: a tracked part that first shows two frames or more after the shot opened, and each burst of frame energy (a burst that opens within two frames of an appearance is that appearance). */
 export function shotEvents(shot, fps) {
   const appear = shot.moves.filter((m) => m.appears).map((m) => ({ t: m.firstSeen, what: `${m.id} appears`, kind: 'appears' }));
   const bursts = (shot.energy?.bursts ?? [])
@@ -22,7 +22,7 @@ const verdictOf = (frames) => (frames == null ? 'no sound' : Math.abs(frames) <=
 
 /**
  * Each event with the nearest sound mark `{ t, label }` within REACH_S: `frames` is the sound minus the event (positive: the sound comes after
- * the action), `verdict` is `sound on the frame` within 1 frame, `sound before its action` when the sound comes more than a frame early (the cause-first rule), `sound near` within 3 frames after, `sound off` beyond, `no sound` when no mark is in reach. Pure.
+ * the action), `verdict` is `sound on the frame` within 1 frame, `sound before its action` when the sound comes more than a frame early (the cause-first rule), `sound near` within 3 frames after, `sound off` beyond, `no sound` when no mark is in reach.
  */
 export function pairEvents(events, marks, fps) {
   return events.map((e) => {
@@ -32,26 +32,25 @@ export function pairEvents(events, marks, fps) {
   });
 }
 
-/** The sound marks no event of the film is within NEAR_FRAMES of: a sound with no action in the picture. Pure. */
+/** The sound marks no event of the film is within NEAR_FRAMES of: a sound with no action in the picture. */
 export function soundsWithoutAction(marks, events, fps) {
   return marks.filter((m) => !events.some((e) => Math.abs(m.t - e.t) * fps <= NEAR_FRAMES + 1e-6)).map((m) => ({ t: round(m.t), label: m.label }));
 }
 
-/** { events, onFrame, share }: how many events have their sound on the frame. Pure. */
+/** { events, onFrame, share }: how many events have their sound on the frame. */
 export function matchOf(shots) {
   const events = shots.flatMap((s) => s.events ?? []);
   const onFrame = events.filter((e) => e.verdict === 'sound on the frame').length;
   return { events: events.length, onFrame, share: events.length ? round(onFrame / events.length, 2) : null };
 }
 
-/** The printed lines of one shot's events. Pure. */
 export function eventLines(events) {
   if (!events?.length) return [];
   return ['Events inside (second, what, nearest sound):', ...events.map((e) => `- ${e.t.toFixed(2)} s ${e.what}: ${e.sound ? `${e.sound.label} at ${e.sound.t.toFixed(2)} s (${e.sound.frames > 0 ? '+' : ''}${e.sound.frames} f), ${e.verdict}` : e.verdict}`)];
 }
 
 /**
- * What changes in the frame between two gray planes of w x h: { share (of the pixels that changed), box { x, y, w, h } as fractions, where, words }. Pure.
+ * What changes in the frame between two gray planes of w x h: { share (of the pixels that changed), box { x, y, w, h } as fractions, where, words }.
  * A change over 60% of the frame is a cut or a camera move; under 0.2% nothing moves.
  */
 export function changeRegion(a, b, w, h, step = 24) {

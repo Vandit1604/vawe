@@ -7,7 +7,7 @@ const LEVEL_WINDOW_S = 0.05;
 const CURVE_WINDOW_S = 0.4;
 const CURVE_STEP_S = 0.1;
 
-/** Seconds of a source between data-trim and data-trim-end (or its end). Pure. */
+/** Seconds of a source between data-trim and data-trim-end (or its end). */
 export const playableOf = (spec, seconds) => Math.max(0.01, Math.min(seconds, spec.trimEnd ?? Infinity) - spec.trim);
 
 const round1 = (n) => Math.round(n * 10) / 10;

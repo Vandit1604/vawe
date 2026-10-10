@@ -22,7 +22,6 @@ if (!url || !name) { console.error('usage: node scripts/brand/kit.mjs <url> <nam
 const dir = path.join(ROOT, 'assets/brands', name);
 fs.mkdirSync(dir, { recursive: true });
 
-// ---- init: is the checkout ready to render, before spending a capture on it? ----
 if (init) {
   console.log('→ doctor: is the checkout ready to render');
   try {

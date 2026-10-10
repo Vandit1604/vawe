@@ -1,6 +1,6 @@
 // The moving-tail rule (taste/rules/moving-tail.md) read from the page: a tail is moving when an animation on a visible part
 // runs at every sample of the last tail_seconds, whatever the pixels of the judge's sheet say. A camera move, a whole-frame
-// element and a decorative (aria-hidden) layer are not a part: camera-moves.mjs owns what a camera move is. Pure.
+// element and a decorative (aria-hidden) layer are not a part: camera-moves.mjs owns what a camera move is.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { isCameraMove } from './camera-moves.mjs';
 

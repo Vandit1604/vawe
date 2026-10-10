@@ -1,6 +1,6 @@
 // The whole-frame moves of a film (a camera push, pull or drift, a transform on a world or stage root, parallax on the whole ground),
 // read from the motion records (harness/lib/motion-lint.mjs). They are not element motion: live-hold counts a hold as alive only through
-// a part moving inside the frame, and constant-camera asks for a camera that holds still by default. Pure.
+// a part moving inside the frame, and constant-camera asks for a camera that holds still by default.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { CUT, moveProps } from './motion-records.mjs';
 
@@ -34,12 +34,11 @@ const minus = (spans, cut) => spans.flatMap(([a, b]) => {
   return parts;
 });
 
-/** The camera moves of a film as [a, b] seconds, merged. */
 export const cameraSpans = (records) => unionOf(records.filter(isCameraMove).map(spanOf));
 
 /**
  * The seconds where the camera moves and no part of the frame moves by itself: [a, b] pairs. An element move is any other record on a part
- * that does not cover the frame. Pure.
+ * that does not cover the frame.
  */
 export function cameraOnlySpans(records) {
   const alive = records.filter((r) => !isCameraMove(r) && !r.fullFrame && r.duration > CUT && r.props.length);
@@ -48,7 +47,7 @@ export function cameraOnlySpans(records) {
 
 const round2 = (x) => +x.toFixed(2);
 
-/** The still runs of scene-stats with the camera-only spans added: pixels change under a camera move, so the page's records name those seconds. A run built from them carries `camera: true`. Pure. */
+/** The still runs of scene-stats with the camera-only spans added: pixels change under a camera move, so the page's records name those seconds. A run built from them carries `camera: true`. */
 export function withCameraStills(runs, cameraOnly) {
   const parts = [...runs.map((r) => ({ a: r.a, b: r.b, camera: false })), ...cameraOnly.map(([a, b]) => ({ a, b, camera: true }))].sort((x, y) => x.a - y.a);
   const out = [];
@@ -64,7 +63,7 @@ const covered = (spans, [a, b]) => spans.reduce((s, [c, d]) => s + Math.max(0, M
 /**
  * How much of the film the camera moves: { share (of the duration), worlds (the longest run of consecutive worlds with a camera move),
  * first (second the first move starts) }. A move that holds the `spectacle` second is the one deliberate move and is left out. A world has a
- * move when the camera covers half of it. `worlds` is [{ start, end }] or null. Pure.
+ * move when the camera covers half of it. `worlds` is [{ start, end }] or null.
  */
 export function cameraLoad(records, { dur, worlds = null, spectacle = null }) {
   const moves = records.filter(isCameraMove).map(spanOf).filter(([a, b]) => spectacle == null || !(a <= spectacle && spectacle <= b));

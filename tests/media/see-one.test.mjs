@@ -1,4 +1,4 @@
-// tests/media/see-one.test.mjs: the pure parts of `vawe see` on canned numbers. No ffmpeg, no browser.
+// The pure parts of `vawe see` on canned numbers. No ffmpeg, no browser.
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { findRuns, findTransitions } from '../../harness/lib/ref-measure/transition.mjs';
