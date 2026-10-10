@@ -1,0 +1,57 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.6">
+<title>move: caret door</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .line { position: absolute; left: 9vw; top: calc(var(--u) * 46); margin: 0; z-index: 1; white-space: pre; font: 500 calc(var(--u) * 8)/1 var(--mono); letter-spacing: -0.02em; }
+  .line .prompt { color: var(--muted); }
+  .caret { position: absolute; z-index: 3; border-radius: 0.2vh; background: var(--accent); }
+  .door { position: absolute; z-index: 2; top: -2vh; height: 104vh; background: var(--paper); color: var(--paper-ink); border: solid var(--accent); border-width: 0 calc(var(--u) * 0.6); visibility: hidden; will-change: transform; }
+  .door .face { position: absolute; top: 2vh; width: 100vw; height: 100vh; }
+  .face h1 { position: absolute; left: 9vw; top: calc(var(--u) * 28); margin: 0; font: 800 calc(var(--u) * 17)/1 var(--head); letter-spacing: var(--head-track); }
+  .face .meta { position: absolute; left: 9.4vw; top: calc(var(--u) * 54); margin: 0; font: 500 var(--t-lead)/1.5 var(--mono); color: var(--paper-muted); white-space: pre; }
+  .face .live { position: absolute; left: 9.4vw; top: calc(var(--u) * 72); padding: calc(var(--u) * 1.6) calc(var(--u) * 3.2); border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 700 var(--t-body)/1 var(--mono); }
+</style>
+</head>
+<body>
+<p class="line" id="line"><span class="prompt">$ </span><span id="typed"></span></p>
+<div class="caret" id="caret"></div>
+<div class="door" id="door"><div class="face" id="face"><h1>Shipped.</h1><p class="meta">launch.mp4  41 s
+16:9  9:16  1:1</p><span class="live" id="live">live</span></div></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, u = H / 100, clamp = (x) => Math.min(1, Math.max(0, x));
+const CMD = 'vawe ship launch';
+const line = document.getElementById('line'), typed = document.getElementById('typed'), caret = document.getElementById('caret');
+const door = document.getElementById('door'), face = document.getElementById('face'), live = document.getElementById('live');
+const land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch'), pop = easeFn('pop');
+const RETRACT = 0.3, TYPE = 0.15, STEP = 0.04, T_GROW = 1.3, D_GROW = 0.5, T_OPEN = 1.8, D_OPEN = 0.9, PERSPECTIVE = 1.7 * W;
+const END = TYPE + STEP * CMD.length;
+const blink = (t) => t < END + 0.05 || Math.floor((t - END - 0.05) / 0.28) % 2 === 1;   // solid while typing, then it blinks and is lit again when it grows
+vawe.onFrame((t) => {
+  typed.textContent = CMD.slice(0, clamp((t - TYPE) / (STEP * CMD.length)) * CMD.length | 0);
+  const rl = line.getBoundingClientRect();
+  const cx = rl.right + 0.5 * u, cy = (rl.top + rl.bottom) / 2, ch = 7.4 * u, cw = 1.2 * u;
+  // a short dip before the growth: the caret gathers, then rises from its middle
+  const g = land(clamp((t - T_GROW) / D_GROW)), dip = Math.sin(Math.PI * clamp((t - T_GROW + 0.12) / 0.12)) * 0.08;
+  const h = (ch * (1 - dip) + (1.04 * H - ch) * g) * (1 - launch(clamp((t - T_OPEN) / RETRACT)));   // once the door turns, the caret is its axis and draws back into the middle
+  caret.style.left = `${cx - cw / 2}px`; caret.style.width = `${cw}px`;
+  caret.style.top = `${cy - h / 2 + (H / 2 - cy) * g}px`; caret.style.height = `${h}px`;
+  const opening = t >= T_OPEN;
+  caret.style.visibility = (opening ? t < T_OPEN + RETRACT : t >= T_GROW || blink(t)) ? 'visible' : 'hidden';
+  door.style.visibility = opening ? 'visible' : 'hidden';
+  // the door is two screens wide and turns about the caret: its edges are the caret, split in two
+  door.style.left = `${cx - W}px`; door.style.width = `${2 * W}px`;
+  face.style.left = `${W - cx}px`;
+  const a = 90 * (1 - settle(clamp((t - T_OPEN) / D_OPEN)));
+  door.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${a}deg)`;
+  live.style.scale = String(t < T_OPEN + D_OPEN - 0.1 ? 0 : pop(clamp((t - T_OPEN - D_OPEN + 0.1) / 0.5)));
+});
+</script>
+</body>
+</html>

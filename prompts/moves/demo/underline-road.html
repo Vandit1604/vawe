@@ -1,0 +1,89 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="paper">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.9">
+<title>move: underline road</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .world { position: absolute; left: 0; top: 0; width: 100vw; height: 200vh; will-change: translate; }
+  .world > svg { position: absolute; left: 0; top: 0; width: 100vw; height: 200vh; overflow: visible; }
+  .map { z-index: 1; height: 250vh; -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 100vh, #000 128vh); mask-image: linear-gradient(to bottom, transparent 0, transparent 100vh, #000 128vh); }
+  .road { z-index: 3; }
+  .a-copy { position: absolute; left: 9vw; top: calc(var(--u) * 29); margin: 0; z-index: 2; }
+  .a-copy .eyebrow { margin-bottom: var(--s2); }
+  .a-copy h1 { margin: 0; white-space: nowrap; font: 400 calc(var(--u) * 11)/1.12 var(--head); letter-spacing: var(--head-track); }
+  .a-copy h1 .em { color: var(--accent); }
+  .pin { position: absolute; z-index: 4; width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); margin: calc(var(--u) * -2.6) 0 0 calc(var(--u) * -2.6); border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 calc(var(--u) * 0.9) var(--surface), var(--stack); }
+  .ring { position: absolute; z-index: 3; width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); margin: calc(var(--u) * -2.6) 0 0 calc(var(--u) * -2.6); border-radius: 50%; border: calc(var(--u) * 0.35) solid var(--accent); }
+  .eta { position: absolute; z-index: 5; left: 9vw; top: calc(var(--u) * 121); display: flex; align-items: center; gap: var(--s3); }
+  .eta .big { font: 400 calc(var(--u) * 9)/1 var(--head); letter-spacing: var(--head-track); }
+  .eta .small { color: var(--muted); font-family: var(--mono); }
+</style>
+</head>
+<body>
+<div class="world" id="world">
+  <svg class="map" id="map" aria-hidden="true"></svg>
+  <div class="a-copy"><div class="eyebrow">Routes</div><h1>Find the <span id="word" class="em">fastest way</span> home.</h1></div>
+  <svg class="road" id="road" aria-hidden="true"><path id="route" fill="none" stroke="var(--accent)" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="ring" id="ring"></div><div class="pin" id="pin"></div>
+  <div class="card eta" id="eta"><div class="big">14 min</div><div class="small">3.2 km  via Pine St</div></div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, u = H / 100, clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, x) => p + (q - p) * x;
+const NS = 'http://www.w3.org/2000/svg', $ = (id) => document.getElementById(id);
+const world = $('world'), map = $('map'), road = $('road'), route = $('route'), ring = $('ring'), pin = $('pin'), eta = $('eta'), word = $('word');
+const land = easeFn('land'), swap = easeFn('swap'), pop = easeFn('pop');
+const css = getComputedStyle(document.documentElement);
+const raised = css.getPropertyValue('--raised').trim(), hover = css.getPropertyValue('--hover').trim();
+
+// the map: blocks between streets, the street gap is the ground colour
+const XS = [0.02, 0.17, 0.32, 0.47, 0.61, 0.74, 0.88, 1.02].map((f) => f * W), YS = [0.9, 1.14, 1.38, 1.62, 1.86, 2.1, 2.34].map((f) => f * H), SW = 3.4 * u;
+for (let j = 0; j < YS.length - 1; j++) for (let i = 0; i < XS.length - 1; i++) {
+  const r = document.createElementNS(NS, 'rect');
+  r.setAttribute('x', XS[i] + SW / 2); r.setAttribute('y', YS[j] + SW / 2);
+  r.setAttribute('width', XS[i + 1] - XS[i] - SW); r.setAttribute('height', YS[j + 1] - YS[j] - SW);
+  r.setAttribute('rx', 0.9 * u); r.setAttribute('fill', (i * 3 + j * 5) % 4 === 0 ? hover : raised);
+  map.appendChild(r);
+}
+// the route follows street centres: out of the underline, down one street, along another, to the pin
+const DEST = { x: XS[4], y: YS[4] };
+const stops = (x0, y0) => [[x0, y0], [XS[5], y0], [XS[5], YS[2]], [XS[3], YS[2]], [XS[3], DEST.y], [DEST.x, DEST.y]];
+const rounded = (pts, rad) => pts.map(([x, y], i) => {
+  if (i === 0) return `M${x} ${y}`;
+  if (i === pts.length - 1) return `L${x} ${y}`;
+  const [px, py] = pts[i - 1], [nx, ny] = pts[i + 1], d1 = Math.hypot(x - px, y - py), d2 = Math.hypot(nx - x, ny - y);
+  const a = [x - ((x - px) / d1) * rad, y - ((y - py) / d1) * rad], b = [x + ((nx - x) / d2) * rad, y + ((ny - y) / d2) * rad];
+  return `L${a[0]} ${a[1]} Q${x} ${y} ${b[0]} ${b[1]}`;
+}).join(' ');
+
+const T_UL = 0.35, D_UL = 0.4, T_GO = 1.05, D_GO = 1.8, T_ARRIVE = T_GO + D_GO, T_CARD = T_ARRIVE + 0.15;
+const k = 0.09 * H, sp = (x) => k * Math.log(1 + Math.exp(x / k));
+let total = 0, lenWord = 0;
+vawe.onFrame((t) => {
+  world.style.translate = '0 0';                                  // measure the word before the camera moves
+  const r = word.getBoundingClientRect();                         // measured per frame: the face may load after the first paint
+  const ya = r.bottom - 0.1 * r.height;
+  route.setAttribute('d', rounded(stops(r.left, ya), 3.2 * u));
+  route.setAttribute('stroke-width', 1.1 * u);
+  total = route.getTotalLength(); lenWord = r.width;
+  const s = t < T_GO ? lenWord * land(clamp((t - T_UL) / D_UL)) : lenWord + (total - lenWord) * (0.5 * clamp((t - T_GO) / D_GO) + 0.5 * swap(clamp((t - T_GO) / D_GO)));
+  route.style.strokeDasharray = `${total} ${total}`; route.style.strokeDashoffset = String(total - s);
+  route.style.visibility = s < 0.5 ? 'hidden' : 'visible';
+  const head = route.getPointAtLength(Math.min(s, total));
+  // the camera follows the head down the street and stops where the map ends
+  const x = head.y - 0.55 * H, off = sp(x) - sp(x - 1.1 * H);
+  world.style.translate = `0 ${-off}px`;
+  const ua = clamp((t - T_ARRIVE) / 0.5);
+  pin.style.left = `${DEST.x}px`; pin.style.top = `${DEST.y}px`; ring.style.left = `${DEST.x}px`; ring.style.top = `${DEST.y}px`;
+  pin.style.scale = String(t < T_ARRIVE - 0.05 ? 0 : pop(clamp((t - T_ARRIVE + 0.05) / 0.5)));
+  ring.style.scale = String(1 + 3.2 * land(ua)); ring.style.opacity = String(t < T_ARRIVE ? 0 : 1 - ua);
+  const uc = land(clamp((t - T_CARD) / 0.7));
+  eta.style.translate = `0 ${(1 - uc) * 4 * u}px`; eta.style.opacity = String(clamp(uc * 3));
+});
+</script>
+</body>
+</html>

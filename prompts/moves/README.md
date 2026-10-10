@@ -48,7 +48,7 @@ One row per job, best move first. Every built move is in this table.
 | change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md), [light-leak-transition](light-leak-transition.md) |
 | change between shots, graphic | [direction-wipe](direction-wipe.md), [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md), [shape-morph-wipe](shape-morph-wipe.md), [type-match-cut](type-match-cut.md) |
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md), [spin-transition](spin-transition.md) |
-| change between shots, one object carries over with no cut and no crossfade | [cursor-spotlight](cursor-spotlight.md), [toggle-horizon](toggle-horizon.md), [progress-timeline](progress-timeline.md), [avatar-world](avatar-world.md), [glow-record](glow-record.md) |
+| change between shots, one object carries over with no cut and no crossfade | [cursor-spotlight](cursor-spotlight.md), [toggle-horizon](toggle-horizon.md), [progress-timeline](progress-timeline.md), [avatar-world](avatar-world.md), [glow-record](glow-record.md), [highlight-sweep](highlight-sweep.md), [shadow-handoff](shadow-handoff.md), [word-portal](word-portal.md), [underline-road](underline-road.md), [caret-door](caret-door.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [camera-moves](camera-moves.md), [rack-focus](rack-focus.md) |
 | film a screen as a real object: tilt, depth, bloom, LED grid, fringes | [lens](lens.md) |
@@ -152,6 +152,11 @@ One row per job, best move first. Every built move is in this table.
 | [progress timeline](progress-timeline.md) | a bar ends and the result opens in an editor: the fill runs past its end, stands up into the scrubber of a timeline and reveals it while it keeps the fill's speed |
 | [avatar world](avatar-world.md) | a person or brand is the way in: a round vector avatar grows until its circle covers the frame and its art is the ground of the next scene |
 | [glow record](glow-record.md) | an alert becomes a live state: a badge's red floods the frame in 0.35 s on a screen blend with over-exposure, then gathers into the red dot of a recording light |
+| [highlight sweep](highlight-sweep.md) | a highlight sweeps across a key word, keeps going off the line and grows into the next panel's background; the edge never stops at the word, and the word flips to dark ink at the edge |
+| [shadow handoff](shadow-handoff.md) | a card lifts, its blurred shadow stretches down and right and darkens into the night scene's ground colour, then the card leaves faster than it lifted |
+| [word portal](word-portal.md) | a typed word grows until one stem is the whole frame and the next scene shows through the letterforms (an SVG text clip over a fixed scene B), on a log-path zoom |
+| [underline road](underline-road.md) | the underline of a headline extends, bends down and becomes the route on a simple map, with the camera trailing the head at its speed and stopping at the map's end |
+| [caret door](caret-door.md) | the blinking caret grows tall, then opens as a two-frame-wide door that turns about it under perspective; the next screen is on the door's face |
 
 ## Point the eye
 

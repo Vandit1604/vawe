@@ -1,0 +1,70 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.8">
+<title>move: word portal</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .a-label { position: absolute; left: 11.4vw; top: calc(var(--u) * 24); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--muted); z-index: 1; }
+  .caret { position: absolute; left: 0; top: 0; z-index: 1; background: var(--accent); transform-origin: 0 0; }
+  svg.m { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; visibility: hidden; pointer-events: none; }
+  svg.m text, svg.clip text { font: 800 calc(var(--u) * 26) var(--head); letter-spacing: -0.04em; }
+  .b { position: absolute; inset: 0; z-index: 2; background: var(--accent); color: var(--on-accent); clip-path: url(#portal); }
+  .b h1 { position: absolute; left: 0; right: 0; top: calc(var(--u) * 33); margin: 0; text-align: center; font: 800 calc(var(--u) * 19)/1 var(--head); letter-spacing: -0.05em; }
+  .b .row { position: absolute; left: 0; right: 0; top: calc(var(--u) * 58); display: flex; justify-content: center; gap: var(--s2); }
+  .b .row span { padding: calc(var(--u) * 1.4) calc(var(--u) * 2.8); border-radius: 999px; background: var(--paper); color: var(--paper-ink); font: 600 var(--t-body)/1 var(--mono); }
+  .b .url { position: absolute; left: 0; right: 0; top: calc(var(--u) * 74); margin: 0; text-align: center; font: 500 var(--t-lead)/1 var(--mono); }
+</style>
+</head>
+<body>
+<svg class="m" aria-hidden="true"><text id="measure" x="0" y="0">launch</text></svg>
+<svg class="clip" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><clipPath id="portal" clipPathUnits="userSpaceOnUse"><text id="ptext" x="0" y="0" ></text></clipPath></defs></svg>
+<p class="a-label">$ vawe ship --to</p>
+<div class="caret" id="caret"></div>
+<section class="b" id="b">
+  <h1 class="pop">Live in 41 s</h1>
+  <div class="row pop"><span>16:9</span><span>9:16</span><span>1:1</span></div>
+  <p class="url pop">vawe.dev/launch</p>
+</section>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, u = H / 100, clamp = (x) => Math.min(1, Math.max(0, x));
+const WORD = 'launch', F = 26 * u, X0 = 0.114 * W, Y0 = 58 * u;
+const measure = document.getElementById('measure'), ptext = document.getElementById('ptext'), caret = document.getElementById('caret'), b = document.getElementById('b');
+const pops = [...b.querySelectorAll('.pop')];
+const land = easeFn('land'), swap = easeFn('swap');
+const TYPE = 0.3, STEP = 0.14, T0 = 1.6, DUR = 1.15;            // the portal opens on a lit caret, the last blink after the typing
+const END = TYPE + STEP * (WORD.length - 1);
+const STEM = 0.19;                                              // ink width of the l's stem as a share of the font size
+measure.setAttribute('x', X0); measure.setAttribute('y', Y0);
+vawe.onFrame((t) => {
+  const typed = t < TYPE ? 0 : Math.min(WORD.length, Math.floor((t - TYPE) / STEP) + 1);
+  const ext = measure.getExtentOfChar(0);
+  const ox = ext.x + ext.width / 2, oy = Y0 - 0.37 * F;          // the middle of the stem of the first letter
+  const S = (1.15 * W) / (STEM * F);
+  const q = clamp((t - T0) / DUR), p = 0.4 * q + 0.6 * swap(q);  // a linear share keeps the growth readable through the middle
+  const s = Math.exp(Math.log(S) * p);
+  const px = ox + (W / 2 - ox) * p, py = oy + (H / 2 - oy) * p;   // the stem drifts to the middle as it grows
+  const m = `translate(${px - s * ox}px, ${py - s * oy}px) scale(${s})`;
+  ptext.textContent = WORD.slice(0, typed);
+  ptext.setAttribute('x', X0); ptext.setAttribute('y', Y0); 
+  ptext.setAttribute('transform', `translate(${px - s * ox} ${py - s * oy}) scale(${s})`);
+  const cx = X0 + (typed ? measure.getSubStringLength(0, typed) : 0) + 0.02 * F;
+  const lit = t < END + STEP + 0.02 || Math.floor((t - END - STEP) / 0.3) % 2 === 0;
+  caret.style.width = `${0.075 * F}px`; caret.style.height = `${0.8 * F}px`;
+  caret.style.left = `${cx}px`; caret.style.top = `${Y0 - 0.72 * F}px`;
+  caret.style.transform = m;
+  caret.style.visibility = lit && t > TYPE - 0.1 ? 'visible' : 'hidden';
+  b.style.clipPath = q >= 1 ? 'none' : 'url(#portal)';
+  pops.forEach((el, i) => {
+    const k = land(clamp((t - T0 - 0.1 - i * 0.12) / 0.7));
+    el.style.translate = `0 ${(1 - k) * 7 * u}px`;
+    el.style.opacity = String(clamp(k * 4));
+  });
+});
+</script>
+</body>
+</html>

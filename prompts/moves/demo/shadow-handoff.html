@@ -1,0 +1,76 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="daylight">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.8">
+<title>move: shadow handoff</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  :root { --night: #060914; }
+  body { display: block; }
+  .a-copy { position: absolute; left: 9vw; top: calc(var(--u) * 9); margin: 0; z-index: 1; }
+  .a-copy b { color: var(--ink); font-weight: 600; }
+  .shadow { position: absolute; z-index: 3; border-radius: var(--r-card); will-change: left, top, width, height, filter; }
+  .a-card { position: absolute; z-index: 4; left: 50vw; top: 50vh; width: 31vw; height: calc(var(--u) * 54); margin: calc(var(--u) * -27) 0 0 -15.5vw; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--ring); }
+  .a-card .num { font: 600 calc(var(--u) * 17)/1 var(--head); letter-spacing: -0.05em; }
+  .a-card .bars { display: flex; align-items: flex-end; gap: var(--s1); height: calc(var(--u) * 11); }
+  .a-card .bars i { flex: 1; border-radius: var(--r1); background: var(--raised); }
+  .a-card .bars i:last-child { background: var(--accent); }
+  .a-card .row { display: flex; justify-content: space-between; align-items: center; }
+
+  .b { position: absolute; inset: 0; z-index: 5; color: #eef2ff; --muted: #8e9ac0; --accent: #7b86ff; visibility: hidden; }
+  .b .mask { position: absolute; left: 9vw; overflow: hidden; clip-path: inset(0 -20vw); }
+  .b h1 { margin: 0; font: 600 calc(var(--u) * 12)/1.12 var(--head); letter-spacing: var(--head-track); will-change: translate; }
+  .b h1 em { font-style: normal; color: var(--accent); }
+  .b .m1 { top: calc(var(--u) * 33); }
+  .b .m2 { top: calc(var(--u) * 47); }
+  .b .sub { position: absolute; left: 9.2vw; top: calc(var(--u) * 66); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--muted); }
+</style>
+</head>
+<body>
+<p class="a-copy eyebrow"><b>vawe</b>  weekly report</p>
+<div class="shadow" id="shadow"></div>
+<section class="card a-card" id="card">
+  <div class="row"><span class="eyebrow">This week</span><span class="pill up">+18%</span></div>
+  <div><div class="num">128</div><div class="body muted">films shipped</div></div>
+  <div class="bars"><i style="height:38%"></i><i style="height:52%"></i><i style="height:44%"></i><i style="height:70%"></i><i style="height:58%"></i><i style="height:100%"></i></div>
+</section>
+<section class="b" id="b">
+  <div class="mask m1"><h1 id="h1">Same numbers,</h1></div>
+  <div class="mask m2"><h1 id="h2">after <em>dark.</em></h1></div>
+  <p class="sub" id="bsub">02:14 UTC  3 renders queued</p>
+</section>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, u = H / 100, clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, x) => p + (q - p) * x;
+const card = document.getElementById('card'), shadow = document.getElementById('shadow'), b = document.getElementById('b');
+const h1 = document.getElementById('h1'), h2 = document.getElementById('h2'), bsub = document.getElementById('bsub');
+const land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch'), glide = easeFn('glide');
+const LIFT = { at: 0.6, dur: 0.8 }, SPREAD = { at: 0.85, dur: 1.15 }, LEAVE = { at: 2.05, dur: 0.42 }, SHOW = 2.4;
+const cw = 0.31 * W, ch = 54 * u, cx = W / 2, cy = H / 2;
+const day = [15, 32, 51, 0.2], night = [6, 9, 20, 1];                 // the shadow ends as the colour of the night ground
+const mix = (p, q, x) => p.map((v, i) => lerp(v, q[i], x));
+vawe.onFrame((t) => {
+  const p = settle(clamp((t - LIFT.at) / LIFT.dur));                  // card height above the ground, 0 to 1
+  const g = glide(clamp((t - SPREAD.at) / SPREAD.dur));                // how far the shadow has spread over the frame
+  const out = launch(clamp((t - LEAVE.at) / LEAVE.dur));
+  card.style.translate = `0 ${-6 * u * p - (H * 0.9) * out}px`;
+  card.style.scale = String(1 + 0.04 * p + 0.1 * out);
+  // the shadow stays on the ground: it grows and softens as the card rises, then keeps growing until it is the whole frame
+  const w = lerp(cw * (1 + 0.1 * p), W * 1.7, g), h = lerp(ch * (1 + 0.3 * p), H * 1.7, g);
+  const dx = lerp(2 * u * p, 0, g), dy = lerp(1.6 * u + 9 * u * p, 0, g);   // a low light throws the shadow down and to the right
+  shadow.style.left = `${cx - w / 2 + dx}px`; shadow.style.top = `${cy - h / 2 + dy}px`;
+  shadow.style.width = `${w}px`; shadow.style.height = `${h}px`;
+  const [r, gr, bl, a] = mix(day, night, g);
+  shadow.style.background = `rgba(${r}, ${gr}, ${bl}, ${a})`;
+  shadow.style.filter = `blur(${lerp(1.2 * u + 3.4 * u * p, 9 * u, g)}px)`;
+  b.style.visibility = t < SHOW - 0.05 ? 'hidden' : 'visible';
+  const rise = (el, at, dur) => { el.style.translate = `0 ${(1 - land(clamp((t - at) / dur))) * 112}%`; };
+  rise(h1, SHOW, 0.8); rise(h2, SHOW + 0.1, 0.8);
+  const us = land(clamp((t - SHOW - 0.3) / 0.7));
+  bsub.style.translate = `0 ${(1 - us) * 2 * u}px`; bsub.style.opacity = String(clamp(us * 3));
+});
+</script>
+</body>
+</html>
