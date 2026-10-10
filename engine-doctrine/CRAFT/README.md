@@ -33,5 +33,5 @@ about how to run a film or change the engine, not about how a film should look.
 
 - `taste/` = what a film should look and sound like: the rules, and the reasons behind them.
 - `engine-doctrine/CRAFT/` = how to choose a film type, run the loop and change the engine (you are here).
-- `engine-doctrine/DESIGN-DATABASE.md` = what techniques exist (the catalog).
+- `prompts/moves/README.md` = what techniques exist; `core/motion/README.md` = the motion numbers.
 - `skills/{taste-skill,impeccable}` = enforcement for web UI work, not for films.

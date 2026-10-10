@@ -20,7 +20,7 @@ The numbers behind the spines, one rule per file: [the index](../README.md).
 |---|---|---|
 | House style | How should it look? Face, palette, shape, imagery | [typography](typography.md), [color](color.md), [layout](layout.md), [imagery](imagery.md) |
 | Composition | How do I fill a frame so it reads produced? | [density](density.md) (hero, support, metadata) |
-| Motion | How should it move? | [motion-craft](motion-craft.md), [motion-standards](motion-standards.md), `engine-doctrine/DESIGN-DATABASE.md` (numbers) |
+| Motion | How should it move? | [motion-craft](motion-craft.md), [motion-standards](motion-standards.md), `core/motion/README.md` (numbers) |
 | Direction | Why does it read amateur when every layer renders fine? | [direction](direction.md) (pacing, restraint, story placement, each rule sourced) |
 | Film structure | What holds this film together across its cuts? | [film-structure](film-structure.md) |
 | Story | Why these beats, in this order? | [story](story.md) (hook, suspense, payoff; never spoil) |
