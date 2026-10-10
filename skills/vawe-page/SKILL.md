@@ -24,7 +24,7 @@ depth (`mengto/beautiful-shadows` or `mengto/progressive-blur`), then frame: com
 eyebrow, section padding), never by skipping the builder rung. Write one DESIGN.md line per rung: `Skill <rung>: <slug>: what it
 decided`, or `Skipped <rung>: <reason>` (`bin/vawe` advises on a missing rung). Product UI inside the film is a designed
 interface with real-looking data, never placeholder bars. For an invented product the UI is invented but designed.
-DESIGN.md also names colour roles (ground, text, muted, one scarce accent that is voltage and never dominant by area, positive, negative), type roles in fixed faces (display, body, mono for every numeral; the measured brand weights) and a negative list (no nav or footer chrome, no second accent, no `back`, `bounce` or `elastic` easing unless the brand is a toy brand).
+DESIGN.md also names colour roles (ground, text, muted, one scarce accent, positive, negative), type roles (mono for every numeral; the measured brand weights) and a negative list (no nav or footer chrome, no second accent, no `back`, `bounce` or `elastic` easing unless the brand is a toy brand).
 Kit format: `kit/kit.css` holds `:root` tokens (palette roles, light positions) and one rule per part (`.ground-*`,
 light devices, `.grain`, `.lockup`, `.word`, `.line`), each moving part its own element; `kit/kit.html` is an optional
 sheet that shows every part once. Example: `films/examples/colour-sting/DESIGN.md` and `kit/`. (4) Build each `data-world` as a static state from the kit (`bin/vawe frames <page>`): about 1 line and 2 or 3 things, and a
@@ -51,16 +51,7 @@ stage after each step; `bin/vawe ship` warns while the Board or the Motion pass 
 
 ## Sound is felt, not noticed
 
-A few soft key ticks and one swell beat many hits. `data-gain` is absolute dB: it replaces the voice's
-default, it does not add to it. Leave it off and a voice takes its default (`DEFAULT_GAIN_DB` in
-`core/audio/kit.mjs`: UI cues -6 dB, whoosh/riser/swell -4, the weight voices impact/drop -2; the quiet
-palette tap -3, tick -5, which land a film near -20 LUFS; a `src` file defaults to 0 dB). Write a gain only to move one cue on purpose. Reach for impact or drop only when the brief asks for
-weight. Not every word gets a tick: cue the first and the last. The mix warns when one cue peaks more
-than 6 dB above the median cue, with the `data-gain` change that fixes it. Name each beat once in
-CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat.
-
-What you write is what you hear: no normalising, default gains land near -20 LUFS, and
-`<meta name="loudness" content="-14">` opts in to a delivery target. `node harness/media/review.mjs <page> --final` warns outside -30 to -12 LUFS.
+A recorded effect first, a few soft synth ticks and at most one swell after it, never a bed (`taste/craft/sound.md`). `data-gain` is absolute dB and replaces the voice default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`; a `src` file defaults to 0 dB): write it only to move one cue on purpose. Cue the first and the last key word, not every word. Name each beat once in CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat. What you write is what you hear: no normalising, and `<meta name="loudness" content="-14">` opts in to a delivery target. The mix warns when one cue peaks more than 6 dB above the median, and `node harness/media/review.mjs <page> --final` warns outside -30 to -12 LUFS.
 
 ## Moves to copy
 
