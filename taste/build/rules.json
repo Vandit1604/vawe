@@ -89,13 +89,9 @@
   "file": "taste/rules/hero-plus-proof.md",
   "instead": "put the product and photos at hero size in the acts where the reference shows them; real photos, never an invented image. The background is not empty: a radial glow, a real ground field from prompts/moves, oversized ghost type bleeding off the frame, or a subtle panel, 2 to 5 decoratives. A decorative that moves does so with the beat's own element motion, not a drift of its own. Decoratives never carry information. Never a big word centred on empty space."
  },
- "hero-scale": {
-  "file": "taste/rules/hero-scale.md",
-  "instead": "use bigger type, not a wider box: the glyphs filled only 67 percent of the declared boxes."
- },
  "hierarchy": {
   "file": "taste/rules/hierarchy.md",
-  "instead": "lower the contrast or the weight of supporting text instead of only shrinking it. If you read the support first, it is too loud."
+  "instead": "lower the contrast or the weight of supporting text instead of only shrinking it. If you read the support first, it is too loud. Use bigger type, not a wider box: the glyphs filled only 67 percent of the declared boxes."
  },
  "icon-family": {
   "file": "taste/rules/icon-family.md",

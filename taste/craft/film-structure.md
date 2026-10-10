@@ -1,6 +1,6 @@
 ---
 when: "what holds this film together across its cuts"
-answers: the devices a short film can be held by (spatial, verbal, temporal, conceptual), how many threads to carry, how practitioners choose, and causality as the register the devices miss
+answers: the devices a short film can be held by (spatial, verbal, temporal, conceptual), how many threads to carry, how practitioners choose, causality as the register the devices miss, and the ten motion patterns measured in 22 reference films
 group: crosscutting
 ---
 
@@ -12,6 +12,7 @@ Contents:
 - [How practitioners decide](#how-practitioners-decide)
 - [A decision aid (inference, argue with it)](#a-decision-aid-inference-argue-with-it)
 - [Causality: what made the cut happen](#causality-what-made-the-cut-happen)
+- [The motion grammar: ten patterns that recur](#the-motion-grammar-ten-patterns-that-recur)
 - [Sources](#sources)
 
 Name what holds the film across each cut, and carry it in at least two registers. A transforming prop is
@@ -146,6 +147,23 @@ A cause names an act, not an order and not a transition. "Then" and "it cuts to 
 how, not why. Not every film has a causal spine: a manifesto, an anthology and a metric-cut list are held by
 something else. Decide whether this film should have one. Whether the causing act is on screen is a judgement
 for your eyes.
+
+## The motion grammar: ten patterns that recur
+
+Twenty-two reference films were measured frame by frame (shot length, mean frame-to-frame luma change, ground luminance per shot) and 17 were read by hand. A device seen in one film is an idea, in three a technique. This is evidence, not a rule; the rules that came from it are [world-turns](../rules/world-turns.md), [first-frame](../rules/first-frame.md), [shot-length-varies](../rules/shot-length-varies.md) and [accent-share](../rules/accent-share.md). Median shot length is about 4 s (the fastest film, 1.48 s, did not read as frantic; films built on travel and dissolves have no hard cuts, which is often the finding). A mean is the wrong statistic for a beat: read the per-frame curve.
+
+1. **A beat is a burst, then a rest** (3 films). The change curve rises to a peak and decays to near nothing before the next beat; every shot ends quieter than its middle. The rest is what makes the next arrival read as an arrival. Filling flat segments with drift to lift the average produced a uniform churn: hold the pose with no keys.
+2. **Blur-resolve as the entrance** (3 films). Type arrives heavily blurred and settles; nothing slides or fades. A blurred still looks fast, a half-opacity still looks broken. Animate `filter: blur()` from about 24 px to 0 over about 0.4 s.
+3. **The ground inverts on every cut** (3 films). Consecutive beats alternate dark and light, so no cut needs an effect; the inversion is the transition. Within one hue is the gentler form.
+4. **Three ways to invert a frame** (3 films): the backdrop changes (a new world), the subject changes value, or the light changes over an unchanging world. Only the first is a new world, and we reach for it every time.
+5. **Hold the picture, move the type** (3 films). Every photographic or rendered object is still; all motion is type arriving and the ground changing. The cut rate is high while the change inside a shot is low. Do not add a push-in to every image reflexively: it costs this.
+6. **One accent colour, one word at a time** (4 films). One hue carries every emphasis, in one film 0.13 % of all pixels.
+7. **The loudest frame is often an absence** (3 films): something leaving, or the frame flooding with flat colour. An emptying is the one we never use.
+8. **A container that holds while its contents change** (4 films). One frame, pill, ring or window stays put and what is inside swaps: the cheapest continuity device. Recolour the container to match its new contents.
+9. **Escalate the unit, not just the pace** (2 films). Single words under a second, then sentences at four: beat length and meaning grow together.
+10. **Word, proof, word, proof** (1 film, the strongest product-demo shape seen). A hero type card states a claim and the next shot shows it in real product UI; a scale collapse (a word larger than the canvas resolving to a caption) recurs as one punctuation gesture.
+
+Single-film findings worth stealing: one object can be the whole film; a true continuous object (an input pill becomes a window becomes an application, on one ground, with no cut); grade as punctuation; a palette can be the only thread; frame the photograph rather than move it; camera travel over one white plane is the strongest case for building from travel rather than cuts, and its static background is earned by a subject that never stops moving, so argue it per film. Study a reference with `bin/vawe spec <ref.mp4>` and `bin/vawe compare`. Keep the reading, not the pixels: no frame, crop or copy of another person's film goes into the repo.
 
 ## Sources
 

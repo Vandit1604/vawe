@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-88 rules, 33 scored by the judge.
+87 rules, 33 scored by the judge.
 
 ## concept
 
@@ -47,7 +47,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [first-frame](rules/first-frame.md): Something of the subject (the subject, its ground or its first mark) is on screen at frame 0 and reads as an image by 0.1 s. Check: judge.
 - [graphic-is-subject](rules/graphic-is-subject.md): If a graphic is the point of the beat, it owns the frame: hero scale, type demoted to a caption. Check: judge.
 - [hero-plus-proof](rules/hero-plus-proof.md): A beat held longer than 3 s carries a hero plus proof. Check: judge.
-- [hero-scale](rules/hero-scale.md): Size for video, not the web. Check: none.
 - [hierarchy](rules/hierarchy.md): Make one element dominant by scale contrast: one huge hero and one small caption beat three medium lines. Check: judge.
 - [icon-family](rules/icon-family.md): Show a company's mark whenever it is named. Check: none.
 - [image-source-order](rules/image-source-order.md): Use the lightest visual that carries the meaning, and take it from the best source. Check: judge.
@@ -134,7 +133,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [direction.md](craft/direction.md)
 - [failure-modes.md](craft/failure-modes.md)
 - [film-structure.md](craft/film-structure.md)
-- [grammar.md](craft/grammar.md)
 - [imagery.md](craft/imagery.md)
 - [law.md](craft/law.md)
 - [layout.md](craft/layout.md)

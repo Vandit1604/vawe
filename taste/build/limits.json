@@ -53,17 +53,15 @@
   "decoratives_min": 2,
   "decoratives_max": 5
  },
- "hero-scale": {
+ "hierarchy": {
+  "scale_contrast_min": 4,
+  "scale_contrast_max": 8,
+  "levels": 3,
   "hero_width_pct_min": 60,
   "hero_width_pct_max": 80,
   "headline_px_min_1920": 84,
   "support_px_1920": 44,
   "label_px_1920": 32
- },
- "hierarchy": {
-  "scale_contrast_min": 4,
-  "scale_contrast_max": 8,
-  "levels": 3
  },
  "image-treatment": {
   "ken_burns_pct_min": 3,

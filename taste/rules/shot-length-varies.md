@@ -12,11 +12,11 @@ prevents: doc GRAMMAR.md: a reference ran shots of 0.76 to 3.2 s with a median o
 status: active
 scored: no
 numbers: {"punchy_min_s":0.8,"punchy_max_s":1.5,"breathing_min_s":2,"breathing_max_s":3}
-craft: grammar
+craft: film-structure
 ---
 
 ## Example
 
 Shots of 1.0, 1.2, 0.9, 2.5, 1.1 and a 3 s payoff.
 
-Why and sources: [grammar](../craft/grammar.md).
+Why and sources: [film-structure](../craft/film-structure.md#the-motion-grammar-ten-patterns-that-recur).

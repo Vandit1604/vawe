@@ -14,11 +14,11 @@ scored: yes
 numbers: {"turn_seconds_max":2,"run_tiles_max":8,"tail_tiles_max":4,"sheet_fps":5,"near_identical_diff":4.5,"blank_run_s":0.3,"blank_edge_s":0.5,"blank_grid_span_max":0.06,"blank_grain_spread":0.06}
 print-storyboard: turn the world every 1 to 2 s (a new element, a cut, a ground swap), not one lockup held
 digest: Turn the world at least every 2 s or at each beat; no one lockup held.
-craft: grammar
+craft: film-structure
 ---
 
 ## Example
 
 Right: cobalt ground to paper ground at 1.8 s, a new word at 2.6 s. Wrong: one colour field with one lockup from 2.3 s to 5.0 s.
 
-Why and sources: [grammar](../craft/grammar.md).
+Why and sources: [film-structure](../craft/film-structure.md#the-motion-grammar-ten-patterns-that-recur).

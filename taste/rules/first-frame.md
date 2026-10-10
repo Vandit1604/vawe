@@ -13,11 +13,11 @@ status: active
 scored: yes
 numbers: {"subject_by_s":0.1,"empty_max_s":0.5,"motion_delay_min_s":0,"motion_delay_max_s":0.3}
 print-frames: show the subject by 0.1 s, not an empty ground for the first half second
-craft: grammar
+craft: film-structure
 ---
 
 ## Example
 
 Right: the ground and the first word sit at frame 0 and the word starts to move at 0.2 s. Wrong: black until a dot arrives at 0.5 s.
 
-Why and sources: [grammar](../craft/grammar.md).
+Why and sources: [film-structure](../craft/film-structure.md#the-motion-grammar-ten-patterns-that-recur).
