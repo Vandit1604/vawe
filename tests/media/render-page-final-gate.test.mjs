@@ -82,7 +82,7 @@ test('stamping the page\'s current hash lets FINAL through, and an edit invalida
 
 test('authoring.allow + _why in the page itself waives the gate, with no second mechanism', () => {
   const authoring = '<script type="application/json" id="authoring">'
-    + '{"allow":["unverified-final"],"_why":{"unverified-final":"exploratory spike, not for ship"}}</script>';
+    + '{"allow":["unverified-final"],"_why":{"unverified-final":"spike at 0.1 s: the box moves 60 px in a 0.2 s probe"}}</script>';
   const pagePath = writePage(tmp, authoring);
   fs.writeFileSync(path.join(tmp, 'reference.json'), JSON.stringify({ ref: 'refs/fake.mp4' }));
   const out = path.join(tmp, 'out.mp4');
@@ -100,4 +100,15 @@ test('a waiver with no _why does not excuse the gate', () => {
   try { execFileSync('node', [SCRIPT, pagePath, out, '--final'], { encoding: 'utf8', stdio: 'pipe' }); }
   catch { threw = true; }
   assertOk(threw, 'a waiver with no reason must still block, same rule as a scene\'s authoring.allow');
+});
+
+test('a reason that names no place or measure does not excuse the gate', () => {
+  const authoring = '<script type="application/json" id="authoring">'
+    + '{"allow":["unverified-final"],"_why":{"unverified-final":"exploratory spike, not for ship"}}</script>';
+  const pagePath = writePage(tmp, authoring);
+  fs.writeFileSync(path.join(tmp, 'reference.json'), JSON.stringify({ ref: 'refs/fake.mp4' }));
+  let message = '';
+  try { execFileSync('node', [SCRIPT, pagePath, path.join(tmp, 'out.mp4'), '--final'], { encoding: 'utf8', stdio: 'pipe' }); }
+  catch (e) { message = String(e.stderr || e.message); }
+  assertOk(/FINAL render refused/.test(message), `the same vetting as every other waiver applies: ${message}`);
 });

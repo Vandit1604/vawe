@@ -56,15 +56,13 @@ function isGeneric(reason) {
 }
 
 /**
- * Why a reason does not count, or null when it does. `ctx`: { worlds (the page's data-world ids), reasons (every reason on the page, to catch a copy), loose (a gate waiver
- * with no place or time: only the length and the generic test apply) }.
+ * Why a reason does not count, or null when it does. `ctx`: { worlds (the page's data-world ids), reasons (every reason on the page, to catch a copy) }.
  * A reason must name where (a world id or a second) and what was measured (a number with its unit); a second is one number, not the measure.
  */
 export function reasonProblem(reason, ctx = {}) {
   const text = typeof reason === 'string' ? reason.trim() : '';
   if (text.length < MIN_REASON_LEN) return `the reason is under ${MIN_REASON_LEN} characters`;
   if (isGeneric(text)) return 'the reason is generic (intentional, by design, deliberate, stylistic, fine, ok, as intended say nothing): name what you saw and measured';
-  if (ctx.loose) return null;
   const lower = text.toLowerCase();
   const world = (ctx.worlds ?? []).find((id) => new RegExp(String.raw`(^|[^a-z0-9-])${id.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^a-z0-9-])`).test(lower));
   const second = SECOND.test(text);
@@ -84,10 +82,13 @@ export function hasReason(why, entry, ctx = {}) {
 
 const ctxOf = (authoring) => ({ worlds: authoring._worlds ?? [], reasons: Object.values(authoring._why ?? {}) });
 
+/** Does the reason the page gives for `entry` count? The one vetting every check uses. */
+export const entryHasReason = (authoring, entry) => hasReason(authoring._why, entry, ctxOf(authoring));
+
 /** Is a finding of `code` (at instance `at`, optional) waived by an entry, bare or scoped to a range holding `at`, whose reason counts? */
 export function isWaived(authoring = {}, code, at = null) {
   const { allow = [], _why = {} } = authoring;
-  return allow.some((e) => waiverCovers(e, code, at) && !RETIRED_CODES[splitWaiver(e).code] && hasReason(_why, e, ctxOf(authoring)));
+  return allow.some((e) => waiverCovers(e, code, at) && !RETIRED_CODES[splitWaiver(e).code] && entryHasReason(authoring, e));
 }
 
 /** Every allow entry with its reason and why it waives nothing (null when it does): [{ entry, why, problem }]. */

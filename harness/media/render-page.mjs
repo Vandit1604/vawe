@@ -72,7 +72,7 @@ import { metaOf } from '../lib/page-meta.mjs';
 import { boardChecks, spectacleOf, lockedSpectacle } from '../lib/board.mjs';
 import { moveDocLines } from '../lib/move-docs.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
-import { isWaivedBy, hasReason, isWaived, waiverHint, waiverProblems } from '../lib/waivers.mjs';
+import { isWaived, waiverHint, waiverProblems } from '../lib/waivers.mjs';
 import { beatAdvice } from '../lib/sound-read.mjs';
 import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
@@ -873,13 +873,11 @@ export function assertFinalReady(pagePath) {
   const ref = referenceFor(pagePath);
   if (!ref) return;
   if (motionStampFresh(pagePath)) return;
-  const { allow = [], _why = {} } = pageAuthoring(pagePath);
   const code = 'unverified-final';
-  if (isWaivedBy(allow, code) && hasReason(_why, code, { loose: true })) return;
+  if (isWaived(pageAuthoring(pagePath), code)) return;
   die(`${pagePath}: FINAL render refused, no passing required-motion-match for this page's current `
     + `content. Run: vawe critique ${pagePath} --ref ${ref}\n`
-    + `Waivable only via <script type="application/json" id="authoring">{"allow":["${code}"],`
-    + `"_why":{"${code}":"…"}}</script> in the page.`);
+    + `Waivable only in the page: ${waiverHint(code)}`);
 }
 
 // A final writes two files: the master (x264, dithered) and next to it a small web copy (AV1 10-bit).

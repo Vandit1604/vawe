@@ -34,7 +34,7 @@ import { fillCollisionPairs, activeOverlapPairs, animatedProps, reachesBack } fr
 import { openPreview } from '../../harness/media/preview-server.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
-import { isWaivedBy, hasReason } from '../../harness/lib/waivers.mjs';
+import { isWaived } from '../../harness/lib/waivers.mjs';
 import { runMotionCollector, motionLint, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -227,8 +227,7 @@ async function checkPage(absFile) {
     const findings = await runTrapChecker(page, durMs);
     pageTraps(fs.readFileSync(absFile, 'utf8'), (what, where, fix) => findings.push({ what, where, fix }));
     const authoring = pageAuthoring(absFile);
-    const { allow = [], _why = {} } = authoring;
-    const waived = isWaivedBy(allow, 'anim-traps') && hasReason(_why, 'anim-traps', { loose: true });
+    const waived = isWaived(authoring, 'anim-traps');
     return { file: relFile, findings, waived, motion: lintLines(unwaived(motionLint(motion), authoring)) };
   } finally { await close(); }
 }

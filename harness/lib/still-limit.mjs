@@ -2,17 +2,17 @@
 // scene-stats staticRuns plus the seconds where only a whole-frame move runs (harness/lib/camera-moves.mjs). A hold is declared per check
 // (AGENTS.md "Waivers"): "static-window@2.1-3.4" for a still run, "tile-run@a-b" and "tail-tiles@a-b" for the judge's sheet, "world-held@a-b" for a world.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
-import { splitWaiver, hasReason, waiverHint } from './waivers.mjs';
+import { splitWaiver, entryHasReason, waiverHint } from './waivers.mjs';
 
 export const STILL_SEC = LIMITS['live-hold'].still_limit_s;
 
 /** The [a, b] second ranges the page declares as holds for check `code`, each with its _why. Pure. */
 export function declaredHolds(authoring = {}, code = 'static-window') {
-  const { allow = [], _why = {} } = authoring;
+  const { allow = [] } = authoring;
   const holds = [];
   for (const entry of allow) {
     const { code: entryCode, instance } = splitWaiver(entry);
-    if (entryCode !== code || !hasReason(_why, entry, { worlds: authoring._worlds ?? [] })) continue;
+    if (entryCode !== code || !entryHasReason(authoring, entry)) continue;
     const m = instance === null ? ['', '0', 'Infinity'] : instance.match(/^([\d.]+)-([\d.]+)$/);
     if (m) holds.push([Number(m[1]), Number(m[2])]);
   }
