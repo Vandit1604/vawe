@@ -40,7 +40,7 @@ seven staggered copies read as a wave.
 
 **Overshoot.** Each oscillation is shorter and smaller than the last. By keyframes for scale:
 120, 90, 105, 97.5, 101.25, 100. By spring: a small bounce is felt once, a large one is a toy. The film default is no overshoot on type or UI
-([no-bounce](../rules/no-bounce.md)): EASE.pop is for a press or a pop the page names. Overshoot is
+([overshoot](../rules/overshoot.md)): EASE.pop is for a press or a pop the page names. Overshoot is
 a decaying sine at constant frequency. A bounce is parabolas whose frequency rises as energy drains
 (Ebberts: elasticity 0.7, gravity 5000, up to 9 bounces). Wrong for dense grids and anything read at once.
 

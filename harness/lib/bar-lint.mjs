@@ -18,7 +18,7 @@ import { moveScore, trackPoints } from '../media/see/velocity-math.mjs';
 import { cameraLoad } from './camera-moves.mjs';
 
 const SPEED = LIMITS['speed-ceiling'];
-const SHOOT = LIMITS['overshoot-share'];
+const SHOOT = LIMITS.overshoot;
 const BREATH = LIMITS['text-breathing'];
 const LINGER = LIMITS['readable-hold'];
 const JOLT = LIMITS['no-dead-stop'];
@@ -308,7 +308,7 @@ export function overshootPct(records, boxArrivals = []) {
 }
 
 /**
- * Too few or too many arrivals that overshoot (rule overshoot-share). The easing of the animation records decides; a page that paints
+ * Too few or too many arrivals that overshoot (rule overshoot). The easing of the animation records decides; a page that paints
  * in window.seek has none, so its arrivals come from the boxes (`boxArrivals`, from boxMotion) when the records give fewer than arrivals_min.
  */
 export function overshootShare(records, boxArrivals = []) {
@@ -319,9 +319,9 @@ export function overshootShare(records, boxArrivals = []) {
   const at = Math.min(...arrivals.map((a) => a.at));
   const counted = `${over} of ${arrivals.length} arrivals overshoot (${pct(share)}%)`;
   if (share < SHOOT.share_min_pct) return [finding('overshoot-share', at, `${counted}; the reference films overshoot ${SHOOT.share_min_pct}% to 41%`,
-    'give about 1 in 3 arrivals a small spring: EASE.nudge (stagger(els, {nudgeEvery: 3})); keep EASE.pop for the one hero arrival')];
+    'give about 1 in 3 arrivals a small spring: EASE.nudge (stagger(els, {nudgeEvery: 3})); keep EASE.pop for the one hero arrival', 'overshoot')];
   if (share > SHOOT.share_max_pct) return [finding('overshoot-share', at, `${counted}; the reference films overshoot 41% at most`,
-    'land most arrivals on EASE.land and keep the spring for the one that matters')];
+    'land most arrivals on EASE.land and keep the spring for the one that matters', 'overshoot')];
   return [];
 }
 

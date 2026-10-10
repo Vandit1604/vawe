@@ -18,7 +18,7 @@ Every rule below is a corollary. When two rules collide, this one wins.
 
 Borrowed from reference motion-design notes, with the receipts from this repo.
 
-- **One ease on every tween.** Your default is the same designed ease everywhere. Vary eases like you vary font weights ([ease-variety](../rules/ease-variety.md)).
+- **One ease on every tween.** Your default is the same designed ease everywhere. Vary eases like you vary font weights ([named-eases](../rules/named-eases.md)).
 - **One speed on everything.** Your default is a duration near the middle of the range. The slowest move is several times the fastest ([speed-bands](../rules/speed-bands.md)).
 - **Everything enters from one direction.** Your default is a short translateY plus a fade on every element. A 28 s film shipped with a fade on nearly every one of 31 hand-written layers. Vary the origin: from left, from right, from scale, opacity only, letter-spacing ([entrance-origin](../rules/entrance-origin.md)).
 - **One stagger everywhere.** Each scene needs its own rhythm ([stagger](../rules/stagger.md)).
@@ -26,7 +26,7 @@ Borrowed from reference motion-design notes, with the receipts from this repo.
 - **Everything starts at frame 0 into an empty frame.** Something of the subject is on screen at frame 0, and its motion may start a beat later ([first-frame](../rules/first-frame.md)).
 - **The ease direction backwards.** You get this backwards: a slow-start entrance feels sluggish, a decelerating exit feels reluctant ([entrance-ease](../rules/entrance-ease.md), [exits-shorter](../rules/exits-shorter.md)).
 - **Subtle reads as static at 30 fps.** Two films written as improvements on a third both came out slower, at 0.95 and 0.85 events per second against a library median of 1.20. Check the measured event rate before you call a draft safe.
-- **A spring or an overshoot on a counting number.** Overshoot paints a number that is not true for several frames ([counter-no-overshoot](../rules/counter-no-overshoot.md)).
+- **A spring or an overshoot on a counting number.** Overshoot paints a number that is not true for several frames ([overshoot](../rules/overshoot.md)).
 
 ## The failure-modes catalog: name the smell, then the fix
 
@@ -56,7 +56,7 @@ CTA, a music punctuation. Everything else is a hard cut on the beat ([hard-cut-d
 One cut family per film. One accent hue. Mixing whip and iris in one piece, or a new look every beat,
 is five fonts on a slide ([one-cut-family](../rules/one-cut-family.md)).
 
-The budget flexes with the register ([motion-registers.md](motion-registers.md)): quiet (UI-adjacent, explainer) treats
+The budget flexes with the register ([motion-craft.md](motion-craft.md#registers-restraint-depends-on-the-film)): quiet (UI-adjacent, explainer) treats
 motion as a cost the viewer pays, so one loud moment against a calm field is right. Kinetic (launch,
 sting, hype) makes sustained motion the content, so a still beat is the cost.
 

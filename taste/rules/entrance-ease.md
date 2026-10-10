@@ -12,11 +12,11 @@ prevents: doc MOTION-STANDARDS and ease-direction: a slow-start entrance delays 
 status: active
 scored: yes
 numbers: {"scale_start_min":0.9,"scale_start_max":0.97}
-craft: motion-standards
+craft: motion-craft
 ---
 
 ## Example
 
 translate 0 40px to 0 0 over 700 ms with EASE.land.
 
-Why and sources: [motion-standards](../craft/motion-standards.md).
+Why and sources: [motion-craft](../craft/motion-craft.md).

@@ -151,16 +151,17 @@ A hold keeps life through a part that moves inside the frame: a line typing, a c
 
 Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. The CSS keywords ease, ease-out and ease-in-out are not a default for everything.
 
-- Limit: a move longer than 0.3 s is not on linear or on a bare CSS keyword with no curve of its own
-- Range: EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops
-- Judge: Is any move on a bare keyword or a hand-fitted bezier? Does frame 1 jump?
+- Limit: a move longer than 0.3 s is not on linear or on a bare CSS keyword with no curve of its own; one to two eases per scene
+- Range: EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops; vary eases like font weights, and two layers moving in one beat differ in duration or offset
+- Judge: Is any move on a bare keyword or a hand-fitted bezier? Does frame 1 jump? How many eases does each scene use, and do two layers in one beat move in lockstep?
 
-### no-bounce
+### overshoot
 
-No bounce or overshoot on type or UI by default. Overshoot is a claim about mass.
+Overshoot is a claim about mass. Type, UI and a counting number do not overshoot by default, and a number never passes its final figure. Some arrivals of things with mass land with a spring, so a film where none do reads stiff.
 
-- Range: EASE.pop (about 15 percent overshoot) only where the point of the move is a press or a pop, named in the page; one accent moment per film
-- Judge: Does any word or UI element overshoot with no stated reason?
+- Limit: 21 to 61 percent of the arrivals that move overshoot; a count never passes its final figure
+- Range: reference films overshoot 21 to 41 percent of their arrivals (p10 to p90); EASE.pop (about 15 percent) only where the move is a press or a pop, named in the page, and only on things that then hold still; roll-up 0.8 to 1.4 s, the last 30 percent of the time covers the last 5 percent of the count
+- Judge: Does any word, UI element or count overshoot with no stated reason? Does any count pass its final figure and fall back? Does any arrival settle past its rest position and return, or do none?
 
 ### real-physics
 

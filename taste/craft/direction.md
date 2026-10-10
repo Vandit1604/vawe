@@ -21,7 +21,7 @@ with `bin/vawe critique` in a fresh session and your own eyes. If your eye catch
 (`../JUDGE.md`).
 
 The mechanics of which curve and which cut live in [motion-craft.md](motion-craft.md). Register-dependence of restraint
-is in [motion-registers.md](motion-registers.md). Read that first for a kinetic or hype film. The numbers are in the
+is in [motion-craft.md](motion-craft.md#registers-restraint-depends-on-the-film). Read that first for a kinetic or hype film. The numbers are in the
 rules (`taste/README.md`).
 
 ## 1. First principles of motion (Disney's twelve, the ones type and graphics obey)
@@ -30,7 +30,7 @@ rules (`taste/README.md`).
 |---|---|---|---|
 | Slow in, slow out | Nothing starts or stops instantly. | Entrances decelerate, exits accelerate. A constant rate is right where there is no rest to ease: a pan, a scroll, a marquee, a progress ring, an ambient drift. | [entrance-ease](../rules/entrance-ease.md), [exits-shorter](../rules/exits-shorter.md) |
 | Timing | Frame count is weight and meaning. | A heavy title enters slower than a caption. Never one global duration. | [speed-bands](../rules/speed-bands.md) |
-| Spacing | Where distance falls across frames is the ease's texture. | Arrive fast, land soft (EASE.land, `approach`) over a flat ramp. | [named-eases](../rules/named-eases.md), [no-bounce](../rules/no-bounce.md) |
+| Spacing | Where distance falls across frames is the ease's texture. | Arrive fast, land soft (EASE.land, `approach`) over a flat ramp. | [named-eases](../rules/named-eases.md), [overshoot](../rules/overshoot.md) |
 | Anticipation | A small opposite wind-up readies the eye. | Before a hero scale-up, a small dip. Hero moments only. | [anticipation](../rules/anticipation.md) |
 | Follow-through, overlap | Parts trail and stagger. | Siblings stagger, never one frame. A child lags its parent. Within one element: scale finishes after position. | [stagger](../rules/stagger.md), [follow-through](../rules/follow-through.md) |
 | Staging | One idea per shot, one focal point. | One headline-scale message per beat, the rest subordinate in size, opacity and motion. | [one-focal-point](../rules/one-focal-point.md), [one-hero-motion](../rules/one-hero-motion.md) |

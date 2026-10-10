@@ -29,7 +29,7 @@ test('eases: more than the limit among a scene\'s entrances fire; exits, linear 
   const eased = (names) => names.map((n, i) => rec({ target: i, delay: i * 0.1, easing: EASE[n] ?? n }));
   assert.equal(easeCount(eased(['land', 'glide'])).length, 0);
   const [f] = easeCount(eased(['land', 'glide', 'pop']));
-  assert.deepEqual([f.code, f.rule], ['ease-count', 'ease-variety']);
+  assert.deepEqual([f.code, f.rule], ['ease-count', 'named-eases']);
   assert.match(f.what, /3 eases \(land, glide, pop\); the rule allows 2/);
   assert.equal(easeCount([...eased(['land', 'glide']), rec({ target: 7, id: 'leave', opacity: [1, 0], easing: EASE.launch })]).length, 0);
   assert.equal(easeCount(eased(['land', 'glide', 'linear'])).length, 0);
@@ -38,7 +38,7 @@ test('eases: more than the limit among a scene\'s entrances fire; exits, linear 
 
 test('lockstep: two entrances that start and last alike fire; an offset or another duration clears it; a drift is not an entrance', () => {
   const pair = (b) => [rec({ target: 0 }), rec({ target: 1, ...b })];
-  assert.deepEqual(lockstep(pair({})).map((f) => [f.code, f.rule]), [['lockstep', 'ease-variety']]);
+  assert.deepEqual(lockstep(pair({})).map((f) => [f.code, f.rule]), [['lockstep', 'named-eases']]);
   assert.equal(lockstep(pair({ delay: 0.06 })).length, 0);
   assert.equal(lockstep(pair({ duration: 0.65 })).length, 0);
   assert.equal(lockstep(pair({ id: '', opacity: null })).length, 0);
