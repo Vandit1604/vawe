@@ -1,0 +1,30 @@
+@font-face { font-family: "Archivo"; src: url("../assets/Archivo.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "JetBrains Mono"; src: url("../assets/JetBrainsMono.woff2") format("woff2"); font-weight: 100 800; }
+
+:root { --ink: #f4f4f0; --ground: #060606; --yellow: #f6e84a; --lock: #ff2a1a; }
+
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+
+/* the flat screen: 1920 x 1080 source px, filmed by the lens */
+#screen { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--ground); color: var(--ink); }
+.shot { position: absolute; inset: 0; display: none; overflow: hidden; }
+.shot .ground { position: absolute; inset: 0; background: radial-gradient(circle at var(--lx, 50%) var(--ly, 50%), #2c2c2c 0, #0c0c0c 46%, #040404 100%); }
+.shot .bg { position: absolute; inset: 0; font: 500 24px/34px "JetBrains Mono", monospace; color: #3c3c3c; white-space: pre; }
+
+.type { position: absolute; margin: 0; white-space: pre; font-family: "Archivo", sans-serif; font-weight: 800; line-height: 1.04; letter-spacing: -0.035em; word-spacing: 0.14em; }
+.type.mono { font-family: "JetBrains Mono", monospace; font-weight: 700; letter-spacing: -0.02em; line-height: 1.6; }
+.g { display: inline-block; }
+.g.hot { color: var(--yellow); }
+
+.box { position: absolute; box-sizing: border-box; border: 5px solid var(--ink); mix-blend-mode: difference;
+  background: repeating-linear-gradient(45deg, var(--ink) 0 4px, transparent 4px 11px); }
+.box.lock { mix-blend-mode: normal; border-color: var(--lock);
+  background: repeating-linear-gradient(45deg, var(--lock) 0 4px, transparent 4px 11px); }
+.caret { position: absolute; width: 0.55em; background: var(--ink); }
+.mark { position: absolute; right: 120px; bottom: 90px; font: 700 104px/1 "JetBrains Mono", monospace; letter-spacing: -0.03em; }
+
+.lab { position: absolute; margin: 0; white-space: pre; font: 500 24px/1 "JetBrains Mono", monospace; color: var(--ink); }
+.link { position: absolute; height: 4px; background: var(--ink); transform-origin: 0 50%; display: none; }
+.arrow { position: absolute; width: 24px; height: 24px; background: var(--ink); clip-path: polygon(100% 50%, 0 0, 0 100%); display: none; }
+.dot { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); display: none; }
+#white { position: absolute; inset: 0; z-index: 9; background: #fff; opacity: 0; pointer-events: none; }
