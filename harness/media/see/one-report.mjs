@@ -115,7 +115,7 @@ function lookSection(m) {
   L.push('', `Flashes as exposure events (${l.flashes.length}): a flash is one event of mean luma, not two cuts.`);
   if (l.flashes.length) {
     L.push('', ...table(['#', 'start s', 'frames', 'seconds', 'luma base to peak', 'rise f', 'decay f', 'clipped at peak', 'tint', 'shot', 'around it'],
-      l.flashes.map((x, i) => [i + 1, f2(x.at), x.frames, f2(x.seconds), `${x.baseLuma} to ${x.peakLuma}`, x.rise, x.decay, x.clippedAtPeak == null ? '-' : `${x.clippedAtPeak}%`, x.tint ?? '-', x.shot ?? '-', x.sameShot === true ? 'same shot' : x.sameShot === false ? 'cut under it' : '-'])));
+      l.flashes.map((x, i) => [i + 1, f2(x.at), x.frames, f2(x.seconds), `${x.baseLuma} to ${x.peakLuma}`, x.rise, x.decay, x.clippedAtPeak == null ? '-' : `${x.clippedAtPeak}%`, x.tint ?? x.tintNote ?? '-', x.shot ?? '-', x.sameShot === true ? 'same shot' : x.sameShot === false ? 'cut under it' : '-'])));
   }
   L.push('', 'Per shot (grain is the temporal noise sigma in levels of 255 on flat tiles; focus ratio is the sharpest third of a 4x3 grid over the softest third, near 1 is even focus):', '');
   L.push(...table(['#', 'luma', 'clipped %', 'bloom px (sigma)', 'fringe dx,dy px', 'texture', 'glow', 'grain', 'focus ratio', 'ground'],
@@ -138,6 +138,7 @@ function typeSection(m) {
 function soundSection(m) {
   const so = m.sound;
   const L = ['## SOUND', ''];
+  if (so.mp4Note) L.push(`${so.mp4Note}.`);
   if (so.mp4) L.push(`Loudness of the film's own audio: ${so.mp4.lufs} LUFS, true peak ${so.mp4.truePeakDb} dBFS.`);
   if (so.page?.mix) L.push(`Mix of the page's audio tags as written: ${so.page.mix.lufs} LUFS, true peak ${so.page.mix.truePeakDb} dBFS.`);
   if (!so.hasAudio && !so.page) L.push('No audio stream.');

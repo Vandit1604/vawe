@@ -95,7 +95,9 @@ export function sectionsOf(mono, sampleRate) {
 }
 
 function loudnessOf(file) {
-  try { const m = measureFile(file); return { lufs: m.I, truePeakDb: m.TP }; } catch { return null; }
+  try { const m = measureFile(file); return { loudness: { lufs: m.I, truePeakDb: m.TP } }; } catch (e) {
+    return { loudness: null, loudnessNote: `loudness not read: ${String(e.message).split('\n')[0]}` };
+  }
 }
 
 const sha = (...parts) => { const h = crypto.createHash('sha1'); for (const p of parts) h.update(p); return h.digest('hex'); };
@@ -103,7 +105,7 @@ const CODE = ['harness/lib/sound-read.mjs', 'harness/lib/sound-class.mjs', 'harn
 const codeHash = () => sha(...CODE.map((f) => fs.readFileSync(path.join(ROOT, f))));
 
 /**
- * The sound of one file, in the file's own seconds: { duration, loudness, tempo: { bpm, confidence, usable, periodS, firstBeatS },
+ * The sound of one file, in the file's own seconds: { duration, loudness (null with a loudnessNote saying why), tempo: { bpm, confidence, usable, periodS, firstBeatS },
  * beats: [seconds], barOffset, onsets: [{ attack, peak, strength, errMs, kind, sound }], sections }. Any format ffmpeg reads (m4a, mp3, wav, mp4).
  * Kept in out/sound-cache/ by the content hash of the file and of this code.
  */
@@ -119,7 +121,7 @@ export function readSound(file, { cache = true } = {}) {
   if (!a) throw new Error(`${file} is too short to read`);
   const onsets = a.hits.map((h) => ({ attack: h.attack, peak: h.t, strength: h.strength, errMs: h.errMs, kind: hitKind(h), sound: classifyHit(mono, RATE, h.attack, h.errMs).cls }));
   const usable = a.confidence >= TEMPO_USABLE && a.beats.length > 1;
-  const sound = { duration, loudness: loudnessOf(file),
+  const sound = { duration, ...loudnessOf(file),
     tempo: { bpm: r1(a.bpm), confidence: r1(a.confidence), usable, periodS: a.beats.length > 1 ? r3((a.beats.at(-1) - a.beats[0]) / (a.beats.length - 1)) : null, firstBeatS: a.beats[0] ?? null },
     beats: a.beats, barOffset: barOffset(a.beats, a.hits), onsets, sections: sectionsOf(mono, RATE) };
   if (cache) { fs.mkdirSync(path.dirname(kept), { recursive: true }); fs.writeFileSync(kept, `${JSON.stringify(sound)}\n`); }
