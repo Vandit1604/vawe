@@ -67,8 +67,17 @@ export function captureEtaMs({ first, firstAt, done, total, now }) {
   return rate > 0 ? (total - done) / rate : null;
 }
 
-/** One colour fills the frame and the luma grid is level. */
-export const isFlat = (f) => Math.max(...f.hist) >= 0.99 && Math.max(...f.grid) - Math.min(...f.grid) < 0.03;
+/** The luma spread (0 to 1) of the pixels between the 2nd and the 98th percentile: film grain stays inside it, text and shapes do not. */
+function lumaSpread(luma) {
+  const counts = new Array(256).fill(0);
+  for (const v of luma) counts[v]++;
+  const at = (share) => { let run = 0; for (let v = 0; v < 256; v++) { run += counts[v]; if (run >= share * luma.length) return v; } return 255; };
+  return (at(0.98) - at(0.02)) / 255;
+}
+
+/** One colour fills the frame (a grain over it still counts as one colour) and the luma grid is level within the limit: a faint gradient is not a ground. */
+export const isFlat = (f) => (Math.max(...f.hist) >= 0.99 || (f.luma?.length > 0 && lumaSpread(f.luma) <= WORLD.blank_grain_spread))
+  && Math.max(...f.grid) - Math.min(...f.grid) < WORLD.blank_grid_span_max;
 
 /** Sample runs, at least `blankSec` long, where the frame is one flat colour, away from the first and last `blankEdgeSec`. */
 export function blankRuns(feats, isFlat, limits = LIMITS) {

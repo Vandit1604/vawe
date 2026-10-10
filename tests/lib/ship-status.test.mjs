@@ -93,3 +93,13 @@ test('the newest ship event decides whether the last final failed, and the line 
   const films = [{ film: 'brindle', runs: [failed] }, { film: 'old', runs: [{ ...failed, at: '2026-09-01T00:00:00Z' }] }];
   assert.deepEqual(recentFailedShipLines(films, now), [failedShipLine('brindle', failed)]);
 });
+
+test('isFlat: grain over one colour is still flat, a faint gradient is flat, a lit ground is not', () => {
+  const hist = (top) => Float64Array.from([top, 1 - top]);
+  const noisy = Uint8Array.from({ length: 1000 }, (_, i) => 100 + (i % 7));
+  assert.ok(isFlat({ hist: hist(0.6), grid: Float64Array.from([0.5, 0.5]), luma: noisy }));
+  assert.ok(isFlat({ hist: hist(1), grid: Float64Array.from([0.5, 0.55]) }));
+  assert.ok(!isFlat({ hist: hist(1), grid: Float64Array.from([0.3, 0.5]) }));
+  const text = Uint8Array.from({ length: 1000 }, (_, i) => (i % 10 === 0 ? 255 : 20));
+  assert.ok(!isFlat({ hist: hist(0.6), grid: Float64Array.from([0.5, 0.5]), luma: text }));
+});

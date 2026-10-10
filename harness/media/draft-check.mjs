@@ -214,9 +214,23 @@ function layoutBoxes(env) {
     return {
       tag: el.tagName.toLowerCase(), p: nearestListed(el), box: [r.x, r.y, r.width, r.height], op,
       bg: bg[3] > 0 ? bg : null, image: cs.backgroundImage !== 'none', blurred: cs.filter.includes('blur'),
+      paint: cs.backgroundImage === 'none' ? null : cs.backgroundImage.slice(0, 600), blend: cs.mixBlendMode, tilePx: cs.backgroundRepeat.startsWith('no-repeat') ? 0 : parseFloat(cs.backgroundSize) || 0, canvasVaries: el.tagName === 'CANVAS' ? canvasVaries(el) : null,
       border: { l: side(cs, 'Left'), r: side(cs, 'Right'), t: side(cs, 'Top'), b: side(cs, 'Bottom') },
       radius: parseFloat(cs.borderTopLeftRadius) || 0, shadow: cs.boxShadow !== 'none', decorative: Boolean(el.closest(decorative)),
     };
+  };
+  // The spread of a canvas's painted cells, 0 to 1, or null when it cannot be read (a tainted or GPU canvas).
+  const canvasVaries = (el) => {
+    try {
+      const probe = document.createElement('canvas');
+      probe.width = 16; probe.height = 9;
+      const ctx = probe.getContext('2d');
+      ctx.drawImage(el, 0, 0, 16, 9);
+      const d = ctx.getImageData(0, 0, 16, 9).data;
+      const cells = [];
+      for (let i = 0; i < d.length; i += 4) cells.push([d[i], d[i + 1], d[i + 2]].map((v) => (v * d[i + 3]) / 255 / 255));
+      return Math.max(...[0, 1, 2].map((c) => Math.max(...cells.map((x) => x[c])) - Math.min(...cells.map((x) => x[c]))));
+    } catch { return null; }
   };
   const skipTag = (el) => /^(SCRIPT|STYLE|NOSCRIPT|TITLE|LINK|META)$/.test(el.tagName) || el instanceof SVGElement;
   // A ::before or ::after that paints a gradient, image or blur is its own box with no parent, so only the living-ground lint counts it.
@@ -229,6 +243,7 @@ function layoutBoxes(env) {
     return {
       tag: which, p: -1, box: [host.box[0] + (placed ? parseFloat(cs.left) || 0 : 0), host.box[1] + (placed ? parseFloat(cs.top) || 0 : 0), w > 0 ? w : host.box[2], h > 0 ? h : host.box[3]],
       op: host.op * Number(cs.opacity), bg: null, image: cs.backgroundImage !== 'none', blurred,
+      paint: cs.backgroundImage === 'none' ? null : cs.backgroundImage.slice(0, 600), blend: cs.mixBlendMode, tilePx: cs.backgroundRepeat.startsWith('no-repeat') ? 0 : parseFloat(cs.backgroundSize) || 0, canvasVaries: null,
       border: { l: [0, null], r: [0, null], t: [0, null], b: [0, null] }, radius: 0, shadow: false, decorative: host.decorative,
     };
   }).filter(Boolean);

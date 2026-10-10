@@ -11,7 +11,7 @@ judge: The turns are the page's data-world spans, a new world is a turn even on 
 prevents: feedback: "the world should turn every 1-2 beats; 7 beats on one colour field are events, not scenes". vawe-sting: cobalt held 2.3 to 5.0 s. judge1: static 1.1 s tail. judge2: 1.4 s static lockup. ref: ground inverts at 5.5, 7.7, 19.3, 21.3 s; a new word cuts in every 0.5 to 1.5 s. 82 percent of 135 library scenes painted one backdrop for the whole runtime.
 status: active
 scored: yes
-numbers: {"turn_seconds_max":2,"run_tiles_max":8,"tail_tiles_max":4,"sheet_fps":5,"near_identical_diff":4.5,"blank_run_s":0.3,"blank_edge_s":0.5}
+numbers: {"turn_seconds_max":2,"run_tiles_max":8,"tail_tiles_max":4,"sheet_fps":5,"near_identical_diff":4.5,"blank_run_s":0.3,"blank_edge_s":0.5,"blank_grid_span_max":0.06,"blank_grain_spread":0.06}
 print-storyboard: turn the world every 1 to 2 s (a new element, a cut, a ground swap), not one lockup held
 digest: Turn the world at least every 2 s or at each beat; no one lockup held.
 craft: grammar

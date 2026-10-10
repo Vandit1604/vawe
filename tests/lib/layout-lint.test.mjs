@@ -160,10 +160,25 @@ test('living ground: a frame with no gradient, blur, image or canvas layer is fl
   const [f] = livingGround([flat]);
   assert.deepEqual([f.code, f.rule, f.at], ['living-ground', 'living-ground', 1]);
   assert.equal(livingGround([blob()]).length, 0);
-  assert.equal(livingGround([blob({ image: false, blurred: true })]).length, 0);
+  assert.equal(livingGround([blob({ image: false, blurred: true, bg: [230, 90, 60, 1] })]).length, 0);
   assert.equal(livingGround([blob({ image: false, tag: 'canvas' })]).length, 0);
   assert.equal(livingGround([blob({ box: [0, 0, 200, 200] })]).length, 1);
   assert.equal(livingGround([blob({ op: 0.1 })]).length, 1);
+});
+
+const FULL = [0, 0, 1920, 1080];
+const trick = (over) => sample({ boxes: [box({ box: FULL, bg: [20, 20, 30, 1] }), box({ box: FULL, decorative: true, image: true, ...over })] });
+
+test('living ground: a full-frame faint gradient, a grain overlay, a blend layer and an empty canvas do not make a ground', () => {
+  const faint = 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 100%)';
+  const lit = 'radial-gradient(circle at 30% 40%, rgba(230, 90, 60, 0.6) 0%, rgba(0, 0, 0, 0) 70%)';
+  assert.equal(livingGround([trick({ paint: faint })]).length, 1);
+  assert.equal(livingGround([trick({ paint: lit })]).length, 0);
+  assert.equal(livingGround([trick({ paint: 'url("data:image/svg+xml;utf8,<svg><filter><feTurbulence/></filter></svg>")' })]).length, 1);
+  assert.equal(livingGround([trick({ paint: 'url(grain.png)', tilePx: 128 })]).length, 1);
+  assert.equal(livingGround([trick({ paint: lit, blend: 'overlay' })]).length, 1);
+  assert.equal(livingGround([trick({ image: false, tag: 'canvas', canvasVaries: 0 })]).length, 1);
+  assert.equal(livingGround([trick({ image: false, tag: 'canvas', canvasVaries: 0.4 })]).length, 0);
 });
 
 test('living ground: fires when more than half the samples are flat, and a one-world sample is judged alone', () => {

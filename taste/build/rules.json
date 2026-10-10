@@ -131,7 +131,7 @@
  },
  "living-ground": {
   "file": "taste/rules/living-ground.md",
-  "instead": "put two or three large soft blobs behind the content and let them drift: the Grounds moves in prompts/moves/README.md (gradient-mesh-field, aurora-drift, light-pool, grain-field). Keep the text on a calm part of the blob."
+  "instead": "put two or three large soft blobs, clearly lighter or more saturated than the ground, behind the content: the Grounds moves in prompts/moves/README.md (gradient-mesh-field, aurora-drift, light-pool, grain-field). Keep the text on a calm part of the blob."
  },
  "logo-prominence": {
   "file": "taste/rules/logo-prominence.md",
