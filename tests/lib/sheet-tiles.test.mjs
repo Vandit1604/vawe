@@ -9,7 +9,7 @@ const H4O = [22.54, 7.64, 12.27, 48.59, 25.29, 29.22, 28.56, 15.69, 90, 8.91, 8.
 test('the h4o tail reads as 5 near-identical tiles, as the judge counted', () => {
   assert.deepEqual(tileRuns(H4O, 5), [{ a: 2.6, b: 3.4, tiles: 5 }, { a: 4, b: 4.8, tiles: 5 }]);
   assert.deepEqual(tileProblems(H4O, 5), [
-    `5 near-identical tail tiles 4-4.8 s on the judge's sheet (limit 4): add a move there or make the push larger; ${waiverHint('dead-air@4-4.8')}`,
+    `5 near-identical tail tiles 4-4.8 s on the judge's sheet (limit 4): add a move there or make the push larger; ${waiverHint('tail-tiles@4-4.8')}`,
   ]);
 });
 
@@ -19,13 +19,16 @@ test('a mid-film run over 8 tiles is named; 8 is fine; a declared hold is not co
   assert.match(tileProblems([20, ...still(8), 20, 20], 5)[0], /^9 near-identical tiles 0\.2-1\.8 s/);
   const tail = [20, 20, ...still(5)];
   assert.equal(tileProblems(tail, 5).length, 1);
-  assert.equal(tileProblems(tail, 5, { allow: ['dead-air@0.4-1.4'], _why: { 'dead-air@0.4-1.4': 'the wordmark holds' } }).length, 0);
+  const held = (code) => ({ allow: [`${code}@0.4-1.4`], _why: { [`${code}@0.4-1.4`]: 'the wordmark of world s1 holds 1.0 s as the last beat' }, _worlds: ['s1'] });
+  assert.equal(tileProblems(tail, 5, held('tail-tiles')).length, 0);
+  assert.equal(tileProblems(tail, 5, held('tile-run')).length, 1, 'a tile-run hold does not cover the tail');
+  assert.equal(tileProblems(tail, 5, held('dead-air')).length, 1, 'the retired dead-air covers nothing');
 });
 
 test('tailTiles counts the near-identical tiles at the end, none for a move or a declared hold', () => {
   assert.equal(tailTiles([20, 20, 1, 1, 1], 5), 4);
   assert.equal(tailTiles([1, 1, 20, 20], 5), 0);
-  assert.equal(tailTiles([20, 20, 1, 1, 1], 5, { allow: ['dead-air@0.4-1'], _why: { 'dead-air@0.4-1': 'the wordmark holds' } }), 0);
+  assert.equal(tailTiles([20, 20, 1, 1, 1], 5, { allow: ['tail-tiles@0.4-1'], _why: { 'tail-tiles@0.4-1': 'the wordmark of world s1 holds 0.6 s as the last beat' }, _worlds: ['s1'] }), 0);
 });
 
 test('a tail the page animates is not frozen, but a mid-film run still is', () => {

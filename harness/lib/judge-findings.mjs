@@ -40,7 +40,7 @@ export function declaredLines({ signature = {}, waivers = [], message = null }) 
   ];
   if (!waivers.length) return [...lines, 'Waivers: none.'];
   return [...lines, 'Waivers (rules the author broke on purpose, each with the reason given). For each one, say if the break is earned: does it serve the idea?',
-    ...waivers.map((w) => `- ${w.code}: ${w.why || 'no reason given'}`),
+    ...waivers.map((w) => `- ${w.code}: ${w.why || 'no reason given'}${w.problem ? ` [the harness does not honour this waiver: ${w.problem}]` : ''}`),
     ...(waivers.length > WAIVERS_TO_NAME ? [`The film has ${waivers.length} waivers, more than ${WAIVERS_TO_NAME}: name every one of them in your report.`] : [])];
 }
 

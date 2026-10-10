@@ -4,6 +4,7 @@
 import { spawnSync } from 'node:child_process';
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { contrastRatio, ensureContrast } from '../../core/color/index.js';
+import { isWaived } from './waivers.mjs';
 
 const RATIO = LIMITS['text-contrast'];
 export const DRAFT_MIN_RATIO = RATIO.body_ratio;
@@ -107,5 +108,8 @@ export const draftContrastLines = (samples) => contrastLines(draftLowContrast(sa
 
 /** One advice line per low-contrast text (draftLowContrast's list). Pure. */
 export function contrastLines(low) {
-  return (low ?? []).map((c) => `text "${c.text}" at ${c.t.toFixed(2)} s reads ${c.ratio.toFixed(1)}:1 on the pixels behind it (${hexOf(c.fg)} on ${hexOf(c.bg)}, needs ${c.need}:1): use ${passingColour(c)}, or change the ground behind it, or waive "text-low-contrast" with a _why`);
+  return (low ?? []).map((c) => `text "${c.text}" at ${c.t.toFixed(2)} s reads ${c.ratio.toFixed(1)}:1 on the pixels behind it (${hexOf(c.fg)} on ${hexOf(c.bg)}, needs ${c.need}:1): use ${passingColour(c)}, or change the ground behind it, or waive "text-low-contrast@${c.t.toFixed(2)}" with a _why`);
 }
+
+/** The low-contrast texts the page does not waive: a waiver is `text-low-contrast@<second>` or a range "a-b" that holds the sample's second. Null stays null (not sampled). Pure. */
+export const unwaivedContrast = (low, authoring) => (low ? low.filter((c) => !isWaived(authoring, 'text-low-contrast', c.t.toFixed(2))) : low);

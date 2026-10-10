@@ -36,6 +36,7 @@ export function pageAuthoring(pagePath) {
   try {
     const html = fs.readFileSync(pagePath, 'utf8');
     const m = /<script[^>]*id=["']authoring["'][^>]*>([\s\S]*?)<\/script>/.exec(html);
-    return m ? JSON.parse(m[1]) : { allow: [] };
+    const worlds = [...html.matchAll(/data-world=["']([^"']+)["']/g)].map((w) => w[1]);
+    return { ...(m ? JSON.parse(m[1]) : { allow: [] }), _worlds: [...new Set(worlds)] };
   } catch { return { allow: [] }; }
 }

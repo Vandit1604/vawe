@@ -4,7 +4,7 @@ step: motion
 principle: A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. A readable hold is good; a frozen frame is not a hold. A camera drift or push does not count, the camera holds still by default.
 limit: no span longer than 0.5 s outside a declared hold where no part of the frame moves by itself (a whole-frame move does not count)
 range: an element move with slow ease at both ends; a rest of 0.4 to 0.6 s after an element settles
-break-when: a declared hold (dead-air waiver with a reason): the held wordmark that is the last beat
+break-when: a declared hold (static-window@a-b waiver with a reason): the held wordmark that is the last beat
 instead: give the hold an element motion: type a line, tick a counter, pass a glint, start a secondary action, add a second key at the end of the hold. Do not fill the hold with a camera drift, push or pan, a scale or translate on a world or stage root, or parallax on the whole ground: the check leaves those out and constant-camera names a camera that never rests. Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion.
 check: static-window, sheet-tiles
 judge: Is there a 0.5 s span where nothing moves and no hold is declared?

@@ -92,8 +92,10 @@ test('one speed band across the film is flagged unless the page paints in script
 
 test('a waiver with a reason silences its line, bare or at its second', () => {
   const findings = exitLength([rec({ opacity: [0, 1], duration: 0.3 }), rec({ opacity: [1, 0], delay: 2, duration: 0.3 })]);
-  assert.equal(unwaived(findings, { allow: ['exit-length'], _why: { 'exit-length': 'the slow fade is the ending' } }).length, 0);
-  assert.equal(unwaived(findings, { allow: ['exit-length@2.00'], _why: { 'exit-length@2.00': 'the slow fade is the ending' } }).length, 0);
+  const reason = 'the slow fade at 2.0 s is the ending and lasts 0.3 s';
+  assert.equal(unwaived(findings, { allow: ['exit-length'], _why: { 'exit-length': reason } }).length, 0);
+  assert.equal(unwaived(findings, { allow: ['exit-length@2.00'], _why: { 'exit-length@2.00': reason } }).length, 0);
+  assert.equal(unwaived(findings, { allow: ['exit-length'], _why: { 'exit-length': 'the slow fade is the ending' } }).length, 1, 'a reason with no second and no measure does not waive');
   assert.equal(unwaived(findings, { allow: ['exit-length'] }).length, 1);
 });
 

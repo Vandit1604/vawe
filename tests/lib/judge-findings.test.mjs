@@ -101,3 +101,9 @@ test('siblings are the newest judged films with a video, never the film itself, 
   assert.equal(siblingFilms(dir, 'self', 2).length, 2);
   assert.deepEqual(siblingFilms(path.join(dir, 'none'), 'x'), []);
 });
+
+test('the judge sees every waiver, and the ones the harness refuses say so', () => {
+  const prompt = findingsPrompt({ card: '', declared: { signature: {}, waivers: [{ code: 'world-held@2-5', why: 'world s2 holds 3 s', problem: null }, { code: 'static-window@1-2', why: 'intentional', problem: 'refused: the reason is under 12 characters' }], message: null }, siblings: [] });
+  assert.match(prompt, /- world-held@2-5: world s2 holds 3 s\n/);
+  assert.match(prompt, /- static-window@1-2: intentional \[the harness does not honour this waiver: refused: the reason is under 12 characters\]/);
+});

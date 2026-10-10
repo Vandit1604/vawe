@@ -79,9 +79,12 @@ Over 60 seconds or more than one session: one chapter file per agent
 
 ## Waivers  `[live: harness/media/render-page.mjs]`
 
-A rule broken for cause is declared in the page with its reason, nowhere else; no `_why`, no waiver.
-Checks advise; only determinism and a missing reason refuse.
-`<script type="application/json" id="authoring">{"allow": ["dead-air"], "_why": {"dead-air": "the held wordmark IS the last beat"}}</script>`
+A rule broken for cause is declared in the page with its reason, nowhere else. Checks advise; only determinism, banned items
+and a reason that does not count refuse. One code per check, scoped to the seconds: `static-window@a-b`, `tile-run@a-b`,
+`tail-tiles@a-b`, `world-held@a-b` (the old `dead-air` waives nothing). A reason names where (a world id of the page or a second)
+and what was measured (a number with its unit); "intentional", "by design", "deliberate", "stylistic", "fine", "ok" and "as intended"
+do not count, and nor does one reason copied to 3 or more waivers. The draft lists every refused waiver; the judge sees every waiver.
+`<script type="application/json" id="authoring">{"allow": ["world-held@3.5-6.2"], "_why": {"world-held@3.5-6.2": "world s4, 2.7 s: the wordmark is the last beat and a caret ticks on it"}}</script>`
 
 ## Changing the engine, not a film  `[ref: engine-doctrine/CRAFT/ENGINE-CHANGES.md]`
 

@@ -99,7 +99,7 @@ export function blankRuns(feats, isFlat, limits = LIMITS) {
 
 /** Held worlds from the pixel turns of scene-stats: the guess for a page with no data-world element. Pure. */
 function heldFromTurns(stats, limits, authoring) {
-  const held = insideHold(authoring);
+  const held = insideHold(authoring, 'world-held');
   const edges = [0, ...stats.turns.map((t) => t.t), stats.duration];
   const found = [];
   for (let i = 1; i < edges.length; i++) {
