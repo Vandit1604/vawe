@@ -8,8 +8,8 @@ group: engine
 
 `gates/` holds the checkers. `bin/vawe check` lists them and `bin/vawe check <name> [args]` runs one:
 `page-check` and `anim-traps` (a page), `doc-refs` (every path a doc names must exist), `code-quality`,
-`skill-reach`, `rule-length`, `threshold-provenance` and a few more. `judge.mjs`, `rubric.mjs` and
-`compare.mjs` are not gates: `bin/vawe judge` and `bin/vawe compare` run them.
+`skill-reach`, `rule-length`, `threshold-provenance` and a few more. `judge.mjs` and `rubric.mjs` are not gates: `bin/vawe judge` runs them. `bin/vawe compare` runs
+`harness/media/compare-frames.mjs`.
 
 `baselines/` holds the ratchet files. A ratchet gate compares today's count to its file, so a metric can
 only get better. Fix something, run the gate with `--write`, and the line drops for good.

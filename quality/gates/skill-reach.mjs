@@ -12,12 +12,8 @@
 // (who opens a doc only when something told them to) is the same failure as not having written it.
 //
 // WHAT COUNTS AS ROUTED. AGENTS.md, `engine-doctrine/CRAFT/ROUTING.md`, the Makefile, or another
-// skill's SKILL.md naming the skill's directory. `engine-doctrine/INDEX.md` and
-// `skills/vawe-docs/SKILL.md` do NOT count: both are GENERATED, mechanically listing every skill
-// under `CRAFT_ALSO` in `doc-map.mjs` regardless of whether an agent is ever told to open it, so a
-// skill would show up there even freshly written and unrouted. Counting them would make this gate
-// unable to ever fail, which is the same silent gap `vawe check discovery` closed for registries that only
-// the catalogue, never the search corpus, could see.
+// skill's SKILL.md naming the skill's directory. A generated index would not count, because it lists
+// every skill whether or not an agent is told to open it, and the gate could then never fail.
 //
 // Pure: reads files, no render, no network.
 import fs from 'node:fs';
@@ -27,10 +23,6 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-
-// Generated, so a skill named only here has been indexed, not routed. Named explicitly rather than
-// derived, so a future generated view has to be added here on purpose, not discovered by surprise.
-const PURE_INDEX = new Set(['engine-doctrine/INDEX.md']);
 
 const read = (root, rel) => {
   const abs = path.join(root, rel);
@@ -56,13 +48,10 @@ function skills(root) {
  *  uses to point the gate at a small fixture tree instead of the real 18-skill library. */
 export function run({ root = ROOT } = {}) {
   const all = skills(root);
-  // The search surface: AGENTS.md, the routing table, the Makefile, and every skill's own SKILL.md
-  // (including the generated ones, so PURE_INDEX below is what excludes their hits, not their
-  // absence from this list).
+  // The search surface: AGENTS.md, the routing table, the Makefile, and every skill's own SKILL.md.
   const sources = [
     'AGENTS.md',
     'engine-doctrine/CRAFT/ROUTING.md',
-    'engine-doctrine/INDEX.md',
     'Makefile',
     ...all.map((s) => s.file),
   ];
@@ -72,8 +61,7 @@ export function run({ root = ROOT } = {}) {
   for (const { dir, file } of all) {
     const NAME = new RegExp(`\\b${dir.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`);
     const hits = sources.filter((rel) => rel !== file && NAME.test(text.get(rel)));
-    const real = hits.filter((rel) => !PURE_INDEX.has(rel));
-    if (!real.length) unrouted.push({ dir, file, hits });
+    if (!hits.length) unrouted.push({ dir, file });
   }
   return { total: all.length, unrouted };
 }
@@ -84,8 +72,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   console.log(`── skill reach · ${total} skill(s)\n`);
   if (!unrouted.length) console.log('✓ every skill is routed from AGENTS.md, engine-doctrine/CRAFT/ROUTING.md, the Makefile, or another skill');
   for (const u of unrouted) {
-    const seenOnly = u.hits.length ? ` (named only in ${u.hits.join(', ')}, a generated index, not a router)` : '';
-    const msg = `${u.dir}: nothing routes to it${seenOnly}. Add it to AGENTS.md's skill router table or engine-doctrine/CRAFT/ROUTING.md, or name it from the skill that should hand off to it.`;
+    const msg = `${u.dir}: nothing routes to it. Add it to AGENTS.md's skill router table or engine-doctrine/CRAFT/ROUTING.md, or name it from the skill that should hand off to it.`;
     console.log(`   ✗ ${u.file}  ${msg}`);
     f.fail('skill-unrouted', msg, { at: u.file });
   }
