@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FIXTURES = path.join(ROOT, 'tests/fixtures/truth');
 const OUT = path.join(ROOT, 'out/see-truth');
-export const ORDER = ['cuts', 'flash', 'motion', 'camera', 'eye', 'ground', 'look', 'type', 'sound', 'beat'];
+export const ORDER = ['cuts', 'flash', 'motion', 'camera', 'eye', 'ground', 'look', 'type', 'sound', 'events', 'beat'];
 const EPS = 1e-9;
 
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
@@ -448,6 +448,24 @@ export function soundSeeRows(t, { a, p }) {
   return rows;
 }
 
+/** `vawe see` on the events fixture: the second of each in-shot event, its sound offset in frames and verdict, and the sounds with no action. */
+export function eventsSeeRows(t, { a }) {
+  const F = 'events', tol = t.tolerance;
+  const events = a?.shots.flatMap((s) => s.events ?? []) ?? [];
+  const rows = [];
+  t.truth.events.forEach((e) => {
+    const found = nearest(events, e.t, (x) => x.t);
+    const near = found && Math.abs(found.t - e.t) <= 0.2 ? found : null;
+    rows.push(scoreRow({ fixture: F, measure: `${e.label}: event second`, tool: SEE, truth: e.t, measured: near?.t, tolerance: tol.eventSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${e.label}: sound offset (frames, + = sound after)`, tool: SEE, truth: e.frames, measured: near?.sound?.frames, tolerance: tol.soundFrames }));
+    rows.push(scoreRow({ fixture: F, measure: `${e.label}: verdict`, tool: SEE, truth: e.verdict, measured: near?.verdict }));
+  });
+  const lone = a?.sound.events?.soundsWithoutAction ?? null;
+  rows.push(scoreRow({ fixture: F, measure: 'sounds with no action (count)', tool: SEE, truth: t.truth.soundsWithoutAction.length, measured: lone?.length, tolerance: tol.count }));
+  t.truth.soundsWithoutAction.forEach((at) => rows.push(scoreRow({ fixture: F, measure: `sound with no action at ${at} s`, tool: SEE, truth: at, measured: nearest(lone ?? [], at, (x) => x.t)?.t, tolerance: tol.eventSeconds })));
+  return rows;
+}
+
 const BEAT = 'vawe sound';
 
 /** `vawe sound` on the beat fixture: tempo, first beat, every strike, each cut's verdict and frames, the page cue. `sound` is its sound.json; null when the verb failed. */
@@ -539,6 +557,7 @@ const FIXTURE_RUN = {
     const wave = vawe('sound', pageOf('sound'), '--waveform', '--out', 'out/see-truth/sound-wave.png');
     return [...soundRows(t, { audioAt: parseAudioAt(at.text), lufs: parseLufs(wave.text), timeline: timelineOf('sound'), spec: specOf('sound', mp4) }), ...soundSeeRows(t, { a: seeOf('sound', mp4), p: seeOf('sound', mp4, { page: true }) })];
   },
+  events: (t, o) => eventsSeeRows(t, { a: seeOf('events', render('events', { ...o, audio: true })) }),
   beat: (t) => {
     const out = 'out/see-truth/beat-sound';
     const res = vawe('sound', pageOf('beat'), '--out', out, '--no-cache');

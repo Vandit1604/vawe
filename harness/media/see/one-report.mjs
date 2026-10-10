@@ -1,4 +1,5 @@
 // The see.md of `vawe see`: one film's measures and images as Readable text. Pure: the measure object and the image object in, lines out.
+import { eventLines } from './events-math.mjs';
 const r2 = (n) => +Number(n).toFixed(2);
 const f2 = (n) => (n == null ? '-' : Number(n).toFixed(2));
 const s2 = (n) => (n == null ? '-' : `${Number(n).toFixed(2)} s`);
@@ -60,7 +61,7 @@ export function shotAccount(s) {
   const moves = s.moves.length ? [`Moving parts (${s.moves.length}):`, ...s.moves.map(moveLine)] : ['No part is tracked as moving.'];
   const hits = s.hits.length ? `Sound hits inside: ${s.hits.map((h) => `f${h.frame} (${h.strength})`).join(', ')}.` : null;
   return [openingLine(s), groundLine(s.ground), `Palette ${s.palette.map((p) => `${p.hex} ${Math.round(p.share * 100)}%`).join(', ')}.`, layoutLine(s.layout), ...moves,
-    energyLine(s.energy), `Camera: ${s.camera.words}.${tiltWords(s.camera.tilt)}`, eyeLine(s.eye), textLine(s.text), hits].filter(Boolean);
+    energyLine(s.energy), ...eventLines(s.events), `Camera: ${s.camera.words}.${tiltWords(s.camera.tilt)}`, eyeLine(s.eye), textLine(s.text), hits].filter(Boolean);
 }
 
 function structureSection(m) {
@@ -147,7 +148,11 @@ function soundSection(m) {
   }
   if (so.hits.length) {
     L.push('', `Onsets heard in the film (${so.hits.length}; onset is where the sound starts, peak is its loudest change, later):`, '',
-      ...table(['onset s', 'peak s', 'strength', 'kind', 'shot', 'nearest cut s', 'lead ms (+ = sound first)'], so.hits.map((h) => [f2(h.onset), f2(h.peak), h.strength, h.kind ?? '-', h.shot ?? '-', h.nearestCut == null ? '-' : f2(h.nearestCut), h.leadMs ?? '-'])));
+      ...table(['onset s', 'peak s', 'strength', 'kind', 'sounds like', 'shot', 'nearest cut s', 'lead ms (+ = sound first)'], so.hits.map((h) => [f2(h.onset), f2(h.peak), h.strength, h.kind ?? '-', h.sound ?? '-', h.shot ?? '-', h.nearestCut == null ? '-' : f2(h.nearestCut), h.leadMs ?? '-'])));
+  }
+  if (so.events?.events) {
+    L.push('', `Action and sound: ${so.events.onFrame} of ${so.events.events} events inside shots have their sound within 1 frame (an event is a part appearing or a burst of motion; each is listed under its shot).`);
+    if (so.events.soundsWithoutAction.length) L.push(`Sounds with no event within 3 frames: ${so.events.soundsWithoutAction.map((x) => `${x.label} at ${x.t.toFixed(2)} s`).join(', ')}.`);
   }
   return L;
 }

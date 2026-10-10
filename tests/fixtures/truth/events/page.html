@@ -1,0 +1,32 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4.5">
+<meta name="message" content="two boxes appear at known seconds, each with a sound at a known offset">
+<title>Truth events</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #101820; }
+  .box { position: absolute; width: 260px; height: 180px; opacity: 0; }
+  #a { left: 200px; top: 200px; background: #ff7a3d; }
+  #b { left: 1200px; top: 600px; background: #3dd6ff; }
+</style>
+</head>
+<body>
+<div class="world" data-world="events" style="position:absolute;inset:0">
+  <div class="box" id="a"></div>
+  <div class="box" id="b"></div>
+</div>
+<audio data-synth="pluck" data-at="1.0"></audio>
+<audio data-synth="droplet" data-at="2.3"></audio>
+<audio data-synth="pluck" data-at="3.6"></audio>
+<script>
+  window.seek = (t) => {
+    const ramp = (from) => Math.min(1, Math.max(0, (t - from) / 0.15));
+    document.getElementById('a').style.opacity = ramp(1.0);
+    document.getElementById('b').style.opacity = ramp(2.2);
+  };
+  window.seek(0);
+</script>
+</body>
+</html>

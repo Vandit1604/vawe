@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, fitGrid } from '../../core/beats/detect.js';
 import { attackTimes } from './ref-measure/audio-attack.mjs';
 import { decodeMono } from './audio-onsets.mjs';
+import { classifyHit } from './sound-class.mjs';
 import { measureFile } from '../media/page-audio.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -98,12 +99,12 @@ function loudnessOf(file) {
 }
 
 const sha = (...parts) => { const h = crypto.createHash('sha1'); for (const p of parts) h.update(p); return h.digest('hex'); };
-const CODE = ['harness/lib/sound-read.mjs', 'harness/lib/ref-measure/audio-attack.mjs', 'core/beats/detect.js'];
+const CODE = ['harness/lib/sound-read.mjs', 'harness/lib/sound-class.mjs', 'harness/lib/ref-measure/audio-attack.mjs', 'core/beats/detect.js'];
 const codeHash = () => sha(...CODE.map((f) => fs.readFileSync(path.join(ROOT, f))));
 
 /**
  * The sound of one file, in the file's own seconds: { duration, loudness, tempo: { bpm, confidence, usable, periodS, firstBeatS },
- * beats: [seconds], barOffset, onsets: [{ attack, peak, strength, errMs, kind }], sections }. Any format ffmpeg reads (m4a, mp3, wav, mp4).
+ * beats: [seconds], barOffset, onsets: [{ attack, peak, strength, errMs, kind, sound }], sections }. Any format ffmpeg reads (m4a, mp3, wav, mp4).
  * Kept in out/sound-cache/ by the content hash of the file and of this code.
  */
 export function readSound(file, { cache = true } = {}) {
@@ -116,7 +117,7 @@ export function readSound(file, { cache = true } = {}) {
   const duration = r3(mono.length / RATE);
   const a = analyseMono(mono, RATE, { fps: 30, duration });
   if (!a) throw new Error(`${file} is too short to read`);
-  const onsets = a.hits.map((h) => ({ attack: h.attack, peak: h.t, strength: h.strength, errMs: h.errMs, kind: hitKind(h) }));
+  const onsets = a.hits.map((h) => ({ attack: h.attack, peak: h.t, strength: h.strength, errMs: h.errMs, kind: hitKind(h), sound: classifyHit(mono, RATE, h.attack, h.errMs).cls }));
   const usable = a.confidence >= TEMPO_USABLE && a.beats.length > 1;
   const sound = { duration, loudness: loudnessOf(file),
     tempo: { bpm: r1(a.bpm), confidence: r1(a.confidence), usable, periodS: a.beats.length > 1 ? r3((a.beats.at(-1) - a.beats[0]) / (a.beats.length - 1)) : null, firstBeatS: a.beats[0] ?? null },
