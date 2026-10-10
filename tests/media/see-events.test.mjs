@@ -11,11 +11,11 @@ test('shotEvents lists an appearing part and a burst, and folds a burst that ope
   assert.match(ev[0].what, /dialog appears/);
 });
 
-test('pairEvents: sound on the frame within 1 frame, near within 3, off beyond, none out of reach', () => {
+test('pairEvents: on the frame within 1 frame, a sound early is before its action, late is near within 3 and off beyond, none out of reach', () => {
   const events = [{ t: 1.2, what: 'a' }, { t: 2.0, what: 'b' }, { t: 3.0, what: 'c' }, { t: 4.0, what: 'd' }];
   const marks = [{ t: 1.2 + 1 / FPS, label: 'click' }, { t: 2.0 - 3 / FPS, label: 'pop' }, { t: 3.2, label: 'swish' }];
   const out = pairEvents(events, marks, FPS);
-  assert.deepEqual(out.map((e) => e.verdict), ['sound on the frame', 'sound near', 'sound off', 'no sound']);
+  assert.deepEqual(out.map((e) => e.verdict), ['sound on the frame', 'sound before its action', 'sound off', 'no sound']);
   assert.equal(out[0].sound.frames, 1);
   assert.equal(out[1].sound.frames, -3);
   assert.equal(out[3].sound, null);
@@ -24,7 +24,7 @@ test('pairEvents: sound on the frame within 1 frame, near within 3, off beyond, 
 test('a sound before its cause is a negative frame count the line prints', () => {
   const [e] = pairEvents([{ t: 1.5, what: 'burst of motion' }], [{ t: 1.2, label: 'click' }], FPS);
   assert.equal(e.sound.frames, -9);
-  assert.match(eventLines([e]).join('\n'), /click at 1\.20 s \(-9 f\), sound off/);
+  assert.match(eventLines([e]).join('\n'), /click at 1\.20 s \(-9 f\), sound before its action/);
 });
 
 test('soundsWithoutAction names a mark with no event within 3 frames; matchOf counts the events on the frame', () => {

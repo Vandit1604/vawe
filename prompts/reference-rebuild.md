@@ -53,7 +53,9 @@ Read the Spec. For every line, write KEEP or SWAP and one reason.
 KEEP: anything the reference does that we want exactly (light, pacing, curves, type scale).
 SWAP: the content (our strings, our captures, our brand from its kit), anything the reference does
 that breaks a house rule (an em dash on screen, a hook over 12 words, an exit slower than its entrance,
-two adjacent transitions in one direction), and anything measured off the grid.
+two adjacent transitions in one direction), anything measured off the grid, and any effect the reference shows before its cause
+in our story: a burst before the press, a pop before the window opens, a sound before its action. Our cause-effect order wins
+over the reference's sound timing (`taste/rules/cause-first.md`); style is taken from a reference, never its text, logos or photos.
 Nothing is silent: an unmarked line is a bug.
 </swap>
 ```
