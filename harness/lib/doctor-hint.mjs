@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const WORDS = { chrome: /chrome|puppeteer/i, gsap: /gsap/i, fonts: /fonts?\b/i };
+const WORDS = { chrome: /chrome|puppeteer/i, fonts: /fonts?\b/i };
 const mentions = (id, text) => (WORDS[id] || new RegExp(`\\b${id}\\b`, 'i')).test(text);
 
 export function doctorHint(errorText, checks) {

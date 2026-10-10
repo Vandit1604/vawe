@@ -1,6 +1,6 @@
 ---
 when: writing or changing repo maintenance tooling: a brand-capture script or a site build helper
-answers: "what scripts/ is: brand/ (capture a site into a kit: palette, sections, photos), site/ (build helpers for the marketing site) and vendor-gsap.mjs"
+answers: "what scripts/ is: brand/ (capture a site into a kit: palette, sections, photos), site/ (build helpers for the marketing site)"
 group: process
 ---
 
@@ -15,4 +15,3 @@ tools and hooks).
 - `site/`: builds what the marketing site consumes (`og-image.mjs`, `vendor-assets.mjs`,
   `dev-all.mjs`). `easing.mjs` builds `site/lib/easing.json`; `easing-clips.mjs` renders the clip on each
   `/easing` page into `site/public/easing/`.
-- `vendor-gsap.mjs`: copies `gsap.min.js` from `node_modules` into `assets/vendor/` on `npm install`.

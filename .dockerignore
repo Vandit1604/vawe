@@ -9,8 +9,8 @@
 # absent from the context until somebody says otherwise, and the failure mode of forgetting is a build
 # that stops with "not found" instead of one that quietly grows.
 #
-#   Dockerfile      (the site + docs apps): assets/vendor scripts generators core harness/media/fonts.lock.json
-#                   site (site/docker-start.sh included) docs-site NOTICE package.json package-lock.json (gsap)
+#   Dockerfile      (the site + docs apps): scripts generators core harness/media/fonts.lock.json
+#                   site (site/docker-start.sh included) docs-site NOTICE package.json
 #
 # EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `quality/gates/site-build-check.mjs` builds
 # the context and prints what is in it.
@@ -18,13 +18,12 @@
 **
 
 # ── build inputs ─────────────────────────────────────────────────────────────────────────────────
-# scripts/site/vendor-assets.mjs and scripts/vendor-gsap.mjs both live under scripts/.
+# scripts/site/vendor-assets.mjs lives under scripts/.
 !scripts
 # generators/media/fonts.mjs refuses to run without its lock, and the builder stage runs it.
 !harness/media/fonts.lock.json
 !generators
 !core
-!assets/vendor
 
 # ── the two web apps ─────────────────────────────────────────────────────────────────────────────
 # docs-site runs on 3001 inside the SAME image and the site rewrites /docs to it. Its .source must
@@ -37,9 +36,6 @@
 # nobody thought to un-ignore is simply absent, which is how the first attempt at this shipped a
 # build that died on "Module not found: Can't resolve '../../package.json'".
 !package.json
-# The root lockfile: both images run `npm ci --omit=dev` at /src|/engine so gsap's postinstall
-# (scripts/vendor-gsap.mjs) can vendor assets/vendor/gsap.min.js, never committed (license).
-!package-lock.json
 **/node_modules
 **/.next
 **/.next-build

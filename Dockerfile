@@ -1,4 +1,4 @@
-# The marketing site. Build context is the REPO ROOT, not site/. The faces and gsap, which cannot be
+# The marketing site. Build context is the REPO ROOT, not site/. The faces, which cannot be
 # committed, are copied into site/public at build time by scripts/site/vendor-assets.mjs.
 #
 #   docker build -t vawe-site .
@@ -10,8 +10,6 @@ FROM node:22-alpine AS builder
 # parent. `docker builder prune -af` on the host is the actual cure.
 WORKDIR /src
 
-# assets/vendor holds the committed bonus gsap plugins; gsap.min.js joins it from the npm install below.
-COPY assets/vendor ./assets/vendor
 COPY scripts ./scripts
 # generators/ bakes the standing assets (fonts here); the RUN below needs it in the image
 COPY generators ./generators
@@ -43,18 +41,12 @@ RUN node generators/media/fonts.mjs
 # version or description actually changes. docker-check reads COPY lines and cannot see what a JS
 # import resolves to, which is why this arrived as a failed deploy rather than a failed gate.
 COPY package.json ./package.json
-# The root lockfile too, ONLY so gsap can be vendored: `npm ci --omit=dev` here installs the runtime
-# dependencies (gsap among them), whose postinstall (scripts/vendor-gsap.mjs) writes
-# assets/vendor/gsap.min.js. It is never committed (license, see assets/vendor/README.md), so a build
-# context without this step has no gsap to copy. No site page loads gsap since the JSON engine left.
-COPY package-lock.json ./package-lock.json
-RUN npm ci --omit=dev && rm -rf node_modules
 COPY site/package.json site/package-lock.json ./site/
 WORKDIR /src/site
 RUN npm ci
 
 COPY site/ ./
-# `prebuild` runs ../scripts/site/vendor-assets.mjs, which copies the faces and gsap into public/assets/
+# `prebuild` runs ../scripts/site/vendor-assets.mjs, which copies the faces into public/assets/
 # BUILD TO `.next`, DO NOT RENAME AFTERWARDS. `site/package.json`'s build script pins
 # NEXT_DIST_DIR=.next-build so a running `next dev` and a `next build` do not fight over `.next`
 # locally. Nothing runs `next dev` in this image, so the pin has no job here and two attempts to

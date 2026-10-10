@@ -66,7 +66,6 @@ const TOOLS = [
   { id: 'ffprobe', name: 'ffprobe', required: true, probe: () => probeBinary('ffprobe'), pkg: { brew: 'ffmpeg', apt: 'ffmpeg', dnf: 'ffmpeg', pacman: 'ffmpeg', apk: 'ffmpeg', zypper: 'ffmpeg', winget: 'Gyan.FFmpeg', choco: 'ffmpeg' } },
   { id: 'tesseract', name: 'tesseract (optional, OCR for spec and coverage --text)', required: false, probe: () => probeBinary('tesseract', '--version'), pkg: { brew: 'tesseract', apt: 'tesseract-ocr', dnf: 'tesseract', pacman: 'tesseract tesseract-data-eng', apk: 'tesseract-ocr', zypper: 'tesseract-ocr', winget: 'UB-Mannheim.TesseractOCR', choco: 'tesseract' } },
   { id: 'chrome', name: 'puppeteer Chrome', required: true, probe: probeChrome, fix: 'npm install, then npx puppeteer browsers install chrome' },
-  { id: 'gsap', name: 'assets/vendor/gsap.min.js', required: true, probe: probeFile('assets/vendor/gsap.min.js'), fix: 'npm install (its postinstall copies gsap)' },
   { id: 'fonts', name: 'assets/fonts', required: true, probe: probeFile('assets/fonts', true), fix: 'git checkout -- assets/fonts, or node generators/media/fonts.mjs' },
 ];
 

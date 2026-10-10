@@ -6,7 +6,7 @@
 //
 //   node scripts/brand/kit.mjs <url> <name>
 //   node scripts/brand/kit.mjs <url> <name> --init
-//     --init also checks the checkout is ready to render (node scripts/vendor-gsap.mjs --check) before spending a capture.
+//     --init also runs the doctor (node harness/dev/doctor.mjs) before spending a capture.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -22,11 +22,11 @@ if (!url || !name) { console.error('usage: node scripts/brand/kit.mjs <url> <nam
 const dir = path.join(ROOT, 'assets/brands', name);
 fs.mkdirSync(dir, { recursive: true });
 
-// ---- init: is the checkout ready to render, before spending a capture on it? (scripts/vendor-gsap.mjs) ----
+// ---- init: is the checkout ready to render, before spending a capture on it? ----
 if (init) {
   console.log('→ doctor: is the checkout ready to render');
   try {
-    console.log(`  ${execFileSync(process.execPath, [path.join(ROOT, 'scripts/vendor-gsap.mjs'), '--check'], { cwd: ROOT, encoding: 'utf8' }).trim()}`);
+    console.log(`  ${execFileSync(process.execPath, [path.join(ROOT, 'harness/dev/doctor.mjs')], { cwd: ROOT, encoding: 'utf8' }).trim()}`);
   } catch (e) {
     console.warn(`  ⚠ ${(e.stderr || e.stdout || e.message).trim()}`);
   }
