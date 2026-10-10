@@ -200,7 +200,7 @@ export function spectacleWeak(peaks, spectacle, span, scales = []) {
   const [mine, other] = [fastest(moves.filter(near)), fastest(moves.filter((p) => !near(p)))];
   if (other && (!mine || other.speed >= mine.speed * SPECTACLE.stronger_margin)) return [finding('spectacle-weak', spectacle,
     `spectacle at ${n1(spectacle)} s is weaker than ${n1(other.at)} s: ${mine ? `${mine.label} peaks at ${n1(mine.speed)} frame heights per second there` : 'no element moves there'}, ${other.label} peaks at ${n1(other.speed)} at ${n1(other.at)} s`,
-    'give the spectacle the fastest or longest move of the film, or move <meta name="spectacle"> to the moment that already is strongest and put quiet before it')];
+    'give the second named in <meta name="spectacle"> and in the Board the fastest or longest move of the film, with quiet before it')];
   const moving = moves.filter((p) => p.speed >= SPEED.moving_floor_fh_s).map((p) => p.speed).sort((a, b) => a - b);
   if (!mine || moving.length < SPEED.moving_min) return [];
   const median = moving[Math.floor((moving.length - 1) / 2)];

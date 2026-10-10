@@ -5,7 +5,7 @@ principle: A gradient the brief asks for is clean. h264 bands a slow dark ramp i
 limit: no banding rings and no straight edge inside a glow
 range: 1 to 2 percent grain on dark gradients; hold a grain pattern 2 frames; prefer a radial and a short ramp
 break-when: never
-instead: break the ramp with grain, dither or a dot texture; grain is the cheapest fix and what film did for the same reason. Check at the darkest moment and at the brightest glow.
+instead: break the ramp with grain, dither or a dot texture; grain breaks a ramp and film did the same for the same reason. Grain is texture: it is not a ground, not motion and not a fix for a flat frame. Check at the darkest moment and at the brightest glow.
 check: judge
 judge: On a full frame at the darkest moment and at the brightest glow, are there banding rings or a straight seam?
 prevents: judge1: banding rings at 0.6 s; vertical glow seam at x=860 at 2.5 s.

@@ -385,7 +385,7 @@
  },
  "gradient-grain": {
   "file": "taste/rules/gradient-grain.md",
-  "instead": "break the ramp with grain, dither or a dot texture; grain is the cheapest fix and what film did for the same reason. Check at the darkest moment and at the brightest glow."
+  "instead": "break the ramp with grain, dither or a dot texture; grain breaks a ramp and film did the same for the same reason. Grain is texture: it is not a ground, not motion and not a fix for a flat frame. Check at the darkest moment and at the brightest glow."
  },
  "mark-rides-parent": {
   "file": "taste/rules/mark-rides-parent.md",
@@ -393,7 +393,7 @@
  },
  "moving-tail": {
   "file": "taste/rules/moving-tail.md",
-  "instead": "keep the ground or a part of the held lockup alive with a slow move (2 to 4 percent over the last second), or end on one last move; a camera push is a camera move (constant-camera). The film has one accent: do not add a second. Do not fade the payoff and do not freeze it."
+  "instead": "give one part of the held lockup its own last key (a caret blinks, a value ticks, a highlight moves to the next item), or time one last arrival into the final second. A camera push or a drift on the ground is not a part move (constant-camera). The film has one accent: do not add a second. Do not fade the payoff and do not freeze it."
  },
  "no-tells": {
   "file": "taste/rules/no-tells.md",
