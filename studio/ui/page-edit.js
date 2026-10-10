@@ -7,7 +7,6 @@ export const fmt = (n, digits = 4) => String(+Number(n).toFixed(digits));
 const replace = (lit, text) => ({ start: lit.start, end: lit.end, expect: lit.text, text });
 const insert = (pos, text) => ({ start: pos, end: pos, expect: '', text });
 
-export const parseTime = (text) => (/ms$/.test(text) ? parseFloat(text) / 1000 : parseFloat(text));
 const timeLike = (seconds, like) => (/ms$/.test(like) ? `${fmt(seconds * 1000, 1)}ms` : `${fmt(seconds, 3)}s`);
 const quoted = (lit, text) => `${lit.text[0] === '"' ? '"' : "'"}${text}${lit.text[0] === '"' ? '"' : "'"}`;
 

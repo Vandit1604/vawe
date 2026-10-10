@@ -12,5 +12,3 @@ export function loadErrors(file = ERROR_BASELINE) {
   if (!fs.existsSync(file)) return { generated: null, measures: {}, accuracy: {} };
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
-
-export const errOk = (err, key) => !err || !err.measures || !err.measures[key] || err.measures[key].ok;

@@ -27,10 +27,3 @@ export function parseFix(raw) {
   if (at < 0) return { code: s, beat: null };
   return { code: s.slice(0, at), beat: s.slice(at + 1) };
 }
-
-// Throws with every valid code listed, so the caller's error message never has to restate the set.
-export function assertJudgeCode(code) {
-  if (!isJudgeCode(code)) {
-    throw new Error(`"${code}" is not a judge fix code. Valid codes: ${JUDGE_CODES.join(', ')}`);
-  }
-}

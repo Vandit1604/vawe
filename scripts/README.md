@@ -13,5 +13,6 @@ tools and hooks).
   runs the steps in one go and writes `kit.json` (palette, fonts, favicon, section captures).
   The steps run alone: `sections.mjs`, `palette.mjs`, `photos.mjs`, `localize-assets.mjs`.
 - `site/`: builds what the marketing site consumes (`og-image.mjs`, `vendor-assets.mjs`,
-  `dev-all.mjs`).
+  `dev-all.mjs`). `easing.mjs` builds `site/lib/easing.json`; `easing-clips.mjs` renders the clip on each
+  `/easing` page into `site/public/easing/`.
 - `vendor-gsap.mjs`: copies `gsap.min.js` from `node_modules` into `assets/vendor/` on `npm install`.
