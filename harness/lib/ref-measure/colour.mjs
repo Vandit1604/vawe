@@ -2,6 +2,7 @@
 // Colours per shot and per film (k-means, merged by distance), chroma, and the value structure.
 // Port of the reliable colour measures of the python prototype (measures.md, "Palette per shot").
 import { r1, r3, percentile } from '../move-fit.mjs';
+import { srgbToLinear } from '../../../core/color/linear.js';
 
 export const SAMPLE_W = 96;
 export const KMEANS_K = 8;
@@ -14,16 +15,37 @@ export const MAX_STAT_PIXELS = 200000;
 export const DARK_L = 20;
 export const LIGHT_L = 85;
 
-const LINEAR = Float32Array.from({ length: 256 }, (_, i) => { const c = i / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+const LINEAR = Float32Array.from({ length: 256 }, (_, i) => srgbToLinear(i));
 const WHITE = [0.95047, 1, 1.08883];
 const labF = (t) => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116);
 
-export function rgbToLab(r, g, b, out, o = 0) {
-  const lr = LINEAR[r], lg = LINEAR[g], lb = LINEAR[b];
+function linearToLab(lr, lg, lb, out, o) {
   const fx = labF((0.4124564 * lr + 0.3575761 * lg + 0.1804375 * lb) / WHITE[0]);
   const fy = labF(0.2126729 * lr + 0.7151522 * lg + 0.072175 * lb);
   const fz = labF((0.0193339 * lr + 0.119192 * lg + 0.9503041 * lb) / WHITE[2]);
   out[o] = 116 * fy - 16; out[o + 1] = 500 * (fx - fy); out[o + 2] = 200 * (fy - fz);
+}
+
+/** Writes the Lab of an integer 0..255 sRGB colour into out[o..o+2]: the table lookup, for per-pixel loops. */
+export function rgbToLab(r, g, b, out, o = 0) {
+  linearToLab(LINEAR[r], LINEAR[g], LINEAR[b], out, o);
+}
+
+/** [L, a, b] of any 0..255 sRGB triple, whole numbers or not. */
+export function labOf([r, g, b]) {
+  const out = [0, 0, 0];
+  linearToLab(srgbToLinear(r), srgbToLinear(g), srgbToLinear(b), out, 0);
+  return out;
+}
+
+/** The sRGB hex of a Lab colour (D65). */
+export function labToHex([L, a, b]) {
+  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
+  const inv = (t) => (t ** 3 > 216 / 24389 ? t ** 3 : (116 * t - 16) / (24389 / 27));
+  const X = WHITE[0] * inv(fx), Y = inv(fy), Z = WHITE[2] * inv(fz);
+  const lin = [3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z, -0.969266 * X + 1.8760108 * Y + 0.041556 * Z, 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z];
+  const enc = (c) => Math.round(255 * Math.min(1, Math.max(0, c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055)));
+  return `#${lin.map((c) => enc(c).toString(16).padStart(2, '0')).join('')}`;
 }
 
 // Frame f of V as Lab, box-averaged down to about SAMPLE_W pixels wide: three floats per pixel.

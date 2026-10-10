@@ -6,7 +6,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { srgbToLinear } from '../../core/color/linear.js';
+import { deltaE, labOf } from './ref-measure/colour.mjs';
 
 const ff = (a) => {
   const r = spawnSync('ffmpeg', ['-hide_banner', '-v', 'error', '-nostdin', ...a], { encoding: 'utf8', maxBuffer: 1 << 24 });
@@ -125,20 +125,10 @@ export function meanColorOf(png) {
 
 // labDeltaE(a, b): CIE76 distance between two 0..255 sRGB colours, converted through linear light and
 // CIE XYZ (D65) to CIELAB. 0 is identical; a few units is a just-noticeable difference; 100+ is
-// black-vs-white. srgbToLinear is core/color/linear.js's own conversion, not a second copy of it.
+// black-vs-white. The conversion is ref-measure/colour.mjs labOf.
 export function labDeltaE(a, b) {
-  const toLab = ([r, g, b2]) => {
-    const [R, G, B] = [srgbToLinear(r), srgbToLinear(g), srgbToLinear(b2)];
-    const X = (0.4124564 * R + 0.3575761 * G + 0.1804375 * B) / 0.95047;
-    const Y = 0.2126729 * R + 0.7151522 * G + 0.0721750 * B;
-    const Z = (0.0193339 * R + 0.1191920 * G + 0.9503041 * B) / 1.08883;
-    const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : (841 / 108) * t + 4 / 29);
-    const [fx, fy, fz] = [f(X), f(Y), f(Z)];
-    return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
-  };
   if (!a || !b) return null;
-  const [L1, a1, b1] = toLab(a), [L2, a2, b2] = toLab(b);
-  return Math.sqrt((L1 - L2) ** 2 + (a1 - a2) ** 2 + (b1 - b2) ** 2);
+  return deltaE(labOf(a), labOf(b));
 }
 
 // tile box for a given video aspect: scrutiny-sized, not thumbnails.

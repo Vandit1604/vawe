@@ -12,6 +12,7 @@ import { readTimeline } from '../timeline.mjs';
 import { hitKind, readSound } from '../../lib/sound-read.mjs';
 import { APPEAR_MIN_FRAMES, matchOf, pairEvents, shotEvents, soundsWithoutAction } from './events-math.mjs';
 import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
+import { labToHex } from '../../lib/ref-measure/colour.mjs';
 import { decodeGray, frameRgb } from './frame.mjs';
 import { edgesAt, lumaSeries, measureFilm } from './look.mjs';
 import { bloomSigma, flashProfile, hueOf, summarise } from './look-math.mjs';
@@ -28,16 +29,6 @@ const SILENT_LUFS = -70;
 const MIN_WORDS = 6;
 const SOLID_STEP = 24;
 const SOLID_SHARE = 0.004;
-
-/** The sRGB hex of a Lab colour (D65). */
-export function labToHex([L, a, b]) {
-  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - b / 200;
-  const inv = (t) => (t ** 3 > 216 / 24389 ? t ** 3 : (116 * t - 16) / (24389 / 27));
-  const X = 0.95047 * inv(fx), Y = inv(fy), Z = 1.08883 * inv(fz);
-  const lin = [3.2404542 * X - 1.5371385 * Y - 0.4985314 * Z, -0.969266 * X + 1.8760108 * Y + 0.041556 * Z, 0.0556434 * X - 0.2040259 * Y + 1.0572252 * Z];
-  const enc = (c) => Math.round(255 * Math.min(1, Math.max(0, c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055)));
-  return `#${lin.map((c) => enc(c).toString(16).padStart(2, '0')).join('')}`;
-}
 
 function grayFrames(video, t, n, w, h) {
   const { data } = decodeGray(video, { w, h, t, frames: n, flags: 'area' });
