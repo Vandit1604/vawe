@@ -17,6 +17,12 @@
 .hs-now-title{font-family:var(--font-title);font-weight:500;font-size:13px;margin-right:auto}
 .hs-now-link{font-size:13px;color:var(--accent);padding:6px 4px}
 .hs-now-link:hover{text-decoration:underline;text-underline-offset:3px}
+.hs-cap{color:var(--muted);font-size:14px;line-height:1.5;text-wrap:pretty}
+.hs-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.hs-tab{min-height:36px;padding:0 12px;border:0;border-radius:8px;background:var(--raised);color:var(--ink-2);font:inherit;font-size:13px;cursor:pointer}
+.hs-tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+@media (hover:hover) and (pointer:fine){ .hs-tab[aria-pressed="false"]:hover{background:var(--raised-2)} }
+@media (max-width:640px){ .hs-tab{min-height:44px;flex:1 1 auto} }
 @media (max-width:900px){
   .hs{grid-template-columns:1fr;gap:24px;padding-top:24px}
   .hs-copy{display:contents}
