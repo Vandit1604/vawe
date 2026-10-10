@@ -90,14 +90,21 @@ function stepCode({ code, signal }, call) {
   return code;
 }
 
+function orNone(read, none) {
+  try { return read(); } catch (e) {
+    if (e.code === 'ENOENT') return none;
+    throw e;
+  }
+}
+
 function stageOf(positional) {
   const page = positional.find((p) => p.endsWith('.html'));
-  try { return page ? nextStep(path.resolve(ROOT, page), ROOT).stage : null; } catch { return null; }
+  return page ? orNone(() => nextStep(path.resolve(ROOT, page), ROOT).stage, null) : null;
 }
 
 function briefOf(input) {
   const page = input && String(input).endsWith('.html') ? input : input && filmKeyOf(input) ? path.join('films', filmKeyOf(input), 'page.html') : null;
-  try { return page ? fs.readFileSync(path.resolve(ROOT, path.dirname(page), 'brief.md'), 'utf8') : ''; } catch { return ''; }
+  return page ? orNone(() => fs.readFileSync(path.resolve(ROOT, path.dirname(page), 'brief.md'), 'utf8'), '') : '';
 }
 
 function record(verb, rest, call, code, reason, endMs) {
