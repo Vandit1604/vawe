@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sampleTimes, frameUnitLines, textProblems, soundLine, mergeProblems, draftCheckLines, draftAdvice, briefLine } from '../../harness/lib/draft-check.mjs';
+import { hiddenTextLines, TEXTURE, sampleTimes, frameUnitLines, textProblems, soundLine, mergeProblems, draftCheckLines, draftAdvice, briefLine } from '../../harness/lib/draft-check.mjs';
 
 const at = (t, ...lines) => ({ t, lines: lines.map(([text, fontPx]) => ({ text, fontPx })) });
 const dim = { step: 0.5, frameH: 540 };
@@ -88,4 +88,16 @@ test('frameUnitLines: a font taller than the frame or under 0.2% of it names the
   assert.match(line, /--vh is the frame height in px; use calc\(var\(--vh\) \* 0\.08\) for 8%/);
   assert.equal(frameUnitLines([at(1, ['dot', 0.4])], dim).length, 1);
   assert.deepEqual(frameUnitLines([at(1, ['fine', 40], ['huge', 500])], dim), []);
+});
+
+test('hidden text: copy under aria-hidden is named with its count, a page that hides most of its text is told the share', () => {
+  const [reads] = hiddenTextLines({ total: 72, marked: 48, reads: 6, sample: ['Quarterly total', 'Invoices'] });
+  assert.match(reads, /^6 of 72 text nodes carry aria-hidden or data-chrome but read as copy \("Quarterly total", "Invoices"\)/);
+  assert.match(reads, /data-texture="why"/);
+  const most = hiddenTextLines({ total: 72, marked: 48, reads: 0, sample: [] });
+  assert.equal(most.length, 1);
+  assert.match(most[0], /^48 of 72 text nodes are exempt from the text checks as texture, over 50% of the page/);
+  assert.deepEqual(hiddenTextLines({ total: 72, marked: 20, reads: 0, sample: [] }), []);
+  assert.deepEqual(hiddenTextLines(null), []);
+  assert.equal(TEXTURE.repeatsMin, 3);
 });

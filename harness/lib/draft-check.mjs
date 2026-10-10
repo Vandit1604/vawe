@@ -13,6 +13,9 @@ export const RULES = { capFrac: SIZE.cap_height_pct / 100, chromeCapFrac: SIZE.c
 export const DECORATIVE = '[aria-hidden="true"]';
 export const CHROME = '[data-chrome]';
 
+// A text under DECORATIVE or CHROME is exempt only when it is texture by measure (visibleLines): too small to read, repeated, or marked with a reason.
+export const TEXTURE = { capFrac: SIZE.texture_cap_pct_max / 100, repeatsMin: SIZE.texture_repeats_min, reasonMin: SIZE.texture_reason_min_chars, shareMax: SIZE.texture_share_max_pct / 100 };
+
 const FONT_TINY_SHARE = 0.002;
 
 /** Sample times spread over the film: one every 0.5 s, between 10 and 40 samples, each at the middle of its slot. */
@@ -106,6 +109,22 @@ export function textProblems(samples, ctx, rules = RULES) {
     .filter((r) => r.cap < floorOf(r, rules))
     .sort((a, b) => a.cap - b.cap)
     .map((r) => `text "${r.key}" at ${r.t.toFixed(1)} s: cap height ${(r.cap * 100).toFixed(1)}% of frame (rule readable-text-size asks ${+(floorOf(r, rules) * 100).toFixed(1)}%)`);
+}
+
+/**
+ * Advice on text hidden from the checks. `hidden` is { total (text nodes on the page), marked (under aria-hidden or data-chrome),
+ * reads (marked nodes that are not texture by measure, so they are checked as copy), sample (a few of their words) }. Pure.
+ */
+export function hiddenTextLines(hidden, texture = TEXTURE) {
+  if (!hidden?.total) return [];
+  const lines = [];
+  if (hidden.reads) {
+    const e = hidden.sample.slice(0, 3).map((t) => `"${t.slice(0, 24)}"`).join(', ');
+    lines.push(`${hidden.reads} of ${hidden.total} text nodes carry aria-hidden or data-chrome but read as copy (${e}): they are checked as copy; remove the attribute, or mark real texture with data-texture="why" (${texture.reasonMin} characters or more)`);
+  }
+  const exempt = hidden.marked - hidden.reads;
+  if (exempt / hidden.total > texture.shareMax) lines.push(`${exempt} of ${hidden.total} text nodes are exempt from the text checks as texture, over ${Math.round(texture.shareMax * 100)}% of the page: show the product UI as text the checks read, and keep the exemption for small, repeated or reasoned texture`);
+  return lines;
 }
 
 /** One line when a text is taller than the frame or under 0.2% of it: the sign of --vh read as 1vh. Pure. */

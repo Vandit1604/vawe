@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { openPage, settle, resolveFrame } from '../../harness/media/render-page.mjs';
 import { visibleLines } from '../../harness/media/draft-check.mjs';
-import { DECORATIVE, CHROME } from '../../harness/lib/draft-check.mjs';
+import { DECORATIVE, CHROME, TEXTURE } from '../../harness/lib/draft-check.mjs';
 import { lineFor } from '../../harness/lib/spec-conformance.mjs';
 
 const PAGE = 'tests/fixtures/pages/decorative-text.html';
@@ -16,7 +16,7 @@ test('a line keeps its block id when lines before it come and go, wrapped text l
   try {
     await opened.page.goto(opened.url, { waitUntil: 'load' });
     await settle(opened.page);
-    const read = () => opened.page.evaluate(visibleLines, DECORATIVE, CHROME);
+    const read = () => opened.page.evaluate(visibleLines, DECORATIVE, CHROME, false, TEXTURE);
     const before = (await read()).lines;
     await opened.page.evaluate(() => { document.getElementById('early').style.visibility = 'hidden'; });
     const after = (await read()).lines;
@@ -30,15 +30,17 @@ test('a line keeps its block id when lines before it come and go, wrapped text l
   } finally { await opened.close(); }
 });
 
-test('aria-hidden text is not probed, data-chrome text is flagged, and split letters join into one text', async () => {
+test('texture by measure is not probed and chrome texture is flagged; hidden text that reads as copy is probed and counted; split letters join into one text', async () => {
   const opened = await openPage(PAGE, resolveFrame(PAGE, {}));
   try {
     await opened.page.goto(opened.url, { waitUntil: 'load' });
     await settle(opened.page);
-    const sample = await opened.page.evaluate(visibleLines, DECORATIVE, CHROME);
+    const sample = await opened.page.evaluate(visibleLines, DECORATIVE, CHROME, false, TEXTURE);
     const texts = sample.lines.map((l) => l.text);
     assert.ok(texts.includes('Read this'));
-    assert.ok(!texts.some((t) => /invoices|flood/.test(t)), 'aria-hidden text must be skipped');
+    assert.ok(!texts.some((t) => /invoices|flood/.test(t)), 'aria-hidden text with a texture reason must be skipped');
+    assert.ok(texts.includes('Quarterly total'), 'aria-hidden text that reads as copy is checked as copy');
+    assert.deepEqual([sample.hidden.total, sample.hidden.marked, sample.hidden.reads, sample.hidden.sample], [10, 5, 1, ['Quarterly total']]);
     assert.deepEqual(sample.lines.filter((l) => l.chrome).map((l) => l.text), ['Inbox', '(3)']);
     assert.ok(!sample.lines.find((l) => l.text === 'Read this').chrome);
     assert.equal(lineFor(sample, 'Ship').text, 'Ship');
