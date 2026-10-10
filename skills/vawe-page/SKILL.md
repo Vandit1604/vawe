@@ -134,4 +134,4 @@ asks for overshoot. Full reference: `core/motion/README.md`.
 Motion pass rows, Read the `bin/vawe strip <page> --cuts` grids, prepare the critique notes). Fix the verdict worst first on drafts (`bin/vawe dev`, then
 `bin/vawe judge <draft mp4> --fresh`) until PASS, then ship once more.
 `bin/vawe critique <page> [--ref mp4]`: the fresh look (`vawe-critique`; with `--ref`, `vawe-reference`).
-Templates: `prompts/README.md`. Long films: `prompts/directors-brief-long-form.md`.
+Templates: `engine-doctrine/CRAFT/ROUTING.md`. Long films: `prompts/directors-brief-long-form.md`.

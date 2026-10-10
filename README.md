@@ -102,7 +102,7 @@ A hook (`harness/live/stage-say.mjs`) names the next command for the film you ed
 The critique is run by a session that did not write the page, rejects by default, and names every
 finding as shot + frame + fix (`skills/vawe-critique/SKILL.md`). A reference is matched through
 `SPEC.md` and a KEEP/CHANGE list (`bin/vawe spec <mp4>`, then `bin/vawe coverage <film.mp4> --ref <mp4>` lists the seconds that still differ; `skills/vawe-reference/SKILL.md`). One prompt template per film
-type: `prompts/README.md`; the router: `engine-doctrine/CRAFT/ROUTING.md`.
+type: the router `engine-doctrine/CRAFT/ROUTING.md`.
 
 ## Determinism
 
@@ -148,7 +148,7 @@ out/               rendered mp4s (gitignored)
 
 ## Docs
 
-New here and want to author? This page, then `AGENTS.md` (the house rules). Then `prompts/README.md`,
+New here and want to author? This page, then `AGENTS.md` (the house rules). Then `engine-doctrine/CRAFT/ROUTING.md`,
 `prompts/moves/README.md`, `core/motion/README.md`, `taste/README.md` (every taste rule; `taste/build/DIGEST.md` is the first read), and `engine-doctrine/JUDGE.md` (how a film is scored). `bin/vawe --help` prints every command.
 
 ## Status and license
