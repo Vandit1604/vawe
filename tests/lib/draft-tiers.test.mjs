@@ -66,7 +66,7 @@ test('only red rows print, one line each, and the count of green matches them', 
   const rows = buildRows([], { stills: [{ a: 1, b: 2 }], guessed: { words: 1 } }, { mode: 'draft', stage: 'draft' });
   const red = rows.filter((r) => r.status === 'advice');
   assert.equal(red.length, 1);
-  assert.match(redLine(red[0]), /^ {2}still windows over 0.5 s outside a declared hold: 1 \(1-2 s held still\); keep one thing moving/);
+  assert.match(redLine(red[0]), /^ {2}still windows over 0.5 s outside a declared hold: 1 \(1-2 s held still\); give the hold an element motion/);
   const measured = rows.filter((r) => r.status !== 'not measured').length;
   const atShip = rows.filter((r) => r.atShip).length;
   assert.equal(rows.length, 15);

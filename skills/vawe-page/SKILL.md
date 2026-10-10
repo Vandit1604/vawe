@@ -32,7 +32,7 @@ ground that is never flat (a light, grain or depth device named from a reference
 the spectacle second (also `<meta name="spectacle">`; recipe 15 in `prompts/moves/RECIPES.md`), a named move per cut
 (overlap, camera, what carries the eye, which arrivals overshoot: `EASE.nudge` for ordinary ones, `EASE.pop` for the hero),
 and sound: small effects on actions, no bed (`taste/craft/sound.md`; `bin/vawe sound`). (6) Then the Shots rows, the
-motion and `bin/vawe dev`. The motion is done when overshoot-share, live-hold and seam-variety are clean or waived with a
+motion and `bin/vawe dev`. The camera holds still by default and moves only with a reason (the spectacle, a reveal): a hold stays alive through an element motion (typing, a counter, a glint), not a camera drift. The motion is done when overshoot-share, live-hold, constant-camera and seam-variety are clean or waived with a
 reason, and you have Read `bin/vawe strip <page> --cuts` for every cut (and `bin/vawe onion` and `bin/vawe velocity` on the
 spectacle second), fixed what reads flat and written a row per cut in the brief's "Motion pass". `bin/vawe` names the next
 stage after each step; `bin/vawe ship` warns while the Board or the Motion pass is unfilled.

@@ -18,7 +18,7 @@ Every command prints the lines of its step again. All rules: `taste/README.md`. 
 - Speed bands: 0.15 to 0.3 s, 0.3 to 0.5 s, 0.5 to 0.8 s; the slowest move runs 3 times the fastest. (speed-bands)
 - Stagger a group 30 to 80 ms; never a group that lands on one frame. (stagger)
 - Each moving seam changes axis or direction; a hard cut is exempt. (seam-variety)
-- Nothing static in the last 1 s: end on a slow push or drift. (moving-tail)
+- Nothing static in the last 1 s: end on a small move on a part or the ground. (moving-tail)
 - No tells unless the brief asks: gradient text, corner labels, borders, glow on UI, bursts, RGB split, shake, flares. (no-tells)
 
 ## Attractors

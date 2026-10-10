@@ -26,5 +26,5 @@ test('a bare dead-air covers the film, and a waiver with no reason covers nothin
 });
 
 test('stillText names the seconds, the limit and both fixes', () => {
-  assert.equal(stillText({ a: 2, b: 2.7, len: 0.7 }), 'static window 2-2.7 s (0.7 s, limit 0.5 s): keep one thing moving (a slow drift on the ground or the hero); waive: "allow": ["dead-air@2-2.7"], "_why": {"dead-air@2-2.7": "<reason>"} in <script id="authoring">');
+  assert.equal(stillText({ a: 2, b: 2.7, len: 0.7 }), 'static window 2-2.7 s (0.7 s, limit 0.5 s): nothing moves; give the hold an element motion (typing, a counter, a glint), not a camera drift; waive: "allow": ["dead-air@2-2.7"], "_why": {"dead-air@2-2.7": "<reason>"} in <script id="authoring">');
 });

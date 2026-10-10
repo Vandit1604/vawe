@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.
 
-107 rules, 34 scored by the judge.
+108 rules, 34 scored by the judge.
 
 ## concept
 
@@ -89,13 +89,14 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [arrival-rhythm](rules/arrival-rhythm.md): Motion order is reading order. Check: no-overlap.
 - [blur-follows-motion](rules/blur-follows-motion.md): Blur follows motion: a still thing never blurs. Check: judge.
 - [blur-out-dense](rules/blur-out-dense.md): Faces, cards and dense grids leave through focus, not through space. Check: judge.
+- [constant-camera](rules/constant-camera.md): The camera holds still by default and moves only with a reason: the spectacle, a reveal. Check: constant-camera.
 - [counter-no-overshoot](rules/counter-no-overshoot.md): A counting number never overshoots. Check: judge.
 - [ease-variety](rules/ease-variety.md): Vary eases like you vary font weights, and offset layers that move together. Check: judge, ease-count, lockstep.
 - [entrance-ease](rules/entrance-ease.md): An entrance is a landing: it decelerates on EASE.land and shows most of its move by frame 1. Check: judge.
 - [entrance-origin](rules/entrance-origin.md): Motion explains: one entrance per beat, and it says where the thing came from (origin at its trigger, a wipe on the motion, a match on a shape). Check: judge, entrance-direction.
 - [exits-shorter](rules/exits-shorter.md): An exit is a launch: it runs shorter than its entrance and accelerates. Check: exit-length.
 - [follow-through](rules/follow-through.md): A trailing property finishes after the main one: scale after position, a shadow after its card. Check: follow-through.
-- [live-hold](rules/live-hold.md): A hold keeps life. Check: static-window, sheet-tiles.
+- [live-hold](rules/live-hold.md): A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. Check: static-window, sheet-tiles.
 - [named-eases](rules/named-eases.md): Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. Check: linear-move, default-ease.
 - [no-bounce](rules/no-bounce.md): No bounce or overshoot on type or UI by default. Check: judge.
 - [no-dead-stop](rules/no-dead-stop.md): A move never jumps speed from one frame to the next. Check: dead-stop.
@@ -128,7 +129,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 
 - [gradient-grain](rules/gradient-grain.md): A gradient the brief asks for is clean. Check: judge.
 - [mark-rides-parent](rules/mark-rides-parent.md): Every mark rides the thing it belongs to. Check: judge.
-- [moving-tail](rules/moving-tail.md): The world keeps moving to the last frame: the last second carries a slow push or drift. Check: sheet-tiles.
+- [moving-tail](rules/moving-tail.md): The world keeps moving to the last frame: the last second carries a small move on a part or the ground. Check: sheet-tiles.
 - [no-tells](rules/no-tells.md): No generated tells. Check: judge.
 - [reveal-mask-pad](rules/reveal-mask-pad.md): A reveal mask clears the glyphs. Check: judge.
 - [stock-device-once](rules/stock-device-once.md): A stock device is seasoning, never the idea. Check: judge.

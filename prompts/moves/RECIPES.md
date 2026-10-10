@@ -291,7 +291,7 @@ Traps:
 - card-assemble is added at station 2 so two clicks do not sit side by side. A third click beside them would be a template.
 - Exit the cursor down before each pan (it is gone by 2.50 and by 10.80). A cursor in the world streaks with the pan.
 - pan-stations and ui-focus-zoom both move the world. Drive both from one camera state (`translate`, `scale`) in one `vawe.onFrame`, and read station 4's rect with `offsetLeft`/`offsetTop`, never mid-pan.
-- Hold each station for words x 0.6 s, at least 1.2 s, and drift the camera through the hold so it is never a still.
+- Hold each station for words x 0.6 s, at least 1.2 s, and keep one element moving through the hold so it is never a still (the camera rests).
 - ui-focus-zoom needs a target with no glyph under it (a status pill). Cut out on the next beat; never zoom back on a mirror curve.
 - calm-lockup's lights are the film's one stock device. Lay the lockup on the ground the status colour sits on, so the zoom's last frame and the lockup share a ground.
 
@@ -378,17 +378,17 @@ The one big moment of a film, in three parts: quiet before, the moment, the rele
 
 | time | move | what carries into the next beat | sound |
 |---|---|---|---|
-| 0.00 | [camera-moves](camera-moves.md) `drift` on the ground only | quiet: one line, fewer moves, the slow band (cinematic), nothing else arrives; it reads for 1.0 s | none |
+| 0.00 | [drift-hold](drift-hold.md) the ground only, the camera rests | quiet: one line, fewer moves, the slow band (cinematic), nothing else arrives; it reads for 1.0 s | none |
 | 1.00 | [camera-moves](camera-moves.md) `push` with [depth-parallax](depth-parallax.md) | the camera starts leaning 0.2 s before the word lands; ground 0.3, mid 1, front 1.8; it runs to 2.40 | whoosh 0.80 |
 | 1.20 | [arrival-spring](arrival-spring.md) `pop` | the hero word lands on `EASE.pop`, the one deep overshoot of the beat | hit 1.20 |
 | 1.40 | [chain-beats](chain-beats.md) overlap | the front-layer chips arrive 0.2 s after the word, one in four on `EASE.nudge`, a ring bursts on the ground; four layers move at once | tick 1.60 |
-| 2.40 | [camera-moves](camera-moves.md) `drift` from the push's end | the release: the push has stopped, the camera drifts, nothing new arrives; it holds to 3.00 | none |
+| 2.40 | the camera rests where the push ended | the release: the push has stopped, nothing new arrives, one small element move keeps the hold alive (a glint, a counter settling); it holds to 3.00 | none |
 | 0.00 | option: [speed-ramp](speed-ramp.md) into the moment | when the quiet before and the big word share a direction (a shrink into a word that arrives from larger), cut with `ramp(quiet, big, { at })` at the landing second instead of a camera push | swell ends on the cut |
 | 2.20 | invent: the film's own moment | one detail inside the big moment that only this product's own object can make | none |
 
 Why it works: contrast. Few moves and a slow band make the quiet; then four layers move together
-under one camera, with one deep overshoot, so the eye has one place to go; then the camera keeps drifting
-so the hold is alive. The camera starts before the word, so the word lands into a move that is already
+under one camera, with one deep overshoot, so the eye has one place to go; then the camera rests
+and one small element move keeps the hold alive. The camera starts before the word, so the word lands into a move that is already
 under way.
 
 Traps:

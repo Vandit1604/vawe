@@ -141,10 +141,10 @@ An exit is a launch: it runs shorter than its entrance and accelerates. A card t
 
 ### live-hold
 
-A hold keeps life. A readable hold is good, and it carries a slow drift or push; a frozen frame is not a hold. A fast beat earns a still one, and the still keeps moving slowly.
+A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. A readable hold is good; a frozen frame is not a hold. A camera drift or push does not count, the camera holds still by default.
 
-- Limit: no whole-frame still longer than 0.5 s outside a declared hold
-- Range: slow ease at both ends; 1 to 3 percent scale or 6 to 14 px position over the hold; a rest of 0.4 to 0.6 s after an element settles
+- Limit: no span longer than 0.5 s outside a declared hold where no part of the frame moves by itself (a whole-frame move does not count)
+- Range: an element move with slow ease at both ends; a rest of 0.4 to 0.6 s after an element settles
 - Judge: Is there a 0.5 s span where nothing moves and no hold is declared?
 
 ### named-eases
@@ -226,10 +226,10 @@ Every mark rides the thing it belongs to. A mark that sits still while its paren
 
 ### moving-tail
 
-The world keeps moving to the last frame: the last second carries a slow push or drift. A wordmark may land and hold, but something still moves.
+The world keeps moving to the last frame: the last second carries a small move on a part or the ground. A wordmark may land and hold, but something still moves.
 
 - Limit: no static frame in the last 1 s; at most 4 near-identical tail tiles, unless an animation runs on a visible element through the last 1 s on the sheet
-- Range: a slow push or drift through the last second
+- Range: a slow part or ground move through the last second
 - Judge: Does anything move in the last second?
 
 ### no-tells

@@ -247,6 +247,10 @@
   "file": "taste/rules/blur-out-dense.md",
   "instead": "blur out and fade; the blur runs only during the exit itself."
  },
+ "constant-camera": {
+  "file": "taste/rules/constant-camera.md",
+  "instead": "hold the camera still and give the hold an element motion: a line typing, a counter, a glint, a secondary action. Keep camera() for the spectacle or a reveal."
+ },
  "counter-no-overshoot": {
   "file": "taste/rules/counter-no-overshoot.md",
   "instead": "ease the count with expo-out or quart-out: the deceleration is the weight. Counting to a small number is a stunt: cut it."
@@ -273,7 +277,7 @@
  },
  "live-hold": {
   "file": "taste/rules/live-hold.md",
-  "instead": "add a second key at the end of the hold; do not fill every flat segment with drift (a uniform churn made the number move and the film worse). Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion."
+  "instead": "give the hold an element motion: type a line, tick a counter, pass a glint, start a secondary action, add a second key at the end of the hold. Do not fill the hold with a camera drift, push or pan, a scale or translate on a world or stage root, or parallax on the whole ground: the check leaves those out and constant-camera names a camera that never rests. Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion."
  },
  "named-eases": {
   "file": "taste/rules/named-eases.md",
@@ -389,7 +393,7 @@
  },
  "moving-tail": {
   "file": "taste/rules/moving-tail.md",
-  "instead": "keep the ground or the held lockup alive with a slow drift or push (2 to 4 percent over the last second), or end on one last move. The film has one accent: do not add a second. Do not fade the payoff and do not freeze it."
+  "instead": "keep the ground or a part of the held lockup alive with a slow move (2 to 4 percent over the last second), or end on one last move; a camera push is a camera move (constant-camera). The film has one accent: do not add a second. Do not fade the payoff and do not freeze it."
  },
  "no-tells": {
   "file": "taste/rules/no-tells.md",
