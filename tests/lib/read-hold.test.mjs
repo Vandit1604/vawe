@@ -68,3 +68,22 @@ test('a line that left before its settle time has no hold: not a problem, counte
   assert.deepEqual(readHoldProblems(tracks), []);
   assert.equal(readHoldUnmeasured(tracks).length, 1);
 });
+
+test('a typed line is one track that settles when it stops changing, not one track per prefix', () => {
+  const full = 'Ship it now';
+  const typed = Array.from(full, (_, i) => rows(0.25 + i * 0.25, full.slice(0, i + 1)));
+  const held = (n) => Array.from({ length: n }, (_, i) => rows(0.25 + full.length * 0.25 + i * 0.25, full));
+  const after = 0.25 + (full.length + 8) * 0.25;
+  const tracks = probeTracks([...typed, ...held(8), rows(after)], { step: 0.25, frameH: 600 });
+  assert.deepEqual(tracks.map((t) => t.text), [full]);
+  assert.equal(tracks[0].tSettled, 0.25 + (full.length - 1) * 0.25 - 0.125);
+  assert.deepEqual(readHoldProblems(tracks), []);
+  const short = probeTracks([...typed, ...held(1), rows(after)], { step: 0.25, frameH: 600 });
+  assert.equal(readHoldProblems(short).length, 1);
+});
+
+test('two elements that type different text never join into one track', () => {
+  const two = (a, b) => ({ t: 0, lines: [{ text: a, box, block: 0 }, { text: b, box, block: 1 }] });
+  const s = [two('A', 'B'), two('AB', 'BC'), two('ABC', 'BCD')].map((x, i) => ({ ...x, t: 0.25 + i * 0.25 }));
+  assert.deepEqual(probeTracks([...s, rows(1)], { step: 0.25, frameH: 600 }).map((t) => t.text).sort(), ['ABC', 'BCD']);
+});

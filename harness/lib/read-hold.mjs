@@ -70,7 +70,7 @@ export const readHoldUnmeasured = (tracks) => groupsOf(tracks).filter((g) => g.h
  * the run's first sample minus half a step, out at its last plus half a step. `block` is the sample's element identity
  * (the nearest block-level ancestor): the texts of one element read as one line, two elements never join. A word of the
  * brief's Words table that the text holds gives the settle time; without one the run's start stands in for it, so the hold
- * is the whole time on screen. Text inside data-chrome or data-ui is not a line to read and has no track.
+ * is the time since the line last changed. A line that grows by appending characters (typed) stays one track: it settles when it stops changing. Text inside data-chrome or data-ui is not a line to read and has no track.
  */
 export function probeTracks(samples, { step, frameH }, words = []) {
   const tracks = [];
@@ -80,17 +80,24 @@ export function probeTracks(samples, { step, frameH }, words = []) {
     open.delete(key);
     tracks.push({ text: r.text, block: r.block, sizeSettled: r.h / frameH, tIn: r.tIn, tSettled: r.tSettled, tOut: r.tOut });
   };
+  const keyOf = (l) => `${l.block ?? l.text}|${l.text}`;
   for (const { t, lines } of samples) {
+    const shown = lines.map((l) => ({ ...l, text: l.text.replace(/\s+/g, ' ').trim() })).filter((l) => l.text && l.box && !l.chrome && !l.ui);
+    const now = new Set(shown.map(keyOf));
     const seen = new Set();
-    for (const l of lines) {
-      const text = l.text.replace(/\s+/g, ' ').trim();
-      if (!text || !l.box || l.chrome || l.ui) continue;
+    for (const l of shown) {
+      const { text } = l;
       const block = l.block ?? text;
-      const key = `${block}|${text}`;
+      const key = keyOf(l);
       seen.add(key);
-      const r = open.get(key) || { text, block, h: l.box[3], tIn: Math.max(0, t - step / 2) };
+      let r = open.get(key);
+      if (!r && l.block != null) {
+        const typed = [...open].find(([k, x]) => x.block === block && !now.has(k) && text.length > x.text.length && text.startsWith(x.text));
+        if (typed) { open.delete(typed[0]); r = Object.assign(typed[1], { text, changedAt: Math.max(0, t - step / 2) }); }
+      }
+      r ??= { text, block, h: l.box[3], tIn: Math.max(0, t - step / 2), changedAt: Math.max(0, t - step / 2) };
       const spec = words.find((w) => typeof w.settle === 'number' && text.toLowerCase().includes(w.text.toLowerCase()));
-      r.tSettled = Math.max(r.tIn, spec ? spec.settle : r.tIn);
+      r.tSettled = Math.max(r.tIn, spec ? spec.settle : r.changedAt);
       r.tOut = t + step / 2;
       open.set(key, r);
     }
