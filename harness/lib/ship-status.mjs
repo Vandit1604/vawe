@@ -109,24 +109,31 @@ export function blankRuns(feats, isFlat, limits = LIMITS) {
   return runs;
 }
 
-/** Held worlds from the pixel turns of scene-stats: the guess for a page with no data-world element. Pure. */
-function heldFromTurns(stats, limits, authoring) {
+const overlap = (run, a, b) => Math.max(0, Math.min(run.b, b) - Math.max(run.a, a));
+
+/**
+ * Held worlds from the pixel turns of scene-stats: the guess for a page with no data-world element. A canvas film has no hard turns
+ * while its picture moves, so there a stretch is held only when still pixels fill most of it. Pure.
+ */
+function heldFromTurns(stats, limits, authoring, canvasFilm = false) {
   const held = insideHold(authoring, 'world-held');
   const edges = [0, ...stats.turns.map((t) => t.t), stats.duration];
   const found = [];
   for (let i = 1; i < edges.length; i++) {
     const len = edges[i] - edges[i - 1];
+    const still = stats.static.reduce((sum, r) => sum + overlap(r, edges[i - 1], edges[i]), 0);
+    if (canvasFilm && still <= len / 2) continue;
     if (len > limits.worldSec && !held({ a: edges[i - 1], b: edges[i] })) found.push({ len, text: `world held ${edges[i - 1].toFixed(1)}-${edges[i].toFixed(1)} s (${len.toFixed(1)} s)` });
   }
   return found;
 }
 
-/** Problems worth a look, worst first, each with its seconds. `stats` is scene-stats summarize(), `blanks` from blankRuns, `authoring` the page's #authoring waivers, `worlds` the measured data-world spans (null for a page with none, which reads the turns from pixels). */
-export function problemsOf(stats, blanks, limits = LIMITS, authoring = {}, worlds = null) {
+/** Problems worth a look, worst first, each with its seconds. `stats` is scene-stats summarize(), `blanks` from blankRuns, `authoring` the page's #authoring waivers, `worlds` the measured data-world spans (null for a page with none, which reads the turns from pixels), `canvasFilm` true when a canvas covers the frame (its DOM worlds are not measured). */
+export function problemsOf(stats, blanks, limits = LIMITS, authoring = {}, worlds = null, canvasFilm = false) {
   const found = [];
   for (const r of blanks.filter((x) => !(worlds?.length && insideTextWorlds(worlds, x)))) found.push({ len: r.b - r.a, text: `blank frame ${r.a.toFixed(1)}-${r.b.toFixed(1)} s` });
   for (const r of undeclaredStills(stats.static, authoring, limits.staticSec)) found.push({ len: r.len, text: stillText(r, limits.staticSec) });
-  found.push(...(worlds?.length ? heldWorlds(worlds, limits.worldSec, authoring) : heldFromTurns(stats, limits, authoring)));
+  found.push(...(worlds?.length ? heldWorlds(worlds, limits.worldSec, authoring) : heldFromTurns(stats, limits, authoring, canvasFilm)));
   return found.sort((x, y) => y.len - x.len).map((p) => p.text);
 }
 

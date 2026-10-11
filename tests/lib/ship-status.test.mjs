@@ -113,3 +113,11 @@ test('waitCallsLeft counts the wait calls from the capture eta, else from the us
   assert.equal(early.calls, 2);
   assert.match(early.basis, /no pace yet/);
 });
+
+test('problemsOf: a canvas film whose pixels move is no held world, one that sits still is', () => {
+  const moving = stats({ turns: [], duration: 12, static: [{ a: 3, b: 4, len: 1 }] });
+  assert.deepEqual(problemsOf(moving, [], undefined, {}, null, true).filter((p) => p.startsWith('world held')), []);
+  assert.deepEqual(problemsOf(moving, []).filter((p) => p.startsWith('world held')), ['world held 0.0-12.0 s (12.0 s)']);
+  const still = stats({ turns: [], duration: 12, static: [{ a: 1, b: 11, len: 10 }] });
+  assert.deepEqual(problemsOf(still, [], undefined, {}, null, true).filter((p) => p.startsWith('world held')), ['world held 0.0-12.0 s (12.0 s)']);
+});

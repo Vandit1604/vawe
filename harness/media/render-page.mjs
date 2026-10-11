@@ -988,7 +988,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
 export async function videoChecks(mp4, pagePath, checks, probe = {}, cameraOnly = []) {
   const authoring = pageAuthoring(pagePath);
   const shots = dropGuesses(parseBriefTables(readBrief(pagePath))).set.shots;
-  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail), cameraOnly };
+  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail), canvasFilm: Boolean(probe.canvasFilm), cameraOnly };
   try {
     return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds, cameraOnly) }; }, { authoring, shots, page });
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
