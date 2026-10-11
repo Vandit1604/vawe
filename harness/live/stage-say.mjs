@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// UserPromptSubmit hook: names the one next command for the page film edited most recently.
-// Silent when no films/*/page.html changed in the last RECENT_MS, so a framework session sees nothing.
+// UserPromptSubmit hook: says when the checkout lags origin/main, then names the one next command for the page film edited most recently.
+// The stage line is silent when no films/*/page.html changed in the last RECENT_MS, so a framework session sees nothing of it.
 //   node harness/live/stage-say.mjs [--reset]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,6 +10,7 @@ import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf, moveRo
 import { handoffAdvice } from '../lib/handoffs.mjs';
 import { ideasFilled } from '../lib/ideas.mjs';
 import { SHOW_OWNER, shipProblem } from '../lib/approval.mjs';
+import { staleCheckoutLine } from '../lib/stale-checkout.mjs';
 
 export { boardFilled };
 
@@ -150,6 +151,8 @@ export function nextStep(page, root = process.cwd()) {
 function main() {
   if (process.argv.includes('--reset')) return;
   const root = process.cwd();
+  const stale = staleCheckoutLine(root);
+  if (stale) console.log(`vawe: ${stale}`);
   const recent = pages(root).map((p) => ({ p, t: mtime(p) })).filter((x) => Date.now() - x.t < RECENT_MS).sort((a, b) => b.t - a.t);
   if (!recent.length) return;
   const s = nextStep(recent[0].p, root);

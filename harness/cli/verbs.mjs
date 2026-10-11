@@ -17,6 +17,7 @@ import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs'
 import { readFindings } from '../lib/findings.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
+export { commitsBehind } from '../lib/stale-checkout.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A test that compares seconds with a stamped budget reads a slowdown from the other test files as a slow check, so it runs alone, last.
@@ -27,13 +28,6 @@ const CHROME_NOISE = [/task_policy_set/, /CVDisplayLinkCreateWithCGDisplay/];
 
 /** `text` without the known Chrome noise lines. Pure. */
 export const stripChromeNoise = (text) => String(text).split('\n').filter((l) => !CHROME_NOISE.some((re) => re.test(l))).join('\n');
-
-/** The most commits HEAD lacks from the local `main` or `origin/main` ref (no network); 0 when neither exists. `git(args)` returns stdout or throws. */
-export function commitsBehind(git) {
-  return Math.max(0, ...['main', 'origin/main'].map((ref) => {
-    try { return Number.parseInt(git(['rev-list', '--count', `HEAD..${ref}`]), 10) || 0; } catch { return 0; }
-  }));
-}
 
 /** The sentence for an unknown verb on a checkout that lags main, or '' when it does not. Pure. */
 export const staleNote = (behind) => (behind > 0 ? `this checkout is ${behind} commit${behind === 1 ? '' : 's'} behind main: the verb may exist there (git pull or rebase on main)` : '');
