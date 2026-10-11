@@ -257,6 +257,12 @@ export function mergeRecords(animated, sampled) {
   return [...animated, ...sampled.map((r) => ({ ...r, target: r.target + base }))];
 }
 
+/** The records of a probed page, or null when it paints in seek(t) and no boxes were sampled: nothing then sees its motion. */
+export const sightedRecords = (motion) => {
+  if (motion.scripted && !motion.boxes) return null;
+  return motion.boxes ? mergeRecords(motion.records, recordsFromBoxes(motion.boxes)) : motion.records;
+};
+
 const median = (xs) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] : null);
 const mostCommon = (xs) => [...new Set(xs)].sort((a, b) => xs.filter((x) => x === b).length - xs.filter((x) => x === a).length)[0] ?? null;
 const SIBLING_MAX_S = 0.2;

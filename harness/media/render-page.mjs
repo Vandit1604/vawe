@@ -73,7 +73,7 @@ import { metaOf } from '../lib/page-meta.mjs';
 import { boardChecks, boardFilled, spectacleOf, lockedSpectacle, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
 import { ideasAdvice } from '../lib/ideas.mjs';
-import { slideshowTells, slideshowLines } from '../lib/slideshow.mjs';
+import { slideshowTells, slideshowLines, NO_RECORDS_NOTE } from '../lib/slideshow.mjs';
 import { worldRows } from '../lib/timeline.mjs';
 import { moveDocLines } from '../lib/move-docs.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
@@ -84,7 +84,7 @@ import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { cameraOnlySpans, cameraSpans } from '../lib/camera-moves.mjs';
 import { boardVerify } from '../lib/board-verify.mjs';
-import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
+import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, sightedRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { barLint, boxMotion, overshootPct, timedArrivals } from '../lib/bar-lint.mjs';
 import { measureDraftShape, rangeLines } from '../lib/draft-range.mjs';
@@ -898,7 +898,7 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
-const motionRecords = (motion) => (motion.boxes ? mergeRecords(motion.records, recordsFromBoxes(motion.boxes)) : motion.records);
+const motionRecords = (motion) => sightedRecords(motion) ?? motion.records;
 
 // A page that paints in window.seek with no sampled boxes, or on a canvas, has no records that tell a camera move from an element move.
 const cameraOnlyOf = (motion) => (motion.scripted && !motion.boxes) || motion.boxes?.canvas ? [] : cameraOnlySpans(motionRecords(motion));
@@ -961,10 +961,10 @@ function beatLines(pagePath, worlds, authoring) {
 
 /** The slideshow tells a draft shows without a video (entrances, exits, world spans); [] for a window or a waiver naming the code. */
 function slideshowAdvice(pagePath, motion, probe, authoring) {
-  if (!probe.worlds || (motion.scripted && !motion.boxes)) return [];
-  const { tells } = slideshowTells({ worlds: worldRows(probe.worlds), records: motionRecords(motion) });
+  if (!probe.worlds) return [];
+  const { tells, skipped } = slideshowTells({ worlds: worldRows(probe.worlds), records: sightedRecords(motion) });
   const live = tells.filter((t) => !isWaived(authoring, 'slideshow', t.at[0]));
-  return live.length ? [...slideshowLines({ score: live.length, of: 10, tells: live }), waiverHint('slideshow')] : [];
+  return [...(skipped ? [NO_RECORDS_NOTE] : []), ...(live.length ? [...slideshowLines({ score: live.length, of: 10, tells: live }), waiverHint('slideshow')] : [])];
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */

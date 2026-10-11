@@ -79,3 +79,16 @@ test('vawe check slideshow: the classic fixture page fires, the varied page pass
   assert.match(bad.stdout, /slideshow-equal-shots/);
   assert.match(run('varied').stdout, /score 0\/10/);
 });
+
+test('a page whose motion no source sees skips the record tells and keeps the world and video tells', () => {
+  const r = slideshowTells({ ...classic, records: null });
+  assert.equal(r.skipped, true);
+  assert.deepEqual(codes(r).sort(), ['crossfade-every-cut', 'equal-shots']);
+  assert.equal(slideshowTells(classic).skipped, false);
+});
+
+test('sightedRecords is null for a seek(t) page without sampled boxes', async () => {
+  const { sightedRecords } = await import('../../harness/lib/motion-lint.mjs');
+  assert.equal(sightedRecords({ scripted: true, records: [] }), null);
+  assert.deepEqual(sightedRecords({ scripted: false, records: [1] }), [1]);
+});

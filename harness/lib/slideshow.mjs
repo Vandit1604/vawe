@@ -125,23 +125,29 @@ function staticHolds(staticRuns, duration) {
     fix: 'keep a part moving inside every hold (a counter, a caret, a light)' };
 }
 
-/** { score, of, tells } of a film. `transitions` and `staticRuns` may be null (no video): the tells that need them are skipped. */
+export const NO_RECORDS_NOTE = 'checks skipped: slideshow entrance and exit tells (the page paints in seek(t) and no element boxes were sampled, so no motion is seen)';
+
+/**
+ * { score, of, tells, skipped } of a film. `transitions` and `staticRuns` may be null (no video): the tells that need them are skipped.
+ * `records` null means no source could see the motion: the tells that read entrances and exits are skipped, never fired on nothing.
+ */
 export function slideshowTells({ worlds, records, transitions = null, staticRuns = null, duration = 0, fps = 30 }) {
   const many = worlds.length >= MIN_REPEATS + 1;
   const video = transitions && transitions.length >= MIN_REPEATS;
+  const seen = records !== null;
   const tells = [
-    sameEntrance(records),
-    many && sameInOut(worlds, records),
+    seen && sameEntrance(records),
+    seen && many && sameInOut(worlds, records),
     video && crossfadeEvery(transitions, fps),
-    video && cutAndFadeIn(worlds, records, transitions, fps),
-    many && swapNoCarry(worlds, records),
-    many && deadGap(worlds, records),
-    allAtOnce(records),
-    many && oneThingScenes(worlds, records),
+    seen && video && cutAndFadeIn(worlds, records, transitions, fps),
+    seen && many && swapNoCarry(worlds, records),
+    seen && many && deadGap(worlds, records),
+    seen && allAtOnce(records),
+    seen && many && oneThingScenes(worlds, records),
     equalShots(worlds),
     staticHolds(staticRuns, duration),
   ].filter(Boolean);
-  return { score: tells.length, of: 10, tells };
+  return { score: tells.length, of: 10, tells, skipped: !seen };
 }
 
 /** The advice lines of a result: a score line, then each tell with its seconds and fix. [] when none fired. */

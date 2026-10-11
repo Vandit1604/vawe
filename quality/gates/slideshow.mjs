@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gateFindings } from '../../harness/lib/findings.mjs';
-import { slideshowTells } from '../../harness/lib/slideshow.mjs';
+import { slideshowTells, NO_RECORDS_NOTE } from '../../harness/lib/slideshow.mjs';
 import { worldRows } from '../../harness/lib/timeline.mjs';
 import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
 import { isWaived } from '../../harness/lib/waivers.mjs';
@@ -27,7 +27,7 @@ const video = flag >= 0 ? rest[flag + 1] : [`${name}-draft.mp4`, `${name}.mp4`].
 
 const { resolveFrame, openPage, settle, probePage } = await import('../../harness/media/render-page.mjs');
 const { createChecks } = await import('../../harness/lib/check-runner.mjs');
-const { recordsFromBoxes, mergeRecords } = await import('../../harness/lib/motion-lint.mjs');
+const { sightedRecords } = await import('../../harness/lib/motion-lint.mjs');
 
 async function measurePage() {
   const { page: tab, url, close } = await openPage(page, resolveFrame(page, {}), { final: false });
@@ -36,8 +36,7 @@ async function measurePage() {
     await settle(tab);
     const dur = await tab.evaluate(() => Number(document.querySelector('meta[name="duration"]')?.content) || 0);
     const { motion, probe } = await probePage(tab, dur, page, { checks: createChecks({ pagePath: page, mode: 'draft', cache: false }) });
-    const records = motion.boxes ? mergeRecords(motion.records, recordsFromBoxes(motion.boxes)) : motion.records;
-    return { dur, records, worlds: worldRows(probe.worlds ?? []) };
+    return { duration: dur, records: sightedRecords(motion), worlds: worldRows(probe.worlds ?? []) };
   } finally { await close(); }
 }
 
@@ -63,4 +62,5 @@ if (live.length) {
   out.warn('slideshow', `score ${live.length}/${result.of}`);
   for (const t of live) out.warn(`slideshow-${t.code}`, `at ${t.at.slice(0, 6).join(', ')} s: ${t.what}`, { fix: t.fix });
 } else out.note('slideshow', `score 0/${result.of}`);
+if (result.skipped) out.note('slideshow-skipped', NO_RECORDS_NOTE);
 out.emit();
