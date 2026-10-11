@@ -174,6 +174,14 @@ export const VERBS = [
     },
   },
   {
+    name: 'wait', summary: 'block until any render of a film ends (a dev draft, a clip or a ship final), one progress line a minute, then print its result line; a call stops after about 9 minutes',
+    positional: [{ name: 'page|film', required: true, help: 'films/<name>/page.html, or the film name' }],
+    flags: [],
+    example: 'vawe wait films/my-launch/page.html   |   vawe wait my-launch',
+    build: (v, [film]) => [{ script: 'harness/media/ship-job.mjs', args: ['wait', film] }],
+    next: (v, [film]) => `bin/vawe ship --status ${film} for a final, or ${WAIT_WORK}`,
+  },
+  {
     name: 'approve', summary: 'the owner approves the full draft of the current page; vawe ship needs it. A film session never runs this',
     positional: [PAGE],
     flags: [],

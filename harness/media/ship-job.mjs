@@ -4,6 +4,8 @@
 //   node harness/media/ship-job.mjs status [job] [--wait]                  progress, or the result (default: newest job);
 //                                                                          --wait blocks until the job ends or 9 minutes pass,
 //                                                                          one progress line per minute
+//   node harness/media/ship-job.mjs wait <page|film>                       the same wait for any render of the film: a running ship job,
+//                                                                          else a draft or clip holding a render slot; prints its result line
 //
 // A job is two files in out/ship-jobs, <id>.json (state) and <id>.log (the render's own output); the id starts with the film name. The
 // detached `run` process owns the state file: it starts render-page.mjs --final, then records how it ended and,
@@ -22,6 +24,7 @@ import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { WAIT_WORK } from '../live/stage-say.mjs';
 import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs, waitCallsLeft } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
+import { waitForFilm } from '../lib/render-wait.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
 import { finalAcceptance, lastPageFacts } from './acceptance-run.mjs';
 
@@ -228,11 +231,22 @@ async function waitThenStatus(id) {
   if (target && fs.existsSync(stateFile(target)) && !isOver(target)) console.log(`this call stopped after ${clock(WAIT_CAP_MS)} because a call may not run longer than the 10 minute limit of the Bash tool. The render is still running; nothing is lost. Run the next: command to keep waiting.`);
 }
 
+const activeJobFor = (film) => allJobs().filter((j) => filmKeyOf(j.page) === filmKeyOf(film) && !isOver(j.id) && j.status !== 'cancelled').sort((a, b) => b.startedAt - a.startedAt)[0];
+
+async function waitForRender(film) {
+  const job = activeJobFor(film);
+  if (job) return waitThenStatus(job.id);
+  const { running, result } = await waitForFilm(film, { capMs: WAIT_CAP_MS, progressMs: PROGRESS_MS });
+  if (running) console.log(`this call stopped after ${clock(WAIT_CAP_MS)} because a call may not run longer than the 10 minute limit of the Bash tool. The render is still running; nothing is lost. Run bin/vawe wait ${filmKeyOf(film)} again.`);
+  else console.log(result ?? `vawe wait: no render of ${filmKeyOf(film)} is running and no result is logged yet`);
+}
+
 const [mode, ...rest] = process.argv.slice(2);
 if (mode === 'start') startJob(rest[0], rest.slice(1));
 else if (mode === 'run') runJob(rest[0]);
+else if (mode === 'wait') await waitForRender(rest[0]);
 else if (mode === 'status') {
   const [id] = rest.filter((a) => a !== '--wait');
   if (rest.includes('--wait')) await waitThenStatus(id);
   else console.log(statusOf(id).join('\n'));
-} else die('usage: ship-job.mjs start <page> [args] | status [job] [--wait]');
+} else die('usage: ship-job.mjs start <page> [args] | status [job] [--wait] | wait <page|film>');

@@ -67,7 +67,7 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 - One file per `cat` or `head`: a hook rewrites `cat a b` and it breaks. Read the second file in a second call.
 - Do not pipe `bin/vawe` into `tail`, `head` or `grep`: the pipe hides the exit code. Every verb ends with `vawe: <verb> ok|FAILED (<reason>) in <s>s`.
 - A Bash call over 120 s moves to the background and keeps its render slot: run `dev` alone and strips in a second call.
-- Never `sleep`: wait with `bin/vawe ship --status <page> --wait`: one call blocks until the render ends or about 9 minutes, with a progress line each minute. Run it once, never in parallel, and do the work it names before it.
+- Never `sleep`: wait with `bin/vawe wait <page>` (any draft or final; blocks up to about 9 minutes, a progress line each minute; run it once, not in parallel), or `bin/vawe ship --status <page> --wait` for the verdict of a final.
 - Run `git` plainly from the worktree: no `git -C`, no `$(...)`, no `for` loop around it.
 - macOS has no `timeout`, and `sed -i` needs `''`: `sed -i '' 's/a/b/' f`, or use the Edit tool.
 
