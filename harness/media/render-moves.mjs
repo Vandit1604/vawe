@@ -7,9 +7,10 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolveFrame } from './render-page.mjs';
+import { chooseCrf, RENDER_CRF, CLIP_BUDGET_BYTES } from '../lib/clip-budget.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const MOVES = path.join(ROOT, 'prompts', 'moves');
@@ -42,13 +43,14 @@ export function sourceHash(name) {
   return h.digest('hex').slice(0, 16);
 }
 
+const hashOf = (entry) => (typeof entry === 'string' ? entry : entry?.hash);
 const readLock = () => (fs.existsSync(LOCK) ? JSON.parse(fs.readFileSync(LOCK, 'utf8')) : {});
 const writeLock = (lock) => fs.writeFileSync(LOCK, `${JSON.stringify(Object.fromEntries(Object.entries(lock).sort()), null, 2)}\n`);
 
 /** Why the clip must be rendered again, or '' when its sources match the recorded hash. */
 export function staleReason(name, lock) {
   if (!fs.existsSync(path.join(MOVES, `${name}.mp4`))) return 'no clip yet';
-  return lock[name] === sourceHash(name) ? '' : 'the clip size, demo, demo.css or a core/ import changed';
+  return hashOf(lock[name]) === sourceHash(name) ? '' : 'the clip size, demo, demo.css or a core/ import changed';
 }
 
 function renderArgs(name) {
@@ -66,12 +68,28 @@ function renderOne(name) {
   });
 }
 
+// The render encodes at RENDER_CRF. A clip over the budget is encoded again from that file at the next CRFs; the last file written is the one kept.
+function fitBudget(name) {
+  const file = path.join(MOVES, `${name}.mp4`), fit = path.join(MOVES, `${name}.fit.mp4`);
+  const sizeAt = (crf) => {
+    if (crf === RENDER_CRF) return fs.statSync(file).size;
+    const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', file, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'fast', '-crf', String(crf), '-x264-params', 'aq-mode=3', '-movflags', '+faststart', '-f', 'mp4', fit]);
+    if (r.status !== 0) throw new Error(`ffmpeg re-encode of ${name} at crf ${crf} failed: ${r.stderr}`);
+    return fs.statSync(fit).size;
+  };
+  const chosen = chooseCrf(sizeAt);
+  if (chosen.crf !== RENDER_CRF) fs.renameSync(fit, file);
+  if (!chosen.fits) console.log(`  warn     ${name}: ${(chosen.bytes / 1048576).toFixed(1)} MB at crf ${chosen.crf}, over the ${CLIP_BUDGET_BYTES / 1048576} MB budget`);
+  return chosen.crf;
+}
+
 async function renderAll(names) {
   const queue = [...names], results = [];
   const lane = async () => {
     for (let name = queue.shift(); name; name = queue.shift()) {
       const r = await renderOne(name);
-      console.log(r.code === 0 ? `  rendered ${name}` : `  FAILED   ${name}: ${r.stderr.split('\n').slice(-3).join(' | ')}`);
+      if (r.code === 0) r.crf = fitBudget(name);
+      console.log(r.code === 0 ? `  rendered ${name} (crf ${r.crf})` : `  FAILED   ${name}: ${r.stderr.split('\n').slice(-3).join(' | ')}`);
       results.push(r);
     }
   };
@@ -103,7 +121,7 @@ async function main() {
   }
   const results = await renderAll(names);
   const failed = results.filter((r) => r.code !== 0);
-  for (const r of results) if (r.code === 0) lock[r.name] = sourceHash(r.name);
+  for (const r of results) if (r.code === 0) lock[r.name] = { hash: sourceHash(r.name), crf: r.crf };
   if (results.length) writeLock(lock);
   console.log(`${results.length - failed.length} of ${results.length} clips rendered to prompts/moves/`);
   process.exit(failed.length ? 1 : 0);

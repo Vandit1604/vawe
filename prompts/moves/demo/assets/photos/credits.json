@@ -110,5 +110,12 @@
     "license": "cc0",
     "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
     "source": "https://stocksnap.io/photo/window-view-VTNNBQLDPH"
+  },
+  "crab-nebula.jpg": {
+    "title": "A Giant Hubble Mosaic of the Crab Nebula (resized to 900 px, recompressed)",
+    "creator": "NASA, ESA, J. Hester and A. Loll (Arizona State University)",
+    "license": "public domain",
+    "license_url": "https://commons.wikimedia.org/wiki/File:Crab_Nebula.jpg",
+    "source": "https://science.nasa.gov/asset/hubble/a-giant-hubble-mosaic-of-the-crab-nebula/"
   }
 }

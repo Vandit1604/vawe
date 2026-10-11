@@ -13,7 +13,7 @@ Each move file has a `Sound:` line under its snippet: the voice and the second t
 Scope: a move animates designed things (type, shapes, UI, illustration, colour fields). A photo may be content in a
 move (a card, a tile, a window, a carousel item), moved whole. A move that only works by processing a captured
 image (cutting it into depth layers, faking camera depth inside it, tracking or rotoscoping footage) is a footage
-technique, not motion design, and is not part of vawe.
+technique, not motion design, and is not part of vawe. Sampling a photo into a designed particle form (`imagePoints`) is in scope.
 
 Each move is one markdown file with a 10 to 40 line snippet and a 1 s clip next to it. Choose from
 the clip, not the name. Copy the snippet into the page; the numbers are the ones that read well.
@@ -78,6 +78,7 @@ One row per job, best move first. Every built move is in this table.
 | show an AI agent doing several steps | [agent-progress](agent-progress.md) |
 | show an edit and its result in one frame | [panel-live-sync](panel-live-sync.md) |
 | prove a number | [count-up](count-up.md), [chart-build](chart-build.md) |
+| turn a real photo into a particle form with its own detail | [photo-particles](photo-particles.md) |
 | prove a change with a picture | [before-after-wipe](before-after-wipe.md) |
 | end on the brand | [wordmark-cascade](wordmark-cascade.md), [logo-sting](logo-sting.md), [mark-trace](mark-trace.md), [shape-trace-morph](shape-trace-morph.md) |
 | end quietly | [calm-lockup](calm-lockup.md), [thanks-sweep](thanks-sweep.md) |
@@ -244,7 +245,7 @@ One row per job, best move first. Every built move is in this table.
 | [agent progress](agent-progress.md) | an AI agent works through steps: a card springs in, an arc turns beside a status line that swaps states, and numbered rows flip to checks one by one, ending mid-list |
 | [panel live sync](panel-live-sync.md) | an edit and its result in one frame: a cursor scrubs fields in a panel and the button on the page beside it rotates, rounds and grows in the same frames |
 
-`bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes in `clips.lock.json`). `--only <move>` forces one clip, `--all` forces every clip.
+`bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes and the CRF used in `clips.lock.json`; a clip over 2 MB is encoded again at a higher CRF). `--only <move>` forces one clip, `--all` forces every clip.
 
 Two rules the snippets already obey, so keep them when you adapt one: an exit keyframe has no
 `from` (a `from` fills backwards over the entrance and hides it), and `var()` never goes inside the
@@ -270,6 +271,7 @@ The job: give a held frame a living ground that never steals the eye. Each groun
 | [circling elements](circling-elements.md) | eight upright tiles orbit one point on a 120 px radius, one linear turn in 10 s |
 | [css box](css-box.md) | a 200 px cube of bold type turns to another face on a stiff overdamped spring (stiffness 100, damping 30, no overshoot) under perspective 600 |
 | [pixelate svg filter](pixelate-svg-filter.md) | a photo breaks into square blocks that grow and shrink with one number, size = x / 30 through a convolve, tile and dilate SVG filter |
+| [photo particles](photo-particles.md) | a real photo (filaments, veins, scales) is sampled into 120 000 lit, coloured points that gather from a seeded scatter over 1.5 s and then breathe, filmed through the lens with the film-halation look |
 | [media between text](media-between-text.md) | a picture grows from zero width inside a line of type on a 0.4 s critical spring and closes on a 0.3 s tween, the words part and wrap |
 
 ## Looks: one design system, ten demo looks

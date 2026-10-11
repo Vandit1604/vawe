@@ -1,0 +1,102 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<title>move: photo particles</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="importmap">{"imports":{"three":"/assets/vendor/three.module.min.js"}}</script>
+<style>
+  html, body { margin: 0; background: #000; overflow: hidden; }
+</style>
+</head>
+<body>
+<script type="module">
+import '/core/engine/page-api.js';
+import * as THREE from 'three';
+import { easeFn } from '/core/motion/presets.js';
+import { rng } from '/core/motion/springs.js';
+import { imagePoints } from '/core/surfaces/image-points.js';
+import { lens, canvasSource } from '/core/surfaces/lens.js';
+
+const VERT = `
+attribute vec3 a_color, a_normal, start;
+attribute float delay;
+uniform float u_progress, u_time, u_size;
+uniform vec3 u_key;
+varying vec3 v_color;
+void main() {
+  float u = clamp((u_progress - delay * 0.4) / 0.6, 0.0, 1.0);
+  float e = u;
+  vec3 p = mix(start, position, e);
+  float breath = sin(u_time * 2.1 + delay * 40.0);
+  p.xy *= 1.0 + 0.035 * u_progress * sin(u_time * 1.6 - length(p.xy) * 5.0);
+  p.z += breath * 0.03 * u_progress;
+  float lit = 0.2 + 0.75 * max(dot(normalize(a_normal), normalize(u_key)), 0.0);
+  v_color = a_color * lit * (0.85 + 0.15 * breath);
+  vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+  gl_PointSize = u_size * (1.0 + 0.5 * (1.0 - e)) / -mv.z;
+}`;
+const FRAG = `
+varying vec3 v_color;
+void main() {
+  float d = length(gl_PointCoord - 0.5);
+  if (d > 0.5) discard;
+  gl_FragColor = vec4(v_color * (1.0 - d * 1.2), 1.0);
+}`;
+
+const land = easeFn('land');
+
+async function build() {
+  const img = new Image();
+  img.src = '/prompts/moves/demo/assets/photos/crab-nebula.jpg';
+  await img.decode();
+  const cloud = imagePoints(img, { count: 120000, seed: 7, threshold: 0.03, gamma: 1.0, edgeBoost: 0.6, depthScale: 0.35 });
+
+  const random = rng(11);
+  const start = new Float32Array(cloud.count * 3), delay = new Float32Array(cloud.count);
+  for (let i = 0; i < cloud.count; i++) {
+    const a = random() * Math.PI * 2, r = 1.2 + random() * 1.6;
+    start.set([Math.cos(a) * r * 1.6, Math.sin(a) * r, (random() - 0.5) * 3], i * 3);
+    delay[i] = random();
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(cloud.positions, 3));
+  geometry.setAttribute('a_color', new THREE.BufferAttribute(cloud.colors, 3));
+  geometry.setAttribute('a_normal', new THREE.BufferAttribute(cloud.normals, 3));
+  geometry.setAttribute('start', new THREE.BufferAttribute(start, 3));
+  geometry.setAttribute('delay', new THREE.BufferAttribute(delay, 1));
+
+  const material = new THREE.ShaderMaterial({
+    vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { u_progress: { value: 0 }, u_time: { value: 0 }, u_size: { value: innerHeight * 0.009 }, u_key: { value: new THREE.Vector3(-0.5, 0.6, 0.7) } },
+  });
+  const points = new THREE.Points(geometry, material);
+  points.frustumCulled = false;
+  const scene = new THREE.Scene();
+  scene.add(points);
+  const camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 20);
+  camera.position.z = 3.6;
+
+  const renderer = new THREE.WebGLRenderer({ preserveDrawingBuffer: true, antialias: false });
+  renderer.setPixelRatio(1);
+  renderer.setSize(innerWidth, innerHeight, false);
+  const cam = lens(canvasSource(renderer.domElement), { look: 'film-halation', grain: 0, zoom: (t) => 1 + 0.07 * land(Math.min(1, t / 3)) });
+  return { points, material, scene, camera, renderer, cam };
+}
+
+let stage = null;
+vawe.onFrame(async (t) => {
+  stage ??= await build();
+  const { points, material, scene, camera, renderer, cam } = stage;
+  material.uniforms.u_progress.value = land(Math.min(1, t / 1.5));
+  material.uniforms.u_time.value = t;
+  material.uniforms.u_key.value.set(-0.5 + 0.9 * Math.sin(t * 0.9), 0.6, 0.7);
+  points.rotation.y = 0.16 * Math.sin(t * 0.8);
+  renderer.render(scene, camera);
+  await cam.draw(t);
+});
+</script>
+</body>
+</html>

@@ -74,6 +74,10 @@
   "pan-stations": "9b979e095af734c8",
   "panel-live-sync": "af395098be9352ee",
   "parallax-dive": "3f207b53b9e49411",
+  "photo-particles": {
+    "hash": "813a41a29074d220",
+    "crf": 31
+  },
   "pixelate-svg-filter": "1514cd45d114f90b",
   "progress-timeline": "d9d476bcc3e19a49",
   "pull-back-reveal": "71cca724aa602542",
