@@ -143,3 +143,16 @@ test('the spectacle second the checks read is the Board\'s: a moved meta changes
   assert.equal(lockedSpectacle('## Look\nno board', 4.8), 4.8);
   assert.match(boardChecks(board(), 4.8).join('\n'), /the spectacle checks read 7\.2 s, the Board's/);
 });
+
+test('the spectacle second is read in the forms agents write', () => {
+  const read = (spectacle) => parseBoard(board({ spectacle })).spectacle;
+  assert.equal(read('7.2'), 7.2);
+  assert.equal(read('7.2 s'), 7.2);
+  assert.equal(read('7.2s'), 7.2);
+  assert.equal(read('at 7.2 s'), 7.2);
+  assert.equal(read('at 7.2s'), 7.2);
+  assert.equal(read('6.55 to 7.85 s'), 7.2);
+  assert.equal(read('at 6.55 to 7.85 s'), 7.2);
+  assert.equal(read('[second]'), null);
+  assert.equal(read('near the end'), null);
+});

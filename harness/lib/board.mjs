@@ -44,17 +44,27 @@ export function moveRows(brief) {
   });
 }
 
+const SECOND = '(\\d+(?:\\.\\d+)?)\\s*(?:s\\b)?';
+const AT = new RegExp(`\\bat\\s+${SECOND}(?:\\s*(?:to|-|\u2013)\\s*${SECOND})?`);
+const FIRST = new RegExp(`${SECOND}(?:\\s*(?:to|-|\u2013)\\s*${SECOND})?`);
+
+/** The second of the Board's "Spectacle:" line: "7.2", "7.2 s", "at 7.2 s", or a range ("6.55 to 7.85 s") as its middle. A bracketed template hint is not a second. Null for none. */
+function spectacleSecond(section) {
+  const line = /Spectacle:(.*)$/m.exec(section)?.[1].replace(/\[[^\]]*\]/g, '');
+  const m = line && (AT.exec(line) ?? FIRST.exec(line));
+  return m ? Math.round(((Number(m[1]) + Number(m[2] ?? m[1])) / 2) * 100) / 100 : null;
+}
+
 /** { starts (seconds), cuts (seconds), moves (cells), sound (cells), spectacle (seconds or null) } of the Board section, or null when the brief has none. */
 export function parseBoard(brief) {
   const section = brief ? sectionOf(brief, 'Board') : undefined;
   if (section === undefined) return null;
-  const spectacle = /Spectacle:[^\n]*?\bat\s+(\d+(?:\.\d+)?)/.exec(section);
   return {
     starts: rowsOf(section, 'beat').map((c) => numberOf(c[1] ?? '')).filter((v) => v !== null),
     cuts: rowsOf(section, 'beat').map((c) => numberOf(c[3] ?? '')).filter((v) => v !== null),
     moves: rowsOf(section, 'cut').map((c) => c[1] ?? ''),
     sound: rowsOf(section, 'at s'),
-    spectacle: spectacle ? Number(spectacle[1]) : null,
+    spectacle: spectacleSecond(section),
   };
 }
 
