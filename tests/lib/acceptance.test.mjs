@@ -139,3 +139,11 @@ test('a DESIGN.md type-scale replaces the house 6% and the row target names the 
   assert.equal(edited.status, 'advice');
   assert.equal(edited.target, '5% or more');
 });
+
+test('withHistory keeps the page facts a final check reads: tailMoving (true or false), cameraOnly, canvasFilm', () => {
+  const entry = (facts) => withHistory(null, [], { stage: 'draft', at: 'now', ...facts }).file.history[0];
+  assert.equal(entry({ tailMoving: true }).tailMoving, true);
+  assert.equal(entry({ tailMoving: false }).tailMoving, false);
+  assert.ok(!('tailMoving' in entry({})));
+  assert.equal(entry({ canvasFilm: true }).canvasFilm, true);
+});
