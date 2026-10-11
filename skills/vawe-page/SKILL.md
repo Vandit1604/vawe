@@ -38,6 +38,7 @@ motion and `bin/vawe dev`. The camera holds still by default and moves only with
 reason, and you have Read `bin/vawe strip <page> --cuts` for every cut (and `bin/vawe onion` and `bin/vawe velocity` on the
 spectacle second), fixed what reads flat and written a row per cut in the brief's "Motion pass". `bin/vawe` names the next
 stage after each step; `bin/vawe ship` warns while the Board or the Motion pass is unfilled.
+A film that uses the lens (`core/surfaces/lens.js`, `prompts/moves/lens.md`) picks its look by sight: `bin/vawe looks <page> --at <s>` shows the page under every look, then set `look: '<name>'` in the lens options.
 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->

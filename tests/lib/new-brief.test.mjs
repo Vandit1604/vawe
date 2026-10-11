@@ -7,6 +7,7 @@ import { newFilm, newFilmLines, readDetails, questionsJson } from '../../harness
 import { parseDirections, directionsLines } from '../../harness/lib/directions.mjs';
 import { ACCEPTANCE, GUESS, DETAIL_KEYS, optionsFor } from '../../harness/lib/measured-brief.mjs';
 import { briefLine } from '../../harness/lib/draft-check.mjs';
+import { LOOKS } from '../../core/surfaces/lens.js';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 
@@ -252,4 +253,12 @@ test('the brief carries the strip study, the Board (rhythm, spectacle, cuts, sou
   assert.match(motion, /\| cut \| anticipation[^\n]*follow-through[^\n]*arcs[^\n]*secondary[^\n]*exits[^\n]*hold[^\n]*camera[^\n]*what read flat/);
   assert.doesNotMatch(board, /\[bed/);
   assert.match(text, /strip films\/zz\/page\.html --cuts/);
+});
+
+test('the Look section names bin/vawe looks and every look of the lens, read from the module', () => {
+  const { text } = briefFor('beat-sheet.md', { request: 'a five second sting', length: 5 });
+  const line = text.split('## Look')[1].split('## ')[0].split('\n').find((l) => l.startsWith('- look:'));
+  assert.match(line, /bin\/vawe looks <page> --at <s>/);
+  for (const name of Object.keys(LOOKS)) assert.ok(line.includes(name), name);
+  assert.doesNotMatch(line, /\(guess: change me\)/);
 });

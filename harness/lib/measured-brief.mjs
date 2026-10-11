@@ -2,6 +2,7 @@
 // Acceptance, Gates, Pitfalls, Deliver, and Keep and swap for a reference film. A field the request does not
 // answer holds a stated guess that ends in GUESS. Pure: no I/O.
 import { starterBeats } from './worlds.mjs';
+import { LOOKS } from '../../core/surfaces/lens.js';
 
 export const GUESS = '(guess: change me)';
 export const DEFAULT_LENGTH = 4;
@@ -146,6 +147,7 @@ function lookLines({ face }, guess) {
     `- typeface: ${guess('typeface', `${face.family}, weight 700`)}`,
     `- cap height: ${guess('cap height', '10% of frame height for the headline, never under 6%')}`,
     `- surface: ${guess('surface', 'flat fill, 1 px edge rgba(20,22,26,0.12), no shadow')}`,
+    `- look: only for a film that uses the lens: bin/vawe looks <page> --at <s> shows the page under each look (${Object.keys(LOOKS).join(', ')}); then set look: '<name>' in the lens options`,
   ].join('\n');
 }
 
