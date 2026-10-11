@@ -1,0 +1,357 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="12">
+<meta name="aspect" content="16:9">
+<meta name="message" content="moths glow in the dark: one soft pull of focus and the near one dissolves into light">
+<meta name="spectacle" content="7.2">
+<meta name="signature" content="band=cinematic; ease=glide; stagger=0; seam=rack focus; palette=cool neutral; thread=object (the moths)">
+<title>moths</title>
+<script type="application/json" id="authoring">{"allow": ["world-held@0-12"], "_why": {"world-held@0-12": "worlds drift, quiet, rack: one continuous 12 s loop, the four moths beat and arc through every second and the focus moves 6.55 to 7.85 s"}}</script>
+<script type="importmap">{"imports":{"three":"/assets/vendor/three.module.min.js"}}</script>
+<style>
+  :root { --ground: #010306; --beat-1: 0s; --beat-2: 5.2s; --beat-3: 7s; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  .world { position: absolute; inset: 0; z-index: -2; background: var(--ground); }
+  #gl { position: absolute; left: 0; top: 0; z-index: -1; }
+</style>
+</head>
+<body>
+<div class="world" data-world="drift"></div>
+<div class="world" data-world="quiet"></div>
+<div class="world" data-world="rack"></div>
+<canvas id="gl"></canvas>
+
+<script type="module">
+import * as THREE from 'three';
+window.THREE = THREE;
+import '/core/engine/page-api.js';
+import { lens, canvasSource, PALETTES, OFF } from '/core/surfaces/lens.js';
+
+const root = document.documentElement;
+const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
+const T = parseFloat(document.querySelector('meta[name="duration"]').content);
+const TAU = Math.PI * 2;
+
+// Worlds are time windows only: the scene is one continuous 3D canvas.
+const show = (sel, from, to) => {
+  const el = document.querySelector(sel);
+  el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: from * 1000, fill: 'both' });
+  if (to < T) el.animate([{ opacity: 0 }], { duration: 1, delay: to * 1000, fill: 'forwards' });
+};
+show('[data-world="drift"]', beat(1), beat(2));
+show('[data-world="quiet"]', beat(2), beat(3));
+show('[data-world="rack"]', beat(3), T);
+
+// ---------- the tunables: every number the studio can edit ----------
+const FOCUS = { a: 0.64, c: 0.30, rackFrom: 6.55, rackTo: 7.85, holdTo: 8.7 };   // focus row, fraction of frame height
+const LOOK = { bloom: 0.85, halation: 0.9, grain: 0.42, vignette: 0.25, dofBlur: 1.35, tiltX: -0.3, zoom: 1.06 };
+// One time scale for every part: a 480 fps camera played at 30 fps.
+const FILM = { slow: 16, g: 9.81, spanM: 0.05, calmAt: 6.0, calmDepth: 0.7, beatDip: 0.1 };
+// Orbit plane around the lamp axis: tilt from the screen (rad), far side up to agree with the lens tilt.
+const ORBIT = { tilt: 0.35, squash: 0.7, breathe: 0.2, wander: 0.05 };
+// Hawkmoth-like stroke: amplitude 110 deg (top 65, bottom -45), downstroke 43% of the cycle (measured, Wikimedia clip "Hummingbird Moth feeding at 25% speed").
+const STROKE = { top: 1.13, bottom: -0.79, down: 0.43, tipLag: 0.06, hindLag: 0.02, hindAmp: 0.92, twist: 0.45, sweep: 0.12, eight: 0.07, camber: 0.4 };
+const BODY = { bob: 0.03, bobPitch: 0.035, hoverPitch: 0.3, lampBank: 0.2, maxBank: 0.7, turnLag: 0.15, bankLag: 0.3 };
+// per moth: depth z, orbit centre on the lamp axis (fraction of frame x, y), orbit radius (world units),
+// orbits per loop (sign = direction), real wingbeat Hz, scale, glow, dart phases
+const MOTHS = [
+  { id: 'near',  z: 1.5,  fx: 0.44, fy: 0.54, r: 0.70, orbits: 2,  hz: 16,   s: 0.8,  glow: 0.95, ph: 0.50, seed: 3.1 },
+  { id: 'mid',   z: -0.5, fx: 0.74, fy: 0.46, r: 0.70, orbits: -3, hz: 20,   s: 0.7,  glow: 1.0,  ph: 0.00, seed: 7.7 },
+  { id: 'far',   z: -2.5, fx: 0.30, fy: 0.30, r: 0.60, orbits: 3,  hz: 24,   s: 0.46, glow: 0.9,  ph: 0.70, seed: 1.9 },
+  { id: 'speck', z: -4.0, fx: 0.70, fy: 0.15, r: 0.50, orbits: -3, hz: 26.67, s: 0.28, glow: 0.7, ph: 0.15, seed: 5.3 },
+];
+
+const canvas = document.getElementById('gl');
+const W = window.innerWidth, H = window.innerHeight, PR = window.devicePixelRatio || 1;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(PR);
+renderer.setSize(W, H, false);
+renderer.setClearColor(0x000000, 1);
+canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+
+const scene = new THREE.Scene();
+const CAM_Z = 7, FOV = 28;
+const camera = new THREE.PerspectiveCamera(FOV, W / H, 0.1, 50);
+camera.position.set(0, 0, CAM_Z);
+const halfH = (z) => Math.tan(FOV * Math.PI / 360) * (CAM_Z - z);
+
+// ---------- wing outline: radius by angle from the hinge, Catmull-Rom through a table ----------
+const catmull = (tab, a) => {
+  let i = 0; while (i < tab.length - 2 && a > tab[i + 1][0]) i++;
+  const p = (k) => tab[Math.max(0, Math.min(tab.length - 1, k))];
+  const [a1, r1] = p(i), [a2, r2] = p(i + 1);
+  const u = Math.min(1, Math.max(0, (a - a1) / (a2 - a1)));
+  const r0 = p(i - 1)[1], r3 = p(i + 2)[1];
+  return 0.5 * ((2 * r1) + (-r0 + r2) * u + (2 * r0 - 5 * r1 + 4 * r2 - r3) * u * u + (-r0 + 3 * r1 - 3 * r2 + r3) * u ** 3);
+};
+const FORE = { hinge: [0.07, 0.12], size: 1.0, tab: [[-42, 0.1], [-28, 0.5], [-5, 0.82], [20, 1.08], [38, 1.22], [55, 1.05], [76, 0.66], [98, 0.1]] };
+const HIND = { hinge: [0.05, -0.04], size: 0.74, tab: [[-105, 0.1], [-88, 0.5], [-65, 0.78], [-40, 0.86], [-14, 0.74], [8, 0.5], [26, 0.1]] };
+
+function wingGeometry({ hinge, size, tab }) {
+  const NA = 36, NR = 16;
+  const a0 = tab[0][0], a1 = tab[tab.length - 1][0];
+  const pos = [], uv = [], idx = [];
+  for (let i = 0; i <= NA; i++) {
+    const a = a0 + (a1 - a0) * i / NA, R = catmull(tab, a) * size, rad = a * Math.PI / 180;
+    for (let j = 0; j <= NR; j++) {
+      const rj = j / NR;
+      pos.push(hinge[0] + Math.cos(rad) * R * rj, hinge[1] + Math.sin(rad) * R * rj, 0);
+      uv.push(rj, i / NA);
+    }
+  }
+  for (let i = 0; i < NA; i++) for (let j = 0; j < NR; j++) {
+    const k = i * (NR + 1) + j;
+    idx.push(k, k + 1, k + NR + 1, k + 1, k + NR + 2, k + NR + 1);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('aUV', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  return g;
+}
+const foreGeo = wingGeometry(FORE), hindGeo = wingGeometry(HIND);
+
+// ---------- materials: additive, so light passes through every layer (a back-lit photogram) ----------
+const NOISE = `
+uniform float uSeed;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)) + uSeed) * 43758.5453); }
+float hash3(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7)) + uSeed) * 43758.5453); }
+float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
+float fbm(vec2 p){ float s = 0.0, a = 0.5; for (int k = 0; k < 4; k++) { s += a * vnoise(p); p *= 2.03; a *= 0.5; } return s; }
+`;
+const wingMaterial = (seed, glow, tint) => new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, depthTest: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  uniforms: { uSeed: { value: seed }, uGlow: { value: glow }, uTint: { value: tint },
+    uRoot: { value: 0 }, uTip: { value: 0 }, uCamber: { value: 0 }, uFlutter: { value: 0 }, uPhase: { value: 0 }, uHinge: { value: 0 },
+    uHingeY: { value: 0 }, uSweep: { value: 0 }, uTwist: { value: 0 } },
+  vertexShader: `
+    attribute vec2 aUV;
+    uniform float uRoot, uTip, uCamber, uFlutter, uPhase, uHinge, uHingeY, uSweep, uTwist;
+    varying vec2 vUV; varying vec2 vP; varying vec3 vV;
+    void main(){
+      vUV = aUV; vP = position.xy;
+      vec2 q = position.xy - vec2(uHinge, uHingeY);
+      q = vec2(q.x * cos(uSweep) - q.y * sin(uSweep), q.x * sin(uSweep) + q.y * cos(uSweep));
+      float ang = mix(uRoot, uTip, pow(aUV.x, 1.6));
+      vec3 p = vec3(uHinge + q.x * cos(ang), uHingeY + q.y, q.x * sin(ang));
+      p.z += uTwist * q.y * aUV.x;
+      p.z += uCamber * aUV.x * (1.0 - aUV.x) * 0.6 + uFlutter * sin(aUV.x * 6.0 + aUV.y * 3.0 + uPhase) * aUV.x * aUV.x * 0.05;
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      vV = mv.xyz;
+      gl_Position = projectionMatrix * mv;
+    }`,
+  fragmentShader: `${NOISE}
+    uniform float uGlow, uTint;
+    varying vec2 vUV; varying vec2 vP; varying vec3 vV;
+    void main(){
+      float rj = vUV.x + 0.1 * (fbm(vP * 8.0 + uSeed) - 0.5) * smoothstep(0.5, 1.0, vUV.x);   // ragged outline
+      float body = pow(1.0 - rj, 1.4);                       // thick near the body: more light passes
+      float rim = smoothstep(0.5, 0.95, rj) * (1.0 - smoothstep(0.95, 1.0, rj));
+      float mott = fbm(vP * 3.2 + uSeed);                    // soft translucent mottling
+      float blot = smoothstep(0.35, 0.75, fbm(vP * 1.7 + uSeed * 2.0));
+      float line = smoothstep(0.05, 0.0, abs(fract(vUV.y * 9.0 + 0.55 * mott) - 0.5));
+      float scale = hash(floor(vP * 170.0)) * 0.12;          // scale texture
+      float I = 0.20 + 0.7 * body + 0.32 * rim + 0.06 * line * (1.0 - 0.5 * rj);
+      I *= 0.35 + 1.3 * mott;
+      I *= 1.0 - 0.7 * blot * (1.0 - body);
+      I += scale * (0.4 + 0.6 * body);
+      vec3 n = normalize(cross(dFdx(vV), dFdy(vV)));
+      I *= 0.6 + 0.4 * abs(n.z);                             // flat-on wings pass the most light
+      I *= smoothstep(1.0, 0.9, rj);                         // soft outline
+      gl_FragColor = vec4(vec3(I * uGlow * uTint), 1.0);
+    }`,
+});
+const furMaterial = (seed, glow, shell, t, freq, base, ring) => new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending,
+  uniforms: { uSeed: { value: seed }, uGlow: { value: glow }, uShell: { value: shell }, uT: { value: t }, uFreq: { value: freq }, uBase: { value: base }, uRing: { value: ring } },
+  vertexShader: `
+    uniform float uShell; varying vec3 vPos; varying vec3 vN;
+    void main(){ vPos = position; vN = normalMatrix * normal;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position + normal * uShell, 1.0); }`,
+  fragmentShader: `${NOISE}
+    uniform float uGlow, uT, uFreq, uBase, uRing; varying vec3 vPos; varying vec3 vN;
+    void main(){
+      float cell = hash3(floor(vPos * uFreq));
+      float strand = smoothstep(uT, uT + 0.12, cell);
+      float rimLit = 0.55 + 0.45 * (1.0 - abs(normalize(vN).z));    // fur catches light at its silhouette
+      float seg = 1.0 - uRing * (0.5 + 0.5 * sin(vPos.y * 26.0));
+      float I = uBase * (0.25 + 0.75 * strand) * (1.0 - 0.5 * uT) * rimLit * seg;
+      gl_FragColor = vec4(vec3(I * uGlow), 1.0);
+    }`,
+});
+const tintCold = 1.0;
+
+function buildMoth(def) {
+  const g = new THREE.Group();
+  const sphere = new THREE.SphereGeometry(1, 28, 20);
+  const parts = [   // [centre y, radii, base light, fur freq, rings]
+    { y: 0.06, r: [0.105, 0.17, 0.1], base: 0.2, freq: 42, ring: 0.0 },
+    { y: -0.26, r: [0.075, 0.3, 0.07], base: 0.1, freq: 38, ring: 0.35 },
+    { y: 0.27, r: [0.05, 0.055, 0.05], base: 0.12, freq: 40, ring: 0.0 },
+  ];
+  for (const part of parts) {
+    for (let k = 0; k < 10; k++) {
+      const shell = k * 0.045, t = k / 10;
+      const m = new THREE.Mesh(sphere, furMaterial(def.seed + k * 0.37, def.glow, shell, t, part.freq, part.base * (k === 0 ? 2.2 : 1), part.ring));
+      m.position.y = part.y; m.scale.set(...part.r); m.renderOrder = 2;
+      g.add(m);
+    }
+  }
+  for (const side of [-1, 1]) {   // antennae
+    const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(side * 0.03, 0.31, 0), new THREE.Vector3(side * 0.12, 0.45, 0.02), new THREE.Vector3(side * 0.27, 0.58, 0.0), new THREE.Vector3(side * 0.36, 0.6, -0.03)]);
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 16, 0.016, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.16 * def.glow, 0.16 * def.glow, 0.16 * def.glow), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, depthTest: false }));
+    g.add(tube);
+  }
+  const wings = [];
+  for (const side of [-1, 1]) {
+    for (const [geo, spec, tag] of [[hindGeo, HIND, 'hind'], [foreGeo, FORE, 'fore']]) {
+      const mat = wingMaterial(def.seed + (tag === 'hind' ? 11 : 0), def.glow * (tag === 'hind' ? 0.85 : 1), tintCold);
+      mat.uniforms.uHinge.value = spec.hinge[0];
+      mat.uniforms.uHingeY.value = spec.hinge[1];
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.scale.x = side; mesh.renderOrder = 1;
+      g.add(mesh);
+      wings.push({ mat, tag, side });
+    }
+  }
+  g.scale.setScalar(def.s);
+  return { group: g, wings, def };
+}
+const moths = MOTHS.map(buildMoth);
+moths.forEach((m) => scene.add(m.group));
+
+// ---------- motion: every pose is a pure function of t, periodic in T, so frame T equals frame 0 ----------
+const smooth = (x) => x * x * (3 - 2 * x);
+const frac = (x) => x - Math.floor(x);
+const V = {
+  add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+  mul: (a, k) => [a[0] * k, a[1] * k, a[2] * k],
+  dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+  cross: (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]],
+  len: (a) => Math.hypot(a[0], a[1], a[2]),
+  unit: (a) => V.mul(a, 1 / (V.len(a) || 1)),
+};
+const hash = (n) => frac(Math.sin(n * 127.1 + 311.7) * 43758.5453);
+// Seeded smooth noise with whole-number harmonics only, so it repeats every loop.
+const loopNoise = (seed, u, ks) => ks.reduce((s, k, i) => s + Math.sin(TAU * (k * u + hash(seed + i * 1.37))) / k, 0);
+
+const ORBIT_X = [1, 0, 0];
+const ORBIT_Y = [0, Math.cos(ORBIT.tilt), -Math.sin(ORBIT.tilt)];
+const ORBIT_N = [0, Math.sin(ORBIT.tilt), Math.cos(ORBIT.tilt)];
+const calmPhase = (u, depth) => u - depth * Math.sin(TAU * (u - FILM.calmAt / T)) / TAU;
+
+for (const m of moths) {
+  const d = m.def, hh = halfH(d.z), hw = hh * W / H;
+  const spanU = 2.58 * d.s;
+  m.centre = [(d.fx - 0.5) * 2 * hw, (0.5 - d.fy) * 2 * hh, d.z];
+  m.beats = Math.round(d.hz * T / FILM.slow);
+  m.g = FILM.g * (spanU / FILM.spanM) / FILM.slow ** 2;
+  m.vRef = TAU * d.r * Math.abs(d.orbits) / T;
+}
+
+// Flight path: orbit around the lamp axis, slowed in the quiet, with seeded darts and a spiral in and out.
+function pathAt(m, t) {
+  const d = m.def, u = t / T;
+  const darts = 0.035 * loopNoise(d.seed, u, [3, 5, 7]);
+  const th = TAU * (d.orbits * calmPhase(u, FILM.calmDepth) + d.ph) + TAU * darts;
+  const r = d.r * (1 + ORBIT.breathe * Math.sin(TAU * (2 * u + hash(d.seed))));
+  const wob = (k) => d.r * ORBIT.wander * loopNoise(d.seed + k, u, [4, 6, 9]);
+  let p = V.add(m.centre, V.mul(ORBIT_X, r * Math.cos(th) + wob(1)));
+  p = V.add(p, V.mul(ORBIT_Y, r * ORBIT.squash * Math.sin(th) + wob(2)));
+  return V.add(p, V.mul(ORBIT_N, wob(3)));
+}
+
+// One stroke: s is 1 at the top and 0 at the bottom; q runs 0 to 0.5 on the downstroke and 0.5 to 1 on the upstroke.
+function stroke(p) {
+  const D = STROKE.down;
+  if (p < D) return { s: 0.5 + 0.5 * Math.cos(Math.PI * p / D), q: 0.5 * p / D };
+  return { s: 0.5 - 0.5 * Math.cos(Math.PI * (p - D) / (1 - D)), q: 0.5 + 0.5 * (p - D) / (1 - D) };
+}
+const elevation = (p, amp) => {
+  const mid = (STROKE.top + STROKE.bottom) / 2, half = (STROKE.top - STROKE.bottom) / 2;
+  return mid + amp * half * (2 * stroke(frac(p)).s - 1);
+};
+
+function pose(m, t) {
+  const d = m.def, u = t / T;
+  // wide differences low-pass the path: a body turns and banks over a few wingbeats, not within one
+  const hv = BODY.turnLag, ha = BODY.bankLag;
+  const p1 = pathAt(m, t);
+  const vel = V.mul(V.sub(pathAt(m, t + hv), pathAt(m, t - hv)), 1 / (2 * hv));
+  const acc = V.mul(V.add(V.sub(pathAt(m, t + ha), V.mul(p1, 2)), pathAt(m, t - ha)), 1 / (ha * ha));
+  const speed = V.len(vel);
+
+  // heading follows the velocity; the dorsal side starts on the orbit plane normal
+  const fwd = V.unit(vel);
+  const dorsal0 = V.unit(V.sub(ORBIT_N, V.mul(fwd, V.dot(ORBIT_N, fwd))));
+  const right0 = V.cross(fwd, dorsal0);
+  // bank: a coordinated turn (lift leans toward the centre of the curve) plus the dorsal-light response toward the lamp axis
+  const toAxis = V.unit(V.sub(m.centre, p1));
+  let bank = Math.atan2(V.dot(acc, right0), m.g) + BODY.lampBank * V.dot(toAxis, right0);
+  bank = Math.max(-BODY.maxBank, Math.min(BODY.maxBank, bank));
+  const dorsalB = V.add(V.mul(dorsal0, Math.cos(bank)), V.mul(right0, Math.sin(bank)));
+
+  // beat phase: whole beats per loop; the rate dips in the quiet hover, as a pitched-up moth beats slower
+  const beat = m.beats * calmPhase(u, FILM.beatDip) + d.ph;
+  const bp = frac(beat);
+  const lift = -Math.cos(TAU * (bp - STROKE.down / 2));
+
+  // pitch: nose up in a slow hover, level at speed, and a small nod per stroke
+  const pitch = BODY.hoverPitch * Math.max(0, 1 - speed / m.vRef) + BODY.bobPitch * lift;
+  const f = V.add(V.mul(fwd, Math.cos(pitch)), V.mul(dorsalB, Math.sin(pitch)));
+  const dor = V.sub(V.mul(dorsalB, Math.cos(pitch)), V.mul(fwd, Math.sin(pitch)));
+  const right = V.cross(f, dor);
+
+  const pos = V.add(p1, V.mul(dor, BODY.bob * d.s * lift));
+  m.group.position.set(...pos);
+  m.group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(
+    new THREE.Vector3(...right), new THREE.Vector3(...f), new THREE.Vector3(...dor)));
+
+  // wings: fore and hind coupled by the frenulum; the distal forewing lags (it bends), twist flips at each reversal
+  for (const w of m.wings) {
+    const hind = w.tag === 'hind';
+    const lag = hind ? STROKE.hindLag : 0, amp = hind ? STROKE.hindAmp : 1;
+    const pr = beat - lag, { q } = stroke(frac(pr));
+    const un = w.mat.uniforms;
+    un.uRoot.value = elevation(pr, amp);
+    un.uTip.value = elevation(pr - STROKE.tipLag, amp);
+    un.uSweep.value = -STROKE.sweep * Math.cos(TAU * q) + STROKE.eight * Math.sin(2 * TAU * q);
+    un.uTwist.value = -STROKE.twist * (hind ? 0.8 : 1) * Math.tanh(3 * Math.sin(TAU * (q + 0.04)));
+    un.uCamber.value = STROKE.camber * Math.tanh(3 * Math.sin(TAU * q));
+    un.uFlutter.value = 0.6;
+    un.uPhase.value = TAU * pr;
+  }
+}
+
+// ---------- the one lens: palette, grain, bloom, halation and depth of field are all its work ----------
+const easeInOut = (u) => (u < 0.5 ? 4 * u ** 3 : 1 - (2 - 2 * u) ** 3 / 2);
+const focusRow = (t) => {
+  const { a, c, rackFrom, rackTo, holdTo } = FOCUS;
+  if (t < rackFrom) return a;
+  if (t < rackTo) return a + (c - a) * easeInOut((t - rackFrom) / (rackTo - rackFrom));
+  if (t < holdTo) return c;
+  return c + (a - c) * smooth((t - holdTo) / (T - holdTo));
+};
+const cam = lens(canvasSource(canvas, { scale: PR }), {
+  ...OFF,
+  seed: 5, fps: 30,
+  zoom: LOOK.zoom, tiltX: LOOK.tiltX, focal: 1.7,
+  dof: { blur: LOOK.dofBlur, focus: (t) => [W / 2, focusRow(t) * H], bokeh: 7, blades: 6, roundness: 0.8, soft: 2.6, max: 70 },
+  palette: { stops: PALETTES.cyanotype, amount: 1, keepColor: 0 },
+  bloom: { strength: LOOK.bloom, radius: 34, threshold: 0.25, knee: 0.3 },
+  halation: { strength: LOOK.halation, radius: 90, threshold: 0.5, knee: 0.3, tint: [0.4, 0.6, 1] },
+  grain: LOOK.grain, vignette: LOOK.vignette,
+});
+
+vawe.onFrame(async (t) => {
+  moths.forEach((m) => pose(m, t));
+  renderer.render(scene, camera);
+  await cam.draw(t);
+});
+</script>
+</body>
+</html>
