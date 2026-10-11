@@ -57,7 +57,7 @@ export const LOOKS = {
   clean: {},
   'dream-bloom': { bloom: { strength: 1.5, radius: 120, threshold: 0.22, knee: 0.5 }, softFocus: { amount: 0.18, radius: 30 }, vignette: 0.15, lift: 0.01 },
   'film-halation': { halation: { strength: 1, radius: 90, threshold: 0.55 }, bloom: { strength: 0.35, radius: 40, threshold: 0.5 }, grain: 0.05, vignette: 0.25 },
-  anamorphic: { streaks: { strength: 0.5, length: 700, threshold: 0.7, tint: [0.35, 0.6, 1] }, bloom: { strength: 0.3, radius: 50, threshold: 0.5 }, aberration: { amount: 3 }, vignette: 0.2 },
+  anamorphic: { streaks: { strength: 0.9, length: 800, threshold: 0.45, tint: [0.35, 0.6, 1] }, bloom: { strength: 0.3, radius: 50, threshold: 0.5 }, aberration: { amount: 3 }, vignette: 0.2 },
   'pro-mist': { diffusion: { strength: 0.35, radius: 70 }, vignette: 0.1 },
   'tilt-shift': { tiltShift: { center: 0.5, width: 0.3, blur: 22 } },
   'soft-focus': { softFocus: { amount: 0.5, radius: 14 } },

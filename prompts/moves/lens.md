@@ -78,6 +78,29 @@ The demo was measured against a reference, 1080p: bloom 90 to 10 percent width
 px or more (reference 20 to 28). At 1080p a frame costs about 17 ms on the GPU (12 ms in a draft), and a
 6 s final (360 frames) captures in about 20 s.
 
+## Looks
+
+A look is a named set of lens options, data in `LOOKS` (`core/surfaces/lens.js`, next to `PALETTES`).
+`lens(source, { look: 'film-halation', ...own })` starts from a flat lens, switches on the look, then puts the
+page's own options over it: a page option always wins. A page with no `look` keeps the filmed-screen defaults.
+Choose by sight: `bin/vawe looks <page> --at 4.5,9 [--only a,b] [--out dir]` films the page frame at each second
+under every look and as-is, and writes one labelled grid per second (draft size, so a fine `grid` cell shows only in a final).
+The verb sets `window.__vaweLensOverride` before the page runs. `lens()` merges it over the page options, and it
+holds a full look: every effect the look does not name is off, while `aim`, `zoom`, tilt and `dof` stay the page's. Only the verb sets it.
+
+| look | what it does | numbers |
+|---|---|---|
+| `clean` | every effect off: the flat screen with the page's camera | none |
+| `dream-bloom` | a wide, strong glow and a little soft focus | bloom 1.5, radius 120, threshold 0.22; softFocus 0.18, radius 30; vignette 0.15; lift 0.01 |
+| `film-halation` | the red-orange halo of film around bright edges | halation 1, radius 90, threshold 0.55; bloom 0.35; grain 0.05; vignette 0.25 |
+| `anamorphic` | blue horizontal streaks off bright shapes, a slight colour fringe | streaks 0.9, length 800, threshold 0.45, tint [0.35, 0.6, 1]; bloom 0.3; aberration 3; vignette 0.2 |
+| `pro-mist` | a soft veil: glow over the whole image and lifted blacks | diffusion 0.35, radius 70; vignette 0.1 |
+| `tilt-shift` | a sharp middle band, blur above and below | tiltShift center 0.5, width 0.3, blur 22 |
+| `soft-focus` | the whole image mixed half with a blurred copy | softFocus 0.5, radius 14 |
+| `vintage` | warm tone, grain, weave, strong vignette, soft halo | palette warm 4 stops at 0.4; halation 0.5; bloom 0.3; grain 0.09; weave 1.6; vignette 0.55; lift 0.02 |
+| `cyanotype` | the cyanotype palette, a cold halo, grain | PALETTES.cyanotype; halation 0.8, tint [0.1, 0.4, 1]; grain 0.07; vignette 0.3 |
+| `crt` | LED stripe grid, torn rows, colour fringe, strong bloom | grid 0.9, cell 3; tear 6, prob 0.04; aberration 5; bloom 0.7; vignette 0.5; grain 0.04 |
+
 ## Depth of field for a 3D scene
 
 A tilted plane gives depth by geometry. A three.js scene has depth per pixel, so give the lens that depth:
