@@ -66,9 +66,18 @@ const CLOSE_GRACE_MS = 5000;
 const pidAlive = (pid) => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
 const killGroup = (pid) => { try { process.kill(-pid, 'SIGKILL'); } catch { try { process.kill(pid, 'SIGKILL'); } catch { /* already gone */ } } };
 
-export function reapOrphanBrowsers(dir = CHROME_DIR) {
-  if (!fs.existsSync(dir)) return 0;
+// A Chrome launched by code that never registered it (an older checkout, a bare puppeteer.launch) is
+// adopted by init (ppid 1) when its node process dies; puppeteer's own Chrome always has a node parent.
+export function unownedChromePids(psText) {
+  return psText.split('\n').map((l) => l.trim().match(/^(\d+)\s+(\d+)\s+(.*)$/)).filter(Boolean)
+    .filter(([, , ppid, command]) => ppid === '1' && /puppeteer_dev_chrome_profile/.test(command) && !/--type=/.test(command))
+    .map(([, pid]) => Number(pid));
+}
+
+export function reapOrphanBrowsers(dir = CHROME_DIR, psText = spawnSync('ps', ['-axww', '-o', 'pid=,ppid=,command='], { encoding: 'utf8' }).stdout || '') {
   let reaped = 0;
+  for (const pid of unownedChromePids(psText)) { killGroup(pid); reaped++; }
+  if (!fs.existsSync(dir)) return reaped;
   for (const name of fs.readdirSync(dir)) {
     const file = path.join(dir, name);
     const owner = Number(fs.readFileSync(file, 'utf8'));

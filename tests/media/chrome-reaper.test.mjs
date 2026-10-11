@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { reapOrphanBrowsers } from '../../harness/lib/render-harness.mjs';
+import { reapOrphanBrowsers, unownedChromePids } from '../../harness/lib/render-harness.mjs';
 
 const fakeChrome = () => spawn(process.execPath, ['-e', 'setTimeout(()=>{},60000)', 'puppeteer_dev_chrome_profile-test'], { stdio: 'ignore', detached: true });
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
@@ -18,10 +18,20 @@ test('reapOrphanBrowsers kills the Chrome of a dead owner and keeps the Chrome o
   await new Promise((r) => deadOwner.on('exit', r));
   fs.writeFileSync(path.join(dir, String(orphan.pid)), String(deadOwner.pid));
   fs.writeFileSync(path.join(dir, String(kept.pid)), String(process.pid));
-  assert.equal(reapOrphanBrowsers(dir), 1);
+  assert.equal(reapOrphanBrowsers(dir, ''), 1);
   assert.ok(await gone(orphan.pid));
   assert.ok(alive(kept.pid));
   assert.deepEqual(fs.readdirSync(dir), [String(kept.pid)]);
   process.kill(-kept.pid, 'SIGKILL');
   fs.rmSync(dir, { recursive: true });
+});
+
+test('unownedChromePids names only a main puppeteer Chrome whose parent is init', () => {
+  const ps = [
+    '  101     1 /x/Google Chrome for Testing --user-data-dir=/T/puppeteer_dev_chrome_profile-a',
+    '  102     1 /x/Google Chrome Helper --type=renderer --user-data-dir=/T/puppeteer_dev_chrome_profile-a',
+    '  103  4242 /x/Google Chrome for Testing --user-data-dir=/T/puppeteer_dev_chrome_profile-b',
+    '  104     1 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  ].join('\n');
+  assert.deepEqual(unownedChromePids(ps), [101]);
 });
