@@ -15,12 +15,12 @@ const DB_FLOOR = -60;
 const TRAIL_WIN = Math.round(0.3 / (HOP / SR));
 const ONSET_DB = 8, NOISE_FLOOR_DB = -45, MERGE_S = 0.1;
 
-/** decodeMono(file, sr, { seconds }) -> { samples: Float32Array, error } . `error` is set when there is no readable track; `seconds` reads only the start. */
-export function decodeMono(file, sr = SR, { seconds } = {}) {
+/** decodeMono(file, sr, { seconds, minSeconds }) -> { samples: Float32Array, error } . `error` is set when there is no readable track or it is shorter than `minSeconds` (default 1); `seconds` reads only the start. */
+export function decodeMono(file, sr = SR, { seconds, minSeconds = 1 } = {}) {
   const r = spawnSync('ffmpeg', ['-v', 'error', ...(seconds ? ['-t', String(seconds)] : []), '-i', file, '-vn', '-ac', '1', '-ar', String(sr), '-f', 'f32le', '-'],
     { maxBuffer: 1 << 29 });
-  if (r.status !== 0 || !r.stdout || r.stdout.length < sr * 4) {
-    return { samples: null, error: (r.stderr || '').toString().trim().split('\n')[0] || 'no output' };
+  if (r.status !== 0 || !r.stdout || r.stdout.length < sr * 4 * minSeconds || !r.stdout.length) {
+    return { samples: null, error: (r.stderr || '').toString().trim().split('\n')[0] || `under ${minSeconds} s of audio` };
   }
   return { samples: new Float32Array(r.stdout.buffer, r.stdout.byteOffset, Math.floor(r.stdout.length / 4)), error: null };
 }

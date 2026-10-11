@@ -93,7 +93,7 @@ async function main(argv) {
     result = cutsVsSound(cuts, placed, cutInfo.fps);
   }
   const png = path.join(dir, 'sound.png');
-  const samples = decodeMono(file, 22050).samples;
+  const samples = decodeMono(file, 22050, { minSeconds: 0.02 }).samples;
   await pngOf(png, { samples, placed, rows: result?.rows ?? [], title: `${name}: ${placed.tempo.bpm} BPM (${placed.tempo.usable ? 'usable' : 'weak'}); orange: hits, grey: beats, dashed: half beats, black: bars${result ? '; green, amber, red: cuts on beat, near, off' : ''}` });
   const full = (limit) => [...soundLines({ name, source: isPage ? `${o.input} (bed ${path.basename(file)})` : o.input, placed, limit }), ...cueLines(cues, placed), ...(result ? cutLines({ result, fps: cutInfo.fps, source: path.basename(cutInfo.source) }) : [])];
   fs.writeFileSync(path.join(dir, 'sound.md'), [...full(Infinity), `Picture: ${png}`, ''].join('\n'));

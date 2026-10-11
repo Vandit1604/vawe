@@ -29,3 +29,12 @@ test('decodeMono names the error for a file that is not audio', () => {
   assert.equal(samples, null);
   assert.ok(error);
 });
+
+test('a cue under one second decodes with a lower minSeconds, and the default error names the length, not "no output"', () => {
+  const tick = path.join(dir, 'tick.wav');
+  spawnSync('ffmpeg', ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'sine=frequency=880:duration=0.2', tick]);
+  assert.equal(decodeMono(tick, 8000).error, 'under 1 s of audio');
+  const { samples, error } = decodeMono(tick, 8000, { minSeconds: 0.02 });
+  assert.equal(error, null);
+  assert.ok(Math.abs(samples.length - 1600) < 50, `${samples.length} samples`);
+});

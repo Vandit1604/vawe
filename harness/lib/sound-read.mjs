@@ -111,7 +111,7 @@ export function readSound(file, { cache = true } = {}) {
   const key = sha(fs.readFileSync(file), codeHash());
   const kept = path.join(ROOT, 'out', 'sound-cache', `${key}.json`);
   if (cache && fs.existsSync(kept)) return JSON.parse(fs.readFileSync(kept, 'utf8'));
-  const decoded = decodeMono(file, RATE);
+  const decoded = decodeMono(file, RATE, { minSeconds: 0.02 });
   if (!decoded.samples) throw new Error(`${file} has no audio to read: ${decoded.error}`);
   const mono = new Float32Array(decoded.samples);
   const duration = r3(mono.length / RATE);
