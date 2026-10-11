@@ -12,7 +12,7 @@ prevents: trace review 2026-10-10 PM: a starburst copied from the reference land
 status: active
 scored: no
 numbers: {}
-digest: Feedback follows its cause (burst after the press, pop after the window starts); a sound lands on its action.
+digest: Feedback follows its cause (a burst after the press); a sound lands on its action.
 craft: film-structure
 ---
 

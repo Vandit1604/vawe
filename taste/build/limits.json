@@ -49,6 +49,11 @@
   "graphic_area_pct_min": 8,
   "graphic_runtime_share_min": 0.33
  },
+ "ground-hue": {
+  "hue_span_deg_max": 40,
+  "chroma_min": 6,
+  "shots_min": 3
+ },
  "hero-plus-proof": {
   "proof_after_s": 3,
   "decoratives_min": 2,

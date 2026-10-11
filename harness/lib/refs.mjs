@@ -168,11 +168,16 @@ export const refVideo =(dir, id) => ['mp4', 'webm'].map((e) => path.join(dir, `$
 /** The video to look at for film `id`: the 1080p copy in hd/ when there is one, else the 360p video; undefined when neither exists. */
 export const refSharpVideo = (dir, id) => [path.join(dir, 'hd', `${id}.mp4`)].find(fs.existsSync) ?? refVideo(dir, id);
 
-/** The measured shots of film `id` as [{ start, end }] from spec/<id>/spec.json; empty before `vawe spec` ran. */
-export function refShots(dir, id) {
+const readSpec = (dir, id) => {
   const file = path.join(dir, 'spec', id, 'spec.json');
-  return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, 'utf8')).shots ?? []).map((s) => ({ start: s.t0, end: s.t1 })) : [];
-}
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
+};
+
+/** The measured shots of film `id` as [{ start, end }] from spec/<id>/spec.json; empty before `vawe spec` ran. */
+export const refShots = (dir, id) => (readSpec(dir, id).shots ?? []).map((s) => ({ start: s.t0, end: s.t1 }));
+
+/** The ground block (per shot and per cut) of film `id` from spec/<id>/spec.json, or null before `vawe spec` ran. */
+export const refGround = (dir, id) => readSpec(dir, id).ground ?? null;
 
 /** The manifest of film `id` under `dir`, or null when `vawe refs frames` has not written it. */
 export function readFrameManifest(dir, id) {

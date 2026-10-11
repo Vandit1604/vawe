@@ -13,7 +13,7 @@ status: active
 scored: no
 numbers: {"ground_layer_area_pct_min":15,"flat_samples_share_max_pct":50,"ground_layer_strength_min":0.06}
 print-frames: put soft colour blobs behind the content, not one flat fill
-digest: A ground is never one flat fill: soft blobs or a real field behind the content.
+digest: A ground is never one flat fill: soft blobs or a real field behind it.
 craft: color
 ---
 

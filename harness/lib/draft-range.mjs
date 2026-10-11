@@ -56,7 +56,7 @@ export function worldShots(worlds, fps, n) {
   return shots.map((s, i) => (shots[i + 1] && shots[i + 1].f0 > s.f0 ? { ...s, f1: Math.min(s.f1, shots[i + 1].f0) } : s));
 }
 
-/** { <metric key>: number or null } of a draft video. Cuts are the world spans the page declares, or the detected transitions when the page shows fewer than two worlds. Null when there is no cut. */
+/** { values, perShot, seconds } of a draft video: `values` is { <metric key>: number or null }, `perShot` the ground block of each world. Cuts are the world spans the page declares, or the detected transitions when the page shows fewer than two worlds. Null when there is no cut. */
 export function measureDraftShape(mp4, worlds, fps) {
   const { width, height } = probeSize(mp4);
   if (!width || !height) return null;
@@ -67,6 +67,7 @@ export function measureDraftShape(mp4, worlds, fps) {
     const shots = declared.length >= MIN_WORLDS ? declared : shotSpans(findTransitions(V), V.n);
     if (shots.length < MIN_WORLDS) return null;
     const spec = { eye: measureEye(V, shots, fps), ground: measureGround(V, shots, fps) };
-    return Object.fromEntries(SHAPE_METRICS.filter((m) => ROWS.some((r) => r.key === m.name)).map((m) => [m.name, m.pick(spec) ?? null]));
+    const values = Object.fromEntries(SHAPE_METRICS.filter((m) => ROWS.some((r) => r.key === m.name)).map((m) => [m.name, m.pick(spec) ?? null]));
+    return { values, perShot: spec.ground.perShot, seconds: V.n / fps };
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }

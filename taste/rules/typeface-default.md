@@ -13,7 +13,7 @@ status: active
 scored: yes
 numbers: {}
 print-frames: use the kit's face and ground or a face the direction chose, not Inter or Space Grotesk by habit
-digest: Use the kit's face and ground, or a face the direction chose; not Inter or Space Grotesk by habit.
+digest: Use the kit's face and ground, or one the direction chose; not Inter or Space Grotesk by habit.
 craft: typography
 ---
 

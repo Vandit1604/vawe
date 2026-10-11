@@ -12,7 +12,7 @@ prevents: feedback: "it shows so little" (launch film). About 4 in 10 shipped sc
 status: active
 scored: yes
 numbers: {"screen_text_px_min_1920":28}
-digest: Show real things working, not slogans in boxes; an invented product gets a UI designed as a real interface, never functionless chrome.
+digest: Show real things working, not slogans in boxes; an invented product gets a real interface, never functionless chrome.
 craft: show-dont-tell
 ---
 

@@ -88,6 +88,8 @@ import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, sig
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { barLint, boxMotion, overshootPct, timedArrivals } from '../lib/bar-lint.mjs';
 import { measureDraftShape, rangeLines } from '../lib/draft-range.mjs';
+import { groundHueLines, GROUND_HUE } from '../lib/ground-hue.mjs';
+import { namedRef, refsDir, refGround } from '../lib/refs.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { textCollisionLines } from '../lib/text-collision.mjs';
@@ -1041,12 +1043,21 @@ function writeDevNotes(mp4, { timing, advice, taste, signature, fired, rows }) {
 
 const nameOfFilm = (mp4) => path.basename(mp4, '.mp4').replace(/-draft.*$/, '');
 
+/** The ground-hue advice of a draft: [] when the ground turns, the page waives it or the brief names no reference with a spec to point at. */
+function groundHueAdvice(pagePath, shape) {
+  if (isWaived(pageAuthoring(pagePath), GROUND_HUE, shape.perShot.find((p) => p.start)?.t0 ?? 0)) return [];
+  const named = namedRef({ dir: refsDir(), briefText: readBrief(pagePath) ?? '' });
+  const ground = named && refGround(refsDir(), named.id);
+  const lines = groundHueLines(shape.perShot, shape.seconds, ground ? { id: named.id, ground } : null);
+  return lines.length ? [...lines, waiverHint(GROUND_HUE)] : [];
+}
+
 /** The reference-range lines of a whole draft; [] when the page has under two worlds or the measure fails (advice must never stop a draft). */
-async function rangeBlock(mp4, r, fps, checks) {
+async function rangeBlock(mp4, pagePath, r, fps, checks) {
   try {
     return await checks.time('range', async () => {
       const shape = measureDraftShape(mp4, r.probe?.worlds, fps);
-      return shape ? rangeLines({ ...shape, overshoot_pct: overshootPct(motionRecords(r.motion), r.probe?.speed?.arrivals) }) : [];
+      return shape ? [...rangeLines({ ...shape.values, overshoot_pct: overshootPct(motionRecords(r.motion), r.probe?.speed?.arrivals) }), ...groundHueAdvice(pagePath, shape)] : [];
     });
   } catch (e) { console.error(`  no reference range: ${e.message}`); return []; }
 }
@@ -1056,7 +1067,7 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   try { await checks.time('sheet', async () => { const { out, frames, fastest } = writeDraftSheet({ video: mp4, out: mp4.replace(/\.mp4$/, '.png'), fps: opts.fps, from }); look = `  look: ${out} (frames at ${frames.join(', ')} s; fastest motion at ${fastest} s)`; }); } catch (e) { console.error(`  no key-frame sheet: ${e.message}`); }
   const whole = from === 0 && opts.durArg == null;
   const report = await draftReport(mp4, pagePath, { ...r, whole, checks });
-  const range = whole ? await rangeBlock(mp4, r, opts.fps, checks) : [];
+  const range = whole ? await rangeBlock(mp4, pagePath, r, opts.fps, checks) : [];
   checks.save();
   const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds(), capture: frameFormat(false).label });
   const notes = writeDevNotes(mp4, { timing, ...report.notes });

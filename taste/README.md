@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-91 rules, 33 scored by the judge.
+92 rules, 33 scored by the judge.
 
 ## concept
 
@@ -48,6 +48,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [asymmetry](rules/asymmetry.md): Compose asymmetric with one hero, anchored to edges and thirds. Check: judge.
 - [first-frame](rules/first-frame.md): Something of the subject (the subject, its ground or its first mark) is on screen at frame 0 and reads as an image by 0.1 s. Check: judge.
 - [graphic-is-subject](rules/graphic-is-subject.md): If a graphic is the point of the beat, it owns the frame: hero scale, type demoted to a caption. Check: judge.
+- [ground-hue](rules/ground-hue.md): The ground turns across the film. Check: ground-hue.
 - [hero-plus-proof](rules/hero-plus-proof.md): A beat held longer than 3 s carries a hero plus proof. Check: judge.
 - [hierarchy](rules/hierarchy.md): Make one element dominant by scale contrast: one huge hero and one small caption beat three medium lines. Check: judge.
 - [icon-family](rules/icon-family.md): Show a company's mark whenever it is named. Check: none.
