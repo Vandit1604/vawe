@@ -96,3 +96,11 @@ test('a move of the change-between-shots index is accepted as a handoff name', (
   assert.deepEqual(advice(['deliberate cut: a', 'iris: focus moves']), []);
   assert.match(advice(['iris: a', 'iris wipe: b']).join('\n'), /both use iris-wipe/);
 });
+
+test('an exact move name wins over a family word inside it', () => {
+  assert.equal(parseHandoff('cursor-spotlight: the dot').id, 'cursor-spotlight');
+  assert.equal(parseHandoff('cursor spotlight: the dot').id, 'cursor-spotlight');
+  assert.equal(parseHandoff('glow-record: the ring').id, 'flood');
+  assert.equal(parseHandoff('light: warm').id, 'flood');
+  assert.equal(parseHandoff('flood: warm').id, 'flood');
+});

@@ -57,20 +57,21 @@ export function transitionMoves(root = ROOT) {
 }
 
 let moveIndex;
-function moveFamily(name) {
+const moves = () => (moveIndex ??= transitionMoves());
+
+function moveFamily(name, exact) {
   const n = dashed(name);
   if (!n) return null;
-  moveIndex ??= transitionMoves();
-  for (const [slug, id] of moveIndex) if (slug === n || slug.startsWith(`${n}-`)) return id;
+  for (const [slug, id] of moves()) if (slug === n || (!exact && slug.startsWith(`${n}-`))) return id;
   return null;
 }
 
-/** { id, name, object, text } of a handoff cell "family: object". `family` may also be a move of the "change between shots" index ("iris" is iris-wipe). `id` is null for an unknown family, `name` is '' for an empty cell. */
+/** { id, name, object, text } of a handoff cell "family: object". `family` may also be a move of the "change between shots" index: an exact move name wins over a family word in it ("cursor-spotlight" is no flood), a prefix ("iris") is tried after the families. `id` is null for an unknown family, `name` is '' for an empty cell. */
 export function parseHandoff(cell) {
   const text = (cell ?? '').trim();
   const colon = text.indexOf(':');
   const name = (colon < 0 ? text : text.slice(0, colon)).trim();
-  return { id: familyOf(name) ?? moveFamily(name), name, object: colon < 0 ? '' : text.slice(colon + 1).trim(), text };
+  return { id: moveFamily(name, true) ?? familyOf(name) ?? moveFamily(name, false), name, object: colon < 0 ? '' : text.slice(colon + 1).trim(), text };
 }
 
 const label = (i) => `cut ${i + 1}`;
