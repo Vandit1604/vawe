@@ -74,6 +74,11 @@ export function declaredSilent(brief) {
   return /^[^|\n]*\bsound:?\s+none\b/im.test(brief ?? '') || (rows.length > 0 && rows.every((c) => /^none\b/i.test(c[1] ?? '')));
 }
 
+/** True when the brief's request or Facts say the film has no text ("no text"): the text dial and the type axis cannot apply. */
+export function declaredNoText(brief) {
+  return /^[-*] [^\n]*\bno text\b/im.test(brief ?? '');
+}
+
 /** The second in `<meta name="spectacle">` of page html, or null when the page has none or it is not a number. */
 export function spectacleOf(html) {
   const s = metaOf(html, 'spectacle');

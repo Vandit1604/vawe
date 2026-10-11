@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { declaredSilent, parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings, lockedSpectacle } from '../../harness/lib/board.mjs';
+import { declaredSilent, declaredNoText, parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings, lockedSpectacle } from '../../harness/lib/board.mjs';
 
 const board = ({ cuts = ['0.6', '0.3', '1.1'], spectacle = 'at 7.2', moves = ['whip', 'push', 'overlap'], sound = ['tick', 'tap'] } = {}) => `## Look
 
@@ -164,4 +164,12 @@ test('declaredSilent: a Board sound row of none, or a "sound none" line, declare
   assert.equal(declaredSilent(board('| [s] | [voice] | | [a cut] |')), false);
   assert.equal(declaredSilent(board('| 2 | tick | | the cut |')), false);
   assert.equal(declaredSilent(null), false);
+});
+
+test('declaredNoText: a request or Facts bullet saying "no text" declares a text-free film; a table cell or prose does not', () => {
+  assert.equal(declaredNoText('## Inputs\n\n- request: a 12 s loop of moths, no text\n'), true);
+  assert.equal(declaredNoText('- Look: red powder. No text, silent.\n'), true);
+  assert.equal(declaredNoText('| s1 | no text yet |\n'), false);
+  assert.equal(declaredNoText('Sentence with no text in it.\n'), false);
+  assert.equal(declaredNoText(null), false);
 });

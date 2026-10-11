@@ -19,7 +19,7 @@ import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
 import { findingsPrompt, readFindings, ruleOf, findingsEvent } from '../lib/judge-findings.mjs';
-import { declaredSilent } from '../lib/board.mjs';
+import { declaredSilent, declaredNoText } from '../lib/board.mjs';
 import { readTricks, capByTricks, selfApprovedTricks } from '../lib/judge-tricks.mjs';
 import { readApproval } from '../lib/approval.mjs';
 import { siblingFilms } from '../lib/judge-siblings.mjs';
@@ -156,7 +156,8 @@ async function prepare(input, stage, brief) {
   const dur = durationOf(video);
   const sheet = contactSheet(video, dur, dir);
   const keys = keyFrames(video, dur, dir, parseBriefTables(brief ? fs.readFileSync(brief, 'utf8') : null));
-  const silent = stage === 'final' && declaredSilent(brief ? fs.readFileSync(brief, 'utf8') : null);
+  const briefText = brief ? fs.readFileSync(brief, 'utf8') : null;
+  const silent = stage === 'final' && declaredSilent(briefText);
   const sound = stage === 'final' && !silent && hasAudio(video) ? loudness(video) : null;
   const anchor = anchorOf(input, brief);
   const anchorShots = anchor.kind === 'reference' ? anchorFrames(anchor.ref, keys, dir) : [];
@@ -172,7 +173,7 @@ async function prepare(input, stage, brief) {
   const siblings = siblingThumbs(name, dir);
   const refs = referencesFor(briefArg, dur);
   const declared = await declaredOf(pageOf(input, brief));
-  return { name, stage, silent, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file), ...siblings.map((s) => s.file), ...refs.map((r) => r.file)], notes, dir, keys, images, anchor, caps: lastCaps(name), siblings, refs, declared };
+  return { name, stage, silent, noText: declaredNoText(briefText), files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file), ...siblings.map((s) => s.file), ...refs.map((r) => r.file)], notes, dir, keys, images, anchor, caps: lastCaps(name), siblings, refs, declared };
 }
 
 const STILLS_TASK = `The image shows three directions side by side: A on the left, B in the middle, C on the right, each a key frame with a caption.
@@ -235,8 +236,8 @@ function runJudge(prompt, ev) {
 }
 
 function finish(ev, raw, ms) {
-  const axes = FRESH_AXES[ev.stage === 'stills' ? 'stills' : 'film'].map(([k]) => k).filter((k) => !(k === 'sound' && (ev.stage !== 'final' || ev.silent)));
-  const bar = ev.refs?.length ? barResult(raw.bar, ev.refs) : null;
+  const axes = FRESH_AXES[ev.stage === 'stills' ? 'stills' : 'film'].map(([k]) => k).filter((k) => !(k === 'sound' && (ev.stage !== 'final' || ev.silent)) && !(k === 'type' && ev.noText));
+  const bar = ev.refs?.length ? barResult(raw.bar, ev.refs).filter((b) => !(ev.noText && b.dial === 'text')) : null;
   const given = Object.fromEntries(axes.map((k) => [k, Number(raw.scores[k])]));
   const tricks = ev.stage === 'stills' ? [] : [...readTricks(raw), ...selfApprovedTricks(readApproval(filmName(input), repoRoot), readRuns(filmName(input), repoRoot))];
   const scores = capByTricks(bar ? capScores(given, bar).scores : given, tricks);
