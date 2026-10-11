@@ -10,6 +10,7 @@ import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { lookProblem } from '../media/see/look-math.mjs';
+import { looksProblem } from '../lib/looks.mjs';
 import { seeProblem } from '../media/see/one-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
 import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs';
@@ -114,6 +115,22 @@ export const VERBS = [
     next: (v, [page]) => (v.full || v.world?.length
       ? `Read the stills at full size and fix the states; then bin/vawe frames ${page} for the sheet`
       : nextStep(path.resolve(page), ROOT).next),
+  },
+  {
+    name: 'looks', summary: 'a page frame under every named camera look of the lens (and as-is), one labelled grid per second; the look is set from outside, the page is not edited',
+    positional: [PAGE],
+    flags: [
+      { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 4.5,9' },
+      { name: 'only', type: 'string', help: 'comma-separated look names, for example anamorphic,crt; all when left out' },
+      { name: 'out', type: 'path', default: 'out/looks-<film>', help: 'folder for the grids' },
+    ],
+    example: 'vawe looks films/my-launch/page.html --at 4.5,9   |   vawe looks films/my-launch/page.html --at 3 --only anamorphic,pro-mist',
+    build: (v, [page]) => {
+      const problem = looksProblem({ at: v.at, only: v.only });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/looks.mjs', args: [page, ...opt('--at', v.at), ...opt('--only', v.only), ...opt('--out', v.out)] }];
+    },
+    next: () => 'Read each grid at full size, pick a look by sight, then put `look: \'<name>\'` in the lens options of the page (prompts/moves/lens.md lists the numbers); the page options still win over the look',
   },
   {
     name: 'dev', summary: 'draft render: half size, 30 fps, silent; also writes a key-frame sheet PNG next to it',

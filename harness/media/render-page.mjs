@@ -206,14 +206,17 @@ async function openLane(software) {
 const SVG_FILTER = /<filter[\s>]|\bfe[A-Z][a-zA-Z]+\b|filter\s*:[^;}]*url\(|createElementNS\([^)]*['"]filter['"]/;
 const IMPORTED = /(?:from\s*|import\s*\(?\s*)['"]([^'"]+\.m?js)['"]/g;
 
-export function usesSvgFilter(pagePath, seen = new Set()) {
+/** Whether the page, or a module it imports (relative or from the repo root), has text matching `pattern`. */
+export function pageSourceMatches(pagePath, pattern, seen = new Set()) {
   const file = path.resolve(pagePath);
   if (seen.has(file) || !fs.existsSync(file)) return false;
   seen.add(file);
   const text = fs.readFileSync(file, 'utf8');
-  if (SVG_FILTER.test(text)) return true;
-  return [...text.matchAll(IMPORTED)].some(([, spec]) => usesSvgFilter(spec.startsWith('/') ? path.join(REPO_ROOT, spec) : path.resolve(path.dirname(file), spec), seen));
+  if (pattern.test(text)) return true;
+  return [...text.matchAll(IMPORTED)].some(([, spec]) => pageSourceMatches(spec.startsWith('/') ? path.join(REPO_ROOT, spec) : path.resolve(path.dirname(file), spec), pattern, seen));
 }
+
+export const usesSvgFilter = (pagePath) => pageSourceMatches(pagePath, SVG_FILTER);
 
 async function openLanePage(lane, pagePath, frame) {
   const page = await lane.browser.newPage();
