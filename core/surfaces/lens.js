@@ -50,12 +50,46 @@ export const OFF = {
   tiltShift: { blur: 0 }, distortion: { amount: 0 }, weave: { amount: 0 }, grain: 0, vignette: 0, exposure: 1, lift: 0, fade: 0,
 };
 
+// Named camera looks: options over a flat lens (OFF), so a look names every effect it uses and nothing else is on.
+// lens(source, { look, ...own }) puts the page's own options over the look.
+const WARM = ['#140c06', '#4a3524', '#a88a66', '#f0ddbb'].map(hex);
+export const LOOKS = {
+  clean: {},
+  'dream-bloom': { bloom: { strength: 1.5, radius: 120, threshold: 0.22, knee: 0.5 }, softFocus: { amount: 0.18, radius: 30 }, vignette: 0.15, lift: 0.01 },
+  'film-halation': { halation: { strength: 1, radius: 90, threshold: 0.55 }, bloom: { strength: 0.35, radius: 40, threshold: 0.5 }, grain: 0.05, vignette: 0.25 },
+  anamorphic: { streaks: { strength: 0.5, length: 700, threshold: 0.7, tint: [0.35, 0.6, 1] }, bloom: { strength: 0.3, radius: 50, threshold: 0.5 }, aberration: { amount: 3 }, vignette: 0.2 },
+  'pro-mist': { diffusion: { strength: 0.35, radius: 70 }, vignette: 0.1 },
+  'tilt-shift': { tiltShift: { center: 0.5, width: 0.3, blur: 22 } },
+  'soft-focus': { softFocus: { amount: 0.5, radius: 14 } },
+  vintage: {
+    palette: { stops: WARM, amount: 0.4 }, halation: { strength: 0.5, radius: 80, threshold: 0.55 }, bloom: { strength: 0.3, radius: 40, threshold: 0.5 },
+    grain: 0.09, weave: { amount: 1.6 }, vignette: 0.55, lift: 0.02,
+  },
+  cyanotype: { palette: { stops: PALETTES.cyanotype }, halation: { strength: 0.8, radius: 90, threshold: 0.5, tint: [0.1, 0.4, 1] }, grain: 0.07, vignette: 0.3 },
+  crt: { grid: { amount: 0.9, cell: 3, layout: 'stripe' }, tear: { amount: 6, prob: 0.04, band: 12 }, aberration: { amount: 5 }, bloom: { strength: 0.7, radius: 40, threshold: 0.3 }, vignette: 0.5, grain: 0.04 },
+};
+
 const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
 export function merge(base, over) {
   const out = { ...base };
   for (const [k, v] of Object.entries(over || {})) out[k] = isObject(v) && isObject(base[k]) ? merge(base[k], v) : v;
   return out;
 }
+const EFFECTS_OFF = Object.fromEntries(Object.entries(OFF).filter(([k]) => k !== 'dof'));
+/** A look as a full override: every effect it does not name is off, the camera and the focus stay the page's. For `window.__vaweLensOverride`. */
+export function lookOverride(name) {
+  if (!(name in LOOKS)) throw new Error(`lens: unknown look "${name}"; valid: ${Object.keys(LOOKS).join(', ')}`);
+  return { ...merge(EFFECTS_OFF, LOOKS[name]), look: name };
+}
+
+/** DEFAULTS, or the named look over a flat lens, then the page's options, then the preview override (set by `vawe looks` before the page runs). */
+export function resolveOptions(options = {}, override = globalThis.__vaweLensOverride) {
+  const name = override?.look ?? options.look;
+  if (name != null && !(name in LOOKS)) throw new Error(`lens: unknown look "${name}"; valid: ${Object.keys(LOOKS).join(', ')}`);
+  const base = name == null ? DEFAULTS : merge(DEFAULTS, merge(OFF, LOOKS[name]));
+  return merge(merge(base, options), override || {});
+}
+
 const resolve = (v, t) => {
   if (typeof v === 'function') return v(t);
   if (isObject(v)) return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, resolve(x, t)]));
@@ -598,7 +632,7 @@ function finalPass(rig, p, t) {
 }
 
 export function lens(source, options = {}) {
-  const opts = merge(DEFAULTS, options);
+  const opts = resolveOptions(options);
   const pixelRatio = opts.pixelRatio || window.devicePixelRatio || 1;
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(innerWidth * pixelRatio);

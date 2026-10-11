@@ -11,7 +11,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { REPO_ROOT, serveRepo, RENDER_ARGS } from '../../harness/lib/render-harness.mjs';
-import { projectWith } from '../../core/surfaces/lens.js';
+import { projectWith, resolveOptions, lookOverride, LOOKS } from '../../core/surfaces/lens.js';
 import { installPageFrame } from '../../core/engine/page-seek.js';
 
 const W = 1920, H = 1080;
@@ -30,13 +30,15 @@ async function newPage() {
   return page;
 }
 
-async function shoot(cfg, { only, src, t = 0.3, scale = 1, draws = 1, probe = [] } = {}) {
+async function shoot(cfg, { only, src, t = 0.3, scale = 1, draws = 1, probe = [], plain = false, override = null } = {}) {
   const page = await newPage();
   try {
+    if (override) await page.evaluateOnNewDocument((o) => { window.__vaweLensOverride = o; }, override);
     await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
     const q = new URLSearchParams({ cfg: JSON.stringify(cfg), scale: String(scale) });
     if (only) q.set('only', only);
     if (src) q.set('src', src);
+    if (plain) q.set('raw', '1');
     await page.goto(`http://127.0.0.1:${server.port}/tests/fixtures/pages/lens.html?${q}`, { waitUntil: 'load' });
     const b64 = await page.evaluate(async (tt, n) => {
       for (let i = 0; i < n; i++) for (const fn of window.__vaweFrameHooks) await fn(tt);
@@ -379,4 +381,34 @@ test('gate weave: the image moves with the frame and the seed, project() follows
   assert.ok(Math.abs(ca - cs) <= 14 * 0.6 + 1 && Math.abs(cb - cs) <= 14 * 0.6 + 1, 'the shift stays inside the amount');
   assert.ok(Math.abs(ca - a.probes[0].x) < 1 && Math.abs(cb - b.probes[0].x) < 1, 'project() follows the weave');
   assert.equal(hash(await at(cfg, 0.3)), hash(a), 'the same frame is the same pixels');
+});
+
+test('looks: the page wins over the look, the override wins over the page, no look is the old default', () => {
+  assert.equal(resolveOptions({}, null).grid.amount, 0.9, 'no look: the filmed-screen defaults');
+  const look = resolveOptions({ look: 'film-halation' }, null);
+  assert.equal(look.halation.strength, LOOKS['film-halation'].halation.strength, 'the look sets its effects');
+  assert.equal(look.grid.amount, 0, 'a named look starts from a flat lens, not the defaults');
+  assert.equal(resolveOptions({ look: 'film-halation', grain: 0.2, halation: { radius: 10 } }, null).grain, 0.2, 'a page option beats the look');
+  assert.deepEqual([resolveOptions({ look: 'film-halation', halation: { radius: 10 } }, null).halation.radius, resolveOptions({ look: 'film-halation', halation: { radius: 10 } }, null).halation.strength], [10, 1], 'a nested page option beats one key only');
+  assert.equal(resolveOptions({ look: 'film-halation', grain: 0.2 }, { grain: 0.7 }).grain, 0.7, 'the override beats the page');
+  assert.equal(resolveOptions({ look: 'film-halation' }, { look: 'cyanotype' }).palette.stops.length, 6, 'the override look replaces the page look');
+  assert.throws(() => resolveOptions({ look: 'nope' }, null), /unknown look "nope"; valid: clean, dream-bloom/);
+});
+
+test('looks: an override look turns the page effects off and keeps its camera and focus', () => {
+  const page = { zoom: 2, tiltY: 0.3, dof: { blur: 0.7 }, bloom: { strength: 1.2 }, palette: { stops: [[0, 0, 0], [1, 1, 1]] } };
+  const p = resolveOptions(page, lookOverride('clean'));
+  assert.deepEqual([p.zoom, p.tiltY, p.dof.blur], [2, 0.3, 0.7], 'camera and focus stay');
+  assert.deepEqual([p.bloom.strength, p.palette, p.grid.amount, p.grain], [0, null, 0, 0], 'every effect is off');
+  assert.equal(resolveOptions(page, lookOverride('crt')).grid.amount, 0.9, 'the look turns its own on');
+  assert.throws(() => lookOverride('nope'), /unknown look/);
+});
+
+test('looks: lens({ look }) films the look, and the preview override swaps it', async () => {
+  const beside = (img) => mean(window2(img, 150, 500, 12, 40).map((p) => p[0]));
+  const clean = await shoot({ look: 'clean' }, { only: 'bar', plain: true });
+  const halation = await shoot({ look: 'film-halation', vignette: 0, grain: 0 }, { only: 'bar', plain: true });
+  assert.ok(beside(halation) - beside(clean) > 15, `the look lights the dark beside the bar, ${beside(clean).toFixed(1)} to ${beside(halation).toFixed(1)}`);
+  const swapped = await shoot({ look: 'film-halation', vignette: 0, grain: 0 }, { only: 'bar', plain: true, override: lookOverride('clean') });
+  assert.equal(hash(swapped), hash(clean), 'the override look beats the page look');
 });

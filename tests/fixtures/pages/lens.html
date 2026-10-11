@@ -59,7 +59,7 @@ function halves() {
 }
 const source = q.get('src') === 'depth' ? canvasSource(stripes(), { depth: halves() })
   : q.get('src') === 'canvas' ? canvasSource(drawnScreen()) : htmlSource(document.getElementById('screen'), { scale: Number(q.get('scale') || 1) });
-const cam = lens(source, cfg ? merge(OFF, cfg) : moving);
+const cam = lens(source, cfg ? (q.get('raw') ? cfg : merge(OFF, cfg)) : moving);
 window.__lens = cam;
 vawe.onFrame((t) => cam.draw(t));
 </script></body></html>
