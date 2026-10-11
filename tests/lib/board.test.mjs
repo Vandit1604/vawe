@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings, lockedSpectacle } from '../../harness/lib/board.mjs';
+import { declaredSilent, parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings, lockedSpectacle } from '../../harness/lib/board.mjs';
 
 const board = ({ cuts = ['0.6', '0.3', '1.1'], spectacle = 'at 7.2', moves = ['whip', 'push', 'overlap'], sound = ['tick', 'tap'] } = {}) => `## Look
 
@@ -155,4 +155,13 @@ test('the spectacle second is read in the forms agents write', () => {
   assert.equal(read('at 6.55 to 7.85 s'), 7.2);
   assert.equal(read('[second]'), null);
   assert.equal(read('near the end'), null);
+});
+
+test('declaredSilent: a Board sound row of none, or a "sound none" line, declares a silent film; a placeholder row does not', () => {
+  const board = (row) => `## Board\n\n| at s | voice | gain dB | for |\n|---|---|---|---|\n${row}\n`;
+  assert.equal(declaredSilent(board('| 0 | none | | the film is silent |')), true);
+  assert.equal(declaredSilent(`## Facts\n\n- Board: no cuts; sound none.\n`), true);
+  assert.equal(declaredSilent(board('| [s] | [voice] | | [a cut] |')), false);
+  assert.equal(declaredSilent(board('| 2 | tick | | the cut |')), false);
+  assert.equal(declaredSilent(null), false);
 });

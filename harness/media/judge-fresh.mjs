@@ -19,6 +19,7 @@ import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
 import { findingsPrompt, readFindings, ruleOf, findingsEvent } from '../lib/judge-findings.mjs';
+import { declaredSilent } from '../lib/board.mjs';
 import { readTricks, capByTricks, selfApprovedTricks } from '../lib/judge-tricks.mjs';
 import { readApproval } from '../lib/approval.mjs';
 import { siblingFilms } from '../lib/judge-siblings.mjs';
@@ -155,7 +156,8 @@ async function prepare(input, stage, brief) {
   const dur = durationOf(video);
   const sheet = contactSheet(video, dur, dir);
   const keys = keyFrames(video, dur, dir, parseBriefTables(brief ? fs.readFileSync(brief, 'utf8') : null));
-  const sound = stage === 'final' && hasAudio(video) ? loudness(video) : null;
+  const silent = stage === 'final' && declaredSilent(brief ? fs.readFileSync(brief, 'utf8') : null);
+  const sound = stage === 'final' && !silent && hasAudio(video) ? loudness(video) : null;
   const anchor = anchorOf(input, brief);
   const anchorShots = anchor.kind === 'reference' ? anchorFrames(anchor.ref, keys, dir) : [];
   const sizeOf = (label, file, tile) => ({ label, ...probeSize(file), ...(tile ? { tile } : {}) });
@@ -165,12 +167,12 @@ async function prepare(input, stage, brief) {
     `sheet: ${sheet.file}  (one frame every ${(1 / sheet.fps).toFixed(2)} s, read left to right and top to bottom, each tile is labelled with its time in seconds)`,
     ...keys.map((k, i) => `key frame ${i + 1} at ${k.t.toFixed(1)} s (a settled moment: nothing mid-transition): ${k.file}`),
     ...anchorShots.map((a, i) => `anchor frame ${i + 1} (the reference at ${a.t.toFixed(1)} s, the anchor for key frame ${i + 1}): ${a.file}`),
-    sound || (stage === 'final' ? 'sound: the file has no audio track' : 'sound: not scored at this stage'),
+    sound || (silent ? 'sound: the brief declares a silent film; not scored' : stage === 'final' ? 'sound: the file has no audio track' : 'sound: not scored at this stage'),
   ];
   const siblings = siblingThumbs(name, dir);
   const refs = referencesFor(briefArg, dur);
   const declared = await declaredOf(pageOf(input, brief));
-  return { name, stage, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file), ...siblings.map((s) => s.file), ...refs.map((r) => r.file)], notes, dir, keys, images, anchor, caps: lastCaps(name), siblings, refs, declared };
+  return { name, stage, silent, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file), ...siblings.map((s) => s.file), ...refs.map((r) => r.file)], notes, dir, keys, images, anchor, caps: lastCaps(name), siblings, refs, declared };
 }
 
 const STILLS_TASK = `The image shows three directions side by side: A on the left, B in the middle, C on the right, each a key frame with a caption.
@@ -233,7 +235,7 @@ function runJudge(prompt, ev) {
 }
 
 function finish(ev, raw, ms) {
-  const axes = FRESH_AXES[ev.stage === 'stills' ? 'stills' : 'film'].map(([k]) => k).filter((k) => !(k === 'sound' && ev.stage !== 'final'));
+  const axes = FRESH_AXES[ev.stage === 'stills' ? 'stills' : 'film'].map(([k]) => k).filter((k) => !(k === 'sound' && (ev.stage !== 'final' || ev.silent)));
   const bar = ev.refs?.length ? barResult(raw.bar, ev.refs) : null;
   const given = Object.fromEntries(axes.map((k) => [k, Number(raw.scores[k])]));
   const tricks = ev.stage === 'stills' ? [] : [...readTricks(raw), ...selfApprovedTricks(readApproval(filmName(input), repoRoot), readRuns(filmName(input), repoRoot))];

@@ -68,6 +68,12 @@ export function parseBoard(brief) {
   };
 }
 
+/** True when the brief declares a silent film: every Board sound row has the voice "none", or a line says "sound none". */
+export function declaredSilent(brief) {
+  const rows = parseBoard(brief)?.sound ?? [];
+  return /^[^|\n]*\bsound:?\s+none\b/im.test(brief ?? '') || (rows.length > 0 && rows.every((c) => /^none\b/i.test(c[1] ?? '')));
+}
+
 /** The second in `<meta name="spectacle">` of page html, or null when the page has none or it is not a number. */
 export function spectacleOf(html) {
   const s = metaOf(html, 'spectacle');
