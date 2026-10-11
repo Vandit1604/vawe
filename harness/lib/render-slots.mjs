@@ -36,10 +36,12 @@ export function slotsInUse(dir = slotDir()) {
 const ageS = (start, now) => Math.max(0, Math.round((now - Date.parse(start)) / 1000)) || 0;
 export const whoLine = (slots, now = Date.now()) => slots.map((s) => `${s.who} (${s.kind}, pid ${s.pid}, running ${ageS(s.start, now)}s)`).join(', ');
 
+// A final holds a slot for minutes: it may take only slots 0 to count-2, so the top slot is always free for a draft (a draft, taking the top slot first, waited up to 357 s behind finals on 2026-10-11).
 // A slot file is written in two steps (create, then fill); a reader that sees it empty treats it as taken.
 function tryTake(dir, count, entry) {
   slotsInUse(dir);
-  for (let i = 0; i < count; i++) {
+  const order = entry.kind === 'final' ? [...Array(Math.max(1, count - 1)).keys()] : [...Array(count).keys()].reverse();
+  for (const i of order) {
     const file = path.join(dir, `slot-${i}.json`);
     try {
       const fd = fs.openSync(file, 'wx');

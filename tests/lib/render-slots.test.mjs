@@ -67,3 +67,21 @@ test('a slot file of a live holder names pid, film, verb and age in the wait lin
     s.release();
   } finally { fs.rmSync(env.VAWE_RENDER_SLOT_DIR, { recursive: true, force: true }); }
 });
+
+test('a final never takes the last free slot: a draft starts at once while a final runs, and a second final waits', async () => {
+  const env = tmpEnv(2);
+  try {
+    const lines = [];
+    const log = (l) => lines.push(l);
+    const final = await takeRenderSlot({ kind: 'final', who: 'a' }, { env, log });
+    let second = null;
+    const waiting = takeRenderSlot({ kind: 'final', who: 'b' }, { env, log }).then((s) => { second = s; });
+    const draft = await takeRenderSlot({ kind: 'draft', who: 'c' }, { env, log });
+    assert.equal(second, null, 'the second final must wait for the first');
+    assert.equal(draft.others, 1);
+    final.release();
+    await waiting;
+    draft.release();
+    second.release();
+  } finally { fs.rmSync(env.VAWE_RENDER_SLOT_DIR, { recursive: true, force: true }); }
+});
