@@ -23,13 +23,22 @@ export async function resolveInput(input) {
 
 async function filmCuts(name, page) {
   const { lastWorlds } = await import('../acceptance-run.mjs');
-  const worlds = lastWorlds(name);
+  const worlds = lastWorlds(name) ?? (page ? await pageSpans(page) : null);
   if (!worlds) die(`no measured data-world spans for ${name}: run bin/vawe dev ${page ?? `films/${name}/page.html`} first (a full draft, no --from or --to), then repeat`);
   const cuts = worldCuts(worlds);
   const unseen = worlds.filter((w) => w.start == null).map((w) => w.id);
   if (unseen.length) console.log(`note: the last draft never showed ${unseen.join(', ')} (a --from/--to draft covers part of the film): run bin/vawe dev ${page ?? `films/${name}/page.html`} with no range for every cut`);
   if (!cuts.length) die(`${name}: no world change measured`);
   return cuts;
+}
+
+// A canvas film skips the world measure at dev (the DOM worlds are not the picture), but its data-world elements still declare the spans.
+async function pageSpans(page) {
+  try {
+    const { readTimeline } = await import('../timeline.mjs');
+    const spans = (await readTimeline(page)).spans.filter((s) => s.start != null);
+    return spans.length ? spans : null;
+  } catch { return null; }
 }
 
 function refCuts(id) {
