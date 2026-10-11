@@ -36,7 +36,7 @@ Sound: a short noise tick at each tear, and a low thud on a lock (aberration pea
 - `dof`: blur grows with the depth difference to `focus` (a source point: pass a function to follow a
   target). Bokeh takes the aperture's shape: `blades` (n-gon), `rotation`, `roundness`, and `catEye`
   squeezes it toward the frame edge. Bright pixels weigh more in the taps. `soft` is the lens floor.
-- `palette`: brightness through 2 to 8 colour stops (`PALETTES.thermal phosphor amber navy paper mono`).
+- `palette`: brightness through 2 to 8 colour stops (`PALETTES.thermal phosphor amber navy paper mono cyanotype`).
   `keepColor` leaves saturated marks (a red lock box) in their own colour.
 - Light is linear from the first tap to the last pass. `grid` is a panel mask on the screen plane: a soft
   dot per subpixel (`layout` stripe, triad or dot, `softness`), the same shape per channel so the
@@ -44,6 +44,12 @@ Sound: a short noise tick at each tear, and a low thud on a lock (aberration pea
   focus, and is applied before bloom, so bright dots bleed into each other.
 - `bloom`: soft-knee threshold, then a 6-level downsample and upsample chain weighted by `radius`: a
   tight core plus a wide tail. `aberration`: red and blue move apart radially, `amount` px at the edge.
+- `halation`: the warm halo film gets where a bright edge meets dark. Pixels above `threshold` (0.6) go through
+  the same blur chain as bloom at a wider `radius` (90 px), are multiplied by `tint` (default `[1, 0.3, 0.1]`,
+  a red-orange; pass `[0.1, 0.4, 1]` for a cold halo) and added only where the base is dark, so bright areas
+  keep their colour. `strength` is 0 by default and in `OFF`: turn it on with about 0.5 to 1.2.
+- `PALETTES.cyanotype`: six stops measured from a reference image, dark to light: `#010306 #070d13 #162432
+  #3b4f64 #6f8599 #ccd8e4`. A near-black blue ground with a pale blue-grey top.
 - `tear` (rows slide, seeded), `grain`, `vignette`, `exposure`, `lift`, `fade`. All noise is hashed from
   `seed` and `floor(t * fps)`: a frame is a pure function of t, so renders match byte for byte.
 - `project(x, y, t)` is the same camera on the CPU. Labels, links and brackets drawn in HTML on top

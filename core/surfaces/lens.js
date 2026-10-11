@@ -15,6 +15,7 @@ export const PALETTES = {
   navy: ['#02040c', '#0a1c4a', '#1f5fd0', '#7cb8ff', '#f2f8ff'].map(hex),
   paper: ['#1a1410', '#5a4a3a', '#a89478', '#e0d2b6', '#fbf5e6'].map(hex),
   mono: ['#000000', '#555555', '#aaaaaa', '#ffffff'].map(hex),
+  cyanotype: ['#010306', '#070d13', '#162432', '#3b4f64', '#6f8599', '#ccd8e4'].map(hex),
 };
 
 const LAYOUTS = { stripe: 0, triad: 1, dot: 2 };
@@ -31,13 +32,14 @@ const DEFAULTS = {
   dof: { blur: 0.5, focus: null, max: 46, bokeh: 7, taps: 48, soft: 2.5, blades: 6, rotation: 0.3, roundness: 0.15, catEye: 0.5 },
   palette: null, // { stops: [[r,g,b] ...2 to 8], amount: 1, keepColor: 0 }
   bloom: { strength: 0.9, radius: 42, threshold: 0.3, knee: 0.3 },
+  halation: { strength: 0, radius: 90, threshold: 0.6, knee: 0.3, tint: [1, 0.3, 0.1] },
   grid: { amount: 0.9, cell: 3, layout: 'stripe', softness: 0.08, brightness: 0.85 },
   aberration: { amount: 6 },
   tear: { amount: 0, prob: 0.07, band: 16 },
   grain: 0.05, vignette: 0.4, exposure: 1, lift: 0, fade: 0,
 };
 export const OFF = {
-  dof: { blur: 0, soft: 0 }, palette: null, bloom: { strength: 0 }, grid: { amount: 0 },
+  dof: { blur: 0, soft: 0 }, palette: null, bloom: { strength: 0 }, halation: { strength: 0 }, grid: { amount: 0 },
   aberration: { amount: 0 }, tear: { amount: 0 }, grain: 0, vignette: 0, exposure: 1, lift: 0, fade: 0,
 };
 
@@ -313,13 +315,18 @@ void main() {
 }`;
 
 const FINAL = `${HEAD}
-uniform sampler2D u_scene, u_bloomTex;
+uniform sampler2D u_scene, u_bloomTex, u_haloTex;
 uniform vec2 u_res;
-uniform float u_bloom, u_exp, u_lift, u_vig, u_grain, u_fade, u_seed, u_frame;
+uniform vec3 u_haloTint;
+uniform float u_bloom, u_halo, u_exp, u_lift, u_vig, u_grain, u_fade, u_seed, u_frame;
 void main() {
   vec2 uv = gl_FragCoord.xy / u_res;
   vec3 col = texture(u_scene, uv).rgb;
   if (u_bloom > 0.0) col += texture(u_bloomTex, uv).rgb * u_bloom;
+  if (u_halo > 0.0) {
+    float dark = 1.0 - smoothstep(0.02, 0.35, dot(texture(u_scene, uv).rgb, LUMA));
+    col += texture(u_haloTex, uv).rgb * u_haloTint * u_halo * dark;
+  }
   col = col * u_exp + u_lift;
   vec2 s = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
   vec2 v = s * vec2(0.85, 1.15);
@@ -381,12 +388,14 @@ function createRig(gl, canvas) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  const down = Array.from({ length: LEVELS }, (_, i) => target(gl, Math.max(1, canvas.width >> (i + 1)), Math.max(1, canvas.height >> (i + 1)), hdr));
+  const chain = () => {
+    const down = Array.from({ length: LEVELS }, (_, i) => target(gl, Math.max(1, canvas.width >> (i + 1)), Math.max(1, canvas.height >> (i + 1)), hdr));
+    return { down, up: down.map((d) => target(gl, d.w, d.h, hdr)) };
+  };
   return {
-    gl, canvas, srcTex, down,
+    gl, canvas, srcTex, chain, bloom: chain(), halo: null,
     programs: { scene: program(gl, SCENE), down: program(gl, DOWN), up: program(gl, UP), final: program(gl, FINAL) },
     sceneT: target(gl, canvas.width, canvas.height, hdr),
-    up: down.map((d) => target(gl, d.w, d.h, hdr)),
     pxs: canvas.height / innerHeight,
   };
 }
@@ -447,9 +456,9 @@ function scenePass(rig, p, t, src, tex) {
   draw3(gl);
 }
 
-function bloomChain(rig, p) {
-  const { gl, down, up } = rig;
-  const weights = bloomWeights(p.bloom.radius * rig.pxs);
+function blurChain(rig, { down, up }, spec) {
+  const { gl } = rig;
+  const weights = bloomWeights(spec.radius * rig.pxs);
   const dn = rig.programs.down;
   for (let i = 0; i < LEVELS; i++) {
     const from = i === 0 ? rig.sceneT : down[i - 1];
@@ -458,8 +467,8 @@ function bloomChain(rig, p) {
     gl.uniform1i(dn.loc('u_in'), 0);
     gl.uniform2f(dn.loc('u_texel'), 1 / from.w, 1 / from.h);
     gl.uniform1f(dn.loc('u_first'), i === 0 ? 1 : 0);
-    gl.uniform1f(dn.loc('u_thr'), p.bloom.threshold ** 2.2);
-    gl.uniform1f(dn.loc('u_knee'), Math.max(1e-3, p.bloom.knee * Math.max(p.bloom.threshold, 0.05) ** 2.2));
+    gl.uniform1f(dn.loc('u_thr'), spec.threshold ** 2.2);
+    gl.uniform1f(dn.loc('u_knee'), Math.max(1e-3, spec.knee * Math.max(spec.threshold, 0.05) ** 2.2));
     draw3(gl);
   }
   const upp = rig.programs.up;
@@ -478,11 +487,13 @@ function finalPass(rig, p, t) {
   const { gl } = rig;
   const f = rig.programs.final;
   begin(rig, f, null);
-  bind(gl, 0, rig.sceneT.tex); bind(gl, 1, rig.up[0].tex);
-  gl.uniform1i(f.loc('u_scene'), 0); gl.uniform1i(f.loc('u_bloomTex'), 1);
+  bind(gl, 0, rig.sceneT.tex); bind(gl, 1, rig.bloom.up[0].tex);
+  if (p.halation.strength > 0) bind(gl, 2, rig.halo.up[0].tex);
+  gl.uniform1i(f.loc('u_scene'), 0); gl.uniform1i(f.loc('u_bloomTex'), 1); gl.uniform1i(f.loc('u_haloTex'), 2);
+  gl.uniform3fv(f.loc('u_haloTint'), p.halation.tint);
   gl.uniform2f(f.loc('u_res'), rig.canvas.width, rig.canvas.height);
   const u1 = (name, v) => gl.uniform1f(f.loc(name), v);
-  u1('u_bloom', p.bloom.strength > 0 ? p.bloom.strength : 0); u1('u_exp', p.exposure); u1('u_lift', p.lift); u1('u_vig', p.vignette);
+  u1('u_bloom', p.bloom.strength > 0 ? p.bloom.strength : 0); u1('u_halo', p.halation.strength > 0 ? p.halation.strength : 0); u1('u_exp', p.exposure); u1('u_lift', p.lift); u1('u_vig', p.vignette);
   u1('u_grain', p.grain); u1('u_fade', p.fade); u1('u_seed', p.seed); u1('u_frame', Math.floor(t * p.fps));
   draw3(gl);
 }
@@ -509,7 +520,8 @@ export function lens(source, options = {}) {
     bind(gl, 0, rig.srcTex);
     const tex = await source.upload(gl);
     scenePass(rig, p, t, source.size, tex);
-    if (p.bloom.strength > 0) bloomChain(rig, p);
+    if (p.bloom.strength > 0) blurChain(rig, rig.bloom, p.bloom);
+    if (p.halation.strength > 0) blurChain(rig, rig.halo ??= rig.chain(), p.halation);
     finalPass(rig, p, t);
   }
 

@@ -111,6 +111,21 @@ test('bloom: a bright glyph lifts the pixels around it, not the far ground', asy
   assert.ok(far(on) - far(off) < 2, 'far ground unchanged');
 });
 
+test('halation: a bar tints the dark pixels beside it warm, only when on, and OFF is the identity', async (t) => {
+  const off = await shoot({}, { only: 'bar' });
+  const on = await shoot({ halation: { strength: 1, radius: 60, threshold: 0.5 } }, { only: 'bar' });
+  const cold = await shoot({ halation: { strength: 1, radius: 60, threshold: 0.5, tint: [0.1, 0.4, 1] } }, { only: 'bar' });
+  const beside = (img) => [0, 1, 2].map((c) => mean(window2(img, 150, 500, 12, 40).map((p) => p[c])));
+  const [r0, g0, b0] = beside(off), [r1, g1, b1] = beside(on), [r2, , b2] = beside(cold);
+  t.diagnostic(`beside the bar: off ${[r0, g0, b0].map((v) => v.toFixed(1))}, on ${[r1, g1, b1].map((v) => v.toFixed(1))}`);
+  assert.ok(r0 < 30, `dark beside the bar with halation off, red ${r0.toFixed(1)}`);
+  assert.ok(r1 - r0 > 25 && r1 > g1 && g1 > b1, `warm halo beside the bar, ${r1.toFixed(1)},${g1.toFixed(1)},${b1.toFixed(1)}`);
+  assert.ok(b2 > r2, 'a cold tint gives a blue halo');
+  const bar = on.px(120, 540);
+  assert.deepEqual(bar, off.px(120, 540), 'the bright bar itself is not changed');
+  assert.equal(hash(await shoot({ halation: { strength: 0 } }, { only: 'bar' })), hash(off), 'strength 0 is the identity');
+});
+
 test('grid: equal-area RGB stripes, one cell per period, no overall tint', async (t) => {
   const img = await shoot({ grid: { amount: 1, cell: 6 }, zoom: 2, aim: [1400, 500] }, { only: 'patch' });
   const cell = 12;
