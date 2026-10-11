@@ -1,3 +1,7 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 // The handoff column of the Board's cut table ("family: object") as data, and the advice it earns.
 // The grammar (the twelve families) is taste/craft/transitions.md; the way to choose is skills/vawe-transitions/SKILL.md.
 // Pure: Board rows and measured transitions in, advice lines out. Advice only: a board is a plan.
@@ -26,13 +30,47 @@ const SHOWS = new Set(['flood', 'camera-through', 'container-transform', 'shared
 const PLAIN = /\b(cross-?fade|dissolve|fade)\b/i;
 const REASON = /\b(because|reason)\b/i;
 
-/** { id, name, object, text } of a handoff cell "family: object". `id` is null for an unknown family, `name` is '' for an empty cell. */
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const dashed = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const familyOf = (name) => FAMILIES.find(([, re]) => re.test(name.toLowerCase()))?.[0] ?? null;
+const linked = (cell) => [...cell.matchAll(/\[[^\]]*\]\(([^)]*?)([a-z0-9-]+)\.md\)/g)].map((m) => m[2]);
+
+/**
+ * Move slugs of the "change between shots" rows of the move index, each with its handoff family when
+ * the family table of taste/craft/transitions.md lists it ("moves to copy"), else the slug itself.
+ */
+export function transitionMoves(root = ROOT) {
+  const read = (...p) => fs.readFileSync(path.join(root, ...p), 'utf8');
+  const cells = (line) => line.split('|').slice(1, -1).map((c) => c.trim());
+  const listed = new Map();
+  for (const line of read('taste', 'craft', 'transitions.md').split('\n').filter((l) => l.startsWith('|'))) {
+    const c = cells(line);
+    const id = c.length >= 5 ? familyOf(c[0]) : null;
+    if (id) for (const slug of linked(c[4])) listed.set(slug, id);
+  }
+  const moves = new Map();
+  for (const line of read('prompts', 'moves', 'README.md').split('\n')) {
+    const c = line.startsWith('|') ? cells(line) : [];
+    if (c[0]?.startsWith('change between shots')) for (const slug of linked(c[1] ?? '')) moves.set(slug, listed.get(slug) ?? slug);
+  }
+  return moves;
+}
+
+let moveIndex;
+function moveFamily(name) {
+  const n = dashed(name);
+  if (!n) return null;
+  moveIndex ??= transitionMoves();
+  for (const [slug, id] of moveIndex) if (slug === n || slug.startsWith(`${n}-`)) return id;
+  return null;
+}
+
+/** { id, name, object, text } of a handoff cell "family: object". `family` may also be a move of the "change between shots" index ("iris" is iris-wipe). `id` is null for an unknown family, `name` is '' for an empty cell. */
 export function parseHandoff(cell) {
   const text = (cell ?? '').trim();
   const colon = text.indexOf(':');
   const name = (colon < 0 ? text : text.slice(0, colon)).trim();
-  const found = FAMILIES.find(([, re]) => re.test(name.toLowerCase()));
-  return { id: found ? found[0] : null, name, object: colon < 0 ? '' : text.slice(colon + 1).trim(), text };
+  return { id: familyOf(name) ?? moveFamily(name), name, object: colon < 0 ? '' : text.slice(colon + 1).trim(), text };
 }
 
 const label = (i) => `cut ${i + 1}`;

@@ -87,3 +87,12 @@ test('vawe check transitions: 4 crossfades fire, a varied board passes', () => {
   assert.match(bad.stdout, /plain fade or crossfade with no reason/);
   assert.doesNotMatch(run(VARIED).stdout, /\[transitions\]/);
 });
+
+test('a move of the change-between-shots index is accepted as a handoff name', () => {
+  assert.equal(parseHandoff('iris: focus moves plane to plane').id, 'iris-wipe');
+  assert.equal(parseHandoff('Iris wipe: the click').id, 'iris-wipe');
+  assert.equal(parseHandoff('direction wipe: x').id, 'shared-axis');
+  assert.equal(parseHandoff('zigzag: b').id, null);
+  assert.deepEqual(advice(['deliberate cut: a', 'iris: focus moves']), []);
+  assert.match(advice(['iris: a', 'iris wipe: b']).join('\n'), /both use iris-wipe/);
+});
