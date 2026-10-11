@@ -1,7 +1,7 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import { GROUPS, JOBS, LOOKS, MOVES, toCard } from "../../lib/moves";
+import { FEATURED, GROUPS, JOBS, LOOKS, MOVES, moveByName, toCard } from "../../lib/moves";
 import { jsonLdScript } from "../../lib/schema";
 import { movesItemListSchema } from "../../lib/schema-content";
 import { MovesGallery } from "./MovesGallery";
@@ -27,6 +27,7 @@ export default function Moves() {
           </p>
           <MovesGallery
             moves={MOVES.map(toCard)}
+            featured={FEATURED.map((n) => toCard(moveByName(n)!))}
             groups={GROUPS}
             looks={LOOKS}
             jobs={JOBS.map(({ id, label }) => ({ id, label }))}

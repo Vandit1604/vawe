@@ -35,10 +35,16 @@ function readIndex() {
   const groupOf = new Map();
   const shortUse = new Map();
   const jobs = new Map();
+  const featured = [];
   let section = null;
   for (const line of read(path.join(SRC, 'README.md')).split('\n')) {
     const h = line.match(/^## (.+)/);
     if (h) { section = h[1].trim(); continue; }
+    if (section === 'Featured') {
+      const name = line.match(/^\d+\. \[[^\]]+\]\(([a-z0-9-]+)\.md\)/)?.[1];
+      if (name) featured.push(name);
+      continue;
+    }
     if (!line.startsWith('|') || /^\|\s*-/.test(line)) continue;
     const cells = line.split('|').slice(1, -1).map((c) => c.trim());
     if (section === 'Pick by job') {
@@ -55,7 +61,7 @@ function readIndex() {
     groupOf.set(name, slug(section));
     shortUse.set(name, plain(cells[1]));
   }
-  return { groups, groupOf, shortUse, jobs: [...jobs].map(([label, moves]) => ({ id: slug(label), label, moves })) };
+  return { groups, groupOf, shortUse, featured, jobs: [...jobs].map(([label, moves]) => ({ id: slug(label), label, moves })) };
 }
 
 // ---- markdown: the small subset the move files use ------------------------------------------------
@@ -321,7 +327,7 @@ function writeIndex(moves, data) {
     page: `${SITE}/moves/${m.name}`,
     duration: m.duration,
   }));
-  fs.writeFileSync(INDEX, `${JSON.stringify({ site: SITE, groups: data.groups, looks: data.looks, jobs: data.jobs.map(({ id, label }) => ({ id, label })), moves: out }, null, 1)}\n`);
+  fs.writeFileSync(INDEX, `${JSON.stringify({ site: SITE, groups: data.groups, looks: data.looks, featured: data.featured, jobs: data.jobs.map(({ id, label }) => ({ id, label })), moves: out }, null, 1)}\n`);
 }
 
 function writeLlms(moves, data) {
@@ -371,7 +377,9 @@ for (const m of moves) {
 }
 
 const looks = [...new Set(moves.map((m) => m.look))].sort((a, b) => (a === DEFAULT_LOOK ? -1 : b === DEFAULT_LOOK ? 1 : a.localeCompare(b)));
-const data = { groups: index.groups, looks, jobs: index.jobs, moves };
+const unknown = index.featured.filter((n) => !moves.some((m) => m.name === n && m.clipHash));
+if (unknown.length) throw new Error(`Featured names a move with no doc or clip: ${unknown.join(', ')}`);
+const data = { groups: index.groups, looks, jobs: index.jobs, featured: index.featured, moves };
 fs.writeFileSync(DATA, `${JSON.stringify(data, null, 1)}\n`);
 writeIndex(moves, data);
 writeLlms(moves, data);

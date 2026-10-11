@@ -529,6 +529,13 @@
    ]
   }
  ],
+ "featured": [
+  "marquee-along-path",
+  "lens",
+  "counter-dive",
+  "ticker-takeover",
+  "shape-trace-morph"
+ ],
  "moves": [
   {
    "name": "mask-rise",

@@ -108,13 +108,50 @@ const Card = memo(function Card({
   );
 });
 
+// The bento above the grid: the first move large, the next four around it. It hides under a filter or
+// a search, which means the reader is looking for something specific.
+function Featured({ moves, groupText, reduced }: { moves: MoveCard[]; groupText: Map<string, string>; reduced: boolean }) {
+  return (
+    <section className="mv-feat" aria-labelledby="mv-feat-h">
+      <h2 className="meta mv-feat-h" id="mv-feat-h">Featured</h2>
+      <ul className="mv-bento">
+        {moves.map((m, i) => {
+          const files = clip(m);
+          return (
+            <li key={m.name} className="mv-card panel" data-hero={i === 0 || undefined}>
+              <div className="mv-media">
+                <img src={i === 0 ? files.posterHd : files.poster} alt={moveAlt(m)} width={i === 0 ? 1280 : 640} height={i === 0 ? 720 : 360} decoding="async" fetchPriority={i === 0 ? "high" : "auto"} />
+                {reduced ? null : (
+                  <video muted loop playsInline autoPlay aria-hidden="true" onPlaying={(e) => e.currentTarget.setAttribute("data-on", "")}>
+                    {i === 0 ? null : <source src={files.webm} type="video/webm" />}
+                    <source src={files.mp4} type="video/mp4" />
+                  </video>
+                )}
+              </div>
+              <div className="mv-cap">
+                <h3 className="mv-title">
+                  <Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link>
+                </h3>
+                {i === 0 ? <p className="mv-use">{m.use}</p> : null}
+                <p className="meta mv-meta">{groupText.get(m.group ?? "") ?? ""}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function MovesGallery({
   moves,
+  featured,
   groups,
   looks,
   jobs,
 }: {
   moves: MoveCard[];
+  featured: MoveCard[];
   groups: Facet[];
   looks: string[];
   jobs: Facet[];
@@ -199,6 +236,7 @@ export function MovesGallery({
 
   return (
     <>
+      {active || !featured.length ? null : <Featured moves={featured} groupText={groupText} reduced={reduced} />}
       <div className="mv-top" role="search">
         <label className="mv-find">
           <span className="sr-only">Search moves by name or when line</span>

@@ -34,6 +34,7 @@ export const MOVES = data.moves as Move[];
 export const GROUPS = data.groups as Facet[];
 export const LOOKS = data.looks as string[];
 export const JOBS = data.jobs as Job[];
+export const FEATURED = data.featured as string[];
 
 export const moveByName = (name: string) => MOVES.find((m) => m.name === name) ?? null;
 export const groupLabel = (id: string | null) => GROUPS.find((g) => g.id === id)?.label ?? "";

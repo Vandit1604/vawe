@@ -42,6 +42,13 @@
   "swiss",
   "terminal"
  ],
+ "featured": [
+  "marquee-along-path",
+  "lens",
+  "counter-dive",
+  "ticker-takeover",
+  "shape-trace-morph"
+ ],
  "jobs": [
   {
    "id": "open-on-a-detail-answer-with-the-whole",

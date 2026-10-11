@@ -24,6 +24,17 @@ Every curve is an `EASE` name (`EASE.land` for an entrance, `EASE.launch` for an
 A move earns its place with a real reference, an approved clip and a clear use; a clip that is not approved, or a use another move covers better, goes out.
 This index lists the built moves, in seven groups.
 
+## Featured
+
+The five moves the gallery shows first, in order; the first is the large one. Chosen from a blind score of every clip
+(three reviewers, the median; 8 or more only), at most two per group, then by the owner.
+
+1. [Marquee along path](marquee-along-path.md): a row of tiles rides one curve at an even gap for a whole beat
+2. [Lens](lens.md): a screen filmed as a real object, with tilt, depth, bloom and an LED grid
+3. [Counter dive](counter-dive.md): the camera enters a title through the hole of an "o"
+4. [Ticker takeover](ticker-takeover.md): the real answer crashes in and shoves a cycling line off the frame
+5. [Shape trace morph](shape-trace-morph.md): a traced outline morphs into the brand mark on one pop
+
 ## Pick by job
 
 One row per job, best move first. Every built move is in this table.
