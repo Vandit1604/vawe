@@ -78,6 +78,17 @@ Code the next agent can read once and change safely. The code-quality hook
   (`PAGE_ARGS`). A second copy is a fork, and forks drift.
 - **Comments only for facts the code cannot show:** a limit, a measured number, an outside quirk.
 
+## Landing a change
+
+`bin/vawe land` is the one way to put a worktree branch on main. Commit everything first, then run it. It runs these steps and stops at the first that fails, with `land: FAILED at <step>: <reason>` and a non-zero exit:
+
+1. `git fetch`, then `git rebase origin/main`. On a conflict it names the files, aborts the rebase and leaves the branch as it was; it never goes on half rebased.
+2. A scan of every commit in the range: a file over 5 MB (even one a later commit deletes) is refused by name.
+3. `tests/lib` and `tests/hooks`.
+4. `git push origin HEAD:main` with an ssh keep-alive (the pre-push e2e is slow enough to drop an idle connection). It prints the pre-push e2e line, then the pushed range.
+
+If main moved during the push, run `bin/vawe land` again. Do not use `--no-verify`.
+
 ## A bug is closed when a check catches it
 
 The check is the record, not a log entry. Close a bug with a check that catches it (a render

@@ -182,6 +182,14 @@ export const VERBS = [
     next: (v, [film]) => `bin/vawe ship --status ${film} for a final, or ${WAIT_WORK}`,
   },
   {
+    name: 'land', summary: 'put the current branch on main: fetch, rebase onto origin/main (stops on a conflict), scan for files over 5 MB, run tests/lib and tests/hooks, push with ssh keep-alive, print the e2e line and the pushed range',
+    positional: [],
+    flags: [],
+    example: 'vawe land   (from a worktree branch with every change committed)',
+    build: () => [{ script: 'harness/dev/land.mjs', args: [] }],
+    next: () => 'delete the merged branch and its worktree (git branch -d <topic>)',
+  },
+  {
     name: 'approve', summary: 'the owner approves the full draft of the current page; vawe ship needs it. A film session never runs this',
     positional: [PAGE],
     flags: [],
