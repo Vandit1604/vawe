@@ -32,9 +32,9 @@ second question does: is this the film a hundred other attempts would land on?
 
 ## Gates
 
-- Estimate for each concept the chance that a model given this brief with no guidance would produce it
-  first. At least two must sit below 0.10, or the set is not diverse: resample, push on paths 4 and 5.
-  This is a constraint on your own generation, never a claim of measured fact.
+- Run the method in `guides/IDEATE.md` for the concept: write the meaning, give each concept a device
+  and a typicality number, and write four of them as the `film` row of the brief's `## Ideas` table. At
+  least two concepts must sit below 0.10, or the set is not diverse: resample, push on paths 4 and 5.
 - Sketch each concept as rough boxes (hero mass, type, how full the frame is). Two concepts with one
   silhouette are one concept. Replace one.
 

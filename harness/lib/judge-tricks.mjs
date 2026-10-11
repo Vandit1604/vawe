@@ -12,7 +12,11 @@ export const TRICKS = [
   { id: 'moved-spectacle', look: 'a spectacle second set on a moment that is not the film\'s strongest move, or with no quiet before it', axes: ['motion', 'hook'] },
   { id: 'formula-motion', look: 'the same dip, nudge or overshoot applied to every element on a formula, so no arrival is chosen', axes: ['motion'] },
   { id: 'uniform-gain', look: 'every cue shifted by the same gain so the level passes while the balance of the cues is unchanged (final stage)', axes: ['sound'] },
+  { id: 'reworded-ideas', look: 'the brief\'s Ideas table lists four ideas per beat that are one idea reworded under four device labels, so the pick was never chosen from a spread', axes: ['expensive', 'scenes'] },
+  { id: 'unkept-idea', look: 'a beat whose chosen idea in the brief\'s Ideas table is not on the frames (no shared element, no object, no change of state), only in the plan text', axes: ['expensive', 'scenes'] },
 ];
+
+export const IDEAS_QUESTION = 'Ideas. If the brief has an Ideas table, name the idea you see in each beat and each cut. Does the frame show the chosen idea (the shared element, the object), or only the plan text? A chosen idea you cannot see is a fix on "expensive" at that second, and the trick unkept-idea.';
 
 const OWNER_RULES = [
   'The film\'s DESIGN.md and brief are the owner\'s decisions for this film. Judge whether the film follows its own DESIGN.md, never a house style.',
@@ -26,6 +30,8 @@ export function tricksPrompt({ stage }) {
   if (stage === 'stills') return owner;
   const list = TRICKS.map((t) => `- ${t.id}: ${t.look} (games: ${t.axes.join(', ')})`).join('\n');
   return `${owner}
+
+${IDEAS_QUESTION}
 
 Known tricks. Look for each one. Name a trick only with the second you saw it at and what you saw there; a trick named with no second does not count, and neither does a guess from the page's code. A trick you cite caps the axes it games at 7. If you see none, return "tricks":[].
 ${list}`;

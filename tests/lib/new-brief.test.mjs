@@ -225,6 +225,15 @@ test('plain questions and --questions-json ask the same details', () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('the brief carries an Ideas ledger between the States and the Board, read as not yet filled', async () => {
+  const { text } = briefFor('beat-sheet.md', { request: 'a 20 s launch film for Loomline, an invented app', length: 20 });
+  const found = headings(text);
+  assert.ok(found.indexOf('Ideas') > found.indexOf('States') && found.indexOf('Ideas') < found.indexOf('Board'));
+  const { ideasFilled } = await import('../../harness/lib/ideas.mjs');
+  assert.equal(ideasFilled(text), false);
+  assert.match(text, /guides\/IDEATE\.md/);
+});
+
 test('the brief carries the strip study, the Board (rhythm, spectacle, cuts, sound) after the states, and the motion pass', () => {
   const { text } = briefFor('beat-sheet.md', { request: 'a 20 s launch film for Loomline, an invented app', length: 20 });
   const found = headings(text);

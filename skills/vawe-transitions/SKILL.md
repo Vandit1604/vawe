@@ -1,6 +1,6 @@
 ---
 name: vawe-transitions
-description: "Plan the handoff at every cut of a vawe film so the transitions are continuous, varied and chosen, not defaulted: name what carries over, list 4 ideas from 3 families, pick the less typical, keep a ledger, and set up the execution. Load at stage 5, when you fill the Board's handoff column."
+description: "Plan the handoff at every cut of a vawe film so the transitions are continuous, varied and chosen, not defaulted: name what carries over, run the idea method (guides/IDEATE.md) with the twelve families as devices, keep a ledger, and set up the execution. Load at stage 5, when you fill the Board's handoff column."
 effort: medium
 ---
 
@@ -17,9 +17,10 @@ Run it for every cut of the Board's cut table, then write the result in its `han
 1. **What changes, what carries over.** One line: place, state, scale, time, a reveal or a payoff changes. Name the handoff object: the one thing that leaves
    A and starts B, with its screen position, scale, direction and speed on both sides. If nothing carries over, the family is `deliberate cut`
    and you write why (on a beat, for shock, a tonal flip).
-2. **List at least 4 ideas from at least 3 families.** One line each: the object, its anchor, direction, speed. Do not stop at the first good one.
-3. **Rate how typical each is**: how likely a typical model writes it for this cut (high, medium, low). Pick from the low and medium half unless the story needs the plain
-   one, and write one sentence why. A pick that fits any similar film is a default.
+2. **Run `guides/IDEATE.md` for the cut.** Write the cut's row in the brief's `## Ideas` table: the meaning, 4 ideas with 4 different devices, a typicality number
+   for each, the pick and why. The twelve families below are the device list for a cut: each idea names one family and the object, its anchor, direction and speed.
+   The method owns the 4 ideas and the typicality; this file does not repeat it.
+3. **Write the pick in the handoff cell.** The chosen idea's family and object go in the Board's `handoff (family: object)` column. A pick that fits any similar film is a default.
 4. **Check the ledger** (the Board's second table, filled from the handoff column):
    - no family on two adjacent cuts;
    - no family more than twice per film (a `deliberate cut` is exempt: hard cuts are most seams, rule `hard-cut-default`);

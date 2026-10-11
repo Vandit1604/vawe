@@ -296,6 +296,14 @@ const statesText = () => `## States
 
 Phase 4: one static key frame per world, built from the kit, before any motion. Budget: the reference frames show a median of 1 text line, 1 word and 2 objects. A state shows about 1 line and 2 or 3 things; layout: taste/craft/layout.md. Its ground is never flat: one light, grain or depth device per film, named from a Taken from frame, and the ground changes at each world turn.`;
 
+const ideasText = () => `## Ideas
+
+Phase 5, first part: after the states and before the Board. One row per beat (the world id) and per cut (\`s1 to s2\`), plus one for the film (\`film\`) and one for the hero motion moment. Method: guides/IDEATE.md. Write the plain meaning, then 4 ideas from 4 different devices (metaphor, transformation, show the invisible, scale shift, personification, literalise, part for whole, reversal, collision, literal), each as \`device: the idea, typicality\` with typicality 0 to 1 (how likely a model with no guidance writes it first). Take every idea from the subject's own world. Chosen is the idea number. Pick one that is not the most typical, and write "because ..." in why. Build the pick: the frames must show it.
+
+| at | meaning | idea 1 (device: idea, typicality) | idea 2 | idea 3 | idea 4 | chosen (1 to 4) | why |
+|---|---|---|---|---|---|---|---|
+| [s1] | [what the beat says, one sentence] | [device: idea, 0.0] | [device: idea, 0.0] | [device: idea, 0.0] | [device: idea, 0.0] | [n] | [because ...] |`;
+
 const boardText = () => `## Board
 
 Phase 5, after the states and before any motion. The board is a plan for time: rhythm, spectacle, transitions, sound. It is not a list of frames. Name each move from prompts/moves (\`prompts/moves/README.md\`), never "fade" by default. Replace every bracket.
@@ -334,7 +342,7 @@ Phase 7, after the first draft. Done when \`bin/vawe dev\` shows overshoot-share
 |---|---|---|---|---|---|---|---|---|---|---|
 | [s1 to s2] | [ok] | [ok] | [ok] | [ok] | [ok] | [ok] | [ok] | [ok] | [the strip showed] | [the change, or the reason it stays] |`;
 
-const SKELETON = [['task', 'Task'], ['taken'], ['directions'], ['signature'], ['look', 'Look'], ['system'], ['states'], ['board'], ['motion'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
+const SKELETON = [['task', 'Task'], ['taken'], ['directions'], ['signature'], ['look', 'Look'], ['system'], ['states'], ['ideas'], ['board'], ['motion'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
 
 const heading = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
 
@@ -344,7 +352,7 @@ function briefText(name, templateRel, questions, sections, answers, measured, re
     ? lines.join('\n')
     : '- the template has no question bank: write the promise, the moments and the platform';
   const own = Object.fromEntries(sections.map((s) => [s.name, s.body.replaceAll('<name>', name)]));
-  const fixed = { taken: takenFromText(), directions: directionsText(name), signature: signatureSection(undefined, variety), system: systemText(name), states: statesText(), board: boardText(), motion: motionText() };
+  const fixed = { taken: takenFromText(), directions: directionsText(name), signature: signatureSection(undefined, variety), system: systemText(name), states: statesText(), ideas: ideasText(), board: boardText(), motion: motionText() };
   const skeleton = SKELETON.filter(([key]) => fixed[key] || measured.sections[key]).map(([key, title]) => (
     fixed[key] ?? `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
   const rest = sections.filter((s) => !SKELETON.some(([key]) => key === s.name))

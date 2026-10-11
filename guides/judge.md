@@ -49,9 +49,11 @@ text is `FRESH_AXES` in `quality/gates/rubric.mjs`. Keep this table and that tex
 The rubric lists the tricks that turn a check green without improving the film (`TRICKS` in
 `harness/lib/judge-tricks.mjs`): camera drift through a hold, a drifting ground, a grain or faint
 gradient laid over a flat ground, a drone bed, hidden or faint copy, padded or split worlds, a moved
-spectacle, motion on a formula, and a uniform gain shift. The judge names a trick only with the second
+spectacle, motion on a formula, a uniform gain shift, reworded ideas and an unkept idea. The judge names a trick only with the second
 it saw it at and what it saw there; an entry with no second is dropped. A cited trick caps the axes it
 games at 7, and the report prints it as `trick <id> at <s> s: <evidence>`.
+
+The brief's `## Ideas` table (`guides/IDEATE.md`) adds one question for each beat and cut: name the idea on screen, and say whether the frame shows the chosen idea (the shared element, the object) or only the plan text. A planned idea that no frame shows is a finding (trick `unkept-idea`). The ledger checks read only the plan, so the judge also looks for the known trick `reworded-ideas`: four ideas with four device labels that are one thought.
 
 The judge respects the film's own `DESIGN.md` and the owner decisions: it asks for no house face
 (no forced Anybody), no bigger elements to reach a number, no camera push as a reward or a fix, and no

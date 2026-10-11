@@ -186,3 +186,15 @@ test('after a draft the next step follows what is done: strips under any out/str
   assert.equal(s.stage, 'ship');
   assert.equal(s.next, SAY.ship('f', 'films/f/page.html'));
 });
+
+test('an empty Ideas ledger is named before the Board; a filled one moves on', () => {
+  const { root, page } = film('<meta name="spectacle" content="3"><p>x</p>');
+  const brief = path.join(root, 'films', 'f', 'brief.md');
+  const head = '## Ideas\n\n| at | meaning | i1 | i2 | i3 | i4 | chosen | why |\n|---|---|---|---|---|---|---|---|\n';
+  fs.writeFileSync(brief, `${head}| [s1] | [m] | [a] | [b] | [c] | [d] | [n] | [because] |\n\n## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n`);
+  const s = nextStep(page, root);
+  assert.equal(s.stage, 'ideas');
+  assert.match(s.next, /guides\/IDEATE\.md/);
+  fs.writeFileSync(brief, `${head}| s1 | m | a: x, 0.1 | b: y, 0.2 | c: z, 0.3 | d: w, 0.4 | 1 | because |\n\n## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n`);
+  assert.equal(nextStep(page, root).stage, 'board');
+});

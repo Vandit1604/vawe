@@ -72,6 +72,7 @@ import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
 import { boardChecks, boardFilled, spectacleOf, lockedSpectacle, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
+import { ideasAdvice } from '../lib/ideas.mjs';
 import { slideshowTells, slideshowLines } from '../lib/slideshow.mjs';
 import { worldRows } from '../lib/timeline.mjs';
 import { moveDocLines } from '../lib/move-docs.mjs';
@@ -977,7 +978,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
     text: textProblems(probe.samples, { ...probe, rules: rulesWith(readDecls(pagePath), RULES) }),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
     lines: [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
-      ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...(isWaived(authoring, 'transitions') || boardFilled(brief ?? '') !== true ? [] : handoffAdvice(moveRows(brief)).flatMap((l) => [l, waiverHint('transitions')])), ...moveDocLines(brief),
+      ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...(isWaived(authoring, 'transitions') || boardFilled(brief ?? '') !== true ? [] : handoffAdvice(moveRows(brief)).flatMap((l) => [l, waiverHint('transitions')])), ...ideasAdvice(brief, authoring), ...moveDocLines(brief),
       ...beatLines(pagePath, probe.worlds, authoring),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };

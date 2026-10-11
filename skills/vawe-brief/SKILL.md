@@ -30,6 +30,8 @@ bin/vawe new <name> --request "<the ask>" --answers <file>
 If the person answers "you decide", or no person is there (hill-climb, CI), run `bin/vawe new` with
 `--defaults` instead: it guesses each open detail and names which.
 
+When the request is thin, add one more call before the answers file: offer 2 or 3 ideas for the key beat as one AskUserQuestion question (each idea is an option with its device and a one-line description, the least typical one marked Recommended). Make the ideas with `guides/IDEATE.md`; the pick goes in the film's `film` row of the brief's `## Ideas` table.
+
 ## 1. Pick the template
 
 `guides/ROUTING.md` maps the request to a film type and a `prompts/<t>.md`. Two

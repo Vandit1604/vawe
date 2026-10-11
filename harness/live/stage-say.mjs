@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { verbRanSince } from '../lib/verb-log.mjs';
 import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
+import { ideasFilled } from '../lib/ideas.mjs';
 
 export { boardFilled };
 
@@ -67,7 +68,8 @@ export const SAY = {
   skills: (name, rungs) => `add to films/${name}/DESIGN.md one line per rung (${rungs.join(', ')}): "Skill <rung>: <slug>: what it decided", or "Skipped <rung>: <reason>"; list the skills with command npx -y ui-skills list`,
   states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet (layout: taste/craft/layout.md), then bin/vawe frames ${rel}; ask: where is the eye in each frame, and what does it see first?`,
   frames: (name, rel) => `bin/vawe frames ${rel}`,
-  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut and its handoff (load skills/vawe-transitions/SKILL.md: 4 ideas from 3 families per cut, the less typical pick, the ledger; families: taste/craft/transitions.md; feeling: taste/craft/selection.md), sound (effects on actions, a real recording first, no bed: taste/craft/sound.md); ask: what carries the eye across each cut, what is the rhythm, where is the one big moment, what sound sits on each action?`,
+  ideas: (name) => `fill "Ideas" in films/${name}/brief.md (guides/IDEATE.md): for each beat and each cut write the meaning, 4 ideas from 4 different devices with a typicality number, and pick one that is not the most typical, with a reason; ask: what would a typical film do here, and what in this subject's own world does the same job?`,
+  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut and its handoff (load skills/vawe-transitions/SKILL.md: the cut's row in the Ideas ledger (guides/IDEATE.md), the less typical pick, the ledger; families: taste/craft/transitions.md; feeling: taste/craft/selection.md), sound (effects on actions, a real recording first, no bed: taste/craft/sound.md); ask: what carries the eye across each cut, what is the rhythm, where is the one big moment, what sound sits on each action?`,
   dev: (name, rel) => `bin/vawe dev ${rel}`,
   motion: (name, rel) => `bin/vawe strip ${rel} --cuts and Read every cut at full size; for the spectacle second also bin/vawe onion ${rel} --at <s> and bin/vawe velocity ${rel} --at <s>; check each cut against taste/craft/motion-craft.md and the principles in core/motion/README.md: anticipation on the hero, follow-through and overlap, eased spacing, arcs on travelling elements, secondary action, exits faster than entrances, holds alive through element motion, camera still unless the spectacle; fix what reads flat`,
   motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: each principle checked, what read flat, what you fixed`,
@@ -122,6 +124,9 @@ export function nextStep(page, root = process.cwd()) {
     return { name, stage: 'states', next: SAY.states(name, rel), why: 'DESIGN.md is newer than the page; the states come before the frames and the motion' };
   }
   if (early && hasWorlds(page)) return { name, stage: 'states', next: SAY.frames(name, rel), why: 'the frames come before the motion' };
+  if (!draft && !final && ideasFilled(brief) === false) {
+    return { name, stage: 'ideas', next: SAY.ideas(name), why: 'the Ideas ledger is empty; the ideas come before the board, so each cut carries a chosen idea' };
+  }
   if (!draft && !final && boardFilled(brief) === false) {
     return { name, stage: 'board', next: SAY.board(name), why: 'the board is a plan for time and comes after the states, before the motion' };
   }

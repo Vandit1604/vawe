@@ -41,6 +41,8 @@ fidelity, asset fidelity, produced-not-generated, value), 1 to 10. Threshold 7 o
 runs, A and B, before a beat closes; one judge is an opinion: `bin/vawe judge <page> --struct --runs A,B`. A
 PASS is never self-recorded.
 
+Name the idea in each beat and each cut: read the brief's `## Ideas` table (`guides/IDEATE.md`) and look at the frames. Does the frame show the chosen idea (the shared element, the object), or only the plan text? An idea planned in the ledger and absent in the frames is a finding, with the second and the fix. Also name an Ideas row whose four ideas are one idea reworded.
+
 Name every default you recognise; each is a rejection: a particle burst, a bouncy spring, a glow, a
 logo slam, a gradient on chrome, a centred title on a gradient, everything fading in, corner labels,
 a crossfade where a cut belongs, fake UI, dead time that no `authoring` waiver declares.

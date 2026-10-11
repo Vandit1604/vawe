@@ -21,7 +21,7 @@ export function boardFilled(brief) {
 }
 
 // The answer rows of the table whose header row starts with `head` (a first-cell label), as arrays of cells.
-function rowsOf(section, head) {
+export function rowsOf(section, head) {
   const lines = section.split('\n');
   const at = lines.findIndex((l) => l.startsWith('|') && cellsOf(l)[0] === head);
   if (at < 0) return [];
