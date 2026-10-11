@@ -23,12 +23,13 @@ before(async () => {
 });
 after(async () => { await browser?.close(); server?.close(); });
 
-async function shoot(cfg, { only, t = 0.3, scale = 1, draws = 1, probe = [] } = {}) {
+async function shoot(cfg, { only, src, t = 0.3, scale = 1, draws = 1, probe = [] } = {}) {
   const page = await browser.newPage();
   try {
     await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
     const q = new URLSearchParams({ cfg: JSON.stringify(cfg), scale: String(scale) });
     if (only) q.set('only', only);
+    if (src) q.set('src', src);
     await page.goto(`http://127.0.0.1:${server.port}/tests/fixtures/pages/lens.html?${q}`, { waitUntil: 'load' });
     const b64 = await page.evaluate(async (tt, n) => {
       for (let i = 0; i < n; i++) for (const fn of window.__vaweFrameHooks) await fn(tt);
@@ -264,4 +265,34 @@ test('render-page: the lens fixture renders identically twice, in a draft and a 
       assert.deepEqual(a, b, `${mode.length ? 'final' : 'draft'}: two renders differ`);
     }
   } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+const stripeEnergy = (img, x0) => mean(Array.from({ length: 400 * 200 }, (_, i) => { const x = x0 + (i % 400), y = 440 + Math.floor(i / 400); return Math.abs(luma(img.px(x + 1, y)) - luma(img.px(x, y))); }));
+
+test('depth of field from a depth canvas: only the half away from the focus depth blurs, and the reverse', async (t) => {
+  const kept = async (focus) => {
+    const sharp = await shoot({ dof: { blur: 0, soft: 0, focus } }, { src: 'depth' });
+    const soft = await shoot({ dof: { blur: 0.9, soft: 0, focus } }, { src: 'depth' });
+    return { near: stripeEnergy(soft, 300) / stripeEnergy(sharp, 300), far: stripeEnergy(soft, 1300) / stripeEnergy(sharp, 1300) };
+  };
+  const nearFocus = await kept(0.2);
+  const farFocus = await kept(0.8);
+  t.diagnostic(`stripe contrast kept, focus near: near ${nearFocus.near.toFixed(2)} far ${nearFocus.far.toFixed(2)}; focus far: near ${farFocus.near.toFixed(2)} far ${farFocus.far.toFixed(2)}`);
+  assert.ok(nearFocus.near > 0.85 && nearFocus.far < 0.3, `focus near: ${JSON.stringify(nearFocus)}`);
+  assert.ok(farFocus.far > 0.85 && farFocus.near < 0.3, `focus far: ${JSON.stringify(farFocus)}`);
+});
+
+test('depth of field from a depth canvas: a focus point reads its depth', async () => {
+  const sharp = await shoot({ dof: { blur: 0, soft: 0 } }, { src: 'depth' });
+  const soft = await shoot({ dof: { blur: 0.9, soft: 0, focus: [300, 540] } }, { src: 'depth' });
+  assert.ok(stripeEnergy(soft, 300) / stripeEnergy(sharp, 300) > 0.85, 'the near half holds the focus point');
+  assert.ok(stripeEnergy(soft, 1300) / stripeEnergy(sharp, 1300) < 0.3, 'the far half blurs');
+});
+
+test('depth of field without a depth input is the plane path: the source has no depth upload', async () => {
+  const page = await browser.newPage();
+  try {
+    await page.goto(`http://127.0.0.1:${server.port}/tests/fixtures/pages/lens.html?src=canvas`, { waitUntil: 'load' });
+    assert.equal(await page.evaluate(() => typeof window.__lens.source.uploadDepth), 'undefined');
+  } finally { await page.close(); }
 });

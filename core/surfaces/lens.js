@@ -152,10 +152,15 @@ float hash(vec3 p) {
 }
 `;
 
-const SCENE = `${HEAD}
+const SCENE_BODY = `
 uniform sampler2D u_tex;   // the source, sRGB8: sampled in linear light
 uniform vec2 u_res, u_src, u_aim;
 uniform float u_texScale, u_zoom, u_focal, u_zf, u_edge;
+#ifdef DEPTH
+uniform sampler2D u_depthTex;  // linear depth 0..1 in red, linear filtering, no mips
+uniform float u_focusDepth;  // < 0: the focus depth is read at u_focusPt
+uniform vec2 u_focusPt;
+#endif
 uniform vec3 u_eu, u_ev, u_n, u_outside;
 uniform float u_cocK, u_cocMax, u_bokeh, u_soft, u_blades, u_rot, u_round, u_cat;
 uniform int u_taps;
@@ -187,6 +192,10 @@ vec3 samp(vec2 q, float lod) {
   float inside = mix(step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0), 1.0, u_edge);
   return textureLod(u_tex, uv, lod).rgb * inside;
 }
+
+#ifdef DEPTH
+float depthAt(vec2 q) { return textureLod(u_depthTex, clamp(q / u_src, 0.0, 1.0), 0.0).r; }
+#endif
 
 // Distance to a rounded box: negative inside.
 float rbox(vec2 p, vec2 hb, float r) { vec2 q = abs(p) - hb + r; return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r; }
@@ -239,7 +248,13 @@ void main() {
   float logPerPx = u_src.y / (u_zoom * u_res.y) * z;
   float lod0 = max(0.0, log2(logPerPx * u_texScale));
 
+#ifdef DEPTH
+  float dCenter = depthAt(base);
+  float dFocus = u_focusDepth >= 0.0 ? u_focusDepth : depthAt(u_focusPt);
+  float coc = max(clamp(u_cocK * abs(dCenter - dFocus), 0.0, u_cocMax), u_soft);
+#else
   float coc = max(clamp(u_cocK * abs(1.0 - u_zf / z), 0.0, u_cocMax), u_soft);
+#endif
   float rLog = max(coc, 0.7) * logPerPx;
   int taps = coc < 0.7 ? 3 : min(u_taps, max(8, int(coc * 2.0)));
   float lodT = max(lod0, log2(max(1.0, rLog * sqrt(3.14159 / float(taps)) * u_texScale)) - 1.0);
@@ -260,6 +275,11 @@ void main() {
     vec2 q = base + off;
     vec3 g = samp(q, lodT);
     float w = (1.0 + u_bokeh * pow(dot(g, LUMA), 2.0)) * R * R;
+#ifdef DEPTH
+    float dT = depthAt(q);
+    float reach = clamp(u_cocK * abs(dT - dFocus), 0.0, u_cocMax) - length(off) / logPerPx + 1.0;
+    w *= dT > dCenter ? 1.0 : max(clamp(reach, 0.0, 1.0), 1e-3);
+#endif
     accG += g * w;
     if (u_ca > 0.0) { accR += samp(q + ca, lodT) * w; accB += samp(q - ca, lodT) * w; }
     wsum += w;
@@ -276,6 +296,8 @@ void main() {
   float beyond = (1.0 - step(0.0, base.x) * step(0.0, base.y) * step(base.x, u_src.x) * step(base.y, u_src.y)) * (1.0 - u_edge);
   o = vec4(mix(col, toLinear(u_outside), beyond), 1.0);
 }`;
+
+const sceneShader = (depth) => `${HEAD}${depth ? '#define DEPTH\n' : ''}${SCENE_BODY}`;
 
 const DOWN = `${HEAD}
 uniform sampler2D u_in;
@@ -382,6 +404,9 @@ function bloomWeights(radiusPx) {
 
 function createRig(gl, canvas) {
   const hdr = !!(gl.getExtension('EXT_color_buffer_float') || gl.getExtension('EXT_color_buffer_half_float'));
+  const depthTex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, depthTex);
+  for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
   const srcTex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, srcTex);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
@@ -393,8 +418,8 @@ function createRig(gl, canvas) {
     return { down, up: down.map((d) => target(gl, d.w, d.h, hdr)) };
   };
   return {
-    gl, canvas, srcTex, chain, bloom: chain(), halo: null,
-    programs: { scene: program(gl, SCENE), down: program(gl, DOWN), up: program(gl, UP), final: program(gl, FINAL) },
+    gl, canvas, srcTex, depthTex, chain, bloom: chain(), halo: null,
+    programs: { scene: program(gl, sceneShader(false)), sceneDepth: null, down: program(gl, DOWN), up: program(gl, UP), final: program(gl, FINAL) },
     sceneT: target(gl, canvas.width, canvas.height, hdr),
     pxs: canvas.height / innerHeight,
   };
@@ -427,12 +452,14 @@ function setDepthOfField(gl, prog, p, rig) {
   gl.uniform1i(prog.loc('u_taps'), Math.min(64, p.dof.taps | 0));
 }
 
-function scenePass(rig, p, t, src, tex) {
+const DEPTH_UNIT = 3;
+
+function scenePass(rig, p, t, src, tex, hasDepth) {
   const { gl, pxs } = rig;
   const { eu, ev, n } = basis(p);
   const aim = aimOf(p, src);
-  const focus = p.dof.focus || aim;
-  const prog = rig.programs.scene;
+  const focus = Array.isArray(p.dof.focus) ? p.dof.focus : aim;
+  const prog = hasDepth ? (rig.programs.sceneDepth ??= program(gl, sceneShader(true))) : rig.programs.scene;
   begin(rig, prog, rig.sceneT);
   bind(gl, 0, rig.srcTex);
   const u1 = (name, v) => gl.uniform1f(prog.loc(name), v);
@@ -445,6 +472,12 @@ function scenePass(rig, p, t, src, tex) {
   u1('u_edge', p.edge === 'extend' ? 1 : 0);
   gl.uniform3fv(prog.loc('u_eu'), eu); gl.uniform3fv(prog.loc('u_ev'), ev); gl.uniform3fv(prog.loc('u_n'), n);
   gl.uniform3fv(prog.loc('u_outside'), p.outside);
+  if (hasDepth) {
+    bind(gl, DEPTH_UNIT, rig.depthTex);
+    gl.uniform1i(prog.loc('u_depthTex'), DEPTH_UNIT);
+    u1('u_focusDepth', typeof p.dof.focus === 'number' ? p.dof.focus : -1);
+    gl.uniform2f(prog.loc('u_focusPt'), focus[0], focus[1]);
+  }
   setDepthOfField(gl, prog, p, rig);
   setPalette(gl, prog, p);
   const layout = p.grid.layout in LAYOUTS ? p.grid.layout : 'stripe';
@@ -519,7 +552,12 @@ export function lens(source, options = {}) {
     const p = params(t);
     bind(gl, 0, rig.srcTex);
     const tex = await source.upload(gl);
-    scenePass(rig, p, t, source.size, tex);
+    const hasDepth = typeof source.uploadDepth === 'function';
+    if (hasDepth) {
+      bind(gl, DEPTH_UNIT, rig.depthTex);
+      await source.uploadDepth(gl);
+    }
+    scenePass(rig, p, t, source.size, tex, hasDepth);
     if (p.bloom.strength > 0) blurChain(rig, rig.bloom, p.bloom);
     if (p.halation.strength > 0) blurChain(rig, rig.halo ??= rig.chain(), p.halation);
     finalPass(rig, p, t);

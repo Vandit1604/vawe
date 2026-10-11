@@ -40,7 +40,25 @@ function drawnScreen() {
   g.font = '800 130px Anybody, sans-serif'; g.fillText('LENS 0123', 120, 160);
   return c;
 }
-const source = q.get('src') === 'canvas' ? canvasSource(drawnScreen()) : htmlSource(document.getElementById('screen'), { scale: Number(q.get('scale') || 1) });
+function stripes() {
+  const c = document.createElement('canvas');
+  c.width = 1920; c.height = 1080;
+  const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 1920, 1080);
+  g.fillStyle = '#fff';
+  for (let x = 0; x < 1920; x += 10) g.fillRect(x, 0, 5, 1080);
+  return c;
+}
+function halves() {
+  const c = document.createElement('canvas');
+  c.width = 1920; c.height = 1080;
+  const g = c.getContext('2d');
+  g.fillStyle = 'rgb(51,51,51)'; g.fillRect(0, 0, 960, 1080);
+  g.fillStyle = 'rgb(204,204,204)'; g.fillRect(960, 0, 960, 1080);
+  return c;
+}
+const source = q.get('src') === 'depth' ? canvasSource(stripes(), { depth: halves() })
+  : q.get('src') === 'canvas' ? canvasSource(drawnScreen()) : htmlSource(document.getElementById('screen'), { scale: Number(q.get('scale') || 1) });
 const cam = lens(source, cfg ? merge(OFF, cfg) : moving);
 window.__lens = cam;
 vawe.onFrame((t) => cam.draw(t));

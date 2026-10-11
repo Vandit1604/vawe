@@ -36,6 +36,7 @@ Sound: a short noise tick at each tear, and a low thud on a lock (aberration pea
 - `dof`: blur grows with the depth difference to `focus` (a source point: pass a function to follow a
   target). Bokeh takes the aperture's shape: `blades` (n-gon), `rotation`, `roundness`, and `catEye`
   squeezes it toward the frame edge. Bright pixels weigh more in the taps. `soft` is the lens floor.
+  A source with a `depth` input (below) blurs by each pixel's own depth instead of the tilted plane.
 - `palette`: brightness through 2 to 8 colour stops (`PALETTES.thermal phosphor amber navy paper mono cyanotype`).
   `keepColor` leaves saturated marks (a red lock box) in their own colour.
 - Light is linear from the first tap to the last pass. `grid` is a panel mask on the screen plane: a soft
@@ -62,6 +63,40 @@ The demo was measured against a reference, 1080p: bloom 90 to 10 percent width
 px or more (reference 20 to 28). At 1080p a frame costs about 17 ms on the GPU (12 ms in a draft), and a
 6 s final (360 frames) captures in about 20 s.
 
+## Depth of field for a 3D scene
+
+A tilted plane gives depth by geometry. A three.js scene has depth per pixel, so give the lens that depth:
+`canvasSource(color, { depth })`. `depth` is a canvas (or ImageBitmap, ImageData) holding linear depth in the red
+channel, 0 near to 1 far, or a function returning one, called on every draw. It may have another size than the
+colour canvas. The circle of confusion is `blur` x `|depth - focus|`, so `dof.focus` is a depth number (0 to 1; a
+function of t racks it) or a source point whose depth is read. `max`, `bokeh`, `blades`, `soft` keep their meaning.
+A sharp near object does not smear into the blurred far one; a blurred near object spreads over the far one.
+Without `depth` the plane path runs unchanged. Depth is 8 bit here: avoid a range wider than the scene needs.
+
+```js
+const color = Object.assign(document.createElement('canvas'), { width: 1920, height: 1080 });
+const depth = Object.assign(document.createElement('canvas'), { width: 1920, height: 1080 });
+const depthMat = new THREE.ShaderMaterial({   // linear view depth, not the nonlinear depth buffer
+  uniforms: { near: { value: camera.near }, far: { value: camera.far } },
+  vertexShader: 'varying float v; void main() { vec4 m = modelViewMatrix * vec4(position, 1.0); v = -m.z; gl_Position = projectionMatrix * m; }',
+  fragmentShader: 'uniform float near, far; varying float v; void main() { gl_FragColor = vec4(vec3(clamp((v - near) / (far - near), 0.0, 1.0)), 1.0); }',
+});
+function renderBoth(t) {
+  scene.background = beautyBackground; scene.overrideMaterial = null;
+  renderer.render(scene, camera);
+  color.getContext('2d').drawImage(renderer.domElement, 0, 0);
+  scene.background = new THREE.Color(1, 1, 1); scene.overrideMaterial = depthMat;   // far = white
+  renderer.render(scene, camera);
+  depth.getContext('2d').drawImage(renderer.domElement, 0, 0);
+  scene.overrideMaterial = null;
+}
+const cam = lens(canvasSource(color, { depth }), { dof: { blur: 0.6, focus: (t) => rack(t) } });   // rack: depth 0..1
+vawe.onFrame(async (t) => { update(t); renderBoth(t); await cam.draw(t); });
+```
+
+Set the renderer's `preserveDrawingBuffer: true` or copy right after each render, as above. Lights and fog do
+not touch the override material, so the depth stays a pure function of the geometry.
+
 ## Rejected approximations
 
 These faked one effect per element and never matched a camera:
@@ -70,6 +105,7 @@ These faked one effect per element and never matched a camera:
 - A repeating-gradient overlay as the pixel grid: it does not follow perspective, does not fade out of
   focus and tints the average colour. Use `grid`.
 - One `filter: blur()` as depth of field: a uniform blur has no depth. Use `dof` over a tilted plane.
+- Depth bands by screen height as the depth of a 3D scene: a subject that crosses a band gets the wrong blur. Pass `depth` to `canvasSource`.
 - CSS `transform: perspective() rotate3d()` on the screen: a skew of the layer, one blur per plane,
   sharp text on the far side. Use `tiltX`, `tiltY` and `zoom`.
 - `mix-blend-mode` colour layers as a palette: use `palette`.

@@ -1,9 +1,16 @@
-// canvasSource(canvas, { scale }) and htmlSource(element, { scale }) return { size: [w, h] in source px, async upload(gl, texture) }; `scale` is texture px per source px.
+// canvasSource(canvas, { scale, depth }) and htmlSource(element, { scale }) return { size: [w, h] in source px, async upload(gl, texture) }; `scale` is texture px per source px.
+// `depth` (canvasSource only) is a per-pixel depth for the lens's depth of field: a canvas, ImageBitmap or ImageData in the red channel, linear 0 (near) to 1 (far),
+// or a function returning one, called on every draw. It maps onto the source by uv, so it may have another size than the colour canvas.
 // An SVG image cannot load anything outside itself, so htmlSource inlines fonts, <img>, <canvas> and url() backgrounds as data URIs
 // and turns text `content` of ::before / ::after into spans; scripts, iframes, video and counters do not carry over.
 
-export function canvasSource(canvas, { scale = 1 } = {}) {
+export function canvasSource(canvas, { scale = 1, depth = null } = {}) {
   return {
+    ...(depth && {
+      async uploadDepth(gl) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, typeof depth === 'function' ? await depth() : depth);
+      },
+    }),
     size: [canvas.width / scale, canvas.height / scale],
     async upload(gl) {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.SRGB8_ALPHA8, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
