@@ -56,6 +56,7 @@ export async function awaitFonts(timeoutMs = 10000) {
 export function installPageFrame({ aspect, width, height }) {
   const vawe = window.vawe || (window.vawe = {});
   Object.assign(vawe, { aspect, width, height });
+  vawe.onFrame = (fn) => (window.__vaweFrameHooks || (window.__vaweFrameHooks = [])).push(fn);
   Object.defineProperty(vawe, 'fps', {
     configurable: true,
     get() { const m = document.querySelector('meta[name="fps"]'); return m ? Number(m.content) : undefined; },

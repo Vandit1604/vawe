@@ -1,7 +1,8 @@
 // core/engine/page-api.js: wires `window.vawe` for a hand-authored BARE HTML page, the render target
 // harness/media/render-page.mjs and preview-server.mjs serve. Importing this ONE module gives a page:
 //
-//   vawe.onFrame((t) => { ... })   registers a per-frame hook, run by core/engine/page-seek.js.
+//   vawe.onFrame((t) => { ... })   registers a per-frame hook; core/engine/page-seek.js defines it before any script and runs it,
+//                                  so it works without this import.
 //   vawe.value(row, t)             samples a timing-sheet row ({at,dur,from,to,ease}) as a plain
 //                                  NUMBER; `ease` is a CSS keyword or a name in core/motion/easings.js.
 //   vawe.three.studio/extrude/material   the three.js helpers in core/three/index.js.
@@ -51,9 +52,6 @@ function unknownEase(name) {
   return `unknown ease ${JSON.stringify(name)}: ${mapped ? `use ${mapped}` : `closest is "${nearest}"`}. Valid: ${valid.join(', ')}.`;
 }
 
-// A hook runs after every animation on the page is seeked to t (core/engine/page-seek.js).
-const onFrame = (fn) => (window.__vaweFrameHooks || (window.__vaweFrameHooks = [])).push(fn);
-
 /** vawe.value(row, t) → a NUMBER, `row.from` eased toward `row.to` between `row.at` and `row.at+row.dur`. */
 export function value(row, t) {
   const { at = 0, dur = 0.5, from = 0, to = 1, ease } = row;
@@ -71,4 +69,4 @@ export function assert(t, fn, message) {
   (window.__vaweAsserts ||= []).push({ t, fn, message });
 }
 
-if (typeof window !== 'undefined') Object.assign(window.vawe || (window.vawe = {}), { onFrame, value, assert, clock: window.__pageClock, three: { studio, extrude, material } });
+if (typeof window !== 'undefined') Object.assign(window.vawe || (window.vawe = {}), { value, assert, clock: window.__pageClock, three: { studio, extrude, material } });
