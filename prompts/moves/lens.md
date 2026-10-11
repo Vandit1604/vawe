@@ -51,6 +51,21 @@ Sound: a short noise tick at each tear, and a low thud on a lock (aberration pea
   keep their colour. `strength` is 0 by default and in `OFF`: turn it on with about 0.5 to 1.2.
 - `PALETTES.cyanotype`: six stops measured from a reference image, dark to light: `#010306 #070d13 #162432
   #3b4f64 #6f8599 #ccd8e4`. A near-black blue ground with a pale blue-grey top.
+- Optical effects, all off by default and in `OFF` (strength, amount or blur 0). Each one reads like a lens part:
+  - `streaks: { strength, length, threshold, tint }`: anamorphic streaks. Pixels above `threshold` (0.7) go through
+    the same blur chain as bloom, but the chain halves only the width, so a bright point becomes a thin
+    horizontal line `length` px long (600), multiplied by `tint` (default blue) and added. Use about 0.3 to 1.
+  - `diffusion: { strength, radius }`: Pro-Mist. A low-threshold wide glow (`radius` 70 px) added over the whole
+    image, plus a very small black lift, so the blacks beside bright areas rise. Use about 0.2 to 0.5.
+  - `softFocus: { amount, radius }`: the image mixed with a blurred copy of itself (`radius` 16 px). The core
+    stays, the detail softens. Use `amount` 0.2 to 0.6.
+  - `tiltShift: { center, width, blur }`: a sharp band (`center` and `width` are shares of the view height) with
+    blur rising above and below it to `blur` px. It uses the circle-of-confusion path of `dof`, with the
+    screen row as a synthetic depth. A source with its own `depth` keeps that depth and gets the band blur as a floor.
+  - `distortion: { amount }`: a radial remap of the sample point. Above 0 is barrel (corners pulled in), below 0
+    is pincushion. Use -0.12 to 0.12. `project()` and `quad()` follow it.
+  - `weave: { amount }`: gate weave. The whole image moves by up to `amount` px, a new seeded offset every
+    frame (`seed`, `fps`). `project()` follows it.
 - `tear` (rows slide, seeded), `grain`, `vignette`, `exposure`, `lift`, `fade`. All noise is hashed from
   `seed` and `floor(t * fps)`: a frame is a pure function of t, so renders match byte for byte.
 - `project(x, y, t)` is the same camera on the CPU. Labels, links and brackets drawn in HTML on top

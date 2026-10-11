@@ -36,11 +36,18 @@ const DEFAULTS = {
   grid: { amount: 0.9, cell: 3, layout: 'stripe', softness: 0.08, brightness: 0.85 },
   aberration: { amount: 6 },
   tear: { amount: 0, prob: 0.07, band: 16 },
+  streaks: { strength: 0, length: 600, threshold: 0.7, tint: [0.4, 0.65, 1] },
+  diffusion: { strength: 0, radius: 70 },
+  softFocus: { amount: 0, radius: 16 },
+  tiltShift: { center: 0.5, width: 0.3, blur: 0 }, // center and width are shares of the view height, blur is the largest radius in px
+  distortion: { amount: 0 }, // > 0 barrel, < 0 pincushion; 0.1 pulls the corners in by 10 percent
+  weave: { amount: 0 }, // the whole image moves by up to this many px, a new offset every frame
   grain: 0.05, vignette: 0.4, exposure: 1, lift: 0, fade: 0,
 };
 export const OFF = {
   dof: { blur: 0, soft: 0 }, palette: null, bloom: { strength: 0 }, halation: { strength: 0 }, grid: { amount: 0 },
-  aberration: { amount: 0 }, tear: { amount: 0 }, grain: 0, vignette: 0, exposure: 1, lift: 0, fade: 0,
+  aberration: { amount: 0 }, tear: { amount: 0 }, streaks: { strength: 0 }, diffusion: { strength: 0 }, softFocus: { amount: 0 },
+  tiltShift: { blur: 0 }, distortion: { amount: 0 }, weave: { amount: 0 }, grain: 0, vignette: 0, exposure: 1, lift: 0, fade: 0,
 };
 
 const isObject = (v) => v && typeof v === 'object' && !Array.isArray(v);
@@ -77,6 +84,30 @@ function camera(p, src) {
   return { eu, ev, n, aim, K, zAt };
 }
 
+// The view point (in units of the view height from its middle) whose barrel-warped sample lands on the ideal point s: the shader
+// samples at s * (1 + amount * |s|^2), so the inverse solves rho + amount * rho^3 = |s| (Newton, a fixed 8 steps).
+function unwarp(amount, s) {
+  const target = Math.hypot(s[0], s[1]);
+  if (!amount || target < 1e-9) return s;
+  let rho = target;
+  for (let i = 0; i < 8; i++) rho -= (rho + amount * rho ** 3 - target) / (1 + 3 * amount * rho * rho);
+  return [s[0] * (rho / target), s[1] * (rho / target)];
+}
+
+// A new offset every frame, hashed from the seed and the frame number: the image shift in CSS px the weave adds at time t.
+const pcg = (v) => {
+  const s = (Math.imul(v >>> 0, 747796405) + 2891336453) >>> 0;
+  const w = Math.imul(((s >>> ((s >>> 28) + 4)) ^ s) >>> 0, 277803737) >>> 0;
+  return ((w >>> 22) ^ w) >>> 0;
+};
+function weaveShift(p, t) {
+  const amount = p.weave.amount;
+  if (!(amount > 0)) return [0, 0];
+  const frame = Math.floor(t * p.fps);
+  const unit = (axis) => pcg((p.seed >>> 0) ^ pcg(frame ^ pcg(axis))) / 4294967296 - 0.5;
+  return [unit(1) * 2 * amount * 0.6, unit(2) * 2 * amount];
+}
+
 export function projectWith(p, src, view, x, y) {
   const c = camera(p, src);
   const lx = (x - c.aim[0]) / c.K;
@@ -84,8 +115,11 @@ export function projectWith(p, src, view, x, y) {
   const P = [c.eu[0] * lx + c.ev[0] * ly, c.eu[1] * lx + c.ev[1] * ly, 1 + c.eu[2] * lx + c.ev[2] * ly];
   const depth = P[2];
   if (depth <= 1e-4) return { x: NaN, y: NaN, scale: 0, depth, visible: false };
-  const sx = (P[0] / depth) * p.focal * view.h + view.w / 2;
-  const sy = (P[1] / depth) * p.focal * view.h + view.h / 2;
+  const ideal = [(P[0] / depth) * p.focal, (P[1] / depth) * p.focal];
+  const [wx, wy] = unwarp(p.distortion?.amount, ideal);
+  const shift = p.shift || [0, 0];
+  const sx = wx * view.h + view.w / 2 + shift[0];
+  const sy = wy * view.h + view.h / 2 + shift[1];
   const scale = (p.zoom * view.h) / (src[1] * depth);
   const visible = sx >= 0 && sy >= 0 && sx <= view.w && sy <= view.h && x >= 0 && y >= 0 && x <= src[0] && y <= src[1];
   return { x: sx, y: sy, scale, depth, visible };
@@ -94,7 +128,9 @@ export function projectWith(p, src, view, x, y) {
 // The source point seen at view pixel (x, y), or null above the horizon of a plane tilted edge-on.
 function unprojectWith(p, src, view, x, y) {
   const c = camera(p, src);
-  const d = [(x - view.w / 2) / view.h, (y - view.h / 2) / view.h, p.focal];
+  const sv = [(x - view.w / 2) / view.h, (y - view.h / 2) / view.h];
+  const warp = 1 + (p.distortion?.amount || 0) * (sv[0] * sv[0] + sv[1] * sv[1]);
+  const d = [sv[0] * warp, sv[1] * warp, p.focal];
   const dn = dot(d, c.n);
   if (dn <= 1e-4) return null;
   const hit = d.map((v) => v * (c.n[2] / dn));
@@ -169,8 +205,11 @@ uniform float u_palN, u_palAmt, u_keep;
 uniform float u_gridAmt, u_cell, u_gridSoft, u_gridGain;
 uniform int u_layout;
 uniform float u_ca, u_tear, u_tearProb, u_tearBand, u_seed, u_frame;
+uniform float u_dist, u_tsBlur, u_tsCenter, u_tsWidth;
+uniform vec2 u_shift;  // the weave: how far the image moved, in px
 
 const int MAXT = 64;
+const float TS_RAMP = 0.35;  // the share of the view height over which the tilt-shift blur rises to its full radius
 
 vec3 pal(float x) {
   float t = clamp(x, 0.0, 1.0) * (u_palN - 1.0);
@@ -229,6 +268,8 @@ float polygon(float a) {
 void main() {
   vec2 fp = vec2(gl_FragCoord.x, u_res.y - gl_FragCoord.y);
   vec2 frame2 = vec2(u_seed, u_frame);
+  float screenY = fp.y / u_res.y;
+  fp -= u_shift;
 
   if (u_tear > 0.0) {
     float band = floor(fp.y / u_tearBand);
@@ -237,6 +278,7 @@ void main() {
   }
 
   vec2 s = (fp - 0.5 * u_res) / u_res.y;
+  if (u_dist != 0.0) s *= 1.0 + u_dist * dot(s, s);
   vec3 d = vec3(s, u_focal);
   float dn = dot(d, u_n);
   if (dn <= 1e-4) { o = vec4(toLinear(u_outside), 1.0); return; }
@@ -255,6 +297,10 @@ void main() {
 #else
   float coc = max(clamp(u_cocK * abs(1.0 - u_zf / z), 0.0, u_cocMax), u_soft);
 #endif
+  if (u_tsBlur > 0.0) {
+    float excess = max(abs(screenY - u_tsCenter) - 0.5 * u_tsWidth, 0.0);
+    coc = max(coc, u_tsBlur * smoothstep(0.0, 1.0, excess / TS_RAMP));
+  }
   float rLog = max(coc, 0.7) * logPerPx;
   int taps = coc < 0.7 ? 3 : min(u_taps, max(8, int(coc * 2.0)));
   float lodT = max(lod0, log2(max(1.0, rLog * sqrt(3.14159 / float(taps)) * u_texScale)) - 1.0);
@@ -301,7 +347,7 @@ const sceneShader = (depth) => `${HEAD}${depth ? '#define DEPTH\n' : ''}${SCENE_
 
 const DOWN = `${HEAD}
 uniform sampler2D u_in;
-uniform vec2 u_texel;
+uniform vec2 u_texel, u_step, u_tap;  // u_step: input texels per output texel; u_tap scales the 13 taps per axis (0 on y keeps a streak thin)
 uniform float u_first, u_thr, u_knee;
 vec3 prefilter(vec3 c) {
   if (u_first < 0.5) return c;
@@ -310,9 +356,9 @@ vec3 prefilter(vec3 c) {
   soft = soft * soft / (4.0 * u_knee + 1e-4);
   return c * (max(soft, l - u_thr) / max(l, 1e-4));
 }
-vec3 t(vec2 uv, vec2 k) { return prefilter(texture(u_in, uv + k * u_texel).rgb); }
+vec3 t(vec2 uv, vec2 k) { return prefilter(texture(u_in, uv + k * u_tap * u_texel).rgb); }
 void main() {
-  vec2 uv = gl_FragCoord.xy * 2.0 * u_texel;
+  vec2 uv = gl_FragCoord.xy * u_step * u_texel;
   vec3 a = t(uv, vec2(-2, 2)), b = t(uv, vec2(0, 2)), c = t(uv, vec2(2, 2));
   vec3 d = t(uv, vec2(-2, 0)), e = t(uv, vec2(0, 0)), f = t(uv, vec2(2, 0));
   vec3 g = t(uv, vec2(-2, -2)), h = t(uv, vec2(0, -2)), i = t(uv, vec2(2, -2));
@@ -323,11 +369,12 @@ void main() {
 const UP = `${HEAD}
 uniform sampler2D u_low, u_level;
 uniform float u_has, u_gain;
+uniform vec2 u_tap;
 void main() {
   vec2 uv = gl_FragCoord.xy / vec2(textureSize(u_level, 0));
   vec3 acc = texture(u_level, uv).rgb * u_gain;
   if (u_has > 0.5) {
-    vec2 k = 1.0 / vec2(textureSize(u_low, 0));
+    vec2 k = u_tap / vec2(textureSize(u_low, 0));
     vec3 tent = texture(u_low, uv + k * vec2(-1, 1)).rgb + 2.0 * texture(u_low, uv + k * vec2(0, 1)).rgb + texture(u_low, uv + k * vec2(1, 1)).rgb
       + 2.0 * texture(u_low, uv + k * vec2(-1, 0)).rgb + 4.0 * texture(u_low, uv).rgb + 2.0 * texture(u_low, uv + k * vec2(1, 0)).rgb
       + texture(u_low, uv + k * vec2(-1, -1)).rgb + 2.0 * texture(u_low, uv + k * vec2(0, -1)).rgb + texture(u_low, uv + k * vec2(1, -1)).rgb;
@@ -337,18 +384,21 @@ void main() {
 }`;
 
 const FINAL = `${HEAD}
-uniform sampler2D u_scene, u_bloomTex, u_haloTex;
+uniform sampler2D u_scene, u_bloomTex, u_haloTex, u_streakTex, u_mistTex, u_softTex;
 uniform vec2 u_res;
-uniform vec3 u_haloTint;
-uniform float u_bloom, u_halo, u_exp, u_lift, u_vig, u_grain, u_fade, u_seed, u_frame;
+uniform vec3 u_haloTint, u_streakTint;
+uniform float u_bloom, u_halo, u_streak, u_mist, u_soft, u_exp, u_lift, u_vig, u_grain, u_fade, u_seed, u_frame;
 void main() {
   vec2 uv = gl_FragCoord.xy / u_res;
   vec3 col = texture(u_scene, uv).rgb;
+  if (u_soft > 0.0) col = mix(col, texture(u_softTex, uv).rgb, u_soft);
   if (u_bloom > 0.0) col += texture(u_bloomTex, uv).rgb * u_bloom;
   if (u_halo > 0.0) {
     float dark = 1.0 - smoothstep(0.02, 0.35, dot(texture(u_scene, uv).rgb, LUMA));
     col += texture(u_haloTex, uv).rgb * u_haloTint * u_halo * dark;
   }
+  if (u_streak > 0.0) col += texture(u_streakTex, uv).rgb * u_streakTint * u_streak;
+  if (u_mist > 0.0) col += texture(u_mistTex, uv).rgb * u_mist + u_mist * 0.004;
   col = col * u_exp + u_lift;
   vec2 s = (gl_FragCoord.xy - 0.5 * u_res) / u_res.y;
   vec2 v = s * vec2(0.85, 1.15);
@@ -380,6 +430,9 @@ function program(gl, fragment) {
 }
 
 const LEVELS = 6;
+const STREAK_LEVELS = 8;
+// A streak chain halves only the width after its first level, so the blur is wide and the lines stay thin.
+const STREAK_GAIN = 6;
 
 function target(gl, w, h, hdr) {
   const tex = gl.createTexture();
@@ -395,9 +448,9 @@ function target(gl, w, h, hdr) {
 
 // Level i is 2^(i+1) times smaller than the canvas: its weight is 1 up to the level the glow radius
 // reaches and fades over the next one, each level a little lighter than the one before.
-function bloomWeights(radiusPx) {
+function bloomWeights(radiusPx, levels = LEVELS) {
   const reach = Math.log2(Math.max(radiusPx, 2)) - 1;
-  const w = Array.from({ length: LEVELS }, (_, i) => clamp(reach - i + 1, 0, 1) * 0.8 ** i);
+  const w = Array.from({ length: levels }, (_, i) => clamp(reach - i + 1, 0, 1) * 0.8 ** i);
   const sum = w.reduce((s, v) => s + v, 0) || 1;
   return w.map((v) => v / sum);
 }
@@ -413,12 +466,12 @@ function createRig(gl, canvas) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  const chain = () => {
-    const down = Array.from({ length: LEVELS }, (_, i) => target(gl, Math.max(1, canvas.width >> (i + 1)), Math.max(1, canvas.height >> (i + 1)), hdr));
+  const chain = (levels = LEVELS, flatY = false) => {
+    const down = Array.from({ length: levels }, (_, i) => target(gl, Math.max(1, canvas.width >> (i + 1)), Math.max(1, canvas.height >> (flatY ? 1 : i + 1)), hdr));
     return { down, up: down.map((d) => target(gl, d.w, d.h, hdr)) };
   };
   return {
-    gl, canvas, srcTex, depthTex, chain, bloom: chain(), halo: null,
+    gl, canvas, srcTex, depthTex, chain, bloom: chain(), halo: null, streak: null, mist: null, soft: null,
     programs: { scene: program(gl, sceneShader(false)), sceneDepth: null, down: program(gl, DOWN), up: program(gl, UP), final: program(gl, FINAL) },
     sceneT: target(gl, canvas.width, canvas.height, hdr),
     pxs: canvas.height / innerHeight,
@@ -486,31 +539,38 @@ function scenePass(rig, p, t, src, tex, hasDepth) {
   u1('u_ca', p.aberration.amount * pxs);
   u1('u_tear', p.tear.amount * pxs); u1('u_tearProb', p.tear.prob); u1('u_tearBand', p.tear.band * pxs);
   u1('u_seed', p.seed); u1('u_frame', Math.floor(t * p.fps));
+  u1('u_dist', p.distortion.amount);
+  u1('u_tsBlur', p.tiltShift.blur * pxs); u1('u_tsCenter', p.tiltShift.center); u1('u_tsWidth', p.tiltShift.width);
+  gl.uniform2f(prog.loc('u_shift'), p.shift[0] * pxs, p.shift[1] * pxs);
   draw3(gl);
 }
 
-function blurChain(rig, { down, up }, spec) {
+function blurChain(rig, { down, up }, spec, tap = [1, 1]) {
   const { gl } = rig;
-  const weights = bloomWeights(spec.radius * rig.pxs);
+  const levels = down.length;
+  const weights = bloomWeights(spec.radius * rig.pxs, levels);
   const dn = rig.programs.down;
-  for (let i = 0; i < LEVELS; i++) {
+  for (let i = 0; i < levels; i++) {
     const from = i === 0 ? rig.sceneT : down[i - 1];
     begin(rig, dn, down[i]);
     bind(gl, 0, from.tex);
     gl.uniform1i(dn.loc('u_in'), 0);
     gl.uniform2f(dn.loc('u_texel'), 1 / from.w, 1 / from.h);
+    gl.uniform2f(dn.loc('u_step'), down[i].w < from.w ? 2 : 1, down[i].h < from.h ? 2 : 1);
+    gl.uniform2fv(dn.loc('u_tap'), tap);
     gl.uniform1f(dn.loc('u_first'), i === 0 ? 1 : 0);
     gl.uniform1f(dn.loc('u_thr'), spec.threshold ** 2.2);
     gl.uniform1f(dn.loc('u_knee'), Math.max(1e-3, spec.knee * Math.max(spec.threshold, 0.05) ** 2.2));
     draw3(gl);
   }
   const upp = rig.programs.up;
-  for (let i = LEVELS - 1; i >= 0; i--) {
+  for (let i = levels - 1; i >= 0; i--) {
     begin(rig, upp, up[i]);
     bind(gl, 0, down[i].tex);
-    if (i < LEVELS - 1) bind(gl, 1, up[i + 1].tex);
+    if (i < levels - 1) bind(gl, 1, up[i + 1].tex);
     gl.uniform1i(upp.loc('u_level'), 0); gl.uniform1i(upp.loc('u_low'), 1);
-    gl.uniform1f(upp.loc('u_has'), i < LEVELS - 1 ? 1 : 0);
+    gl.uniform2fv(upp.loc('u_tap'), tap);
+    gl.uniform1f(upp.loc('u_has'), i < levels - 1 ? 1 : 0);
     gl.uniform1f(upp.loc('u_gain'), weights[i]);
     draw3(gl);
   }
@@ -522,11 +582,17 @@ function finalPass(rig, p, t) {
   begin(rig, f, null);
   bind(gl, 0, rig.sceneT.tex); bind(gl, 1, rig.bloom.up[0].tex);
   if (p.halation.strength > 0) bind(gl, 2, rig.halo.up[0].tex);
-  gl.uniform1i(f.loc('u_scene'), 0); gl.uniform1i(f.loc('u_bloomTex'), 1); gl.uniform1i(f.loc('u_haloTex'), 2);
+  if (p.streaks.strength > 0) bind(gl, 3, rig.streak.up[0].tex);
+  if (p.diffusion.strength > 0) bind(gl, 4, rig.mist.up[0].tex);
+  if (p.softFocus.amount > 0) bind(gl, 5, rig.soft.up[0].tex);
+  for (const [name, unit] of [['u_scene', 0], ['u_bloomTex', 1], ['u_haloTex', 2], ['u_streakTex', 3], ['u_mistTex', 4], ['u_softTex', 5]]) gl.uniform1i(f.loc(name), unit);
   gl.uniform3fv(f.loc('u_haloTint'), p.halation.tint);
+  gl.uniform3fv(f.loc('u_streakTint'), p.streaks.tint);
   gl.uniform2f(f.loc('u_res'), rig.canvas.width, rig.canvas.height);
   const u1 = (name, v) => gl.uniform1f(f.loc(name), v);
-  u1('u_bloom', p.bloom.strength > 0 ? p.bloom.strength : 0); u1('u_halo', p.halation.strength > 0 ? p.halation.strength : 0); u1('u_exp', p.exposure); u1('u_lift', p.lift); u1('u_vig', p.vignette);
+  u1('u_bloom', p.bloom.strength > 0 ? p.bloom.strength : 0); u1('u_halo', p.halation.strength > 0 ? p.halation.strength : 0);
+  u1('u_streak', p.streaks.strength > 0 ? p.streaks.strength * STREAK_GAIN : 0); u1('u_mist', p.diffusion.strength > 0 ? p.diffusion.strength : 0); u1('u_soft', p.softFocus.amount > 0 ? p.softFocus.amount : 0);
+  u1('u_exp', p.exposure); u1('u_lift', p.lift); u1('u_vig', p.vignette);
   u1('u_grain', p.grain); u1('u_fade', p.fade); u1('u_seed', p.seed); u1('u_frame', Math.floor(t * p.fps));
   draw3(gl);
 }
@@ -545,7 +611,8 @@ export function lens(source, options = {}) {
   const view = { w: innerWidth, h: innerHeight };
   const params = (t) => {
     const p = resolve(opts, t);
-    return p.fit && (p.fit.keep || p.fit.cover) ? fitCamera(p, source.size, view) : p;
+    const placed = p.fit && (p.fit.keep || p.fit.cover) ? fitCamera(p, source.size, view) : p;
+    return { ...placed, shift: weaveShift(p, t) };
   };
 
   async function draw(t) {
@@ -560,6 +627,9 @@ export function lens(source, options = {}) {
     scenePass(rig, p, t, source.size, tex, hasDepth);
     if (p.bloom.strength > 0) blurChain(rig, rig.bloom, p.bloom);
     if (p.halation.strength > 0) blurChain(rig, rig.halo ??= rig.chain(), p.halation);
+    if (p.streaks.strength > 0) blurChain(rig, rig.streak ??= rig.chain(STREAK_LEVELS, true), { radius: p.streaks.length, threshold: p.streaks.threshold, knee: 0.3 }, [1, 0]);
+    if (p.diffusion.strength > 0) blurChain(rig, rig.mist ??= rig.chain(), { radius: p.diffusion.radius, threshold: 0.12, knee: 0.5 });
+    if (p.softFocus.amount > 0) blurChain(rig, rig.soft ??= rig.chain(), { radius: p.softFocus.radius, threshold: 0, knee: 0 });
     finalPass(rig, p, t);
   }
 

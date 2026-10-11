@@ -12,6 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { REPO_ROOT, serveRepo, RENDER_ARGS } from '../../harness/lib/render-harness.mjs';
 import { projectWith } from '../../core/surfaces/lens.js';
+import { installPageFrame } from '../../core/engine/page-seek.js';
 
 const W = 1920, H = 1080;
 let server, browser;
@@ -23,8 +24,14 @@ before(async () => {
 });
 after(async () => { await browser?.close(); server?.close(); });
 
-async function shoot(cfg, { only, src, t = 0.3, scale = 1, draws = 1, probe = [] } = {}) {
+async function newPage() {
   const page = await browser.newPage();
+  await page.evaluateOnNewDocument(installPageFrame, { aspect: '16:9', width: W, height: H });
+  return page;
+}
+
+async function shoot(cfg, { only, src, t = 0.3, scale = 1, draws = 1, probe = [] } = {}) {
+  const page = await newPage();
   try {
     await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
     const q = new URLSearchParams({ cfg: JSON.stringify(cfg), scale: String(scale) });
@@ -238,7 +245,7 @@ test('fit: a strong tilt keeps the target in the frame and, with cover, shows no
 });
 
 test('a canvas source films the same plane as an HTML source', async () => {
-  const page = await browser.newPage();
+  const page = await newPage();
   try {
     await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
     const q = new URLSearchParams({ cfg: JSON.stringify({ palette: { stops: [[0, 0, 0], [1, 1, 1]] } }), src: 'canvas' });
@@ -290,9 +297,86 @@ test('depth of field from a depth canvas: a focus point reads its depth', async 
 });
 
 test('depth of field without a depth input is the plane path: the source has no depth upload', async () => {
-  const page = await browser.newPage();
+  const page = await newPage();
   try {
     await page.goto(`http://127.0.0.1:${server.port}/tests/fixtures/pages/lens.html?src=canvas`, { waitUntil: 'load' });
     assert.equal(await page.evaluate(() => typeof window.__lens.source.uploadDepth), 'undefined');
   } finally { await page.close(); }
+});
+
+const sum = (img, x0, y0, w, h) => window2(img, x0, y0, w, h).reduce((s, p) => s + lin(p), 0);
+const barCentroid = (img, y = 540) => { let s = 0, w = 0; for (let x = 0; x < 260; x++) { const v = Math.max(0, luma(img.px(x, y)) - 14); s += x * v; w += v; } return s / w; };
+
+test('new effects at strength 0 leave the OFF image byte for byte', async () => {
+  const zeros = {
+    streaks: { strength: 0, length: 900 }, diffusion: { strength: 0, radius: 200 }, softFocus: { amount: 0, radius: 60 },
+    tiltShift: { blur: 0, center: 0.2, width: 0.1 }, distortion: { amount: 0 }, weave: { amount: 0 },
+  };
+  for (const only of ['glyph', 'stripes']) assert.equal(hash(await shoot(zeros, { only })), hash(await shoot({}, { only })), only);
+});
+
+test('anamorphic streaks: a bright point spreads light along the row, far more than along the column', async (t) => {
+  const off = await shoot({}, { only: 'point' });
+  const on = await shoot({ streaks: { strength: 1, length: 600, threshold: 0.5 } }, { only: 'point' });
+  const cx = 1006, cy = 806;
+  const across = sum(on, cx + 100, cy - 2, 300, 4) - sum(off, cx + 100, cy - 2, 300, 4);
+  const along = sum(on, cx - 2, cy - 400, 4, 300) - sum(off, cx - 2, cy - 400, 4, 300);
+  t.diagnostic(`streak light 100 to 400 px away: along the row ${across.toFixed(3)}, along the column ${along.toFixed(3)}`);
+  assert.ok(across > 0.5, `light along the row ${across.toFixed(3)}`);
+  assert.ok(across > 20 * Math.max(along, 1e-4), `row ${across.toFixed(3)} vs column ${along.toFixed(3)}`);
+  const cold = await shoot({ streaks: { strength: 1, length: 600, threshold: 0.5, tint: [0, 0, 1] } }, { only: 'point' });
+  const [r, , b] = cold.px(cx + 150, cy);
+  assert.ok(b > r + 10, `the tint colours the streak, ${r},${b}`);
+});
+
+test('diffusion: the blacks beside a bright area lift, the far ground barely does', async (t) => {
+  const off = await shoot({}, { only: 'glyph' });
+  const on = await shoot({ diffusion: { strength: 0.5, radius: 60 } }, { only: 'glyph' });
+  const near = (img) => mean(window2(img, 310, 470, 40, 12).map(luma));
+  const far = (img) => mean(window2(img, 1500, 150, 40, 12).map(luma));
+  t.diagnostic(`diffusion lift near ${(near(on) - near(off)).toFixed(1)}, far ${(far(on) - far(off)).toFixed(1)} levels`);
+  assert.ok(near(on) - near(off) > 10, `lift beside the glyph ${(near(on) - near(off)).toFixed(1)}`);
+  assert.ok(far(on) - far(off) < (near(on) - near(off)) / 3, 'the far ground lifts much less');
+});
+
+test('soft focus: the image mixes with a blurred copy, so edges lose contrast and the mean light stays', async () => {
+  const sharp = await shoot({}, { only: 'stripes' });
+  const soft = await shoot({ softFocus: { amount: 0.8, radius: 20 } }, { only: 'stripes' });
+  assert.ok(stripeEnergy(soft, 600) < stripeEnergy(sharp, 600) * 0.5, `stripe contrast ${stripeEnergy(soft, 600).toFixed(1)} vs ${stripeEnergy(sharp, 600).toFixed(1)}`);
+  assert.ok(Math.abs(mean(window2(soft, 600, 440, 200, 40).map(lin)) / mean(window2(sharp, 600, 440, 200, 40).map(lin)) - 1) < 0.1, 'the mean light holds');
+});
+
+test('tilt-shift: the band stays sharp, the stripes above and below blur', async (t) => {
+  const cfg = { tiltShift: { center: 0.6, width: 0.2, blur: 30 } };
+  const sharp = await shoot({}, { only: 'stripes' });
+  const shifted = await shoot(cfg, { only: 'stripes' });
+  const energy = (img, y0) => mean(Array.from({ length: 400 * 20 }, (_, i) => { const x = 500 + (i % 400), y = y0 + Math.floor(i / 400); return Math.abs(luma(img.px(x + 1, y)) - luma(img.px(x, y))); }));
+  const kept = (y0) => energy(shifted, y0) / energy(sharp, y0);
+  t.diagnostic(`stripe contrast kept: top ${kept(310).toFixed(2)}, middle ${kept(640).toFixed(2)}, bottom ${kept(950).toFixed(2)}`);
+  assert.ok(kept(310) < 0.5 && kept(950) < 0.5, 'the top and bottom stripes blur');
+  assert.ok(kept(640) > 0.9, 'the middle stays sharp');
+});
+
+test('distortion: barrel pulls an edge feature inward, pincushion pushes it outward, project() follows', async (t) => {
+  const at = async (amount) => shoot({ distortion: { amount } }, { only: 'bar', probe: [[120, 540]] });
+  const flat = await at(0), barrel = await at(0.12), pin = await at(-0.12);
+  const [c0, cb, cp] = [flat, barrel, pin].map((i) => barCentroid(i));
+  t.diagnostic(`bar centre: flat ${c0.toFixed(1)}, barrel ${cb.toFixed(1)} (project ${barrel.probes[0].x.toFixed(1)}), pincushion ${cp.toFixed(1)} (project ${pin.probes[0].x.toFixed(1)})`);
+  assert.ok(Math.abs(c0 - 120) < 0.6, `flat ${c0}`);
+  assert.ok(cb > c0 + 10, `barrel moves the bar inward, ${cb.toFixed(1)}`);
+  assert.ok(cp < c0 - 10, `pincushion moves the bar outward, ${cp.toFixed(1)}`);
+  assert.ok(Math.abs(cb - barrel.probes[0].x) < 1.5 && Math.abs(cp - pin.probes[0].x) < 1.5, 'project() lands on the warped bar');
+});
+
+test('gate weave: the image moves with the frame and the seed, project() follows, and off is still', async (t) => {
+  const at = async (cfg, time) => shoot(cfg, { only: 'bar', t: time, probe: [[120, 540]] });
+  const cfg = { weave: { amount: 14 } };
+  const [a, b, still, other] = [await at(cfg, 0.3), await at(cfg, 0.6), await at({}, 0.3), await at({ ...cfg, seed: 9 }, 0.3)];
+  const [ca, cb, cs, co] = [a, b, still, other].map((i) => barCentroid(i));
+  t.diagnostic(`bar centre: off ${cs.toFixed(2)}, frame 9 ${ca.toFixed(2)}, frame 18 ${cb.toFixed(2)}, seed 9 ${co.toFixed(2)}`);
+  assert.ok(Math.abs(cs - 120) < 0.6, 'off: no weave');
+  assert.ok(Math.abs(ca - cb) > 1 && Math.abs(ca - co) > 1, 'a new frame and a new seed move the image');
+  assert.ok(Math.abs(ca - cs) <= 14 * 0.6 + 1 && Math.abs(cb - cs) <= 14 * 0.6 + 1, 'the shift stays inside the amount');
+  assert.ok(Math.abs(ca - a.probes[0].x) < 1 && Math.abs(cb - b.probes[0].x) < 1, 'project() follows the weave');
+  assert.equal(hash(await at(cfg, 0.3)), hash(a), 'the same frame is the same pixels');
 });
