@@ -47,12 +47,13 @@ export function causeOf(reason) {
 const tenths = (s) => Math.round(s * 10) / 10;
 
 /** The runs.jsonl fields of one call. `stage` is stage-say's stage for the film when the call started; `tagged` is false for a run no VAWE_AGENT names. */
-export function verbEvent({ verb, args, stage = null, startMs, endMs, exitCode, reason = null, slotWaitS = null, images = [] }) {
+export function verbEvent({ verb, args, stage = null, startMs, endMs, exitCode, reason = null, slotWaitS = null, images = [], env = process.env }) {
   return {
     cmd: 'verb', verb, args, stage,
     start: new Date(startMs).toISOString(), durationS: tenths((endMs - startMs) / 1000),
     exitCode, error: exitCode === 0 ? null : reason, slotWaitS: slotWaitS == null ? null : tenths(slotWaitS),
     images, tagged: namedAgent(agentId()) !== null,
+    ...(verb === 'ship' && env.VAWE_UNATTENDED === '1' ? { unattended: true } : {}),
   };
 }
 

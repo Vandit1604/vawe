@@ -138,7 +138,7 @@ export const VERBS = [
     next: devNext,
   },
   {
-    name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background',
+    name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background; refused until the owner approves the draft (vawe approve)',
     positional: [{ name: 'page|job', help: 'films/<name>/page.html; with --status, that page or a job id (default: the newest job)' }],
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
@@ -152,15 +152,23 @@ export const VERBS = [
       if (v.status) return [{ script: 'harness/media/ship-job.mjs', args: ['status', ...(page ? [page] : []), ...(v.wait ? ['--wait'] : [])] }];
       if (!page) throw new UsageError('missing <page>; usage: vawe ship <page> [flags]  or  vawe ship --status [job]');
       const args = [page, ...(v.out ? [v.out] : []), ...(v.profile ? ['--profile'] : [])];
-      const warn = { script: 'harness/live/ship-warn.mjs', args: [page] };
-      if (v.wait) return [warn, { script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
-      return [warn, { script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
+      const before = [{ script: 'harness/live/ship-approval.mjs', args: [page] }, { script: 'harness/live/ship-warn.mjs', args: [page] }];
+      if (v.wait) return [...before, { script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
+      return [...before, { script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
     next: (v, [page]) => {
       if (v.status) return null;
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
       return `rendering in the background: bin/vawe ship --status ${page} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`;
     },
+  },
+  {
+    name: 'approve', summary: 'the owner approves the full draft of the current page; vawe ship needs it. A film session never runs this',
+    positional: [PAGE],
+    flags: [],
+    example: 'vawe approve films/my-launch/page.html   (after vawe dev without --from and --to)',
+    build: (v, [page]) => [{ script: 'harness/live/approve.mjs', args: [page] }],
+    next: (v, [page]) => `bin/vawe ship ${page}`,
   },
   {
     name: 'spec-sync', summary: 'write the times the last draft measured into the brief\'s Words and Objects tables (after you retimed on purpose)',

@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { scratch } from '../lib/scratch.mjs';
-import { appendRun } from '../lib/runlog.mjs';
+import { appendRun, readRuns } from '../lib/runlog.mjs';
 import { judgeEvent } from '../lib/run-events.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
@@ -19,7 +19,8 @@ import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
 import { findingsPrompt, readFindings, ruleOf, findingsEvent } from '../lib/judge-findings.mjs';
-import { readTricks, capByTricks } from '../lib/judge-tricks.mjs';
+import { readTricks, capByTricks, selfApprovedTricks } from '../lib/judge-tricks.mjs';
+import { readApproval } from '../lib/approval.mjs';
 import { siblingFilms } from '../lib/judge-siblings.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { sizeLines, capLines, holdLines, anchorLines, anchorResult, barLines, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
@@ -235,7 +236,7 @@ function finish(ev, raw, ms) {
   const axes = FRESH_AXES[ev.stage === 'stills' ? 'stills' : 'film'].map(([k]) => k).filter((k) => !(k === 'sound' && ev.stage !== 'final'));
   const bar = ev.refs?.length ? barResult(raw.bar, ev.refs) : null;
   const given = Object.fromEntries(axes.map((k) => [k, Number(raw.scores[k])]));
-  const tricks = ev.stage === 'stills' ? [] : readTricks(raw);
+  const tricks = ev.stage === 'stills' ? [] : [...readTricks(raw), ...selfApprovedTricks(readApproval(filmName(input), repoRoot), readRuns(filmName(input), repoRoot))];
   const scores = capByTricks(bar ? capScores(given, bar).scores : given, tricks);
   const low = axes.filter((k) => !(scores[k] >= PASS_AT));
   const fixes = low.map((k) => {

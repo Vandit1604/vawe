@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { writeApproval } from '../../harness/lib/approval.mjs';
 import { SAY, BRIEF_ASK, CRITIQUE_ASK, WAIT_WORK, nextStep,takenFromCount, movesTakenCount, boardFilled, missingRungs } from '../../harness/live/stage-say.mjs';
 
 function film(html, brief = '## Look\n') {
@@ -182,6 +183,10 @@ test('after a draft the next step follows what is done: strips under any out/str
   fs.writeFileSync(brief, '## Motion pass\n\n| cut | what read flat | fixed |\n|---|---|---|\n| s1 | too slow | shortened |\n');
   assert.equal(nextStep(page, root).stage, 'critique');
   fs.writeFileSync(out('f.runs.jsonl'), `${JSON.stringify({ cmd: 'verb', verb: 'critique', exitCode: 0, at: new Date(now).toISOString(), start: new Date(now).toISOString() })}\n`);
+  const asked = nextStep(page, root);
+  assert.equal(asked.stage, 'approve');
+  assert.match(asked.next, /show the draft to the owner \(storyboard: bin\/vawe sheet <draft>\) and stop/);
+  writeApproval(page, { root });
   const s = nextStep(page, root);
   assert.equal(s.stage, 'ship');
   assert.equal(s.next, SAY.ship('f', 'films/f/page.html'));

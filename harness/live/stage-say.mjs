@@ -9,6 +9,7 @@ import { verbRanSince } from '../lib/verb-log.mjs';
 import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
 import { ideasFilled } from '../lib/ideas.mjs';
+import { SHOW_OWNER, shipProblem } from '../lib/approval.mjs';
 
 export { boardFilled };
 
@@ -75,6 +76,7 @@ export const SAY = {
   motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: each principle checked, what read flat, what you fixed`,
   critique: (name, rel) => `bin/vawe critique ${rel}`,
   judge: (name, rel, ref) => `VAWE_AGENT=judge-${name} bin/vawe judge ${rel} --struct --runs A,B${ref ? ` --ref ${ref}` : ''} in a fresh session, then fix the named seconds with bin/vawe dev ${rel} --from s --to s`,
+  approve: (name, rel) => `${SHOW_OWNER} (${rel}); never run bin/vawe approve yourself`,
   ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`,
 };
 
@@ -140,6 +142,7 @@ export function nextStep(page, root = process.cwd()) {
   if (final < t && !verbRanSince(runsOf(root, name), 'critique', draft)) {
     return { name, stage: 'critique', next: SAY.critique(name, rel), why: `the motion pass is done; critique the draft in a fresh session, fix the named seconds, then bin/vawe ship; ${CRITIQUE_ASK}` };
   }
+  if (final < t && shipProblem(page, { root })) return { name, stage: 'approve', next: SAY.approve(name, rel), why: 'the critique ran on this draft; the final render needs the owner\'s approval of the draft, and the owner has not given it for this page' };
   if (final < t) return { name, stage: 'ship', next: SAY.ship(name, rel), why: 'the critique ran on this draft; fix the seconds it named, then render the final' };
   return { name, stage: 'judge', next: SAY.critique(name, rel), why: 'the final is rendered; a fresh session judges it' };
 }

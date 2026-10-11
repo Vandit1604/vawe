@@ -64,8 +64,8 @@ const parseRuns = (text) => text.split('\n').filter(Boolean)
   .filter(Boolean);
 
 /** readRuns(film) -> every logged run, oldest first. A corrupt line is dropped, not thrown. */
-export function readRuns(film) {
-  const p = runsPathFor(film);
+export function readRuns(film, root = '.') {
+  const p = runsPathFor(film, root);
   return fs.existsSync(p) ? parseRuns(fs.readFileSync(p, 'utf8')) : [];
 }
 

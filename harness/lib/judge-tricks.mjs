@@ -1,3 +1,5 @@
+import { selfApproved } from './approval.mjs';
+
 // The tricks that turn a check green without making the film better, as the fresh judge is told them, and the owner decisions it must respect.
 // A trick counts only with a cited second and what the judge saw there.
 
@@ -48,6 +50,11 @@ export function readTricks(raw) {
 export function capByTricks(scores, tricks) {
   const capped = new Set(tricks.flatMap((c) => TRICKS.find((t) => t.id === c.trick)?.axes ?? []));
   return Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, capped.has(k) ? Math.min(v, 7) : v]));
+}
+
+/** The self-approved trick when the film's author approved its own draft (harness/lib/approval.mjs); no second applies, so at is 0 and no axis is capped. */
+export function selfApprovedTricks(approval, runs) {
+  return selfApproved(approval, runs) ? [{ trick: 'self-approved', at: 0, evidence: `the draft was approved by ${approval.by}, the agent that wrote the film: the owner did not approve it` }] : [];
 }
 
 export const trickLines = (tricks = []) => tricks.map((t) => `trick ${t.trick} at ${t.at} s: ${t.evidence}`);
