@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: taste
 tags: "background music, synth bed, sound design, agents, checks"
 keywords: "background music for generated video, synth bed, dead air check, sound effects on actions"
-hero: /blog/no-synth-bed/hero.svg
+hero: /blog/no-synth-bed/hero.webp
 heroAlt: "Two bar charts. 4 of 24 audio films shipped a synth bed before the ban. The ban commit touched 44 files, adding 133 lines and removing 376."
 ---
 
@@ -24,18 +24,18 @@ Taste was the other half of the case. A constant synthetic tone does not follow 
 
 ## The evidence
 
-Commit [f68dc7df2](https://github.com/Vandit1604/vawe/commit/f68dc7df2) removed the `bed`, `swell-soft` and `braam` voices, the `synth-bed.mjs` helper and the `data-bpm` attribute. It touched 44 files, adding 133 lines and removing 376; much of the change was in the audio kit (71 lines changed), the palette (94) and the bake script (44). A page that writes `data-synth="bed"`, or another removed sustained voice, is now refused by `harness/media/page-audio.mjs` with the rule and the fix. The message tells the agent to use a real music file (`<audio loop src=...>`) or no bed, and that sparse effects on actions are fine. A bare refusal sends an agent searching. One with the fix in it does not.
+Commit [1feb1c38b](https://github.com/Vandit1604/vawe/commit/1feb1c38b) removed the `bed`, `swell-soft` and `braam` voices, the `synth-bed.mjs` helper and the `data-bpm` attribute. It touched 44 files, adding 133 lines and removing 376; much of the change was in the audio kit (71 lines changed), the palette (94) and the bake script (44). A page that writes `data-synth="bed"`, or another removed sustained voice, is now refused by `harness/media/page-audio.mjs` with the rule and the fix. The message tells the agent to use a real music file (`<audio loop src=...>`) or no bed, and that sparse effects on actions are fine. A bare refusal sends an agent searching. One with the fix in it does not.
 
-![Before, a bed made the dead-air check green. After, the page is refused and the agent uses small effects on actions or a real track.](/blog/no-synth-bed/flow.svg)
+![Before, a bed made the dead-air check green. After, the page is refused and the agent uses small effects on actions or a real track.](/blog/no-synth-bed/flow.webp)
 
 The rule now has one owner, `taste/craft/sound.md`, and every other doc points to it:
 
 - Sound is small effects on actions, like UI button sounds: clicks, taps, pops, short whooshes, a success chime. Each sits on the frame of its action.
 - Recorded effects come first. The short synth voices that remain are the fallback, and short ticks tied to actions are cheap where a held tone is not.
 - Music only comes from a real track the user gives. A film with no track has no beat grid, and `vawe sound` says so instead of inventing one.
-- With a track, `vawe sound` (`harness/media/sound.mjs`, from [bf4252858](https://github.com/Vandit1604/vawe/commit/bf4252858)) reads it and prints a beat grid and a cut table; the tutorial on how to [cut video to the beat with a beat grid](/blog/beat) walks through it.
+- With a track, `vawe sound` (`harness/media/sound.mjs`, from [a600cae64](https://github.com/Vandit1604/vawe/commit/a600cae64)) reads it and prints a beat grid and a cut table; the tutorial on how to [cut video to the beat with a beat grid](/blog/beat) walks through it.
 
-A follow-up, [25e1ef4e9](https://github.com/Vandit1604/vawe/commit/25e1ef4e9), folded the sound rules together: `sound-default-on` merged into `sound-voices`, and `cue-sparse`, `sound-swell` and `cue-has-event` merged into `sound-cues`, removing 711 lines and adding 75. The licence note says the synthesized beds are retired ([e51af67b8](https://github.com/Vandit1604/vawe/commit/e51af67b8)).
+A follow-up, [9a89c1791](https://github.com/Vandit1604/vawe/commit/9a89c1791), folded the sound rules together: `sound-default-on` merged into `sound-voices`, and `cue-sparse`, `sound-swell` and `cue-has-event` merged into `sound-cues`, removing 711 lines and adding 75. The licence note says the synthesized beds are retired ([6c042a4d2](https://github.com/Vandit1604/vawe/commit/6c042a4d2)).
 
 ## The strongest objection: write a smarter check
 

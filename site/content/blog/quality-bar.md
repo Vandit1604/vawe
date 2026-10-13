@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: measurement
 tags: "motion graphics, quality metrics, benchmark, video analysis, agents"
 keywords: "motion graphics quality benchmark, measure motion design, shot cut analysis, reference film measurement"
-hero: /blog/quality-bar/hero.svg
+hero: /blog/quality-bar/hero.webp
 heroAlt: "Large number 167 with the caption cuts measured, the quality bar is a range, not an opinion"
 ---
 
@@ -20,18 +20,18 @@ Until 7 October our film judge compared a new film with our own earlier films. A
 
 ## Setup: the reference set and the tools
 
-`vawe refs` indexes the reference films and picks them by film type and length. The films live in a folder outside the repo and are never committed; we publish the measurement and keep the films private ([7259df42c](https://github.com/Vandit1604/vawe/commit/7259df42c)).
+`vawe refs` indexes the reference films and picks them by film type and length. The films live in a folder outside the repo and are never committed; we publish the measurement and keep the films private ([10f9e5ebf](https://github.com/Vandit1604/vawe/commit/10f9e5ebf)).
 
-`vawe spec` measures any film deterministically: its cuts and flashes, and since [2aeb3d688](https://github.com/Vandit1604/vawe/commit/2aeb3d688) two more groups.
+`vawe spec` measures any film deterministically: its cuts and flashes, and since [576d7c9ff](https://github.com/Vandit1604/vawe/commit/576d7c9ff) two more groups.
 
 - The eye group: where the focus sits in each shot, how far it jumps at a cut, how far it travels, and how often it sits near the centre.
-- The ground group: the edge tone, whether the ground changes at a cut, and how much the light drifts. [d54e256f8](https://github.com/Vandit1604/vawe/commit/d54e256f8) later made a cut compare the border cells of the two worlds.
+- The ground group: the edge tone, whether the ground changes at a cut, and how much the light drifts. [2a1e5fb32](https://github.com/Vandit1604/vawe/commit/2a1e5fb32) later made a cut compare the border cells of the two worlds.
 
 How far each of those numbers can be trusted is its own question; we calibrated the tools against [ground truth fixtures](/blog/see-truth) before relying on them.
 
 ## Method: one value per film, then percentiles
 
-`bar-from-refs` takes one value per film for each metric and prints the p10, median and p90 ([45b9d8f44](https://github.com/Vandit1604/vawe/commit/45b9d8f44)). The output is a committed file, `taste/build/ref-range.json`. One value per film comes first so that a long film with many cuts does not decide the range on its own.
+`bar-from-refs` takes one value per film for each metric and prints the p10, median and p90 ([78a282e7c](https://github.com/Vandit1604/vawe/commit/78a282e7c)). The output is a committed file, `taste/build/ref-range.json`. One value per film comes first so that a long film with many cuts does not decide the range on its own.
 
 The range covers 17 in-scope films and 167 cuts. Overshoot was measured over 22 films.
 
@@ -45,7 +45,7 @@ The range covers 17 in-scope films and 167 cuts. Overshoot was measured over 22 
 | Arrivals that overshoot (22 films) | 21.1% | 30.5% | 40.9% |
 
 <figure>
-<img src="/blog/quality-bar/ref-range.svg" alt="Range bars from the reference films: eye jump median 0.185 frame heights, eye near centre median 50 percent, ground change median 56.3 percent, overshoot median 30.5 percent" width="720" height="410" loading="lazy">
+<img src="/blog/quality-bar/ref-range.webp" alt="Range bars from the reference films: eye jump median 0.185 frame heights, eye near centre median 50 percent, ground change median 56.3 percent, overshoot median 30.5 percent" width="720" height="410" loading="lazy">
 <figcaption>p10 to p90 as a bar and the median as a tick, drawn from <code>taste/build/ref-range.json</code>. Each row has its own axis.</figcaption>
 </figure>
 
@@ -53,7 +53,7 @@ Read across, the median reference film keeps the eye nearly still at a cut, puts
 
 ## Results: our early drafts against the range
 
-The same commit wrote four checks straight from the ranges ([b44f29662](https://github.com/Vandit1604/vawe/commit/b44f29662)). Each limit comes from a percentile, and each rule file records what our films looked like when we measured them.
+The same commit wrote four checks straight from the ranges ([9fd9a76e2](https://github.com/Vandit1604/vawe/commit/9fd9a76e2)). Each limit comes from a percentile, and each rule file records what our films looked like when we measured them.
 
 | Check | Reference | Our early films |
 |---|---|---|
@@ -63,13 +63,13 @@ The same commit wrote four checks straight from the ranges ([b44f29662](https://
 | `text-lingers`: how long one word holds | 0.7 to 2.8 s | 3 to 4 s in two films |
 
 <figure>
-<img src="/blog/quality-bar/ours-vs-ref.svg" alt="Four rows comparing our early films with the reference range: overshoot 0 to 11 against 21 to 41 percent, peak speed 14 to 30 against at most 12.6 frame heights per second, readable text 94 against 84 percent or less, and a word held 3 to 4 seconds against 2.8" width="720" height="320" loading="lazy">
+<img src="/blog/quality-bar/ours-vs-ref.webp" alt="Four rows comparing our early films with the reference range: overshoot 0 to 11 against 21 to 41 percent, peak speed 14 to 30 against at most 12.6 frame heights per second, readable text 94 against 84 percent or less, and a word held 3 to 4 seconds against 2.8" width="720" height="320" loading="lazy">
 <figcaption>Early drafts against the same range.</figcaption>
 </figure>
 
 The gap on speed is the largest: our films reached 30 frame heights per second at p90, against a reference ceiling near 13.
 
-The checks advise and do not block, and each rule has a break-when line. A kinetic type film where the words are the picture says so in its brief. A percentile describes films; turned into a hard gate it invites agents to game it, which is what happened with another check in [reward hacking in AI agents](/blog/loophole-audit). The judge changed at the same time: it now compares sheets side by side with two reference films per dial and caps its scores when we lose ([e82b60704](https://github.com/Vandit1604/vawe/commit/e82b60704)).
+The checks advise and do not block, and each rule has a break-when line. A kinetic type film where the words are the picture says so in its brief. A percentile describes films; turned into a hard gate it invites agents to game it, which is what happened with another check in [reward hacking in AI agents](/blog/loophole-audit). The judge changed at the same time: it now compares sheets side by side with two reference films per dial and caps its scores when we lose ([4e4aa7ed6](https://github.com/Vandit1604/vawe/commit/4e4aa7ed6)).
 
 ## What the numbers do not show
 

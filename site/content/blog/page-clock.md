@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: architecture
 tags: "virtual clock, math.random seed, deterministic rendering, headless chrome, javascript"
 keywords: "math random seed javascript, virtual clock javascript, fake date.now, requestanimationframe seek"
-hero: /blog/page-clock/hero.svg
+hero: /blog/page-clock/hero.webp
 heroAlt: "A seek time t enters a virtual clock that sets Date, performance.now, requestAnimationFrame, timers and Math.random, and one identical frame comes out."
 ---
 
@@ -63,9 +63,9 @@ Agents write what they know, and that includes `setTimeout` and `Math.random`. O
 
 ## What the clock does not cover
 
-The clock handles scripts. CSS animations and Web Animations run on the document timeline, a second clock the browser drives. We freeze it by setting the animation playback rate to 0 (commit `874af4972`), because the compositor rasterized animated layers against real time before the first seek: a first seek 1.5 s after load painted different edge pixels than one at 0.05 s. The seek side is in [how to seek CSS animations frame by frame](/blog/seekable-css).
+The clock handles scripts. CSS animations and Web Animations run on the document timeline, a second clock the browser drives. We freeze it by setting the animation playback rate to 0 (commit `1454df446`), because the compositor rasterized animated layers against real time before the first seek: a first seek 1.5 s after load painted different edge pixels than one at 0.05 s. The seek side is in [how to seek CSS animations frame by frame](/blog/seekable-css).
 
-![Six boxes in order: set the clock, call window.seek, seek animations, run onFrame hooks, settle, screenshot.](/blog/page-clock/diagram.svg)
+![Six boxes in order: set the clock, call window.seek, seek animations, run onFrame hooks, settle, screenshot.](/blog/page-clock/diagram.webp)
 
 ## The test that holds it
 
@@ -80,8 +80,8 @@ Determinism is also the one thing in vawe that can refuse a render; everything e
 | `core/engine/page-clock.js` | the virtual clock (75 lines) |
 | `core/engine/page-seek.js` | the in-page seek that sets the clock and seeks every animation |
 | `tests/media/render-page-determinism.test.mjs` | render twice, compare frame hashes |
-| [`f92f5f59c`](https://github.com/Vandit1604/vawe/commit/f92f5f59c) (2026-09-30) | the virtual clock, `window.seek`, the settle barrier, aspect and a 60 fps final |
-| [`06d63c5ce`](https://github.com/Vandit1604/vawe/commit/06d63c5ce) (2026-09-30) | `page-clock` added |
-| [`874af4972`](https://github.com/Vandit1604/vawe/commit/874af4972) (2026-10-08) | freeze the document timeline |
+| [`5a271307f`](https://github.com/Vandit1604/vawe/commit/5a271307f) (2026-09-30) | the virtual clock, `window.seek`, the settle barrier, aspect and a 60 fps final |
+| [`f8eff86b0`](https://github.com/Vandit1604/vawe/commit/f8eff86b0) (2026-09-30) | `page-clock` added |
+| [`1454df446`](https://github.com/Vandit1604/vawe/commit/1454df446) (2026-10-08) | freeze the document timeline |
 
 User-facing rules are in the [determinism docs](/docs/determinism), and the public explanation is on [/determinism](/determinism).

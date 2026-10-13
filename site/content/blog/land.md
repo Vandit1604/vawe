@@ -6,11 +6,11 @@ updated: 2026-10-13
 section: agent-experience
 tags: "git worktree, rebase, ai agents, merge workflow"
 keywords: "git worktree merge to main, git worktree workflow, rebase and push, big file scan"
-hero: /blog/land/hero.svg
+hero: /blog/land/hero.webp
 heroAlt: "The five steps of vawe land: rebase onto origin main, scan the range for files over 5 MB, run the tests, push with an ssh keep-alive, then print the e2e line and the pushed range."
 ---
 
-You can merge a git worktree branch to `main` with one command that rebases, scans for big files, runs the tests, pushes and reports, and that stops cleanly at the first failure. It is how agents land work on [vawe](https://github.com/Vandit1604/vawe), where several agents run at once, each in its own worktree on its own topic branch, and every branch is pushed straight to `main`. The command is `bin/vawe land`, added on 2026-10-11 in [685fe28](https://github.com/Vandit1604/vawe/commit/685fe284b).
+You can merge a git worktree branch to `main` with one command that rebases, scans for big files, runs the tests, pushes and reports, and that stops cleanly at the first failure. It is how agents land work on [vawe](https://github.com/Vandit1604/vawe), where several agents run at once, each in its own worktree on its own topic branch, and every branch is pushed straight to `main`. The command is `bin/vawe land`, added on 2026-10-11 in [82b68c3](https://github.com/Vandit1604/vawe/commit/82b68c3c7).
 
 By hand, a clean landing was about six steps: fetch, rebase onto `origin/main`, check that no huge file went in, run the tests, push, and read the pre-push e2e result. Agents rarely failed one step. They failed the sequence: in our own notes, agents on worktrees pushed stale branches, forgot the tests, pushed big files, and lost ssh pushes that dropped while the pre-push hook ran the e2e suite. Turning that ritual into a verb follows the rule behind our [agent harness for the weaker model](/blog/weaker-model): one command per step, with the fix in the output.
 
@@ -47,7 +47,7 @@ Together they tolerate an idle connection for about 20 minutes, which covers the
 
 It prints the e2e result line from the hook, or from the e2e report file when that report is for the same commit, then the pushed range with the commit count. After a good landing, the next-step line says to delete the merged branch and its worktree.
 
-![What each stop of vawe land leaves behind.](/blog/land/diagram.svg)
+![What each stop of vawe land leaves behind.](/blog/land/diagram.webp)
 
 ## Check that it works
 
@@ -63,7 +63,7 @@ In daily use, every stop ends in the shape every vawe verb uses: `land: FAILED a
 
 - A conflict. The message ends with "Run git rebase origin/main by hand, resolve it, then run bin/vawe land again". The branch is as it was before the command.
 - A big file. The message names the file and ends with "Remove it from the history, then run bin/vawe land again".
-- A stale checkout before you even start. [b5ab6f2](https://github.com/Vandit1604/vawe/commit/b5ab6f217), two minutes before the landing verb, makes the stage hook print a line at the next prompt (the number is an example):
+- A stale checkout before you even start. [61dd23b](https://github.com/Vandit1604/vawe/commit/61dd23b33), two minutes before the landing verb, makes the stage hook print a line at the next prompt (the number is an example):
 
 ```
 this checkout is 3 commits behind origin/main: new guides, verbs and

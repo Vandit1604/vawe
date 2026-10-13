@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: taste
 tags: "video transitions, match cut, handoffs, slideshow, motion design"
 keywords: "motion graphics transitions, match cut, scene transitions in motion graphics, slideshow tells, cut on motion"
-hero: /blog/transitions/hero.svg
+hero: /blog/transitions/hero.webp
 heroAlt: "Twelve handoff families as a grid: graphic match, action match, object to object, position lock, container transform, shared axis, colour or light flood, type-driven, camera through, invisible cut, sound bridge, deliberate cut."
 ---
 
@@ -22,9 +22,9 @@ How to check: write the carried element in the plan before you build. If the cel
 
 ## 2. Pick a family from the twelve, and read its cost
 
-Commit [`f12a9f516`](https://github.com/Vandit1604/vawe/commit/f12a9f516) added the family table in `taste/craft/transitions.md`. Each family says what it is, when the story at the cut fits it, its cost or risk, and which moves to copy.
+Commit [`530a27f8c`](https://github.com/Vandit1604/vawe/commit/530a27f8c) added the family table in `taste/craft/transitions.md`. Each family says what it is, when the story at the cut fits it, its cost or risk, and which moves to copy.
 
-![The twelve families: graphic match, action match, object to object, position lock, container transform, shared axis, colour or light flood, type-driven, camera through, invisible cut, sound bridge, deliberate cut.](/blog/transitions/hero.svg)
+![The twelve families: graphic match, action match, object to object, position lock, container transform, shared axis, colour or light flood, type-driven, camera through, invisible cut, sound bridge, deliberate cut.](/blog/transitions/hero.webp)
 
 The cost column keeps an agent from using the showiest family on every cut:
 
@@ -54,15 +54,15 @@ The Board's cut table has a handoff column. `vawe check transitions` and the dra
 
 ## 6. Score the film for slideshow tells
 
-Commit [`a5a50e80e`](https://github.com/Vandit1604/vawe/commit/a5a50e80e) added `harness/lib/slideshow.mjs`. It scores ten tells from the motion records, the world spans and, when there is a video, the detected cut kinds and the still runs. It prints a score out of 10 with each tell, its seconds and a fix. It is advice only.
+Commit [`3734cb9b7`](https://github.com/Vandit1604/vawe/commit/3734cb9b7) added `harness/lib/slideshow.mjs`. It scores ten tells from the motion records, the world spans and, when there is a video, the detected cut kinds and the still runs. It prints a score out of 10 with each tell, its seconds and a fix. It is advice only.
 
-![Ten slideshow tells and their codes, with the repeat thresholds.](/blog/transitions/tells.svg)
+![Ten slideshow tells and their codes, with the repeat thresholds.](/blog/transitions/tells.webp)
 
 The thresholds are repeat counts: 3 or more cuts, 5 or more elements, a 75 percent share, or shots within 15 percent of one length. A single event is a choice: one crossfade for a time jump is not a tell. We set the thresholds so that our two public example films, `colour-sting` and `tracking-hud`, stay clean, and a test reads their pages through the same rules.
 
 ## 7. Copy a continuous-take move when the story allows one
 
-Two commits on 2026-10-10 added ten handoff moves. Each carries one shared element from scene A to scene B with no cut and no crossfade. [`c8d4b7779`](https://github.com/Vandit1604/vawe/commit/c8d4b7779) added highlight sweep, shadow handoff, word portal, underline road and caret door. `9d0224a63` added swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid. Our notes describe a larger set of polished continuous-take moves, but we verified only these ten in the commits.
+Two commits on 2026-10-10 added ten handoff moves. Each carries one shared element from scene A to scene B with no cut and no crossfade. [`a5ed8672b`](https://github.com/Vandit1604/vawe/commit/a5ed8672b) added highlight sweep, shadow handoff, word portal, underline road and caret door. `c921d7163` added swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid. Our notes describe a larger set of polished continuous-take moves, but we verified only these ten in the commits.
 
 <figure>
 <video src="/blog/transitions/swipe-continues.mp4" poster="/blog/transitions/swipe-continues.hd.webp" muted loop playsinline controls></video>
@@ -78,7 +78,7 @@ When the carried element moves across the cut, match its speed on both sides. `r
 
 ## 8. Cap the exposure flash at three per second
 
-The exposure flash ([`dac155c18`](https://github.com/Vandit1604/vawe/commit/dac155c18)) is a 3-frame over-exposure on a cut. The new shot starts at twice the brightness and settles in 0.15 s. Measured on the clip at 60 fps: mean luma 27 before the cut, 203 to 208 in the peak, 67 on the first frame after it, and 38 after 0.15 s. The helper allows at most 3 flashes in any one second, in line with the WCAG limit of three flashes per second. A fourth cut in that second still cuts, without the flash.
+The exposure flash ([`bb913b6db`](https://github.com/Vandit1604/vawe/commit/bb913b6db)) is a 3-frame over-exposure on a cut. The new shot starts at twice the brightness and settles in 0.15 s. Measured on the clip at 60 fps: mean luma 27 before the cut, 203 to 208 in the peak, 67 on the first frame after it, and 38 after 0.15 s. The helper allows at most 3 flashes in any one second, in line with the WCAG limit of three flashes per second. A fourth cut in that second still cuts, without the flash.
 
 <figure>
 <video src="/blog/transitions/exposure-flash.mp4" poster="/blog/transitions/exposure-flash.hd.webp" muted loop playsinline controls></video>
@@ -87,7 +87,7 @@ The exposure flash ([`dac155c18`](https://github.com/Vandit1604/vawe/commit/dac1
 
 ## 9. Keep the seam rules few
 
-We folded the older seam rules into three: `seam-timing`, `hard-cut-default` and `eye-trace` (`73336e6fc`). That commit added 73 lines, removed 255 and retired five rule ids.
+We folded the older seam rules into three: `seam-timing`, `hard-cut-default` and `eye-trace` (`d6c9d9ced`). That commit added 73 lines, removed 255 and retired five rule ids.
 
 ## The checklist at a glance
 

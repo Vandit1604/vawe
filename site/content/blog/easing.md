@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: taste
 tags: "easing, css, motion, cubic-bezier, after effects"
 keywords: "css easing functions, cubic-bezier easing, css linear() easing, easing curves cheat sheet, after effects easing in css"
-hero: /blog/easing/hero.svg
+hero: /blog/easing/hero.webp
 heroAlt: "Large number 44 with the caption easing pages, 9 named curves, one vocabulary for every move"
 ---
 
@@ -35,13 +35,13 @@ A table of names is the common fix, and every motion system has one. We had an e
 Each name is two After Effects keyframe handles: an influence (how far along the time axis the handle reaches) and a speed (how steep the curve is at the key). The vocabulary lives in one file, `core/motion/presets.js`. Each curve converts to a CSS `linear()` string, and every page also shows the nearest `cubic-bezier` with its fit error.
 
 <figure>
-<img src="/blog/easing/curves.svg" alt="Progress curves for land, land-soft, launch, leave and pop plotted on one chart" width="720" height="400" loading="lazy">
+<img src="/blog/easing/curves.webp" alt="Progress curves for land, land-soft, launch, leave and pop plotted on one chart" width="720" height="400" loading="lazy">
 <figcaption>The five curves that matter most, plotted from the sampled data on the easing pages. Peak speed is relative to a straight line.</figcaption>
 </figure>
 
 ## land and landSoft: entrances
 
-`land` is a fast start with a long soft stop. It peaks at 4.8 times average speed, and on a move shorter than 0.4 s that reads as a jump (the README note in the fix commit says so). `landSoft` keeps the long stop and drops the peak to 2.81 times average ([`70069b63d`](https://github.com/Vandit1604/vawe/commit/70069b63d)). A later commit lengthened the short pops and exits that the energy measure had flagged (`7a8b902c7`).
+`land` is a fast start with a long soft stop. It peaks at 4.8 times average speed, and on a move shorter than 0.4 s that reads as a jump (the README note in the fix commit says so). `landSoft` keeps the long stop and drops the peak to 2.81 times average ([`a5fd39d88`](https://github.com/Vandit1604/vawe/commit/a5fd39d88)). A later commit lengthened the short pops and exits that the energy measure had flagged (`766c2a809`).
 
 <figure>
 <video src="/blog/easing/land.mp4" poster="/blog/easing/land.webp" muted loop playsinline autoplay width="640" height="360"></video>
@@ -69,7 +69,7 @@ The first set had six names: `land`, `leave`, `launch`, `settle`, `swap` and `gl
 
 ## ramp(): matching speed across a cut
 
-`ramp()` is a speed ramp across a cut. The outgoing element accelerates into the cut, and the incoming one leaves it at the same speed and slows down, so velocity matches on both sides ([`3e6b5eb4d`](https://github.com/Vandit1604/vawe/commit/3e6b5eb4d)). Matching velocity across a cut is the part people get wrong by eye. See [the speed-ramp move](/moves/speed-ramp), and for other ways to carry motion over a seam, [motion graphics transitions](/blog/transitions).
+`ramp()` is a speed ramp across a cut. The outgoing element accelerates into the cut, and the incoming one leaves it at the same speed and slows down, so velocity matches on both sides ([`8f117991b`](https://github.com/Vandit1604/vawe/commit/8f117991b)). Matching velocity across a cut is the part people get wrong by eye. See [the speed-ramp move](/moves/speed-ramp), and for other ways to carry motion over a seam, [motion graphics transitions](/blog/transitions).
 
 ## Where the handle values came from
 
@@ -77,7 +77,7 @@ We did not pick the handles by taste. We measured 1,339 animation segments from 
 
 ## The 44 easing pages
 
-A script reads the motion library and writes one JSON file per ease with the curve, its velocity, the `linear()` string, a cubic-bezier fit and the After Effects handle values. The site renders 44 pages from it: the nine vawe curves, 30 classic ones (ten families, each in, out and in-out) and the 5 CSS keywords including `linear` ([`e32a4f38b`](https://github.com/Vandit1604/vawe/commit/e32a4f38b)). Only the words are typed by hand. Each vawe page carries a 2 s clip of the curve moving a square next to a linear one.
+A script reads the motion library and writes one JSON file per ease with the curve, its velocity, the `linear()` string, a cubic-bezier fit and the After Effects handle values. The site renders 44 pages from it: the nine vawe curves, 30 classic ones (ten families, each in, out and in-out) and the 5 CSS keywords including `linear` ([`88f2f435a`](https://github.com/Vandit1604/vawe/commit/88f2f435a)). Only the words are typed by hand. Each vawe page carries a 2 s clip of the curve moving a square next to a linear one.
 
 ## What this list cannot tell you
 

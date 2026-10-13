@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: speed
 tags: "testing, end-to-end tests, ci, agents, rendering"
 keywords: "how to speed up e2e tests, e2e test speed, fast pre-push hook, parallel render tests"
-hero: /blog/test-suite/hero.svg
+hero: /blog/test-suite/hero.webp
 heroAlt: "Bar chart of seconds per command: make e2e about 175 s before and 4.3 s after, make test about 95 s, page tests about 15 s."
 ---
 
@@ -14,7 +14,7 @@ In late September our `make e2e` took about 175 seconds and failed on a busy lap
 
 <figure>
 
-![Seconds per command before and after: e2e from about 175 s to 4.3 s, make test unchanged at about 95 s](/blog/test-suite/hero.svg)
+![Seconds per command before and after: e2e from about 175 s to 4.3 s, make test unchanged at about 95 s](/blog/test-suite/hero.webp)
 
 <figcaption>The 175 s, 95 s and 4.3 s figures come from our own timing notes, not from a commit message.</figcaption>
 </figure>
@@ -29,7 +29,7 @@ We chose not to tune the old suite, since tuning code about to be deleted is was
 
 ## The rebuilt run: render every page, check one fact
 
-After the format was gone, commit [777ec0da5](https://github.com/Vandit1604/vawe/commit/777ec0da5) rewrote `harness/dev/e2e.mjs`. It has two parts.
+After the format was gone, commit [6d34b376a](https://github.com/Vandit1604/vawe/commit/6d34b376a) rewrote `harness/dev/e2e.mjs`. It has two parts.
 
 First it runs the page tests with `node --test`: determinism, page audio and the motion tests. Then it finds every `films/**/page.html` and every page in `tests/fixtures/pages/`, and renders each one as a half-size draft. A small pool runs 2 to 4 renders at once, depending on the core count.
 
@@ -39,7 +39,7 @@ The run never stops at the first failure. It collects every result and writes `r
 
 <figure>
 
-![Flow of make e2e: page tests and a pool of half-size draft renders, each checked with ffprobe, then one report](/blog/test-suite/flow.svg)
+![Flow of make e2e: page tests and a pool of half-size draft renders, each checked with ffprobe, then one report](/blog/test-suite/flow.webp)
 
 </figure>
 
@@ -47,7 +47,7 @@ The 4.3 seconds needs a caveat. At that commit the repository had one example fi
 
 ## Timing tests that measure the machine first
 
-A fixed limit fails under load. In [250b7a3d5](https://github.com/Vandit1604/vawe/commit/250b7a3d5) we made the two timing tests measure the machine before they judge it.
+A fixed limit fails under load. In [cb4fe0188](https://github.com/Vandit1604/vawe/commit/cb4fe0188) we made the two timing tests measure the machine before they judge it.
 
 The check-budget test (`tests/media/check-budget.test.mjs`) stores the seconds each draft check took, plus how long the capture of its fixture took on the stamping run. On a later run it divides this run's capture time by the stamped one. If the machine is 2x slower, each check gets a 2x limit. The stall test (`tests/media/render-stall.test.mjs`) does the same: it renders the page once with no stall, then sets its stall limit to twice that capture time, with a floor of 1.5 seconds.
 
@@ -55,7 +55,7 @@ A real regression still fails, because a check that grows without the capture gr
 
 ## Hooks, and one e2e per merge
 
-The same week we cut the Makefile down to thin aliases for `bin/vawe` verbs and rewrote the git hooks ([b4be7483b](https://github.com/Vandit1604/vawe/commit/b4be7483b), 70 files, +158 and -2,481). Pre-commit runs fast checks. Pre-push runs fast checks plus e2e. Later [685fe284b](https://github.com/Vandit1604/vawe/commit/685fe284b) wrapped the ritual into one verb, `vawe land`: fetch, rebase onto origin/main, scan for big files, run the tests, then push with an ssh keep-alive. The tutorial on [merging a git worktree branch to main in one command](/blog/land) covers it.
+The same week we cut the Makefile down to thin aliases for `bin/vawe` verbs and rewrote the git hooks ([3913b499c](https://github.com/Vandit1604/vawe/commit/3913b499c), 70 files, +158 and -2,481). Pre-commit runs fast checks. Pre-push runs fast checks plus e2e. Later [82b68c3c7](https://github.com/Vandit1604/vawe/commit/82b68c3c7) wrapped the ritual into one verb, `vawe land`: fetch, rebase onto origin/main, scan for big files, run the tests, then push with an ssh keep-alive. The tutorial on [merging a git worktree branch to main in one command](/blog/land) covers it.
 
 Our rule is one e2e per merge. Agents do not run it per branch, because ten agents each running a render suite is how the laptop reached a load of 18.
 

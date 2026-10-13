@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "ai agents, clarifying questions, cli design, brief"
 keywords: "ai agent clarifying questions, agent asks before acting, cli prompts for agents, creative brief"
-hero: /blog/new-asks/hero.svg
+hero: /blog/new-asks/hero.webp
 heroAlt: "Decision flow of vawe new: unanswered subject, message or show prints the questions and writes nothing; answers or the defaults flag write the page and brief."
 ---
 
@@ -18,13 +18,13 @@ Asking first is one rule of the [AI agent harness we design for the weaker model
 
 ## What you need for an ask-first command
 
-- One command that every session runs first. A skill or a doc page will not do: we tried a `vawe-brief` skill on 2026-09-30 ([19ce83e](https://github.com/Vandit1604/vawe/commit/19ce83e43)), and a skill only works if the agent loads it.
+- One command that every session runs first. A skill or a doc page will not do: we tried a `vawe-brief` skill on 2026-09-30 ([7577445](https://github.com/Vandit1604/vawe/commit/7577445dc)), and a skill only works if the agent loads it.
 - A list of the details that change the output most, in order, with a flag for which ones are required.
 - A file format the agent can write with its file tool, such as `key: value` lines.
 
 ## Step 1: print the questions and write nothing
 
-[14670012](https://github.com/Vandit1604/vawe/commit/14670012e) changed `vawe new` to stop when a required detail is missing. `vawe new demo --request "a 5 s sting"` now prints this and creates no files:
+[10bbe613](https://github.com/Vandit1604/vawe/commit/10bbe6132) changed `vawe new` to stop when a required detail is missing. `vawe new demo --request "a 5 s sting"` now prints this and creates no files:
 
 ```
 vawe new: 5 facts needed before a good brief
@@ -62,13 +62,13 @@ vawe new demo --detail subject="..." --detail message="..."
 vawe new demo --questions-json               # structured question calls, at most four each
 ```
 
-`--questions-json` arrived in [4c7636d](https://github.com/Vandit1604/vawe/commit/4c7636d1e). It is for clients with a question tool, so the human sees choices and not a wall of text.
+`--questions-json` arrived in [4e3fc43](https://github.com/Vandit1604/vawe/commit/4e3fc43d2). It is for clients with a question tool, so the human sees choices and not a wall of text.
 
 ## Step 5: keep a flag for runs with nobody to ask
 
 Tests and unattended jobs need a way through. `--defaults` guesses every open detail and prints which ones it guessed. When the three required details (subject, message, show) are answered and an optional one is not, the command goes ahead and writes the gap into `brief.md` as a stated guess marked `(guess: change me)`. A guess is never hidden.
 
-![The decision flow in vawe new: ask, answer, write.](/blog/new-asks/diagram.svg)
+![The decision flow in vawe new: ask, answer, write.](/blog/new-asks/diagram.webp)
 
 ## Check that it works
 
@@ -81,7 +81,7 @@ Tests and unattended jobs need a way through. `--defaults` guesses every open de
 - The question lives in a doc. The agent skips the doc. Put it in the command.
 - The ask exits non-zero. The agent treats it as a crash and retries.
 - The defaults path guesses silently. Nobody can then tell a guess from a fact in the brief.
-- The answers feed nothing measurable. The same week, [a9a821a](https://github.com/Vandit1604/vawe/commit/a9a821aa5) made the measured brief the default file: Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. Its numbers are only as good as the facts under them, and [acceptance criteria for AI agents](/blog/measured-brief) shows how that scoreboard can still go wrong.
+- The answers feed nothing measurable. The same week, [f889153](https://github.com/Vandit1604/vawe/commit/f88915325) made the measured brief the default file: Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. Its numbers are only as good as the facts under them, and [acceptance criteria for AI agents](/blog/measured-brief) shows how that scoreboard can still go wrong.
 
 ## What we cannot prove yet
 

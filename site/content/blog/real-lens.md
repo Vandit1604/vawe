@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: taste
 tags: "depth of field, bloom, webgl, html to video, lens"
 keywords: "depth of field in the browser, webgl depth of field, bloom effect css, halation, webgl lens shader"
-hero: /blog/real-lens/hero.svg
+hero: /blog/real-lens/hero.webp
 heroAlt: "Pipeline diagram. A flat HTML screen becomes an SVG image, then a GL texture, then one lens shader applies perspective, depth of field, palette, LED mask, bloom, halation, aberration and grain."
 ---
 
@@ -27,7 +27,7 @@ We learned this when we set our first HUD film next to a reference filmed off a 
 
 A real defocus depends on distance from the focal plane, and bright points take the shape of the aperture. `filter: blur()` gives every pixel in a layer the same radius and has no bokeh. Tuning it has a ceiling, because each blurred element works alone.
 
-The lens does depth of field in one shader, together with perspective. The first lens commit, [`c91ee96cf`](https://github.com/Vandit1604/vawe/commit/c91ee96cf), added `core/surfaces/lens.js` at 546 lines, a source adapter, a demo page, a test file and a move clip. The page does not know it is being filmed. The chain has four steps:
+The lens does depth of field in one shader, together with perspective. The first lens commit, [`eaa5cdf46`](https://github.com/Vandit1604/vawe/commit/eaa5cdf46), added `core/surfaces/lens.js` at 546 lines, a source adapter, a demo page, a test file and a move clip. The page does not know it is being filmed. The chain has four steps:
 
 1. The page draws a 1920 by 1080 `#screen` element, parked behind the lens canvas.
 2. `htmlSource` inlines the computed styles and fonts into an SVG image.
@@ -59,21 +59,21 @@ Bloom and panel period are close. The colour fringe is further off. We have no j
 
 A frame costs about 17 ms on the GPU at 1080p (12 ms in a draft), and a 6 second final of 360 frames captures in about 20 seconds. The CSS route costs nothing extra, which is its real advantage.
 
-The upload was the first cost to cut. The SVG screen source was large, and it is rebuilt and uploaded on every frame of a seek. Commit [`7d3d83855`](https://github.com/Vandit1604/vawe/commit/7d3d83855) inlines only the styles that differ from a bare element and its parent clone, and the SVG image became about one tenth of its old size.
+The upload was the first cost to cut. The SVG screen source was large, and it is rebuilt and uploaded on every frame of a seek. Commit [`4821e1780`](https://github.com/Vandit1604/vawe/commit/4821e1780) inlines only the styles that differ from a bare element and its parent clone, and the SVG image became about one tenth of its old size.
 
 ## Determinism: will a draft match the final?
 
-A film renderer needs a frame to be a pure function of time. Commit [`8f153f31b`](https://github.com/Vandit1604/vawe/commit/8f153f31b) draws the SVG screen into a software canvas so a draft's pixels match from run to run; it was a one-line change to how the canvas is created. All noise in the lens (grain, tear, weave) is hashed from a seed and `floor(t * fps)`. A test renders a lens page whose HTML changes every frame twice, on several lanes, and compares the frames. The wider reasoning is in [deterministic rendering in headless Chrome](/blog/determinism).
+A film renderer needs a frame to be a pure function of time. Commit [`398fd7a7c`](https://github.com/Vandit1604/vawe/commit/398fd7a7c) draws the SVG screen into a software canvas so a draft's pixels match from run to run; it was a one-line change to how the canvas is created. All noise in the lens (grain, tear, weave) is hashed from a seed and `floor(t * fps)`. A test renders a lens page whose HTML changes every frame twice, on several lanes, and compares the frames. The wider reasoning is in [deterministic rendering in headless Chrome](/blog/determinism).
 
 ## Control: one property per element against named looks
 
 Every lens option is a literal in the page: a number, an array or a function of the seek time. The lens also has `project()`, which runs the same camera on the CPU, so a label drawn in HTML on top of the canvas can sit on the right pixel of the filmed screen.
 
-The long option list became its own problem for agents, so commit [`6e3635043`](https://github.com/Vandit1604/vawe/commit/6e3635043) added a `LOOKS` table with ten entries: `clean`, `dream-bloom`, `film-halation`, `anamorphic`, `pro-mist`, `tilt-shift`, `soft-focus`, `vintage`, `cyanotype` and `crt`. A look names every effect it uses and nothing else is on. The page's own options go over the look, and a preview override goes over both.
+The long option list became its own problem for agents, so commit [`3920d8220`](https://github.com/Vandit1604/vawe/commit/3920d8220) added a `LOOKS` table with ten entries: `clean`, `dream-bloom`, `film-halation`, `anamorphic`, `pro-mist`, `tilt-shift`, `soft-focus`, `vintage`, `cyanotype` and `crt`. A look names every effect it uses and nothing else is on. The page's own options go over the look, and a preview override goes over both.
 
-![Three layers of options. The preview override wins over the page options, which win over the named look. Ten look names are listed.](/blog/real-lens/looks.svg)
+![Three layers of options. The preview override wins over the page options, which win over the named look. Ten look names are listed.](/blog/real-lens/looks.webp)
 
-`vawe looks` (commit `0800a139f`) renders a page frame under every named look and prints one labelled grid per second, so an agent picks by looking instead of guessing numbers. The starter brief now has a Look line that names the command (`191285f5d`).
+`vawe looks` (commit `73b687aef`) renders a page frame under every named look and prints one labelled grid per second, so an agent picks by looking instead of guessing numbers. The starter brief now has a Look line that names the command (`4004bac38`).
 
 ## When to choose which
 

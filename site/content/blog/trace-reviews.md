@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "ai agent traces, long-running commands, render queue, debugging agents, harness"
 keywords: "ai agent traces, long-running commands for ai agents, agent polling, debugging ai agents"
-hero: /blog/trace-reviews/session-time.svg
+hero: /blog/trace-reviews/session-time.webp
 heroAlt: "A stacked bar of one 110-minute agent session. The ship and waits segment is 81.5 minutes, 74 percent. All other stages together are under 27 minutes."
 ---
 
@@ -26,7 +26,7 @@ An 8 s film took a 73-minute span, 56 minutes of it active. The agent made 162 t
 
 A 20 s film took 110 minutes and 170 tool calls.
 
-![Stacked bar of one 110-minute session by stage](/blog/trace-reviews/session-time.svg)
+![Stacked bar of one 110-minute session by stage](/blog/trace-reviews/session-time.webp)
 
 Ship and waits took 68 calls and 81.5 minutes. Of 130 Bash calls, 52 were `ship --status --wait` polls. The agent often sent three or four in one message, and they ran one after another, each blocking for up to 100 s. Those polls account for 17.6M of the session's 40.7M cache-read tokens, 43%. The session record showed API time of 1,235 s out of 6,630 s (19%) and tool time of 5,562 s (84%). The two overlap, but most of the session was tool time and not model time.
 
@@ -36,7 +36,7 @@ The polls were a symptom of the shape of the command. A final render takes about
 
 3 of the 5 finals in the 110-minute session failed.
 
-![Bar chart of five final renders and their elapsed seconds](/blog/trace-reviews/ships.svg)
+![Bar chart of five final renders and their elapsed seconds](/blog/trace-reviews/ships.webp)
 
 The failures cost 2,967 s, 49 minutes or 45% of the session. Two of them had captured to 100% (the log shows `capturing 19198/19200`) and then died at the audio mux step with a "detached Frame" error. The run log recorded `failedAt: 0`, so the next ship started from the beginning and captured everything again. The third lost a slice after four tries, because another process closed the shared browser.
 
@@ -46,7 +46,7 @@ The agent could not see its own failures well either. Of 140 `vawe` calls in one
 
 The later review of eight sessions added up the time drafts spent waiting for a render slot. A machine has two render slots by default, and a final could hold one for minutes. Inside `dev`, the slot wait was 357 s of 427 in one film, 339 of 395 in another, then 172 of 200, 155 of 243 and 133 of 247. The five add up to 1,156 s.
 
-![Draft time spent waiting for a render slot in five films.](/blog/cheap-wait/hero.svg)
+![Draft time spent waiting for a render slot in five films.](/blog/cheap-wait/hero.webp)
 
 One more cost sat on a canvas film. Per-frame DOM probes ran on a film that draws on one canvas, where there is no DOM to probe, and `dev --fast` on it took 109 s. The same log showed `vawe sound` failing 8 of 19 calls on cues shorter than one second, with a message that hid the cause: the reader needed one second of samples.
 
@@ -54,33 +54,33 @@ One more cost sat on a canvas film. Per-frame DOM probes ran on a film that draw
 
 The first group of fixes changed how a long-running command talks to an agent.
 
-`ship` runs in the background by default: it starts a job and returns, `--wait` blocks, and `--status` reports progress or the result ([a0bf744d4](https://github.com/Vandit1604/vawe/commit/a0bf744d4)). A later commit checks the final first and cancels a duplicate job ([fd50ef01f](https://github.com/Vandit1604/vawe/commit/fd50ef01f)).
+`ship` runs in the background by default: it starts a job and returns, `--wait` blocks, and `--status` reports progress or the result ([a5d092c22](https://github.com/Vandit1604/vawe/commit/a5d092c22)). A later commit checks the final first and cancels a duplicate job ([6e74cd5a5](https://github.com/Vandit1604/vawe/commit/6e74cd5a5)).
 
-`ship --status --wait` blocks for up to 9 minutes and prints a progress line each minute ([0699bdcac](https://github.com/Vandit1604/vawe/commit/0699bdcac)), so a long block never looks like a hang. Its result names the next call and how many calls are left ([6ddf4240d](https://github.com/Vandit1604/vawe/commit/6ddf4240d)), which removes a decision from the agent.
+`ship --status --wait` blocks for up to 9 minutes and prints a progress line each minute ([e3e504636](https://github.com/Vandit1604/vawe/commit/e3e504636)), so a long block never looks like a hang. Its result names the next call and how many calls are left ([6bea1e806](https://github.com/Vandit1604/vawe/commit/6bea1e806)), which removes a decision from the agent.
 
-`vawe wait` blocks on any render of a film, draft or final, with the same progress line and a result line at the end ([955d4a94c](https://github.com/Vandit1604/vawe/commit/955d4a94c)). AGENTS.md names it for waiting and says to run it once, not in parallel.
+`vawe wait` blocks on any render of a film, draft or final, with the same progress line and a result line at the end ([f0ab4f483](https://github.com/Vandit1604/vawe/commit/f0ab4f483)). AGENTS.md names it for waiting and says to run it once, not in parallel.
 
-![Before: many polls, each blocking up to 100 s. After: one call up to 9 minutes with a progress line each minute.](/blog/cheap-wait/polls.svg)
+![Before: many polls, each blocking up to 100 s. After: one call up to 9 minutes with a progress line each minute.](/blog/cheap-wait/polls.webp)
 
 ## Keeping a slot free for drafts
 
-A final never takes the last free render slot now. Slots 0 to count minus 2 are the finals' share, and a draft takes slots from the top, so a draft no longer queues behind finals ([7d01618fc](https://github.com/Vandit1604/vawe/commit/7d01618fc)). When a slot is busy, the waiting line names the holder and its age, and a navigation timeout is retried once ([fc84e8c70](https://github.com/Vandit1604/vawe/commit/fc84e8c70)). The slot logic lives in `harness/lib/render-slots.mjs`; the background job and status lines in `harness/media/ship-job.mjs` and `harness/lib/ship-status.mjs`.
+A final never takes the last free render slot now. Slots 0 to count minus 2 are the finals' share, and a draft takes slots from the top, so a draft no longer queues behind finals ([05aa73d9c](https://github.com/Vandit1604/vawe/commit/05aa73d9c)). When a slot is busy, the waiting line names the holder and its age, and a navigation timeout is retried once ([37749a58a](https://github.com/Vandit1604/vawe/commit/37749a58a)). The slot logic lives in `harness/lib/render-slots.mjs`; the background job and status lines in `harness/media/ship-job.mjs` and `harness/lib/ship-status.mjs`.
 
-Canvas films skip the DOM probes, and `dev` names why a page never loads after 30 s ([6ddf4240d](https://github.com/Vandit1604/vawe/commit/6ddf4240d)). On the canvas film, `dev --fast` went from 109 s to 26 s, a number from the commit subject.
+Canvas films skip the DOM probes, and `dev` names why a page never loads after 30 s ([6bea1e806](https://github.com/Vandit1604/vawe/commit/6bea1e806)). On the canvas film, `dev --fast` went from 109 s to 26 s, a number from the commit subject.
 
-![A canvas film's dev --fast run: 109 s before, 26 s after.](/blog/cheap-wait/fast.svg)
+![A canvas film's dev --fast run: 109 s before, 26 s after.](/blog/cheap-wait/fast.webp)
 
 ## Fixing what the failures threw away
 
 The second group made failed work recoverable and visible.
 
-- A mux failure keeps the capture. [544693435](https://github.com/Vandit1604/vawe/commit/544693435) reads the page audio before the capture, keeps the frames and records the real stage when the mux fails.
-- A resume finds its frames. [8069d09c7](https://github.com/Vandit1604/vawe/commit/8069d09c7) keys the kept-frames folder on file bytes, because a rebase or an edit in another session changed the file times that the key used. [Resumable video rendering](/blog/resumable-finals) tells the rest of that story.
-- A final needs a person's approval of the current page ([f776acb65](https://github.com/Vandit1604/vawe/commit/f776acb65), 13 files, 228 lines added and 12 removed). Agents had shipped a 16-minute final on their own whenever they finished; [AI agent guardrails](/blog/advise-refuse) explains the gate.
-- Short cues work: [0eae5d9fb](https://github.com/Vandit1604/vawe/commit/0eae5d9fb) lets `vawe sound` read a cue under one second.
-- Two natural calls stop failing: [84932e278](https://github.com/Vandit1604/vawe/commit/84932e278) defines `vawe.onFrame` before any page script, and [38b1fc355](https://github.com/Vandit1604/vawe/commit/38b1fc355) lets `strip --cuts` read the declared worlds of a canvas film.
+- A mux failure keeps the capture. [e1b944267](https://github.com/Vandit1604/vawe/commit/e1b944267) reads the page audio before the capture, keeps the frames and records the real stage when the mux fails.
+- A resume finds its frames. [7d840bb3e](https://github.com/Vandit1604/vawe/commit/7d840bb3e) keys the kept-frames folder on file bytes, because a rebase or an edit in another session changed the file times that the key used. [Resumable video rendering](/blog/resumable-finals) tells the rest of that story.
+- A final needs a person's approval of the current page ([2ac1331ab](https://github.com/Vandit1604/vawe/commit/2ac1331ab), 13 files, 228 lines added and 12 removed). Agents had shipped a 16-minute final on their own whenever they finished; [AI agent guardrails](/blog/advise-refuse) explains the gate.
+- Short cues work: [6ec0d5adc](https://github.com/Vandit1604/vawe/commit/6ec0d5adc) lets `vawe sound` read a cue under one second.
+- Two natural calls stop failing: [3f5749500](https://github.com/Vandit1604/vawe/commit/3f5749500) defines `vawe.onFrame` before any page script, and [d81896d45](https://github.com/Vandit1604/vawe/commit/d81896d45) lets `strip --cuts` read the declared worlds of a canvas film.
 - Every verb now ends with an `ok` or `FAILED` line, so a pipe cannot hide the result.
-- The review script itself got a fix: [876927f88](https://github.com/Vandit1604/vawe/commit/876927f88) counts a hook block only from the hook's own refusal line.
+- The review script itself got a fix: [75fb24d56](https://github.com/Vandit1604/vawe/commit/75fb24d56) counts a hook block only from the hook's own refusal line.
 
 The thin run log got its own fix as well: every verb now writes one line, and [AI agent observability with one JSONL line per command](/blog/run-logs) describes it. We also stopped asking agents how long a step took. The clock in the trace is the only one we trust.
 

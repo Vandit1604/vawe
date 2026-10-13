@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "agent hooks, ai agents, workflow, harness"
 keywords: "agent hooks, ai agent hooks, next step hook, agent workflow"
-hero: /blog/stage-say/hero.svg
+hero: /blog/stage-say/hero.webp
 heroAlt: "Flow of the stage-say hook: git status finds the changed page, the hook reads the brief, design and render files, picks the first unmet stage and prints one next command."
 ---
 
@@ -22,18 +22,18 @@ More text in AGENTS.md did not help. The agent reads it once at the start, and t
 
 ## From a gate to a hook that only speaks
 
-The flow from the JSON era had two hooks. `stage-gate` ran before file writes and checked the film against its stage; its source says it "used to deny unconditionally" and by then only printed the reason, unless an environment variable restored the old behaviour. `stage-say` named the next step. When we moved to HTML pages we removed the gate in the same merge ([75b2c57](https://github.com/Vandit1604/vawe/commit/75b2c5731)), so `stage-say` became the only owner of the stage order. Two places that know the order will drift apart.
+The flow from the JSON era had two hooks. `stage-gate` ran before file writes and checked the film against its stage; its source says it "used to deny unconditionally" and by then only printed the reason, unless an environment variable restored the old behaviour. `stage-say` named the next step. When we moved to HTML pages we removed the gate in the same merge ([fba98e1](https://github.com/Vandit1604/vawe/commit/fba98e191)), so `stage-say` became the only owner of the stage order. Two places that know the order will drift apart.
 
 `harness/live/stage-say.mjs` runs on each prompt and works in four steps:
 
-1. It asks `git status` which `films/*/page.html` changed or is new. A fresh checkout rewrites file times, so only a page git sees as changed counts as the film in progress ([6afb94a](https://github.com/Vandit1604/vawe/commit/6afb94a17)). If no page changed in the last three hours it stays silent, so a framework session never sees it.
+1. It asks `git status` which `films/*/page.html` changed or is new. A fresh checkout rewrites file times, so only a page git sees as changed counts as the film in progress ([c0a3933](https://github.com/Vandit1604/vawe/commit/c0a3933f1)). If no page changed in the last three hours it stays silent, so a framework session never sees it.
 2. It reads the film's state from files: whether `brief.md` exists, how many frames the "Taken from" table names, whether `DESIGN.md` is newer than the page, whether a frames sheet or a draft exists, and whether the Board and Motion pass tables are filled.
 3. It picks the first unmet stage. State lives in files, so the hook holds none of its own.
 4. It prints one line with the reason, such as `bin/vawe frames films/<name>/page.html`.
 
 `tests/hooks/stage-say.test.mjs` keeps that order under test.
 
-The verbs carry the same text. `harness/cli/verbs.mjs` (where each verb's `next` function lives, including `devNext`) imports a `SAY` table from the hook and prints its line after each run, so a verb and the hook cannot name different steps ([39a3932](https://github.com/Vandit1604/vawe/commit/39a3932f3)). `frames`, `dev`, `strip` and `critique` all do this, and `ship` warns when the Board or the Motion pass is still empty. A later commit adds a line when the checkout is behind `origin/main`, with the command to update it and the fetch cached for 10 minutes ([b5ab6f2](https://github.com/Vandit1604/vawe/commit/b5ab6f217)).
+The verbs carry the same text. `harness/cli/verbs.mjs` (where each verb's `next` function lives, including `devNext`) imports a `SAY` table from the hook and prints its line after each run, so a verb and the hook cannot name different steps ([1374501](https://github.com/Vandit1604/vawe/commit/137450108)). `frames`, `dev`, `strip` and `critique` all do this, and `ship` warns when the Board or the Motion pass is still empty. A later commit adds a line when the checkout is behind `origin/main`, with the command to update it and the fetch cached for 10 minutes ([61dd23b](https://github.com/Vandit1604/vawe/commit/61dd23b33)).
 
 ## What the 2026-10-10 transcripts showed
 
@@ -41,7 +41,7 @@ We read the transcripts line by line and checked whether the agent did what each
 
 For the early stages the answer was yes. Every verb's `next:` was followed for brief, reference study, design, states and board, in order. The agent stopped only where its prompt told it to stop.
 
-![Which next lines the agent followed in the 2026-10-10 review.](/blog/stage-say/diagram.svg)
+![Which next lines the agent followed in the 2026-10-10 review.](/blog/stage-say/diagram.webp)
 
 Three things went wrong.
 
@@ -53,7 +53,7 @@ And one line never changed. After 13 of 13 `dev` results the agent read "strip t
 
 ## The fix for the repeated line
 
-[b5df5ed](https://github.com/Vandit1604/vawe/commit/b5df5ed98) made `dev` ask the same state function as the hook. `nextStep` now checks whether `out/strip/<name>` changed since the last draft, and when it did, the line moves on to the next unmet stage. The same commit made critique, compare and judge default to the reference the brief names, which answers the 0 of 6 `compare` calls from the other side; [can AI agents watch videos](/blog/watch-a-film) tells that part.
+[5b98da5](https://github.com/Vandit1604/vawe/commit/5b98da554) made `dev` ask the same state function as the hook. `nextStep` now checks whether `out/strip/<name>` changed since the last draft, and when it did, the line moves on to the next unmet stage. The same commit made critique, compare and judge default to the reference the brief names, which answers the 0 of 6 `compare` calls from the other side; [can AI agents watch videos](/blog/watch-a-film) tells that part.
 
 ## What we still do not know
 

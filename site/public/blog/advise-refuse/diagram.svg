@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" role="img" aria-label="Bars. Three traced final renders took 390, 400 and 421 seconds. In another session, 12 status calls across 4 finals cost 3,922 seconds.">
-<rect width="900" height="360" fill="#f4f5fa"/>
-<g font-family="system-ui,sans-serif" fill="#14161f">
-<text x="30" y="40" font-size="20" font-weight="700">What a final render costs (seconds)</text>
-<text x="30" y="98" font-size="18">Final 1</text><rect x="120" y="70" width="70" height="40" rx="5" fill="#2f4bff"/><text x="200" y="98" font-size="18" font-weight="600">390 s</text>
-<text x="30" y="154" font-size="18">Final 2</text><rect x="120" y="126" width="71" height="40" rx="5" fill="#2f4bff"/><text x="201" y="154" font-size="18" font-weight="600">400 s</text>
-<text x="30" y="210" font-size="18">Final 3</text><rect x="120" y="182" width="75" height="40" rx="5" fill="#2f4bff"/><text x="205" y="210" font-size="18" font-weight="600">421 s</text>
-<text x="30" y="266" font-size="18">One session</text><rect x="120" y="238" width="700" height="40" rx="5" fill="#d9480f"/><text x="132" y="266" font-size="18" font-weight="600" fill="#ffffff">3,922 s in 12 status calls for 4 finals</text>
-<text x="30" y="335" font-size="15" fill="#4a4f60">Figures from our trace reviews of agent sessions. The two groups come from different sessions.</text></g></svg>

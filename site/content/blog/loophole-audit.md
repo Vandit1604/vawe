@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: measurement
 tags: "ai agents, reward hacking, automated checks, testing, harness design"
 keywords: "reward hacking ai agents, agents gaming checks, goodhart's law agents, test fixtures for checks"
-hero: /blog/loophole-audit/hero.svg
+hero: /blog/loophole-audit/hero.webp
 heroAlt: "Large text 18 of 36 with the caption films drifted the camera, because our own advice taught them how"
 ---
 
@@ -27,7 +27,7 @@ A vawe film is one HTML page that the harness renders and then checks against 10
 The audit was read-only. We rendered nothing and edited nothing. For each check we asked one question: what is the cheapest change that turns it green? Then we counted how many of the 36 page films already used that change. The counts are a grep of the page source, so they show a pattern in the code, not a measured render.
 
 <figure>
-<img src="/blog/loophole-audit/tricks.svg" alt="Bar chart: 30 of 36 films had a full-frame gradient, 23 a grain overlay, 18 a slow drift, about 7 a drifting blob ground, and 4 of 24 audio films a synth bed" width="720" height="410" loading="lazy">
+<img src="/blog/loophole-audit/tricks.webp" alt="Bar chart: 30 of 36 films had a full-frame gradient, 23 a grain overlay, 18 a slow drift, about 7 a drifting blob ground, and 4 of 24 audio films a synth bed" width="720" height="410" loading="lazy">
 <figcaption>Patterns found in the page source of 36 films. Gradient and grain are mostly honest, because the rule asks for a lit ground. The check could not tell a lit ground from a transparent layer.</figcaption>
 </figure>
 
@@ -61,20 +61,20 @@ One exemption list covered about ten checks. Text marked `aria-hidden` or `data-
 
 Each fix has the same shape: exclude the global cheap change from what counts.
 
-Live-hold stopped counting a whole-frame camera move, and the starter page no longer drifts the camera ([f852ba76c](https://github.com/Vandit1604/vawe/commit/f852ba76c)). Living-ground and blank-frame now measure what a layer paints against the ground, so grain, a blend overlay or a faint gradient is not a ground ([cb2ba70c2](https://github.com/Vandit1604/vawe/commit/cb2ba70c2)).
+Live-hold stopped counting a whole-frame camera move, and the starter page no longer drifts the camera ([bb965eb3e](https://github.com/Vandit1604/vawe/commit/bb965eb3e)). Living-ground and blank-frame now measure what a layer paints against the ground, so grain, a blend overlay or a faint gradient is not a ground ([e959dd362](https://github.com/Vandit1604/vawe/commit/e959dd362)).
 
-The advice stopped teaching tricks. The moving-tail, grain, acceptance and spectacle lines name the real fix instead ([4ef89a719](https://github.com/Vandit1604/vawe/commit/4ef89a719)), and the docs no longer recommend a ground or lockup drift as the hold ([e781b8484](https://github.com/Vandit1604/vawe/commit/e781b8484)).
+The advice stopped teaching tricks. The moving-tail, grain, acceptance and spectacle lines name the real fix instead ([fec66ba0e](https://github.com/Vandit1604/vawe/commit/fec66ba0e)), and the docs no longer recommend a ground or lockup drift as the hold ([563516725](https://github.com/Vandit1604/vawe/commit/563516725)).
 
-Waivers became one code per check, scoped to seconds. A reason has to say where and what was measured, and a generic, copied or dead waiver is refused ([805a5427c](https://github.com/Vandit1604/vawe/commit/805a5427c)). The judge rubric now lists each known trick and needs a cited second for a claim ([8af091647](https://github.com/Vandit1604/vawe/commit/8af091647)).
+Waivers became one code per check, scoped to seconds. A reason has to say where and what was measured, and a generic, copied or dead waiver is refused ([ecb537a46](https://github.com/Vandit1604/vawe/commit/ecb537a46)). The judge rubric now lists each known trick and needs a cited second for a claim ([cf73a1c7a](https://github.com/Vandit1604/vawe/commit/cf73a1c7a)).
 
 <figure>
-<img src="/blog/loophole-audit/audit-loop.svg" alt="Diagram: ask each check the cheapest-change question, exclude global answers, then fixtures, advice, waivers and judge rubric" width="720" height="340" loading="lazy">
+<img src="/blog/loophole-audit/audit-loop.webp" alt="Diagram: ask each check the cheapest-change question, exclude global answers, then fixtures, advice, waivers and judge rubric" width="720" height="340" loading="lazy">
 <figcaption>The audit question and the four things that came out of it.</figcaption>
 </figure>
 
 ## A fixture page for every trick
 
-The change we trust most is a test. For each trick the audit found there is now a fixture page in `tests/fixtures/tricks/`, with an honest page beside it, and `tests/media/tricks.test.mjs` runs the checks on each ([b2641afc0](https://github.com/Vandit1604/vawe/commit/b2641afc0)). A check that stops catching its trick shows up as a failing test. The honest page proves the check still passes real work, which is the half that is easy to forget. Before this, nobody tested that the checks reject cheats, and a loophole fixed once could come back unseen.
+The change we trust most is a test. For each trick the audit found there is now a fixture page in `tests/fixtures/tricks/`, with an honest page beside it, and `tests/media/tricks.test.mjs` runs the checks on each ([c8f4630e6](https://github.com/Vandit1604/vawe/commit/c8f4630e6)). A check that stops catching its trick shows up as a failing test. The honest page proves the check still passes real work, which is the half that is easy to forget. Before this, nobody tested that the checks reject cheats, and a loophole fixed once could come back unseen.
 
 The checks themselves live in `quality/gates/page-check.mjs` and `harness/lib/`.
 

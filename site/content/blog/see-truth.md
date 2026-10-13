@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: measurement
 tags: "ground truth, test fixtures, calibration, video analysis, measurement"
 keywords: "ground truth fixtures, calibrating measurement tools, measurement error bar, video analysis ground truth"
-hero: /blog/see-truth/hero.svg
+hero: /blog/see-truth/hero.webp
 heroAlt: "A three-second timeline split into six worlds by cuts at 0.5, 0.6, 0.85, 1.85 and 2.25 seconds, with a one-frame tolerance."
 ---
 
@@ -45,7 +45,7 @@ The render is the same draft render that `vawe dev` runs (960x540, 30 fps), with
 
 Each fixture is a `page.html` plus a `truth.json` (in `tests/fixtures/truth/<family>/`) with the known values and the tolerance a good tool must meet. Set each tolerance from the unit of the thing. One frame at 30 fps is 0.0333 s, so the tolerance for a cut is 0.0334 s: the tool may be off by one frame and no more. A flash length may be off by one frame, and a flash start by 0.0334 s.
 
-![Timeline of the cuts fixture: six worlds, five cuts at known seconds, and the one-frame tolerance.](/blog/see-truth/hero.svg)
+![Timeline of the cuts fixture: six worlds, five cuts at known seconds, and the one-frame tolerance.](/blog/see-truth/hero.webp)
 
 ## Step 3: score every measure with four states
 
@@ -55,7 +55,7 @@ A number passes only when the error is inside the tolerance, and a missing value
 
 The result has four states: pass, fail, "no tool" and "not available". A measure the repo has no tool for shows as "no tool". A measure whose verb is not on main yet shows as "not available". A gap in the tooling then looks like a gap and never like a pass.
 
-![The flow: a fixture is rendered, each tool measures it, and the scorer prints one row per measure.](/blog/see-truth/flow.svg)
+![The flow: a fixture is rendered, each tool measures it, and the scorer prints one row per measure.](/blog/see-truth/flow.webp)
 
 ## Step 4: attach an error bar to every number
 
@@ -67,19 +67,19 @@ The detection limits come from the decision the number feeds. For most timing me
 
 Then `harness/lib/ref-measure/error-table.mjs` attaches the error to every spec. Where the p90 error is larger than what the measure must detect, the spec prints "check by eye" for that line in place of a confident number. Put the error in the same output the agent reads: an error table in a separate file is a table nobody opens.
 
-![Flow: known-truth fixtures go through ref-calibrate, which writes p50, p90 and bias per measure. Every spec carries that error.](/blog/calibrate-spec/flow.svg)
+![Flow: known-truth fixtures go through ref-calibrate, which writes p50, p90 and bias per measure. Every spec carries that error.](/blog/calibrate-spec/flow.webp)
 
 ## Step 5: grade the combined reader too
 
-Once the pieces were trusted, `vawe see` joined them. `vawe see <mp4 | page | ref-id> [--vs other]` reads a film completely: structure, motion, look, type, sound and images, side by side with a second film if you ask. The same commit made a drifting ground count as no transition, and gave one-frame shots a colour row ([86b51bd17](https://github.com/Vandit1604/vawe/commit/86b51bd17)).
+Once the pieces were trusted, `vawe see` joined them. `vawe see <mp4 | page | ref-id> [--vs other]` reads a film completely: structure, motion, look, type, sound and images, side by side with a second film if you ask. The same commit made a drifting ground count as no transition, and gave one-frame shots a colour row ([cbc71f813](https://github.com/Vandit1604/vawe/commit/cbc71f813)).
 
-Then we pointed the truth suite at `see` itself. That added fixtures for the slow camera (zoom, pan and turn between the ends of a run of frames, and a static tilt), for events inside a shot beside the nearest sound, and for the beat grid. The sound tool now names the kind of each hit (click, pop, swish, impact or sustained) and what moves in the frame at that moment ([e4fc42729](https://github.com/Vandit1604/vawe/commit/e4fc42729), [f80b3869c](https://github.com/Vandit1604/vawe/commit/f80b3869c)).
+Then we pointed the truth suite at `see` itself. That added fixtures for the slow camera (zoom, pan and turn between the ends of a run of frames, and a static tilt), for events inside a shot beside the nearest sound, and for the beat grid. The sound tool now names the kind of each hit (click, pop, swish, impact or sustained) and what moves in the frame at that moment ([440f50939](https://github.com/Vandit1604/vawe/commit/440f50939), [b71bae255](https://github.com/Vandit1604/vawe/commit/b71bae255)).
 
 ## Check that it worked
 
-The truth suite reached 11 fixture families: cuts, flash, motion, camera, eye, ground, look, type, sound, events and beat ([23ed48a94](https://github.com/Vandit1604/vawe/commit/23ed48a94) added the fixtures and the scorer). The tolerances are written down: 0.0334 s for cuts, one frame for flash length, 6 video pixels for a pan of 60, 0.03 for a zoom of 1.3, 1.5 degrees for a turn of 12. We did not record a final pass count; the commits and notes carry none, so we give none here.
+The truth suite reached 11 fixture families: cuts, flash, motion, camera, eye, ground, look, type, sound, events and beat ([fefd44571](https://github.com/Vandit1604/vawe/commit/fefd44571) added the fixtures and the scorer). The tolerances are written down: 0.0334 s for cuts, one frame for flash length, 6 video pixels for a pan of 60, 0.03 for a zoom of 1.3, 1.5 degrees for a turn of 12. We did not record a final pass count; the commits and notes carry none, so we give none here.
 
-The calibration has a full table. Thirteen of 14 measures sit inside their limit ([f299477c3](https://github.com/Vandit1604/vawe/commit/f299477c3)):
+The calibration has a full table. Thirteen of 14 measures sit inside their limit ([ad90de076](https://github.com/Vandit1604/vawe/commit/ad90de076)):
 
 | Measure | p90 error | Must detect |
 |---|---|---|
@@ -89,7 +89,7 @@ The calibration has a full table. Thirteen of 14 measures sit inside their limit
 | word start (`wordT0Ms`) | 33 ms | 33.3 ms |
 | tail landing (`landMsTail`) | 304 ms | 33.3 ms |
 
-![p90 error as a share of the error each measure may have. landMsTail is at 912 percent, wordT0Ms at 99 percent, all others under 52 percent.](/blog/calibrate-spec/hero.svg)
+![p90 error as a share of the error each measure may have. landMsTail is at 912 percent, wordT0Ms at 99 percent, all others under 52 percent.](/blog/calibrate-spec/hero.webp)
 
 `wordT0Ms` passes by 0.3 ms, at 99% of its budget. Any change to the word timing code could tip it over, so watch measures that pass by a hair.
 
@@ -103,7 +103,7 @@ Calibration is also a test of the parser. Three fixes came out of it, each a wro
 - Element size was read wrongly. It is now read as the flat-colour box at rest.
 - Word font size follows the word's own letters.
 
-A second commit stamped the matching thresholds used by the see-measured tools and marked them uncalibrated until a golden film exists ([9d3cf8089](https://github.com/Vandit1604/vawe/commit/9d3cf8089)). Printing "not calibrated yet" is better than printing a threshold with false confidence.
+A second commit stamped the matching thresholds used by the see-measured tools and marked them uncalibrated until a golden film exists ([270fd1521](https://github.com/Vandit1604/vawe/commit/270fd1521)). Printing "not calibrated yet" is better than printing a threshold with false confidence.
 
 ## Where to go next
 

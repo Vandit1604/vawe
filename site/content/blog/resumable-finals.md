@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: speed
 tags: "resumable rendering, checkpoints, headless chrome, retries, agents"
 keywords: "resumable rendering, resume failed render, render checkpoint, ffmpeg mux failure"
-hero: /blog/resumable-finals/hero.svg
+hero: /blog/resumable-finals/hero.webp
 heroAlt: "Eight capture slices: six have finish markers, one is marked lost after four attempts, one has not run. A resume skips the six and runs the last two."
 ---
 
@@ -20,7 +20,7 @@ Before the change, if a slice lost its page twice, the final exited with code 2 
 
 ## Markers, keys and four attempts
 
-Commit [5eb3dcca5](https://github.com/Vandit1604/vawe/commit/5eb3dcca5) changed four things in `render-page.mjs`.
+Commit [7fcf92913](https://github.com/Vandit1604/vawe/commit/7fcf92913) changed four things in `render-page.mjs`.
 
 The frames directory is named by the page and a key of its settings, so the same film at the same settings finds its own frames. A finished slice leaves a marker, and the next run skips every slice that has one. A slice gets four attempts (`SLICE_ATTEMPTS = 4`), each on a fresh page, since a page that failed once is a bad page. Only after the fourth does the render throw.
 
@@ -28,27 +28,27 @@ A failed final also records its percent and its reason in the ship event. `ship 
 
 After a successful encode the frames are removed. Frames directories untouched for three days are swept, so a forgotten failure does not keep gigabytes forever.
 
-![Eight capture slices: six with markers, one lost after four attempts, one not run. A resume skips the six.](/blog/resumable-finals/hero.svg)
+![Eight capture slices: six with markers, one lost after four attempts, one not run. A resume skips the six.](/blog/resumable-finals/hero.webp)
 
 ## The key that moved under a rebase
 
 The marker design assumed the key would be stable. It was not. The key hashed the size and the mtime of every file in the page folder and in `core/`. A checkout, a rebase or an edit by another session changed the hash between a failed final and its resume, so the resume opened a new directory and captured from 0%.
 
-We changed the hash to cover file bytes instead ([8069d09c7](https://github.com/Vandit1604/vawe/commit/8069d09c7)). Anything git can touch, such as mtimes, paths or sizes, will move a key; content will not.
+We changed the hash to cover file bytes instead ([7d840bb3e](https://github.com/Vandit1604/vawe/commit/7d840bb3e)). Anything git can touch, such as mtimes, paths or sizes, will move a key; content will not.
 
-![Before: the key hashed size and mtime, so a rebase changed it and the resume started over. After: the key hashes file bytes, so the same content finds the same directory.](/blog/resumable-finals/key.svg)
+![Before: the key hashed size and mtime, so a rebase changed it and the resume started over. After: the key hashes file bytes, so the same content finds the same directory.](/blog/resumable-finals/key.webp)
 
 ## A dead browser and a dead mux
 
-If a lane's browser died, the retry had no page to use. A final now opens a new Chrome for that lane ([d3532ffb6](https://github.com/Vandit1604/vawe/commit/d3532ffb6)).
+If a lane's browser died, the retry had no page to use. A final now opens a new Chrome for that lane ([b872c194a](https://github.com/Vandit1604/vawe/commit/b872c194a)).
 
-Some finals were 100% captured and then lost at the last step, mixing the page audio. We now read the page audio before the capture, keep the frames when the mux fails, and record the real stage in the ship event ([544693435](https://github.com/Vandit1604/vawe/commit/544693435)). `tests/media/render-mux-retry.test.mjs` covers the retry, and `tests/media/render-resume.test.mjs` covers the resume.
+Some finals were 100% captured and then lost at the last step, mixing the page audio. We now read the page audio before the capture, keep the frames when the mux fails, and record the real stage in the ship event ([e1b944267](https://github.com/Vandit1604/vawe/commit/e1b944267)). `tests/media/render-mux-retry.test.mjs` covers the retry, and `tests/media/render-resume.test.mjs` covers the resume.
 
 ## Where the 49 minutes went
 
 We read the trace of one 110-minute session. Three of its five ships failed. The failed finals cost 2,967 s, which is 49 minutes and 45% of the session.
 
-![A 110 minute session bar: 49 minutes in failed finals, 61 minutes everything else.](/blog/resumable-finals/cost.svg)
+![A 110 minute session bar: 49 minutes in failed finals, 61 minutes everything else.](/blog/resumable-finals/cost.webp)
 
 Two of the failures sat at "0%" in the record, after the log had shown `capturing 19198/19200`. The capture was finished. The last step lost its browser frame while mixing the audio ("detached Frame"), and the ship record said 0%. The two ships ran for 1,411.5 s and 1,034.2 s and both ended with a recorded failure at 0. The agent also wrote a keep-alive of its own to stop the preview server from going idle.
 

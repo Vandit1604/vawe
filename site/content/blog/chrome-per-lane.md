@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: speed
 tags: "headless chrome, puppeteer, rendering, parallelism, performance"
 keywords: "headless chrome render video, puppeteer parallel screenshots, chrome per worker, html to video render speed"
-hero: /blog/chrome-per-lane/hero.svg
+hero: /blog/chrome-per-lane/hero.webp
 heroAlt: "Left: four capture lanes feed one queue that feeds one Chrome. Right: four lanes each feed their own Chrome."
 ---
 
@@ -24,21 +24,21 @@ The lanes ran in parallel on paper. In practice they all talked to one browser, 
 
 A speed number means nothing if the output changes with it, so two earlier changes came first.
 
-Fixed slices. Capture slices are 60 frames long, each on a fresh page, so the pixels do not depend on how many workers ran. `--workers` changes the speed and never the frames ([09177897c](https://github.com/Vandit1604/vawe/commit/09177897c)).
+Fixed slices. Capture slices are 60 frames long, each on a fresh page, so the pixels do not depend on how many workers ran. `--workers` changes the speed and never the frames ([b70389ff6](https://github.com/Vandit1604/vawe/commit/b70389ff6)).
 
-Focus emulation. The tab that holds browser focus rasterizes edges slightly differently from the others (sub-pixel text and shape edges, SSIM 0.9994), so which slice was in front changed pixels with `--workers`. We emulate focus so every tab renders the same ([169fdc5d6](https://github.com/Vandit1604/vawe/commit/169fdc5d6)). Both appear in our [deterministic rendering checklist](/blog/determinism).
+Focus emulation. The tab that holds browser focus rasterizes edges slightly differently from the others (sub-pixel text and shape edges, SSIM 0.9994), so which slice was in front changed pixels with `--workers`. We emulate focus so every tab renders the same ([586d132c4](https://github.com/Vandit1604/vawe/commit/586d132c4)). Both appear in our [deterministic rendering checklist](/blog/determinism).
 
 ## The change: each lane launches its own Chrome
 
-A final now opens one Chrome per worker. A lane launches its own browser and serves the repo to it, takes slices from the shared list, and closes the browser when it runs out. Inside a lane there is no queue: each lane calls the page directly. Drafts keep the shared browser and are unchanged ([5ec9d4712](https://github.com/Vandit1604/vawe/commit/5ec9d4712)).
+A final now opens one Chrome per worker. A lane launches its own browser and serves the repo to it, takes slices from the shared list, and closes the browser when it runs out. Inside a lane there is no queue: each lane calls the page directly. Drafts keep the shared browser and are unchanged ([8efe38cad](https://github.com/Vandit1604/vawe/commit/8efe38cad)).
 
-![Four lanes sharing one queue and one Chrome, compared with four lanes that each own a Chrome.](/blog/chrome-per-lane/hero.svg)
+![Four lanes sharing one queue and one Chrome, compared with four lanes that each own a Chrome.](/blog/chrome-per-lane/hero.webp)
 
 ## The second hot spot: base64 on the shared Node thread
 
 With real parallelism, a new cost showed. `page.screenshot` decoded its base64 payload with a per-character `Uint8Array.from`. That is about 70 ms per 1 MB PNG, on the one Node thread that all lanes share.
 
-We take the base64 string and decode it with `Buffer`. The bytes are identical ([71d432bde](https://github.com/Vandit1604/vawe/commit/71d432bde)).
+We take the base64 string and decode it with `Buffer`. The bytes are identical ([4ffdb23b4](https://github.com/Vandit1604/vawe/commit/4ffdb23b4)).
 
 The same commit fixed a bug in the old design that we had worked around. Opening or closing a page while another lane took a screenshot gave that frame a corrupt tile. In the shared browser, page open and close now join the same queue as the shots, so no lane opens a page during another lane's screenshot.
 
@@ -51,7 +51,7 @@ The same commit fixed a bug in the old design that we had worked around. Opening
 | `Buffer` decode, under load | baseline | about 40% faster |
 | `Uint8Array.from` decode cost | about 70 ms per 1 MB PNG | removed |
 
-![Capture time 140 s with one shared Chrome and 47 s with one Chrome per lane; Buffer decode 11% faster on a quiet machine and about 40% faster under load.](/blog/chrome-per-lane/chart.svg)
+![Capture time 140 s with one shared Chrome and 47 s with one Chrome per lane; Buffer decode 11% faster on a quiet machine and about 40% faster under load.](/blog/chrome-per-lane/chart.webp)
 
 We quote the numbers as the commits record them.
 

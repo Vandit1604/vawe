@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: architecture
 tags: "delete dead code, refactoring, git, agents, architecture"
 keywords: "how to remove dead code, delete legacy code, git restore tag, large deletion commit"
-hero: /blog/big-deletion/hero.svg
+hero: /blog/big-deletion/hero.webp
 heroAlt: "Bar chart of lines deleted by folder in one commit: core 34,139, films 33,733, tests 29,864, quality 29,733, harness 23,501, blocks 17,221."
 ---
 
@@ -33,27 +33,27 @@ The tag turns "what if we need it?" into a cheap question, and it removes the st
 
 ## Step 2: do not freeze a copy
 
-Our first move was to freeze, and it was a mistake. Commit `1c2d3e8fc` vendored a copy of the engine into `site/public` (+50,586 lines) so the site pages built on it kept working while we sorted out what to keep. The copy added code and removed no pull on agents. At 21:19 the same day we deleted it as well. A frozen copy is still code, and it still counts.
+Our first move was to freeze, and it was a mistake. Commit `44be6195f` vendored a copy of the engine into `site/public` (+50,586 lines) so the site pages built on it kept working while we sorted out what to keep. The copy added code and removed no pull on agents. At 21:19 the same day we deleted it as well. A frozen copy is still code, and it still counts.
 
 ## Step 3: delete the core in one commit
 
-[ef1da265d](https://github.com/Vandit1604/vawe/commit/ef1da265d) deleted the format, the engine, the tools, the gates, the tests, the skills and the Go renderer: 1,415 files changed, +65 and -205,163. Tracked files fell from 3,534 to 2,133.
+[420928c23](https://github.com/Vandit1604/vawe/commit/420928c23) deleted the format, the engine, the tools, the gates, the tests, the skills and the Go renderer: 1,415 files changed, +65 and -205,163. Tracked files fell from 3,534 to 2,133.
 
 The deleted lines were spread across the repo: `core/` lost 34,139, `films/` 33,733, `tests/` 29,864, `quality/` 29,733, `harness/` 23,501 and `blocks/` 17,221. A migration plan would have handled each folder one at a time. One deletion needed no plan per folder.
 
 ## Step 4: drop the guards in the same hour
 
-Gates and hooks that check a deleted thing block every other commit. `5572e9736` dropped the JSON gates from the pre-commit and pre-push hooks (-107 lines), two minutes after the main commit.
+Gates and hooks that check a deleted thing block every other commit. `000366b1a` dropped the JSON gates from the pre-commit and pre-push hooks (-107 lines), two minutes after the main commit.
 
 ## Step 5: remove scripts, routers and the site copy
 
-[b4be7483b](https://github.com/Vandit1604/vawe/commit/b4be7483b) made the Makefile a set of thin aliases and deleted routers and dead scripts: 70 files, -2,481 lines. [2d5c905fb](https://github.com/Vandit1604/vawe/commit/2d5c905fb) removed the frozen engine copy, its data and the pages built on it: 1,792 files, -127,750 lines. `bdbbb91a0` then removed the JSON-era films and every mention of the format.
+[3913b499c](https://github.com/Vandit1604/vawe/commit/3913b499c) made the Makefile a set of thin aliases and deleted routers and dead scripts: 70 files, -2,481 lines. [170c70020](https://github.com/Vandit1604/vawe/commit/170c70020) removed the frozen engine copy, its data and the pages built on it: 1,792 files, -127,750 lines. `6506927c7` then removed the JSON-era films and every mention of the format.
 
-![Timeline of the deletion commits on 2026-09-30 with the lines each one added or removed.](/blog/big-deletion/diagram.svg)
+![Timeline of the deletion commits on 2026-09-30 with the lines each one added or removed.](/blog/big-deletion/diagram.webp)
 
 ## Step 6: hunt the small leftovers
 
-A week later we stripped the scene registries, the three.js layer builder and the theme colour markers (`804f86f64`, `3253f53ef`, and [708e79447](https://github.com/Vandit1604/vawe/commit/708e79447) on 2026-10-07, which removed the last theme markers and stage CSS). Each was small. Each was a place where the next agent could still stumble into the old path, because a registry with one stale entry reads like a live feature.
+A week later we stripped the scene registries, the three.js layer builder and the theme colour markers (`70b79ef66`, `a5619a0d6`, and [d70663eaa](https://github.com/Vandit1604/vawe/commit/d70663eaa) on 2026-10-07, which removed the last theme markers and stage CSS). Each was small. Each was a place where the next agent could still stumble into the old path, because a registry with one stale entry reads like a live feature.
 
 ## Check that the deletion worked
 
@@ -61,9 +61,9 @@ Read the size of each commit straight from `git show --shortstat`:
 
 | Commit | Files | Added | Removed |
 |---|---|---|---|
-| `ef1da265d` delete the format | 1,415 | 65 | 205,163 |
-| `2d5c905fb` remove the site engine copy | 1,792 | 511 | 127,750 |
-| `b4be7483b` thin Makefile, hooks, scripts | 70 | 158 | 2,481 |
+| `420928c23` delete the format | 1,415 | 65 | 205,163 |
+| `170c70020` remove the site engine copy | 1,792 | 511 | 127,750 |
+| `3913b499c` thin Makefile, hooks, scripts | 70 | 158 | 2,481 |
 
 Then grep for the old vocabulary. In our tree, layer types, JSON validators and the old make targets no longer turn up. We have no agent success number that isolates this commit, because other changes landed the same week, so we do not claim one.
 

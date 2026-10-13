@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: measurement
 tags: "puppeteer, headless chrome, llm judge, render bug, debugging"
 keywords: "puppeteer default viewport, puppeteer browser.pages 800x600, puppeteer shared browser tabs, llm judge false positives"
-hero: /blog/judge-defect/hero.svg
+hero: /blog/judge-defect/hero.webp
 heroAlt: "Large text 3 times with the caption the judge said echo, and three times we said it misread"
 ---
 
@@ -15,7 +15,7 @@ heroAlt: "Large text 3 times with the caption the judge said echo, and three tim
 | Date | 30 September to 1 October 2026 |
 | Impact | Final renders carried an 800x600 copy of the page in the top-left corner, or 800x600 tiles blended into the motion blur. Two films named in the fix commit were affected. |
 | Cause | `browser.pages()` in a second process attached to the render's tab, and Puppeteer gave it the default 800x600 viewport. |
-| Fix | Find warm tabs by URL through `browser.targets()` and attach only to our own ([`eaef43da2`](https://github.com/Vandit1604/vawe/commit/eaef43da2)). |
+| Fix | Find warm tabs by URL through `browser.targets()` and attach only to our own ([`60de4a7aa`](https://github.com/Vandit1604/vawe/commit/60de4a7aa)). |
 | Detection | Our automated judge reported the defect three times. We dismissed it three times. |
 
 The bug produced wrong frames that looked like render drift, so it is one item on our [deterministic rendering checklist for headless Chrome](/blog/determinism).
@@ -50,7 +50,7 @@ const warm = (await Promise.all(tabs.map((t) => t.page().catch(() => null)))).fi
 Only warm tabs get a `Page` on the looking connection, and a render's tab is never one of them. The code is `takeWarmPage` in `harness/media/preview-server.mjs`.
 
 <figure>
-<img src="/blog/judge-defect/bug.svg" alt="Diagram: before, browser.pages() attaches to every tab and resets the render tab to 800x600. After, warm tabs are found by URL and the render tab is untouched." width="720" height="410" loading="lazy">
+<img src="/blog/judge-defect/bug.webp" alt="Diagram: before, browser.pages() attaches to every tab and resets the render tab to 800x600. After, warm tabs are found by URL and the render tab is untouched." width="720" height="410" loading="lazy">
 <figcaption>Before and after the change in <code>preview-server.mjs</code>.</figcaption>
 </figure>
 
@@ -59,7 +59,7 @@ Only warm tabs get a `Page` on the looking connection, and a render's tab is nev
 We rendered a 66-frame window of one film beside a compare loop, twice before the fix and twice after. Before, both runs had 5 or 6 wrong frames. After, both had none. Then we re-rendered both full finals. The first film had 14 frame-to-frame luma jumps over 20 before the fix and none after, and the second had no wrong-viewport frame. The capture path itself did not change.
 
 <figure>
-<img src="/blog/judge-defect/numbers.svg" alt="Bars: wrong frames in a 66-frame window fell from 5 to 6 to 0, and luma jumps over 20 in a final fell from 14 to 0" width="720" height="280" loading="lazy">
+<img src="/blog/judge-defect/numbers.webp" alt="Bars: wrong frames in a 66-frame window fell from 5 to 6 to 0, and luma jumps over 20 in a final fell from 14 to 0" width="720" height="280" loading="lazy">
 <figcaption>The same renders before and after. Two runs for the window, one full final for the luma count.</figcaption>
 </figure>
 
@@ -73,8 +73,8 @@ The same week showed a second way two instruments can disagree. The judge counte
 
 ## Follow-ups
 
-- The draft check now reads the sheet the judge reads, at 5 fps and 288 px, with the same limits ([`12d203f22`](https://github.com/Vandit1604/vawe/commit/12d203f22)). It prints 5 tail tiles on that film, 15 on another where the judge had written "about 15", and nothing on a third.
-- A defect the judge reports is real until full-size frames at those seconds say otherwise. A contact-sheet grid is not an echo, so the grid itself does not count, but the prompt never rules a defect class out ([`faa44d37f`](https://github.com/Vandit1604/vawe/commit/faa44d37f), `44951917f`).
-- A shared browser needs an owner for each tab. Two more bugs came from the same preview server. A final's own page sat idle in the daemon, the daemon quit after 5 idle minutes, and the audio step failed with "Attempted to use detached Frame" ([`a570bbcd8`](https://github.com/Vandit1604/vawe/commit/a570bbcd8)). A stray tab could also keep an idle daemon alive, so it now exits after 10 idle minutes (`92b8fdc99`).
+- The draft check now reads the sheet the judge reads, at 5 fps and 288 px, with the same limits ([`60d485cce`](https://github.com/Vandit1604/vawe/commit/60d485cce)). It prints 5 tail tiles on that film, 15 on another where the judge had written "about 15", and nothing on a third.
+- A defect the judge reports is real until full-size frames at those seconds say otherwise. A contact-sheet grid is not an echo, so the grid itself does not count, but the prompt never rules a defect class out ([`b394dd450`](https://github.com/Vandit1604/vawe/commit/b394dd450), `5b2041b6f`).
+- A shared browser needs an owner for each tab. Two more bugs came from the same preview server. A final's own page sat idle in the daemon, the daemon quit after 5 idle minutes, and the audio step failed with "Attempted to use detached Frame" ([`76180aeab`](https://github.com/Vandit1604/vawe/commit/76180aeab)). A stray tab could also keep an idle daemon alive, so it now exits after 10 idle minutes (`2bfe6ec1a`).
 
 The rule we took from it: do not call `browser.pages()` on a browser that other processes share. Other ways a headless render can produce different pixels are collected in our [deterministic rendering checklist for headless Chrome](/blog/determinism), and a related layout bug is in [Puppeteer deviceScaleFactor: lay out big, capture small](/blog/drafts-lie). The measured bar the judge compares against is in [average shot length in motion graphics](/blog/quality-bar).

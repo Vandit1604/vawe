@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: taste
 tags: "verbalized sampling, mode collapse, creative agents, ideation, motion graphics"
 keywords: "verbalized sampling, verbalized sampling prompt, mode collapse llm, agent ideation method"
-hero: /blog/ideate/hero.svg
+hero: /blog/ideate/hero.webp
 heroAlt: "Five steps of the ideate method: meaning, four ideas from four devices, a typicality number, a pick that is not the most typical, and a ledger row."
 ---
 
@@ -28,9 +28,9 @@ Our version is smaller. For each idea we ask for a number from 0 to 1: how likel
 
 ## What does the agent do, step by step?
 
-`guides/IDEATE.md` owns the method. Commit [`cbfd562d8`](https://github.com/Vandit1604/vawe/commit/cbfd562d8) added it, with the Ideas ledger, six advice checks and a question for the judge and the critic. It runs once per decision:
+`guides/IDEATE.md` owns the method. Commit [`348ec4d8a`](https://github.com/Vandit1604/vawe/commit/348ec4d8a) added it, with the Ideas ledger, six advice checks and a question for the judge and the critic. It runs once per decision:
 
-![The five steps: meaning, four ideas from four devices, typicality, pick, keep the ledger row.](/blog/ideate/hero.svg)
+![The five steps: meaning, four ideas from four devices, typicality, pick, keep the ledger row.](/blog/ideate/hero.webp)
 
 1. Write what the beat or cut must say, in one plain sentence, with no style words.
 2. Write four ideas, each with a different device from a table of ten: metaphor, transformation, show the invisible, scale shift, personification, literalise, part for whole, reversal, collision and literal. Take every idea from the subject's own objects, materials and verbs.
@@ -38,9 +38,9 @@ Our version is smaller. For each idea we ask for a number from 0 to 1: how likel
 4. Pick one that is not the most typical, with one reason. If the plain `literal` idea is right, say why the story needs it.
 5. Write the row in the `## Ideas` table of `brief.md`, then build what you picked. The frame has to show it.
 
-![Example: a spinner is the first idea. The send button that grows into a wok has typicality 0.15.](/blog/ideate/wok.svg)
+![Example: a spinner is the first idea. The send button that grows into a wok has typicality 0.15.](/blog/ideate/wok.webp)
 
-The same method plans cuts. Commit [`f12a9f516`](https://github.com/Vandit1604/vawe/commit/f12a9f516) added a transitions skill that runs it per cut: four ideas drawn from three of twelve handoff families, the less typical pick, a ledger row. The families are in [motion graphics transitions](/blog/transitions).
+The same method plans cuts. Commit [`530a27f8c`](https://github.com/Vandit1604/vawe/commit/530a27f8c) added a transitions skill that runs it per cut: four ideas drawn from three of twelve handoff families, the less typical pick, a ledger row. The families are in [motion graphics transitions](/blog/transitions).
 
 ## How is the ledger checked?
 

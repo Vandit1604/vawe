@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "cli, ai agents, harness, developer experience"
 keywords: "cli design for ai agents, cli for ai agents, ai agent cli, usage errors"
-hero: /blog/one-binary/hero.svg
+hero: /blog/one-binary/hero.webp
 heroAlt: "Before and after diagram: a 156 line Makefile with routers and scripts becomes one command, bin/vawe, with a 19 line Makefile that only forwards."
 ---
 
@@ -14,13 +14,13 @@ This page lists the design rules of `bin/vawe`, the one command that agents use 
 
 | Rule | What the agent sees | Added in |
 |---|---|---|
-| One entry point | `bin/vawe <verb>` for every step; the Makefile only forwards | [97f888c](https://github.com/Vandit1604/vawe/commit/97f888c53), [b4be748](https://github.com/Vandit1604/vawe/commit/b4be7483b) |
-| The verb is the step | one verb per stage of the loop | [97f888c](https://github.com/Vandit1604/vawe/commit/97f888c53) |
-| Usage in the error | one line: what is missing, then the usage | [97f888c](https://github.com/Vandit1604/vawe/commit/97f888c53) |
-| Unknown verb lists verbs | the valid verbs, and a note if the checkout is stale | [1ea544d](https://github.com/Vandit1604/vawe/commit/1ea544dc3) |
+| One entry point | `bin/vawe <verb>` for every step; the Makefile only forwards | [29daa32](https://github.com/Vandit1604/vawe/commit/29daa32ba), [3913b49](https://github.com/Vandit1604/vawe/commit/3913b499c) |
+| The verb is the step | one verb per stage of the loop | [29daa32](https://github.com/Vandit1604/vawe/commit/29daa32ba) |
+| Usage in the error | one line: what is missing, then the usage | [29daa32](https://github.com/Vandit1604/vawe/commit/29daa32ba) |
+| Unknown verb lists verbs | the valid verbs, and a note if the checkout is stale | [03dcbf6](https://github.com/Vandit1604/vawe/commit/03dcbf68e) |
 | A result line last | `vawe: <verb> ok` or `FAILED (<reason>) in <s>s` | after a transcript review |
-| Verbs come from traces | a new verb for each hand-rolled command | [a7845dd](https://github.com/Vandit1604/vawe/commit/a7845ddde) and later |
-| Verbs before raw tools | AGENTS.md: use `bin/vawe` before `ffmpeg`, Chrome or a script | [472ac95](https://github.com/Vandit1604/vawe/commit/472ac9546) |
+| Verbs come from traces | a new verb for each hand-rolled command | [a610943](https://github.com/Vandit1604/vawe/commit/a61094320) and later |
+| Verbs before raw tools | AGENTS.md: use `bin/vawe` before `ffmpeg`, Chrome or a script | [3d1a494](https://github.com/Vandit1604/vawe/commit/3d1a49464) |
 
 These rules are one part of a harness built for the weaker model; the [AI agent harness engineering](/blog/weaker-model) pillar explains that approach and links the other parts.
 
@@ -34,7 +34,7 @@ Documentation did not close the gap. AGENTS.md got a Shell section, and the next
 
 ## One entry point
 
-`bin/vawe` arrived on 2026-09-30 in [97f888c](https://github.com/Vandit1604/vawe/commit/97f888c53) with nine verbs: `new`, `dev`, `ship`, `critique`, `spec`, `studio`, `check`, `test` and `judge`. Six minutes later [b4be748](https://github.com/Vandit1604/vawe/commit/b4be7483b) cut the Makefile from 156 lines to 19 aliases and deleted the routers and dead scripts: 70 files, 2,481 lines removed. Old paths forward to the CLI, so they cannot drift from it.
+`bin/vawe` arrived on 2026-09-30 in [29daa32](https://github.com/Vandit1604/vawe/commit/29daa32ba) with nine verbs: `new`, `dev`, `ship`, `critique`, `spec`, `studio`, `check`, `test` and `judge`. Six minutes later [3913b49](https://github.com/Vandit1604/vawe/commit/3913b499c) cut the Makefile from 156 lines to 19 aliases and deleted the routers and dead scripts: 70 files, 2,481 lines removed. Old paths forward to the CLI, so they cannot drift from it.
 
 ## The verb is the step
 
@@ -49,13 +49,13 @@ vawe: missing <page>; usage: vawe frames <page> [flags]
 vawe: frames FAILED (missing <page>; usage: vawe frames <page> [flags]) in 0.0s
 ```
 
-An unknown verb lists the valid verbs. Since [1ea544d](https://github.com/Vandit1604/vawe/commit/1ea544dc3) it also says when the checkout is stale: an agent that asks for a verb that exists on `main` but not in its worktree gets that answer.
+An unknown verb lists the valid verbs. Since [03dcbf6](https://github.com/Vandit1604/vawe/commit/03dcbf68e) it also says when the checkout is stale: an agent that asks for a verb that exists on `main` but not in its worktree gets that answer.
 
 ## A result line that survives a pipe
 
 A review of agent transcripts found 134 of 140 `vawe` calls piped into `tail`, `head` or `grep`. A pipe hides the exit code. The tool's error flag showed 2 failures in that review, and the real count was at least 8. So the last line of every verb says ok or FAILED, with the reason and the seconds, and `tail -1` still shows it. The run log records the same fields; see [AI agent observability with one JSONL line per command](/blog/run-logs).
 
-![One failed call: a usage error, a FAILED footer with the reason and the seconds, and the exit code. The footer survives a pipe.](/blog/one-binary/diagram.svg)
+![One failed call: a usage error, a FAILED footer with the reason and the seconds, and the exit code. The footer survives a pipe.](/blog/one-binary/diagram.webp)
 
 Later reviews counted fewer pipes: 9 of 32 calls across three sessions of one film, and 12 of 87 across eight sessions of another. The later prompts also told the agent not to pipe, so the footer cannot take all the credit.
 
@@ -65,7 +65,7 @@ The first nine verbs were a guess. The next 33 came from trace reviews: each tim
 
 ## Verbs before raw tools
 
-AGENTS.md says to use `bin/vawe` before any raw `ffmpeg`, Chrome or script, to run `bin/vawe <verb> --help` first, and, if a verb is missing what you need, to say so in the report and not hand-roll it ([472ac95](https://github.com/Vandit1604/vawe/commit/472ac9546)). The last clause turns each gap into a visible bug report.
+AGENTS.md says to use `bin/vawe` before any raw `ffmpeg`, Chrome or script, to run `bin/vawe <verb> --help` first, and, if a verb is missing what you need, to say so in the report and not hand-roll it ([3d1a494](https://github.com/Vandit1604/vawe/commit/3d1a49464)). The last clause turns each gap into a visible bug report.
 
 ## What the numbers do and do not show
 

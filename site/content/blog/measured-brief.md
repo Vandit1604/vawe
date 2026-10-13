@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: measurement
 tags: "acceptance criteria, ai agents, measurement, harness, postmortem"
 keywords: "acceptance criteria for ai agents, measurable brief, agent evaluation, ai agent scoreboard"
-hero: /blog/measured-brief/hero.svg
+hero: /blog/measured-brief/hero.webp
 heroAlt: "A loop: the brief's Spec tables feed the page the agent writes, and the acceptance script compares the draft back against the same tables. The reference film sits outside the loop."
 ---
 
@@ -25,14 +25,14 @@ vawe turns one HTML page into a film. Early on, quality control was a critique p
 
 ## How the scoreboard was built, step by step
 
-1. The brief got a fixed shape. Every `vawe new` brief carries Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. A field the user did not answer is filled with a stated guess marked `(guess: change me)` ([a9a821aa5](https://github.com/Vandit1604/vawe/commit/a9a821aa5)). The shape lives in `harness/lib/measured-brief.mjs`.
-2. The table got measured after every draft and final. `harness/lib/acceptance.mjs` parses the Spec and Acceptance tables of `brief.md`, counts frozen runs, jerky steps and jumps, and compares the words, objects and cuts in the film against the spec. It prints one table with a trend line so the agent sees whether the last edit helped ([909f9b8db](https://github.com/Vandit1604/vawe/commit/909f9b8db)). Ship uses the same table: PASS only when the judge passes and no measured row missed.
-3. Rows that were wrong for honest reasons got fixed. Text inside `aria-hidden` left every text row. Product UI labels marked `data-chrome` got a 2.5% cap-height floor and no read hold. Appear, settle and object times moved onto the frame grid, so a measure no longer drifted 0.25 s per copy of an element ([ff82d2ad7](https://github.com/Vandit1604/vawe/commit/ff82d2ad7)).
-4. Drafts and ships got one denominator. A draft prints "N of M measured green, K more at ship (15 rows)" and marks the judge row and the unrun tiers as not measured ([3c1398992](https://github.com/Vandit1604/vawe/commit/3c1398992)).
+1. The brief got a fixed shape. Every `vawe new` brief carries Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. A field the user did not answer is filled with a stated guess marked `(guess: change me)` ([f88915325](https://github.com/Vandit1604/vawe/commit/f88915325)). The shape lives in `harness/lib/measured-brief.mjs`.
+2. The table got measured after every draft and final. `harness/lib/acceptance.mjs` parses the Spec and Acceptance tables of `brief.md`, counts frozen runs, jerky steps and jumps, and compares the words, objects and cuts in the film against the spec. It prints one table with a trend line so the agent sees whether the last edit helped ([f3855fb25](https://github.com/Vandit1604/vawe/commit/f3855fb25)). Ship uses the same table: PASS only when the judge passes and no measured row missed.
+3. Rows that were wrong for honest reasons got fixed. Text inside `aria-hidden` left every text row. Product UI labels marked `data-chrome` got a 2.5% cap-height floor and no read hold. Appear, settle and object times moved onto the frame grid, so a measure no longer drifted 0.25 s per copy of an element ([7cee8cc52](https://github.com/Vandit1604/vawe/commit/7cee8cc52)).
+4. Drafts and ships got one denominator. A draft prints "N of M measured green, K more at ship (15 rows)" and marks the judge row and the unrun tiers as not measured ([354e9aef3](https://github.com/Vandit1604/vawe/commit/354e9aef3)).
 
 ## What the trace showed
 
-![Three counts from one film: 7 of 15 rows green, 9 of 12 drafts that fixed nothing, 15 of 17 dev calls with the judge skipped.](/blog/measured-brief/counts.svg)
+![Three counts from one film: 7 of 15 rows green, 9 of 12 drafts that fixed nothing, 15 of 17 dev calls with the judge skipped.](/blog/measured-brief/counts.webp)
 
 The acceptance table stayed at 7 of 14 or 15 rows green for ten drafts. The `rules_fired` field showed "fixed none" in 9 of the 12 drafts after the first. Fifteen of the 17 `dev` calls ran with `--no-judge`. The one stills judge that did run scored 3, 2 and 2 for its three candidate frames, and no judge ran on a later draft.
 

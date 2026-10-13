@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: taste
 tags: "motion design system, design tokens, headless components, contrast, moves library"
 keywords: "motion design system, headless components, design tokens for video, wcag contrast video"
-hero: /blog/ten-looks/hero.svg
+hero: /blog/ten-looks/hero.webp
 heroAlt: "Large number 10 with the caption looks, 70 clips, one design system, one rule: faint is never text"
 ---
 
@@ -28,9 +28,9 @@ So the system had two jobs. Give the library one language, and keep that languag
 
 A headless component carries structure and behaviour and no styling. We applied that idea to our blocks with one rule: a block owns mechanism and structure only. The theme owns radius, borders, depth and type treatment. When a film needs a hero element that no theme can restyle, the element is ejected into the film, and from then on the film owns it.
 
-![Diagram: block owns structure, theme owns tokens, film picks one theme](/blog/headless-blocks/layers.svg)
+![Diagram: block owns structure, theme owns tokens, film picks one theme](/blog/headless-blocks/layers.webp)
 
-The block catalog itself went away with the JSON format. Commit [ef1da265d](https://github.com/Vandit1604/vawe/commit/ef1da265d) deleted the 181 files under `blocks/` as part of the 1,415-file deletion described in [how to delete dead code safely](/blog/big-deletion). The headless idea survived in a smaller form: the move demos.
+The block catalog itself went away with the JSON format. Commit [420928c23](https://github.com/Vandit1604/vawe/commit/420928c23) deleted the 181 files under `blocks/` as part of the 1,415-file deletion described in [how to delete dead code safely](/blog/big-deletion). The headless idea survived in a smaller form: the move demos.
 
 ## How is the system built?
 
@@ -51,7 +51,7 @@ A move written for one look runs in all ten. The foundation holds what every loo
 
 Because type is sized from frame height, a frame at any size keeps its proportions.
 
-Commit [bfd68f0a8](https://github.com/Vandit1604/vawe/commit/bfd68f0a8) put the first eight looks into `demo.css` as `html[data-look="name"]` token sets. It touched one file, with 133 lines added and 6 removed. It added eight font faces and thirteen new tokens, such as `--edge`, `--dim`, `--cursor`, `--paper` and `--up-ink`, so a look could reach every surface a demo draws. Commit `0068ed6a9` completed the system with ten looks and assigned a look to every demo.
+Commit [5952587ec](https://github.com/Vandit1604/vawe/commit/5952587ec) put the first eight looks into `demo.css` as `html[data-look="name"]` token sets. It touched one file, with 133 lines added and 6 removed. It added eight font faces and thirteen new tokens, such as `--edge`, `--dim`, `--cursor`, `--paper` and `--up-ink`, so a look could reach every surface a demo draws. Commit `50aaa558c` completed the system with ten looks and assigned a look to every demo.
 
 ## What are the ten looks?
 
@@ -71,7 +71,7 @@ The same markup renders differently under each look. Three stills from the libra
 <figcaption>Paper (mask-rise), swiss (tracking-collapse) and terminal (caret-typing). Each move is plain HTML and CSS.</figcaption>
 </figure>
 
-The default look, `vawe`, is a token set like the others. It uses the studio ground `#16151a`, a surface ladder, one cobalt accent `#0a87ff` and dark ink on the accent, since white on that blue measures 3.6:1. Commit [74157217f](https://github.com/Vandit1604/vawe/commit/74157217f) made the engine theme match the real dark landing page. Commit [708e79447](https://github.com/Vandit1604/vawe/commit/708e79447) later removed the old theme colour markers and the scene stage CSS: 3 files, 12 lines added, 148 removed.
+The default look, `vawe`, is a token set like the others. It uses the studio ground `#16151a`, a surface ladder, one cobalt accent `#0a87ff` and dark ink on the accent, since white on that blue measures 3.6:1. Commit [e90f1663d](https://github.com/Vandit1604/vawe/commit/e90f1663d) made the engine theme match the real dark landing page. Commit [d70663eaa](https://github.com/Vandit1604/vawe/commit/d70663eaa) later removed the old theme colour markers and the scene stage CSS: 3 files, 12 lines added, 148 removed.
 
 ## How do you stop every clip picking the same look?
 
@@ -81,19 +81,19 @@ The assignment is one `data-look` per demo file, so a grep shows the spread. Tod
 
 ## Which rule was hardest to keep?
 
-Every look defines a `--faint` colour for dots, rules and icons. It is low contrast by design, so it must never carry words. We wrote `contrast.mjs` with the foundation (`0068ed6a9`). It reads every look in `demo.css` and checks WCAG contrast: ink, muted, on-accent and paper text must pass 4.5 to 1, and accent used as text must pass 3 to 1, for large type only.
+Every look defines a `--faint` colour for dots, rules and icons. It is low contrast by design, so it must never carry words. We wrote `contrast.mjs` with the foundation (`50aaa558c`). It reads every look in `demo.css` and checks WCAG contrast: ink, muted, on-accent and paper text must pass 4.5 to 1, and accent used as text must pass 3 to 1, for large type only.
 
-The follow-up commit, [`63a0b5b84`](https://github.com/Vandit1604/vawe/commit/63a0b5b84), wrote the rule into `LOOKS.md`: faint is for dots, rules and icons, never for text. It made the check read short hex colours, and it darkened swiss's "up" ink, the red used for a rising number, from `#d40500` to `#c40400` so it passes 4.5 to 1. Running `node prompts/moves/demo/contrast.mjs` today prints "10 looks, 0 failing pairs".
+The follow-up commit, [`061b3aa23`](https://github.com/Vandit1604/vawe/commit/061b3aa23), wrote the rule into `LOOKS.md`: faint is for dots, rules and icons, never for text. It made the check read short hex colours, and it darkened swiss's "up" ink, the red used for a rising number, from `#d40500` to `#c40400` so it passes 4.5 to 1. Running `node prompts/moves/demo/contrast.mjs` today prints "10 looks, 0 failing pairs".
 
-![Diagram: the demo.css foundation feeds ten looks, which pass through contrast.mjs and become 70 clips rendered once](/blog/ten-looks/system.svg)
+![Diagram: the demo.css foundation feeds ten looks, which pass through contrast.mjs and become 70 clips rendered once](/blog/ten-looks/system.webp)
 
 The same commit records which public skills shaped the pass and which parts we rejected. We used better-typography for measure, balanced wraps and tabular figures, better-ui for concentric radius and optical alignment, and baseline-ui for a spacing review. We rejected the 16 px body floor (a film sets its own sizes), the no-gradient and no-letter-spacing rules (several looks need both) and every hover and press rule (a film has no input). The written rejections stop a later author from importing those defaults again.
 
 ## How do 70 clips get re-rendered cheaply?
 
-A design system is only useful if it is cheap to apply to 70 clips. `bin/vawe moves` renders each clip once at 1280x720 and 60 fps. The size and rate are part of the clip's source hash, stored in `clips.lock.json`, so changing them marks every clip stale and nothing else. `scripts/site/moves.mjs` then derives the gallery copies: a 1280 H.264 file and a 1280 poster for the move page, and a 640 VP9 file and a 640 poster for the grid ([`0c3f9a44c`](https://github.com/Vandit1604/vawe/commit/0c3f9a44c)). By default only stale clips re-render, and `--all` forces every clip (`a09d12e71`).
+A design system is only useful if it is cheap to apply to 70 clips. `bin/vawe moves` renders each clip once at 1280x720 and 60 fps. The size and rate are part of the clip's source hash, stored in `clips.lock.json`, so changing them marks every clip stale and nothing else. `scripts/site/moves.mjs` then derives the gallery copies: a 1280 H.264 file and a 1280 poster for the move page, and a 640 VP9 file and a 640 poster for the grid ([`7945d97b2`](https://github.com/Vandit1604/vawe/commit/7945d97b2)). By default only stale clips re-render, and `--all` forces every clip (`77a8d9147`).
 
-All 70 clips were re-rendered with the ten looks (`e6aa715fb`). The pick-by-job table covered 53 moves (`a09d12e71`), and the contrast check passes on all ten looks. A move you copy from the gallery carries neutral tokens, so it takes the look of the page you paste it into.
+All 70 clips were re-rendered with the ten looks (`7bf0ce2c1`). The pick-by-job table covered 53 moves (`77a8d9147`), and the contrast check passes on all ten looks. A move you copy from the gallery carries neutral tokens, so it takes the look of the page you paste it into.
 
 ## What the system does not prove
 

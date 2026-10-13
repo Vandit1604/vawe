@@ -6,11 +6,11 @@ updated: 2026-10-13
 section: taste
 tags: "ui skills, ai agents, blind test, design systems, taste"
 keywords: "ui skills for ai agents, frontend design skill, ai design skills, blind design test"
-hero: /blog/skill-combos/hero.svg
+hero: /blog/skill-combos/hero.webp
 heroAlt: "Table of six skill combos against two frame kinds. Warm editorial was picked for both. Soft light and Sparse geometry for the UI card only. Soft glass for the type frame only. Brutalist telemetry and Apple material for neither."
 ---
 
-One skill combo out of six, Warm editorial, was picked in a blind test for both kinds of film frame we tried. Before that, eleven public UI skills tested one at a time all gave the same result: a decent but cluttered web hero. The unit that works is a set of skills plus your own composition rules. The full results are in [`5b64295c6`](https://github.com/Vandit1604/vawe/commit/5b64295c6).
+One skill combo out of six, Warm editorial, was picked in a blind test for both kinds of film frame we tried. Before that, eleven public UI skills tested one at a time all gave the same result: a decent but cluttered web hero. The unit that works is a set of skills plus your own composition rules. The full results are in [`bce59c817`](https://github.com/Vandit1604/vawe/commit/bce59c817).
 
 This test fed the frame rules in our [motion design system](/blog/ten-looks).
 
@@ -24,9 +24,9 @@ Round 1, single skills. Eleven arms built the same frame: bolder, swiss-design, 
 
 Round 2, combos. Six arms built the same two frames for a fictional product: a type frame ("Talk messy. Ship clean.") and a product UI summary card. One reviewer judged the frames blind, and we recorded the winners and each combo's reject list.
 
-A combo is a named set of skills for four rungs: builder, type, colour and depth. The fifth rung, frame, is always vawe's own rules. Commit [`7a1f1be10`](https://github.com/Vandit1604/vawe/commit/7a1f1be10) added this ladder to the brief, to the DESIGN.md advice and to the stills judge question; its message says the frame rung rejects web-page patterns while the builder rung still builds the product UI. Commit [`39aaa85fb`](https://github.com/Vandit1604/vawe/commit/39aaa85fb) named the combos.
+A combo is a named set of skills for four rungs: builder, type, colour and depth. The fifth rung, frame, is always vawe's own rules. Commit [`edc7f6e0e`](https://github.com/Vandit1604/vawe/commit/edc7f6e0e) added this ladder to the brief, to the DESIGN.md advice and to the stills judge question; its message says the frame rung rejects web-page patterns while the builder rung still builds the product UI. Commit [`8fcb51ee2`](https://github.com/Vandit1604/vawe/commit/8fcb51ee2) named the combos.
 
-![The ladder. Builder, type, colour and depth take a fetched skill each. The frame rung uses our rules.](/blog/skill-combos/ladder.svg)
+![The ladder. Builder, type, colour and depth take a fetched skill each. The frame rung uses our rules.](/blog/skill-combos/ladder.webp)
 
 ## Method: a skill may change the surface, never the composition
 
@@ -58,7 +58,7 @@ Two results we did not expect:
 
 This was one reviewer and one run, with two frames for one fictional product. It tells us which sets to start from. It does not prove the rejected skills are bad. A combo proven for one kind of frame is only proven for that kind, and the doc says so in capitals; a blended score across kinds would have hidden that Soft glass wins on type and loses on product UI. An untested combo only becomes proven after a still-frame test and sign-off.
 
-We used the same kind of blind choice for the move gallery. Commit [`b56f1349b`](https://github.com/Vandit1604/vawe/commit/b56f1349b) adds a featured bento above the gallery with five moves, chosen from a blind three-reviewer score of every clip.
+We used the same kind of blind choice for the move gallery. Commit [`3587ae495`](https://github.com/Vandit1604/vawe/commit/3587ae495) adds a featured bento above the gallery with five moves, chosen from a blind three-reviewer score of every clip.
 
 ## Reproduce it
 

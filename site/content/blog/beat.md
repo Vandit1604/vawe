@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "cut to the beat, beat detection, audio onsets, agents, error messages"
 keywords: "cut video to the beat, beat grid, audio onset detection, beat sync editing"
-hero: /blog/beat/hero.svg
+hero: /blog/beat/hero.webp
 heroAlt: "Before the fix, vawe sound failed 8 of 19 calls on short cues with the message no output. The cause was a one-second minimum. After the fix, one agent used the verb 21 times."
 ---
 
@@ -28,11 +28,11 @@ Run the verb on the track alone. It prints the tempo, a beat grid and the hits:
 bin/vawe sound <track.mp3>
 ```
 
-The input can be a track, a film or a page, or a reference id from `vawe refs list` ([6353c65ec](https://github.com/Vandit1604/vawe/commit/6353c65ec)). The verb came from [bf4252858](https://github.com/Vandit1604/vawe/commit/bf4252858), which made `vawe sound` the one reader of sound and folded in the older `audio`, `sounds` and `beatmap` verbs: 30 files, 695 lines added and 112 removed.
+The input can be a track, a film or a page, or a reference id from `vawe refs list` ([f1453e1d4](https://github.com/Vandit1604/vawe/commit/f1453e1d4)). The verb came from [a600cae64](https://github.com/Vandit1604/vawe/commit/a600cae64), which made `vawe sound` the one reader of sound and folded in the older `audio`, `sounds` and `beatmap` verbs: 30 files, 695 lines added and 112 removed.
 
 ## Step 2: name each hit
 
-A beat grid tells you where the pulse is. A hit tells you what happens. Since [f80b3869c](https://github.com/Vandit1604/vawe/commit/f80b3869c) each hit has a kind (click, pop, swish, impact or sustained) and the verb says what moves in the frame at that moment. An impact is a stronger place to cut than a sustained note, so read the kinds before you choose.
+A beat grid tells you where the pulse is. A hit tells you what happens. Since [b71bae255](https://github.com/Vandit1604/vawe/commit/b71bae255) each hit has a kind (click, pop, swish, impact or sustained) and the verb says what moves in the frame at that moment. An impact is a stronger place to cut than a sustained note, so read the kinds before you choose.
 
 ## Step 3: check the film's cuts against the grid
 
@@ -44,7 +44,7 @@ bin/vawe sound <track.mp3> --cuts <page.html>
 
 The cut table gives each cut a verdict. Within 1 frame of a hit or a beat line, it is on beat. Within 3 frames it is near. Beyond that it is off, and the row gives the second to move it to.
 
-![Schematic cut table. Cuts within one frame of a hit are on beat, within three frames are near, beyond that are off, and an off cut shows the second to move to.](/blog/beat/grid.svg)
+![Schematic cut table. Cuts within one frame of a hit are on beat, within three frames are near, beyond that are off, and an off cut shows the second to move to.](/blog/beat/grid.webp)
 
 ## Step 4: move the off cuts in the page
 
@@ -56,7 +56,7 @@ You do not have to remember Step 3. The draft loop reads the same table through 
 
 ## Failures we hit on short cues and wrong inputs
 
-"no output" on a tick or a pop. Agents also called `vawe sound` on the film's own cues to check them, and those files are often well under a second. The decoder rejected any file with less than a second of samples and printed the first line of ffmpeg's stderr, or "no output" when ffmpeg had said nothing, which it had not, because nothing was wrong with the file. In one session's log, 8 of 19 `sound` calls exited with code 2 on a tick, a word pop, a leave swish, an ETA tick and similar. We reproduced it on a valid mp3 tick. [0eae5d9fb](https://github.com/Vandit1604/vawe/commit/0eae5d9fb) fixed it: `decodeMono` in `harness/lib/audio-onsets.mjs` takes a `minSeconds` option with a default of 1, the sound reader passes 0.02, and a file that is too short now fails with `under N s of audio`. A test asserts that the default error names the length.
+"no output" on a tick or a pop. Agents also called `vawe sound` on the film's own cues to check them, and those files are often well under a second. The decoder rejected any file with less than a second of samples and printed the first line of ffmpeg's stderr, or "no output" when ffmpeg had said nothing, which it had not, because nothing was wrong with the file. In one session's log, 8 of 19 `sound` calls exited with code 2 on a tick, a word pop, a leave swish, an ETA tick and similar. We reproduced it on a valid mp3 tick. [6ec0d5adc](https://github.com/Vandit1604/vawe/commit/6ec0d5adc) fixed it: `decodeMono` in `harness/lib/audio-onsets.mjs` takes a `minSeconds` option with a default of 1, the sound reader passes 0.02, and a file that is too short now fails with `under N s of audio`. A test asserts that the default error names the length.
 
 A reference id where a path was expected, and a page with no music. In one remix session, 3 of the 13 errors came from `vawe sound`: one passed a reference id where a path was expected, and two ran on a page that had no music bed. Both now get a clear answer: reference ids are accepted, and a page with no music file gets "no beat grid".
 

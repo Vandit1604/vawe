@@ -1,0 +1,40 @@
+{
+  "title": "The shape of every vawe call",
+  "parts": [
+    {
+      "kind": "code",
+      "lines": [
+        {
+          "code": "$ bin/vawe frames"
+        },
+        {
+          "code": "vawe: missing <page>; usage: vawe frames <page> [flags]"
+        },
+        {
+          "code": "vawe: frames FAILED (missing <page>; usage: vawe frames <page> [flags]) in 0.0s"
+        },
+        {
+          "code": "exit code 1"
+        }
+      ]
+    },
+    {
+      "kind": "list",
+      "items": [
+        {
+          "name": "1. one-line usage error",
+          "note": "names the missing part"
+        },
+        {
+          "name": "2. last line, always",
+          "note": "ok or FAILED, with seconds"
+        },
+        {
+          "name": "3. survives a pipe",
+          "note": "tail -1 still shows the result"
+        }
+      ],
+      "plain": true
+    }
+  ]
+}

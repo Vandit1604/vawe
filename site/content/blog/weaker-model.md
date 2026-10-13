@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "ai agent harness, weaker model, advice, judge, agents"
 keywords: "ai agent harness, agent harness engineering, weaker model, llm agent tooling"
-hero: /blog/weaker-model/symptoms.svg
+hero: /blog/weaker-model/symptoms.webp
 heroAlt: "Four rows pairing a weaker-model failure with the harness change that answers it: attractor check, stills judge in dev, advice and error prefixes, and a judge ledger."
 ---
 
@@ -16,7 +16,7 @@ Harness here means everything around the model: the commands it runs, the lines 
 
 ## Four failures that were harness gaps
 
-On 2026-10-01 we looked closely at one film from a weaker model. Commit [61ac19259](https://github.com/Vandit1604/vawe/commit/61ac19259) lists what we saw in its message:
+On 2026-10-01 we looked closely at one film from a weaker model. Commit [4246a6a53](https://github.com/Vandit1604/vawe/commit/4246a6a53) lists what we saw in its message:
 
 1. It named the brand with a name from our own attractor list, and it drew a banded disc. Both were on the list of things to avoid.
 2. It skipped the stills judge.
@@ -25,7 +25,7 @@ On 2026-10-01 we looked closely at one film from a weaker model. Commit [61ac192
 
 None of these was a model flaw in the sense that a better prompt would fix it. The attractor list named the traps and nothing checked for them. The advice lines looked like errors. The judge had no memory of what it had said the round before. A stronger model had walked past all four without tripping, so we had never seen them.
 
-![Four failures and the harness change for each](/blog/weaker-model/symptoms.svg)
+![Four failures and the harness change for each](/blog/weaker-model/symptoms.webp)
 
 ## What the weaker model made us change
 
@@ -37,11 +37,11 @@ Prefixes that cannot be misread. Every advice line from `dev`, `new` and the sti
 
 The stills judge inside `dev`. `bin/vawe dev` runs the stills judge itself when `brief.md` has three filled directions, once per change of the directions or the slots, and prints its pick in three lines. `--no-judge` skips it.
 
-A judge ledger. The judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones, and it must say why a new fix reverses an old one. The report prints `ledger: N fixed, N partly, N still; N new`. A follow-up, [1810fc14a](https://github.com/Vandit1604/vawe/commit/1810fc14a), keeps what, now and want on each entry, and after three rounds on one target the ledger prints a stop line.
+A judge ledger. The judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones, and it must say why a new fix reverses an old one. The report prints `ledger: N fixed, N partly, N still; N new`. A follow-up, [30579d4af](https://github.com/Vandit1604/vawe/commit/30579d4af), keeps what, now and want on each entry, and after three rounds on one target the ledger prints a stop line.
 
 Motion lint for `window.seek` pages. The five motion rules now also run on element boxes sampled over time (`harness/lib/box-track.mjs`). Canvas contents are out of scope, and the output says so.
 
-Later, repeated judge findings became defaults in the starter page, the moves and the taste digest. The first 5 s sting that passed the fresh judge ([2c292300f](https://github.com/Vandit1604/vawe/commit/2c292300f)) became the gold example, [`films/examples/colour-sting`](https://github.com/Vandit1604/vawe/tree/main/films/examples/colour-sting).
+Later, repeated judge findings became defaults in the starter page, the moves and the taste digest. The first 5 s sting that passed the fresh judge ([bee932a4b](https://github.com/Vandit1604/vawe/commit/bee932a4b)) became the gold example, [`films/examples/colour-sting`](https://github.com/Vandit1604/vawe/tree/main/films/examples/colour-sting).
 
 ## The evidence nine days later
 

@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: speed
 tags: "headless chrome, screenshots, jpeg, gpu compositing, drafts, performance"
 keywords: "puppeteer screenshot speed, headless chrome screenshots, jpeg screenshot quality, gpu compositing headless"
-hero: /blog/fast-drafts/hero.svg
+hero: /blog/fast-drafts/hero.webp
 heroAlt: "Table comparing the draft path and the final path: JPEG against lossless PNG, GPU against software compositing, slices sized to the work against fixed 60-frame slices, x264 ultrafast against preset fast."
 ---
 
@@ -16,7 +16,7 @@ The final render keeps its own, slower settings. Our pillar post on [faster head
 
 <figure>
 
-![Table comparing the draft path and the final path](/blog/fast-drafts/hero.svg)
+![Table comparing the draft path and the final path](/blog/fast-drafts/hero.webp)
 
 </figure>
 
@@ -24,11 +24,11 @@ The final render keeps its own, slower settings. Our pillar post on [faster head
 
 Why: you cannot pick a fix until you know where the time goes. We had been giving drafts the final's settings, scaled down: lossless PNG screenshots, software compositing and fixed slices. That is correct and slow.
 
-How: commit `92990647f` added `harness/dev/bench-capture.mjs`. It runs one render per child process, so every run reads its environment fresh, and prints a JSON line. It has two switches, GPU compositing and a browser per worker, both off by default, so each can be measured on its own. It also writes per-subframe timings for the seek, the settle, the screenshot call and the file write.
+How: commit `2d0805933` added `harness/dev/bench-capture.mjs`. It runs one render per child process, so every run reads its environment fresh, and prints a JSON line. It has two switches, GPU compositing and a browser per worker, both off by default, so each can be measured on its own. It also writes per-subframe timings for the seek, the settle, the screenshot call and the file write.
 
 ## 2. Capture drafts as JPEG at quality 92
 
-Why: a draft does not need lossless frames. Commit `f12b7955b` made the draft its own path. At the time of the commit, the code comment said encoding and writing a half-size JPEG frame cost about half as much as PNG.
+Why: a draft does not need lossless frames. Commit `e0da1a9b7` made the draft its own path. At the time of the commit, the code comment said encoding and writing a half-size JPEG frame cost about half as much as PNG.
 
 How: capture with `type: 'jpeg'`, quality 92 (`DRAFT_JPEG_QUALITY`) and `optimizeForSpeed`. Check the frame size: on `colour-sting` it is about 73 KB a frame. The final stays lossless.
 
@@ -40,7 +40,7 @@ A final keeps GPU compositing off. About 150 rapid seek-and-screenshot round tri
 
 ## 4. Send pages with SVG filters back to software
 
-This is the first thing we took back. GPU compositing rasterized an SVG filter in two states at random: 70 of 216 frames differed between two renders. Commit `60bc38dc4` moves any page that draws an SVG filter back to software compositing, which costs a draft about 2.5 times as much. Only those pages pay it.
+This is the first thing we took back. GPU compositing rasterized an SVG filter in two states at random: 70 of 216 frames differed between two renders. Commit `0b1d35912` moves any page that draws an SVG filter back to software compositing, which costs a draft about 2.5 times as much. Only those pages pay it.
 
 How to check: render the page twice and compare frame hashes. The full account is in [the deterministic rendering checklist](/blog/determinism).
 
@@ -62,11 +62,11 @@ The second thing we took back. Chrome's downscale of WebGL gave different pixels
 
 ## 8. Cache what is a pure function of its inputs
 
-Smaller changes came from `169fdc5d6`: PNG `optimizeForSpeed` for finals, a low-resolution clip for the pixel speed pass, and a cached speed pass. The speed pass is a pure function of the page folder, `core/` and the render settings, so a second ship of an unchanged page reads the answer from disk.
+Smaller changes came from `586d132c4`: PNG `optimizeForSpeed` for finals, a low-resolution clip for the pixel speed pass, and a cached speed pass. The speed pass is a pure function of the page folder, `core/` and the render settings, so a second ship of an unchanged page reads the answer from disk.
 
 ## 9. Put every draft check in a tier, and time it
 
-Capture is not the only cost of a draft. Commit `ad5a4cbe9` put every draft check in one of three tiers, from one table in `harness/lib/draft-tiers.mjs`:
+Capture is not the only cost of a draft. Commit `78e0e42d2` put every draft check in one of three tiers, from one table in `harness/lib/draft-tiers.mjs`:
 
 - `fast` runs on every draft: motion, text, worlds, tail, video and sound.
 - `settled` runs at settled frames only: contrast, layout, spec and speed.
@@ -76,24 +76,24 @@ Checks are timed and cached under `out/`. A test, `check-budget`, fails if a che
 
 ## A number we dropped
 
-Our planning notes quoted a "40 ms frame" from a bench stamp: a median of 9,077 ms for 228 frames, 39.8 ms per frame. That stamp was written on 2026-09-26 (`db1a1af86`) against a JSON sample film, `tests/fixtures/films/sample.json`.
+Our planning notes quoted a "40 ms frame" from a bench stamp: a median of 9,077 ms for 228 frames, 39.8 ms per frame. That stamp was written on 2026-09-26 (`c4bb8d30a`) against a JSON sample film, `tests/fixtures/films/sample.json`.
 
-The stamp in the repo today (`33c2cf28a`, 2026-10-10) is a median of 1,881 ms for 15 frames, 125.4 ms per frame, on a 15-frame canvas page, `seek-canvas.html`. The bench runs the whole render command as a child process, so that figure includes process and browser start. The two are not comparable. We have no like-for-like before and after for page drafts, and we do not present the 40 ms as one.
+The stamp in the repo today (`1039084f0`, 2026-10-10) is a median of 1,881 ms for 15 frames, 125.4 ms per frame, on a 15-frame canvas page, `seek-canvas.html`. The bench runs the whole render command as a child process, so that figure includes process and browser start. The two are not comparable. We have no like-for-like before and after for page drafts, and we do not present the 40 ms as one.
 
-One timing we can quote: the `three-star` warm draft, from the layout change in `992aed43c`, went from 1.4–1.5 s to 1.3 s of capture and from 2.7 s to 2.3 s of wall time.
+One timing we can quote: the `three-star` warm draft, from the layout change in `1f99365b6`, went from 1.4–1.5 s to 1.3 s of capture and from 2.7 s to 2.3 s of wall time.
 
 ## The checklist as a table
 
 | Check | How to verify | Where in the code |
 |---|---|---|
-| Capture bench exists | one JSON line per variant | `harness/dev/bench-capture.mjs`, [92990647f](https://github.com/Vandit1604/vawe/commit/92990647f) |
-| Drafts capture JPEG q92 | about 73 KB a frame on `colour-sting` | `frameFormat`, `DRAFT_JPEG_QUALITY`, [f12b7955b](https://github.com/Vandit1604/vawe/commit/f12b7955b) |
+| Capture bench exists | one JSON line per variant | `harness/dev/bench-capture.mjs`, [2d0805933](https://github.com/Vandit1604/vawe/commit/2d0805933) |
+| Drafts capture JPEG q92 | about 73 KB a frame on `colour-sting` | `frameFormat`, `DRAFT_JPEG_QUALITY`, [e0da1a9b7](https://github.com/Vandit1604/vawe/commit/e0da1a9b7) |
 | GPU compositing in drafts only | time line prints `gpu` | `pageArgs` in `render-harness.mjs` |
-| SVG filter pages in software | render twice, compare hashes | [60bc38dc4](https://github.com/Vandit1604/vawe/commit/60bc38dc4) |
+| SVG filter pages in software | render twice, compare hashes | [0b1d35912](https://github.com/Vandit1604/vawe/commit/0b1d35912) |
 | Draft slices sized to the work | every lane busy on a short window | `sliceFramesFor` |
 | Warm browser per capture mode | mode on the time line | the preview daemon |
 | WebGL scaled by ffmpeg | `render-draft-halfsize-determinism.test.mjs` | `flags=area` encode |
-| Pure steps cached | second ship reads from disk | `169fdc5d6` |
-| Draft checks tiered and timed | `check-budget` test | `harness/lib/draft-tiers.mjs`, [ad5a4cbe9](https://github.com/Vandit1604/vawe/commit/ad5a4cbe9) |
+| Pure steps cached | second ship reads from disk | `586d132c4` |
+| Draft checks tiered and timed | `check-budget` test | `harness/lib/draft-tiers.mjs`, [78e0e42d2](https://github.com/Vandit1604/vawe/commit/78e0e42d2) |
 
 Where agents lose time waiting rather than capturing is in [reading AI agent traces](/blog/trace-reviews). Lane scaling is in [too many headless Chrome processes: slots and a reaper](/blog/slots-reaper), and the rest of the render pipeline is mapped in the [one-browser-per-lane benchmark](/blog/chrome-per-lane). The CLI verb is described in the [CLI docs](/docs/cli).

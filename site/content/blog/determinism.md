@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: speed
 tags: "determinism, headless chrome, svg filter, gpu compositing, rendering"
 keywords: "deterministic rendering, headless chrome rendering, repeatable screenshots, svg filter gpu compositing"
-hero: /blog/determinism/hero.svg
+hero: /blog/determinism/hero.webp
 heroAlt: "Bar chart of frames that differed between two renders: 70 of 216 in a shared Chrome, 1 of 1296 with a Chrome per lane, 0 of 648 with software compositing, 117 of 154 for a downscaled WebGL page."
 ---
 
@@ -16,7 +16,7 @@ Each item below is one source of drift we found while turning web pages into vid
 
 <figure>
 
-![Share of frames or captures that differed between two renders, by cause](/blog/determinism/hero.svg)
+![Share of frames or captures that differed between two renders, by cause](/blog/determinism/hero.webp)
 
 <figcaption>Counts come from the commit messages and code comments named below. Each row renders one page twice.</figcaption>
 </figure>
@@ -25,7 +25,7 @@ Why bother: a renderer that cannot produce the same frame twice cannot be debugg
 
 <figure>
 
-![Table of six sources of pixel drift and the fix for each](/blog/determinism/sources.svg)
+![Table of six sources of pixel drift and the fix for each](/blog/determinism/sources.webp)
 
 </figure>
 
@@ -41,7 +41,7 @@ How to check: `tests/media/render-page-determinism.test.mjs` renders a page that
 
 The document timeline runs in real time from page load. The compositor rasterizes animated layers against that time before the first seek pauses them. A first seek 1.5 seconds after load painted different edge pixels than one at 0.05 seconds, so a frame depended on how slowly the tab started.
 
-Commit `874af4972` sets the animation playback rate to 0 through the DevTools protocol. Only a seek moves an animation after that. Seeking backward has its own traps (finished `fill: none` animations drop out of `document.getAnimations()`), and the steps are in [how to seek CSS animations frame by frame](/blog/seekable-css).
+Commit `1454df446` sets the animation playback rate to 0 through the DevTools protocol. Only a seek moves an animation after that. Seeking backward has its own traps (finished `fill: none` animations drop out of `document.getAnimations()`), and the steps are in [how to seek CSS animations frame by frame](/blog/seekable-css).
 
 How to check: seek to the end, back to the middle, and compare with a fresh page seeked once to the middle.
 
@@ -56,7 +56,7 @@ The gooey-filter move draws its tab bar through an SVG filter. In a shared draft
 <figcaption>The <a href="/moves/gooey-filter">gooey filter move</a>, the page that exposed the drift.</figcaption>
 </figure>
 
-Commit `60bc38dc4` made two changes. Each draft lane now has its own Chrome, which took the difference down to 1 of 1,296 frames. A page that draws an SVG filter also composites in software, which gave 0 of 648.
+Commit `0b1d35912` made two changes. Each draft lane now has its own Chrome, which took the difference down to 1 of 1,296 frames. A page that draws an SVG filter also composites in software, which gave 0 of 648.
 
 Software compositing costs a draft about 2.5 times as much, so only pages that need it pay. The renderer finds them by scanning the page source, and the modules it imports, for a `<filter>` element, an `fe*` primitive or a `filter: url(...)` rule. A Chrome per lane also made renders faster, which we measured in [one headless Chrome per render lane](/blog/chrome-per-lane).
 
@@ -64,7 +64,7 @@ How to check: `render-draft-filter-determinism.test.mjs` renders a filter page t
 
 ## 4. Emulate focus on every page
 
-The tab that holds browser focus rasterizes sub-pixel edges differently from the others (SSIM 0.9994 in our measurement). With several workers, which slice was frontmost changed the pixels. Commit `169fdc5d6` turns on focus emulation for every page, so all of them paint as the focused one.
+The tab that holds browser focus rasterizes sub-pixel edges differently from the others (SSIM 0.9994 in our measurement). With several workers, which slice was frontmost changed the pixels. Commit `586d132c4` turns on focus emulation for every page, so all of them paint as the focused one.
 
 How to check: render with two workers and with four, and compare the hashes.
 
@@ -78,9 +78,9 @@ How to check: `render-determinism-load.test.mjs` renders under different worker 
 
 ## 6. Keep WebGL capture out of Chrome's own scaling
 
-Two fixes here. The WebGL lens films the page as a flat screen, and commit `8f153f31b` makes it draw its SVG screen into a software canvas, so the draft pixels match from run to run.
+Two fixes here. The WebGL lens films the page as a flat screen, and commit `398fd7a7c` makes it draw its SVG screen into a software canvas, so the draft pixels match from run to run.
 
-Then the downscale. A half-size draft of a WebGL page used Chrome's downscale, and 117 of 154 captures differed between runs. Commit `166771b93` captures at full size and lets ffmpeg shrink the frames with `flags=area`. Why a draft must lay out at full size in the first place is explained in [Puppeteer deviceScaleFactor: lay out big, capture small](/blog/drafts-lie).
+Then the downscale. A half-size draft of a WebGL page used Chrome's downscale, and 117 of 154 captures differed between runs. Commit `a916e59d6` captures at full size and lets ffmpeg shrink the frames with `flags=area`. Why a draft must lay out at full size in the first place is explained in [Puppeteer deviceScaleFactor: lay out big, capture small](/blog/drafts-lie).
 
 How to check: `render-draft-halfsize-determinism.test.mjs` renders a window of `colour-sting` twice and compares per-frame hashes.
 
@@ -108,11 +108,11 @@ Every fix landed with a test that renders twice and compares. Most checks in vaw
 | Check | How to verify | Where in the code |
 | --- | --- | --- |
 | Page clock owns time and random | render twice, compare hashes | `core/engine/page-clock.js`, `render-page-determinism.test.mjs` |
-| Timeline frozen, all animations seeked | seek back and compare with a fresh page | `Animation.setPlaybackRate`, [874af4972](https://github.com/Vandit1604/vawe/commit/874af4972) |
-| Chrome per lane, SVG filters in software | render a filter page twice | `SVG_FILTER`, `usesSvgFilter`, [60bc38dc4](https://github.com/Vandit1604/vawe/commit/60bc38dc4) |
-| Focus emulated | compare 2 and 4 workers | [169fdc5d6](https://github.com/Vandit1604/vawe/commit/169fdc5d6) |
+| Timeline frozen, all animations seeked | seek back and compare with a fresh page | `Animation.setPlaybackRate`, [1454df446](https://github.com/Vandit1604/vawe/commit/1454df446) |
+| Chrome per lane, SVG filters in software | render a filter page twice | `SVG_FILTER`, `usesSvgFilter`, [0b1d35912](https://github.com/Vandit1604/vawe/commit/0b1d35912) |
+| Focus emulated | compare 2 and 4 workers | [586d132c4](https://github.com/Vandit1604/vawe/commit/586d132c4) |
 | Fixed 60-frame final slices | `render-determinism-load.test.mjs` | `SLICE_FRAMES` in `harness/media/render-page.mjs` |
-| WebGL captured at full size, scaled in ffmpeg | `render-draft-halfsize-determinism.test.mjs` | [166771b93](https://github.com/Vandit1604/vawe/commit/166771b93), `8f153f31b` |
+| WebGL captured at full size, scaled in ffmpeg | `render-draft-halfsize-determinism.test.mjs` | [a916e59d6](https://github.com/Vandit1604/vawe/commit/a916e59d6), `398fd7a7c` |
 | Only your own tabs attached | render beside a compare run | `harness/media/preview-server.mjs` |
 
 ## Deeper posts on each source of drift

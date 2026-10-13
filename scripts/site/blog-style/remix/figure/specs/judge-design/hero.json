@@ -1,0 +1,15 @@
+{
+  "title": "Sound score for a silent film",
+  "parts": [
+    {
+      "kind": "number",
+      "items": [
+        {
+          "value": "0",
+          "label": "sound score for a silent film",
+          "sub": "the judge that could not be argued with"
+        }
+      ]
+    }
+  ]
+}

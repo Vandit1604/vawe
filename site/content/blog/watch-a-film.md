@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "ai video analysis, agents, reference video, video comparison, measurement"
 keywords: "can ai agents watch videos, video reference comparison, video analysis for agents, frame extraction"
-hero: /blog/watch-a-film/hero.svg
+hero: /blog/watch-a-film/hero.webp
 heroAlt: "Bar chart. The reference film's three flashes lasted 0.10, 0.07 and 0.10 seconds. The agent's three flashes lasted 0.20 seconds each. In the reference 27 percent of pixels were darker than Y 50, in the agent's film 80 percent."
 ---
 
@@ -32,7 +32,7 @@ The agent saw reference frames downscaled and turned them into sentences. Senten
 | Share above Y 110 | 5% | 8% |
 | Glow and screen | halation, a pixel-grid screen, a lens tilt | a `text-shadow` |
 
-![Flash length and brightness split: reference against ours](/blog/plan-vs-reference/gap.svg)
+![Flash length and brightness split: reference against ours](/blog/plan-vs-reference/gap.webp)
 
 The agent described its film as "dark and sparse". That is true of both films, so nothing told it that one was far darker. Our own docs warn that an exposure flash held for 6 frames or more is a strobe, and 0.20 s is 6 frames at 30 per second. Every row in that table is a number a tool could have printed, and none was.
 
@@ -48,14 +48,14 @@ The critique step failed more quietly. A subagent critic read three sheets, and 
 
 We set two rules. If you cannot measure it, you cannot improve it. And there is no token cap on reading a reference: a shot gets a full-size frame, not a thumbnail. Each tool answers a question the agent used to guess at.
 
-![Six verbs: refs frames, strip, onion, velocity, spec and see, from one frame to a whole film.](/blog/watch-a-film/verbs.svg)
+![Six verbs: refs frames, strip, onion, velocity, spec and see, from one frame to a whole film.](/blog/watch-a-film/verbs.webp)
 
-- `vawe refs frames` writes the settled full-size frame of each shot ([ca91ebcb9](https://github.com/Vandit1604/vawe/commit/ca91ebcb9)). The judge and the refs verb share one key-frame extractor, so both see the same frames.
-- `vawe strip` shows the frames through a moment or through every cut, with the motion start and the settle ([d68b6a56c](https://github.com/Vandit1604/vawe/commit/d68b6a56c)). Reading every cut with `vawe strip --cuts` is now a step in the loop.
-- `vawe onion` blends the frames of one move into a single image, newest strongest and older ones fainter, tinted from cool to warm. `vawe velocity` samples a page at 120 a second and reports start, peak, settle, overshoot and ease shape for each element, with a graph ([4cc29c417](https://github.com/Vandit1604/vawe/commit/4cc29c417)). At 120 samples a second, a 3-frame flash covers many samples.
-- `vawe spec` measures where the eye goes (eye point, jump at a cut, travel, centre bias) and what the ground does (edge tone, change at a cut, light drift) in each shot ([2aeb3d688](https://github.com/Vandit1604/vawe/commit/2aeb3d688)).
-- `vawe look` reports flashes, clipped share, bloom, chromatic offset, screen texture and glow colour, with advice, and `vawe zoom` shows a nearest-neighbour crop of one region beside the same region of a second film ([6af606c6c](https://github.com/Vandit1604/vawe/commit/6af606c6c): 8 files, 824 lines). Flash-count deltas say how many ([c2e51a48c](https://github.com/Vandit1604/vawe/commit/c2e51a48c)).
-- `vawe see` reads a film completely: structure, motion, look, type, sound and images ([86b51bd17](https://github.com/Vandit1604/vawe/commit/86b51bd17): 22 files, 1,653 lines). A ground-truth suite grades it; see [test measurement tools against ground truth fixtures](/blog/see-truth).
+- `vawe refs frames` writes the settled full-size frame of each shot ([a6a9444cb](https://github.com/Vandit1604/vawe/commit/a6a9444cb)). The judge and the refs verb share one key-frame extractor, so both see the same frames.
+- `vawe strip` shows the frames through a moment or through every cut, with the motion start and the settle ([a2c426abc](https://github.com/Vandit1604/vawe/commit/a2c426abc)). Reading every cut with `vawe strip --cuts` is now a step in the loop.
+- `vawe onion` blends the frames of one move into a single image, newest strongest and older ones fainter, tinted from cool to warm. `vawe velocity` samples a page at 120 a second and reports start, peak, settle, overshoot and ease shape for each element, with a graph ([fc117b598](https://github.com/Vandit1604/vawe/commit/fc117b598)). At 120 samples a second, a 3-frame flash covers many samples.
+- `vawe spec` measures where the eye goes (eye point, jump at a cut, travel, centre bias) and what the ground does (edge tone, change at a cut, light drift) in each shot ([576d7c9ff](https://github.com/Vandit1604/vawe/commit/576d7c9ff)).
+- `vawe look` reports flashes, clipped share, bloom, chromatic offset, screen texture and glow colour, with advice, and `vawe zoom` shows a nearest-neighbour crop of one region beside the same region of a second film ([bbe1d2714](https://github.com/Vandit1604/vawe/commit/bbe1d2714): 8 files, 824 lines). Flash-count deltas say how many ([4411a2b96](https://github.com/Vandit1604/vawe/commit/4411a2b96)).
+- `vawe see` reads a film completely: structure, motion, look, type, sound and images ([cbc71f813](https://github.com/Vandit1604/vawe/commit/cbc71f813): 22 files, 1,653 lines). A ground-truth suite grades it; see [test measurement tools against ground truth fixtures](/blog/see-truth).
 
 `look`, `zoom` and `see` take `--vs <ref>` and print deltas. The tools live in `harness/media/see/`, and the verb table in `harness/cli/verbs.mjs`.
 
@@ -70,13 +70,13 @@ The clip is the [exposure-flash move](/moves/exposure-flash).
 
 Two commits changed where the reference sits in the loop.
 
-[b5df5ed98](https://github.com/Vandit1604/vawe/commit/b5df5ed98) made `critique`, `compare` and `judge` default to the reference the brief names, added a reference card to `refs frames`, and made the `dev` next line name the next unmet step (8 files, 214 lines added). AGENTS.md now says it in one line. We had a `--ref` flag before, and agents skipped it; a default removes the choice. Reference choice lives in `harness/lib/refs.mjs`.
+[5b98da554](https://github.com/Vandit1604/vawe/commit/5b98da554) made `critique`, `compare` and `judge` default to the reference the brief names, added a reference card to `refs frames`, and made the `dev` next line name the next unmet step (8 files, 214 lines added). AGENTS.md now says it in one line. We had a `--ref` flag before, and agents skipped it; a default removes the choice. Reference choice lives in `harness/lib/refs.mjs`.
 
-[fa9c2ddd2](https://github.com/Vandit1604/vawe/commit/fa9c2ddd2) renders the page and reads it with the same reference-spec reader as the reference, so the DOM only names the elements. When one side is measured by a script and the other by an eye, part of the delta is the difference between the two measurers. One instrument for both sides removes that.
+[99916c823](https://github.com/Vandit1604/vawe/commit/99916c823) renders the page and reads it with the same reference-spec reader as the reference, so the DOM only names the elements. When one side is measured by a script and the other by an eye, part of the delta is the difference between the two measurers. One instrument for both sides removes that.
 
 ## Blur that follows travel
 
-The same trace review fed the renderer. [97b39b871](https://github.com/Vandit1604/vawe/commit/97b39b871) measures the edge travel of a turn and of an inset clip. In one test film a clip edge moved 181 px a frame where the box moved 124 px, and the turn now gets 16 subframes, not 8. The details are in [motion blur for HTML animation](/blog/motion-blur), and the [lens move](/moves/lens) is the move closest to the missing depth.
+The same trace review fed the renderer. [f5789a68a](https://github.com/Vandit1604/vawe/commit/f5789a68a) measures the edge travel of a turn and of an inset clip. In one test film a clip edge moved 181 px a frame where the box moved 124 px, and the turn now gets 16 subframes, not 8. The details are in [motion blur for HTML animation](/blog/motion-blur), and the [lens move](/moves/lens) is the move closest to the missing depth.
 
 ## What changed in later sessions
 

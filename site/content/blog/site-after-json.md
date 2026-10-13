@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: architecture
 tags: "css animation library, site, seo, documentation, agents, open source"
 keywords: "css animation library, copy paste css animations, motion design moves, easing functions"
-hero: /blog/site-after-json/pipeline.svg
+hero: /blog/site-after-json/pipeline.webp
 heroAlt: "Flow diagram: a move is a markdown file and a demo page. One script builds a JSON index, copies the markdown, writes the llms.txt list and renders clips only when the source hash changed."
 ---
 
@@ -18,15 +18,15 @@ Films had become plain web pages, as the [page contract for rendering HTML to vi
 
 After the [205,163-line deletion of the JSON format](/blog/big-deletion), the site still carried the engine copy, the editor, the playground and a `/json-to-video` page. The home page promised JSON scene files, an editor and an MCP server. None of those existed any more. The format had lost [an A/B test against plain HTML](/blog/html-over-json), and films were now one web page each.
 
-Commit [2d5c905fb](https://github.com/Vandit1604/vawe/commit/2d5c905fb) removed the site's engine copy, its data and the pages built on it: 1,792 files changed, 511 lines added and 127,750 removed. It deleted `site/public/{core,blocklib,scenes,themes,vendor,films}` and the `/arsenal`, `/editor`, `/playground` and `/json-to-video` routes, which stay reachable at the git tag `arsenal-final`. The home hero and the film cards now play rendered MP4s instead of booting the engine.
+Commit [170c70020](https://github.com/Vandit1604/vawe/commit/170c70020) removed the site's engine copy, its data and the pages built on it: 1,792 files changed, 511 lines added and 127,750 removed. It deleted `site/public/{core,blocklib,scenes,themes,vendor,films}` and the `/arsenal`, `/editor`, `/playground` and `/json-to-video` routes, which stay reachable at the git tag `arsenal-final`. The home hero and the film cards now play rendered MP4s instead of booting the engine.
 
 We removed first and built second. In the deletion commit the removed routes redirect to `/`, and `/arsenal` does so only "until the /moves gallery exists". That order worked only because the gallery landed the same day. A redirect to the home page is a hole, and we would land the replacement first next time.
 
 ## One move, published three ways
 
-A move is a short, proven piece of motion: a title that rises under a mask, a caret that types, a counter that dives. Each lives in `prompts/moves` as a markdown file with a demo page. Commit [04b5fba46](https://github.com/Vandit1604/vawe/commit/04b5fba46) added the gallery: 298 files, 4,899 lines added.
+A move is a short, proven piece of motion: a title that rises under a mask, a caret that types, a counter that dives. Each lives in `prompts/moves` as a markdown file with a demo page. Commit [b4ddc928c](https://github.com/Vandit1604/vawe/commit/b4ddc928c) added the gallery: 298 files, 4,899 lines added.
 
-![Pipeline: a markdown file and demo page become a JSON index, a copy for agents, an llms.txt list and clips](/blog/site-after-json/pipeline.svg)
+![Pipeline: a markdown file and demo page become a JSON index, a copy for agents, an llms.txt list and clips](/blog/site-after-json/pipeline.webp)
 
 `scripts/site/moves.mjs` does four jobs. It builds `site/lib/moves.json`. It copies each `.md` to `site/public/moves` so an agent can fetch the move as plain text. It writes the Moves section of `llms.txt`. With `--clips` it encodes an H.264 MP4, a VP9 WebM and a WebP poster per clip. Publishing each move for people and again as markdown for agents costs one copy step in the build.
 
@@ -39,17 +39,17 @@ The gallery filters by group, look and job, and searches by name and job. Clips 
 
 ## Keeping 120 clips fresh without rendering 120 clips
 
-Rendering every clip for every edit wastes time when an edit touches one move. Commit [a09d12e71](https://github.com/Vandit1604/vawe/commit/a09d12e71) made `bin/vawe moves` render only stale clips. A source hash for each clip lives in `clips.lock.json`, and `--all` forces every clip.
+Rendering every clip for every edit wastes time when an edit touches one move. Commit [77a8d9147](https://github.com/Vandit1604/vawe/commit/77a8d9147) made `bin/vawe moves` render only stale clips. A source hash for each clip lives in `clips.lock.json`, and `--all` forces every clip.
 
-Later, [ef948c58c](https://github.com/Vandit1604/vawe/commit/ef948c58c) gave each clip a 2 MB budget. A clip over budget is re-encoded at higher CRF steps, and the CRF is logged in the lock file. The largest clip today is 2.2 MB. The [x264 preset benchmark](/blog/encode) covers the encode choices. A size budget is cheaper to set at 70 clips than at 120.
+Later, [817edeee7](https://github.com/Vandit1604/vawe/commit/817edeee7) gave each clip a 2 MB budget. A clip over budget is re-encoded at higher CRF steps, and the CRF is logged in the lock file. The largest clip today is 2.2 MB. The [x264 preset benchmark](/blog/encode) covers the encode choices. A size budget is cheaper to set at 70 clips than at 120.
 
 ## 44 easing pages generated from the engine
 
-Commit [e32a4f38b](https://github.com/Vandit1604/vawe/commit/e32a4f38b) added `/easing`, with 44 easing pages. Each carries the curve, its velocity, a `linear()` form, a bezier fit and After Effects handle data. The data comes from `core/motion` through `scripts/site/easing.mjs`, so a page cannot disagree with the code. The vawe curves also carry a 2 s rendered clip. The page for [`land`](/easing/land) shows the format, and the [CSS easing functions cheat sheet](/blog/easing) explains the named curves.
+Commit [88f2f435a](https://github.com/Vandit1604/vawe/commit/88f2f435a) added `/easing`, with 44 easing pages. Each carries the curve, its velocity, a `linear()` form, a bezier fit and After Effects handle data. The data comes from `core/motion` through `scripts/site/easing.mjs`, so a page cannot disagree with the code. The vawe curves also carry a 2 s rendered clip. The page for [`land`](/easing/land) shows the format, and the [CSS easing functions cheat sheet](/blog/easing) explains the named curves.
 
 ## Redirects and search
 
-Commit [390fc6187](https://github.com/Vandit1604/vawe/commit/390fc6187) was the first SEO phase: a redirect map, structured data, a better move page structure, real `lastmod` dates, cache headers and an HTML-to-video page (28 files, 3,718 lines added). Commit [b60f82d4b](https://github.com/Vandit1604/vawe/commit/b60f82d4b) turned `/json-to-video` into a permanent redirect to the HTML to MP4 quickstart, so people who searched for the old page land on the new one.
+Commit [cd6ef5d49](https://github.com/Vandit1604/vawe/commit/cd6ef5d49) was the first SEO phase: a redirect map, structured data, a better move page structure, real `lastmod` dates, cache headers and an HTML-to-video page (28 files, 3,718 lines added). Commit [aa4664582](https://github.com/Vandit1604/vawe/commit/aa4664582) turned `/json-to-video` into a permanent redirect to the HTML to MP4 quickstart, so people who searched for the old page land on the new one.
 
 ## The library in numbers
 

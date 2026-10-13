@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "lint waivers, suppression comments, quality gates, ai agents, checks"
 keywords: "lint suppression comments, waive a check, suppress lint warnings, check suppression reason"
-hero: /blog/waivers/hero.svg
+hero: /blog/waivers/hero.webp
 heroAlt: "A waiver before and after. Before it names no place and no number and hides every finding of its code. After it is scoped to 2.25 s and names the measured 4.4:1 against the 4.5:1 limit."
 ---
 
@@ -35,9 +35,9 @@ The gold example is the finding that stuck. Agents copy examples. A gold example
 
 ## What a reason must contain now
 
-Length was the only test, and an agent can write 60 characters of nothing. So the rule moved from how long a reason is to what it says ([805a542](https://github.com/Vandit1604/vawe/commit/805a5427c) and [3827592](https://github.com/Vandit1604/vawe/commit/38275928e), both on 2026-10-10).
+Length was the only test, and an agent can write 60 characters of nothing. So the rule moved from how long a reason is to what it says ([ecb537a](https://github.com/Vandit1604/vawe/commit/ecb537a46) and [7ee9506](https://github.com/Vandit1604/vawe/commit/7ee9506ec), both on 2026-10-10).
 
-One function decides. `entryHasReason` in `harness/lib/waivers.mjs` is the only place that decides whether a reason counts, and the three checks that vetted on their own now call it ([753c32e](https://github.com/Vandit1604/vawe/commit/753c32e92) moved anim-traps over).
+One function decides. `entryHasReason` in `harness/lib/waivers.mjs` is the only place that decides whether a reason counts, and the three checks that vetted on their own now call it ([a2646fa](https://github.com/Vandit1604/vawe/commit/a2646fa14) moved anim-traps over).
 
 One code per check, scoped to seconds. A waiver is `code@second` or `code@a-b` for a range. `dead-air` is retired, and using it prints the four codes to choose from instead. A scoped waiver does not cover a finding that has no second.
 
@@ -51,7 +51,7 @@ One code per check, scoped to seconds. A waiver is `code@second` or `code@a-b` f
 
 A refusal prints the missing part, for example "the reason names no measured value: write the number the check printed, with its unit". The agent can fix it in one step.
 
-![The five tests a waiver reason must pass.](/blog/waivers/diagram.svg)
+![The five tests a waiver reason must pass.](/blog/waivers/diagram.webp)
 
 The judge sees every waiver as well. A waiver no longer hides a decision from the fresh-session judge that scores the film.
 
@@ -64,7 +64,7 @@ The public example film `colour-sting` shows it. Its contrast waiver used to be 
 mid-move at 4.4:1 against the 4.5:1 limit and lands readable by 2.5 s"
 ```
 
-It names the world, the second, the measured ratio and the limit. A reviewer can open the film at 2.25 s and check it in ten seconds. We rewrote the `tracking-hud` example the same way in [90e2144](https://github.com/Vandit1604/vawe/commit/90e214401). One of its reasons says that at 1.95 s a 4k px² readout relocks to its glyph in 0.05 s, while a 1k px² caret types for 0.69 s, so the label jumps to its new lock and does not travel.
+It names the world, the second, the measured ratio and the limit. A reviewer can open the film at 2.25 s and check it in ten seconds. We rewrote the `tracking-hud` example the same way in [cd90a43](https://github.com/Vandit1604/vawe/commit/cd90a438e). One of its reasons says that at 1.95 s a 4k px² readout relocks to its glyph in 0.05 s, while a 1k px² caret types for 0.69 s, so the label jumps to its new lock and does not travel.
 
 ## The objection: why not ban waivers?
 

@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: measurement
 tags: "llm as a judge, evaluation, ai agents, motion graphics, rubric"
 keywords: "llm as a judge, llm judge rubric, llm judge reference comparison, judge ledger"
-hero: /blog/judge-design/hero.svg
+hero: /blog/judge-design/hero.webp
 heroAlt: "Large number 0 with the caption sound score for a silent film, the judge that could not be argued with"
 ---
 
@@ -16,7 +16,7 @@ This page explains how the judge works now. It starts from reject, it answers si
 
 ## What does the judge read and score?
 
-On 30 September we added `judge --fresh` ([1561e6876](https://github.com/Vandit1604/vawe/commit/1561e6876)). It is a fresh, read-only agent. It reads a deterministic contact sheet, six change-peak frames and a loudness line, uses the Read tool only, takes about 30 seconds and writes one JSON object. The run lives in `harness/media/judge-fresh.mjs`.
+On 30 September we added `judge --fresh` ([3577db81f](https://github.com/Vandit1604/vawe/commit/3577db81f)). It is a fresh, read-only agent. It reads a deterministic contact sheet, six change-peak frames and a loudness line, uses the Read tool only, takes about 30 seconds and writes one JSON object. The run lives in `harness/media/judge-fresh.mjs`.
 
 It scores eight axes from 1 to 10:
 
@@ -47,30 +47,30 @@ It had no outside bar. It compared a film only with our own earlier films, so a 
 
 The judge answers a side-by-side question against two reference films on four dials: text, colour, motion and craft. The premise, written in the code comment, is that a judge asked "which is better" agrees with people more often than one that scores alone. So the scores follow the answers.
 
-If our film loses a dial to both references, the axes on that dial are capped at 6. If it loses to one, they are capped at 7. A missing answer counts as a loss, and a cap can only lower a score ([2498ea00a](https://github.com/Vandit1604/vawe/commit/2498ea00a), [e82b60704](https://github.com/Vandit1604/vawe/commit/e82b60704)). The mapping is fixed: type to the text dial, colour to colour, motion and pace to motion, scenes and "expensive" to craft. The code is `harness/lib/judge-bar.mjs`.
+If our film loses a dial to both references, the axes on that dial are capped at 6. If it loses to one, they are capped at 7. A missing answer counts as a loss, and a cap can only lower a score ([536a5ea29](https://github.com/Vandit1604/vawe/commit/536a5ea29), [4e4aa7ed6](https://github.com/Vandit1604/vawe/commit/4e4aa7ed6)). The mapping is fixed: type to the text dial, colour to colour, motion and pace to motion, scenes and "expensive" to craft. The code is `harness/lib/judge-bar.mjs`.
 
 <figure>
-<img src="/blog/judge-design/flow.svg" alt="Flow: a read-only judge reads a contact sheet, compares with two reference films per dial, applies score caps, writes a ledger, and the next judge marks each fix" width="720" height="390" loading="lazy">
+<img src="/blog/judge-design/flow.webp" alt="Flow: a read-only judge reads a contact sheet, compares with two reference films per dial, applies score caps, writes a ledger, and the next judge marks each fix" width="720" height="390" loading="lazy">
 <figcaption>One pass of the fresh judge, and where the ledger and fairness rules sit.</figcaption>
 </figure>
 
 ## How does a ledger stop the judge changing its mind?
 
-Each fix the judge asks for gets an id in a file next to the film. The next judge of that film has to mark each open fix as fixed, partly or still before it may add new ones. A fix that undoes an earlier one must say which one and why ([61ac19259](https://github.com/Vandit1604/vawe/commit/61ac19259)).
+Each fix the judge asks for gets an id in a file next to the film. The next judge of that film has to mark each open fix as fixed, partly or still before it may add new ones. A fix that undoes an earlier one must say which one and why ([4246a6a53](https://github.com/Vandit1604/vawe/commit/4246a6a53)).
 
-Each fix also names what it changes, its value now and the value it wants. When the asked value for one target moves back and forth over three rounds (85, then 40, then 85, for example), the report prints a stop line: keep this at its current value, the judge varies on this item ([1810fc14a](https://github.com/Vandit1604/vawe/commit/1810fc14a)). A fix marked stale is closed and counted ([ff71eaf1a](https://github.com/Vandit1604/vawe/commit/ff71eaf1a)). Measured deltas go into the rubric as settled facts, so the model judges taste and only confirms the lines we mark ([527e8bd50](https://github.com/Vandit1604/vawe/commit/527e8bd50)). The ledger code is `harness/lib/judge-ledger.mjs`.
+Each fix also names what it changes, its value now and the value it wants. When the asked value for one target moves back and forth over three rounds (85, then 40, then 85, for example), the report prints a stop line: keep this at its current value, the judge varies on this item ([30579d4af](https://github.com/Vandit1604/vawe/commit/30579d4af)). A fix marked stale is closed and counted ([c4bffa825](https://github.com/Vandit1604/vawe/commit/c4bffa825)). Measured deltas go into the rubric as settled facts, so the model judges taste and only confirms the lines we mark ([72e06339c](https://github.com/Vandit1604/vawe/commit/72e06339c)). The ledger code is `harness/lib/judge-ledger.mjs`.
 
 Our digest records the working assumption that the judge varies by about 1 point per axis. After three rounds that flip one note, keep the value you measured.
 
 ## How can an author decline an axis?
 
-By declaring it in the brief, in a form the harness can check. A brief that declares silence, with a Board sound row of "none" or a line "sound none", removes the sound axis ([4ebc99f59](https://github.com/Vandit1604/vawe/commit/4ebc99f59)). A brief that says "no text" removes the type axis and the text dial ([bc65eaaf1](https://github.com/Vandit1604/vawe/commit/bc65eaaf1)).
+By declaring it in the brief, in a form the harness can check. A brief that declares silence, with a Board sound row of "none" or a line "sound none", removes the sound axis ([12618c189](https://github.com/Vandit1604/vawe/commit/12618c189)). A brief that says "no text" removes the type axis and the text dial ([4639ecb5d](https://github.com/Vandit1604/vawe/commit/4639ecb5d)).
 
 The declaration has to be checkable, a Board row or a line in the brief. A free-text excuse would become a loophole, and agents find loopholes fast: [18 of 36 films gamed one of our checks](/blog/loophole-audit).
 
 ## Why does the author never see the score?
 
-A score shown to the author becomes a target. The printed report does not show one. The rubric lists each known trick, needs a cited second for each claim, and respects the film's own DESIGN.md ([8af091647](https://github.com/Vandit1604/vawe/commit/8af091647)). A PASS is never recorded by the agent that rendered the film either: the verdict step refuses it.
+A score shown to the author becomes a target. The printed report does not show one. The rubric lists each known trick, needs a cited second for each claim, and respects the film's own DESIGN.md ([cf73a1c7a](https://github.com/Vandit1604/vawe/commit/cf73a1c7a)). A PASS is never recorded by the agent that rendered the film either: the verdict step refuses it.
 
 ## How well does it work?
 

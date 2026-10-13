@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "observability, run logs, ai agents, jsonl"
 keywords: "ai agent observability, agent run logs, jsonl log, harness metrics"
-hero: /blog/run-logs/hero.svg
+hero: /blog/run-logs/hero.webp
 heroAlt: "One JSONL log line per verb call, with stage, duration, exit code, slot wait and images, feeding a runs report for time, failures and the draft series."
 ---
 
@@ -14,7 +14,7 @@ To add observability to an AI agent workflow, make the tool log every call, so y
 
 We started on 2026-10-04, when we asked an agent to log how long each step of a 6.2-minute task took. It handed back a table that summed to about 18 minutes. It had run `date` once, typed the other timestamps by hand and guessed its own thinking time. It said so, but the numbers still looked like measurements. A language model has no clock while it thinks and sees time only in tool output, so we wrote down a rule: ask an agent what it saw and decided, never how long something took. The log is part of the [harness we build for the weaker model](/blog/weaker-model).
 
-![Asking the agent for the duration of a 6.2 minute run produced about 18 minutes; the run log carries the measured seconds.](/blog/run-logs/diagram.svg)
+![Asking the agent for the duration of a 6.2 minute run produced about 18 minutes; the run log carries the measured seconds.](/blog/run-logs/diagram.webp)
 
 ## What you need for a per-command log
 
@@ -24,11 +24,11 @@ We started on 2026-10-04, when we asked an agent to log how long each step of a 
 
 ## Step 1: log one event per step for the main commands
 
-[5ae7553](https://github.com/Vandit1604/vawe/commit/5ae7553de) (2026-10-01) wrote one event per step for `new`, `dev`, `judge` and `ship`, added `vawe runs`, and put the ship job logs under `out/ship-jobs`. This is enough to start, and it was not enough to keep. In one trace review the log held 21 lines for 162 tool calls. `strip`, `frames`, `compare`, `velocity`, `onion`, `critique` and `audio` left no record, a failed or killed draft wrote nothing, and time spent waiting for a render slot sat inside the draft's wall time.
+[97bf133](https://github.com/Vandit1604/vawe/commit/97bf13390) (2026-10-01) wrote one event per step for `new`, `dev`, `judge` and `ship`, added `vawe runs`, and put the ship job logs under `out/ship-jobs`. This is enough to start, and it was not enough to keep. In one trace review the log held 21 lines for 162 tool calls. `strip`, `frames`, `compare`, `velocity`, `onion`, `critique` and `audio` left no record, a failed or killed draft wrote nothing, and time spent waiting for a render slot sat inside the draft's wall time.
 
 ## Step 2: log every command, including the ones that fail
 
-[bf4a5af](https://github.com/Vandit1604/vawe/commit/bf4a5af9f) (2026-10-10) made the log cover every verb. Each call appends one line with these fields:
+[914f16f](https://github.com/Vandit1604/vawe/commit/914f16f20) (2026-10-10) made the log cover every verb. Each call appends one line with these fields:
 
 - the verb and its arguments;
 - the stage the film was in when the call started;
@@ -50,7 +50,7 @@ The same commit added a footer: `vawe: dev ok in 38.2s` or `vawe: dev FAILED (re
 
 ## Step 5: give the log a reader
 
-A JSONL file nobody reads is storage. `vawe runs <film>` shows time per stage and verb, failures and why, and the draft series. `vawe runs --all` gives one row per film for the last 30 days. `vawe runs --taste` reports, per rule, how often it fired, how often it was fixed and how often it still fired in the next draft ([f2a5e91](https://github.com/Vandit1604/vawe/commit/f2a5e9188); [80d1b8e](https://github.com/Vandit1604/vawe/commit/80d1b8e19) restored the per-draft lines). The report code is in `harness/lib/runs-report.mjs` and `harness/dev/runs.mjs`.
+A JSONL file nobody reads is storage. `vawe runs <film>` shows time per stage and verb, failures and why, and the draft series. `vawe runs --all` gives one row per film for the last 30 days. `vawe runs --taste` reports, per rule, how often it fired, how often it was fixed and how often it still fired in the next draft ([6cb5227](https://github.com/Vandit1604/vawe/commit/6cb52276b); [1560a60](https://github.com/Vandit1604/vawe/commit/1560a60ec) restored the per-draft lines). The report code is in `harness/lib/runs-report.mjs` and `harness/dev/runs.mjs`.
 
 ## Check that the log answers real questions
 

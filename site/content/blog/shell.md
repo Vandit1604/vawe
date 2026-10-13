@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: agent-experience
 tags: "ai agent shell, hooks, bash, agents, developer experience"
 keywords: "shell for ai agents, bash for ai agents, agent tool failures, agent hooks"
-hero: /blog/shell/timeline.svg
+hero: /blog/shell/timeline.webp
 heroAlt: "A timeline of three commits on 2026-09-30: a hook is added at 04:58, reverted seven minutes later at 05:05, and narrowed to four git commands 26 seconds after that."
 ---
 
@@ -24,13 +24,13 @@ This is a postmortem on a shell hook we wrote for AI agents and took out seven m
 
 Before the hook. AGENTS.md carried a header on its Shell section: `443 of 5,520 agent Bash calls failed on these`, about one call in twelve. The causes were few. macOS `sed -i` needs an empty suffix (`sed -i ''`). A hook rewrote `cat a b` and broke it. Unquoted zsh globs gave `no matches found`. A Bash call over 120 s moved to the background and kept its render slot.
 
-04:58:27. Commit [5d2beaeed](https://github.com/Vandit1604/vawe/commit/5d2beaeed) extended our git guard, `harness/live/no-blanket-git.mjs`. It refused a `for`, `while` or `until` loop, `sed -i`, and a multi-part command that starts with `cd`. Each refusal printed a fix: one command per call, the Edit tool, no `cd` prefix. It added 32 lines, removed 8, and came with a test case for each form.
+04:58:27. Commit [ba89f5db0](https://github.com/Vandit1604/vawe/commit/ba89f5db0) extended our git guard, `harness/live/no-blanket-git.mjs`. It refused a `for`, `while` or `until` loop, `sed -i`, and a multi-part command that starts with `cd`. Each refusal printed a fix: one command per call, the Edit tool, no `cd` prefix. It added 32 lines, removed 8, and came with a test case for each form.
 
-05:05:31. [25eec4c93](https://github.com/Vandit1604/vawe/commit/25eec4c93) reverted it.
+05:05:31. [2972e403a](https://github.com/Vandit1604/vawe/commit/2972e403a) reverted it.
 
-05:05:57. [607cfe6f0](https://github.com/Vandit1604/vawe/commit/607cfe6f0) narrowed the guard to the four git commands that destroy uncommitted work. Its subject states the decision: shell style (loops, `cd`, `sed`) is the agent's choice.
+05:05:57. [e16b230e9](https://github.com/Vandit1604/vawe/commit/e16b230e9) narrowed the guard to the four git commands that destroy uncommitted work. Its subject states the decision: shell style (loops, `cd`, `sed`) is the agent's choice.
 
-![Timeline: a hook added at 04:58:27, reverted at 05:05:31, narrowed at 05:05:57](/blog/shell/timeline.svg)
+![Timeline: a hook added at 04:58:27, reverted at 05:05:31, narrowed at 05:05:57](/blog/shell/timeline.webp)
 
 ## Root cause
 
@@ -42,14 +42,14 @@ The refusals we meant to prevent came from the worktree isolation of the agent r
 
 The changes that followed each alter the environment, so the habit works or the failure names its cause.
 
-- Fewer hooks that fight. [65abeef9d](https://github.com/Vandit1604/vawe/commit/65abeef9d), "Stop fighting the hooks", allowed `git add -A` with an explicit path, made doc references advisory in pre-commit, and dropped the `MISTAKES.md` log and its duplicates gate: 43 files, 61 lines added, 1,376 removed. The rule behind it is that a check closes a bug and a log entry does not.
-- A quality hook that reads its own worktree. [7a785570c](https://github.com/Vandit1604/vawe/commit/7a785570c) compares an edit only with the `HEAD` of its own worktree, so a tangle the edit did not add never blocks it.
-- Capability probes. [e94808616](https://github.com/Vandit1604/vawe/commit/e94808616) gave `vawe doctor` a `--json` output and probes for encode, `drawtext` and launching Chrome. It writes `.vawe/doctor.json`, and a render failure names the failed check.
-- One verb for waiting. [955d4a94c](https://github.com/Vandit1604/vawe/commit/955d4a94c) added `vawe wait`, which blocks until any render of a film ends and prints a progress line each minute. AGENTS.md says: never `sleep`, run `vawe wait`.
-- The habit documented once. The `vawe-page` skill gives the macOS `sed -i ''` form ([8973c50be](https://github.com/Vandit1604/vawe/commit/8973c50be)), and the Shell section of AGENTS.md lists what fails in this shell ([ab9e5a79e](https://github.com/Vandit1604/vawe/commit/ab9e5a79e)).
+- Fewer hooks that fight. [6a0bae25b](https://github.com/Vandit1604/vawe/commit/6a0bae25b), "Stop fighting the hooks", allowed `git add -A` with an explicit path, made doc references advisory in pre-commit, and dropped the `MISTAKES.md` log and its duplicates gate: 43 files, 61 lines added, 1,376 removed. The rule behind it is that a check closes a bug and a log entry does not.
+- A quality hook that reads its own worktree. [45ffd6077](https://github.com/Vandit1604/vawe/commit/45ffd6077) compares an edit only with the `HEAD` of its own worktree, so a tangle the edit did not add never blocks it.
+- Capability probes. [e1b240532](https://github.com/Vandit1604/vawe/commit/e1b240532) gave `vawe doctor` a `--json` output and probes for encode, `drawtext` and launching Chrome. It writes `.vawe/doctor.json`, and a render failure names the failed check.
+- One verb for waiting. [f0ab4f483](https://github.com/Vandit1604/vawe/commit/f0ab4f483) added `vawe wait`, which blocks until any render of a film ends and prints a progress line each minute. AGENTS.md says: never `sleep`, run `vawe wait`.
+- The habit documented once. The `vawe-page` skill gives the macOS `sed -i ''` form ([298be1120](https://github.com/Vandit1604/vawe/commit/298be1120)), and the Shell section of AGENTS.md lists what fails in this shell ([8eebf5561](https://github.com/Vandit1604/vawe/commit/8eebf5561)).
 - A result line a pipe cannot hide. Agents piped 134 of 140 `vawe` calls in one review into `tail`, `head` or `grep`. Every verb now ends with `vawe: <verb> ok|FAILED (<reason>) in <s>s`. [CLI design for AI agents](/blog/one-binary) has the details.
 
-![Four habits and the environment change for each](/blog/shell/habit-fixes.svg)
+![Four habits and the environment change for each](/blog/shell/habit-fixes.webp)
 
 ## Why we missed it
 

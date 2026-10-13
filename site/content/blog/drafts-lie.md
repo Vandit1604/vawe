@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: speed
 tags: "puppeteer, devicescalefactor, rendering, drafts, webgl"
 keywords: "puppeteer devicescalefactor, puppeteer setviewport, half-size screenshot, draft render"
-hero: /blog/drafts-lie/hero.svg
+hero: /blog/drafts-lie/hero.webp
 heroAlt: "Before: the same translateX(600px) box lands at 62.5 percent of a 960 pixel draft and 31 percent of a 1920 pixel final. After: both lay out at 1920 pixels and the draft is captured at scale 0.5."
 ---
 
@@ -16,7 +16,7 @@ We learned it the hard way. Our half-size video drafts shrank the viewport inste
 
 <figure>
 
-![Before and after layout: the same pixel offset lands at 62.5 percent of the draft and 31.25 percent of the final, then both lay out at 1920 by 1080](/blog/drafts-lie/hero.svg)
+![Before and after layout: the same pixel offset lands at 62.5 percent of the draft and 31.25 percent of the final, then both lay out at 1920 by 1080](/blog/drafts-lie/hero.webp)
 
 <figcaption>Schematic. The box and the 600 px offset are an example, not a frame from a film.</figcaption>
 </figure>
@@ -33,7 +33,7 @@ It cost us real time. An agent fixed a draft that looked right, and the final th
 
 ## What does deviceScaleFactor change?
 
-Commit `992aed43c` changed what a draft means. The page now always lays out at the aspect's full CSS size, and the browser captures it at a device scale of 0.5 for a draft and 1 for a final. `resolveFrame` returns the full size plus the scale.
+Commit `1f99365b6` changed what a draft means. The page now always lays out at the aspect's full CSS size, and the browser captures it at a device scale of 0.5 for a draft and 1 for a final. `resolveFrame` returns the full size plus the scale.
 
 The values `--vw`, `--vh`, `data-aspect` and `window.vawe.width` and `height` always report the full size, so a page cannot tell it is in a draft. The commit message notes that Chromium honored the factor for screenshots even under `--force-device-scale-factor=1`, so there was one capture path and no downscale step.
 
@@ -51,7 +51,7 @@ The values `--vw`, `--vh`, `data-aspect` and `window.vawe.width` and `height` al
 
 <figure>
 
-![Bar chart of the mean pixel difference at frame 5: 10.07 with a 960x540 draft layout, 0.86 with a 1920x1080 layout](/blog/drafts-lie/frame-diff.svg)
+![Bar chart of the mean pixel difference at frame 5: 10.07 with a 960x540 draft layout, 0.86 with a 1920x1080 layout](/blog/drafts-lie/frame-diff.webp)
 
 </figure>
 
@@ -59,7 +59,7 @@ The commit also records a timing on the `three-star` example, a warm draft: capt
 
 ## When is deviceScaleFactor the wrong tool?
 
-On a WebGL page. Ten days later (`166771b93`) we found that Chrome's own downscale of a WebGL page gave different pixels from run to run. On the `colour-sting` example, 117 of 154 captures differed between two renders. A full-size capture of the same page was repeatable.
+On a WebGL page. Ten days later (`a916e59d6`) we found that Chrome's own downscale of a WebGL page gave different pixels from run to run. On the `colour-sting` example, 117 of 154 captures differed between two renders. A full-size capture of the same page was repeatable.
 
 A draft that changes on each run cannot be debugged, so we changed the capture again. A draft now captures at device scale 1, and the encode scales the result down with ffmpeg's `scale` filter and `flags=area`. The layout rule stays: the page still sees the full size. Only the place where the pixels shrink moved, from the browser to ffmpeg.
 
@@ -69,8 +69,8 @@ Correct and repeatable are two separate checks. A scale that is right but differ
 
 ## What did the full-size capture cost?
 
-Capturing at full size costs more than capturing at half. We accepted that for correctness, and won the time back elsewhere with JPEG capture and slices sized to the work (commit [f12b7955b](https://github.com/Vandit1604/vawe/commit/f12b7955b)). Those settings are in [Puppeteer screenshot speed: what helped, what we undid](/blog/fast-drafts).
+Capturing at full size costs more than capturing at half. We accepted that for correctness, and won the time back elsewhere with JPEG capture and slices sized to the work (commit [e0da1a9b7](https://github.com/Vandit1604/vawe/commit/e0da1a9b7)). Those settings are in [Puppeteer screenshot speed: what helped, what we undid](/blog/fast-drafts).
 
 ## Where the idea goes next
 
-The page must not know it is in a draft, just as it must not know the wall time. The same idea drives the [virtual clock that seeds Math.random and freezes Date.now](/blog/page-clock), and both are items in the [full determinism checklist](/blog/determinism). The code lives in `harness/media/render-page.mjs` (`resolveFrame`, and the draft encode with `flags=area`); the two commits are [992aed43c](https://github.com/Vandit1604/vawe/commit/992aed43c) and [166771b93](https://github.com/Vandit1604/vawe/commit/166771b93). See also the [determinism docs](/docs/determinism) and [HyperFrames alternatives](/hyperframes-alternatives).
+The page must not know it is in a draft, just as it must not know the wall time. The same idea drives the [virtual clock that seeds Math.random and freezes Date.now](/blog/page-clock), and both are items in the [full determinism checklist](/blog/determinism). The code lives in `harness/media/render-page.mjs` (`resolveFrame`, and the draft encode with `flags=area`); the two commits are [1f99365b6](https://github.com/Vandit1604/vawe/commit/1f99365b6) and [a916e59d6](https://github.com/Vandit1604/vawe/commit/a916e59d6). See also the [determinism docs](/docs/determinism) and [HyperFrames alternatives](/hyperframes-alternatives).

@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: speed
 tags: "motion blur, subframes, ffmpeg, headless chrome, rendering"
 keywords: "motion blur css, subframe motion blur, 180 degree shutter, ffmpeg frame blend"
-hero: /blog/motion-blur/hero.svg
+hero: /blog/motion-blur/hero.webp
 heroAlt: "Schematic: three subframes of a fast circle show as three separate ghosts, eight subframes overlap into one streak."
 ---
 
@@ -16,7 +16,7 @@ This explainer covers how the count is chosen, how the blend is built, and what 
 
 <figure>
 
-![Schematic of 3 subframes showing ghost copies against 8 subframes forming a streak](/blog/motion-blur/hero.svg)
+![Schematic of 3 subframes showing ghost copies against 8 subframes forming a streak](/blog/motion-blur/hero.webp)
 
 <figcaption>A schematic of the failure and the fix. Positions are drawn for clarity, not taken from a render.</figcaption>
 </figure>
@@ -29,7 +29,7 @@ Capture is the expensive part of a render. Each subframe is a seek, a settle (fo
 
 ## How many subframes does a frame need?
 
-Commit `c466e8631` made the count follow each frame's travel. The rule lives in `subframesForTravel`:
+Commit `75fa04dc6` made the count follow each frame's travel. The rule lives in `subframesForTravel`:
 
 - The blur spans half the frame interval, a 180 degree shutter (`SHUTTER = 0.5`).
 - Neighbouring subframes should sit at most 3 px apart (`STEP_PX = 3`).
@@ -57,7 +57,7 @@ Counts are powers of two and run-length encoded before capture. The ffmpeg filte
 
 ## When can a subframe skip its screenshot?
 
-Commit `33038e674` raised the cap to 32 subframes and added reuse. After a seek, the page reports whether anything still pending can change the pixels: timers, animation frame callbacks, canvas, video or SMIL. If nothing can, two subframes with the same animation state paint the same pixels, and the second one reuses the first capture. A held frame costs one screenshot however many subframes it asks for. The pending count comes from the [virtual clock that owns timers and requestAnimationFrame](/blog/page-clock).
+Commit `086276b67` raised the cap to 32 subframes and added reuse. After a seek, the page reports whether anything still pending can change the pixels: timers, animation frame callbacks, canvas, video or SMIL. If nothing can, two subframes with the same animation state paint the same pixels, and the second one reuses the first capture. A held frame costs one screenshot however many subframes it asks for. The pending count comes from the [virtual clock that owns timers and requestAnimationFrame](/blog/page-clock).
 
 A `--profile` flag prints a table of frames, subframes, screenshots (and how many were reused) and capture seconds per second of film. That table shows which second of a film is expensive.
 
@@ -67,22 +67,22 @@ The pixel estimate cannot tell a frame that needs 32 subframes from one that nee
 
 <figure>
 
-![Bar chart: 4,017 subframes with the fast band capped at 16 and 7,805 with a cap of 32](/blog/motion-blur/subframes.svg)
+![Bar chart: 4,017 subframes with the fast band capped at 16 and 7,805 with a cap of 32](/blog/motion-blur/subframes.webp)
 
 </figure>
 
 We have not compared the two renders side by side for quality, so we cannot claim the 16 band looks the same on every film.
 
-For big finals, commit `20e0c3377` prints advice when a final asks for more than 8,000 subframes: the count, an estimate in minutes (1,000 subframes per minute) and the `--blur` option that lowers the cap. The code comment records one measurement: 19,200 subframes took 15 to 23 minutes.
+For big finals, commit `cc6c9b05b` prints advice when a final asks for more than 8,000 subframes: the count, an estimate in minutes (1,000 subframes per minute) and the `--blur` option that lowers the cap. The code comment records one measurement: 19,200 subframes took 15 to 23 minutes.
 
 ## What can go wrong in the encode?
 
 Frames can vanish. The blended frames are encoded as segments, and each segment restarts its timestamps, so a one-frame segment carries no duration and the next segment overlaps it. With `-r` set to the frame rate, ffmpeg rate-converted the stream and dropped the overlapped frames: 7 to 24 frames per 6 seconds. Films came out short and drifted away from their audio, which is how we noticed.
 
-Commit `3184064c0` re-stamps the timestamps after the concat with `setpts=N/fps/TB` and uses `-fps_mode passthrough`, so ffmpeg never rate-converts. A later commit (`40091a783`) fixed a similar loss from a pixel-format change mid-sequence, covered in the [x264 preset benchmark](/blog/encode). Count your frames after encoding.
+Commit `3c8d7a692` re-stamps the timestamps after the concat with `setpts=N/fps/TB` and uses `-fps_mode passthrough`, so ffmpeg never rate-converts. A later commit (`958f17f9d`) fixed a similar loss from a pixel-format change mid-sequence, covered in the [x264 preset benchmark](/blog/encode). Count your frames after encoding.
 
 ## Limits, and where to try it
 
-The quality cost of the 16 cap is unmeasured, and the minutes estimate comes from one measurement. The code is in `harness/media/render-page.mjs` (`subframesForTravel`, `bucketize`, `clampSegments`, `blendGraph`), with tests in `tests/media/render-blur-travel.test.mjs` and `tests/media/render-reuse.test.mjs`. Commits: [c466e8631](https://github.com/Vandit1604/vawe/commit/c466e8631), [33038e674](https://github.com/Vandit1604/vawe/commit/33038e674), [3184064c0](https://github.com/Vandit1604/vawe/commit/3184064c0), [20e0c3377](https://github.com/Vandit1604/vawe/commit/20e0c3377).
+The quality cost of the 16 cap is unmeasured, and the minutes estimate comes from one measurement. The code is in `harness/media/render-page.mjs` (`subframesForTravel`, `bucketize`, `clampSegments`, `blendGraph`), with tests in `tests/media/render-blur-travel.test.mjs` and `tests/media/render-reuse.test.mjs`. Commits: [75fa04dc6](https://github.com/Vandit1604/vawe/commit/75fa04dc6), [086276b67](https://github.com/Vandit1604/vawe/commit/086276b67), [3c8d7a692](https://github.com/Vandit1604/vawe/commit/3c8d7a692), [cc6c9b05b](https://github.com/Vandit1604/vawe/commit/cc6c9b05b).
 
 The [smear stretch](/moves/smear-stretch) move is a fast motion to try this on. For how to ask for blur from the command line, see the [CLI docs](/docs/cli). The capture loop that spends these subframes is benchmarked in [faster headless Chrome rendering: one browser per lane](/blog/chrome-per-lane).

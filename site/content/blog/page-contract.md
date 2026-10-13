@@ -6,7 +6,7 @@ updated: 2026-10-13
 section: architecture
 tags: "html to video, html video format, data attributes, web page, architecture"
 keywords: "render html to video, html video format, data attribute contract, responsive video layout"
-hero: /blog/page-contract/hero.svg
+hero: /blog/page-contract/hero.webp
 heroAlt: "An annotated film page: a duration meta, message and spectacle metas, data-aspect on the html element, root custom properties, one data-world element per beat, audio tags and an optional window.seek."
 ---
 
@@ -54,15 +54,15 @@ The renderer never lets the page run on its own clock. It sets the time and asks
 
 The renderer sets `data-aspect` on `<html>`, and `--vw` and `--vh` (pixel lengths) on `:root` and on `window.vawe`, before any page script runs. The document element does not exist yet at that moment, so the code waits for the parser with a `MutationObserver` and applies the values the instant it appears (`core/engine/page-seek.js`). Authors lay out in CSS for the five aspects and never crop. The [aspect ratio guide](/docs/aspect-ratios) has the details.
 
-A brief can name a different length or aspect than the page. We made that an advice line and not a refusal (`fcb47d203`). The page owns its length.
+A brief can name a different length or aspect than the page. We made that an advice line and not a refusal (`7364cd097`). The page owns its length.
 
 ## What can tools do with so little?
 
-Twelve layout and motion checks read the DOM from this contract. Commit [b6e60d817](https://github.com/Vandit1604/vawe/commit/b6e60d817) (2026-10-07) added them: 28 files, +939 -66. Each check cites a taste rule and a number from one `limits.json`. A second commit, [b03c92817](https://github.com/Vandit1604/vawe/commit/b03c92817), made the checks agree on the same worlds: `world-held` reads the measured `data-world` spans when the page has them, and the tail check no longer fires when an animation runs on a visible element through the last second.
+Twelve layout and motion checks read the DOM from this contract. Commit [378aeea9f](https://github.com/Vandit1604/vawe/commit/378aeea9f) (2026-10-07) added them: 28 files, +939 -66. Each check cites a taste rule and a number from one `limits.json`. A second commit, [de510594b](https://github.com/Vandit1604/vawe/commit/de510594b), made the checks agree on the same worlds: `world-held` reads the measured `data-world` spans when the page has them, and the tail check no longer fires when an animation runs on a visible element through the last second.
 
-`vawe frames` renders one still for each `data-world` element, plus a contact sheet and a `frames.html` page, and runs the still-frame layout rules (`c02c355d6`). `vawe new` writes a starter with one `data-world` per beat ([080c37756](https://github.com/Vandit1604/vawe/commit/080c37756)) and fills the metas from `--length`, `--aspect` and `--title` (`f346fe089`).
+`vawe frames` renders one still for each `data-world` element, plus a contact sheet and a `frames.html` page, and runs the still-frame layout rules (`b5fb5ad33`). `vawe new` writes a starter with one `data-world` per beat ([c58276e14](https://github.com/Vandit1604/vawe/commit/c58276e14)) and fills the metas from `--length`, `--aspect` and `--title` (`2ccda3a22`).
 
-![One page.html is read by the renderer, twelve draft checks, the frames verb, the judge and the studio.](/blog/page-contract/diagram.svg)
+![One page.html is read by the renderer, twelve draft checks, the frames verb, the judge and the studio.](/blog/page-contract/diagram.webp)
 
 The design choices that made this work are small ones. `data-world` is one attribute on a `div`. Every tool finds beats through the same marker, so the checks, the judge and the stills stop disagreeing. Numbers stay literals, so an editor can rewrite them with no schema. The frame facts are set before the page runs, so a page that lays out from `--vw` and `--vh` never measures the window.
 
