@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" role="img" aria-label="One page.html is read by the renderer, twelve draft checks, the frames verb, the judge and the studio. All of them find the same worlds by reading data-world.">
+<rect width="900" height="360" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="17" fill="#14161f">
+<text x="30" y="40" font-size="20" font-weight="700">Everyone reads the same page</text>
+<rect x="60" y="140" width="220" height="90" rx="10" fill="#dfe5ff" stroke="#2f4bff" stroke-width="2"/>
+<text x="84" y="178" font-weight="700">page.html</text><text x="84" y="204" fill="#4a4f60">data-world, metas, literals</text>
+<g stroke="#c4c8d6" stroke-width="2" fill="#ffffff">
+<rect x="500" y="60" width="340" height="44" rx="8"/><rect x="500" y="118" width="340" height="44" rx="8"/><rect x="500" y="176" width="340" height="44" rx="8"/><rect x="500" y="234" width="340" height="44" rx="8"/><rect x="500" y="292" width="340" height="44" rx="8"/>
+</g>
+<text x="516" y="88">Renderer: sets aspect, --vw, --vh</text>
+<text x="516" y="146">12 draft checks (layout and motion)</text>
+<text x="516" y="204">frames: one still per world</text>
+<text x="516" y="262">Judge: reads worlds and waivers</text>
+<text x="516" y="320">Studio: edits literals in place</text>
+<path d="M282 185 C400 185 400 82 498 82 M282 185 C400 185 400 140 498 140 M282 185 H498 M282 185 C400 185 400 256 498 256 M282 185 C400 185 400 314 498 314" stroke="#14161f" stroke-width="2" fill="none"/>
+</g>
+</svg>

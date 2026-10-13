@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 280" role="img" aria-label="Encode pipeline: captured frames are blended in one ffmpeg pass, dithered and encoded with x264 preset fast as the master, then encoded again to a 10-bit AV1 web copy">
+<rect x="0.5" y="0.5" width="679" height="279" rx="10" fill="#f6f7fb" stroke="#dfe2ea"/>
+<g font-family="system-ui,sans-serif" font-size="13" fill="#14161c">
+<text x="20" y="28" font-size="16" font-weight="700">One capture, two encodes</text>
+<rect x="20" y="90" width="130" height="70" rx="8" fill="#ffffff" stroke="#c9cedb"/>
+<text x="85" y="116" text-anchor="middle">captured frames</text><text x="85" y="135" text-anchor="middle" font-size="11" fill="#5b6170">lossless PNG</text><text x="85" y="149" text-anchor="middle" font-size="11" fill="#5b6170">blend subframes</text>
+<path d="M150 125 L200 80" stroke="#5b6170" fill="none"/><path d="M150 125 L200 190" stroke="#5b6170" fill="none"/>
+<rect x="200" y="50" width="280" height="70" rx="8" fill="#e8ecff" stroke="#2f4bff"/>
+<text x="340" y="74" text-anchor="middle" font-weight="700">master: x264, 8-bit</text><text x="340" y="93" text-anchor="middle" font-size="11" fill="#5b6170">noise dither, CRF 16, aq-mode=3</text><text x="340" y="108" text-anchor="middle" font-size="11" fill="#5b6170">preset fast</text>
+<rect x="200" y="160" width="280" height="70" rx="8" fill="#e6f4ec" stroke="#1f8a4c"/>
+<text x="340" y="184" text-anchor="middle" font-weight="700">web copy: SVT-AV1, 10-bit</text><text x="340" y="203" text-anchor="middle" font-size="11" fill="#5b6170">no dither, CRF 30, preset 8</text><text x="340" y="218" text-anchor="middle" font-size="11" fill="#5b6170">own pass, after the master</text>
+<path d="M480 85 H520" stroke="#5b6170"/><path d="M514 80 L520 85 L514 90" stroke="#5b6170" fill="none"/>
+<rect x="520" y="60" width="140" height="50" rx="8" fill="#ffffff" stroke="#c9cedb"/>
+<text x="590" y="82" text-anchor="middle">ship: rendered</text><text x="590" y="98" text-anchor="middle" font-size="11" fill="#5b6170">judge starts now</text>
+<path d="M480 195 H520" stroke="#5b6170"/><path d="M514 190 L520 195 L514 200" stroke="#5b6170" fill="none"/>
+<rect x="520" y="170" width="140" height="50" rx="8" fill="#ffffff" stroke="#c9cedb"/>
+<text x="590" y="192" text-anchor="middle">site gets this</text><text x="590" y="208" text-anchor="middle" font-size="11" fill="#5b6170">1.7 and 3.6 MB</text>
+</g></svg>

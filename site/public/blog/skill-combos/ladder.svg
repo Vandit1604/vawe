@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" role="img" aria-label="The skill ladder. Four rungs take a skill each: builder, type, colour, depth. The fifth rung, frame, uses vawe's own rules and rejects web page patterns.">
+<rect width="1200" height="400" fill="#f4f5fa"/>
+<text x="40" y="52" font-family="system-ui,sans-serif" font-size="28" font-weight="700" fill="#14161f">The ladder: one skill per rung, our rules on the last</text>
+<g font-family="system-ui,sans-serif">
+<rect x="40" y="90" width="210" height="150" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="145" y="135" text-anchor="middle" font-size="22" font-weight="700" fill="#14161f">builder</text>
+<text x="145" y="170" text-anchor="middle" font-size="16" fill="#4a4f60">how product UI</text>
+<text x="145" y="192" text-anchor="middle" font-size="16" fill="#4a4f60">is constructed</text>
+<rect x="268" y="90" width="210" height="150" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="373" y="135" text-anchor="middle" font-size="22" font-weight="700" fill="#14161f">type</text>
+<text x="373" y="170" text-anchor="middle" font-size="16" fill="#4a4f60">face, weight,</text>
+<text x="373" y="192" text-anchor="middle" font-size="16" fill="#4a4f60">hierarchy</text>
+<rect x="496" y="90" width="210" height="150" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="601" y="135" text-anchor="middle" font-size="22" font-weight="700" fill="#14161f">colour</text>
+<text x="601" y="170" text-anchor="middle" font-size="16" fill="#4a4f60">palette and</text>
+<text x="601" y="192" text-anchor="middle" font-size="16" fill="#4a4f60">accent</text>
+<rect x="724" y="90" width="210" height="150" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="829" y="135" text-anchor="middle" font-size="22" font-weight="700" fill="#14161f">depth</text>
+<text x="829" y="170" text-anchor="middle" font-size="16" fill="#4a4f60">shadow, blur,</text>
+<text x="829" y="192" text-anchor="middle" font-size="16" fill="#4a4f60">layers</text>
+<rect x="952" y="90" width="208" height="150" rx="10" fill="#2f4bff"/>
+<text x="1056" y="135" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">frame</text>
+<text x="1056" y="170" text-anchor="middle" font-size="16" fill="#ffffff">about 1 line, 2 or 3</text>
+<text x="1056" y="192" text-anchor="middle" font-size="16" fill="#ffffff">things, ground never flat</text>
+</g>
+<text x="40" y="295" font-family="system-ui,sans-serif" font-size="19" fill="#14161f">Rungs 1 to 4 take a fetched skill. A skill changes the surface (palette, type), not the composition.</text>
+<text x="40" y="327" font-family="system-ui,sans-serif" font-size="19" fill="#14161f">Rung 5 is ours. It rejects web page patterns: nav, CTA button, pill, eyebrow, cluttered hero.</text>
+<text x="40" y="372" font-family="system-ui,sans-serif" font-size="17" fill="#4a4f60">Drop the builder rung and the product UI turns into placeholder bars.</text>
+</svg>

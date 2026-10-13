@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" role="img" aria-label="A waiver before and after. Before: the whole film waived for text-low-contrast with a reason that says a threshold is an open decision. After: text-low-contrast@2.25 with a reason naming world hot, 2.25 s and 4.4:1 against 4.5:1.">
+<rect width="900" height="360" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="16" fill="#14161f">
+<text x="20" y="32" font-size="19" font-weight="700">Before 2026-10-10: bare code, film-wide</text>
+<rect x="20" y="46" width="860" height="104" rx="8" fill="#ffe3d6" stroke="#d9480f"/>
+<text x="36" y="76" font-family="ui-monospace,Menlo,monospace" font-size="15">allow: "text-low-contrast"</text>
+<text x="36" y="104">Reason: an approved display type, and the threshold is an open decision.</text>
+<text x="36" y="130" fill="#8a2f06">Hides every later contrast finding in the whole film. Names no place, no number.</text>
+<text x="20" y="196" font-size="19" font-weight="700">After: scoped to a second, with a measure</text>
+<rect x="20" y="210" width="860" height="104" rx="8" fill="#dff5e8" stroke="#1a7f4b"/>
+<text x="36" y="240" font-family="ui-monospace,Menlo,monospace" font-size="15">allow: "text-low-contrast@2.25"</text>
+<text x="36" y="268">Reason: world hot, 2.25 s: "nsen" crosses the dye flood at 4.4:1</text>
+<text x="36" y="292">against the 4.5:1 limit and lands readable by 2.5 s.</text>
+<text x="20" y="344" fill="#4a4f63">From the public example film colour-sting, commit 805a5427c.</text>
+</g>
+</svg>

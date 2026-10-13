@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" role="img" aria-label="Bar chart of words an agent reads before its first layer: 5,402 on 09-27, 2,239 on 10-01, 2,714 on 10-05, 3,215 on 10-07, 3,947 on 10-09 and 4,602 on 10-11.">
+<rect width="900" height="380" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="16" fill="#14161f">
+<text x="30" y="36" font-size="19" font-weight="700">Words an agent reads before its first layer</text>
+<text x="30" y="66">09-27</text><rect x="110" y="48" width="540" height="28" rx="4" fill="#ffe3d6" stroke="#d9480f"/><text x="660" y="68">5,402</text>
+<text x="30" y="108">10-01</text><rect x="110" y="90" width="224" height="28" rx="4" fill="#dff5e8" stroke="#1a7f4b"/><text x="344" y="110">2,239</text>
+<text x="30" y="150">10-05</text><rect x="110" y="132" width="271" height="28" rx="4" fill="#dfe5ff" stroke="#2f4bff"/><text x="391" y="152">2,714</text>
+<text x="30" y="192">10-07</text><rect x="110" y="174" width="322" height="28" rx="4" fill="#dfe5ff" stroke="#2f4bff"/><text x="442" y="194">3,215</text>
+<text x="30" y="234">10-09</text><rect x="110" y="216" width="395" height="28" rx="4" fill="#dfe5ff" stroke="#2f4bff"/><text x="515" y="236">3,947</text>
+<text x="30" y="276">10-11</text><rect x="110" y="258" width="460" height="28" rx="4" fill="#dfe5ff" stroke="#2f4bff"/><text x="580" y="278">4,602</text>
+<text x="30" y="324" fill="#4a4f63">The file list changed on 09-30 when the JSON format was deleted: read the trend, not one cell.</text>
+<text x="30" y="350" fill="#4a4f63">Every bar after 10-01 was a stamp someone chose to commit.</text>
+</g>
+</svg>

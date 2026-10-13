@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" role="img" aria-label="Example for a beat that says the AI is thinking. The literal idea is a spinner, the idea any model writes first. The transformation idea is the send button growing into a wok that tosses the ingredients, with typicality 0.15.">
+<rect width="1200" height="380" fill="#f4f5fa"/>
+<text x="40" y="52" font-family="system-ui,sans-serif" font-size="28" font-weight="700" fill="#14161f">Same meaning, two ideas: "the AI is thinking"</text>
+<rect x="40" y="90" width="530" height="200" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="64" y="132" font-family="system-ui,sans-serif" font-size="21" font-weight="700" fill="#d9480f">The first idea a model writes</text>
+<text x="64" y="176" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#14161f">A spinner</text>
+<text x="64" y="212" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">device: literal. A hundred attempts</text>
+<text x="64" y="238" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">land on the same film.</text>
+<rect x="630" y="90" width="530" height="200" rx="10" fill="#ffffff" stroke="#2f4bff" stroke-width="3"/>
+<text x="654" y="132" font-family="system-ui,sans-serif" font-size="21" font-weight="700" fill="#2f4bff">An idea from the subject's world</text>
+<text x="654" y="176" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#14161f">The send button grows into a wok</text>
+<text x="654" y="212" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">device: transformation. It tosses the</text>
+<text x="654" y="238" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">ingredients. Typicality 0.15.</text>
+<text x="40" y="335" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">The subject here is a food app. Take every idea from the subject's own objects, materials and verbs.</text>
+</svg>

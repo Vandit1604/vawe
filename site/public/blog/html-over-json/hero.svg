@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Bar chart: JSON arm took 10.75 minutes and scored 5 and 4.5; HTML arm took 5.9 minutes and scored 8 and 7.5">
+<rect width="1200" height="630" fill="#f4f5fa"/>
+<text x="60" y="80" font-family="system-ui,sans-serif" font-size="34" font-weight="700" fill="#14161f">Same 6 s sting, two formats</text>
+<text x="60" y="118" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">One run per arm. A signal, not a statistic.</text>
+<text x="60" y="200" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">Time to a finished film (minutes)</text>
+<rect x="60" y="222" width="860" height="56" rx="6" fill="#d9480f"/>
+<text x="76" y="259" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#ffffff">JSON scene format: 10.75 min, 4 renders</text>
+<rect x="60" y="298" width="472" height="56" rx="6" fill="#2f4bff"/>
+<text x="76" y="335" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#ffffff">One HTML file: 5.9 min, 3 renders</text>
+<text x="60" y="440" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">Two blind judges (score out of 10)</text>
+<rect x="60" y="462" width="400" height="48" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="76" y="494" font-family="system-ui,sans-serif" font-size="22" fill="#14161f">JSON: 5 and 4.5</text>
+<rect x="500" y="462" width="400" height="48" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="516" y="494" font-family="system-ui,sans-serif" font-size="22" fill="#14161f">HTML: 8 and 7.5</text>
+<text x="60" y="590" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">vawe.dev/blog</text>
+</svg>

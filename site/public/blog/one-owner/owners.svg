@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 330" role="img" aria-labelledby="t d">
+<title id="t">Copies of one rule before, one owner after</title>
+<desc id="d">Left: three ffmpeg gray-frame readers and two Lab colour copies each hold their own code. Right: each rule has one owner and callers import it.</desc>
+<rect width="680" height="330" fill="#16151a"/>
+<text x="20" y="30" fill="#9a98a3" font-family="ui-monospace,Menlo,monospace" font-size="12" letter-spacing="1">BEFORE: COPIES</text>
+<text x="370" y="30" fill="#9a98a3" font-family="ui-monospace,Menlo,monospace" font-size="12" letter-spacing="1">AFTER: ONE OWNER</text>
+<line x1="340" y1="44" x2="340" y2="312" stroke="#3a3941" stroke-width="1"/>
+<g font-family="ui-monospace,Menlo,monospace" font-size="12">
+<rect x="20" y="50" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="30" y="72" fill="#ecebf1">flash probe</text>
+<rect x="20" y="92" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="30" y="114" fill="#ecebf1">sheet tile diffs</text>
+<rect x="20" y="134" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="30" y="156" fill="#ecebf1">frameMotion</text>
+<rect x="190" y="50" width="130" height="118" rx="6" fill="#2a1a1c" stroke="#ff7a7a"/>
+<text x="200" y="76" fill="#ff9a9a">3 copies of the</text><text x="200" y="94" fill="#ff9a9a">same ffmpeg</text><text x="200" y="112" fill="#ff9a9a">gray decode</text>
+<line x1="150" y1="67" x2="190" y2="80" stroke="#ff7a7a"/><line x1="150" y1="109" x2="190" y2="109" stroke="#ff7a7a"/><line x1="150" y1="151" x2="190" y2="138" stroke="#ff7a7a"/>
+<rect x="20" y="198" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="30" y="220" fill="#ecebf1">tile.mjs</text>
+<rect x="20" y="240" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="30" y="262" fill="#ecebf1">color-delta.mjs</text>
+<rect x="190" y="198" width="130" height="76" rx="6" fill="#2a1a1c" stroke="#ff7a7a"/>
+<text x="200" y="224" fill="#ff9a9a">2 private Lab</text><text x="200" y="242" fill="#ff9a9a">copies, rounded</text><text x="200" y="260" fill="#ff9a9a">constants</text>
+<line x1="150" y1="215" x2="190" y2="225" stroke="#ff7a7a"/><line x1="150" y1="257" x2="190" y2="247" stroke="#ff7a7a"/>
+<rect x="370" y="50" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="380" y="72" fill="#ecebf1">flash probe</text>
+<rect x="370" y="92" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="380" y="114" fill="#ecebf1">sheet tile diffs</text>
+<rect x="370" y="134" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="380" y="156" fill="#ecebf1">frameMotion</text>
+<rect x="540" y="86" width="120" height="48" rx="6" fill="#0d2a46" stroke="#0a87ff"/>
+<text x="550" y="107" fill="#9fd0ff">decodeGray</text><text x="550" y="124" fill="#9fd0ff">one owner</text>
+<line x1="500" y1="67" x2="540" y2="100" stroke="#0a87ff"/><line x1="500" y1="109" x2="540" y2="110" stroke="#0a87ff"/><line x1="500" y1="151" x2="540" y2="122" stroke="#0a87ff"/>
+<rect x="370" y="198" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="380" y="220" fill="#ecebf1">tile.mjs</text>
+<rect x="370" y="240" width="130" height="34" rx="6" fill="#212025" stroke="#5f5e65"/><text x="380" y="262" fill="#ecebf1">color-delta.mjs</text>
+<rect x="540" y="214" width="120" height="44" rx="6" fill="#0d2a46" stroke="#0a87ff"/>
+<text x="550" y="233" fill="#9fd0ff">colour.mjs</text><text x="550" y="249" fill="#9fd0ff">one Lab owner</text>
+<line x1="500" y1="215" x2="540" y2="228" stroke="#0a87ff"/><line x1="500" y1="257" x2="540" y2="246" stroke="#0a87ff"/>
+</g>
+<text x="20" y="306" fill="#9a98a3" font-family="system-ui,sans-serif" font-size="12">Same bytes out of the decoder. A colour distance moves by about 0.001.</text>
+</svg>

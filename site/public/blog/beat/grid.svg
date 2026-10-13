@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-label="Schematic of a cut table. A beat grid with hits along a timeline. Cuts within 1 frame of a hit are on beat, within 3 frames are near, and further are off. Off cuts show the second to move to.">
+<rect width="1200" height="420" fill="#f4f5fa"/>
+<text x="40" y="52" font-family="system-ui,sans-serif" font-size="28" font-weight="700" fill="#14161f">What the cut table checks (schematic)</text>
+<rect x="40" y="90" width="1120" height="110" rx="8" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<g stroke="#c4c8d6" stroke-width="2"><path d="M120 100 V190"/><path d="M290 100 V190"/><path d="M460 100 V190"/><path d="M630 100 V190"/><path d="M800 100 V190"/><path d="M970 100 V190"/><path d="M1140 100 V190"/></g>
+<g fill="#14161f"><rect x="116" y="120" width="8" height="50"/><rect x="456" y="110" width="8" height="60"/><rect x="796" y="125" width="8" height="45"/><rect x="1136" y="115" width="8" height="55"/></g>
+<text x="52" y="76" font-family="system-ui,sans-serif" font-size="16" fill="#4a4f60">grid lines and hits (black bars)</text>
+<circle cx="121" cy="240" r="14" fill="#2f4bff"/><text x="121" y="285" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" fill="#14161f">on beat</text>
+<circle cx="372" cy="240" r="14" fill="#ffffff" stroke="#2f4bff" stroke-width="3"/><text x="372" y="285" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" fill="#14161f">near</text>
+<circle cx="702" cy="240" r="14" fill="#d9480f"/><text x="702" y="285" text-anchor="middle" font-family="system-ui,sans-serif" font-size="17" fill="#14161f">off</text>
+<path d="M702 226 C702 205 640 215 632 204" stroke="#d9480f" stroke-width="2" fill="none"/>
+<text x="740" y="246" font-family="system-ui,sans-serif" font-size="17" fill="#14161f">the table gives the second to move it to</text>
+<text x="40" y="340" font-family="system-ui,sans-serif" font-size="19" fill="#14161f">On beat: within 1 frame of a hit or beat line. Near: within 3 frames. Off: beyond.</text>
+<text x="40" y="372" font-family="system-ui,sans-serif" font-size="19" fill="#14161f">Each hit is named: click, pop, swish, impact or sustained.</text>
+<text x="40" y="404" font-family="system-ui,sans-serif" font-size="17" fill="#4a4f60">Positions are illustrative, not from a real film.</text>
+</svg>

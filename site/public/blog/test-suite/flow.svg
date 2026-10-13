@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 270" role="img" aria-label="How make e2e runs: page tests and parallel half-size renders, each render checked with ffprobe, one report">
+<rect x="0.5" y="0.5" width="679" height="269" rx="10" fill="#f6f7fb" stroke="#dfe2ea"/>
+<g font-family="system-ui,sans-serif" font-size="13" fill="#14161c">
+<text x="20" y="30" font-size="16" font-weight="700">What bin/vawe e2e does now</text>
+<rect x="20" y="90" width="110" height="60" rx="8" fill="#e8ecff" stroke="#2f4bff"/>
+<text x="75" y="116" text-anchor="middle" font-weight="700">make e2e</text>
+<text x="75" y="134" text-anchor="middle" font-size="11" fill="#5b6170">or pre-push</text>
+<path d="M130 120 L170 70" stroke="#5b6170" fill="none"/><path d="M130 120 L170 190" stroke="#5b6170" fill="none"/>
+<rect x="170" y="45" width="230" height="50" rx="8" fill="#ffffff" stroke="#c9cedb"/>
+<text x="285" y="66" text-anchor="middle">node --test: page tests</text>
+<text x="285" y="84" text-anchor="middle" font-size="11" fill="#5b6170">determinism, page-audio, motion</text>
+<rect x="170" y="140" width="230" height="100" rx="8" fill="#ffffff" stroke="#c9cedb"/>
+<text x="285" y="162" text-anchor="middle">one half-size draft per page</text>
+<text x="285" y="182" text-anchor="middle" font-size="11" fill="#5b6170">every films/**/page.html</text>
+<text x="285" y="198" text-anchor="middle" font-size="11" fill="#5b6170">every tests/fixtures/pages/*.html</text>
+<text x="285" y="218" text-anchor="middle" font-size="11" fill="#5b6170">2 to 4 at once, never stops at a failure</text>
+<path d="M400 70 L440 120" stroke="#5b6170" fill="none"/><path d="M400 190 L440 130" stroke="#5b6170" fill="none"/>
+<rect x="440" y="90" width="220" height="60" rx="8" fill="#e6f4ec" stroke="#1f8a4c"/>
+<text x="550" y="112" text-anchor="middle">per render: ffprobe</text>
+<text x="550" y="130" text-anchor="middle" font-size="11" fill="#5b6170">mp4 not empty, duration within 0.15 s</text>
+<path d="M550 150 L550 200" stroke="#5b6170" fill="none"/>
+<rect x="440" y="200" width="220" height="40" rx="8" fill="#ffffff" stroke="#c9cedb"/>
+<text x="550" y="225" text-anchor="middle">report.json + report.md</text>
+</g></svg>

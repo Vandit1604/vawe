@@ -31,6 +31,10 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [The page](https://vawe.dev/docs/the-page): The page contract. One HTML file, a duration, a seek, relative assets.
 - [When it looks wrong](https://vawe.dev/docs/troubleshooting): Symptom to cause, for the failures that repeat. Most of them do not throw an error.
 
+## Blog
+- [Blog](https://vawe.dev/blog): Engineering notes from building vawe: what broke, what we measured and what we changed. Grouped by architecture, agent experience, taste, measurement and speed.
+- [RSS feed](https://vawe.dev/blog/rss.xml): every post with its full text.
+
 ## Moves
 Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/moves.
 To filter: fetch https://vawe.dev/moves/index.json. Top-level groups, looks and jobs list the ids. Each move has group, look, jobs, use (the when line), clip, md and duration.
@@ -160,4 +164,5 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Circling elements](https://vawe.dev/moves/circling-elements.md): eight upright tiles orbit one point on a 120 px radius, one linear turn in 10 s
 - [CSS box](https://vawe.dev/moves/css-box.md): a 200 px cube of bold type turns to another face on a stiff overdamped spring (stiffness 100, damping 30, no overshoot) under perspective 600
 - [Pixelate SVG filter](https://vawe.dev/moves/pixelate-svg-filter.md): a photo breaks into square blocks that grow and shrink with one number, size = x / 30 through a convolve, tile and dilate SVG filter
+- [Photo particles](https://vawe.dev/moves/photo-particles.md): a real photo (filaments, veins, scales) is sampled into 120 000 lit, coloured points that gather from a seeded scatter over 1.5 s and then breathe, filmed through the lens with the film-halation look
 - [Media between text](https://vawe.dev/moves/media-between-text.md): a picture grows from zero width inside a line of type on a 0.4 s critical spring and closes on a 0.3 s tween, the words part and wrap

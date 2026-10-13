@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 320" role="img" aria-labelledby="t d">
+<title id="t">How one move becomes a page, a markdown file and a clip</title>
+<desc id="d">A move is a markdown file and a demo page in prompts/moves. scripts/site/moves.mjs builds moves.json, copies the markdown for agents, writes the Moves section of llms.txt, and with --clips renders mp4, webm and webp. A source hash in clips.lock.json skips clips that are not stale.</desc>
+<rect width="680" height="320" fill="#16151a"/>
+<g font-family="ui-monospace,Menlo,monospace" font-size="12">
+<rect x="20" y="40" width="170" height="64" rx="8" fill="#212025" stroke="#5f5e65"/>
+<text x="32" y="64" fill="#ecebf1">prompts/moves/</text><text x="32" y="82" fill="#b8b6c0">name.md + demo html</text>
+<rect x="255" y="40" width="170" height="64" rx="8" fill="#0d2a46" stroke="#0a87ff"/>
+<text x="267" y="64" fill="#ecebf1">scripts/site/</text><text x="267" y="82" fill="#9fd0ff">moves.mjs</text>
+<line x1="190" y1="72" x2="255" y2="72" stroke="#9a98a3" stroke-width="2"/><polygon points="255,67 255,77 263,72" fill="#9a98a3"/>
+<rect x="490" y="24" width="170" height="40" rx="8" fill="#212025" stroke="#5f5e65"/><text x="502" y="48" fill="#ecebf1">site/lib/moves.json</text>
+<rect x="490" y="72" width="170" height="40" rx="8" fill="#212025" stroke="#5f5e65"/><text x="502" y="96" fill="#ecebf1">public/moves/name.md</text>
+<rect x="490" y="120" width="170" height="40" rx="8" fill="#212025" stroke="#5f5e65"/><text x="502" y="144" fill="#ecebf1">llms.txt: Moves list</text>
+<path d="M425 60 L490 44 M425 72 L490 92 M425 84 L490 140" stroke="#9a98a3" stroke-width="2" fill="none"/>
+<rect x="255" y="190" width="170" height="64" rx="8" fill="#0d2a46" stroke="#0a87ff"/>
+<text x="267" y="214" fill="#ecebf1">moves.mjs --clips</text><text x="267" y="232" fill="#9fd0ff">render if stale</text>
+<line x1="340" y1="104" x2="340" y2="182" stroke="#9a98a3" stroke-width="2"/><polygon points="335,182 345,182 340,190" fill="#9a98a3"/>
+<rect x="490" y="190" width="170" height="64" rx="8" fill="#212025" stroke="#5f5e65"/>
+<text x="502" y="214" fill="#ecebf1">name.mp4  name.webm</text><text x="502" y="232" fill="#b8b6c0">name.webp (poster)</text>
+<line x1="425" y1="222" x2="490" y2="222" stroke="#9a98a3" stroke-width="2"/><polygon points="490,217 490,227 498,222" fill="#9a98a3"/>
+<rect x="20" y="190" width="170" height="64" rx="8" fill="#212025" stroke="#4cc488"/>
+<text x="32" y="214" fill="#ecebf1">clips.lock.json</text><text x="32" y="232" fill="#8fe0b4">source hash per clip</text>
+<line x1="190" y1="222" x2="255" y2="222" stroke="#4cc488" stroke-width="2"/><polygon points="255,217 255,227 263,222" fill="#4cc488"/>
+</g>
+<text x="20" y="290" fill="#b8b6c0" font-family="system-ui,sans-serif" font-size="13">Only a clip whose source hash changed re-renders. --all forces every clip.</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 230" role="img" aria-labelledby="t d">
+<title id="t">The shell hook lived for seven minutes</title>
+<desc id="d">On 2026-09-30 at 04:58 a hook is added that refuses for loops, sed -i and a leading cd. At 05:05 it is reverted. 26 seconds later the guard is narrowed to the four git commands that lose work.</desc>
+<rect width="680" height="230" fill="#16151a"/>
+<g font-family="system-ui,sans-serif">
+<text x="20" y="28" fill="#ecebf1" font-size="14" font-weight="600">2026-09-30, one hook, three commits</text>
+<line x1="40" y1="110" x2="640" y2="110" stroke="#5f5e65" stroke-width="3"/>
+<circle cx="70" cy="110" r="9" fill="#ff7a7a"/><circle cx="470" cy="110" r="9" fill="#ffd479"/><circle cx="600" cy="110" r="9" fill="#4cc488"/>
+<g font-family="ui-monospace,Menlo,monospace" font-size="12">
+<text x="40" y="84" fill="#ecebf1">04:58:27</text><text x="440" y="84" fill="#ecebf1">05:05:31</text><text x="570" y="84" fill="#ecebf1">05:05:57</text>
+<text x="40" y="140" fill="#ffb3b3">5d2beaeed</text><text x="440" y="140" fill="#ffe3a6">25eec4c93</text><text x="570" y="140" fill="#8fe0b4">607cfe6f0</text>
+</g>
+<g font-size="13" fill="#b8b6c0">
+<text x="40" y="162">refuse for loops,</text><text x="40" y="180">sed -i, a leading cd</text>
+<text x="400" y="162">revert</text>
+<text x="520" y="162">guard only the four</text><text x="520" y="180">git commands that</text><text x="520" y="198">lose work</text>
+</g>
+<text x="190" y="104" fill="#9a98a3" font-size="12">7 minutes</text>
+</g>
+</svg>

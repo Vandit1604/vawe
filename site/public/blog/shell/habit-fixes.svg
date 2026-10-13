@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 310" role="img" aria-labelledby="t d">
+<title id="t">Habit, the old answer, the environment answer</title>
+<desc id="d">Four habits. sed -i without an empty suffix: a documented form. sleep in a loop: vawe wait. A missing tool: vawe doctor probes. A pipe that hides an exit code: every verb ends with an ok or FAILED line.</desc>
+<rect width="680" height="310" fill="#16151a"/>
+<g font-family="system-ui,sans-serif" font-size="13">
+<text x="20" y="28" fill="#9a98a3" font-family="ui-monospace,Menlo,monospace" font-size="12" letter-spacing="1">AGENT HABIT</text>
+<text x="250" y="28" fill="#9a98a3" font-family="ui-monospace,Menlo,monospace" font-size="12" letter-spacing="1">WHAT WE CHANGED</text>
+<g fill="#212025" stroke="#5f5e65"><rect x="20" y="42" width="210" height="50" rx="8"/><rect x="20" y="108" width="210" height="50" rx="8"/><rect x="20" y="174" width="210" height="50" rx="8"/><rect x="20" y="240" width="210" height="50" rx="8"/></g>
+<g fill="#0d2a46" stroke="#0a87ff"><rect x="250" y="42" width="410" height="50" rx="8"/><rect x="250" y="108" width="410" height="50" rx="8"/><rect x="250" y="174" width="410" height="50" rx="8"/><rect x="250" y="240" width="410" height="50" rx="8"/></g>
+<g fill="#ecebf1">
+<text x="34" y="72" font-family="ui-monospace,Menlo,monospace">sed -i 's/a/b/' f</text>
+<text x="34" y="138" font-family="ui-monospace,Menlo,monospace">sleep in a loop</text>
+<text x="34" y="204">a tool is missing</text>
+<text x="34" y="270" font-family="ui-monospace,Menlo,monospace">vawe ... | tail</text>
+<text x="264" y="64">The macOS form sed -i '' is in the page skill</text><text x="264" y="82" fill="#b8d9ff">and in the Shell section of AGENTS.md</text>
+<text x="264" y="130">vawe wait blocks on any render with a</text><text x="264" y="148" fill="#b8d9ff">progress line a minute</text>
+<text x="264" y="196">vawe doctor probes encode, drawtext and Chrome</text><text x="264" y="214" fill="#b8d9ff">and a render failure names the failed check</text>
+<text x="264" y="262">every verb ends with ok or FAILED, so the</text><text x="264" y="280" fill="#b8d9ff">last line carries the result</text>
+</g></g>
+</svg>

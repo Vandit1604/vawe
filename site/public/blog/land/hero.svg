@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" aria-label="The steps of vawe land: fetch and rebase onto origin/main, scan the range for files over 5 MB, run tests/lib and tests/hooks, push HEAD to main with an ssh keep-alive, then print the e2e line and the pushed range. Each step can stop the run.">
+<rect width="900" height="300" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="15" fill="#14161f">
+<rect x="20" y="40" width="160" height="110" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="34" y="68" font-weight="700">1. Rebase</text><text x="34" y="92">fetch origin main,</text><text x="34" y="112">rebase onto it</text>
+<rect x="195" y="40" width="160" height="110" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="209" y="68" font-weight="700">2. Big files</text><text x="209" y="92">every commit in</text><text x="209" y="112">the range, 5 MB</text>
+<rect x="370" y="40" width="160" height="110" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="384" y="68" font-weight="700">3. Tests</text><text x="384" y="92">tests/lib and</text><text x="384" y="112">tests/hooks</text>
+<rect x="545" y="40" width="160" height="110" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="559" y="68" font-weight="700">4. Push</text><text x="559" y="92">HEAD to main, ssh</text><text x="559" y="112">keep-alive, e2e hook</text>
+<rect x="720" y="40" width="160" height="110" rx="8" fill="#dff5e8" stroke="#1a7f4b"/><text x="734" y="68" font-weight="700">5. Report</text><text x="734" y="92">e2e line, then the</text><text x="734" y="112">pushed range</text>
+<path d="M182 95 H193 M357 95 H368 M532 95 H543 M707 95 H718" stroke="#14161f" stroke-width="2" fill="none"/>
+<rect x="20" y="190" width="860" height="80" rx="8" fill="#ffe3d6" stroke="#d9480f"/>
+<text x="36" y="220" font-weight="700">Any step can stop the run with one line:</text>
+<text x="36" y="246" font-family="ui-monospace,Menlo,monospace" font-size="14">land: FAILED at rebase | big-file scan | tests | push: &lt;reason&gt;   (exit 1)</text>
+</g>
+</svg>

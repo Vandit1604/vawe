@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" aria-label="The mix as written: audio tags with a source, time, gain and fade go into a sum, then a limiter at minus 1 dBTP that only lowers peaks, then the video. Every draft measures loudness and prints it with its band. Normalising is opt in.">
+<rect width="900" height="300" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="17" fill="#14161f">
+<text x="30" y="40" font-size="20" font-weight="700">The mix, as written</text>
+<rect x="30" y="70" width="210" height="100" rx="8" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="46" y="100" font-weight="700">audio tags</text><text x="46" y="126" fill="#4a4f60">src, data-at,</text><text x="46" y="148" fill="#4a4f60">data-gain, fade-out</text>
+<rect x="300" y="70" width="170" height="100" rx="8" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="316" y="100" font-weight="700">sum</text><text x="316" y="126" fill="#4a4f60">gains as written</text>
+<rect x="530" y="70" width="170" height="100" rx="8" fill="#dfe5ff" stroke="#2f4bff" stroke-width="2"/>
+<text x="546" y="100" font-weight="700">limiter</text><text x="546" y="126" fill="#4a4f60">-1 dBTP, only</text><text x="546" y="148" fill="#4a4f60">lowers peaks</text>
+<rect x="750" y="70" width="120" height="100" rx="8" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="766" y="100" font-weight="700">video</text><text x="766" y="126" fill="#4a4f60">muxed</text>
+<path d="M242 120 H298 M472 120 H528 M702 120 H748" stroke="#14161f" stroke-width="2" fill="none"/>
+<rect x="300" y="215" width="400" height="60" rx="8" fill="#ffe3d6" stroke="#d9480f" stroke-width="2"/>
+<text x="316" y="242" font-weight="700">every draft: measure</text><text x="316" y="264" fill="#4a4f60">LUFS and true peak, printed with the band</text>
+<path d="M385 172 V213" stroke="#d9480f" stroke-width="2" fill="none"/>
+</g>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Two facts. Before the ban 4 of 24 audio films shipped a synth bed. The ban commit changed 44 files with 133 lines added and 376 lines removed.">
+<rect width="1200" height="630" fill="#f4f5fa"/>
+<text x="60" y="80" font-family="system-ui,sans-serif" font-size="34" font-weight="700" fill="#14161f">The cheap way to pass "no dead air"</text>
+<text x="60" y="118" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">A constant hum made the silence check green. We removed the hum.</text>
+<text x="60" y="190" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">Audio films that shipped a synth bed, before the ban</text>
+<rect x="60" y="212" width="1080" height="56" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<rect x="60" y="212" width="180" height="56" rx="6" fill="#d9480f"/>
+<text x="76" y="249" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#ffffff">4</text>
+<text x="1124" y="249" text-anchor="end" font-family="system-ui,sans-serif" font-size="22" fill="#14161f">of 24 audio films</text>
+<text x="60" y="340" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">Lines changed in the ban commit (44 files)</text>
+<rect x="60" y="362" width="1080" height="56" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<rect x="60" y="362" width="382" height="56" rx="6" fill="#2f4bff"/>
+<text x="76" y="399" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#ffffff">+133 added</text>
+<rect x="60" y="440" width="1080" height="56" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<rect x="60" y="440" width="1080" height="56" rx="6" fill="#d9480f"/>
+<text x="76" y="477" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#ffffff">-376 removed</text>
+<text x="60" y="590" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">vawe.dev/blog</text>
+</svg>

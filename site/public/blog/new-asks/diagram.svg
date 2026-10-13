@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 240" role="img" aria-label="The brief written by vawe new has the sections Task, Look, Spec with Shots, Words and Objects tables, Acceptance, Gates, Pitfalls and Deliver. Each unanswered field carries the mark guess: change me.">
+<rect width="900" height="240" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="16" fill="#14161f">
+<text x="20" y="32" font-size="19" font-weight="700">brief.md, the measured shape</text>
+<rect x="20" y="52" width="100" height="56" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="40" y="86">Task</text>
+<rect x="130" y="52" width="100" height="56" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="152" y="86">Look</text>
+<rect x="240" y="52" width="330" height="56" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="256" y="86">Spec: Shots, Words, Objects</text>
+<rect x="580" y="52" width="130" height="56" rx="8" fill="#dff5e8" stroke="#1a7f4b"/><text x="596" y="86">Acceptance</text>
+<rect x="720" y="52" width="70" height="56" rx="8" fill="#ffffff" stroke="#c4c8d6"/><text x="732" y="86">Gates</text>
+<rect x="20" y="124" width="130" height="56" rx="8" fill="#ffffff" stroke="#c4c8d6"/><text x="36" y="158">Pitfalls</text>
+<rect x="160" y="124" width="130" height="56" rx="8" fill="#ffffff" stroke="#c4c8d6"/><text x="176" y="158">Deliver</text>
+<text x="20" y="214" fill="#4a4f63">An unanswered field is a stated guess, marked (guess: change me), so the agent can see what it still owes.</text>
+</g>
+</svg>

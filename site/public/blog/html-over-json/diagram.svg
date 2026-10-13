@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" role="img" aria-label="Two pipelines. Arm A: agent learns a 24-type JSON vocabulary, writes JSON, a Go renderer draws frames. Arm B: agent writes one HTML file, a 40-line puppeteer script seeks and screenshots each frame.">
+<rect width="900" height="360" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="17" fill="#14161f">
+<text x="30" y="40" font-size="19" font-weight="700">Arm A: JSON scene format</text>
+<rect x="30" y="58" width="230" height="64" rx="8" fill="#ffe3d6" stroke="#d9480f"/>
+<text x="46" y="85">Learn 24 layer types,</text><text x="46" y="106">presets, size roles</text>
+<rect x="335" y="58" width="200" height="64" rx="8" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="351" y="95">Write scene JSON</text>
+<rect x="610" y="58" width="260" height="64" rx="8" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="626" y="85">Go renderer + engine</text><text x="626" y="106">draws every frame</text>
+<path d="M262 90 H333 M537 90 H608" stroke="#14161f" stroke-width="2" fill="none"/>
+<path d="M326 84 l9 6 l-9 6 M601 84 l9 6 l-9 6" stroke="#14161f" stroke-width="2" fill="none"/>
+<text x="30" y="160" fill="#8a2f06">10.75 min, 4 renders, judges 5 and 4.5</text>
+<text x="30" y="226" font-size="19" font-weight="700">Arm B: one HTML file</text>
+<rect x="30" y="244" width="230" height="64" rx="8" fill="#dfe5ff" stroke="#2f4bff"/>
+<text x="46" y="271">Use what it already</text><text x="46" y="292">knows: CSS, WAAPI</text>
+<rect x="335" y="244" width="200" height="64" rx="8" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="351" y="281">Write page.html</text>
+<rect x="610" y="244" width="260" height="64" rx="8" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="626" y="271">40-line puppeteer script</text><text x="626" y="292">seeks, screenshots</text>
+<path d="M262 276 H333 M537 276 H608" stroke="#14161f" stroke-width="2" fill="none"/>
+<path d="M326 270 l9 6 l-9 6 M601 270 l9 6 l-9 6" stroke="#14161f" stroke-width="2" fill="none"/>
+<text x="30" y="344" fill="#1b2fb8">5.9 min, 3 renders, judges 8 and 7.5</text>
+</g>
+</svg>

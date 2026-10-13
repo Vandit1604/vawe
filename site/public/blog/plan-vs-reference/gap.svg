@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360" role="img" aria-labelledby="t d">
+<title id="t">Reference against our film: flash length and brightness split</title>
+<desc id="d">Flash runs: reference 0.10, 0.07 and 0.10 seconds, ours 0.20 seconds each. Frame luma: reference 27 percent below Y 50, 68 percent between 50 and 110, 5 percent above 110. Ours 80, 12 and 8 percent.</desc>
+<rect width="680" height="360" fill="#16151a"/>
+<g font-family="system-ui,sans-serif">
+<text x="20" y="28" fill="#ecebf1" font-size="14" font-weight="600">Flash length: seconds above frame-mean Y 110</text>
+<g font-family="ui-monospace,Menlo,monospace" font-size="12">
+<text x="20" y="58" fill="#b8b6c0">flash 1</text>
+<rect x="90" y="44" width="100" height="12" fill="#4cc488"/>
+<text x="198" y="54" fill="#8fe0b4">reference 0.10 s</text>
+<rect x="90" y="58" width="200" height="12" fill="#ff7a7a"/>
+<text x="298" y="68" fill="#ffb3b3">ours 0.20 s</text>
+<text x="20" y="92" fill="#b8b6c0">flash 2</text>
+<rect x="90" y="78" width="70" height="12" fill="#4cc488"/>
+<text x="168" y="88" fill="#8fe0b4">reference 0.07 s</text>
+<rect x="90" y="92" width="200" height="12" fill="#ff7a7a"/>
+<text x="298" y="102" fill="#ffb3b3">ours 0.20 s</text>
+<text x="20" y="126" fill="#b8b6c0">flash 3</text>
+<rect x="90" y="112" width="100" height="12" fill="#4cc488"/>
+<text x="198" y="122" fill="#8fe0b4">reference 0.10 s</text>
+<rect x="90" y="126" width="200" height="12" fill="#ff7a7a"/>
+<text x="298" y="136" fill="#ffb3b3">ours 0.20 s</text>
+</g>
+<text x="20" y="176" fill="#ecebf1" font-size="14" font-weight="600">Share of frames by frame-mean luma (Y)</text>
+<text x="20" y="211" fill="#b8b6c0" font-size="12" font-family="ui-monospace,Menlo,monospace">reference</text>
+<rect x="100.0" y="194" width="151.2" height="26" fill="#7ab8ff"/>
+<text x="106.0" y="211" fill="#16151a" font-size="12" font-weight="700" font-family="ui-monospace,Menlo,monospace">27%</text>
+<rect x="251.2" y="194" width="380.8" height="26" fill="#4cc488"/>
+<text x="257.2" y="211" fill="#16151a" font-size="12" font-weight="700" font-family="ui-monospace,Menlo,monospace">68%</text>
+<rect x="632.0" y="194" width="28.0" height="26" fill="#ffd479"/>
+<text x="20" y="247" fill="#b8b6c0" font-size="12" font-family="ui-monospace,Menlo,monospace">ours</text>
+<rect x="100.0" y="230" width="448.0" height="26" fill="#7ab8ff"/>
+<text x="106.0" y="247" fill="#16151a" font-size="12" font-weight="700" font-family="ui-monospace,Menlo,monospace">80%</text>
+<rect x="548.0" y="230" width="67.2" height="26" fill="#4cc488"/>
+<text x="554.0" y="247" fill="#16151a" font-size="12" font-weight="700" font-family="ui-monospace,Menlo,monospace">12%</text>
+<rect x="615.2" y="230" width="44.8" height="26" fill="#ffd479"/>
+<text x="621.2" y="247" fill="#16151a" font-size="12" font-weight="700" font-family="ui-monospace,Menlo,monospace">8%</text>
+<text x="100" y="286" fill="#7ab8ff" font-size="12" font-family="ui-monospace,Menlo,monospace">below Y 50</text><text x="220" y="286" fill="#4cc488" font-size="12" font-family="ui-monospace,Menlo,monospace">Y 50 to 110</text><text x="340" y="286" fill="#ffd479" font-size="12" font-family="ui-monospace,Menlo,monospace">above Y 110</text>
+<text x="20" y="326" fill="#b8b6c0" font-size="13">The reference reads brighter and flashes for about half as long or less. Our judge scored the film 62, 61 and 62.</text>
+</g></svg>

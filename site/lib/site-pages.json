@@ -106,6 +106,13 @@
       "label": "Hard problems"
     },
     {
+      "path": "/blog",
+      "priority": 0.7,
+      "changeFrequency": "weekly",
+      "group": "project",
+      "label": "Blog"
+    },
+    {
       "path": "/roadmap",
       "priority": 0.7,
       "changeFrequency": "monthly",

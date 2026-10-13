@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" role="img" aria-label="One line of out/film.runs.jsonl per verb call, with fields stage, durationS, exitCode, error, slotWaitS and images, feeding vawe runs for time, failures and the draft series.">
+<rect width="900" height="340" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="16" fill="#14161f">
+<text x="20" y="32" font-size="19" font-weight="700">One call, one line (example values)</text>
+</g>
+<rect x="20" y="48" width="860" height="124" rx="10" fill="#14161f"/>
+<g font-family="ui-monospace,Menlo,monospace" font-size="14" fill="#c4c8d6">
+<text x="36" y="76">{"cmd":"verb","verb":"dev","stage":"motion",</text>
+<text x="36" y="98"> "start":"2026-10-10T09:41:07Z","durationS":38.2,</text>
+<text x="36" y="120"> "exitCode":0,"error":null,"slotWaitS":12.4,</text>
+<text x="36" y="142"> "images":["out/strip/demo/cut-1.png"],"tagged":true}</text>
+</g>
+<g font-family="system-ui,sans-serif" font-size="16" fill="#14161f">
+<path d="M450 176 V206" stroke="#14161f" stroke-width="2" fill="none"/><path d="M444 198 l6 9 l6 -9" stroke="#14161f" stroke-width="2" fill="none"/>
+<text x="20" y="232" font-weight="700">vawe runs &lt;film&gt; answers</text>
+<rect x="20" y="248" width="270" height="62" rx="8" fill="#dfe5ff" stroke="#2f4bff"/><text x="36" y="274" font-weight="700">Time</text><text x="36" y="296">per stage and verb</text>
+<rect x="315" y="248" width="270" height="62" rx="8" fill="#ffe3d6" stroke="#d9480f"/><text x="331" y="274" font-weight="700">Failures</text><text x="331" y="296">grouped by cause</text>
+<rect x="610" y="248" width="270" height="62" rx="8" fill="#dff5e8" stroke="#1a7f4b"/><text x="626" y="274" font-weight="700">Draft series</text><text x="626" y="296">rules fired, fixed, still firing</text>
+</g>
+</svg>

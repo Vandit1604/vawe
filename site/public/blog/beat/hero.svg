@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Before the fix, vawe sound failed 8 of 19 calls on short cues with the message no output. The cause was a reader that needed one second of samples. The remix agent used the verb 21 times once it worked.">
+<rect width="1200" height="630" fill="#f4f5fa"/>
+<text x="60" y="80" font-family="system-ui,sans-serif" font-size="34" font-weight="700" fill="#14161f">"No output" meant "shorter than one second"</text>
+<text x="60" y="118" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">One trace log of vawe sound calls on ticks, pops and swishes.</text>
+<text x="60" y="190" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">Calls that failed before the fix</text>
+<rect x="60" y="212" width="1080" height="56" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<rect x="60" y="212" width="454" height="56" rx="6" fill="#d9480f"/>
+<text x="76" y="249" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#ffffff">8 failed</text>
+<text x="1124" y="249" text-anchor="end" font-family="system-ui,sans-serif" font-size="22" fill="#14161f">of 19 calls</text>
+<text x="60" y="340" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">The message said</text>
+<rect x="60" y="360" width="500" height="64" rx="8" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="80" y="400" font-family="system-ui,sans-serif" font-size="21" fill="#14161f">has no audio to read: no output</text>
+<text x="600" y="400" font-family="system-ui,sans-serif" font-size="21" fill="#14161f">The cause</text>
+<rect x="700" y="360" width="440" height="64" rx="8" fill="#2f4bff"/>
+<text x="720" y="400" font-family="system-ui,sans-serif" font-size="21" font-weight="600" fill="#ffffff">decodeMono needed 1 s of samples</text>
+<text x="60" y="490" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">After the fix</text>
+<text x="60" y="526" font-family="system-ui,sans-serif" font-size="21" fill="#14161f">The remix agent used the verb 21 times in one session.</text>
+<text x="60" y="590" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">vawe.dev/blog</text>
+</svg>

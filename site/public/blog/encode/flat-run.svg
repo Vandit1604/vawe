@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 354" role="img" aria-label="Longest flat run on a dark 1080p ramp (px, lower is better)">
+<rect x="0.5" y="0.5" width="679" height="353" rx="10" fill="#f6f7fb" stroke="#dfe2ea"/>
+<text x="20" y="30" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="#14161c">Longest flat run on a dark 1080p ramp (px, lower is better)</text>
+<text x="20" y="50" font-family="system-ui,sans-serif" font-size="12" fill="#5b6170">A flat run is a visible band. Measured in the encoder comments of render-page.mjs.</text>
+<text x="20" y="89" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">lossless</text>
+<rect x="230" y="74" width="35.8" height="24" rx="4" fill="#8a90a0"/>
+<text x="273.8" y="91" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">14</text>
+<text x="20" y="133" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">AV1 10-bit web copy</text>
+<rect x="230" y="118" width="51.2" height="24" rx="4" fill="#1f8a4c"/>
+<text x="289.2" y="135" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">20</text>
+<text x="20" y="177" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">x264 master, dither + aq-mode 3</text>
+<rect x="230" y="162" width="51.2" height="24" rx="4" fill="#1f8a4c"/>
+<text x="289.2" y="179" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">20</text>
+<text x="20" y="221" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">x264 preset faster</text>
+<rect x="230" y="206" width="138.2" height="24" rx="4" fill="#c2410c"/>
+<text x="376.2" y="223" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">54</text>
+<text x="20" y="265" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">undithered 8-bit</text>
+<rect x="230" y="250" width="250.9" height="24" rx="4" fill="#c2410c"/>
+<text x="488.9" y="267" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">98</text>
+<text x="20" y="309" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">8-bit x264 at web size, CRF 22</text>
+<rect x="230" y="294" width="309.8" height="24" rx="4" fill="#c2410c"/>
+<text x="547.8" y="311" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">121</text>
+</svg>

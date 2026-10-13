@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-label="Six verbs and what each one shows an agent: refs frames, strip, onion, velocity, spec, see.">
+<rect width="1200" height="520" fill="#f4f5fa"/>
+<text x="40" y="52" font-family="system-ui,sans-serif" font-size="28" font-weight="700" fill="#14161f">Six ways to look, from one frame to a whole film</text>
+<g font-family="system-ui,sans-serif">
+<rect x="40" y="80" width="1120" height="58" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="60" y="116" font-size="20" font-weight="700" fill="#2f4bff">vawe refs frames</text><text x="330" y="116" font-size="19" fill="#14161f">the settled full-size frame of each shot</text>
+<rect x="40" y="148" width="1120" height="58" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="60" y="184" font-size="20" font-weight="700" fill="#2f4bff">vawe strip</text><text x="330" y="184" font-size="19" fill="#14161f">frames through a moment or every cut, with motion start and settle</text>
+<rect x="40" y="216" width="1120" height="58" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="60" y="252" font-size="20" font-weight="700" fill="#2f4bff">vawe onion</text><text x="330" y="252" font-size="19" fill="#14161f">frames of one move blended into one image, older ones fainter</text>
+<rect x="40" y="284" width="1120" height="58" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="60" y="320" font-size="20" font-weight="700" fill="#2f4bff">vawe velocity</text><text x="330" y="320" font-size="19" fill="#14161f">speed and scale of page elements at 120 samples a second</text>
+<rect x="40" y="352" width="1120" height="58" rx="6" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="60" y="388" font-size="20" font-weight="700" fill="#2f4bff">vawe spec</text><text x="330" y="388" font-size="19" fill="#14161f">where the eye goes, and what the ground does, per shot</text>
+<rect x="40" y="420" width="1120" height="58" rx="6" fill="#2f4bff"/>
+<text x="60" y="456" font-size="20" font-weight="700" fill="#ffffff">vawe see</text><text x="330" y="456" font-size="19" fill="#ffffff">a whole film: structure, motion, look, type, sound, images, --vs</text>
+</g>
+</svg>

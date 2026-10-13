@@ -143,7 +143,7 @@ a pill is 999px. Some older routes still use 6px and 10px.
 
 ## Components
 
-- **Bar:** the wordmark, three links (Moves, Features, Docs), and GitHub as the one
+- **Bar:** the wordmark, four links (Moves, Features, Blog, Docs), and GitHub as the one
   filled action. The current page is a `<span aria-current="page">` on `raised`, never a link.
 - **Footer:** one panel with the generated link groups (`lib/site-pages.json`) and the Apache 2.0
   line. Pages that end a journey add a closing panel above it (`<Footer bookend />`).
@@ -171,6 +171,22 @@ a pill is 999px. Some older routes still use 6px and 10px.
 - Don't put white text on the accent.
 - Don't nest a shadowed card inside a panel.
 - Don't animate the `wdth` axis.
+
+## Blog
+
+`/blog` and `/blog/<slug>` (`app/blog/`, `blog.css`) read `content/blog/*.md` through `lib/blog.ts`, the one
+owner of the front matter, the Markdown render (`marked`, GFM) and the post order. A post is a `.phead`
+head, a hero on `surface` with the ring, then a 680 px body at 17px / 1.65 (about 70 characters) and,
+from 1000 px, a table of contents beside it. Prose links are the accent with an underline, because colour
+alone does not mark a link inside a paragraph. Code blocks, tables and `<details>` are panels or
+hairlines with tone and weight only, never hue. The index groups posts by section in two-column cards with
+one stretched link each.
+
+Shaped by ui-skills `jakubkrehel/better-typography`. Taken: a capped measure, unitless line-height by
+role, `text-wrap: balance` on headings and `pretty` on prose, `tabular-nums` in tables, underlines from
+the font. Rejected: its type-scale proposal (the site's known scale gap wants its own pass) and its
+Tailwind cheat sheet (no Tailwind here). The table of contents is not sticky: the studio rebuild rejected
+a sticky rail on content pages. No syntax-highlighting dependency, for the same no-hue rule.
 
 ## Provenance: what shaped each surface
 
@@ -226,6 +242,7 @@ was tried.
 | `/problems`, `/roadmap`, `/vs/[slug]`, `/hyperframes-alternatives` (2026-10-03) | brand | ui-skills `pbakaus/typeset` (one skill); layout ideas only from VoltAgent/awesome-design-md `vercel` DESIGN.md | typeset: TAKEN, role contrast by size and tone (title, mono label, body, metadata), 45 to 75ch measure, 16px body, mono for every figure. Vercel spec: TAKEN as layout idea only, large gaps between panels and tight interior, 3-up collapsing to 1-up. REJECTED: its 4px spacing tokens, mesh gradient, pill buttons, and `impeccable detect` (not installed). Status chips use shape (filled, half, ring dot) not hue, because colour here means act-on-it or a lane. Rules in `app/components/study.css`, shared by the three routes. Second pass: icons are inline Lucide paths (ISC) in `app/components/Icon.tsx`, no dependency; images are only vawe's own move posters and clips, and the ease curve is drawn from `core/motion` `easeFn` points in `ease-curves.json`. Competitor logos are NOT used: no official page allows a logo in a comparison (Remotion terms reserve logos; HyperFrames, Motion Canvas and Lottie state nothing), so names are plain text. |
 
 
+| `/blog`, `/blog/[slug]`, RSS (2026-10-13) | brand | ui-skills `jakubkrehel/better-typography` | See the Blog section above: measure, line-height, wrap and underline rules taken; its scale and Tailwind specifics rejected; TOC not sticky by the rebuild rule. |
 | `/easing`, `/easing/[slug]` (44 pages, 2026-10-03) | product | ui-skills `ibelick/fixing-metadata` (taken); `ibelick/baseline-ui` (fetched, rejected); layout read from the Vercel spec on getdesign.md (VoltAgent/awesome-design-md) | fixing-metadata: TAKEN, one `pageMetadata` call per page, title, description (under 155), canonical and JSON-LD agreeing, deterministic dates. baseline-ui: REJECTED, it assumes Tailwind, `cn` and `motion/react`, none of which this site uses. Vercel spec: TAKEN for the idea only, hairline panels and a spec-sheet layout of numbers then code; its Geist faces and monochrome palette rejected. Local tokens won: the curve line is the accent (it is live data), everything else is ink and muted; the `.mv-code` block and `moves.css` are reused. The charts are server-rendered SVG from `lib/easing.json`, built by `scripts/site/easing.mjs`. |
 
 **Two rules for filling a row in.**

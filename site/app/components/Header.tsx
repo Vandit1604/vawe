@@ -12,6 +12,7 @@ export function WaveGlyph({ className = "glyph" }: { className?: string }) {
 const NAV = [
   { href: "/moves", label: "Moves", key: "moves" },
   { href: "/features", label: "Features", key: "features" },
+  { href: "/blog", label: "Blog", key: "blog" },
 ];
 
 // The docs are a separate fumadocs app (docs-site/) served at /docs via a rewrite in

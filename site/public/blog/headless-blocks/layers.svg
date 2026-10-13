@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 300" role="img" aria-labelledby="t d">
+<title id="t">Who owns what: block, theme, film</title>
+<desc id="d">A block owns structure and mechanism. A theme owns colour, type, radius and depth as tokens. The film picks one theme and can eject a block to restyle it.</desc>
+<rect width="680" height="300" fill="#16151a"/>
+<g font-family="system-ui,sans-serif">
+<rect x="20" y="24" width="190" height="150" rx="8" fill="#212025" stroke="#5f5e65"/>
+<text x="36" y="52" fill="#ecebf1" font-size="15" font-weight="600">Block</text>
+<text x="36" y="76" fill="#b8b6c0" font-size="13">layout and structure</text>
+<text x="36" y="96" fill="#b8b6c0" font-size="13">the mechanism</text>
+<text x="36" y="116" fill="#b8b6c0" font-size="13">one class per part</text>
+<text x="36" y="150" fill="#ff9a9a" font-size="12" font-family="ui-monospace,Menlo,monospace">no radius, no depth</text>
+<rect x="245" y="24" width="190" height="150" rx="8" fill="#0d2a46" stroke="#0a87ff"/>
+<text x="261" y="52" fill="#ecebf1" font-size="15" font-weight="600">Theme (a look)</text>
+<text x="261" y="76" fill="#b8d9ff" font-size="13">colour and type faces</text>
+<text x="261" y="96" fill="#b8d9ff" font-size="13">radius, border, depth</text>
+<text x="261" y="116" fill="#b8d9ff" font-size="13">type treatment</text>
+<text x="261" y="150" fill="#9fd0ff" font-size="12" font-family="ui-monospace,Menlo,monospace">html[data-look="paper"]</text>
+<rect x="470" y="24" width="190" height="150" rx="8" fill="#212025" stroke="#5f5e65"/>
+<text x="486" y="52" fill="#ecebf1" font-size="15" font-weight="600">Film page</text>
+<text x="486" y="76" fill="#b8b6c0" font-size="13">picks one look</text>
+<text x="486" y="96" fill="#b8b6c0" font-size="13">ejects a hero block</text>
+<text x="486" y="116" fill="#b8b6c0" font-size="13">and restyles it</text>
+<text x="486" y="150" fill="#4cc488" font-size="12" font-family="ui-monospace,Menlo,monospace">page.html</text>
+<path d="M210 99 H245" stroke="#9a98a3" stroke-width="2" fill="none"/><path d="M435 99 H470" stroke="#9a98a3" stroke-width="2" fill="none"/>
+<polygon points="245,94 245,104 253,99" fill="#9a98a3"/><polygon points="470,94 470,104 478,99" fill="#9a98a3"/>
+<text x="20" y="216" fill="#ecebf1" font-size="14" font-weight="600">What a look may change</text>
+<text x="20" y="240" fill="#b8b6c0" font-size="13">ground, ink, accent, faces, which radius step, line weight, shadow recipe.</text>
+<text x="20" y="262" fill="#ecebf1" font-size="14" font-weight="600">What a look may not change</text>
+<text x="20" y="286" fill="#b8b6c0" font-size="13">a size, a class name, or the layout the block built.</text>
+</g>
+</svg>

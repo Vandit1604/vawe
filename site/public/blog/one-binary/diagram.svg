@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" aria-label="The shape of every vawe call: the verb prints its work, then a next line names the following command, then one last line says ok or FAILED with a reason and the seconds. A pipe to tail still shows the last line.">
+<rect width="900" height="300" fill="#f4f5fa"/>
+<g font-family="ui-monospace,Menlo,monospace" font-size="15" fill="#14161f">
+<rect x="30" y="30" width="840" height="150" rx="10" fill="#14161f"/>
+<text x="50" y="62" fill="#c4c8d6">$ bin/vawe frames</text>
+<text x="50" y="92" fill="#ffb59a">vawe: missing &lt;page&gt;; usage: vawe frames &lt;page&gt; [flags]</text>
+<text x="50" y="122" fill="#ffb59a">vawe: frames FAILED (missing &lt;page&gt;; usage: vawe frames &lt;page&gt; [flags]) in 0.0s</text>
+<text x="50" y="158" fill="#c4c8d6">exit code 1</text>
+</g>
+<g font-family="system-ui,sans-serif" font-size="16" fill="#14161f">
+<rect x="30" y="204" width="270" height="70" rx="8" fill="#dfe5ff" stroke="#2f4bff"/>
+<text x="46" y="232" font-weight="700">1. one-line usage error</text><text x="46" y="256">names the missing part</text>
+<rect x="315" y="204" width="270" height="70" rx="8" fill="#dff5e8" stroke="#1a7f4b"/>
+<text x="331" y="232" font-weight="700">2. last line, always</text><text x="331" y="256">ok or FAILED, with seconds</text>
+<rect x="600" y="204" width="270" height="70" rx="8" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="616" y="232" font-weight="700">3. survives a pipe</text><text x="616" y="256">tail -1 still shows the result</text>
+</g>
+</svg>

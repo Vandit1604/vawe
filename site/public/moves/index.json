@@ -199,6 +199,10 @@
    "label": "prove a number"
   },
   {
+   "id": "turn-a-real-photo-into-a-particle-form-with-its-own-detail",
+   "label": "turn a real photo into a particle form with its own detail"
+  },
+  {
    "id": "prove-a-change-with-a-picture",
    "label": "prove a change with a picture"
   },
@@ -2030,6 +2034,20 @@
    "md": "https://vawe.dev/moves/pixelate-svg-filter.md",
    "page": "https://vawe.dev/moves/pixelate-svg-filter",
    "duration": 4.8
+  },
+  {
+   "name": "photo-particles",
+   "title": "Photo particles",
+   "group": "grounds",
+   "look": "terminal",
+   "jobs": [
+    "turn-a-real-photo-into-a-particle-form-with-its-own-detail"
+   ],
+   "use": "a real photo (filaments, veins, scales) is sampled into 120 000 lit, coloured points that gather from a seeded scatter over 1.5 s and then breathe, filmed through the lens with the film-halation look",
+   "clip": "https://vawe.dev/moves/photo-particles.mp4",
+   "md": "https://vawe.dev/moves/photo-particles.md",
+   "page": "https://vawe.dev/moves/photo-particles",
+   "duration": 3
   },
   {
    "name": "media-between-text",

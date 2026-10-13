@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Pipeline: a flat HTML screen is inlined into an SVG image, uploaded as a texture, and one shader applies perspective, depth of field, palette, bloom, halation, grid mask, aberration, tear and grain to make the frame.">
+<rect width="1200" height="630" fill="#f4f5fa"/>
+<text x="60" y="80" font-family="system-ui,sans-serif" font-size="34" font-weight="700" fill="#14161f">One shader films the flat page</text>
+<text x="60" y="118" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">The page stays plain HTML and CSS. The camera is a pass over its pixels.</text>
+<rect x="60" y="190" width="220" height="150" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="170" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">#screen</text>
+<text x="170" y="282" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">HTML and CSS</text>
+<text x="170" y="308" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">1920 by 1080</text>
+<path d="M285 265 H335" stroke="#2f4bff" stroke-width="3"/><path d="M335 265 l-10 -7 v14 z" fill="#2f4bff"/>
+<rect x="340" y="190" width="220" height="150" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="450" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">SVG image</text>
+<text x="450" y="282" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">only styles that differ</text>
+<text x="450" y="308" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">one tenth the size</text>
+<path d="M565 265 H615" stroke="#2f4bff" stroke-width="3"/><path d="M615 265 l-10 -7 v14 z" fill="#2f4bff"/>
+<rect x="620" y="190" width="220" height="150" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="730" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#14161f">GL texture</text>
+<text x="730" y="282" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">uploaded every seek</text>
+<path d="M845 265 H895" stroke="#2f4bff" stroke-width="3"/><path d="M895 265 l-10 -7 v14 z" fill="#2f4bff"/>
+<rect x="900" y="190" width="240" height="150" rx="10" fill="#2f4bff"/>
+<text x="1020" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="700" fill="#ffffff">lens shader</text>
+<text x="1020" y="282" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" fill="#ffffff">the frame at time t</text>
+<text x="1020" y="308" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" fill="#ffffff">same t, same pixels</text>
+<text x="60" y="415" font-family="system-ui,sans-serif" font-size="20" font-weight="600" fill="#14161f">Inside the shader, in order</text>
+<g font-family="system-ui,sans-serif" font-size="18" fill="#14161f">
+<rect x="60" y="435" width="150" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="135" y="463" text-anchor="middle">perspective</text>
+<rect x="222" y="435" width="170" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="307" y="463" text-anchor="middle">depth of field</text>
+<rect x="404" y="435" width="110" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="459" y="463" text-anchor="middle">palette</text>
+<rect x="526" y="435" width="130" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="591" y="463" text-anchor="middle">LED mask</text>
+<rect x="668" y="435" width="100" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="718" y="463" text-anchor="middle">bloom</text>
+<rect x="780" y="435" width="120" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="840" y="463" text-anchor="middle">halation</text>
+<rect x="912" y="435" width="130" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="977" y="463" text-anchor="middle">aberration</text>
+<rect x="1054" y="435" width="86" height="44" rx="6" fill="#ffffff" stroke="#c4c8d6"/><text x="1097" y="463" text-anchor="middle">grain</text>
+</g>
+<text x="60" y="540" font-family="system-ui,sans-serif" font-size="18" fill="#4a4f60">Also available, off by default: anamorphic streaks, diffusion, soft focus, tilt-shift, distortion, gate weave, tear.</text>
+<text x="60" y="590" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">vawe.dev/blog</text>
+</svg>

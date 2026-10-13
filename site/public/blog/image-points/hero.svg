@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Timeline. On 2026-10-01 photo parallax was removed because it processes a captured image. On 2026-10-11 imagePoints was added because it uses the photo as a source for a designed particle form. The scope rule became one question: does the move depend on processing the image?">
+<rect width="1200" height="630" fill="#f4f5fa"/>
+<text x="60" y="80" font-family="system-ui,sans-serif" font-size="34" font-weight="700" fill="#14161f">Removed on 1 October, added on 11 October</text>
+<text x="60" y="118" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">Both decisions followed the same question.</text>
+<path d="M100 260 H1100" stroke="#4a4f60" stroke-width="3"/>
+<circle cx="200" cy="260" r="16" fill="#d9480f"/>
+<circle cx="1000" cy="260" r="16" fill="#2f4bff"/>
+<text x="200" y="215" text-anchor="middle" font-family="system-ui,sans-serif" font-size="21" font-weight="700" fill="#14161f">2026-10-01</text>
+<text x="1000" y="215" text-anchor="middle" font-family="system-ui,sans-serif" font-size="21" font-weight="700" fill="#14161f">2026-10-11</text>
+<rect x="60" y="300" width="400" height="120" rx="10" fill="#ffffff" stroke="#c4c8d6" stroke-width="2"/>
+<text x="80" y="340" font-family="system-ui,sans-serif" font-size="21" font-weight="700" fill="#d9480f">photo-parallax-2.5d removed</text>
+<text x="80" y="372" font-family="system-ui,sans-serif" font-size="18" fill="#14161f">It cuts a captured photo into</text>
+<text x="80" y="396" font-family="system-ui,sans-serif" font-size="18" fill="#14161f">depth layers. A footage trick.</text>
+<rect x="740" y="300" width="400" height="120" rx="10" fill="#ffffff" stroke="#2f4bff" stroke-width="3"/>
+<text x="760" y="340" font-family="system-ui,sans-serif" font-size="21" font-weight="700" fill="#2f4bff">imagePoints added</text>
+<text x="760" y="372" font-family="system-ui,sans-serif" font-size="18" fill="#14161f">The photo is a source for a</text>
+<text x="760" y="396" font-family="system-ui,sans-serif" font-size="18" fill="#14161f">designed particle form.</text>
+<rect x="60" y="480" width="1080" height="70" rx="10" fill="#2f4bff"/>
+<text x="600" y="523" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" font-weight="700" fill="#ffffff">Does the move depend on processing the image?</text>
+<text x="60" y="600" font-family="system-ui,sans-serif" font-size="20" fill="#4a4f60">vawe.dev/blog</text>
+</svg>

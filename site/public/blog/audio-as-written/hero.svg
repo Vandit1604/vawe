@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="A loudness scale from -34 to -14 LUFS. The colour-sting film measured -28.8 LUFS. The target band is -24 to -16 LUFS with a target near -20. The gap was about 9 dB.">
+<rect width="1200" height="630" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" fill="#14161f">
+<text x="60" y="80" font-size="34" font-weight="700">Our sound sat about 9 dB too low</text>
+<text x="60" y="118" font-size="20" fill="#4a4f60">Integrated loudness in LUFS. Higher is louder.</text>
+<rect x="600" y="230" width="400" height="110" rx="8" fill="#dfe5ff" stroke="#2f4bff" stroke-width="2"/>
+<text x="614" y="262" font-size="20" font-weight="600" fill="#1b2fb8">draft check band: -24 to -16</text>
+<path d="M100 400 H1100" stroke="#14161f" stroke-width="3"/>
+<path d="M100 392 V408" stroke="#14161f" stroke-width="2"/><text x="86" y="436" font-size="18" fill="#14161f">-34</text>
+<path d="M200 392 V408" stroke="#14161f" stroke-width="2"/><text x="186" y="436" font-size="18" fill="#14161f">-32</text>
+<path d="M300 392 V408" stroke="#14161f" stroke-width="2"/><text x="286" y="436" font-size="18" fill="#14161f">-30</text>
+<path d="M400 392 V408" stroke="#14161f" stroke-width="2"/><text x="386" y="436" font-size="18" fill="#14161f">-28</text>
+<path d="M500 392 V408" stroke="#14161f" stroke-width="2"/><text x="486" y="436" font-size="18" fill="#14161f">-26</text>
+<path d="M600 392 V408" stroke="#14161f" stroke-width="2"/><text x="586" y="436" font-size="18" fill="#14161f">-24</text>
+<path d="M700 392 V408" stroke="#14161f" stroke-width="2"/><text x="686" y="436" font-size="18" fill="#14161f">-22</text>
+<path d="M800 392 V408" stroke="#14161f" stroke-width="2"/><text x="786" y="436" font-size="18" fill="#14161f">-20</text>
+<path d="M900 392 V408" stroke="#14161f" stroke-width="2"/><text x="886" y="436" font-size="18" fill="#14161f">-18</text>
+<path d="M1000 392 V408" stroke="#14161f" stroke-width="2"/><text x="986" y="436" font-size="18" fill="#14161f">-16</text>
+<path d="M1100 392 V408" stroke="#14161f" stroke-width="2"/><text x="1086" y="436" font-size="18" fill="#14161f">-14</text>
+<path d="M359.99999999999994 200 V400" stroke="#d9480f" stroke-width="5"/>
+<circle cx="359.99999999999994" cy="400" r="9" fill="#d9480f"/>
+<rect x="249.99999999999994" y="150" width="220" height="48" rx="8" fill="#ffe3d6" stroke="#d9480f" stroke-width="2"/>
+<text x="263.99999999999994" y="181" font-size="21" font-weight="600">colour-sting: -28.8</text>
+<path d="M800 200 V400" stroke="#2f4bff" stroke-width="5"/>
+<circle cx="800" cy="400" r="9" fill="#2f4bff"/>
+<rect x="730" y="150" width="140" height="48" rx="8" fill="#ffffff" stroke="#2f4bff" stroke-width="2"/>
+<text x="748" y="181" font-size="21" font-weight="600">target: -20</text>
+<path d="M359.99999999999994 500 H800" stroke="#14161f" stroke-width="3"/>
+<text x="419.99999999999994" y="540" font-size="24" font-weight="700">about 9 dB of gain missing</text>
+<text x="60" y="600" font-size="20" fill="#4a4f60">vawe.dev/blog</text>
+</g>
+</svg>

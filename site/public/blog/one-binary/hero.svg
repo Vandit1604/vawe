@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" role="img" aria-label="Before: a 156 line Makefile, routers and scripts, each with its own calling shape. After: one command, bin/vawe, with nine verbs on day one and 42 now, and a 19 line Makefile that only forwards.">
+<rect width="900" height="360" fill="#f4f5fa"/>
+<g font-family="system-ui,sans-serif" font-size="17" fill="#14161f">
+<text x="30" y="40" font-size="19" font-weight="700">Before (until 2026-09-30)</text>
+<rect x="30" y="58" width="250" height="52" rx="8" fill="#ffe3d6" stroke="#d9480f"/>
+<text x="46" y="90">Makefile, 156 lines</text>
+<rect x="30" y="124" width="250" height="52" rx="8" fill="#ffe3d6" stroke="#d9480f"/>
+<text x="46" y="156">routers, each own flags</text>
+<rect x="30" y="190" width="250" height="52" rx="8" fill="#ffe3d6" stroke="#d9480f"/>
+<text x="46" y="222">scripts, dead and live</text>
+<rect x="30" y="256" width="250" height="52" rx="8" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="46" y="288">raw ffmpeg, raw Chrome</text>
+<text x="30" y="338" fill="#8a2f06">An agent guesses which shape applies</text>
+<path d="M300 180 H360" stroke="#14161f" stroke-width="2" fill="none"/>
+<path d="M352 174 l9 6 l-9 6" stroke="#14161f" stroke-width="2" fill="none"/>
+<text x="400" y="40" font-size="19" font-weight="700">After (from 2026-09-30)</text>
+<rect x="400" y="58" width="470" height="76" rx="10" fill="#dfe5ff" stroke="#2f4bff" stroke-width="2"/>
+<text x="420" y="90" font-weight="700">bin/vawe &lt;verb&gt; [args]</text>
+<text x="420" y="116">9 verbs on day one, 42 now</text>
+<rect x="400" y="154" width="470" height="76" rx="10" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="420" y="186">--help on every verb</text>
+<text x="420" y="212">one-line usage errors, a footer on every call</text>
+<rect x="400" y="250" width="470" height="58" rx="10" fill="#ffffff" stroke="#c4c8d6"/>
+<text x="420" y="285">Makefile, 19 lines: aliases that forward</text>
+<text x="400" y="338" fill="#1a5f3c">An agent has one place to look</text>
+</g>
+</svg>

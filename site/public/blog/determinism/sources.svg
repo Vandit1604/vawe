@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 330" role="img" aria-label="Six sources of pixel drift and the fix for each">
+<rect x="0.5" y="0.5" width="679" height="329" rx="10" fill="#f6f7fb" stroke="#dfe2ea"/>
+<g font-family="system-ui,sans-serif" font-size="13" fill="#14161c">
+<text x="20" y="28" font-size="16" font-weight="700">Where the pixels drifted, and what stopped it</text>
+<text x="20" y="52" font-size="11" fill="#5b6170">SOURCE OF DRIFT</text><text x="370" y="52" font-size="11" fill="#5b6170">FIX</text>
+<g stroke="#dfe2ea"><path d="M20 58 H660"/><path d="M20 98 H660"/><path d="M20 138 H660"/><path d="M20 178 H660"/><path d="M20 218 H660"/><path d="M20 258 H660"/></g>
+<text x="20" y="82">Date, rAF, timers, Math.random</text><text x="370" y="82" fill="#1f8a4c">virtual page clock owns all four</text>
+<text x="20" y="122">Timeline runs from page load</text><text x="370" y="122" fill="#1f8a4c">playback rate 0, only a seek moves it</text>
+<text x="20" y="162">GPU compositing, SVG filter</text><text x="370" y="162" fill="#1f8a4c">Chrome per lane, software if filter</text>
+<text x="20" y="202">Tab focus changes edge pixels</text><text x="370" y="202" fill="#1f8a4c">focus emulation on every page</text>
+<text x="20" y="242">Raster state kept between seeks</text><text x="370" y="242" fill="#1f8a4c">fixed 60-frame slices, fresh page each</text>
+<text x="20" y="282">Chrome downscale of WebGL</text><text x="370" y="282" fill="#1f8a4c">capture at scale 1, ffmpeg scales</text>
+<text x="20" y="312" font-size="11" fill="#5b6170">Each fix landed with a test that renders twice and compares.</text>
+</g></svg>

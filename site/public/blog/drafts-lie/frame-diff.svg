@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 178" role="img" aria-label="Frame 5, draft against final: mean pixel difference">
+<rect x="0.5" y="0.5" width="679" height="177" rx="10" fill="#f6f7fb" stroke="#dfe2ea"/>
+<text x="20" y="30" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="#14161c">Frame 5, draft against final: mean pixel difference</text>
+<text x="20" y="50" font-family="system-ui,sans-serif" font-size="12" fill="#5b6170">tests/media/render-page-draft-layout.test.mjs, a fixture laid out in px</text>
+<text x="20" y="89" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">draft laid out at 960x540</text>
+<rect x="200" y="74" width="350.0" height="24" rx="4" fill="#c2410c"/>
+<text x="558.0" y="91" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">10.07</text>
+<text x="20" y="133" font-family="system-ui,sans-serif" font-size="13" fill="#14161c">draft laid out at 1920x1080</text>
+<rect x="200" y="118" width="29.9" height="24" rx="4" fill="#1f8a4c"/>
+<text x="237.9" y="135" font-family="ui-monospace,Menlo,monospace" font-size="13" fill="#14161c">0.86</text>
+</svg>

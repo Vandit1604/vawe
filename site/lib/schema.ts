@@ -78,6 +78,53 @@ export function techArticleSchema(opts: { headline: string; description: string;
   };
 }
 
+export function blogPostingSchema(opts: {
+  headline: string;
+  description: string;
+  path: string;
+  datePublished: string;
+  dateModified: string;
+  images: string[];
+  section: string;
+  keywords: string[];
+  words?: number;
+}) {
+  const org = { "@type": "Organization", name: "vawe", url: SITE_URL };
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: opts.headline,
+    description: opts.description,
+    url: `${SITE_URL}${opts.path}`,
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}${opts.path}` },
+    datePublished: opts.datePublished,
+    dateModified: opts.dateModified,
+    image: opts.images.map((src) => (src.startsWith("http") ? src : `${SITE_URL}${src}`)),
+    articleSection: opts.section,
+    keywords: opts.keywords.join(", "),
+    inLanguage: "en",
+    author: org,
+    publisher: { ...org, logo: { "@type": "ImageObject", url: `${SITE_URL}/assets/favicon-512.png` } },
+    isPartOf: { "@type": "Blog", name: "vawe blog", url: `${SITE_URL}/blog` },
+  };
+}
+
+export function blogSchema(posts: { headline: string; path: string; datePublished: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "vawe blog",
+    url: `${SITE_URL}/blog`,
+    publisher: { "@type": "Organization", name: "vawe", url: SITE_URL },
+    blogPost: posts.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.headline,
+      url: `${SITE_URL}${p.path}`,
+      datePublished: p.datePublished,
+    })),
+  };
+}
+
 export type BreadcrumbItem = { name: string; url: string };
 
 export function breadcrumbSchema(items: BreadcrumbItem[]) {
@@ -94,8 +141,7 @@ export function breadcrumbSchema(items: BreadcrumbItem[]) {
 }
 
 // A page renders this with dangerouslySetInnerHTML, same reason the import map in layout.tsx does:
-// JSON-LD must be literal script text, and JSON.stringify's output is already escaped for </script>
-// injection risk is nil here because every input is repo data, not user input.
+// JSON-LD must be literal script text. `<` is escaped because blog post text can hold "</script>".
 export function jsonLdScript(data: object) {
-  return { __html: JSON.stringify(data) };
+  return { __html: JSON.stringify(data).replace(/</g, "\\u003c") };
 }
