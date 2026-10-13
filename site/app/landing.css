@@ -3,6 +3,7 @@
 
 /* ===== SPLIT HERO ======================================================================== */
 .hs{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:48px;align-items:center;padding:40px 0 24px}
+.hs-brand{display:block;font-weight:500;line-height:1.4;letter-spacing:.02em;text-wrap:wrap}
 .hs h1{font-size:clamp(2.2rem,4.2vw,3.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:balance}
 .hs-sub{color:var(--ink-2);font-size:17px;line-height:1.55;margin-top:16px;max-width:42ch;text-wrap:pretty}
 .hs-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}

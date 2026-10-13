@@ -50,7 +50,10 @@ export function HeroSplit() {
   return (
     <section className="hs" id="intro">
       <div className="hs-copy">
-        <h1>Write a web page. Get a film.</h1>
+        <h1>
+          <span className="kicker hs-brand">vawe · HTML to video for developers and AI agents</span>
+          Write a web page. Get a film.
+        </h1>
         <p className="hs-sub">
           A vawe film is one HTML page: CSS, Web Animations, SVG, canvas or three.js. The renderer seeks
           it frame by frame and encodes the video.

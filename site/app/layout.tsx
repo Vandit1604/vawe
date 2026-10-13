@@ -13,7 +13,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", displ
 // a shared link show. The rule the page itself now follows applies here first: name the OUTCOME, and
 // name WHO it is for. An agent or a coding session is the audience that can actually use a text file
 // as a video format, so the title says so.
-const TITLE = "Vawe · make videos by vibe coding";
+const TITLE = "vawe: make videos by vibe coding, HTML to video";
 const BLURB =
   "Motion graphics without a motion designer. Vawe renders video from a text file, so you or an AI "
   + "agent can write a film the way you write anything else, and re-render it the day the numbers change.";
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     description: BLURB,
     type: "website",
     url: "/",
-    siteName: "Vawe",
-    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "Vawe: make videos by vibe coding" }],
+    siteName: "vawe",
+    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "vawe: make videos by vibe coding" }],
   },
   // summary_large_image is the only card that shows a 1200x630 at full width; the default "summary"
   // crops it to a small square and the headline is on the left, so it would crop the claim away.

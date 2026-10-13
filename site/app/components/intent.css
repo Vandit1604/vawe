@@ -55,3 +55,8 @@
 .itable td{color:var(--ink-2)}
 .itable td:first-child{color:var(--ink);font-weight:700}
 .itable tr:last-child td{border-bottom:0}
+
+.ievidence{margin:14px 0 0;padding-left:18px;display:grid;gap:10px;max-width:68ch}
+.ievidence li{color:var(--muted);line-height:1.6}
+.ievidence a,.ifaq a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+.ifaq h3{font-size:17px;margin:22px 0 6px}

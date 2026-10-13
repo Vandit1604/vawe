@@ -1,61 +1,72 @@
 ---
-title: "AI agent observability: one JSONL line per verb"
-description: "We asked an agent how long each step took and got 18 minutes for a 6.2 minute run. A one-line-per-verb log now answers time, failures and draft progress."
+title: "AI agent observability with one JSONL line per command"
+description: "AI agent observability the tool writes, not the agent: one JSONL line per command with stage, seconds and exit code. An agent guessed 18 min for 6.2."
 date: 2026-10-10
+updated: 2026-10-13
 section: agent-experience
 tags: "observability, run logs, ai agents, jsonl"
-keywords: "ai agent observability, agent run logs, jsonl log, agent cannot track time, harness metrics"
+keywords: "ai agent observability, agent run logs, jsonl log, harness metrics"
 hero: /blog/run-logs/hero.svg
 heroAlt: "One JSONL log line per verb call, with stage, duration, exit code, slot wait and images, feeding a runs report for time, failures and the draft series."
 ---
 
-On 2026-10-04 we asked an agent to log how long each step of a 6.2 minute task took. It handed back a table that summed to about 18 minutes. The agent had run `date` once, typed the other timestamps by hand and guessed its own thinking time. It told us so, but the numbers still looked like measurements. That was the day we stopped asking agents for durations and started building AI agent observability into the tool: one JSONL line for every verb the agent runs.
+To add observability to an AI agent workflow, make the tool log every call, so you can answer three questions without asking the agent: where the time went, what failed and why, and whether each draft fixed what the last one flagged. The end state is one JSONL line per command in `out/<film>.runs.jsonl` and a report command that reads it. That is what [vawe](https://github.com/Vandit1604/vawe) runs today.
 
-## The problem: we could not see where the time went
-
-[vawe](https://github.com/Vandit1604/vawe) renders films from HTML pages, and a session has many slow steps: draft renders, a final render that takes minutes and a queue of render slots shared by every agent on the laptop. By late September we could not answer plain questions. Which step was slow? Which calls failed, and why? Did the second draft fix anything the first one flagged?
-
-The run log we had was thin. In one trace review of a tracking-HUD session the log held 21 lines for 162 tool calls. `strip`, `frames`, `compare`, `velocity`, `onion`, `critique` and `audio` left no record at all. A failed or killed draft wrote nothing. An early version of `vawe runs` printed "judge -" for every draft. Time spent waiting for a render slot sat inside the draft's wall time with no field of its own.
-
-## What we tried first
-
-Asking the agent. It failed the way the opening paragraph says. A language model has no clock while it thinks, and it sees time only in tool output. If you ask for durations it estimates them and then reports the estimate in the same format as a measurement. We wrote that down as a rule: ask an agent for what it saw and decided, never for how long something took.
-
-The other tool we had was the agent transcript. Timestamps from each tool call to its result give real durations, and we used them in trace reviews. But a transcript is a separate file in a different format per client, and nobody reads one before the next run.
+We started on 2026-10-04, when we asked an agent to log how long each step of a 6.2-minute task took. It handed back a table that summed to about 18 minutes. It had run `date` once, typed the other timestamps by hand and guessed its own thinking time. It said so, but the numbers still looked like measurements. A language model has no clock while it thinks and sees time only in tool output, so we wrote down a rule: ask an agent what it saw and decided, never how long something took. The log is part of the [harness we build for the weaker model](/blog/weaker-model).
 
 ![Asking the agent for the duration of a 6.2 minute run produced about 18 minutes; the run log carries the measured seconds.](/blog/run-logs/diagram.svg)
 
-## What we built
+## What you need for a per-command log
 
-The log has two layers, added nine days apart.
+- One entry point that every command passes through. Ours is `bin/vawe`, described in [CLI design for AI agents](/blog/one-binary).
+- An append-only file per unit of work (per film, for us).
+- A way for child processes to report facts the entry point cannot see, such as a queue wait.
 
-[97bf133](https://github.com/Vandit1604/vawe/commit/97bf13390) (2026-10-01) wrote one event per step for `new`, `dev`, `judge` and `ship`, added `vawe runs`, and put the ship job logs under `out/ship-jobs`. [914f16f](https://github.com/Vandit1604/vawe/commit/914f16f20) (2026-10-10) made the log cover every verb. A call now appends one line to `out/<film>.runs.jsonl` with these fields: the verb and its arguments, the stage the film was in when the call started, a start time, the duration in seconds, the exit code, the error reason, how long the call waited for a render slot, and the images it printed. A tagged field says whether the run named an agent through `VAWE_AGENT`, so a report can tell a stray untagged run from the agent's own.
+## Step 1: log one event per step for the main commands
 
-The verb itself measures all of that. A child script reports facts such as the slot wait to the main process through a small notes file. The agent writes nothing, so the agent cannot get it wrong.
+[5ae7553](https://github.com/Vandit1604/vawe/commit/5ae7553de) (2026-10-01) wrote one event per step for `new`, `dev`, `judge` and `ship`, added `vawe runs`, and put the ship job logs under `out/ship-jobs`. This is enough to start, and it was not enough to keep. In one trace review the log held 21 lines for 162 tool calls. `strip`, `frames`, `compare`, `velocity`, `onion`, `critique` and `audio` left no record, a failed or killed draft wrote nothing, and time spent waiting for a render slot sat inside the draft's wall time.
 
-The same commit added the footer that ends every call with `vawe: dev ok in 38.2s` or `vawe: dev FAILED (reason) in 38.2s` (see [one binary, one verb per step](/blog/one-binary) for why). The failure reasons are grouped by cause in `vawe runs`, so "render slot or navigation timeout" and "browser lost" show up as counts and not as 40 different strings.
+## Step 2: log every command, including the ones that fail
 
-`vawe runs <film>` answers three questions: where the time went per stage and verb, what failed and why, and the draft series. `vawe runs --all` gives one row per film for the last 30 days. `vawe runs --taste` reports, per rule, how often it fired, how often it was fixed and how often it still fired in the next draft ([6cb5227](https://github.com/Vandit1604/vawe/commit/6cb52276b), and [1560a60](https://github.com/Vandit1604/vawe/commit/1560a60ec) restored the per-draft lines).
+[bf4a5af](https://github.com/Vandit1604/vawe/commit/bf4a5af9f) (2026-10-10) made the log cover every verb. Each call appends one line with these fields:
 
-## What the log showed
+- the verb and its arguments;
+- the stage the film was in when the call started;
+- a start time and the duration in seconds;
+- the exit code and the error reason;
+- how long the call waited for a render slot;
+- the images it printed;
+- a tagged field that says whether the run named an agent through `VAWE_AGENT`.
 
-The log paid for itself in the first weeks, in places we did not plan.
+The tag lets a report tell a stray untagged run from the agent's own. Set `VAWE_AGENT=<name>` and `VAWE_MODEL=<model>` in the agent's shell.
 
-- The docs audit used it as data. The `rules_fired` field in the logs covered 377 `dev` runs over 59 films, so we could say which rules fired most and which never did, instead of guessing which docs to keep.
-- In one trace review, 9 of 12 later drafts fixed no rule that the earlier draft had fired. That is a draft loop that is not converging. Before the log we could only suspect it; after, we could count it, and it fed the work on [what the agent measures against](/blog/plan-vs-reference).
-- A review of a design-systems session found that 52 of 130 shell calls were polls of `ship --status --wait`, and that three of five final renders failed and cost 2,967 seconds, 49 minutes and 45 percent of that session. Two of the failures were already fully captured and died at the last step. Slot waits had been invisible until the log recorded them.
+## Step 3: measure in the tool, never in the agent
 
-None of those numbers came from asking an agent. They came from a log file and transcript timestamps.
+The verb measures every field itself. A child script reports facts such as the slot wait to the main process through a small notes file. The agent writes nothing to the log, so it cannot get the log wrong. The event shape lives in `harness/lib/runlog.mjs` and `harness/lib/verb-log.mjs`, and `bin/vawe` times and logs each call.
 
-## What we would tell you if you build the same thing
+## Step 4: end every call with a result line
 
-Let the tool write the log and keep the agent out of the loop. Log every call, including the ones that fail, because a log that only records success hides what you most want to see. Record the exit code and the reason on the line, so a pipe to `tail` in the agent's command cannot hide a failure from your report. Add a field for any wait that is not work, such as a queue, because it will be a large part of the total and will look like slowness in the tool. Give the log a reader command, since a JSONL nobody reads is storage and not observability.
+The same commit added a footer: `vawe: dev ok in 38.2s` or `vawe: dev FAILED (reason) in 38.2s`. Agents pipe output into `tail` and lose the exit code; the footer keeps the result visible in the last line. Failure reasons are grouped by cause, so "render slot or navigation timeout" and "browser lost" show up as counts and not as 40 different strings.
 
-Last, expect to read the log with a transcript beside it. The log tells you which call took 38 seconds. The transcript tells you what the agent was trying to do. The [reading your film docs](/docs/reading-your-film) show the sibling idea for the film itself, and the [troubleshooting page](/docs/troubleshooting) covers the failure causes the log groups.
+## Step 5: give the log a reader
 
-## In the code
+A JSONL file nobody reads is storage. `vawe runs <film>` shows time per stage and verb, failures and why, and the draft series. `vawe runs --all` gives one row per film for the last 30 days. `vawe runs --taste` reports, per rule, how often it fired, how often it was fixed and how often it still fired in the next draft ([f2a5e91](https://github.com/Vandit1604/vawe/commit/f2a5e9188); [80d1b8e](https://github.com/Vandit1604/vawe/commit/80d1b8e19) restored the per-draft lines). The report code is in `harness/lib/runs-report.mjs` and `harness/dev/runs.mjs`.
 
-- `harness/lib/runlog.mjs` and `harness/lib/verb-log.mjs`: the event shape, the footer line and the failure causes.
-- `harness/lib/runs-report.mjs` and `harness/dev/runs.mjs`: the `vawe runs` report.
-- `bin/vawe`: where each call is timed and logged.
-- Commits: [97bf133](https://github.com/Vandit1604/vawe/commit/97bf13390) (events for new, dev, judge, ship), [914f16f](https://github.com/Vandit1604/vawe/commit/914f16f20) (every verb logged), [6cb5227](https://github.com/Vandit1604/vawe/commit/6cb52276b) (taste report), [1560a60](https://github.com/Vandit1604/vawe/commit/1560a60ec) (per-draft rule lines).
+## Check that the log answers real questions
+
+In its first weeks the log answered questions we had not planned for:
+
+- The docs audit used `rules_fired` across 377 `dev` runs over 59 films to see which rules fired most and which never did. [How long AGENTS.md should be](/blog/read-load) shows what that audit cut.
+- In one trace review, 9 of 12 later drafts fixed no rule the earlier draft had fired. Before the log we could only suspect a draft loop that does not converge; after, we could count it. It fed the work on [what an agent compares its film against](/blog/watch-a-film).
+- A review of a design-systems session found 52 of 130 shell calls were polls of `ship --status --wait`, and three of five finals failed and cost 2,967 seconds (49 minutes, 45% of that session). Slot waits had been invisible until the log recorded them. [Reading AI agent traces](/blog/trace-reviews) follows that session.
+
+None of those numbers came from asking an agent.
+
+## Where per-command logs go wrong
+
+- An early `vawe runs` printed "judge -" for every draft. A skip flag (`--no-judge`) had no counter, so the log could not say the judge was skipped on purpose.
+- A log that records only success hides the calls you most want to see.
+- A queue wait inside a duration looks like a slow tool. Give it its own field.
+- The log alone lacks intent. It tells you which call took 38 seconds; the transcript beside it tells you what the agent was trying to do.
+
+Next, read [reading AI agent traces](/blog/trace-reviews) for a full review built on this log and the transcripts, or [AI agent harness engineering](/blog/weaker-model) for the rest of the harness. The [troubleshooting page](/docs/troubleshooting) covers the failure causes the log groups, and [reading your film](/docs/reading-your-film) is the same idea applied to the film itself.

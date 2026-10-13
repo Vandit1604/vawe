@@ -86,7 +86,7 @@ export function importLine(e: Ease) {
   return `import { ${e.name} } from '../../core/motion/curves.js';\nimport { curveToLinear } from '../../core/motion/springs.js';\n\nconst easing = curveToLinear(${e.name}, { tolerance: 0.002 }); // the linear() string above\nconst x = ${e.name}(u);                                         // per-frame code, u in 0..1`;
 }
 
-const ORG = { "@type": "Organization", name: "Vawe", url: "https://vawe.dev" };
+const ORG = { "@type": "Organization", name: "vawe", url: "https://vawe.dev" };
 
 export function techArticleSchema(e: Ease) {
   return {

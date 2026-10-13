@@ -1,55 +1,68 @@
 ---
-title: "Video transitions that carry the eye: twelve handoff families"
-description: "Video transitions that carry the eye: 12 handoff families, 10 banned slideshow tells and a check that compares the plan with the film. No measured gain yet."
+title: "Motion graphics transitions: 12 handoffs, 10 tells"
+description: "A checklist for motion graphics transitions: name what carries the eye over each cut, pick from 12 handoff families, and avoid the 10 tells of a slideshow."
 date: 2026-10-11
+updated: 2026-10-13
 section: taste
-tags: "video transitions, handoffs, slideshow, motion design, agents"
-keywords: "video transitions, match cut, scene transitions in motion graphics, slideshow tells, cut on motion"
+tags: "video transitions, match cut, handoffs, slideshow, motion design"
+keywords: "motion graphics transitions, match cut, scene transitions in motion graphics, slideshow tells, cut on motion"
 hero: /blog/transitions/hero.svg
 heroAlt: "Twelve handoff families as a grid: graphic match, action match, object to object, position lock, container transform, shared axis, colour or light flood, type-driven, camera through, invisible cut, sound bridge, deliberate cut."
 ---
 
-A cut is only a slide change until something crosses it. Our agents made films where scene A faded and scene B arrived, and when three moves in a row went the same way the film read as one long swipe. We wrote down what can carry the eye across a seam. The result is twelve handoff families, ten banned slideshow tells, a column in the plan, and a check that compares the plan with the film. If you are looking for video transitions that do more than cross-fade, this is what we ended up with. We have no measured film gain from it yet, and we say so below.
+Our agents made films where scene A faded and scene B arrived, and when three moves in a row went the same way the film read as one long swipe. This checklist is what we now ask of every cut. It draws on film grammar that already exists (match cut, cut on action, J-cuts and L-cuts, Murch's Rule of Six) and organises it by one question: what carries the eye across the seam? It is part of our [motion design system](/blog/ten-looks), which covers the rest of the craft.
 
-## The problem: two slides and a fade
+We have no measured film gain from these rules yet. The check is advisory and we have no before-and-after judge score. The numbers below are counts and thresholds.
 
-Our agents' cuts swapped two slides. The tell was easy to see once we looked for it. The background changed, the text changed, and nothing from beat A started beat B. Repetition made it worse: three moves in a row in the same direction read as one long swipe.
+## 1. Name the one thing that crosses the cut
 
-A transition belongs to the one thing that leaves beat A and starts beat B. That thing has a screen position, a scale, a direction and a speed on both sides. If you cannot name it, the cut is a swap.
+A transition belongs to the thing that leaves beat A and starts beat B. That thing has a screen position, a scale, a direction and a speed on both sides of the cut. If you cannot name it, the cut is a swap: the background changes, the text changes, and nothing from beat A starts beat B.
 
-## What we tried
+How to check: write the carried element in the plan before you build. If the cell is empty, you have a slide change.
 
-We started from the film grammar that already exists: match cut, cut on action, J-cuts and L-cuts, Murch's Rule of Six. We did not try to invent a new taxonomy. The new work was to organise it by the question an agent asks at a seam: what carries the eye?
+## 2. Pick a family from the twelve, and read its cost
 
-Our doc already had a taxonomy of transition types and what each one means. That says what a dissolve means. It does not say what to build. The family table changes the question from "which transition?" to "which thing do I carry, and what does it cost?"
-
-## What we built: video transitions as handoffs
-
-### Twelve handoff families
-
-Commit `530a27f8c` added the table in `taste/craft/transitions.md`. Each family says what it is, when the story at the cut fits it, its cost or risk, and which moves to copy.
+Commit [`f12a9f516`](https://github.com/Vandit1604/vawe/commit/f12a9f516) added the family table in `taste/craft/transitions.md`. Each family says what it is, when the story at the cut fits it, its cost or risk, and which moves to copy.
 
 ![The twelve families: graphic match, action match, object to object, position lock, container transform, shared axis, colour or light flood, type-driven, camera through, invisible cut, sound bridge, deliberate cut.](/blog/transitions/hero.svg)
 
-The costs matter as much as the fits. A graphic match needs the same framing in both shots, and an anchor that drifts a few pixels breaks it. An action match fails most visibly on a speed or ease mismatch. A colour flood with no reveal point just cuts. A camera-through is the strongest device, so we allow one per film. A deliberate cut is the last family and it is exempt from the limits, because hard cuts are most seams.
+The cost column keeps an agent from using the showiest family on every cut:
 
-The same commit added a skill, `vawe-transitions`, with the per-cut procedure: four ideas drawn from three families, the less typical pick, and a ledger. That procedure is the ideate method applied to a cut, covered in [Verbalized sampling for agents](/blog/ideate). The ledger limits are: no family on adjacent cuts, and none more than twice.
+| Family | What breaks it |
+|---|---|
+| Graphic match | needs the same framing in both shots; an anchor that drifts a few pixels breaks it |
+| Action match | fails most visibly on a speed or ease mismatch |
+| Colour or light flood | with no reveal point, it just cuts |
+| Camera through | the strongest device, so one per film |
+| Deliberate cut | exempt from the limits, because hard cuts are most seams |
 
-### A plan column and a check
+Our older doc already listed transition types and what each one means. It said what a dissolve means and not what to build. The family table changes the question from "which transition?" to "which thing do I carry, and what does it cost?"
 
-The Board's cut table gained a handoff column. `vawe check transitions` and the draft advice read it, and they compare it with the measured film for planned handoffs that cut hard. The plan says what carries, and the film shows whether it did.
+## 3. Do not repeat a family on adjacent cuts
 
-### Ten banned slideshow tells
+The ledger limits are: no family on two adjacent cuts, and no family more than twice in a film. Three moves in a row in one direction is the repetition that turned our films into one swipe.
 
-Commit `3734cb9b7` added `harness/lib/slideshow.mjs`. It scores ten tells from the motion records, the world spans and, when there is a video, the detected cut kinds and the still runs. The result is a score out of 10 with each tell, its seconds and a fix. It is advice only.
+How to check: the ledger row per cut names the family, so a repeat is visible in the table before any render.
+
+## 4. Choose the less typical of four ideas
+
+The same commit added a skill, `vawe-transitions`, with a per-cut procedure: four ideas drawn from three families, a pick that is not the most typical, and a ledger row. That is the ideate method applied to a cut, described in [verbalized sampling prompts for agents](/blog/ideate).
+
+## 5. Put the handoff in the plan, then check the film against it
+
+The Board's cut table has a handoff column. `vawe check transitions` and the draft advice read it and compare it with the measured film, flagging planned handoffs that came out as hard cuts. A plan that is never compared with the film does nothing.
+
+## 6. Score the film for slideshow tells
+
+Commit [`a5a50e80e`](https://github.com/Vandit1604/vawe/commit/a5a50e80e) added `harness/lib/slideshow.mjs`. It scores ten tells from the motion records, the world spans and, when there is a video, the detected cut kinds and the still runs. It prints a score out of 10 with each tell, its seconds and a fix. It is advice only.
 
 ![Ten slideshow tells and their codes, with the repeat thresholds.](/blog/transitions/tells.svg)
 
-The thresholds are repeat counts: 3 or more cuts, 5 or more elements, a 75 percent share, or shots within 15 percent of one length. One crossfade for a time jump is a choice, not a tell. We set the thresholds on purpose so that our two public example films, `colour-sting` and `tracking-hud`, stay clean, and a test reads their pages through the same rules.
+The thresholds are repeat counts: 3 or more cuts, 5 or more elements, a 75 percent share, or shots within 15 percent of one length. A single event is a choice: one crossfade for a time jump is not a tell. We set the thresholds so that our two public example films, `colour-sting` and `tracking-hud`, stay clean, and a test reads their pages through the same rules.
 
-### Moves to copy
+## 7. Copy a continuous-take move when the story allows one
 
-Two commits on 2026-10-10 added ten continuous-take handoff moves. Each carries one shared element from scene A to scene B with no cut and no crossfade. `a5ed8672b` added highlight sweep, shadow handoff, word portal, underline road and caret door. `c921d7163` added swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid.
+Two commits on 2026-10-10 added ten handoff moves. Each carries one shared element from scene A to scene B with no cut and no crossfade. [`c8d4b7779`](https://github.com/Vandit1604/vawe/commit/c8d4b7779) added highlight sweep, shadow handoff, word portal, underline road and caret door. `9d0224a63` added swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid. Our notes describe a larger set of polished continuous-take moves, but we verified only these ten in the commits.
 
 <figure>
 <video src="/blog/transitions/swipe-continues.mp4" poster="/blog/transitions/swipe-continues.hd.webp" muted loop playsinline controls></video>
@@ -61,34 +74,31 @@ Two commits on 2026-10-10 added ten continuous-take handoff moves. Each carries 
 <figcaption>Word portal: a word from scene A is the opening that scene B arrives through.</figcaption>
 </figure>
 
-### One flash, capped
+When the carried element moves across the cut, match its speed on both sides. `ramp()` in our [CSS easing functions cheat sheet](/blog/easing) does that.
 
-The exposure flash (`bb913b6db`) is a 3-frame over-exposure on a cut. The new shot starts at twice the brightness and settles in 0.15 s. We measured it on the clip at 60 fps: mean luma 27 before the cut, 203 to 208 in the peak, 67 on the first frame after it, then 38 after 0.15 s. The helper allows at most 3 flashes in any one second, in line with the WCAG limit of three flashes per second. A fourth cut in that second still cuts, without the flash.
+## 8. Cap the exposure flash at three per second
+
+The exposure flash ([`dac155c18`](https://github.com/Vandit1604/vawe/commit/dac155c18)) is a 3-frame over-exposure on a cut. The new shot starts at twice the brightness and settles in 0.15 s. Measured on the clip at 60 fps: mean luma 27 before the cut, 203 to 208 in the peak, 67 on the first frame after it, and 38 after 0.15 s. The helper allows at most 3 flashes in any one second, in line with the WCAG limit of three flashes per second. A fourth cut in that second still cuts, without the flash.
 
 <figure>
 <video src="/blog/transitions/exposure-flash.mp4" poster="/blog/transitions/exposure-flash.hd.webp" muted loop playsinline controls></video>
 <figcaption>Exposure flash: the shot swap sits inside the peak, so the viewer never sees it.</figcaption>
 </figure>
 
-We also folded older seam rules into three: `seam-timing`, `hard-cut-default` and `eye-trace` (`d6c9d9ced`). That commit added 73 lines and removed 255, and it retired five rule ids.
+## 9. Keep the seam rules few
 
-## The measured result
+We folded the older seam rules into three: `seam-timing`, `hard-cut-default` and `eye-trace` (`73336e6fc`). That commit added 73 lines, removed 255 and retired five rule ids.
 
-These are counts: 12 families, 10 banned tells, 10 new continuous-take moves in two commits, and 1 flash capped at 3 per second. We have not yet measured a film that improved because of any of it. The check is advisory, and we have no before-and-after score from the judge. Our notes also describe a larger set of polished continuous-take moves, but we only verified the ten above in the commits, so we do not quote a bigger number.
+## The checklist at a glance
 
-## What we would tell someone building the same thing
+| Check | How to verify | Where in the code |
+|---|---|---|
+| A carried element per cut | handoff column filled in the Board | Board cut table |
+| Family chosen with its cost | ledger row names the family | `taste/craft/transitions.md` |
+| No family on adjacent cuts, none more than twice | ledger | `skills/vawe-transitions/SKILL.md` |
+| Four ideas, less typical pick | ledger row | `guides/IDEATE.md` |
+| Plan matches the film | `vawe check transitions` | draft advice |
+| Slideshow score | ten tells, score out of 10 | `harness/lib/slideshow.mjs` |
+| Flash cap | at most 3 per second | exposure flash helper |
 
-- Organise transitions by what carries the eye.
-- Write the cost next to each option. The cost is what keeps an agent from using the showiest family on every cut.
-- Make the plan a column, then check the film against the column. A plan that is never compared is a wish.
-- Set repeat thresholds. Single events (one crossfade for a time jump) are choices.
-- Keep a safety cap in the helper. Ours cannot flash a fourth time in a second.
-
-See the clips on their move pages: [swipe-continues](/moves/swipe-continues), [word-portal](/moves/word-portal) and [exposure-flash](/moves/exposure-flash). For why short exits help any of these, read about [easing as a vocabulary](/blog/easing). The framework is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).
-
-## In the code
-
-- `taste/craft/transitions.md`: the families and the banned tells.
-- `skills/vawe-transitions/SKILL.md`: the per-cut procedure.
-- `harness/lib/slideshow.mjs`: the ten tells and the score.
-- Commits: [`530a27f8c`](https://github.com/Vandit1604/vawe/commit/530a27f8c) families, skill and handoff column, [`3734cb9b7`](https://github.com/Vandit1604/vawe/commit/3734cb9b7) slideshow check, [`bb913b6db`](https://github.com/Vandit1604/vawe/commit/bb913b6db) exposure flash, [`a5ed8672b`](https://github.com/Vandit1604/vawe/commit/a5ed8672b) five handoff moves.
+See the clips on their move pages: [swipe-continues](/moves/swipe-continues), [word-portal](/moves/word-portal) and [exposure-flash](/moves/exposure-flash). For how these cuts fit with looks, curves and lenses, start from the [motion design system](/blog/ten-looks) overview.

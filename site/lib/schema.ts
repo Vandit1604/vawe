@@ -12,6 +12,8 @@ import pkg from "../../package.json";
 
 export const REPO_URL = "https://github.com/Vandit1604/vawe";
 const SITE_URL = "https://vawe.dev";
+const BRAND_DESCRIPTION =
+  "vawe is an open source framework that renders one HTML page into a video, so a developer or an AI agent can write motion graphics as code.";
 
 // Apache-2.0, no paid tier: the licence and repo URL below are read off package.json rather than
 // retyped, so they cannot drift from the one the repo actually ships under.
@@ -19,7 +21,9 @@ export function organizationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Vawe",
+    name: "vawe",
+    alternateName: ["Vawe", "vawe.dev"],
+    description: BRAND_DESCRIPTION,
     url: SITE_URL,
     // Google's logo guidance requires "at minimum" 112x112px (developers.google.com/search/docs/
     // appearance/structured-data/logo). The mark itself is a 32x32 viewBox SVG, so this points at a
@@ -34,8 +38,12 @@ export function websiteSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Vawe",
+    name: "vawe",
+    alternateName: ["Vawe", "vawe.dev"],
+    description: BRAND_DESCRIPTION,
     url: SITE_URL,
+    inLanguage: "en",
+    publisher: { "@type": "Organization", name: "vawe", url: SITE_URL },
   };
 }
 
@@ -47,7 +55,7 @@ export function softwareApplicationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "Vawe",
+    name: "vawe",
     description: pkg.description,
     url: SITE_URL,
     applicationCategory: "DeveloperApplication",

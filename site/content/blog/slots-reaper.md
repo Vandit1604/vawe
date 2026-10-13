@@ -1,15 +1,18 @@
 ---
-title: "Limiting headless Chrome renders: slots and a reaper"
-description: "With 10+ agents and 18 headless Chromes, load hit about 18. Two render slots, a lane budget and a Chrome reaper fixed it. A sixth lane adds under 10% speed."
+title: "Too many headless Chrome processes: slots and a reaper"
+description: "Too many headless Chrome processes: 18 Chromes pushed our load to about 18. How to add render slots, a lane budget and a reaper for orphaned Chromes."
 date: 2026-10-11
+updated: 2026-10-13
 section: speed
 tags: "headless chrome, concurrency, process management, render queue, agents"
-keywords: "limit headless chrome, headless chrome too many processes, render queue, orphaned chrome processes, puppeteer concurrency"
+keywords: "too many chrome processes, kill orphaned chrome processes, limit headless chrome, puppeteer concurrency"
 hero: /blog/slots-reaper/hero.svg
 heroAlt: "Two machine-wide render slots, with slot 1 reserved for drafts, and a reaper that kills Chromes whose owner process died."
 ---
 
-The scarcest resource in an agent-run studio is not GPU time. It is one laptop fan. On 2026-09-26 more than ten agents were running at once, with 18 headless Chrome processes between them, and the load average sat near 18. We needed to limit headless Chrome renders for the whole machine, and then clean up after the ones that died.
+To cap headless Chrome on a machine that many processes share, you need four parts: a machine-wide slot lock, a slot kept free for short jobs, a lane count from free memory, and a reaper that kills Chromes whose owner died. At the end, the machine runs at most two renders, a quick draft never queues behind a long final, and a killed render leaves nothing behind.
+
+We built it after 2026-09-26, when more than ten agents ran at once with 18 headless Chrome processes between them and the load average sat near 18. The machine overheated and throttled, and end-to-end runs failed on timeouts caused by load rather than by any bug. It is one part of our [headless Chrome render pipeline](/blog/chrome-per-lane), where each render opens one Chrome per capture lane.
 
 <figure>
 
@@ -17,31 +20,36 @@ The scarcest resource in an agent-run studio is not GPU time. It is one laptop f
 
 </figure>
 
-## The problem
+## What the Chrome cap needs
 
-Each render launches several Chrome processes, one per capture lane. With many agents each running their own render, the machine overheated and throttled. End-to-end runs failed on timeouts caused by the load rather than by any bug. (This is the same pressure we describe in [how we sped up end-to-end tests](/blog/test-suite).)
+- A shared directory every render can write to.
+- The pid of each render and of each Chrome it launches.
+- One measurement of your own: how fast a render gets with 1, 2, 4 and 6 lanes, under load.
 
-Our first fix only looked at the process list. A render counted the other renders it could see and lowered its own worker count. That reduced the damage, but it did not limit anything. Ten renders at two workers each is still twenty Chromes.
+Our first attempt only read the process list. A render counted the other renders it could see and lowered its own worker count. That reduced the damage but limited nothing: ten renders at two workers each is still twenty Chromes.
 
-Killed renders added a second problem. A render that was stopped with `SIGKILL` runs no handler, so its Chromes kept running. Orphaned `node --test` processes were also a problem; one ran for three hours.
+## Step 1: take a slot with an exclusive file create
 
-## What we built
+A slot is a file in the shared directory, `slot-<i>.json`, created with an exclusive create so two renders can never take the same one. It records the pid, start time, kind and who asked. A slot whose pid is dead is taken back. The default is 2 slots for the whole machine, set by `VAWE_RENDER_SLOTS` (commit `5eb3dcca5`).
 
-### One machine-wide slot lock
+A render that cannot get a slot waits and prints one line naming the holder and its age. Print that line on stdout: our render commands promise a single error line on stderr, and a waiting line is progress (commit `592c2453f`).
 
-Commit `7fcf92913` replaced the process-list scan with slots. A slot is a file in a shared directory, `slot-<i>.json`, created with an exclusive create so two renders can never take the same one. It records the pid, start time, kind and who asked. A slot whose pid is dead is taken back. The default is 2 slots for the whole machine, set by `VAWE_RENDER_SLOTS`.
-
-A render that cannot get a slot waits and prints one line naming the holder and its age. Commit `6055cc38c` moved that line to stdout, since our render commands promise a single error line on stderr and a waiting line is progress.
-
-### A slot kept for drafts
+## Step 2: keep the last slot for short jobs
 
 Slots fixed the load but created a queue. A final holds a slot for minutes, and an agent that wanted a 30-second draft waited behind it. In one session on 2026-10-11, a draft waited up to 357 seconds behind finals (the number is in a code comment).
 
-Commit `05aa73d9c` stops a final from taking the last free slot. A final may take slots 0 to count minus 2. A draft tries the top slot first and then the others. With the default of 2 slots, a final can only use slot-0, and slot-1 is always free for a draft.
+Commit `7d01618fc` stops a final from taking the last free slot. A final may take slots 0 to count minus 2. A draft tries the top slot first and then the others. With the default of 2 slots, a final can only use slot-0, and slot-1 is always free for a draft.
 
-### A lane budget from free memory
+## Step 3: compute the lane count from the machine
 
-Slots limit renders. Lanes limit Chromes inside one render. Commit `088b3d1e3` computes the lane count from the machine: the smaller of cores minus 1, free memory divided by 1,500 MB, free process slots divided by 12, and a cap of 4. At least one lane always runs. The memory figure comes from a measurement: a software-composited 1080p Chrome used about 1.5 GB resident and 7 processes while idle.
+Slots limit renders; lanes limit Chromes inside one render. Commit `30da723d5` takes the smallest of:
+
+- cores minus 1,
+- free memory divided by 1,500 MB,
+- free process slots divided by 12,
+- a cap of 4.
+
+At least one lane always runs. The 1,500 MB comes from a measurement: a software-composited 1080p Chrome used about 1.5 GB resident and 7 processes while idle.
 
 The cap of 4 also comes from a measurement. On a film called tracking-hud, under load 21, we recorded shots per second at 1, 2, 4 and 6 lanes.
 
@@ -53,34 +61,31 @@ The cap of 4 also comes from a measurement. On a film called tracking-hud, under
 
 A sixth lane adds under 10% for 1.3 GB more memory, so the budget stops at 4. When another render already holds a slot, a new render starts at 2 workers instead of 4 (`COOL_WORKERS`), so the second render starts cool. `VAWE_WORKERS` overrides both.
 
-### A reaper for orphans
+## Step 4: register every Chrome and reap the orphans
 
-Every Chrome that the harness launches writes a file named after its pid, whose content is the pid of its owner. At the next launch, the renderer reads that directory and kills the Chromes whose owner is dead (`088b3d1e3`). A Chrome whose owner is alive is left alone. Commit `58f289415` extends this to a puppeteer Chrome whose parent is init, the leftover of code that never registered it. Commit `eea0cc5ee` makes a stop signal close the browsers once and exit. Every signal path closes with a grace limit.
+A render stopped with `SIGKILL` runs no handler, so its Chromes keep running. Orphaned `node --test` processes were a problem too; one ran for three hours.
 
-## Result
+Every Chrome the harness launches writes a file named after its pid, whose content is the pid of its owner. At the next launch, the renderer reads that directory and kills the Chromes whose owner is dead (`30da723d5`). A Chrome whose owner is alive is left alone.
 
-- Before: load about 18 with 18 Chromes (our notes from 2026-09-26).
-- A draft waited 357 s behind finals before the reserved slot.
-- Lane scaling under load 21: 2.5, 4.7, 6.4 and 7.0 shots per second at 1, 2, 4 and 6 lanes.
-- We did not time how much waiting the slots saved, so we do not give a number for it.
+Commit `3ba75d21b` extends this to a Puppeteer Chrome whose parent is init, the leftover of code that never registered it. Commit `9e876b01b` makes a stop signal close the browsers once and exit. Every signal path closes with a grace limit.
 
-## What we would tell someone building the same thing
+## Check that the cap holds
 
-- Limit the number of renders first. A per-render worker count cannot protect a machine that many agents share.
-- Reserve capacity for the short job. A queue that treats a 30-second draft and a 16-minute final alike makes the short job wait for the long one.
-- Measure lane scaling on your own machine under load, then stop where the curve flattens.
-- Assume a process can be killed without cleanup. Write down every child you start where the next run can find it.
-- Print the wait. One line that names the holder turns a mystery into a decision.
+- Start three renders at once. Two run; the third prints one line naming the holder and its age.
+- Start a final while one final runs. The draft slot stays free, and a draft starts at once.
+- Kill a render with `SIGKILL`, then start another. Its Chromes are gone after the next launch.
+- The tests are `tests/lib/render-slots.test.mjs` and `tests/media/chrome-reaper.test.mjs`.
 
-Waiting itself is its own problem, covered in [making the wait cheap](/blog/cheap-wait). The capture loop each lane runs is in [four render workers were one worker](/blog/chrome-per-lane). For the agent side, see the [CLI docs](/docs/cli). Source: [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).
+## When Chromes still pile up
 
-## In the code
+- A Chrome with a live owner is not reaped by design. If the owner is a hung render, see [Puppeteer hangs: a 60 s watchdog that names the step](/blog/stall-watchdog).
+- A Chrome launched outside the harness never wrote its pid file. The init-parent rule in `3ba75d21b` catches most of these.
+- More lanes did not help: check where your curve flattens. Ours went 2.5, 4.7, 6.4 and 7.0 shots per second.
 
-- `harness/lib/render-slots.mjs`: slots, the draft reservation.
-- `harness/lib/lane-budget.mjs`: the lane count.
-- `harness/lib/render-harness.mjs`: Chrome registration and the reaper.
-- `tests/lib/render-slots.test.mjs` and `tests/media/chrome-reaper.test.mjs`.
-- Commit [7fcf92913](https://github.com/Vandit1604/vawe/commit/7fcf92913): the slot lock.
-- Commit [05aa73d9c](https://github.com/Vandit1604/vawe/commit/05aa73d9c): a final never takes the last slot.
-- Commit [088b3d1e3](https://github.com/Vandit1604/vawe/commit/088b3d1e3): lane budget and reaper.
-- Commit [58f289415](https://github.com/Vandit1604/vawe/commit/58f289415): reap puppeteer Chromes whose parent is init.
+We did not time how much waiting the slots saved, so we give no number for it.
+
+## Where to go next
+
+The code is in `harness/lib/render-slots.mjs` (slots and the draft reservation), `harness/lib/lane-budget.mjs` (the lane count) and `harness/lib/render-harness.mjs` (Chrome registration and the reaper). Commits: [5eb3dcca5](https://github.com/Vandit1604/vawe/commit/5eb3dcca5), [7d01618fc](https://github.com/Vandit1604/vawe/commit/7d01618fc), [30da723d5](https://github.com/Vandit1604/vawe/commit/30da723d5), [3ba75d21b](https://github.com/Vandit1604/vawe/commit/3ba75d21b).
+
+The same load broke our tests, which is part of [how to speed up e2e tests](/blog/test-suite). What an agent does while it waits for a slot is in [reading AI agent traces](/blog/trace-reviews). The capture loop each lane runs, and the rest of the pipeline, are in [faster headless Chrome rendering: one browser per lane](/blog/chrome-per-lane). For the agent side, see the [CLI docs](/docs/cli).
