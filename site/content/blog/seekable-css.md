@@ -21,19 +21,19 @@ A page can also create and cancel animations whenever it likes. The renderer can
 
 ### 1. We were killing animations
 
-Our early tokens file had a global `* { animation: none; transition: none }`. It stopped CSS animations before they existed, so there was nothing to seek. Commit `7baa223b9` (2026-09-27) removed it. After that, a CSS keyframe loop or transition on a page is seeked like any other animation. The same commit made the seek drive SVG SMIL (`<animate>`) on its own separate timeline.
+Our early tokens file had a global `* { animation: none; transition: none }`. It stopped CSS animations before they existed, so there was nothing to seek. Commit `d6b380d7c` (2026-09-27) removed it. After that, a CSS keyframe loop or transition on a page is seeked like any other animation. The same commit made the seek drive SVG SMIL (`<animate>`) on its own separate timeline.
 
 ### 2. Finished animations disappeared
 
-`document.getAnimations()` drops a finished animation with `fill: none`. If a render seeks to 5 s and then back to 0.25 s, the list no longer contains that animation, so the element misses its effect. Commit `76d28ec1b` (2026-10-07) keeps every animation the page made in a set, and seeks all of them each time. The regression test `tests/media/seek-fill-none.test.mjs` uses a CSS animation and a `waapi` one, both with `fill: none`. It seeks to 0.25 s on a fresh page and expects opacities of 0.2 and 0.3. It then seeks to 5 s on a second page, back to 0.25 s, and expects the same two values.
+`document.getAnimations()` drops a finished animation with `fill: none`. If a render seeks to 5 s and then back to 0.25 s, the list no longer contains that animation, so the element misses its effect. Commit `e06191445` (2026-10-07) keeps every animation the page made in a set, and seeks all of them each time. The regression test `tests/media/seek-fill-none.test.mjs` uses a CSS animation and a `waapi` one, both with `fill: none`. It seeks to 0.25 s on a fresh page and expects opacities of 0.2 and 0.3. It then seeks to 5 s on a second page, back to 0.25 s, and expects the same two values.
 
 ### 3. Dead animations stayed in the set
 
-Once we kept everything, we had to forget the right things. Commit `8e2200e05` drops an animation from the set if it is idle or its target is no longer in the document. A cancelled animation then stays cancelled on later seeks, and a removed element stops being touched.
+Once we kept everything, we had to forget the right things. Commit `d30e402e1` drops an animation from the set if it is idle or its target is no longer in the document. A cancelled animation then stays cancelled on later seeks, and a removed element stops being touched.
 
 ### 4. The browser's own clock kept running
 
-The document timeline runs in real time from page load. Before our first seek paused anything, the compositor rasterized animated layers against that real time. A first seek at 1.5 s after load painted other edge pixels than a first seek at 0.05 s. We set the animation playback rate to 0 through the DevTools protocol (`874af4972`, 2026-10-08), so only a seek moves an animation. The same pass is described from the clock side in [Time is the seek, never the clock](/blog/page-clock).
+The document timeline runs in real time from page load. Before our first seek paused anything, the compositor rasterized animated layers against that real time. A first seek at 1.5 s after load painted other edge pixels than a first seek at 0.05 s. We set the animation playback rate to 0 through the DevTools protocol (`1454df446`, 2026-10-08), so only a seek moves an animation. The same pass is described from the clock side in [Time is the seek, never the clock](/blog/page-clock).
 
 ![Four fixes in order: stop killing animations, keep finished ones, drop cancelled and removed ones, freeze the document timeline. Fonts are awaited around each seek with a 10 second limit.](/blog/seekable-css/diagram.svg)
 
@@ -49,13 +49,13 @@ The seek is a single function, `seekTo(t)` in `core/engine/page-seek.js`. The re
 6. pauses SVG animations and sets their time,
 7. awaits every `vawe.onFrame` hook.
 
-Fonts get their own rule. `awaitFonts` waits until every face in `document.fonts` has finished loading, including faces whose load starts while we wait. If a face is still loading after 10 seconds, the render fails and names the family. A screenshot with a fallback font is a silent wrong answer, so we make it a loud error (commit `be52c9a99`). It uses the real timer on purpose, because the virtual clock owns `setTimeout`.
+Fonts get their own rule. `awaitFonts` waits until every face in `document.fonts` has finished loading, including faces whose load starts while we wait. If a face is still loading after 10 seconds, the render fails and names the family. A screenshot with a fallback font is a silent wrong answer, so we make it a loud error (commit `c9dec4c55`). It uses the real timer on purpose, because the virtual clock owns `setTimeout`.
 
 ## The measured result
 
 There is no aggregate number for this work, and we do not want to invent one. The concrete figures are two: a 10-second font deadline, and a 1.5 px frame-to-frame flip.
 
-The 1.5 px case came from the gooey filter, one of our [motion moves](/moves/gooey-filter). On a still shape the outline flipped by 1.5 px between frames. The fix (`0e30c9513`, 2026-10-09) gave the SVG filter a wide region (`x="-30%" y="-30%" width="160%" height="160%"`) and put `will-change: transform` on its wrapper. The default filter region is 10 percent of the box and cuts the blur. Here is the move after the fix:
+The 1.5 px case came from the gooey filter, one of our [motion moves](/moves/gooey-filter). On a still shape the outline flipped by 1.5 px between frames. The fix (`7c1c59562`, 2026-10-09) gave the SVG filter a wide region (`x="-30%" y="-30%" width="160%" height="160%"`) and put `will-change: transform` on its wrapper. The default filter region is 10 percent of the box and cuts the blur. Here is the move after the fix:
 
 <figure>
 <video src="/blog/seekable-css/gooey-filter.mp4" poster="/blog/seekable-css/gooey-filter-poster.webp" muted loop playsinline autoplay width="680"></video>
@@ -76,7 +76,7 @@ For the rest of the picture, see the [easing pages](/easing) for curves you can 
 
 - `core/engine/page-seek.js`: `seekTo` and `awaitFonts`.
 - `tests/media/seek-fill-none.test.mjs`: seek past the end and back.
-- [`7baa223b9`](https://github.com/Vandit1604/vawe/commit/7baa223b9) (2026-09-27): CSS animation, transition and Web Animations are seeked, not killed.
-- [`76d28ec1b`](https://github.com/Vandit1604/vawe/commit/76d28ec1b) (2026-10-07): keep every animation so a finished `fill: none` one applies again.
-- [`874af4972`](https://github.com/Vandit1604/vawe/commit/874af4972) (2026-10-08): freeze the document timeline.
-- [`0e30c9513`](https://github.com/Vandit1604/vawe/commit/0e30c9513) (2026-10-09): the gooey filter region and wrapper.
+- [`d6b380d7c`](https://github.com/Vandit1604/vawe/commit/d6b380d7c) (2026-09-27): CSS animation, transition and Web Animations are seeked, not killed.
+- [`e06191445`](https://github.com/Vandit1604/vawe/commit/e06191445) (2026-10-07): keep every animation so a finished `fill: none` one applies again.
+- [`1454df446`](https://github.com/Vandit1604/vawe/commit/1454df446) (2026-10-08): freeze the document timeline.
+- [`7c1c59562`](https://github.com/Vandit1604/vawe/commit/7c1c59562) (2026-10-09): the gooey filter region and wrapper.

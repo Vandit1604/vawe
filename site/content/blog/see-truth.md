@@ -48,9 +48,9 @@ Two details in the scorer matter more than the arithmetic. A number passes when 
 
 ## Then the suite graded the report
 
-Once we trusted the pieces, `vawe see` joined them. `vawe see <mp4 | page | ref-id> [--vs other]` reads a film completely: structure, motion, look, type, sound and images, side by side with a second film if you ask. The same commit made a drifting ground count as no transition, and gave one-frame shots a colour row ([86b51bd17](https://github.com/Vandit1604/vawe/commit/86b51bd17)).
+Once we trusted the pieces, `vawe see` joined them. `vawe see <mp4 | page | ref-id> [--vs other]` reads a film completely: structure, motion, look, type, sound and images, side by side with a second film if you ask. The same commit made a drifting ground count as no transition, and gave one-frame shots a colour row ([cbc71f813](https://github.com/Vandit1604/vawe/commit/cbc71f813)).
 
-Then we pointed the truth suite at `see` itself. That added fixtures for the slow camera (zoom, pan and turn between the ends of a run of frames, and a static tilt), for events inside a shot beside the nearest sound, and for the beat grid. The sound tool now names the kind of each hit (click, pop, swish, impact or sustained) and what moves in the frame at that moment ([e4fc42729](https://github.com/Vandit1604/vawe/commit/e4fc42729), [f80b3869c](https://github.com/Vandit1604/vawe/commit/f80b3869c)).
+Then we pointed the truth suite at `see` itself. That added fixtures for the slow camera (zoom, pan and turn between the ends of a run of frames, and a static tilt), for events inside a shot beside the nearest sound, and for the beat grid. The sound tool now names the kind of each hit (click, pop, swish, impact or sustained) and what moves in the frame at that moment ([440f50939](https://github.com/Vandit1604/vawe/commit/440f50939), [b71bae255](https://github.com/Vandit1604/vawe/commit/b71bae255)).
 
 ## The result
 
@@ -72,9 +72,9 @@ This is the groundwork for a harness an agent can lean on. If you are looking at
 
 - `harness/dev/see-truth.mjs`: the scorer and the fixture runner
 - `tests/fixtures/truth/*/truth.json`: the known values and tolerances, one folder per family
-- [23ed48a94](https://github.com/Vandit1604/vawe/commit/23ed48a94): ground-truth fixtures and a scorer
-- [86b51bd17](https://github.com/Vandit1604/vawe/commit/86b51bd17): `vawe see` reads a film completely
-- [e4fc42729](https://github.com/Vandit1604/vawe/commit/e4fc42729): slow camera measures and a camera fixture
-- [f80b3869c](https://github.com/Vandit1604/vawe/commit/f80b3869c): hit kinds and events beside the nearest sound
+- [fefd44571](https://github.com/Vandit1604/vawe/commit/fefd44571): ground-truth fixtures and a scorer
+- [cbc71f813](https://github.com/Vandit1604/vawe/commit/cbc71f813): `vawe see` reads a film completely
+- [440f50939](https://github.com/Vandit1604/vawe/commit/440f50939): slow camera measures and a camera fixture
+- [b71bae255](https://github.com/Vandit1604/vawe/commit/b71bae255): hit kinds and events beside the nearest sound
 
 The repo is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).

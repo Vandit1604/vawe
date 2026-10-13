@@ -19,18 +19,18 @@ Adding more text to AGENTS.md did not help. The agent reads it once at the start
 
 ## What we tried first
 
-The JSON-era flow had two hooks. `stage-gate` ran before file writes and checked the film against its stage, and `stage-say` named the next step. The gate had already been turned from a refusal into advice: its source says it "used to deny unconditionally" and now allows the write and prints the reason, unless an environment variable restores the old behaviour. When we moved to HTML pages we removed the gate in the same merge ([75b2c57](https://github.com/Vandit1604/vawe/commit/75b2c5731)) and left `stage-say` as the only owner of the stage order. A second place that knew the order would have drifted from the first.
+The JSON-era flow had two hooks. `stage-gate` ran before file writes and checked the film against its stage, and `stage-say` named the next step. The gate had already been turned from a refusal into advice: its source says it "used to deny unconditionally" and now allows the write and prints the reason, unless an environment variable restores the old behaviour. When we moved to HTML pages we removed the gate in the same merge ([fba98e1](https://github.com/Vandit1604/vawe/commit/fba98e191)) and left `stage-say` as the only owner of the stage order. A second place that knew the order would have drifted from the first.
 
 ## What we built
 
 `harness/live/stage-say.mjs` is a hook that runs on each prompt. It works in four steps.
 
-1. It asks `git status` which `films/*/page.html` changed or is new. A fresh checkout rewrites file times, so only a page git sees as changed counts as the film in progress ([6afb94a](https://github.com/Vandit1604/vawe/commit/6afb94a17)). If no page changed in the last three hours the hook stays silent, so a framework session sees none of it.
+1. It asks `git status` which `films/*/page.html` changed or is new. A fresh checkout rewrites file times, so only a page git sees as changed counts as the film in progress ([c0a3933](https://github.com/Vandit1604/vawe/commit/c0a3933f1)). If no page changed in the last three hours the hook stays silent, so a framework session sees none of it.
 2. It reads the state of the film from files: whether `brief.md` exists, how many frames the "Taken from" table names, whether `DESIGN.md` is newer than the page, whether a frames sheet or a draft exists, whether the Board and Motion pass tables are filled.
 3. It returns the first unmet stage and the command for it. State lives in files, so the hook holds none of its own.
 4. It prints one line, such as `bin/vawe frames films/<name>/page.html`, with the reason.
 
-The same text reaches the agent through a second channel. The verbs in `harness/cli/verbs.mjs` import a `SAY` table from the hook and print its line after they run, so a verb and the hook cannot name different steps ([39a3932](https://github.com/Vandit1604/vawe/commit/39a3932f3)). `frames`, `dev`, `strip` and `critique` all do this, and `ship` warns when the Board or the Motion pass is still empty. Later commits added a line that says when the checkout is behind `origin/main` and names the command to update it, with the fetch cached for 10 minutes ([b5ab6f2](https://github.com/Vandit1604/vawe/commit/b5ab6f217)).
+The same text reaches the agent through a second channel. The verbs in `harness/cli/verbs.mjs` import a `SAY` table from the hook and print its line after they run, so a verb and the hook cannot name different steps ([1374501](https://github.com/Vandit1604/vawe/commit/137450108)). `frames`, `dev`, `strip` and `critique` all do this, and `ship` warns when the Board or the Motion pass is still empty. Later commits added a line that says when the checkout is behind `origin/main` and names the command to update it, with the fetch cached for 10 minutes ([61dd23b](https://github.com/Vandit1604/vawe/commit/61dd23b33)).
 
 ## What the traces showed
 
@@ -46,7 +46,7 @@ Three things did not work.
 
 ![Which next lines the agent followed in the 2026-10-10 review.](/blog/stage-say/diagram.svg)
 
-The fix for the third one is in [b5df5ed](https://github.com/Vandit1604/vawe/commit/b5df5ed98): `dev` now asks the same state function as the hook, and `nextStep` checks whether `out/strip/<name>` changed since the last draft. If it did, the line moves on. We have not yet re-run a trace review that measures the effect, so we cannot give you an after-count.
+The fix for the third one is in [5b98da5](https://github.com/Vandit1604/vawe/commit/5b98da554): `dev` now asks the same state function as the hook, and `nextStep` checks whether `out/strip/<name>` changed since the last draft. If it did, the line moves on. We have not yet re-run a trace review that measures the effect, so we cannot give you an after-count.
 
 ## What we would tell you if you build the same thing
 
@@ -59,4 +59,4 @@ If you want the commands themselves, the [CLI reference](/docs/cli) lists the ve
 - `harness/live/stage-say.mjs`: the hook, the `SAY` table and `nextStep`.
 - `harness/cli/verbs.mjs`: each verb's `next` function, including `devNext`.
 - `tests/hooks/stage-say.test.mjs`: the stage order under test.
-- Commits: [75b2c57](https://github.com/Vandit1604/vawe/commit/75b2c5731) (stage-gate removed), [6afb94a](https://github.com/Vandit1604/vawe/commit/6afb94a17) (only a changed page counts), [39a3932](https://github.com/Vandit1604/vawe/commit/39a3932f3) (verbs print the next line), [b5df5ed](https://github.com/Vandit1604/vawe/commit/b5df5ed98) (dev names the next unmet step).
+- Commits: [fba98e1](https://github.com/Vandit1604/vawe/commit/fba98e191) (stage-gate removed), [c0a3933](https://github.com/Vandit1604/vawe/commit/c0a3933f1) (only a changed page counts), [1374501](https://github.com/Vandit1604/vawe/commit/137450108) (verbs print the next line), [5b98da5](https://github.com/Vandit1604/vawe/commit/5b98da554) (dev names the next unmet step).

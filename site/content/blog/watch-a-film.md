@@ -31,13 +31,13 @@ Each verb answers a question the agent used to guess at.
 
 ![Six verbs: refs frames, strip, onion, velocity, spec and see, from one frame to a whole film.](/blog/watch-a-film/verbs.svg)
 
-- `vawe refs frames` writes the settled full-size frame of each shot (commit `ca91ebcb9`). The judge and the refs verb share one key-frame extractor, so both see the same frames.
-- `vawe strip` shows the frames through a moment or through every cut, with the motion start and the settle (`d68b6a56c`). Reading every cut is a step in the loop now.
-- `vawe onion` blends the frames of one move into a single image, with the newest strongest and older ones fainter and tinted from cool to warm. `vawe velocity` samples a page at 120 a second and reports start, peak, settle, overshoot and ease shape for each element, with a graph (`4cc29c417`).
-- `vawe spec` measures where the eye goes (eye point, jump at a cut, travel, centre bias) and what the ground does (edge tone, change at a cut, light drift) for each shot (`2aeb3d688`).
-- `vawe see` reads a film completely: structure, motion, look, type, sound, images, and a `--vs` comparison (`86b51bd17`). It added 1,653 lines in 22 files, and a ground-truth suite grades it.
+- `vawe refs frames` writes the settled full-size frame of each shot (commit `a6a9444cb`). The judge and the refs verb share one key-frame extractor, so both see the same frames.
+- `vawe strip` shows the frames through a moment or through every cut, with the motion start and the settle (`a2c426abc`). Reading every cut is a step in the loop now.
+- `vawe onion` blends the frames of one move into a single image, with the newest strongest and older ones fainter and tinted from cool to warm. `vawe velocity` samples a page at 120 a second and reports start, peak, settle, overshoot and ease shape for each element, with a graph (`fc117b598`).
+- `vawe spec` measures where the eye goes (eye point, jump at a cut, travel, centre bias) and what the ground does (edge tone, change at a cut, light drift) for each shot (`576d7c9ff`).
+- `vawe see` reads a film completely: structure, motion, look, type, sound, images, and a `--vs` comparison (`cbc71f813`). It added 1,653 lines in 22 files, and a ground-truth suite grades it.
 
-Last, commit `b5df5ed98` makes critique, compare and judge default to the reference that the brief names. The agent no longer has to remember to bring it back.
+Last, commit `5b98da554` makes critique, compare and judge default to the reference that the brief names. The agent no longer has to remember to bring it back.
 
 <figure>
 <video src="/blog/watch-a-film/exposure-flash.mp4" poster="/blog/watch-a-film/exposure-flash.hd.webp" muted loop playsinline controls></video>
@@ -66,4 +66,4 @@ If you want to see how an agent uses these in the loop, read [the docs on readin
 
 - `harness/media/see/`: the `vawe see` reader.
 - `harness/cli/verbs.mjs`: the verb table (refs, strip, onion, velocity, spec, see).
-- Commits: [`ca91ebcb9`](https://github.com/Vandit1604/vawe/commit/ca91ebcb9) settled full-size frames, [`d68b6a56c`](https://github.com/Vandit1604/vawe/commit/d68b6a56c) strips through every cut, [`4cc29c417`](https://github.com/Vandit1604/vawe/commit/4cc29c417) onion and velocity, [`86b51bd17`](https://github.com/Vandit1604/vawe/commit/86b51bd17) `vawe see`.
+- Commits: [`a6a9444cb`](https://github.com/Vandit1604/vawe/commit/a6a9444cb) settled full-size frames, [`a2c426abc`](https://github.com/Vandit1604/vawe/commit/a2c426abc) strips through every cut, [`fc117b598`](https://github.com/Vandit1604/vawe/commit/fc117b598) onion and velocity, [`cbc71f813`](https://github.com/Vandit1604/vawe/commit/cbc71f813) `vawe see`.

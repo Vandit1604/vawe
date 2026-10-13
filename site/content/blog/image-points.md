@@ -13,7 +13,7 @@ We deleted a photo move on 1 October and added another photo move on 11 October,
 
 ## The problem: a rule that said "no photos"
 
-On 1 October we removed `photo-parallax-2.5d` (commit `d6ec6f54a`). The reason in the commit is short: parallax on captured photos is not motion design. vawe animates designed things: type, shapes, UI, illustration, colour fields. A move that works by cutting a captured image into depth layers, faking camera depth inside it, tracking it or rotoscoping it is a footage technique. It depends on the photo and fails on an illustration.
+On 1 October we removed `photo-parallax-2.5d` (commit `26e8d99d9`). The reason in the commit is short: parallax on captured photos is not motion design. vawe animates designed things: type, shapes, UI, illustration, colour fields. A move that works by cutting a captured image into depth layers, faking camera depth inside it, tracking it or rotoscoping it is a footage technique. It depends on the photo and fails on an illustration.
 
 Ten days later we wanted particle subjects with real detail: veins, scales, fibres, filaments. A hand-modelled shape cannot give you those. A photo can. So the rule "no photos" was too coarse. We needed a rule that kept the first decision and allowed the second.
 
@@ -25,7 +25,7 @@ We replaced the rule with a question. Does the move depend on processing the ima
 
 ## What we built: photo to point cloud
 
-Commit `7b178273e` added `core/surfaces/image-points.js` at 144 lines. `imagePoints(image, options)` samples a photo into a point cloud.
+Commit `727e944f6` added `core/surfaces/image-points.js` at 144 lines. `imagePoints(image, options)` samples a photo into a point cloud.
 
 ![Pipeline. A photo, with an optional mask, depth and label image, becomes a weight per pixel. Seeded draws from the cumulative weight give the points. Each point has a position, a colour, a normal and a luma.](/blog/image-points/pipeline.svg)
 
@@ -35,13 +35,13 @@ There is also a `regions` helper. It takes a flat label image and gives each poi
 
 ### Seeded
 
-The same photo gives the same cloud on every render. The draw uses the seeded `rng` from our motion module, not `Math.random`. A later commit, `004ef2c05`, added ten tests for it: seed, threshold, the gamma ratio, edge boost, mask, regions, depth, and unit-length normals. Without that, a particle film could not meet our page contract, which requires that a frame is a pure function of time. The determinism reasons are in [our post on deterministic rendering](/blog/determinism).
+The same photo gives the same cloud on every render. The draw uses the seeded `rng` from our motion module, not `Math.random`. A later commit, `753ad2e5a`, added ten tests for it: seed, threshold, the gamma ratio, edge boost, mask, regions, depth, and unit-length normals. Without that, a particle film could not meet our page contract, which requires that a frame is a pure function of time. The determinism reasons are in [our post on deterministic rendering](/blog/determinism).
 
 ### The clip
 
 The move is `photo-particles`. It samples a public-domain Hubble mosaic of the Crab Nebula (NASA, ESA, J. Hester and A. Loll) into 120,000 points. They gather from a seeded scatter over 1.5 seconds and then hold, breathing, for 1.5 seconds. The cloud is filmed through [the lens](/blog/real-lens) (see also the [lens move](/moves/lens)) with the `film-halation` look.
 
-The clip was dense, so it was large. Commit `ef948c58c` added a 2 MB size budget per clip. The renderer encodes again at higher CRF steps until the file fits, and logs the CRF in `clips.lock.json`. The CRF steps start at 16, go up by 3 and stop at 31. This clip ended at CRF 31 and 1.3 MB, which is exactly 1,342,076 bytes in the commit.
+The clip was dense, so it was large. Commit `817edeee7` added a 2 MB size budget per clip. The renderer encodes again at higher CRF steps until the file fits, and logs the CRF in `clips.lock.json`. The CRF steps start at 16, go up by 3 and stop at 31. This clip ended at CRF 31 and 1.3 MB, which is exactly 1,342,076 bytes in the commit.
 
 ![Clip sizes. The removed photo parallax clip was 29.96 MB. The new photo particles clip is 1.34 MB, under a 2 MB budget.](/blog/image-points/size.svg)
 
@@ -72,4 +72,4 @@ For a public example film that puts a three.js scene through the same lens, see 
 - `core/surfaces/image-points.js`: `imagePoints` and `regions`.
 - `harness/lib/clip-budget.mjs`: the 2 MB budget and the CRF steps.
 - `prompts/moves/photo-particles.md`: the move and its options.
-- Commits: [`d6ec6f54a`](https://github.com/Vandit1604/vawe/commit/d6ec6f54a) drop photo parallax, [`7b178273e`](https://github.com/Vandit1604/vawe/commit/7b178273e) `imagePoints`, [`004ef2c05`](https://github.com/Vandit1604/vawe/commit/004ef2c05) tests, [`ef948c58c`](https://github.com/Vandit1604/vawe/commit/ef948c58c) photo-particles and the clip budget.
+- Commits: [`26e8d99d9`](https://github.com/Vandit1604/vawe/commit/26e8d99d9) drop photo parallax, [`727e944f6`](https://github.com/Vandit1604/vawe/commit/727e944f6) `imagePoints`, [`753ad2e5a`](https://github.com/Vandit1604/vawe/commit/753ad2e5a) tests, [`817edeee7`](https://github.com/Vandit1604/vawe/commit/817edeee7) photo-particles and the clip budget.

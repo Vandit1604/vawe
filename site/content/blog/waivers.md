@@ -32,7 +32,7 @@ The last point is the one that stuck. Agents copy examples. A gold example with 
 
 ## What we built
 
-Length was the only vetting, and an agent can write 60 characters of nothing. So the rule moved from how long a reason is to what it says. The commits are [805a542](https://github.com/Vandit1604/vawe/commit/805a5427c) and [3827592](https://github.com/Vandit1604/vawe/commit/38275928e), both on 2026-10-10.
+Length was the only vetting, and an agent can write 60 characters of nothing. So the rule moved from how long a reason is to what it says. The commits are [ecb537a](https://github.com/Vandit1604/vawe/commit/ecb537a46) and [7ee9506](https://github.com/Vandit1604/vawe/commit/7ee9506ec), both on 2026-10-10.
 
 One vetting for every check. `entryHasReason` in `harness/lib/waivers.mjs` is the only place that decides whether a reason counts. The three checks that did their own vetting now call it.
 
@@ -51,7 +51,7 @@ The result is visible in the public example film `colour-sting`. Its contrast wa
 mid-move at 4.4:1 against the 4.5:1 limit and lands readable by 2.5 s"
 ```
 
-It names the world, the second, the measured ratio and the limit. A reviewer can open the film at 2.25 s and check it in ten seconds. We rewrote the `tracking-hud` example in the same spirit in [90e2144](https://github.com/Vandit1604/vawe/commit/90e214401). One of its reasons says that at 1.95 s a 4k px² readout relocks to its glyph in 0.05 s, while a 1k px² caret types for 0.69 s, so the label jumps to its new lock and does not travel.
+It names the world, the second, the measured ratio and the limit. A reviewer can open the film at 2.25 s and check it in ten seconds. We rewrote the `tracking-hud` example in the same spirit in [cd90a43](https://github.com/Vandit1604/vawe/commit/cd90a438e). One of its reasons says that at 1.95 s a 4k px² readout relocks to its glyph in 0.05 s, while a 1k px² caret types for 0.69 s, so the label jumps to its new lock and does not travel.
 
 ## The measured result
 
@@ -70,4 +70,4 @@ The [quality gates docs](/docs/quality-gates) list the checks and how waivers wo
 - `harness/lib/waivers.mjs`: `reasonProblem`, `entryHasReason`, `isWaived` and `RETIRED_CODES`.
 - `tests/lib/waivers.test.mjs`: the tests for each refusal.
 - `films/examples/colour-sting/page.html`: the gold example with scoped waivers.
-- Commits: [805a542](https://github.com/Vandit1604/vawe/commit/805a5427c) (one code per check, reasons vetted), [3827592](https://github.com/Vandit1604/vawe/commit/38275928e) (one vetting for every check), [753c32e](https://github.com/Vandit1604/vawe/commit/753c32e92) (anim-traps), [90e2144](https://github.com/Vandit1604/vawe/commit/90e214401) (measured reasons in an example).
+- Commits: [ecb537a](https://github.com/Vandit1604/vawe/commit/ecb537a46) (one code per check, reasons vetted), [7ee9506](https://github.com/Vandit1604/vawe/commit/7ee9506ec) (one vetting for every check), [a2646fa](https://github.com/Vandit1604/vawe/commit/a2646fa14) (anim-traps), [cd90a43](https://github.com/Vandit1604/vawe/commit/cd90a438e) (measured reasons in an example).

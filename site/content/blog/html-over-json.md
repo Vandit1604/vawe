@@ -64,6 +64,6 @@ If you came here from a search for an alternative to a React-based video tool, s
 
 - `harness/media/render-page.mjs`: the renderer that seeks a page and captures frames.
 - `AGENTS.md`: the page contract agents read first.
-- [`7baa223b9`](https://github.com/Vandit1604/vawe/commit/7baa223b9) (2026-09-27): CSS animation, transition and Web Animations are seeked, not killed.
-- [`c193aa32f`](https://github.com/Vandit1604/vawe/commit/c193aa32f) (2026-09-28): a page's own `vawe.onFrame` drives real WebGL, with no new attribute language.
-- [`ef1da265d`](https://github.com/Vandit1604/vawe/commit/ef1da265d) (2026-09-30): the commit that deleted the JSON format.
+- [`d6b380d7c`](https://github.com/Vandit1604/vawe/commit/d6b380d7c) (2026-09-27): CSS animation, transition and Web Animations are seeked, not killed.
+- [`b454e78ce`](https://github.com/Vandit1604/vawe/commit/b454e78ce) (2026-09-28): a page's own `vawe.onFrame` drives real WebGL, with no new attribute language.
+- [`420928c23`](https://github.com/Vandit1604/vawe/commit/420928c23) (2026-09-30): the commit that deleted the JSON format.

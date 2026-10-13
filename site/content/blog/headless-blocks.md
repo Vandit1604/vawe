@@ -27,11 +27,11 @@ A block owns mechanism and structure only. The theme owns radius, borders, depth
 
 ## What we built: tokens in one CSS file
 
-The block catalog went away with the JSON format. Commit [ef1da265d](https://github.com/Vandit1604/vawe/commit/ef1da265d) deleted 181 files under `blocks/` as part of the 1,415-file deletion we describe in [the biggest commit is a deletion](/blog/big-deletion). The idea survived in a smaller form: the move demos.
+The block catalog went away with the JSON format. Commit [420928c23](https://github.com/Vandit1604/vawe/commit/420928c23) deleted 181 files under `blocks/` as part of the 1,415-file deletion we describe in [the biggest commit is a deletion](/blog/big-deletion). The idea survived in a smaller form: the move demos.
 
 Every move demo links one stylesheet, `prompts/moves/demo/demo.css`. Its header states the contract: a look changes colour, faces, which radius and line steps it picks, and its depth. It never changes a size or a class.
 
-Commit [bfd68f0a8](https://github.com/Vandit1604/vawe/commit/bfd68f0a8) put the first eight looks into that file as `html[data-look="name"]` token sets. The commit touched one file: 133 lines added, 6 removed. It added eight font faces and thirteen new tokens, such as `--edge`, `--dim`, `--cursor`, `--paper` and `--up-ink`, so that a look could reach every surface a demo draws. A demo picks a look on its `<html>` tag and every class follows.
+Commit [5952587ec](https://github.com/Vandit1604/vawe/commit/5952587ec) put the first eight looks into that file as `html[data-look="name"]` token sets. The commit touched one file: 133 lines added, 6 removed. It added eight font faces and thirteen new tokens, such as `--edge`, `--dim`, `--cursor`, `--paper` and `--up-ink`, so that a look could reach every surface a demo draws. A demo picks a look on its `<html>` tag and every class follows.
 
 The same markup can render with a different look:
 
@@ -50,7 +50,7 @@ The set has grown to ten looks: vawe, brutal, chrome, daylight, dusk, field, pap
 
 ## The real vawe look is a theme too
 
-The default look, `vawe`, is also a token set. It uses the studio ground `#16151a`, a surface ladder, one cobalt accent `#0a87ff` and dark ink on the accent, since white on that blue measures 3.6:1. Commit [74157217f](https://github.com/Vandit1604/vawe/commit/74157217f) made the engine theme match the real dark landing page. Commit [708e79447](https://github.com/Vandit1604/vawe/commit/708e79447) later removed the old theme colour markers and the scene stage CSS: 3 files, 12 lines added, 148 removed.
+The default look, `vawe`, is also a token set. It uses the studio ground `#16151a`, a surface ladder, one cobalt accent `#0a87ff` and dark ink on the accent, since white on that blue measures 3.6:1. Commit [e90f1663d](https://github.com/Vandit1604/vawe/commit/e90f1663d) made the engine theme match the real dark landing page. Commit [d70663eaa](https://github.com/Vandit1604/vawe/commit/d70663eaa) later removed the old theme colour markers and the scene stage CSS: 3 files, 12 lines added, 148 removed.
 
 The contrast of every look is checked by a script next to the stylesheet, `prompts/moves/demo/contrast.mjs`. We wrote more about that check in [one design system, ten looks, 70 clips](/blog/ten-looks).
 
@@ -76,7 +76,7 @@ If you want to see how a deterministic page becomes a film, read [why we deleted
 
 - `prompts/moves/demo/demo.css`: the foundation and the ten `data-look` token sets.
 - `prompts/moves/demo/contrast.mjs`: the contrast check across all looks.
-- [bfd68f0a8](https://github.com/Vandit1604/vawe/commit/bfd68f0a8): eight looks as token sets.
-- [74157217f](https://github.com/Vandit1604/vawe/commit/74157217f): the vawe theme matches the real landing page.
-- [708e79447](https://github.com/Vandit1604/vawe/commit/708e79447): the old theme markers and scene stage CSS removed.
-- [ef1da265d](https://github.com/Vandit1604/vawe/commit/ef1da265d): the block catalog deleted with the JSON format.
+- [5952587ec](https://github.com/Vandit1604/vawe/commit/5952587ec): eight looks as token sets.
+- [e90f1663d](https://github.com/Vandit1604/vawe/commit/e90f1663d): the vawe theme matches the real landing page.
+- [d70663eaa](https://github.com/Vandit1604/vawe/commit/d70663eaa): the old theme markers and scene stage CSS removed.
+- [420928c23](https://github.com/Vandit1604/vawe/commit/420928c23): the block catalog deleted with the JSON format.

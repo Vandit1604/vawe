@@ -61,7 +61,7 @@ Calibration was also a test run. Three fixes came out of it:
 
 Each of these was a wrong number that would have looked plausible in a spec.
 
-A second commit stamped the matching thresholds used by the see-measured tools, and marked them uncalibrated until a golden film exists ([9d3cf8089](https://github.com/Vandit1604/vawe/commit/9d3cf8089)). We chose to say "not calibrated yet" over printing a threshold with false confidence.
+A second commit stamped the matching thresholds used by the see-measured tools, and marked them uncalibrated until a golden film exists ([270fd1521](https://github.com/Vandit1604/vawe/commit/270fd1521)). We chose to say "not calibrated yet" over printing a threshold with false confidence.
 
 ## What we would tell you if you build this
 
@@ -78,7 +78,7 @@ The partner post, [before we trusted our film-reading tool, we marked its homewo
 - `harness/media/ref-calibrate.mjs`: renders the fixtures and writes the error table
 - `harness/lib/ref-measure/error-table.mjs`: attaches the error to a spec
 - `quality/baselines/ref-spec-error.json`: the p50, p90 and bias per measure
-- [f299477c3](https://github.com/Vandit1604/vawe/commit/f299477c3): calibrated error per measure, and the three fixes
-- [9d3cf8089](https://github.com/Vandit1604/vawe/commit/9d3cf8089): thresholds stamped, uncalibrated until the golden film
+- [ad90de076](https://github.com/Vandit1604/vawe/commit/ad90de076): calibrated error per measure, and the three fixes
+- [270fd1521](https://github.com/Vandit1604/vawe/commit/270fd1521): thresholds stamped, uncalibrated until the golden film
 
 The repo is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).

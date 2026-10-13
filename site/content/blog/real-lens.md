@@ -23,7 +23,7 @@ Tuning the CSS was the obvious first move, and it has a ceiling: each fake works
 
 ## What we built: depth of field in the browser
 
-The first lens commit (`c91ee96cf`) added `core/surfaces/lens.js` at 546 lines, a source adapter, a demo page, a test file and a move clip. The chain has four steps:
+The first lens commit (`eaa5cdf46`) added `core/surfaces/lens.js` at 546 lines, a source adapter, a demo page, a test file and a move clip. The chain has four steps:
 
 1. The page draws a 1920 by 1080 `#screen` element, parked behind the lens canvas.
 2. `htmlSource` inlines the computed styles and fonts into an SVG image.
@@ -39,17 +39,17 @@ The shader does perspective (tilt, zoom, a ray hitting a tilted plane, so the fa
 
 ### Two fixes that were not about looks
 
-The SVG screen source was large. Commit `7d3d83855` inlines only the styles that differ from a bare element and its parent clone, and the SVG image became about one tenth of its old size. That matters because the image is rebuilt and uploaded on every frame of a seek.
+The SVG screen source was large. Commit `4821e1780` inlines only the styles that differ from a bare element and its parent clone, and the SVG image became about one tenth of its old size. That matters because the image is rebuilt and uploaded on every frame of a seek.
 
-The second was determinism. Commit `8f153f31b` draws the SVG screen into a software canvas so that a draft's pixels match from run to run. All noise in the lens (grain, tear, weave) is hashed from a seed and `floor(t * fps)`, so a frame is a pure function of `t`. We have a test that renders a lens page whose HTML changes every frame twice, on several lanes, and compares the frames. If you want the reasoning for this, see [our post on deterministic rendering](/blog/determinism).
+The second was determinism. Commit `398fd7a7c` draws the SVG screen into a software canvas so that a draft's pixels match from run to run. All noise in the lens (grain, tear, weave) is hashed from a seed and `floor(t * fps)`, so a frame is a pure function of `t`. We have a test that renders a lens page whose HTML changes every frame twice, on several lanes, and compares the frames. If you want the reasoning for this, see [our post on deterministic rendering](/blog/determinism).
 
 ### Looks instead of fifteen knobs
 
-Once the lens worked, agents had a new problem: a long list of options. We replaced the long tail with named looks. Commit `6e3635043` added a `LOOKS` table with ten entries: `clean`, `dream-bloom`, `film-halation`, `anamorphic`, `pro-mist`, `tilt-shift`, `soft-focus`, `vintage`, `cyanotype` and `crt`. A look names every effect it uses and nothing else is on. The page's own options go over the look, and a preview override goes over both.
+Once the lens worked, agents had a new problem: a long list of options. We replaced the long tail with named looks. Commit `3920d8220` added a `LOOKS` table with ten entries: `clean`, `dream-bloom`, `film-halation`, `anamorphic`, `pro-mist`, `tilt-shift`, `soft-focus`, `vintage`, `cyanotype` and `crt`. A look names every effect it uses and nothing else is on. The page's own options go over the look, and a preview override goes over both.
 
 ![Three layers of options. The preview override wins over the page options, which win over the named look. Ten look names are listed.](/blog/real-lens/looks.svg)
 
-`vawe looks` (commit `0800a139f`) renders a page frame under every named look and prints one labelled grid per second, so an agent picks by looking rather than by guessing numbers. The starter brief now has a Look line that names the command (`191285f5d`).
+`vawe looks` (commit `73b687aef`) renders a page frame under every named look and prints one labelled grid per second, so an agent picks by looking rather than by guessing numbers. The starter brief now has a Look line that names the command (`4004bac38`).
 
 ## The measured result
 
@@ -80,4 +80,4 @@ You can see the clip and its code on the [lens move page](/moves/lens). For a fr
 - `core/surfaces/lens.js`: the shader, options, `LOOKS`, `resolveOptions`.
 - `core/surfaces/lens-source.js`: `htmlSource` and the style-diff inlining.
 - `harness/media/looks.mjs`: the `vawe looks` contact sheet.
-- Commits: [`c91ee96cf`](https://github.com/Vandit1604/vawe/commit/c91ee96cf) the lens, [`7d3d83855`](https://github.com/Vandit1604/vawe/commit/7d3d83855) style-diff source, [`8f153f31b`](https://github.com/Vandit1604/vawe/commit/8f153f31b) software canvas, [`6e3635043`](https://github.com/Vandit1604/vawe/commit/6e3635043) the looks table.
+- Commits: [`eaa5cdf46`](https://github.com/Vandit1604/vawe/commit/eaa5cdf46) the lens, [`4821e1780`](https://github.com/Vandit1604/vawe/commit/4821e1780) style-diff source, [`398fd7a7c`](https://github.com/Vandit1604/vawe/commit/398fd7a7c) software canvas, [`3920d8220`](https://github.com/Vandit1604/vawe/commit/3920d8220) the looks table.

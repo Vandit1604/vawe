@@ -27,7 +27,7 @@ Our doc already had a taxonomy of transition types and what each one means. That
 
 ### Twelve handoff families
 
-Commit `f12a9f516` added the table in `taste/craft/transitions.md`. Each family says what it is, when the story at the cut fits it, its cost or risk, and which moves to copy.
+Commit `530a27f8c` added the table in `taste/craft/transitions.md`. Each family says what it is, when the story at the cut fits it, its cost or risk, and which moves to copy.
 
 ![The twelve families: graphic match, action match, object to object, position lock, container transform, shared axis, colour or light flood, type-driven, camera through, invisible cut, sound bridge, deliberate cut.](/blog/transitions/hero.svg)
 
@@ -41,7 +41,7 @@ The Board's cut table gained a handoff column. `vawe check transitions` and the 
 
 ### Ten banned slideshow tells
 
-Commit `a5a50e80e` added `harness/lib/slideshow.mjs`. It scores ten tells from the motion records, the world spans and, when there is a video, the detected cut kinds and the still runs. The result is a score out of 10 with each tell, its seconds and a fix. It is advice only.
+Commit `3734cb9b7` added `harness/lib/slideshow.mjs`. It scores ten tells from the motion records, the world spans and, when there is a video, the detected cut kinds and the still runs. The result is a score out of 10 with each tell, its seconds and a fix. It is advice only.
 
 ![Ten slideshow tells and their codes, with the repeat thresholds.](/blog/transitions/tells.svg)
 
@@ -49,7 +49,7 @@ The thresholds are repeat counts: 3 or more cuts, 5 or more elements, a 75 perce
 
 ### Moves to copy
 
-Two commits on 2026-10-10 added ten continuous-take handoff moves. Each carries one shared element from scene A to scene B with no cut and no crossfade. `c8d4b7779` added highlight sweep, shadow handoff, word portal, underline road and caret door. `9d0224a63` added swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid.
+Two commits on 2026-10-10 added ten continuous-take handoff moves. Each carries one shared element from scene A to scene B with no cut and no crossfade. `a5ed8672b` added highlight sweep, shadow handoff, word portal, underline road and caret door. `c921d7163` added swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid.
 
 <figure>
 <video src="/blog/transitions/swipe-continues.mp4" poster="/blog/transitions/swipe-continues.hd.webp" muted loop playsinline controls></video>
@@ -63,14 +63,14 @@ Two commits on 2026-10-10 added ten continuous-take handoff moves. Each carries 
 
 ### One flash, capped
 
-The exposure flash (`dac155c18`) is a 3-frame over-exposure on a cut. The new shot starts at twice the brightness and settles in 0.15 s. We measured it on the clip at 60 fps: mean luma 27 before the cut, 203 to 208 in the peak, 67 on the first frame after it, then 38 after 0.15 s. The helper allows at most 3 flashes in any one second, in line with the WCAG limit of three flashes per second. A fourth cut in that second still cuts, without the flash.
+The exposure flash (`bb913b6db`) is a 3-frame over-exposure on a cut. The new shot starts at twice the brightness and settles in 0.15 s. We measured it on the clip at 60 fps: mean luma 27 before the cut, 203 to 208 in the peak, 67 on the first frame after it, then 38 after 0.15 s. The helper allows at most 3 flashes in any one second, in line with the WCAG limit of three flashes per second. A fourth cut in that second still cuts, without the flash.
 
 <figure>
 <video src="/blog/transitions/exposure-flash.mp4" poster="/blog/transitions/exposure-flash.hd.webp" muted loop playsinline controls></video>
 <figcaption>Exposure flash: the shot swap sits inside the peak, so the viewer never sees it.</figcaption>
 </figure>
 
-We also folded older seam rules into three: `seam-timing`, `hard-cut-default` and `eye-trace` (`73336e6fc`). That commit added 73 lines and removed 255, and it retired five rule ids.
+We also folded older seam rules into three: `seam-timing`, `hard-cut-default` and `eye-trace` (`d6c9d9ced`). That commit added 73 lines and removed 255, and it retired five rule ids.
 
 ## The measured result
 
@@ -91,4 +91,4 @@ See the clips on their move pages: [swipe-continues](/moves/swipe-continues), [w
 - `taste/craft/transitions.md`: the families and the banned tells.
 - `skills/vawe-transitions/SKILL.md`: the per-cut procedure.
 - `harness/lib/slideshow.mjs`: the ten tells and the score.
-- Commits: [`f12a9f516`](https://github.com/Vandit1604/vawe/commit/f12a9f516) families, skill and handoff column, [`a5a50e80e`](https://github.com/Vandit1604/vawe/commit/a5a50e80e) slideshow check, [`dac155c18`](https://github.com/Vandit1604/vawe/commit/dac155c18) exposure flash, [`c8d4b7779`](https://github.com/Vandit1604/vawe/commit/c8d4b7779) five handoff moves.
+- Commits: [`530a27f8c`](https://github.com/Vandit1604/vawe/commit/530a27f8c) families, skill and handoff column, [`3734cb9b7`](https://github.com/Vandit1604/vawe/commit/3734cb9b7) slideshow check, [`bb913b6db`](https://github.com/Vandit1604/vawe/commit/bb913b6db) exposure flash, [`a5ed8672b`](https://github.com/Vandit1604/vawe/commit/a5ed8672b) five handoff moves.

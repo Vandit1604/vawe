@@ -23,15 +23,15 @@ The lanes ran in parallel on paper. In practice they all talked to one browser, 
 
 Two earlier changes made this one possible.
 
-Fixed slices. Capture slices are 60 frames long, each on a fresh page, so the pixels do not depend on how many workers ran. `--workers` changes the speed and never the frames ([09177897c](https://github.com/Vandit1604/vawe/commit/09177897c)).
+Fixed slices. Capture slices are 60 frames long, each on a fresh page, so the pixels do not depend on how many workers ran. `--workers` changes the speed and never the frames ([b70389ff6](https://github.com/Vandit1604/vawe/commit/b70389ff6)).
 
-Focus emulation. The tab that holds browser focus rasterizes edges slightly differently from the others (sub-pixel text and shape edges, SSIM 0.9994), so which slice was in front changed pixels with `--workers`. We emulate focus so every tab renders the same ([169fdc5d6](https://github.com/Vandit1604/vawe/commit/169fdc5d6)).
+Focus emulation. The tab that holds browser focus rasterizes edges slightly differently from the others (sub-pixel text and shape edges, SSIM 0.9994), so which slice was in front changed pixels with `--workers`. We emulate focus so every tab renders the same ([586d132c4](https://github.com/Vandit1604/vawe/commit/586d132c4)).
 
 Both are about [determinism](/determinism): the number of workers must not change the film.
 
 ## What we built: one headless Chrome per lane
 
-A final now opens one Chrome per worker. A lane launches its own browser and serves the repo to it, takes slices from the shared list, and closes the browser when it runs out. Inside a lane there is no queue: each lane calls the page directly. Drafts keep the shared browser and are unchanged ([5ec9d4712](https://github.com/Vandit1604/vawe/commit/5ec9d4712)).
+A final now opens one Chrome per worker. A lane launches its own browser and serves the repo to it, takes slices from the shared list, and closes the browser when it runs out. Inside a lane there is no queue: each lane calls the page directly. Drafts keep the shared browser and are unchanged ([8efe38cad](https://github.com/Vandit1604/vawe/commit/8efe38cad)).
 
 ![Four lanes sharing one queue and one Chrome, compared with four lanes that each own a Chrome.](/blog/chrome-per-lane/hero.svg)
 
@@ -45,7 +45,7 @@ Drafts still share one browser, so the speed-up is for finals. The lane serves t
 
 With real parallelism, a new cost showed. `page.screenshot` decoded its base64 payload with a per-character `Uint8Array.from`. That is about 70 ms per 1 MB PNG, on the one Node thread that all lanes share.
 
-We take the base64 string and decode it with `Buffer`. The bytes are identical. Capture got 11% faster on a quiet machine and about 40% faster under load ([71d432bde](https://github.com/Vandit1604/vawe/commit/71d432bde)).
+We take the base64 string and decode it with `Buffer`. The bytes are identical. Capture got 11% faster on a quiet machine and about 40% faster under load ([4ffdb23b4](https://github.com/Vandit1604/vawe/commit/4ffdb23b4)).
 
 The same commit fixed a bug in the old design that we had worked around. Opening or closing a page while another lane took a screenshot gave that frame a corrupt tile. In the shared browser, page open and close now join the same queue as the shots, so no lane opens a page during another lane's screenshot.
 
@@ -72,9 +72,9 @@ For the next problem in the same code, a final that loses one slice and the whol
 
 - `harness/media/render-page.mjs`: `openLane`, `openLanePage`, and the lane loop in `runShards`
 - `tests/media/render-final-lanes.test.mjs`: the test for a Chrome per lane
-- [5ec9d4712](https://github.com/Vandit1604/vawe/commit/5ec9d4712): one Chrome per worker, 140 s to 47 s
-- [71d432bde](https://github.com/Vandit1604/vawe/commit/71d432bde): Buffer decode and the open/close queue
-- [09177897c](https://github.com/Vandit1604/vawe/commit/09177897c): fixed 60-frame slices and `--workers`
-- [169fdc5d6](https://github.com/Vandit1604/vawe/commit/169fdc5d6): focus emulation
+- [8efe38cad](https://github.com/Vandit1604/vawe/commit/8efe38cad): one Chrome per worker, 140 s to 47 s
+- [4ffdb23b4](https://github.com/Vandit1604/vawe/commit/4ffdb23b4): Buffer decode and the open/close queue
+- [b70389ff6](https://github.com/Vandit1604/vawe/commit/b70389ff6): fixed 60-frame slices and `--workers`
+- [586d132c4](https://github.com/Vandit1604/vawe/commit/586d132c4): focus emulation
 
 The repo is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).

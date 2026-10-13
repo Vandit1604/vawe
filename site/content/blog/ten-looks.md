@@ -45,17 +45,17 @@ The rule keeps the gallery reading as ten systems. It also gave us a quick way t
 
 ## The gate: faint is never text
 
-Every look defines a `--faint` colour for dots, rules and icons. It is low contrast by design, so it must never carry words. We wrote `contrast.mjs` with the foundation (`0068ed6a9`). It reads every look in `demo.css` and checks WCAG contrast: ink, muted, on-accent and paper text must pass 4.5 to 1, and accent used as text must pass 3 to 1 and only for large type. The follow-up commit (`63a0b5b84`) wrote the rule into LOOKS.md: faint is for dots, rules and icons, never for text. It also made the check read short hex colours, and it darkened swiss's "up" ink, the red used for a rising number, from `#d40500` to `#c40400` so that it passes 4.5 to 1. Running `node prompts/moves/demo/contrast.mjs` today prints "10 looks, 0 failing pairs".
+Every look defines a `--faint` colour for dots, rules and icons. It is low contrast by design, so it must never carry words. We wrote `contrast.mjs` with the foundation (`50aaa558c`). It reads every look in `demo.css` and checks WCAG contrast: ink, muted, on-accent and paper text must pass 4.5 to 1, and accent used as text must pass 3 to 1 and only for large type. The follow-up commit (`061b3aa23`) wrote the rule into LOOKS.md: faint is for dots, rules and icons, never for text. It also made the check read short hex colours, and it darkened swiss's "up" ink, the red used for a rising number, from `#d40500` to `#c40400` so that it passes 4.5 to 1. Running `node prompts/moves/demo/contrast.mjs` today prints "10 looks, 0 failing pairs".
 
 The same commit records which public skills shaped the pass and which parts we rejected. We used better-typography for measure, balanced wraps and tabular figures, better-ui for concentric radius and optical alignment, and baseline-ui for a spacing review. We rejected the 16 px body floor (a film sets its own sizes), the no-gradient and no-letter-spacing rules (several looks need both) and every hover and press rule (a film has no input). Writing the rejections down is what stops a later author importing the default again.
 
 ## Render each clip once
 
-A design system is only useful if it is cheap to apply to 70 clips, so the render step changed too. `bin/vawe moves` renders each clip once at 1280x720 and 60 fps. The size and rate are part of the clip's source hash, stored in `clips.lock.json`, so changing them marks every clip stale and nothing else. The script `scripts/site/moves.mjs` then derives the gallery copies: a 1280 H.264 file and a 1280 poster for the move page, and a 640 VP9 file and a 640 poster for the grid (`0c3f9a44c`). By default only stale clips re-render, and `--all` forces every clip (`a09d12e71`).
+A design system is only useful if it is cheap to apply to 70 clips, so the render step changed too. `bin/vawe moves` renders each clip once at 1280x720 and 60 fps. The size and rate are part of the clip's source hash, stored in `clips.lock.json`, so changing them marks every clip stale and nothing else. The script `scripts/site/moves.mjs` then derives the gallery copies: a 1280 H.264 file and a 1280 poster for the move page, and a 640 VP9 file and a 640 poster for the grid (`7945d97b2`). By default only stale clips re-render, and `--all` forces every clip (`77a8d9147`).
 
 ## The measured result
 
-All 70 clips were re-rendered with the ten looks (`e6aa715fb`). The pick-by-job table covered 53 moves (`a09d12e71`) and the render commit counts 70 clips. The contrast check passes on all ten looks.
+All 70 clips were re-rendered with the ten looks (`7bf0ce2c1`). The pick-by-job table covered 53 moves (`77a8d9147`) and the render commit counts 70 clips. The contrast check passes on all ten looks.
 
 What we did not measure is the cost saved. We expect the source hash to save render time, since only stale clips render, but we never timed a full re-render against an incremental one, so we do not quote a figure.
 
@@ -74,8 +74,8 @@ Keep the variety rule short and checkable. Ours fits in four lines and a grep. F
 - `prompts/moves/demo/demo.css`: the foundation and the ten token sets
 - `prompts/moves/LOOKS.md`: each look in one line, plus the variety rule
 - `prompts/moves/demo/contrast.mjs`: the check across all ten looks
-- [`0068ed6a9`](https://github.com/Vandit1604/vawe/commit/0068ed6a9): one design system with ten looks, a look assigned to every demo
-- [`63a0b5b84`](https://github.com/Vandit1604/vawe/commit/63a0b5b84): faint is never text, swiss up-ink passes 4.5:1
-- [`0c3f9a44c`](https://github.com/Vandit1604/vawe/commit/0c3f9a44c): render each clip once at 1280x720 and 60 fps
+- [`50aaa558c`](https://github.com/Vandit1604/vawe/commit/50aaa558c): one design system with ten looks, a look assigned to every demo
+- [`061b3aa23`](https://github.com/Vandit1604/vawe/commit/061b3aa23): faint is never text, swiss up-ink passes 4.5:1
+- [`7945d97b2`](https://github.com/Vandit1604/vawe/commit/7945d97b2): render each clip once at 1280x720 and 60 fps
 
 The repo is [Vandit1604/vawe](https://github.com/Vandit1604/vawe).

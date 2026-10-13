@@ -27,7 +27,7 @@ The master encode was slow. Dark gradients banded: 8-bit x264 shows visible step
 
 ### Presets
 
-Commit `a99043c5c` moved the master from preset medium to preset fast. Measured against medium, fast encodes 25% faster, makes a 15% larger file and lands 49 dB PSNR away from it. The next preset, faster, is about twice as quick. We rejected it because it leaves a 54 px flat run on the dark ramp in `tests/media/render-banding.test.mjs`. A flat run is a band you can see. Drafts use ultrafast at CRF 20.
+Commit `b7b6c3c41` moved the master from preset medium to preset fast. Measured against medium, fast encodes 25% faster, makes a 15% larger file and lands 49 dB PSNR away from it. The next preset, faster, is about twice as quick. We rejected it because it leaves a 54 px flat run on the dark ramp in `tests/media/render-banding.test.mjs`. A flat run is a band you can see. Drafts use ultrafast at CRF 20.
 
 ### Banding on dark ramps
 
@@ -48,15 +48,15 @@ The numbers in the encoder's comments come from a 1080p dark ramp and two 5-seco
 <figcaption>Lower is better. Values are from comments in render-page.mjs and from the render-banding test.</figcaption>
 </figure>
 
-Commit `8975651a5` changed when the web copy happens. The render reports the mp4 as soon as the master is muxed, and the ship job starts the judge on it while the web copy encodes. `ship --status --wait` prints that the film is rendered but not judged, then the verdict. The extra encode no longer adds to the wait.
+Commit `394d14797` changed when the web copy happens. The render reports the mp4 as soon as the master is muxed, and the ship job starts the judge on it while the web copy encodes. `ship --status --wait` prints that the film is rendered but not judged, then the verdict. The extra encode no longer adds to the wait.
 
 ### A budget for clips
 
-Every move on the [moves gallery](/moves) has a clip. In `ef948c58c` we set a 2 MB budget per clip. The render encodes at CRF 16. If the file is over budget, it is encoded again from that file at CRF 19, 22, and so on up to a cap of 31, and the first one that fits is kept. The CRF that won is written to `clips.lock.json` beside the source hash, so a reader can see how hard each clip was squeezed.
+Every move on the [moves gallery](/moves) has a clip. In `817edeee7` we set a 2 MB budget per clip. The render encodes at CRF 16. If the file is over budget, it is encoded again from that file at CRF 19, 22, and so on up to a cap of 31, and the first one that fits is kept. The CRF that won is written to `clips.lock.json` beside the source hash, so a reader can see how hard each clip was squeezed.
 
 ## One more bug: dropped frames from pixel formats
 
-Chromium saves some frames as RGBA, for example when the page uses `mix-blend-mode`. When the pixel format changes in the middle of a frame sequence, ffmpeg rebuilds its filter graph. That resets the trims and drops frames. Commit `40091a783` keeps one pixel format through the whole encode, so every frame survives.
+Chromium saves some frames as RGBA, for example when the page uses `mix-blend-mode`. When the pixel format changes in the middle of a frame sequence, ffmpeg rebuilds its filter graph. That resets the trims and drops frames. Commit `958f17f9d` keeps one pixel format through the whole encode, so every frame survives.
 
 ## Result
 
@@ -85,7 +85,7 @@ How rendering waits are kept short is in [making the wait cheap](/blog/cheap-wai
 - `harness/media/render-page.mjs`: `x264Args`, `WEB_ARGS`, `DITHER`, `ffmpegWebEncode`.
 - `harness/lib/clip-budget.mjs`: `chooseCrf`.
 - `tests/media/render-banding.test.mjs`.
-- Commit [a99043c5c](https://github.com/Vandit1604/vawe/commit/a99043c5c): preset fast for the master.
-- Commit [33038e674](https://github.com/Vandit1604/vawe/commit/33038e674): AV1 web copy, dither and `aq-mode=3` measurements.
-- Commit [8975651a5](https://github.com/Vandit1604/vawe/commit/8975651a5): report the master before the judge.
-- Commit [ef948c58c](https://github.com/Vandit1604/vawe/commit/ef948c58c): the 2 MB clip budget.
+- Commit [b7b6c3c41](https://github.com/Vandit1604/vawe/commit/b7b6c3c41): preset fast for the master.
+- Commit [086276b67](https://github.com/Vandit1604/vawe/commit/086276b67): AV1 web copy, dither and `aq-mode=3` measurements.
+- Commit [394d14797](https://github.com/Vandit1604/vawe/commit/394d14797): report the master before the judge.
+- Commit [817edeee7](https://github.com/Vandit1604/vawe/commit/817edeee7): the 2 MB clip budget.

@@ -23,7 +23,7 @@ The second part of the problem was taste. A constant synthetic tone does not fol
 
 We did not try to write a smarter check for "a hum that is hiding silence". A check like that would only ask agents to hide the hum better. We chose to take away the thing that was available.
 
-Commit `f68dc7df2` removed the `bed`, `swell-soft` and `braam` voices, the `synth-bed.mjs` helper and the `data-bpm` attribute. A page that writes `data-synth="bed"` (or another removed sustained voice) is now refused with the rule and the fix. The refusal message tells the agent to use a real music file (`<audio loop src=...>`) or no bed, and that sparse effects on actions are fine.
+Commit `1feb1c38b` removed the `bed`, `swell-soft` and `braam` voices, the `synth-bed.mjs` helper and the `data-bpm` attribute. A page that writes `data-synth="bed"` (or another removed sustained voice) is now refused with the rule and the fix. The refusal message tells the agent to use a real music file (`<audio loop src=...>`) or no bed, and that sparse effects on actions are fine.
 
 ![Before, a bed made the dead-air check green. After, the page is refused and the agent uses small effects on actions or a real track.](/blog/no-synth-bed/flow.svg)
 
@@ -36,7 +36,7 @@ The new rule has one owner, `taste/craft/sound.md`, and every other doc points t
 - Music only comes from a real track the user gives us. A film with no track has no beat grid, and `vawe sound` says so instead of inventing one.
 - When there is a track, `vawe sound` reads it and prints a beat grid and a cut table. That is the subject of [Cutting to the beat](/blog/beat).
 
-A follow-up commit (`25e1ef4e9`) folded the sound rules together, so that `sound-default-on` merges into `sound-voices` and `cue-sparse`, `sound-swell` and `cue-has-event` merge into `sound-cues`. That commit removed 711 lines and added 75. The licence note was updated too (`e51af67b8`): the synthesized beds are retired.
+A follow-up commit (`9a89c1791`) folded the sound rules together, so that `sound-default-on` merges into `sound-voices` and `cue-sparse`, `sound-swell` and `cue-has-event` merge into `sound-cues`. That commit removed 711 lines and added 75. The licence note was updated too (`6c042a4d2`): the synthesized beds are retired.
 
 We kept one thing deliberately. Silence between effects is normal. A film still has to read with the sound off, because feeds autoplay muted, so sound is an addition and not a crutch.
 
@@ -61,4 +61,4 @@ For the audio contract in the page, see the [audio docs](/docs/audio), and for h
 - `harness/media/page-audio.mjs`: the banned voices and the refusal message.
 - `taste/craft/sound.md`: the one owner of the sound rule.
 - `harness/media/sound.mjs`: the `vawe sound` verb.
-- Commits: [`f68dc7df2`](https://github.com/Vandit1604/vawe/commit/f68dc7df2) the ban, [`25e1ef4e9`](https://github.com/Vandit1604/vawe/commit/25e1ef4e9) one owner for sound rules, [`bf4252858`](https://github.com/Vandit1604/vawe/commit/bf4252858) `vawe sound` reads a track, [`e51af67b8`](https://github.com/Vandit1604/vawe/commit/e51af67b8) licence note.
+- Commits: [`1feb1c38b`](https://github.com/Vandit1604/vawe/commit/1feb1c38b) the ban, [`9a89c1791`](https://github.com/Vandit1604/vawe/commit/9a89c1791) one owner for sound rules, [`a600cae64`](https://github.com/Vandit1604/vawe/commit/a600cae64) `vawe sound` reads a track, [`6c042a4d2`](https://github.com/Vandit1604/vawe/commit/6c042a4d2) licence note.

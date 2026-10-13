@@ -28,17 +28,17 @@ A final that blocks the shell is a poor fit for an agent: a Bash call over 120 s
 
 ## Long-running commands: what we built
 
-Ship runs in the background. By default `ship` starts a job and returns. `--wait` blocks. `--status` reports progress or the result ([a0bf744d4](https://github.com/Vandit1604/vawe/commit/a0bf744d4)). A later commit checks the final first and cancels a duplicate job ([fd50ef01f](https://github.com/Vandit1604/vawe/commit/fd50ef01f)).
+Ship runs in the background. By default `ship` starts a job and returns. `--wait` blocks. `--status` reports progress or the result ([a5d092c22](https://github.com/Vandit1604/vawe/commit/a5d092c22)). A later commit checks the final first and cancels a duplicate job ([6e74cd5a5](https://github.com/Vandit1604/vawe/commit/6e74cd5a5)).
 
-One call blocks for a long time. `ship --status --wait` blocks for up to 9 minutes and prints a progress line each minute ([0699bdcac](https://github.com/Vandit1604/vawe/commit/0699bdcac)). The result names the next call and how many calls are left ([6ddf4240d](https://github.com/Vandit1604/vawe/commit/6ddf4240d)). An agent reads that line and knows what to do next, so it does not guess.
+One call blocks for a long time. `ship --status --wait` blocks for up to 9 minutes and prints a progress line each minute ([e3e504636](https://github.com/Vandit1604/vawe/commit/e3e504636)). The result names the next call and how many calls are left ([6bea1e806](https://github.com/Vandit1604/vawe/commit/6bea1e806)). An agent reads that line and knows what to do next, so it does not guess.
 
-`vawe wait` blocks on any render of a film. Draft or final, same behaviour: it blocks, prints a progress line a minute, and ends with its result line ([955d4a94c](https://github.com/Vandit1604/vawe/commit/955d4a94c)). AGENTS.md names it for waiting, and says to run it once and not in parallel.
+`vawe wait` blocks on any render of a film. Draft or final, same behaviour: it blocks, prints a progress line a minute, and ends with its result line ([f0ab4f483](https://github.com/Vandit1604/vawe/commit/f0ab4f483)). AGENTS.md names it for waiting, and says to run it once and not in parallel.
 
 ![Before: many polls, each blocking up to 100 s. After: one call up to 9 minutes with a progress line each minute.](/blog/cheap-wait/polls.svg)
 
-A final never takes the last free slot. Slots 0 to count minus 2 are the finals' share, and a draft can take slots from the top. A draft no longer sits behind finals ([7d01618fc](https://github.com/Vandit1604/vawe/commit/7d01618fc)). When a slot is busy, the waiting line names the holder and its age, and a navigation timeout is retried once ([fc84e8c70](https://github.com/Vandit1604/vawe/commit/fc84e8c70)).
+A final never takes the last free slot. Slots 0 to count minus 2 are the finals' share, and a draft can take slots from the top. A draft no longer sits behind finals ([05aa73d9c](https://github.com/Vandit1604/vawe/commit/05aa73d9c)). When a slot is busy, the waiting line names the holder and its age, and a navigation timeout is retried once ([37749a58a](https://github.com/Vandit1604/vawe/commit/37749a58a)).
 
-Canvas films skip the DOM probes. There is nothing to probe, so the draft does not look. `dev` also names why a page never loads after 30 s, so the agent is not left guessing at a blank wait ([6ddf4240d](https://github.com/Vandit1604/vawe/commit/6ddf4240d)).
+Canvas films skip the DOM probes. There is nothing to probe, so the draft does not look. `dev` also names why a page never loads after 30 s, so the agent is not left guessing at a blank wait ([6bea1e806](https://github.com/Vandit1604/vawe/commit/6bea1e806)).
 
 ## The measured result
 
@@ -66,9 +66,9 @@ Waiting is half the story, the other half is making the render itself survive. S
 
 - `harness/media/ship-job.mjs`, `harness/lib/ship-status.mjs`: the background job, the status lines and the wait
 - `harness/lib/render-slots.mjs`: the render slots and the rule that a final leaves one free
-- [a0bf744d4](https://github.com/Vandit1604/vawe/commit/a0bf744d4): `ship` runs in the background by default
-- [0699bdcac](https://github.com/Vandit1604/vawe/commit/0699bdcac): `--status --wait` blocks up to 9 minutes
-- [7d01618fc](https://github.com/Vandit1604/vawe/commit/7d01618fc): a final never takes the last free slot
-- [6ddf4240d](https://github.com/Vandit1604/vawe/commit/6ddf4240d): canvas films skip DOM probes; the wait names the next call
+- [a5d092c22](https://github.com/Vandit1604/vawe/commit/a5d092c22): `ship` runs in the background by default
+- [e3e504636](https://github.com/Vandit1604/vawe/commit/e3e504636): `--status --wait` blocks up to 9 minutes
+- [05aa73d9c](https://github.com/Vandit1604/vawe/commit/05aa73d9c): a final never takes the last free slot
+- [6bea1e806](https://github.com/Vandit1604/vawe/commit/6bea1e806): canvas films skip DOM probes; the wait names the next call
 
 The repo is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).

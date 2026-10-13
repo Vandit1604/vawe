@@ -19,7 +19,7 @@ Nothing counted that cost, so nothing pushed back.
 
 ## What we tried
 
-The first attempt was a plain prune, and it was large. Two commits on 2026-09-30 rewrote the craft docs: [8238186](https://github.com/Vandit1604/vawe/commit/8238186a3) touched 27 files and removed 5,258 lines, and [955db3a](https://github.com/Vandit1604/vawe/commit/955db3a62) touched 58 files and removed 7,461 lines. Their messages say they deleted the docs of the old JSON scene format (see [why we deleted it](/blog/html-over-json)), so the prune was easy to justify. The following day [62c6e0c](https://github.com/Vandit1604/vawe/commit/62c6e0c11) pulled the scattered pitfalls into one list in the taste digest and shortened AGENTS.md and the page skill. The stamp read 2,239 words.
+The first attempt was a plain prune, and it was large. Two commits on 2026-09-30 rewrote the craft docs: [a006f67](https://github.com/Vandit1604/vawe/commit/a006f6707) touched 27 files and removed 5,258 lines, and [941ae59](https://github.com/Vandit1604/vawe/commit/941ae5901) touched 58 files and removed 7,461 lines. Their messages say they deleted the docs of the old JSON scene format (see [why we deleted it](/blog/html-over-json)), so the prune was easy to justify. The following day [aefdda7](https://github.com/Vandit1604/vawe/commit/aefdda74e) pulled the scattered pitfalls into one list in the taste digest and shortened AGENTS.md and the page skill. The stamp read 2,239 words.
 
 Then the number climbed. A new brief stage here, a Board table there, a skill ladder. No single change looked large. The stamp read 2,714 on 10-05, 3,215 on 10-07, 3,947 on 10-09 and 4,602 on 10-11.
 
@@ -39,22 +39,22 @@ The hook warns and never blocks. That was a choice. Our rule is that a guard sho
 
 ![The ratchet loop: edit a doc, the hooks run the bench, the bench warns when the count grew, the author prunes or re-stamps in a commit.](/blog/read-load/diagram.svg)
 
-We pair it with a second ratchet. `quality/gates/rule-length.mjs` counts rules longer than 500 characters across the agent-facing docs. The stamped ceiling fell from 324 to 42 in [93b9f8c](https://github.com/Vandit1604/vawe/commit/93b9f8c14), on the day we merged duplicate rules. A long rule is more likely to be skimmed, and the character limit is a convention we chose, not a measured threshold.
+We pair it with a second ratchet. `quality/gates/rule-length.mjs` counts rules longer than 500 characters across the agent-facing docs. The stamped ceiling fell from 324 to 42 in [439b20b](https://github.com/Vandit1604/vawe/commit/439b20b86), on the day we merged duplicate rules. A long rule is more likely to be skimmed, and the character limit is a convention we chose, not a measured threshold.
 
 ## The measured result
 
 | Date | Words | Commit |
 |---|---|---|
-| 2026-09-27 | 5,402 | [bb9bd76](https://github.com/Vandit1604/vawe/commit/bb9bd7612) |
-| 2026-10-01 | 2,239 | [62c6e0c](https://github.com/Vandit1604/vawe/commit/62c6e0c11) |
-| 2026-10-05 | 2,714 | [2f8ee4f](https://github.com/Vandit1604/vawe/commit/2f8ee4f39) |
-| 2026-10-07 | 3,215 | [472ac95](https://github.com/Vandit1604/vawe/commit/472ac9546) |
-| 2026-10-09 | 3,947 | [a085824](https://github.com/Vandit1604/vawe/commit/a0858241a) |
-| 2026-10-11 | 4,602 | [0724279](https://github.com/Vandit1604/vawe/commit/0724279cb) |
+| 2026-09-27 | 5,402 | [0c9f48b](https://github.com/Vandit1604/vawe/commit/0c9f48b64) |
+| 2026-10-01 | 2,239 | [aefdda7](https://github.com/Vandit1604/vawe/commit/aefdda74e) |
+| 2026-10-05 | 2,714 | [8646d96](https://github.com/Vandit1604/vawe/commit/8646d96ac) |
+| 2026-10-07 | 3,215 | [3d1a494](https://github.com/Vandit1604/vawe/commit/3d1a49464) |
+| 2026-10-09 | 3,947 | [5bf9010](https://github.com/Vandit1604/vawe/commit/5bf9010d5) |
+| 2026-10-11 | 4,602 | [ca8ba7f](https://github.com/Vandit1604/vawe/commit/ca8ba7fbb) |
 
 Two caveats matter. First, the file list changed on 2026-09-30, when the JSON format was deleted and the bench stopped counting the old stage skills. So the 5,402 and the 2,239 count different lists of files, and the right reading is the trend and not the exact ratio. Second, on 09-30 the stamp briefly read 987 words, while the old docs were gone and the new ones were not yet written (the next stamps that day read 1,739 and 2,208). A ratchet that only goes down rewards that kind of dip, which is one more reason ours warns and does not gate.
 
-The commit that added the new motion path ([bb9bd76](https://github.com/Vandit1604/vawe/commit/bb9bd7612)) is a good example of the habit. Its message says the change adds 71 words, 1.3 percent of what an agent reads before its first layer. A one-sentence feature with a price tag attached is easier to argue with than a sentence nobody counted.
+The commit that added the new motion path ([0c9f48b](https://github.com/Vandit1604/vawe/commit/0c9f48b64)) is a good example of the habit. Its message says the change adds 71 words, 1.3 percent of what an agent reads before its first layer. A one-sentence feature with a price tag attached is easier to argue with than a sentence nobody counted.
 
 The pace of regrowth is what surprised us. The pruning took four days and the regrowth took ten. None of the additions was a mistake. Each one answered a real failure. A budget does not stop a good rule from costing something.
 
@@ -70,4 +70,4 @@ Related reading: [the quality gates docs](/docs/quality-gates) explain which che
 - `quality/baselines/bench-ratchet.json`: the stamped numbers.
 - `quality/gates/rule-length.mjs` and `harness/lib/rule-length.mjs`: the 500-character rule check.
 - `.githooks/pre-commit` and `.githooks/pre-push`: where the bench runs.
-- Commits: [8238186](https://github.com/Vandit1604/vawe/commit/8238186a3), [955db3a](https://github.com/Vandit1604/vawe/commit/955db3a62), [62c6e0c](https://github.com/Vandit1604/vawe/commit/62c6e0c11), [93b9f8c](https://github.com/Vandit1604/vawe/commit/93b9f8c14).
+- Commits: [a006f67](https://github.com/Vandit1604/vawe/commit/a006f6707), [941ae59](https://github.com/Vandit1604/vawe/commit/941ae5901), [aefdda7](https://github.com/Vandit1604/vawe/commit/aefdda74e), [439b20b](https://github.com/Vandit1604/vawe/commit/439b20b86).

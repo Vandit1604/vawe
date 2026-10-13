@@ -45,15 +45,15 @@ The second and third rounds added more. In a later review of eight sessions, dra
 
 Each finding became a commit.
 
-- A mux failure no longer throws the capture away. [544693435](https://github.com/Vandit1604/vawe/commit/544693435) reads the page audio before the capture, keeps the frames and records the real stage when the mux fails.
-- A resume finds its frames. [8069d09c7](https://github.com/Vandit1604/vawe/commit/8069d09c7) keys the kept-frames folder on file bytes, not file times, because a rebase or an edit in another session changed the key.
-- Waiting is cheap. `ship` runs in the background ([a0bf744d4](https://github.com/Vandit1604/vawe/commit/a0bf744d4)). `ship --status --wait` blocks up to 9 minutes with a progress line each minute ([0699bdcac](https://github.com/Vandit1604/vawe/commit/0699bdcac)). `vawe wait` blocks on any render of a film ([955d4a94c](https://github.com/Vandit1604/vawe/commit/955d4a94c)). We cover the details in [Making the wait cheap](/blog/cheap-wait).
-- A final never takes the last free render slot, so a draft does not queue behind finals ([7d01618fc](https://github.com/Vandit1604/vawe/commit/7d01618fc)).
-- A final needs approval of the current page. [f776acb65](https://github.com/Vandit1604/vawe/commit/f776acb65) is 13 files, 228 lines added and 12 removed. See [advise on everything, refuse on three things](/blog/advise-refuse).
-- Short cues work. [0eae5d9fb](https://github.com/Vandit1604/vawe/commit/0eae5d9fb) lets `vawe sound` read a cue under one second.
-- Two natural calls stop failing. [84932e278](https://github.com/Vandit1604/vawe/commit/84932e278) defines `vawe.onFrame` before any page script. [38b1fc355](https://github.com/Vandit1604/vawe/commit/38b1fc355) lets `strip --cuts` read the declared worlds of a canvas film.
+- A mux failure no longer throws the capture away. [e1b944267](https://github.com/Vandit1604/vawe/commit/e1b944267) reads the page audio before the capture, keeps the frames and records the real stage when the mux fails.
+- A resume finds its frames. [7d840bb3e](https://github.com/Vandit1604/vawe/commit/7d840bb3e) keys the kept-frames folder on file bytes, not file times, because a rebase or an edit in another session changed the key.
+- Waiting is cheap. `ship` runs in the background ([a5d092c22](https://github.com/Vandit1604/vawe/commit/a5d092c22)). `ship --status --wait` blocks up to 9 minutes with a progress line each minute ([e3e504636](https://github.com/Vandit1604/vawe/commit/e3e504636)). `vawe wait` blocks on any render of a film ([f0ab4f483](https://github.com/Vandit1604/vawe/commit/f0ab4f483)). We cover the details in [Making the wait cheap](/blog/cheap-wait).
+- A final never takes the last free render slot, so a draft does not queue behind finals ([05aa73d9c](https://github.com/Vandit1604/vawe/commit/05aa73d9c)).
+- A final needs approval of the current page. [2ac1331ab](https://github.com/Vandit1604/vawe/commit/2ac1331ab) is 13 files, 228 lines added and 12 removed. See [advise on everything, refuse on three things](/blog/advise-refuse).
+- Short cues work. [6ec0d5adc](https://github.com/Vandit1604/vawe/commit/6ec0d5adc) lets `vawe sound` read a cue under one second.
+- Two natural calls stop failing. [3f5749500](https://github.com/Vandit1604/vawe/commit/3f5749500) defines `vawe.onFrame` before any page script. [d81896d45](https://github.com/Vandit1604/vawe/commit/d81896d45) lets `strip --cuts` read the declared worlds of a canvas film.
 - Every verb now ends with an `ok` or `FAILED` line, so a pipe cannot hide the result.
-- The review script got a fix too. [876927f88](https://github.com/Vandit1604/vawe/commit/876927f88) counts a hook block only from the hook's own refusal line.
+- The review script got a fix too. [75fb24d56](https://github.com/Vandit1604/vawe/commit/75fb24d56) counts a hook block only from the hook's own refusal line.
 
 ## The measured result
 
@@ -74,7 +74,7 @@ For the next level of this, see [Building the harness for the weaker model](/blo
 ## In the code
 
 - `harness/lib/runlog.mjs` and `harness/lib/runs-report.mjs`: the run log and its report.
-- [544693435](https://github.com/Vandit1604/vawe/commit/544693435): keep frames when the mux fails.
-- [8069d09c7](https://github.com/Vandit1604/vawe/commit/8069d09c7): kept-frames key on file bytes.
-- [955d4a94c](https://github.com/Vandit1604/vawe/commit/955d4a94c): `vawe wait`.
-- [f776acb65](https://github.com/Vandit1604/vawe/commit/f776acb65): approval gate.
+- [e1b944267](https://github.com/Vandit1604/vawe/commit/e1b944267): keep frames when the mux fails.
+- [7d840bb3e](https://github.com/Vandit1604/vawe/commit/7d840bb3e): kept-frames key on file bytes.
+- [f0ab4f483](https://github.com/Vandit1604/vawe/commit/f0ab4f483): `vawe wait`.
+- [2ac1331ab](https://github.com/Vandit1604/vawe/commit/2ac1331ab): approval gate.

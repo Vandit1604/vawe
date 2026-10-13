@@ -15,7 +15,7 @@ This post lists what the weaker model did, what we changed, and what the numbers
 
 ## What the weaker model did
 
-On 2026-10-01 we looked at one film from a weaker model. Four things stood out, and we wrote them into the body of commit [61ac19259](https://github.com/Vandit1604/vawe/commit/61ac19259):
+On 2026-10-01 we looked at one film from a weaker model. Four things stood out, and we wrote them into the body of commit [4246a6a53](https://github.com/Vandit1604/vawe/commit/4246a6a53):
 
 1. It named the brand with a name from our own attractor list, and it drew a banded disc. Both were listed as things to avoid.
 2. It skipped the stills judge.
@@ -42,7 +42,7 @@ Advice that cannot be misread. Every advice line from `dev`, `new` and the still
 
 The stills judge inside `dev`. `bin/vawe dev` runs the stills judge itself when `brief.md` has three filled directions. It runs once per change of the directions or the slots, and prints its pick in 3 lines. `--no-judge` skips it.
 
-A judge ledger. The fresh judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones, and it must say why a new fix reverses an old one. The report prints a line such as `ledger: N fixed, N partly, N still; N new`. A follow-up, [1810fc14a](https://github.com/Vandit1604/vawe/commit/1810fc14a), stops a target from being asked back and forth: after three rounds the ledger prints a stop line.
+A judge ledger. The fresh judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones, and it must say why a new fix reverses an old one. The report prints a line such as `ledger: N fixed, N partly, N still; N new`. A follow-up, [30579d4af](https://github.com/Vandit1604/vawe/commit/30579d4af), stops a target from being asked back and forth: after three rounds the ledger prints a stop line.
 
 Motion lint for `window.seek` pages. The same five motion rules now run on element boxes sampled over time (`harness/lib/box-track.mjs`). Canvas contents are out of scope, and the output says so.
 
@@ -77,6 +77,6 @@ The framework is open source at [github.com/Vandit1604/vawe](https://github.com/
 - `harness/lib/advice.mjs`: the `advice:` and `error:` wording.
 - `taste/attractors.json` and `taste/rules/attractors.md`: the attractor list and its rule.
 - `harness/lib/box-track.mjs`: the box sampler for the motion lint.
-- [61ac19259](https://github.com/Vandit1604/vawe/commit/61ac19259): advice, attractor check, stills judge in `dev`, judge ledger, motion lint.
-- [1810fc14a](https://github.com/Vandit1604/vawe/commit/1810fc14a): ledger entries keep what, now and want.
-- [2c292300f](https://github.com/Vandit1604/vawe/commit/2c292300f): the first sting that passed the fresh judge.
+- [4246a6a53](https://github.com/Vandit1604/vawe/commit/4246a6a53): advice, attractor check, stills judge in `dev`, judge ledger, motion lint.
+- [30579d4af](https://github.com/Vandit1604/vawe/commit/30579d4af): ledger entries keep what, now and want.
+- [bee932a4b](https://github.com/Vandit1604/vawe/commit/bee932a4b): the first sting that passed the fresh judge.

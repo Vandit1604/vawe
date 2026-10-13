@@ -21,16 +21,16 @@ We wanted a brief that an agent can check itself against, the way a test suite c
 
 ## Acceptance criteria for AI agents: what we built
 
-Every `vawe new` brief now carries the same sections: Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. A field the user did not answer is filled with a stated guess marked `(guess: change me)` ([a9a821aa5](https://github.com/Vandit1604/vawe/commit/a9a821aa5)).
+Every `vawe new` brief now carries the same sections: Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. A field the user did not answer is filled with a stated guess marked `(guess: change me)` ([f88915325](https://github.com/Vandit1604/vawe/commit/f88915325)).
 
-After each draft and each final, `acceptance.mjs` parses the Spec and Acceptance tables of `brief.md`. It counts frozen runs, jerky steps and jumps. It compares the words, objects and cuts in the film against the spec. Then it prints one table with a trend line, so the agent sees whether the last edit helped ([909f9b8db](https://github.com/Vandit1604/vawe/commit/909f9b8db)).
+After each draft and each final, `acceptance.mjs` parses the Spec and Acceptance tables of `brief.md`. It counts frozen runs, jerky steps and jumps. It compares the words, objects and cuts in the film against the spec. Then it prints one table with a trend line, so the agent sees whether the last edit helped ([f3855fb25](https://github.com/Vandit1604/vawe/commit/f3855fb25)).
 
 Ship uses the same table. The verdict is PASS only when the judge passes and no measured row missed.
 
 We then fixed the rows that were wrong for honest reasons:
 
-- Text inside `aria-hidden` is outside every text row. Product UI labels marked `data-chrome` get a 2.5% cap-height floor and no read hold. Spec appear, settle and object times are measured on the frame grid, so the measure no longer drifts 0.25 s per copy of an element ([ff82d2ad7](https://github.com/Vandit1604/vawe/commit/ff82d2ad7)).
-- A draft and a ship now share one 15-row denominator. A draft prints "N of M measured green, K more at ship (15 rows)" and marks the judge row and the unrun tiers as not measured ([3c1398992](https://github.com/Vandit1604/vawe/commit/3c1398992)).
+- Text inside `aria-hidden` is outside every text row. Product UI labels marked `data-chrome` get a 2.5% cap-height floor and no read hold. Spec appear, settle and object times are measured on the frame grid, so the measure no longer drifts 0.25 s per copy of an element ([7cee8cc52](https://github.com/Vandit1604/vawe/commit/7cee8cc52)).
+- A draft and a ship now share one 15-row denominator. A draft prints "N of M measured green, K more at ship (15 rows)" and marks the judge row and the unrun tiers as not measured ([354e9aef3](https://github.com/Vandit1604/vawe/commit/354e9aef3)).
 
 The trace review writes both "7 of 14" and "7 of 15" for the same table. The row count was moving while we measured.
 
@@ -72,9 +72,9 @@ The same habit shows up in [the loophole audit](/blog/loophole-audit), where we 
 
 - `harness/lib/acceptance.mjs`: the parser, the row checks and the trend line
 - `harness/lib/measured-brief.mjs`: the brief shape that `vawe new` writes
-- [909f9b8db](https://github.com/Vandit1604/vawe/commit/909f9b8db): measure the Acceptance table after every draft and final
-- [a9a821aa5](https://github.com/Vandit1604/vawe/commit/a9a821aa5): the measured brief becomes the default
-- [ff82d2ad7](https://github.com/Vandit1604/vawe/commit/ff82d2ad7): skip decorative and chrome text, measure on the frame grid
-- [3c1398992](https://github.com/Vandit1604/vawe/commit/3c1398992): one 15-row denominator
+- [f3855fb25](https://github.com/Vandit1604/vawe/commit/f3855fb25): measure the Acceptance table after every draft and final
+- [f88915325](https://github.com/Vandit1604/vawe/commit/f88915325): the measured brief becomes the default
+- [7cee8cc52](https://github.com/Vandit1604/vawe/commit/7cee8cc52): skip decorative and chrome text, measure on the frame grid
+- [354e9aef3](https://github.com/Vandit1604/vawe/commit/354e9aef3): one 15-row denominator
 
 The repo is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).

@@ -26,7 +26,7 @@ Capture is the expensive part of a render. Each subframe is a seek, a settle (fo
 
 ## What we built
 
-Commit `c466e8631` made the count follow each frame's travel. The rule lives in `subframesForTravel`:
+Commit `75fa04dc6` made the count follow each frame's travel. The rule lives in `subframesForTravel`:
 
 - The blur spans half the frame interval, a 180 degree shutter (`SHUTTER = 0.5`).
 - Neighbouring subframes should sit at most 3 px apart (`STEP_PX = 3`).
@@ -40,7 +40,7 @@ Counts are powers of two and run-length encoded before capture. The ffmpeg filte
 
 ### Reusing captures
 
-Commit `33038e674` raised the cap to 32 subframes and added reuse. After a seek the page reports whether anything still pending can change the pixels: timers, animation frame callbacks, canvas, video, SMIL. If not, two subframes with the same animation state paint the same pixels, and the second one reuses the first capture. A held frame costs one screenshot however many subframes it asks for. A `--profile` flag prints a table of frames, subframes, screenshots (and how many were reused) and capture seconds per second of film.
+Commit `086276b67` raised the cap to 32 subframes and added reuse. After a seek the page reports whether anything still pending can change the pixels: timers, animation frame callbacks, canvas, video, SMIL. If not, two subframes with the same animation state paint the same pixels, and the second one reuses the first capture. A held frame costs one screenshot however many subframes it asks for. A `--profile` flag prints a table of frames, subframes, screenshots (and how many were reused) and capture seconds per second of film.
 
 ### The 32 cap and the pixel estimate
 
@@ -58,11 +58,11 @@ That is a drop of about 49% in subframes. We have not compared the two films sid
 
 The blended frames are encoded as segments. Each segment restarts its timestamps, so a one-frame segment carries no duration and the next segment overlaps it. With `-r` set to the frame rate, ffmpeg rate-converted the stream and dropped the overlapped frames. It dropped 7 to 24 frames per 6 seconds. Films came out short and drifted away from their audio.
 
-Commit `3184064c0` re-stamps the timestamps after the concat with `setpts=N/fps/TB` and uses `-fps_mode passthrough`, so ffmpeg never rate-converts. A later commit (`40091a783`) fixed a similar loss: Chromium saves some frames as RGBA, for example with `mix-blend-mode`, and a pixel-format change mid-sequence made ffmpeg rebuild its filter graph and drop frames. The encode now keeps one pixel format.
+Commit `3c8d7a692` re-stamps the timestamps after the concat with `setpts=N/fps/TB` and uses `-fps_mode passthrough`, so ffmpeg never rate-converts. A later commit (`958f17f9d`) fixed a similar loss: Chromium saves some frames as RGBA, for example with `mix-blend-mode`, and a pixel-format change mid-sequence made ffmpeg rebuild its filter graph and drop frames. The encode now keeps one pixel format.
 
 ## A warning for big finals
 
-Commit `20e0c3377` adds advice on a final with more than 8,000 subframes. It prints the count, an estimate in minutes (1,000 subframes per minute), and the `--blur` option that lowers the cap. The code comment records one measurement: 19,200 subframes took 15 to 23 minutes.
+Commit `cc6c9b05b` adds advice on a final with more than 8,000 subframes. It prints the count, an estimate in minutes (1,000 subframes per minute), and the `--blur` option that lowers the cap. The code comment records one measurement: 19,200 subframes took 15 to 23 minutes.
 
 ## What we would tell someone building the same thing
 
@@ -78,7 +78,7 @@ The [smear stretch](/moves/smear-stretch) move is a fast motion to try this on, 
 
 - `harness/media/render-page.mjs`: `subframesForTravel`, `bucketize`, `clampSegments`, `blendGraph`.
 - `tests/media/render-blur-travel.test.mjs` and `tests/media/render-reuse.test.mjs`.
-- Commit [c466e8631](https://github.com/Vandit1604/vawe/commit/c466e8631): blur follows each frame's travel.
-- Commit [33038e674](https://github.com/Vandit1604/vawe/commit/33038e674): the 32 cap, capture reuse and the profile table.
-- Commit [3184064c0](https://github.com/Vandit1604/vawe/commit/3184064c0): the pts re-stamp.
-- Commit [20e0c3377](https://github.com/Vandit1604/vawe/commit/20e0c3377): advice on very large finals.
+- Commit [75fa04dc6](https://github.com/Vandit1604/vawe/commit/75fa04dc6): blur follows each frame's travel.
+- Commit [086276b67](https://github.com/Vandit1604/vawe/commit/086276b67): the 32 cap, capture reuse and the profile table.
+- Commit [3c8d7a692](https://github.com/Vandit1604/vawe/commit/3c8d7a692): the pts re-stamp.
+- Commit [cc6c9b05b](https://github.com/Vandit1604/vawe/commit/cc6c9b05b): advice on very large finals.

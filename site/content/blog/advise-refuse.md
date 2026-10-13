@@ -15,7 +15,7 @@ An agent harness can fail in two ways. It can stop the agent when the agent was 
 
 We started with strict checks. A flat frame failed the render. A rule that looked wrong to the check but was a deliberate choice by the agent stopped the run. A check does not know the context, so it cannot tell a real failure from a choice.
 
-A colour block or a white flash is a legitimate frame in a film. A check that fails the render because "this frame is blank" is wrong for a film whose point is the flash. So in commit `939c816e1` (2026-09-30) a flat frame stopped refusing and started advising. The code comment says it: "A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises."
+A colour block or a white flash is a legitimate frame in a film. A check that fails the render because "this frame is blank" is wrong for a film whose point is the flash. So in commit `fc4f72b88` (2026-09-30) a flat frame stopped refusing and started advising. The code comment says it: "A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises."
 
 The second problem came later. A final render is the slow step. Agents spent it on films that no person had looked at, and then waited on it. One session we traced spent 3,922 seconds on 12 status calls across 4 finals, about 16 minutes per final.
 
@@ -23,15 +23,15 @@ The second problem came later. A final render is the slow step. Agents spent it 
 
 Our rule for the harness: a guard should clamp, tolerate or reclassify. It should not refuse. A hard refusal is for the cases where the output would be wrong or the work lost.
 
-We also found the wording mattered more than we expected. In a trace of a weaker model (more in [Building the harness for the weaker model](/blog/weaker-model)), the agent read lines that were only advice as if they were blocking. Commit `61ac19259` (2026-10-01) fixed the wording: every advice line starts with `advice:`, its block ends with `(advice only: the render continued)`, and an error that stops a command starts with `error:`. The module `harness/lib/advice.mjs` owns the format, so no check writes its own.
+We also found the wording mattered more than we expected. In a trace of a weaker model (more in [Building the harness for the weaker model](/blog/weaker-model)), the agent read lines that were only advice as if they were blocking. Commit `4246a6a53` (2026-10-01) fixed the wording: every advice line starts with `advice:`, its block ends with `(advice only: the render continued)`, and an error that stops a command starts with `error:`. The module `harness/lib/advice.mjs` owns the format, so no check writes its own.
 
-A related lesson came from shell guards. We had a hook that refused `for` loops and `sed -i`. We reverted it the same day, and kept guards only on the four git commands that lose work (`607cfe6f0`). The longer story is in [Stop fighting the agent shell](/blog/shell).
+A related lesson came from shell guards. We had a hook that refused `for` loops and `sed -i`. We reverted it the same day, and kept guards only on the four git commands that lose work (`e16b230e9`). The longer story is in [Stop fighting the agent shell](/blog/shell).
 
 ## What we built: three refusals and a clear line
 
-1. Determinism. Time on a page is the seek, never the clock ([Time is the seek, never the clock](/blog/page-clock)). A render that cannot be repeated is not a render, so it refuses. A small set of render invariants fail with one line each and exit code 2: audio tags, fonts, a missing frame, frame count, brief drift and `vawe.assert` (`62ec2f450`, 14 files, +188 -7).
+1. Determinism. Time on a page is the seek, never the clock ([Time is the seek, never the clock](/blog/page-clock)). A render that cannot be repeated is not a render, so it refuses. A small set of render invariants fail with one line each and exit code 2: audio tags, fonts, a missing frame, frame count, brief drift and `vawe.assert` (`82eff9ecc`, 14 files, +188 -7).
 2. A waiver with no reason. A page can break a rule for cause if it says why, in the page. The waiver without the reason refuses; the waiver with a reason passes.
-3. A final without approval. `vawe ship` refuses to render a final unless a person approved the current page. Commit `f776acb65` (2026-10-11) added the gate: 13 files, +228 -12.
+3. A final without approval. `vawe ship` refuses to render a final unless a person approved the current page. Commit `2ac1331ab` (2026-10-11) added the gate: 13 files, +228 -12.
 
 The approval is a file keyed on a hash of the page and every file it references. An edit changes the hash, so a draft that was approved and then changed is refused again. Unattended runs set `VAWE_UNATTENDED=1`, and the command prints that no approval was checked. If a named agent approves a draft it also worked on, the judge sees a `self-approved` flag, because no person approved it. A refusal also tells the agent what to do next: show the draft to a person and stop.
 
@@ -59,7 +59,7 @@ For the framework as a whole, see [the docs on quality gates](/docs/quality-gate
 
 - `harness/lib/advice.mjs`: the one wording for advice and errors.
 - `harness/lib/approval.mjs` and `harness/live/ship-approval.mjs`: the approval file, the page hash and the refusal.
-- [`939c816e1`](https://github.com/Vandit1604/vawe/commit/939c816e1) (2026-09-30): a flat frame advises, only a missing frame refuses.
-- [`62ec2f450`](https://github.com/Vandit1604/vawe/commit/62ec2f450) (2026-09-30): render invariants fail with one line each and exit 2.
-- [`61ac19259`](https://github.com/Vandit1604/vawe/commit/61ac19259) (2026-10-01): `advice:` and `error:` wording.
-- [`f776acb65`](https://github.com/Vandit1604/vawe/commit/f776acb65) (2026-10-11): `vawe ship` refuses a final without approval.
+- [`fc4f72b88`](https://github.com/Vandit1604/vawe/commit/fc4f72b88) (2026-09-30): a flat frame advises, only a missing frame refuses.
+- [`82eff9ecc`](https://github.com/Vandit1604/vawe/commit/82eff9ecc) (2026-09-30): render invariants fail with one line each and exit 2.
+- [`4246a6a53`](https://github.com/Vandit1604/vawe/commit/4246a6a53) (2026-10-01): `advice:` and `error:` wording.
+- [`2ac1331ab`](https://github.com/Vandit1604/vawe/commit/2ac1331ab) (2026-10-11): `vawe ship` refuses a final without approval.

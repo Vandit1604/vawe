@@ -13,21 +13,21 @@ On 1 October we cut what a vawe author reads before it writes a film from 2,654 
 
 ## The problem: AGENTS.md rules that do not fire
 
-Our taste rules lived in long documents. They were accurate and nobody read them. Evidence from one weaker-model film sits in the commit message of `61ac19259`: the film named its brand Vesper and drew a banded disc, although the taste card lists both as attractors (the things a model reaches for by default). It skipped the stills judge. It read advice lines as blocking errors. And the judge flipped its own advice between rounds.
+Our taste rules lived in long documents. They were accurate and nobody read them. Evidence from one weaker-model film sits in the commit message of `4246a6a53`: the film named its brand Vesper and drew a banded disc, although the taste card lists both as attractors (the things a model reaches for by default). It skipped the stills judge. It read advice lines as blocking errors. And the judge flipped its own advice between rounds.
 
 In each case the rule existed and the agent did not meet it at the moment it needed it.
 
 ## What we tried
 
-Our first move was to print the rules at the step where they matter. On 30 September `dev` and `ship --status` started printing 5 to 8 "do X, not Y" lines for their own step (concept, motion, sound, before the verdict). Each line quotes its row in the taste card, and a test fails when a quote leaves the card, so the copy cannot drift (`5530ccab7`). We checked the cost of printing: a draft render of a 4 s starter took 4.3 s wall clock, unchanged.
+Our first move was to print the rules at the step where they matter. On 30 September `dev` and `ship --status` started printing 5 to 8 "do X, not Y" lines for their own step (concept, motion, sound, before the verdict). Each line quotes its row in the taste card, and a test fails when a quote leaves the card, so the copy cannot drift (`dc36222cf`). We checked the cost of printing: a draft render of a 4 s starter took 4.3 s wall clock, unchanged.
 
-The second move was to fix how advice reads. A weaker model took every line as blocking, so every advice line now starts with `advice:` and a block that stops starts with `error:` (`61ac19259`). We also added an attractor check that names the cliche hero shapes and the light-poetry brand names in a brand name and in each direction.
+The second move was to fix how advice reads. A weaker model took every line as blocking, so every advice line now starts with `advice:` and a block that stops starts with `error:` (`4246a6a53`). We also added an attractor check that names the cliche hero shapes and the light-poetry brand names in a brand name and in each direction.
 
-The third move was to delete reading. On 1 October the pitfalls from AGENTS.md and the page-writing skill went into one list in the taste digest, and both documents got shorter (`62c6e0c11`). The same day's token diet added a compact moves index and shorter judge and ship output (`74568f272`).
+The third move was to delete reading. On 1 October the pitfalls from AGENTS.md and the page-writing skill went into one list in the taste digest, and both documents got shorter (`aefdda74e`). The same day's token diet added a compact moves index and shorter judge and ship output (`457d87145`).
 
 ## What we built: one folder, one rule per file
 
-On 5 October the rules got an owner. `taste/rules/` holds one file per rule, 98 of them at that commit. Each file carries the same fields: an id, the step it applies at, a principle, a limit, the measured range, when it may be broken, what to do instead, the check that enforces it, a judge question, and what it prevents. A generator, `harness/dev/taste-build.mjs`, writes everything else: the card, the digest, `steps.json` and `limits.json`. The old card, the old digests and the guides moved to `taste/craft` with their numbers replaced by links to rule ids, and ten conflicts between the old files were resolved (`ef0efb349`).
+On 5 October the rules got an owner. `taste/rules/` holds one file per rule, 98 of them at that commit. Each file carries the same fields: an id, the step it applies at, a principle, a limit, the measured range, when it may be broken, what to do instead, the check that enforces it, a judge question, and what it prevents. A generator, `harness/dev/taste-build.mjs`, writes everything else: the card, the digest, `steps.json` and `limits.json`. The old card, the old digests and the guides moved to `taste/craft` with their numbers replaced by links to rule ids, and ten conflicts between the old files were resolved (`e09a5f569`).
 
 This is the exits rule, shortened:
 
@@ -43,7 +43,7 @@ check: exit-length
 digest: Exits are faster than entrances: shorter, on EASE.launch.
 ```
 
-The digest line is the only text an author has to hold in its head. The rest is there when a check fires and prints the rule behind it. Twelve draft checks read the page from the DOM, and each cites its taste rule and the number from `limits.json` (`b6e60d817`). The [loophole audit](/blog/loophole-audit) later found 21 of 107 rules with no check at all.
+The digest line is the only text an author has to hold in its head. The rest is there when a check fires and prints the rule behind it. Twelve draft checks read the page from the DOM, and each cites its taste rule and the number from `limits.json` (`378aeea9f`). The [loophole audit](/blog/loophole-audit) later found 21 of 107 rules with no check at all.
 
 ## The measured result, and what went wrong
 
@@ -54,7 +54,7 @@ The read-load is a number a bench script computes: the words in the root pointer
 <figcaption>The stamp in <code>bench-ratchet.json</code> at each re-stamp commit. The diet is the second bar.</figcaption>
 </figure>
 
-The diet worked: 2,654 words and about 3,530 tokens became 2,239 words and 2,978 tokens (`62c6e0c11`). Then we kept building. The process phases for the brief, the skill ladder, the lens and `vawe see` verbs, the transitions skill and the idea method each added reading, and each was followed by a re-stamp of the ratchet. By 11 October the stamp was 4,602 words, more than double the low point.
+The diet worked: 2,654 words and about 3,530 tokens became 2,239 words and 2,978 tokens (`aefdda74e`). Then we kept building. The process phases for the brief, the skill ladder, the lens and `vawe see` verbs, the transitions skill and the idea method each added reading, and each was followed by a re-stamp of the ratchet. By 11 October the stamp was 4,602 words, more than double the low point.
 
 We think that is the honest shape of the work. A ratchet cannot stop growth. It makes growth visible, and it makes a person pay for a new rule in public. A fix we have not made yet is to move new reading out of the always-read set and into the step that needs it.
 
@@ -76,9 +76,9 @@ Measure the read-load and ratchet it, and expect it to grow anyway. Read [the we
 - `taste/build/DIGEST.md`: the generated list authors read
 - `harness/dev/taste-build.mjs`: the generator
 - `harness/dev/bench.mjs` and `quality/baselines/bench-ratchet.json`: the read-load ratchet
-- [`ef0efb349`](https://github.com/Vandit1604/vawe/commit/ef0efb349): one folder, one rule per file, everything else generated
-- [`62c6e0c11`](https://github.com/Vandit1604/vawe/commit/62c6e0c11): the pitfalls diet, read-load 2,239 words
-- [`61ac19259`](https://github.com/Vandit1604/vawe/commit/61ac19259): advice that a weaker model reads right, and the attractor check
-- [`5530ccab7`](https://github.com/Vandit1604/vawe/commit/5530ccab7): each step prints its own rules
+- [`e09a5f569`](https://github.com/Vandit1604/vawe/commit/e09a5f569): one folder, one rule per file, everything else generated
+- [`aefdda74e`](https://github.com/Vandit1604/vawe/commit/aefdda74e): the pitfalls diet, read-load 2,239 words
+- [`4246a6a53`](https://github.com/Vandit1604/vawe/commit/4246a6a53): advice that a weaker model reads right, and the attractor check
+- [`dc36222cf`](https://github.com/Vandit1604/vawe/commit/dc36222cf): each step prints its own rules
 
 The repo is [Vandit1604/vawe](https://github.com/Vandit1604/vawe). The agent docs live under [/ai-agents](/ai-agents).

@@ -29,19 +29,19 @@ Killed renders added a second problem. A render that was stopped with `SIGKILL` 
 
 ### One machine-wide slot lock
 
-Commit `5eb3dcca5` replaced the process-list scan with slots. A slot is a file in a shared directory, `slot-<i>.json`, created with an exclusive create so two renders can never take the same one. It records the pid, start time, kind and who asked. A slot whose pid is dead is taken back. The default is 2 slots for the whole machine, set by `VAWE_RENDER_SLOTS`.
+Commit `7fcf92913` replaced the process-list scan with slots. A slot is a file in a shared directory, `slot-<i>.json`, created with an exclusive create so two renders can never take the same one. It records the pid, start time, kind and who asked. A slot whose pid is dead is taken back. The default is 2 slots for the whole machine, set by `VAWE_RENDER_SLOTS`.
 
-A render that cannot get a slot waits and prints one line naming the holder and its age. Commit `592c2453f` moved that line to stdout, since our render commands promise a single error line on stderr and a waiting line is progress.
+A render that cannot get a slot waits and prints one line naming the holder and its age. Commit `6055cc38c` moved that line to stdout, since our render commands promise a single error line on stderr and a waiting line is progress.
 
 ### A slot kept for drafts
 
 Slots fixed the load but created a queue. A final holds a slot for minutes, and an agent that wanted a 30-second draft waited behind it. In one session on 2026-10-11, a draft waited up to 357 seconds behind finals (the number is in a code comment).
 
-Commit `7d01618fc` stops a final from taking the last free slot. A final may take slots 0 to count minus 2. A draft tries the top slot first and then the others. With the default of 2 slots, a final can only use slot-0, and slot-1 is always free for a draft.
+Commit `05aa73d9c` stops a final from taking the last free slot. A final may take slots 0 to count minus 2. A draft tries the top slot first and then the others. With the default of 2 slots, a final can only use slot-0, and slot-1 is always free for a draft.
 
 ### A lane budget from free memory
 
-Slots limit renders. Lanes limit Chromes inside one render. Commit `30da723d5` computes the lane count from the machine: the smaller of cores minus 1, free memory divided by 1,500 MB, free process slots divided by 12, and a cap of 4. At least one lane always runs. The memory figure comes from a measurement: a software-composited 1080p Chrome used about 1.5 GB resident and 7 processes while idle.
+Slots limit renders. Lanes limit Chromes inside one render. Commit `088b3d1e3` computes the lane count from the machine: the smaller of cores minus 1, free memory divided by 1,500 MB, free process slots divided by 12, and a cap of 4. At least one lane always runs. The memory figure comes from a measurement: a software-composited 1080p Chrome used about 1.5 GB resident and 7 processes while idle.
 
 The cap of 4 also comes from a measurement. On a film called tracking-hud, under load 21, we recorded shots per second at 1, 2, 4 and 6 lanes.
 
@@ -55,7 +55,7 @@ A sixth lane adds under 10% for 1.3 GB more memory, so the budget stops at 4. Wh
 
 ### A reaper for orphans
 
-Every Chrome that the harness launches writes a file named after its pid, whose content is the pid of its owner. At the next launch, the renderer reads that directory and kills the Chromes whose owner is dead (`30da723d5`). A Chrome whose owner is alive is left alone. Commit `3ba75d21b` extends this to a puppeteer Chrome whose parent is init, the leftover of code that never registered it. Commit `9e876b01b` makes a stop signal close the browsers once and exit. Every signal path closes with a grace limit.
+Every Chrome that the harness launches writes a file named after its pid, whose content is the pid of its owner. At the next launch, the renderer reads that directory and kills the Chromes whose owner is dead (`088b3d1e3`). A Chrome whose owner is alive is left alone. Commit `58f289415` extends this to a puppeteer Chrome whose parent is init, the leftover of code that never registered it. Commit `eea0cc5ee` makes a stop signal close the browsers once and exit. Every signal path closes with a grace limit.
 
 ## Result
 
@@ -80,7 +80,7 @@ Waiting itself is its own problem, covered in [making the wait cheap](/blog/chea
 - `harness/lib/lane-budget.mjs`: the lane count.
 - `harness/lib/render-harness.mjs`: Chrome registration and the reaper.
 - `tests/lib/render-slots.test.mjs` and `tests/media/chrome-reaper.test.mjs`.
-- Commit [5eb3dcca5](https://github.com/Vandit1604/vawe/commit/5eb3dcca5): the slot lock.
-- Commit [7d01618fc](https://github.com/Vandit1604/vawe/commit/7d01618fc): a final never takes the last slot.
-- Commit [30da723d5](https://github.com/Vandit1604/vawe/commit/30da723d5): lane budget and reaper.
-- Commit [3ba75d21b](https://github.com/Vandit1604/vawe/commit/3ba75d21b): reap puppeteer Chromes whose parent is init.
+- Commit [7fcf92913](https://github.com/Vandit1604/vawe/commit/7fcf92913): the slot lock.
+- Commit [05aa73d9c](https://github.com/Vandit1604/vawe/commit/05aa73d9c): a final never takes the last slot.
+- Commit [088b3d1e3](https://github.com/Vandit1604/vawe/commit/088b3d1e3): lane budget and reaper.
+- Commit [58f289415](https://github.com/Vandit1604/vawe/commit/58f289415): reap puppeteer Chromes whose parent is init.

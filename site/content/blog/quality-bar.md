@@ -19,11 +19,11 @@ A judge that only sees your films can only rank your films. If all of them share
 
 Three pieces made it work.
 
-`vawe refs` indexes the reference films. They live in a folder outside the repo and are never committed, so we publish the measurement and keep the films private (`7259df42c`). It picks references by film type and length.
+`vawe refs` indexes the reference films. They live in a folder outside the repo and are never committed, so we publish the measurement and keep the films private (`10f9e5ebf`). It picks references by film type and length.
 
-`vawe spec` measures any film deterministically: its cuts, its flashes and, from `2aeb3d688`, two more groups of numbers. The eye group is where the focus sits in each shot, how far it jumps at a cut, how far it travels, and how often it sits near the centre. The ground group is the edge tone, whether the ground changes at a cut, and how much the light drifts (`d54e256f8` later made a cut compare the border cells of the two worlds).
+`vawe spec` measures any film deterministically: its cuts, its flashes and, from `576d7c9ff`, two more groups of numbers. The eye group is where the focus sits in each shot, how far it jumps at a cut, how far it travels, and how often it sits near the centre. The ground group is the edge tone, whether the ground changes at a cut, and how much the light drifts (`2a1e5fb32` later made a cut compare the border cells of the two worlds).
 
-`bar-from-refs` takes one value per film and prints the p10, median and p90 of each metric (`45b9d8f44`). The output is a committed file, `taste/build/ref-range.json`.
+`bar-from-refs` takes one value per film and prints the p10, median and p90 of each metric (`78a282e7c`). The output is a committed file, `taste/build/ref-range.json`.
 
 <figure>
 <img src="/blog/quality-bar/ref-range.svg" alt="Range bars from the reference films: eye jump median 0.185 frame heights, eye near centre median 50 percent, ground change median 56.3 percent, overshoot median 30.5 percent" width="720" height="410" loading="lazy">
@@ -48,7 +48,7 @@ Reading across: the median reference film keeps the eye still at a cut (a jump o
 
 ## What we built: four checks from the data
 
-The same commit wrote four checks straight from the ranges (`b44f29662`). Each limit comes from a percentile, and each rule file records what our own films looked like when we measured them.
+The same commit wrote four checks straight from the ranges (`9fd9a76e2`). Each limit comes from a percentile, and each rule file records what our own films looked like when we measured them.
 
 <figure>
 <img src="/blog/quality-bar/ours-vs-ref.svg" alt="Four rows comparing our early films with the reference range: overshoot 0 to 11 against 21 to 41 percent, peak speed 14 to 30 against at most 12.6 frame heights per second, readable text 94 against 84 percent or less, and a word held 3 to 4 seconds against 2.8" width="720" height="320" loading="lazy">
@@ -83,9 +83,9 @@ Keep the checks advisory. A percentile is a description. If you make it a gate, 
 - `harness/media/ref-spec.mjs` and `harness/dev/bar-from-refs.mjs`: measure a film, then summarise the references
 - `taste/build/ref-range.json`: the committed range file
 - `taste/rules/overshoot.md`, `speed-bands.md`, `text-breathing.md` and `readable-hold.md`: where the four rules live today (they were four separate files when first written)
-- [`2aeb3d688`](https://github.com/Vandit1604/vawe/commit/2aeb3d688): eye point and ground measured per shot
-- [`45b9d8f44`](https://github.com/Vandit1604/vawe/commit/45b9d8f44): `bar-from-refs` prints the p10, median and p90
-- [`b44f29662`](https://github.com/Vandit1604/vawe/commit/b44f29662): the four checks from the measured bar
-- [`e82b60704`](https://github.com/Vandit1604/vawe/commit/e82b60704): the judge compares with two reference films per dial
+- [`576d7c9ff`](https://github.com/Vandit1604/vawe/commit/576d7c9ff): eye point and ground measured per shot
+- [`78a282e7c`](https://github.com/Vandit1604/vawe/commit/78a282e7c): `bar-from-refs` prints the p10, median and p90
+- [`9fd9a76e2`](https://github.com/Vandit1604/vawe/commit/9fd9a76e2): the four checks from the measured bar
+- [`4e4aa7ed6`](https://github.com/Vandit1604/vawe/commit/4e4aa7ed6): the judge compares with two reference films per dial
 
 The repo is [Vandit1604/vawe](https://github.com/Vandit1604/vawe). The agent workflow that uses these numbers is on [/ai-agents](/ai-agents).

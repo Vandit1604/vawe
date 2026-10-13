@@ -45,17 +45,17 @@ The gooey-filter move draws its tab bar through an SVG filter. In a shared draft
 <figcaption>The <a href="/moves/gooey-filter">gooey filter move</a>, the page that exposed the drift.</figcaption>
 </figure>
 
-Commit `60bc38dc4` made two changes. Each draft lane now has its own Chrome, which took the difference down to 1 of 1,296 frames. A page that draws an SVG filter also composites in software, which gave 0 of 648. Software compositing costs a draft about 2.5 times as much, so only pages that need it pay. The renderer finds them by scanning the page source, and the modules it imports, for a `<filter>` element, an `fe*` primitive or a `filter: url(...)` rule.
+Commit `0b1d35912` made two changes. Each draft lane now has its own Chrome, which took the difference down to 1 of 1,296 frames. A page that draws an SVG filter also composites in software, which gave 0 of 648. Software compositing costs a draft about 2.5 times as much, so only pages that need it pay. The renderer finds them by scanning the page source, and the modules it imports, for a `<filter>` element, an `fe*` primitive or a `filter: url(...)` rule.
 
 ### The timeline between load and first seek
 
 The document timeline runs in real time from page load. The compositor rasterizes animated layers against that time before the first seek pauses them. A first seek 1.5 seconds after load painted different edge pixels than one at 0.05 seconds, so a frame depended on how slowly the tab started.
 
-Commit `874af4972` sets the animation playback rate to 0 through the DevTools protocol. Only a seek moves an animation. How we seek in both directions is in [making CSS animations seekable](/blog/seekable-css).
+Commit `1454df446` sets the animation playback rate to 0 through the DevTools protocol. Only a seek moves an animation. How we seek in both directions is in [making CSS animations seekable](/blog/seekable-css).
 
 ### Which tab has focus
 
-The tab that holds browser focus rasterizes sub-pixel edges differently from the others (SSIM 0.9994 in our measurement). With several workers, which slice was frontmost changed the pixels. Commit `169fdc5d6` turns on focus emulation for every page, so all of them paint as the focused one.
+The tab that holds browser focus rasterizes sub-pixel edges differently from the others (SSIM 0.9994 in our measurement). With several workers, which slice was frontmost changed the pixels. Commit `586d132c4` turns on focus emulation for every page, so all of them paint as the focused one.
 
 ### Raster state kept between seeks
 
@@ -63,11 +63,11 @@ A page keeps raster state between seeks. The first frame on a fresh page differs
 
 ### Software canvas for the lens source
 
-The WebGL lens films the page as a flat screen. Commit `8f153f31b` makes the lens draw its SVG screen into a software canvas, so the draft pixels match from run to run.
+The WebGL lens films the page as a flat screen. Commit `398fd7a7c` makes the lens draw its SVG screen into a software canvas, so the draft pixels match from run to run.
 
 ### Chrome's own downscale of WebGL
 
-A half-size draft of a WebGL page used Chrome's downscale, and 117 of 154 captures differed between runs. Commit `166771b93` captures at full size and lets ffmpeg shrink the frames with `flags=area`. The whole story is in [drafts that lie](/blog/drafts-lie).
+A half-size draft of a WebGL page used Chrome's downscale, and 117 of 154 captures differed between runs. Commit `a916e59d6` captures at full size and lets ffmpeg shrink the frames with `flags=area`. The whole story is in [drafts that lie](/blog/drafts-lie).
 
 ## How we keep it fixed
 
@@ -97,7 +97,7 @@ For where this matters to buyers, see [when determinism matters](/when-determini
 ## In the code
 
 - `harness/media/render-page.mjs`: `SVG_FILTER`, `usesSvgFilter`, `SLICE_FRAMES`, focus emulation and `Animation.setPlaybackRate`.
-- Commit [60bc38dc4](https://github.com/Vandit1604/vawe/commit/60bc38dc4): a Chrome per draft lane, software compositing for SVG filters.
-- Commit [874af4972](https://github.com/Vandit1604/vawe/commit/874af4972): freeze the document timeline.
-- Commit [169fdc5d6](https://github.com/Vandit1604/vawe/commit/169fdc5d6): focus emulation.
-- Commit [166771b93](https://github.com/Vandit1604/vawe/commit/166771b93): full-size capture, ffmpeg scaling.
+- Commit [0b1d35912](https://github.com/Vandit1604/vawe/commit/0b1d35912): a Chrome per draft lane, software compositing for SVG filters.
+- Commit [1454df446](https://github.com/Vandit1604/vawe/commit/1454df446): freeze the document timeline.
+- Commit [586d132c4](https://github.com/Vandit1604/vawe/commit/586d132c4): focus emulation.
+- Commit [a916e59d6](https://github.com/Vandit1604/vawe/commit/a916e59d6): full-size capture, ffmpeg scaling.

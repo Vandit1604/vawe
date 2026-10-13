@@ -19,9 +19,9 @@ The obvious move was a rule. If agents fail on these forms, refuse the forms and
 
 ## What we tried: a hook with a fix in every refusal
 
-Commit [5d2beaeed](https://github.com/Vandit1604/vawe/commit/5d2beaeed) extended our git guard, `harness/live/no-blanket-git.mjs`. It refused a `for`, `while` or `until` loop, `sed -i`, and a multi-part command that starts with `cd`. Each refusal came with a fix: run the commands one per call, use the Edit tool, drop the `cd` prefix. The commit added 32 lines and removed 8, and added test cases for each form.
+Commit [ba89f5db0](https://github.com/Vandit1604/vawe/commit/ba89f5db0) extended our git guard, `harness/live/no-blanket-git.mjs`. It refused a `for`, `while` or `until` loop, `sed -i`, and a multi-part command that starts with `cd`. Each refusal came with a fix: run the commands one per call, use the Edit tool, drop the `cd` prefix. The commit added 32 lines and removed 8, and added test cases for each form.
 
-It was reverted seven minutes later by [25eec4c93](https://github.com/Vandit1604/vawe/commit/25eec4c93). The commit after that, [607cfe6f0](https://github.com/Vandit1604/vawe/commit/607cfe6f0), narrowed the guard to the four git commands that lose work. Its subject says the rest: shell style (loops, `cd`, `sed`) is the agent's choice.
+It was reverted seven minutes later by [2972e403a](https://github.com/Vandit1604/vawe/commit/2972e403a). The commit after that, [e16b230e9](https://github.com/Vandit1604/vawe/commit/e16b230e9), narrowed the guard to the four git commands that lose work. Its subject says the rest: shell style (loops, `cd`, `sed`) is the agent's choice.
 
 ![Timeline: a hook added at 04:58:27, reverted at 05:05:31, narrowed at 05:05:57](/blog/shell/timeline.svg)
 
@@ -31,15 +31,15 @@ Here is why. The refusals we were trying to prevent came from the worktree isola
 
 We changed what happens when a habit fails.
 
-Fewer hooks that fight. Commit [65abeef9d](https://github.com/Vandit1604/vawe/commit/65abeef9d), "Stop fighting the hooks", narrowed the blanket-add block (`git add -A` with an explicit path is allowed), made doc references advisory in pre-commit, and dropped the `MISTAKES.md` log and its duplicates gate. 43 files changed, 61 lines added and 1,376 removed. The log had a rule behind it: a bug is closed by a check, not a log entry.
+Fewer hooks that fight. Commit [6a0bae25b](https://github.com/Vandit1604/vawe/commit/6a0bae25b), "Stop fighting the hooks", narrowed the blanket-add block (`git add -A` with an explicit path is allowed), made doc references advisory in pre-commit, and dropped the `MISTAKES.md` log and its duplicates gate. 43 files changed, 61 lines added and 1,376 removed. The log had a rule behind it: a bug is closed by a check, not a log entry.
 
-A hook that compares an edit with its own worktree. [7a785570c](https://github.com/Vandit1604/vawe/commit/7a785570c) changed the code-quality hook so it compares an edit with the `HEAD` of its own worktree, and only with `HEAD`. A tangle the edit did not add never blocks it.
+A hook that compares an edit with its own worktree. [45ffd6077](https://github.com/Vandit1604/vawe/commit/45ffd6077) changed the code-quality hook so it compares an edit with the `HEAD` of its own worktree, and only with `HEAD`. A tangle the edit did not add never blocks it.
 
-Capability probes. [e94808616](https://github.com/Vandit1604/vawe/commit/e94808616) gave `vawe doctor` a `--json` output and probes for encode, `drawtext` and launching Chrome. It writes `.vawe/doctor.json`, and a render failure now names the failed check. The agent does not need to guess that the machine is missing a tool.
+Capability probes. [e1b240532](https://github.com/Vandit1604/vawe/commit/e1b240532) gave `vawe doctor` a `--json` output and probes for encode, `drawtext` and launching Chrome. It writes `.vawe/doctor.json`, and a render failure now names the failed check. The agent does not need to guess that the machine is missing a tool.
 
-One verb for waiting. [955d4a94c](https://github.com/Vandit1604/vawe/commit/955d4a94c) added `vawe wait`: it blocks until any render of a film ends, with a progress line each minute. `AGENTS.md` now says: never `sleep`, run `vawe wait`.
+One verb for waiting. [f0ab4f483](https://github.com/Vandit1604/vawe/commit/f0ab4f483) added `vawe wait`: it blocks until any render of a film ends, with a progress line each minute. `AGENTS.md` now says: never `sleep`, run `vawe wait`.
 
-The habit, documented once. A one-line note in the `vawe-page` skill gives the macOS `sed -i ''` form ([8973c50be](https://github.com/Vandit1604/vawe/commit/8973c50be)), and the Shell section of `AGENTS.md` lists the habits that fail in this shell ([ab9e5a79e](https://github.com/Vandit1604/vawe/commit/ab9e5a79e)).
+The habit, documented once. A one-line note in the `vawe-page` skill gives the macOS `sed -i ''` form ([298be1120](https://github.com/Vandit1604/vawe/commit/298be1120)), and the Shell section of `AGENTS.md` lists the habits that fail in this shell ([8eebf5561](https://github.com/Vandit1604/vawe/commit/8eebf5561)).
 
 A result line that survives a pipe. Agents piped 134 of 140 `vawe` calls in one review into `tail`, `head` or `grep`, which hides the exit code. Now every verb ends with a line, `vawe: <verb> ok|FAILED (<reason>) in <s>s`. The pipe cannot hide it.
 
@@ -65,7 +65,7 @@ For the one command that replaced the pile of scripts, see [One binary, one verb
 
 - `harness/live/no-blanket-git.mjs`: the guard, now four git commands.
 - `AGENTS.md`, section Shell: the habits that fail.
-- [5d2beaeed](https://github.com/Vandit1604/vawe/commit/5d2beaeed) and [25eec4c93](https://github.com/Vandit1604/vawe/commit/25eec4c93): the hook and its revert.
-- [607cfe6f0](https://github.com/Vandit1604/vawe/commit/607cfe6f0): guard only data loss.
-- [e94808616](https://github.com/Vandit1604/vawe/commit/e94808616): `vawe doctor` probes.
-- [955d4a94c](https://github.com/Vandit1604/vawe/commit/955d4a94c): `vawe wait`.
+- [ba89f5db0](https://github.com/Vandit1604/vawe/commit/ba89f5db0) and [2972e403a](https://github.com/Vandit1604/vawe/commit/2972e403a): the hook and its revert.
+- [e16b230e9](https://github.com/Vandit1604/vawe/commit/e16b230e9): guard only data loss.
+- [e1b240532](https://github.com/Vandit1604/vawe/commit/e1b240532): `vawe doctor` probes.
+- [f0ab4f483](https://github.com/Vandit1604/vawe/commit/f0ab4f483): `vawe wait`.

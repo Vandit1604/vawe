@@ -29,7 +29,7 @@ That explained one hang. It did not give us a general answer, because the next h
 
 ## What we built
 
-Commit `adf6bc7d4` adds a watchdog around every slice. Before each await, the slice calls `mark('<step>')` with a name such as `seek`, `screenshot`, `settle` or `open page`. A timer checks every second (or a quarter of the limit, if smaller) how long the slice has gone without a new mark.
+Commit `72a65ec3a` adds a watchdog around every slice. Before each await, the slice calls `mark('<step>')` with a name such as `seek`, `screenshot`, `settle` or `open page`. A timer checks every second (or a quarter of the limit, if smaller) how long the slice has gone without a new mark.
 
 After 60 seconds with no progress it prints one line:
 
@@ -37,7 +37,7 @@ After 60 seconds with no progress it prints one line:
 render stalled: worker 1, frame 6 (0.20 s), in seek for 60 s; retrying slice 0.00-0.50s on a fresh page (attempt 2 of 4)
 ```
 
-It then closes the stuck page, opens a fresh one and runs the slice again from its first frame. A seek is a pure function of time, so a rerun gives the same pixels. The first version restarted a slice once and made a second stall an error. When we made finals resumable (`5eb3dcca5`) the limit became 4 attempts. If every attempt stalls, the render fails with an error that names the step and lists the usual causes: a `window.seek` or `onFrame` hook that never resolves, a font or image that never loads, or a starved browser.
+It then closes the stuck page, opens a fresh one and runs the slice again from its first frame. A seek is a pure function of time, so a rerun gives the same pixels. The first version restarted a slice once and made a second stall an error. When we made finals resumable (`7fcf92913`) the limit became 4 attempts. If every attempt stalls, the render fails with an error that names the step and lists the usual causes: a `window.seek` or `onFrame` hook that never resolves, a font or image that never loads, or a starved browser.
 
 ### Why 60 seconds
 
@@ -53,9 +53,9 @@ The limit is a default, and `renderPage` takes a `stallMs` option. Our stall tes
 
 ## Two companions
 
-A page with several WebGL canvases slows down over a long render until one protocol call times out. Commit `ff1c6d9ab` recycles the capture page every 300 subframes and raises the protocol timeout to 30 minutes. A seek is a pure function of time, so a new page produces the same pixels.
+A page with several WebGL canvases slows down over a long render until one protocol call times out. Commit `3df26fcd0` recycles the capture page every 300 subframes and raises the protocol timeout to 30 minutes. A seek is a pure function of time, so a new page produces the same pixels.
 
-The other end of a render has a similar bound. Puppeteer's navigation limit is 30 seconds. On two drafts beside a loaded machine it fired when nothing was wrong. Now `gotoLoaded` checks why the load stalled. An unfinished request, a blocked main thread or a console error fails at once with the reason. If nothing explains it, the load retries with a 120-second limit. Commit `6ddf4240d` added the naming.
+The other end of a render has a similar bound. Puppeteer's navigation limit is 30 seconds. On two drafts beside a loaded machine it fired when nothing was wrong. Now `gotoLoaded` checks why the load stalled. An unfinished request, a blocked main thread or a console error fails at once with the reason. If nothing explains it, the load retries with a 120-second limit. Commit `6bea1e806` added the naming.
 
 ## Result
 
@@ -78,7 +78,7 @@ If you want to know how this fits with resumable finals, read [resumable finals]
 - `harness/media/render-page.mjs`: `STALL_MS`, `SLICE_ATTEMPTS`, `RECYCLE_SUBFRAMES`, `runShards`, `gotoLoaded`.
 - `core/engine/page-seek.js`: `awaitFonts`.
 - `tests/media/render-stall.test.mjs`.
-- Commit [adf6bc7d4](https://github.com/Vandit1604/vawe/commit/adf6bc7d4): the stall watchdog and the font deadline.
-- Commit [ff1c6d9ab](https://github.com/Vandit1604/vawe/commit/ff1c6d9ab): recycle the page every 300 subframes.
-- Commit [5eb3dcca5](https://github.com/Vandit1604/vawe/commit/5eb3dcca5): 4 attempts per slice.
-- Commit [6ddf4240d](https://github.com/Vandit1604/vawe/commit/6ddf4240d): name why a page never loads.
+- Commit [72a65ec3a](https://github.com/Vandit1604/vawe/commit/72a65ec3a): the stall watchdog and the font deadline.
+- Commit [3df26fcd0](https://github.com/Vandit1604/vawe/commit/3df26fcd0): recycle the page every 300 subframes.
+- Commit [7fcf92913](https://github.com/Vandit1604/vawe/commit/7fcf92913): 4 attempts per slice.
+- Commit [6bea1e806](https://github.com/Vandit1604/vawe/commit/6bea1e806): name why a page never loads.

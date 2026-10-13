@@ -28,7 +28,7 @@ We did not tune the old suite. Tuning code that is about to be deleted is wasted
 
 ## What the new e2e run does
 
-After the JSON format was gone, commit `777ec0da5` rewrote `harness/dev/e2e.mjs`. The new run has two parts.
+After the JSON format was gone, commit `6d34b376a` rewrote `harness/dev/e2e.mjs`. The new run has two parts.
 
 First it runs the page tests with `node --test`: determinism, page audio and the motion tests. Second it finds every `films/**/page.html` and every page in `tests/fixtures/pages/`, and renders each one as a half-size draft. A small pool runs 2 to 4 renders at once, depending on the core count.
 
@@ -46,7 +46,7 @@ One caveat belongs next to the 4.3 seconds. At that commit the repository had on
 
 ## Timing tests that read the machine first
 
-A fixed limit fails under load. In `250b7a3d5` we made the two timing tests measure the machine before they judge it.
+A fixed limit fails under load. In `cb4fe0188` we made the two timing tests measure the machine before they judge it.
 
 The check-budget test stores the seconds each draft check took, plus how long the capture of its fixture took on the stamping run. On a later run it divides this run's capture time by the stamped one. If the machine is 2x slower, each check gets a 2x limit. The stall test does the same: it renders the same page once with no stall, then sets its stall limit to twice that capture time, with a floor of 1.5 seconds.
 
@@ -54,7 +54,7 @@ This keeps the tests honest in both directions. A real regression still fails, b
 
 ## The rest of the loop
 
-The same week we cut the Makefile down to thin aliases for `bin/vawe` verbs and rewrote the git hooks (`b4be7483b`, 70 files, +158 and -2,481). Pre-commit runs fast checks. Pre-push runs fast checks plus e2e. Later `vawe land` (`685fe284b`) wrapped the whole ritual into one verb: fetch, rebase onto origin/main, scan for big files, run the tests, then push with an ssh keep-alive. We wrote about it in [cheap waiting](/blog/cheap-wait).
+The same week we cut the Makefile down to thin aliases for `bin/vawe` verbs and rewrote the git hooks (`3913b499c`, 70 files, +158 and -2,481). Pre-commit runs fast checks. Pre-push runs fast checks plus e2e. Later `vawe land` (`82b68c3c7`) wrapped the whole ritual into one verb: fetch, rebase onto origin/main, scan for big files, run the tests, then push with an ssh keep-alive. We wrote about it in [cheap waiting](/blog/cheap-wait).
 
 Our rule is one e2e per merge. Agents do not run it per branch, because ten agents each running a render suite is how the laptop got to a load of 18 in the first place.
 
@@ -81,7 +81,7 @@ If you are building a render pipeline around plain web pages, see how [the page 
 
 - `harness/dev/e2e.mjs`: the page tests plus parallel draft renders.
 - `tests/media/check-budget.test.mjs` and `tests/media/render-stall.test.mjs`: timing tests scaled by a control run.
-- Commit [777ec0da5](https://github.com/Vandit1604/vawe/commit/777ec0da5): the new e2e.
-- Commit [250b7a3d5](https://github.com/Vandit1604/vawe/commit/250b7a3d5): timing tests that scale with the run.
-- Commit [b4be7483b](https://github.com/Vandit1604/vawe/commit/b4be7483b): thin Makefile and fast hooks.
-- Commit [685fe284b](https://github.com/Vandit1604/vawe/commit/685fe284b): `vawe land`.
+- Commit [6d34b376a](https://github.com/Vandit1604/vawe/commit/6d34b376a): the new e2e.
+- Commit [cb4fe0188](https://github.com/Vandit1604/vawe/commit/cb4fe0188): timing tests that scale with the run.
+- Commit [3913b499c](https://github.com/Vandit1604/vawe/commit/3913b499c): thin Makefile and fast hooks.
+- Commit [82b68c3c7](https://github.com/Vandit1604/vawe/commit/82b68c3c7): `vawe land`.

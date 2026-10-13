@@ -21,7 +21,7 @@ Each of these costs a retry, and a retry in a shared repository is a chance to m
 
 ## What we tried first
 
-The stale-checkout part has a lighter tool. [b5ab6f2](https://github.com/Vandit1604/vawe/commit/b5ab6f217), two minutes before the landing verb, makes the stage hook say when a checkout is behind `origin/main` and name the command that updates it (the fetch is cached for 10 minutes). A line like this appears at the start of the next prompt (the number is an example):
+The stale-checkout part has a lighter tool. [61dd23b](https://github.com/Vandit1604/vawe/commit/61dd23b33), two minutes before the landing verb, makes the stage hook say when a checkout is behind `origin/main` and name the command that updates it (the fetch is cached for 10 minutes). A line like this appears at the start of the next prompt (the number is an example):
 
 ```
 this checkout is 3 commits behind origin/main: new guides, verbs and
@@ -32,7 +32,7 @@ That tells an agent that it is stale. It does not stop an agent from pushing fro
 
 ## What we built
 
-`bin/vawe land` ([685fe28](https://github.com/Vandit1604/vawe/commit/685fe284b), 2026-10-11) is `harness/dev/land.mjs` with its pure helpers in `harness/lib/land.mjs`. It runs five steps in a fixed order, and it stops at the first one that fails.
+`bin/vawe land` ([82b68c3](https://github.com/Vandit1604/vawe/commit/82b68c3c7), 2026-10-11) is `harness/dev/land.mjs` with its pure helpers in `harness/lib/land.mjs`. It runs five steps in a fixed order, and it stops at the first one that fails.
 
 1. Rebase. It refuses to start if a tracked file has uncommitted edits. Then it fetches `origin main` and rebases onto `origin/main`. On a conflict it names the conflicted files, aborts the rebase, and leaves the branch as it was. It never goes on half rebased.
 2. Scan for big files. It lists every object in `origin/main..HEAD` and refuses any file over 5 MB by name, even if a later commit deletes it. The scan reads the whole range because the history is what a push sends.
@@ -62,4 +62,4 @@ If you use worktrees for several agents at once, [the stale-checkout line](/blog
 - `harness/lib/land.mjs`: conflict parsing, the big-blob scan, the e2e line and the ssh keep-alive.
 - `tests/lib/land.test.mjs`: the unit tests and three repository tests.
 - `guides/ENGINE-CHANGES.md`: the "Landing a change" section.
-- Commits: [685fe28](https://github.com/Vandit1604/vawe/commit/685fe284b) (the verb), [b5ab6f2](https://github.com/Vandit1604/vawe/commit/b5ab6f217) (stale checkout line).
+- Commits: [82b68c3](https://github.com/Vandit1604/vawe/commit/82b68c3c7) (the verb), [61dd23b](https://github.com/Vandit1604/vawe/commit/61dd23b33) (stale checkout line).

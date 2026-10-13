@@ -46,7 +46,7 @@ Only warm tabs get a `Page` on the looking connection now, and a render's tab is
 
 ## The measured result
 
-We rendered a 66-frame window of one film beside a compare loop, twice before the fix and twice after. Before, both runs had 5 or 6 wrong frames. After, both had none. Then we re-rendered both full finals. The first film had 14 frame-to-frame luma jumps over 20 before the fix and none after, and the second had no wrong-viewport frame. The commit message records the numbers (`eaef43da2`), and the capture path itself did not change.
+We rendered a 66-frame window of one film beside a compare loop, twice before the fix and twice after. Before, both runs had 5 or 6 wrong frames. After, both had none. Then we re-rendered both full finals. The first film had 14 frame-to-frame luma jumps over 20 before the fix and none after, and the second had no wrong-viewport frame. The commit message records the numbers (`60de4a7aa`), and the capture path itself did not change.
 
 <figure>
 <img src="/blog/judge-defect/numbers.svg" alt="Bars: wrong frames in a 66-frame window fell from 5 to 6 to 0, and luma jumps over 20 in a final fell from 14 to 0" width="720" height="280" loading="lazy">
@@ -57,9 +57,9 @@ Two films named in the commit were affected. We did not count how many earlier f
 
 ## The judge and our check had to agree
 
-The same week showed a second way two instruments can disagree. The judge counted "5 near-identical tail tiles (limit 4)" on one film in 7 of 9 rounds, while our own draft check found nothing. The draft check read pixel statistics, and a slow push moves pixels without changing a 288 px tile. We changed it to read the sheet the judge reads, at 5 fps and 288 px, with the same limits (`12d203f22`). It now prints 5 tail tiles on that film, 15 on another film where the judge had written "about 15", and nothing on a third.
+The same week showed a second way two instruments can disagree. The judge counted "5 near-identical tail tiles (limit 4)" on one film in 7 of 9 rounds, while our own draft check found nothing. The draft check read pixel statistics, and a slow push moves pixels without changing a 288 px tile. We changed it to read the sheet the judge reads, at 5 fps and 288 px, with the same limits (`60d485cce`). It now prints 5 tail tiles on that film, 15 on another film where the judge had written "about 15", and nothing on a third.
 
-We also changed how we treat a judge's report. The rule is that a defect the judge reports is real until full-size frames at those seconds say otherwise. A contact-sheet grid is not an echo, so the grid itself does not count, but the prompt never rules a defect class out (`faa44d37f`, `44951917f`).
+We also changed how we treat a judge's report. The rule is that a defect the judge reports is real until full-size frames at those seconds say otherwise. A contact-sheet grid is not an echo, so the grid itself does not count, but the prompt never rules a defect class out (`b394dd450`, `5b2041b6f`).
 
 ## What we would tell someone building the same thing
 
@@ -69,7 +69,7 @@ Check the frames before you decide the reviewer is wrong.
 
 Give two instruments the same input. A judge that reads a 288 px sheet and a check that reads raw pixels will disagree for reasons that are neither of their faults.
 
-A shared browser needs an owner for each tab. We hit two more bugs in the same preview server. A final's own page sat idle in the daemon, the daemon quit after 5 idle minutes, and the audio step failed with "Attempted to use detached Frame" (`a570bbcd8`). A stray tab could also keep an idle daemon alive, so it now exits after 10 idle minutes (`92b8fdc99`). The fixes were small.
+A shared browser needs an owner for each tab. We hit two more bugs in the same preview server. A final's own page sat idle in the daemon, the daemon quit after 5 idle minutes, and the audio step failed with "Attempted to use detached Frame" (`76180aeab`). A stray tab could also keep an idle daemon alive, so it now exits after 10 idle minutes (`2bfe6ec1a`). The fixes were small.
 
 For the judge itself, see [how we designed it](/blog/judge-design). For the measured bar it compares with, see [the quality bar post](/blog/quality-bar). The render path this protects is described on [the determinism page](/determinism).
 
@@ -77,9 +77,9 @@ For the judge itself, see [how we designed it](/blog/judge-design). For the meas
 
 - `harness/media/preview-server.mjs`: `takeWarmPage` and `WARM_HASH`
 - `harness/lib/`: the draft check that now reads the judge's sheet
-- [`eaef43da2`](https://github.com/Vandit1604/vawe/commit/eaef43da2): find warm tabs by URL, never attach to another process's tabs
-- [`12d203f22`](https://github.com/Vandit1604/vawe/commit/12d203f22): count near-identical tiles on the judge's own sheet
-- [`faa44d37f`](https://github.com/Vandit1604/vawe/commit/faa44d37f): confirm a sheet defect on a full-size frame, never rule an echo out
-- [`a570bbcd8`](https://github.com/Vandit1604/vawe/commit/a570bbcd8): keep the daemon up while a render holds a tab
+- [`60de4a7aa`](https://github.com/Vandit1604/vawe/commit/60de4a7aa): find warm tabs by URL, never attach to another process's tabs
+- [`60d485cce`](https://github.com/Vandit1604/vawe/commit/60d485cce): count near-identical tiles on the judge's own sheet
+- [`b394dd450`](https://github.com/Vandit1604/vawe/commit/b394dd450): confirm a sheet defect on a full-size frame, never rule an echo out
+- [`76180aeab`](https://github.com/Vandit1604/vawe/commit/76180aeab): keep the daemon up while a render holds a tab
 
 The repo is [Vandit1604/vawe](https://github.com/Vandit1604/vawe).

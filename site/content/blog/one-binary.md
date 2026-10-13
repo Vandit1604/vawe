@@ -23,7 +23,7 @@ We tried documentation first. The Shell section of AGENTS.md lists the habits th
 
 ## What we built
 
-On 2026-09-30 we added `bin/vawe` in commit [97f888c](https://github.com/Vandit1604/vawe/commit/97f888c53). It had nine verbs (`new`, `dev`, `ship`, `critique`, `spec`, `studio`, `check`, `test`, `judge`), a `--help` on every verb and one-line usage errors. Six minutes later [b4be748](https://github.com/Vandit1604/vawe/commit/b4be7483b) turned the Makefile into thin aliases (156 lines became 19) and deleted the routers and dead scripts. That commit touched 70 files and removed 2,481 lines.
+On 2026-09-30 we added `bin/vawe` in commit [29daa32](https://github.com/Vandit1604/vawe/commit/29daa32ba). It had nine verbs (`new`, `dev`, `ship`, `critique`, `spec`, `studio`, `check`, `test`, `judge`), a `--help` on every verb and one-line usage errors. Six minutes later [3913b49](https://github.com/Vandit1604/vawe/commit/3913b499c) turned the Makefile into thin aliases (156 lines became 19) and deleted the routers and dead scripts. That commit touched 70 files and removed 2,481 lines.
 
 Three rules shaped the interface.
 
@@ -36,7 +36,7 @@ vawe: missing <page>; usage: vawe frames <page> [flags]
 vawe: frames FAILED (missing <page>; usage: vawe frames <page> [flags]) in 0.0s
 ```
 
-An unknown verb lists the valid verbs. Since [1ea544d](https://github.com/Vandit1604/vawe/commit/1ea544dc3) it also says when the checkout is stale, because an agent that asks for a verb that exists on `main` but not in its worktree should get that answer and not a puzzle.
+An unknown verb lists the valid verbs. Since [03dcbf6](https://github.com/Vandit1604/vawe/commit/03dcbf68e) it also says when the checkout is stale, because an agent that asks for a verb that exists on `main` but not in its worktree should get that answer and not a puzzle.
 
 The last line always says ok or FAILED. We added that after a review of agent transcripts (see [the run logs post](/blog/run-logs)) found that 134 of 140 `vawe` calls were piped into `tail`, `head` or `grep`. A pipe hides the exit code. The tool flag for errors showed 2 failures in that review, and the real count was at least 8. The footer is the last thing a verb prints, so `tail -1` still shows it.
 
@@ -46,7 +46,7 @@ The last line always says ok or FAILED. We added that after a review of agent tr
 
 The first nine verbs were a guess. The next 33 were not. Each time a trace review showed an agent hand-rolling something, we checked whether a verb existed and added one if not. In one review an agent found the beat of a music file with a Python and NumPy script, because `vawe see` answered "no readable video stream" for an audio file. We added `vawe sound`, and in the sessions of the next review one film called it 21 times. The same loop produced `sheet`, `sfx`, `zoom`, `look`, `strip`, `wait` and `land`. At the time of writing the list is 42 verbs long.
 
-We also wrote the rule down where the agent reads it. AGENTS.md says to use `bin/vawe` before any raw `ffmpeg`, Chrome or script, to run `bin/vawe <verb> --help` first, and, if a verb is missing what you need, to say so in the report and not to hand-roll it. That last clause turns every gap into a visible bug report. The commit that added the sentence is [472ac95](https://github.com/Vandit1604/vawe/commit/472ac9546).
+We also wrote the rule down where the agent reads it. AGENTS.md says to use `bin/vawe` before any raw `ffmpeg`, Chrome or script, to run `bin/vawe <verb> --help` first, and, if a verb is missing what you need, to say so in the report and not to hand-roll it. That last clause turns every gap into a visible bug report. The commit that added the sentence is [3d1a494](https://github.com/Vandit1604/vawe/commit/3d1a49464).
 
 ## The measured result
 
@@ -69,4 +69,4 @@ For the commands themselves see the [CLI reference](/docs/cli). For how an agent
 - `harness/cli/verbs.mjs`: every verb, with its flags, example and next line.
 - `harness/cli/parse.mjs`: argument parsing and the one-line usage errors.
 - `Makefile`: 19 lines of aliases.
-- Commits: [97f888c](https://github.com/Vandit1604/vawe/commit/97f888c53) (the CLI), [b4be748](https://github.com/Vandit1604/vawe/commit/b4be7483b) (thin Makefile), [a7845dd](https://github.com/Vandit1604/vawe/commit/a7845ddde) (verbs for sheet, sfx and more), [472ac95](https://github.com/Vandit1604/vawe/commit/472ac9546) (use verbs before raw tools).
+- Commits: [29daa32](https://github.com/Vandit1604/vawe/commit/29daa32ba) (the CLI), [3913b49](https://github.com/Vandit1604/vawe/commit/3913b499c) (thin Makefile), [a610943](https://github.com/Vandit1604/vawe/commit/a61094320) (verbs for sheet, sfx and more), [3d1a494](https://github.com/Vandit1604/vawe/commit/3d1a49464) (use verbs before raw tools).

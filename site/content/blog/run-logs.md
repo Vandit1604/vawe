@@ -29,13 +29,13 @@ The other tool we had was the agent transcript. Timestamps from each tool call t
 
 The log has two layers, added nine days apart.
 
-[5ae7553](https://github.com/Vandit1604/vawe/commit/5ae7553de) (2026-10-01) wrote one event per step for `new`, `dev`, `judge` and `ship`, added `vawe runs`, and put the ship job logs under `out/ship-jobs`. [bf4a5af](https://github.com/Vandit1604/vawe/commit/bf4a5af9f) (2026-10-10) made the log cover every verb. A call now appends one line to `out/<film>.runs.jsonl` with these fields: the verb and its arguments, the stage the film was in when the call started, a start time, the duration in seconds, the exit code, the error reason, how long the call waited for a render slot, and the images it printed. A tagged field says whether the run named an agent through `VAWE_AGENT`, so a report can tell a stray untagged run from the agent's own.
+[97bf133](https://github.com/Vandit1604/vawe/commit/97bf13390) (2026-10-01) wrote one event per step for `new`, `dev`, `judge` and `ship`, added `vawe runs`, and put the ship job logs under `out/ship-jobs`. [914f16f](https://github.com/Vandit1604/vawe/commit/914f16f20) (2026-10-10) made the log cover every verb. A call now appends one line to `out/<film>.runs.jsonl` with these fields: the verb and its arguments, the stage the film was in when the call started, a start time, the duration in seconds, the exit code, the error reason, how long the call waited for a render slot, and the images it printed. A tagged field says whether the run named an agent through `VAWE_AGENT`, so a report can tell a stray untagged run from the agent's own.
 
 The verb itself measures all of that. A child script reports facts such as the slot wait to the main process through a small notes file. The agent writes nothing, so the agent cannot get it wrong.
 
 The same commit added the footer that ends every call with `vawe: dev ok in 38.2s` or `vawe: dev FAILED (reason) in 38.2s` (see [one binary, one verb per step](/blog/one-binary) for why). The failure reasons are grouped by cause in `vawe runs`, so "render slot or navigation timeout" and "browser lost" show up as counts and not as 40 different strings.
 
-`vawe runs <film>` answers three questions: where the time went per stage and verb, what failed and why, and the draft series. `vawe runs --all` gives one row per film for the last 30 days. `vawe runs --taste` reports, per rule, how often it fired, how often it was fixed and how often it still fired in the next draft ([f2a5e91](https://github.com/Vandit1604/vawe/commit/f2a5e9188), and [80d1b8e](https://github.com/Vandit1604/vawe/commit/80d1b8e19) restored the per-draft lines).
+`vawe runs <film>` answers three questions: where the time went per stage and verb, what failed and why, and the draft series. `vawe runs --all` gives one row per film for the last 30 days. `vawe runs --taste` reports, per rule, how often it fired, how often it was fixed and how often it still fired in the next draft ([6cb5227](https://github.com/Vandit1604/vawe/commit/6cb52276b), and [1560a60](https://github.com/Vandit1604/vawe/commit/1560a60ec) restored the per-draft lines).
 
 ## What the log showed
 
@@ -58,4 +58,4 @@ Last, expect to read the log with a transcript beside it. The log tells you whic
 - `harness/lib/runlog.mjs` and `harness/lib/verb-log.mjs`: the event shape, the footer line and the failure causes.
 - `harness/lib/runs-report.mjs` and `harness/dev/runs.mjs`: the `vawe runs` report.
 - `bin/vawe`: where each call is timed and logged.
-- Commits: [5ae7553](https://github.com/Vandit1604/vawe/commit/5ae7553de) (events for new, dev, judge, ship), [bf4a5af](https://github.com/Vandit1604/vawe/commit/bf4a5af9f) (every verb logged), [f2a5e91](https://github.com/Vandit1604/vawe/commit/f2a5e9188) (taste report), [80d1b8e](https://github.com/Vandit1604/vawe/commit/80d1b8e19) (per-draft rule lines).
+- Commits: [97bf133](https://github.com/Vandit1604/vawe/commit/97bf13390) (events for new, dev, judge, ship), [914f16f](https://github.com/Vandit1604/vawe/commit/914f16f20) (every verb logged), [6cb5227](https://github.com/Vandit1604/vawe/commit/6cb52276b) (taste report), [1560a60](https://github.com/Vandit1604/vawe/commit/1560a60ec) (per-draft rule lines).

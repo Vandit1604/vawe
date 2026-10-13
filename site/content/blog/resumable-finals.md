@@ -19,7 +19,7 @@ A final render takes about 16 minutes. The renderer cuts the film into slices, c
 
 ## What we built: resumable video rendering
 
-The fix has four parts, all in `render-page.mjs` ([5eb3dcca5](https://github.com/Vandit1604/vawe/commit/5eb3dcca5)):
+The fix has four parts, all in `render-page.mjs` ([7fcf92913](https://github.com/Vandit1604/vawe/commit/7fcf92913)):
 
 - The frames directory is named by the page and a key of its settings, so the same film at the same settings finds its own frames.
 - A finished slice leaves a marker. The next run skips every slice that has one.
@@ -34,14 +34,14 @@ After a successful encode the frames are removed. Frames directories untouched f
 
 The marker design assumed that the key would be stable. It was not.
 
-The key hashed the size and the mtime of every file in the page folder and in `core/`. A checkout, a rebase or an edit by another session changed the hash between a failed final and its resume. The resume opened a new directory and captured from 0%. We changed the hash to cover file bytes instead ([8069d09c7](https://github.com/Vandit1604/vawe/commit/8069d09c7)).
+The key hashed the size and the mtime of every file in the page folder and in `core/`. A checkout, a rebase or an edit by another session changed the hash between a failed final and its resume. The resume opened a new directory and captured from 0%. We changed the hash to cover file bytes instead ([7d840bb3e](https://github.com/Vandit1604/vawe/commit/7d840bb3e)).
 
 ![Before: the key hashed size and mtime, so a rebase changed it and the resume started over. After: the key hashes file bytes, so the same content finds the same directory.](/blog/resumable-finals/key.svg)
 
 Two smaller cases followed:
 
-- If a lane's browser died, the retry had no page to use. A final now opens a new Chrome for that lane ([d3532ffb6](https://github.com/Vandit1604/vawe/commit/d3532ffb6)).
-- Some finals were 100% captured and then lost at the last step, mixing the page audio. We read the page audio before the capture, keep the frames when the mux fails, and record the real stage in the ship event ([544693435](https://github.com/Vandit1604/vawe/commit/544693435)). A test (`render-mux-retry.test.mjs`) covers the retry.
+- If a lane's browser died, the retry had no page to use. A final now opens a new Chrome for that lane ([b872c194a](https://github.com/Vandit1604/vawe/commit/b872c194a)).
+- Some finals were 100% captured and then lost at the last step, mixing the page audio. We read the page audio before the capture, keep the frames when the mux fails, and record the real stage in the ship event ([e1b944267](https://github.com/Vandit1604/vawe/commit/e1b944267)). A test (`render-mux-retry.test.mjs`) covers the retry.
 
 ## The cost, measured in a trace
 
@@ -70,9 +70,9 @@ Resumability sits next to how the machine is shared. [Render slots and the reape
 
 - `harness/media/render-page.mjs`: the frames key, slice markers, `SLICE_ATTEMPTS = 4`, the sweep and the mux path
 - `tests/media/render-resume.test.mjs`, `tests/media/render-mux-retry.test.mjs`
-- [5eb3dcca5](https://github.com/Vandit1604/vawe/commit/5eb3dcca5): resumable finals, four slice attempts, loud failures
-- [8069d09c7](https://github.com/Vandit1604/vawe/commit/8069d09c7): key the kept frames on file bytes
-- [d3532ffb6](https://github.com/Vandit1604/vawe/commit/d3532ffb6): a new Chrome for a lane whose browser died
-- [544693435](https://github.com/Vandit1604/vawe/commit/544693435): read the page audio before capture, keep frames when the mux fails
+- [7fcf92913](https://github.com/Vandit1604/vawe/commit/7fcf92913): resumable finals, four slice attempts, loud failures
+- [7d840bb3e](https://github.com/Vandit1604/vawe/commit/7d840bb3e): key the kept frames on file bytes
+- [b872c194a](https://github.com/Vandit1604/vawe/commit/b872c194a): a new Chrome for a lane whose browser died
+- [e1b944267](https://github.com/Vandit1604/vawe/commit/e1b944267): read the page audio before capture, keep frames when the mux fails
 
 The repo is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).

@@ -25,7 +25,7 @@ Our version is small. For each idea we ask for a number from 0 to 1 for how like
 
 ## What we built
 
-`guides/IDEATE.md` is the one owner of the method. Commit `cbfd562d8` added it, with the Ideas ledger, six advice checks and a question for the judge and the critic. The method has five steps, run once per decision.
+`guides/IDEATE.md` is the one owner of the method. Commit `348ec4d8a` added it, with the Ideas ledger, six advice checks and a question for the judge and the critic. The method has five steps, run once per decision.
 
 ![The five steps: meaning, four ideas from four devices, typicality, pick, keep the ledger row.](/blog/ideate/hero.svg)
 
@@ -37,7 +37,7 @@ Our version is small. For each idea we ask for a number from 0 to 1 for how like
 
 ![Example: a spinner is the first idea. The send button that grows into a wok has typicality 0.15.](/blog/ideate/wok.svg)
 
-The same method plans cuts. Commit `f12a9f516` added a transitions skill that runs it per cut: four ideas drawn from three of twelve handoff families, the less typical pick, a ledger. The twelve families are the subject of [Video transitions that carry the eye](/blog/transitions).
+The same method plans cuts. Commit `530a27f8c` added a transitions skill that runs it per cut: four ideas drawn from three of twelve handoff families, the less typical pick, a ledger. The twelve families are the subject of [Video transitions that carry the eye](/blog/transitions).
 
 ### The six checks
 
@@ -74,4 +74,4 @@ The method is in the open repo at [github.com/Vandit1604/vawe](https://github.co
 
 - `guides/IDEATE.md`: the method and the devices table.
 - `skills/vawe-transitions/SKILL.md`: the per-cut procedure.
-- Commits: [`cbfd562d8`](https://github.com/Vandit1604/vawe/commit/cbfd562d8) the method, ledger and six checks, [`f12a9f516`](https://github.com/Vandit1604/vawe/commit/f12a9f516) transitions skill and handoff column.
+- Commits: [`348ec4d8a`](https://github.com/Vandit1604/vawe/commit/348ec4d8a) the method, ledger and six checks, [`530a27f8c`](https://github.com/Vandit1604/vawe/commit/530a27f8c) transitions skill and handoff column.

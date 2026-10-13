@@ -23,7 +23,7 @@ We started with six names built from After Effects keyframe handles: an influenc
 
 Two of them failed on real clips.
 
-`land` peaks at 4.8 times average speed. On a move shorter than 0.4 s that reads as a jump, and the README note in the fix commit says so. We added `landSoft`, which keeps the long soft stop but drops the peak speed to 2.81 times average (`70069b63d`), then lengthened the short pops and exits the energy measure had flagged (`7a8b902c7`).
+`land` peaks at 4.8 times average speed. On a move shorter than 0.4 s that reads as a jump, and the README note in the fix commit says so. We added `landSoft`, which keeps the long soft stop but drops the peak speed to 2.81 times average (`a5fd39d88`), then lengthened the short pops and exits the energy measure had flagged (`766c2a809`).
 
 `launch` had the opposite problem. An exit that accelerates into a cut is right, but our first version ended at 4.8 times average speed at the cut, and the same README note says it read as a vanish. We capped `launch` at 3 times at the cut.
 
@@ -47,9 +47,9 @@ The vocabulary is nine entries in `core/motion/presets.js`: `land`, `landSoft`, 
 </tbody>
 </table>
 
-The same pass added `ramp()`, a speed ramp across a cut. The outgoing element accelerates into the cut and the incoming one leaves it at the same speed and slows down, so the velocity matches on both sides (`3e6b5eb4d`). Matching velocity across the cut is the part people get wrong by eye. See [the speed-ramp move](/moves/speed-ramp).
+The same pass added `ramp()`, a speed ramp across a cut. The outgoing element accelerates into the cut and the incoming one leaves it at the same speed and slows down, so the velocity matches on both sides (`8f117991b`). Matching velocity across the cut is the part people get wrong by eye. See [the speed-ramp move](/moves/speed-ramp).
 
-Then we generated the pages. A script reads the motion library and writes one JSON file with the curve, its velocity, the `linear()` string, a cubic-bezier fit and the After Effects handle values for every ease. The site renders 44 pages from it: the nine vawe curves, 30 classic ones (ten families, in, out and in-out) and the 5 CSS keywords including `linear` (`e32a4f38b`). Nothing on a page is typed by hand except the words. Each vawe page carries a 2 s clip of the curve moving a square next to a linear one.
+Then we generated the pages. A script reads the motion library and writes one JSON file with the curve, its velocity, the `linear()` string, a cubic-bezier fit and the After Effects handle values for every ease. The site renders 44 pages from it: the nine vawe curves, 30 classic ones (ten families, in, out and in-out) and the 5 CSS keywords including `linear` (`88f2f435a`). Nothing on a page is typed by hand except the words. Each vawe page carries a 2 s clip of the curve moving a square next to a linear one.
 
 <figure>
 <video src="/blog/easing/land.mp4" poster="/blog/easing/land.webp" muted loop playsinline autoplay width="640" height="360"></video>
@@ -86,8 +86,8 @@ Last, keep one owner. The names live in one file, the pages are generated from i
 - `core/motion/presets.js`: the `EASE` vocabulary, `leave()` and `ramp()`
 - `scripts/site/easing.mjs`: builds the data for the easing pages from the motion library
 - `site/app/easing/`: the 44 pages, plus [the index](/easing)
-- [`70069b63d`](https://github.com/Vandit1604/vawe/commit/70069b63d): `EASE.landSoft`, and `launch` capped at 3x at the cut
-- [`3e6b5eb4d`](https://github.com/Vandit1604/vawe/commit/3e6b5eb4d): `ramp()` with matched velocity on both sides
-- [`e32a4f38b`](https://github.com/Vandit1604/vawe/commit/e32a4f38b): the 44 easing pages
+- [`a5fd39d88`](https://github.com/Vandit1604/vawe/commit/a5fd39d88): `EASE.landSoft`, and `launch` capped at 3x at the cut
+- [`8f117991b`](https://github.com/Vandit1604/vawe/commit/8f117991b): `ramp()` with matched velocity on both sides
+- [`88f2f435a`](https://github.com/Vandit1604/vawe/commit/88f2f435a): the 44 easing pages
 
 The repo is [Vandit1604/vawe](https://github.com/Vandit1604/vawe). 

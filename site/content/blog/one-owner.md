@@ -40,17 +40,17 @@ The rule is simple. A formula, a threshold or a decoder has one owning module. W
 
 Here is each move.
 
-Gray frames. `decodeGray` now owns the fps, scale and `format=gray` chain (commit [652d903e3](https://github.com/Vandit1604/vawe/commit/652d903e3)). The flash probe, the sheet tile diffs and `frameMotion` call it with their own scale flags, so each reads the same bytes as before. We left `lumaSeries` and `readFeatures` alone. They decode two outputs and rgb, so they only look like the same code. Merging blocks because they look alike is a different mistake.
+Gray frames. `decodeGray` now owns the fps, scale and `format=gray` chain (commit [91f6b6e7a](https://github.com/Vandit1604/vawe/commit/91f6b6e7a)). The flash probe, the sheet tile diffs and `frameMotion` call it with their own scale flags, so each reads the same bytes as before. We left `lumaSeries` and `readFeatures` alone. They decode two outputs and rgb, so they only look like the same code. Merging blocks because they look alike is a different mistake.
 
-Lab colour. `harness/lib/ref-measure/colour.mjs` holds `linearToLab`, `labOf` and `labToHex`. The tile distance and the hex distance now use it ([92c4e90c0](https://github.com/Vandit1604/vawe/commit/92c4e90c0)). This one is not a pure refactor, because the distance can move by about 0.001. We kept it in its own commit so the number change is easy to find.
+Lab colour. `harness/lib/ref-measure/colour.mjs` holds `linearToLab`, `labOf` and `labToHex`. The tile distance and the hex distance now use it ([15c5a5d8d](https://github.com/Vandit1604/vawe/commit/15c5a5d8d)). This one is not a pure refactor, because the distance can move by about 0.001. We kept it in its own commit so the number change is easy to find.
 
-Import direction. `measureFile` (the loudness of a file) moved to `harness/lib/loudness.mjs`, so `lib/sound-read` no longer imports `media/page-audio`. `resolveInput` and its cut readers moved to `see/input.mjs`, so `one-input`, `zoom`, `onion` and `look` no longer import the `strip` verb ([21ec9530e](https://github.com/Vandit1604/vawe/commit/21ec9530e)). A side effect: a file with no audio stream now throws a message that says so, not a `TypeError`.
+Import direction. `measureFile` (the loudness of a file) moved to `harness/lib/loudness.mjs`, so `lib/sound-read` no longer imports `media/page-audio`. `resolveInput` and its cut readers moved to `see/input.mjs`, so `one-input`, `zoom`, `onion` and `look` no longer import the `strip` verb ([0ec440afe](https://github.com/Vandit1604/vawe/commit/0ec440afe)). A side effect: a file with no audio stream now throws a message that says so, not a `TypeError`.
 
-Sound rules. `taste/craft/sound.md` is the one owner. `sound-default-on` folds into `sound-voices`. `cue-sparse`, `sound-swell` and `cue-has-event` fold into `sound-cues` ([25e1ef4e9](https://github.com/Vandit1604/vawe/commit/25e1ef4e9)). The commit changed 25 files, with 75 lines added and 711 removed.
+Sound rules. `taste/craft/sound.md` is the one owner. `sound-default-on` folds into `sound-voices`. `cue-sparse`, `sound-swell` and `cue-has-event` fold into `sound-cues` ([9a89c1791](https://github.com/Vandit1604/vawe/commit/9a89c1791)). The commit changed 25 files, with 75 lines added and 711 removed.
 
-Thresholds. Checks that held their own numbers now read `taste/build/limits.json`, with a 48-line test that the readers agree ([1ef374770](https://github.com/Vandit1604/vawe/commit/1ef374770), 18 files, +151 -40).
+Thresholds. Checks that held their own numbers now read `taste/build/limits.json`, with a 48-line test that the readers agree ([046ec5ef8](https://github.com/Vandit1604/vawe/commit/046ec5ef8), 18 files, +151 -40).
 
-Dead code. One commit removed 12 dead exports and the second audio bake: 20 files, +21 -189 ([c78b442e9](https://github.com/Vandit1604/vawe/commit/c78b442e9)). Another removed GSAP, the plugin files, the vendor script and the dependency: 19 files, +51 -129 ([2e4db31f0](https://github.com/Vandit1604/vawe/commit/2e4db31f0)).
+Dead code. One commit removed 12 dead exports and the second audio bake: 20 files, +21 -189 ([f4bae3b2a](https://github.com/Vandit1604/vawe/commit/f4bae3b2a)). Another removed GSAP, the plugin files, the vendor script and the dependency: 19 files, +51 -129 ([9dd02632d](https://github.com/Vandit1604/vawe/commit/9dd02632d)).
 
 ## The result in numbers
 
@@ -58,13 +58,13 @@ Dead code. One commit removed 12 dead exports and the second audio bake: 20 file
 
 | Commit | What moved | Files | Added | Removed |
 |---|---|---|---|---|
-| 25e1ef4e9 | sound rules to one owner | 25 | 75 | 711 |
-| c78b442e9 | 12 dead exports, second audio bake | 20 | 21 | 189 |
-| 2e4db31f0 | GSAP | 19 | 51 | 129 |
-| 21ec9530e | `measureFile`, `resolveInput` | 13 | 102 | 51 |
-| 1ef374770 | thresholds to `limits.json` | 18 | 151 | 40 |
-| 652d903e3 | `decodeGray` | 5 | 57 | 12 |
-| 92c4e90c0 | one Lab owner | 5 | 55 | 39 |
+| 9a89c1791 | sound rules to one owner | 25 | 75 | 711 |
+| f4bae3b2a | 12 dead exports, second audio bake | 20 | 21 | 189 |
+| 9dd02632d | GSAP | 19 | 51 | 129 |
+| 0ec440afe | `measureFile`, `resolveInput` | 13 | 102 | 51 |
+| 046ec5ef8 | thresholds to `limits.json` | 18 | 151 | 40 |
+| 91f6b6e7a | `decodeGray` | 5 | 57 | 12 |
+| 15c5a5d8d | one Lab owner | 5 | 55 | 39 |
 
 The net effect is a framework with fewer lines that does the same work. The only behaviour change we expect to see is the 0.001 shift in a colour distance.
 
@@ -87,7 +87,7 @@ The [moves library](/moves) shows the kind of page this framework renders. For t
 - `harness/lib/ref-measure/colour.mjs`: the Lab owner.
 - `harness/lib/loudness.mjs` and `harness/media/see/input.mjs`: the moved owners.
 - `taste/build/limits.json`: the thresholds.
-- [92c4e90c0](https://github.com/Vandit1604/vawe/commit/92c4e90c0): one Lab owner.
-- [652d903e3](https://github.com/Vandit1604/vawe/commit/652d903e3): one gray-frame decoder.
-- [c78b442e9](https://github.com/Vandit1604/vawe/commit/c78b442e9): 12 dead exports and the second audio bake.
-- [25e1ef4e9](https://github.com/Vandit1604/vawe/commit/25e1ef4e9): one sound owner.
+- [15c5a5d8d](https://github.com/Vandit1604/vawe/commit/15c5a5d8d): one Lab owner.
+- [91f6b6e7a](https://github.com/Vandit1604/vawe/commit/91f6b6e7a): one gray-frame decoder.
+- [f4bae3b2a](https://github.com/Vandit1604/vawe/commit/f4bae3b2a): 12 dead exports and the second audio bake.
+- [9a89c1791](https://github.com/Vandit1604/vawe/commit/9a89c1791): one sound owner.

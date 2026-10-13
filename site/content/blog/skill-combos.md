@@ -25,7 +25,7 @@ Second, the combo round. Six arms built the same two frames for a fictional prod
 
 ## UI skills for AI agents: a ladder with five rungs
 
-A combo is a named set of skills for four rungs: builder, type, colour and depth. The fifth rung, frame, is always vawe's own rules. Commit `7a1f1be10` added the ladder to the brief, to the DESIGN.md advice and to the stills judge question. Its message says the frame rung rejects web-page patterns while the builder rung still builds the product UI.
+A combo is a named set of skills for four rungs: builder, type, colour and depth. The fifth rung, frame, is always vawe's own rules. Commit `edc7f6e0e` added the ladder to the brief, to the DESIGN.md advice and to the stills judge question. Its message says the frame rung rejects web-page patterns while the builder rung still builds the product UI.
 
 ![The ladder. Builder, type, colour and depth take a fetched skill each. The frame rung uses our rules.](/blog/skill-combos/ladder.svg)
 
@@ -49,7 +49,7 @@ Two details came out of the test that we did not expect.
 - Dropping the builder rung hurt. One earlier run used a colour skill without a builder, and the product UI turned into placeholder bars. We keep the builder rung even when the colour skill is the star.
 - One combo is still untested, and we say so in the file. "Crisp product" shares its builder and colour rungs with Apple material, which was rejected, so we do not recommend it.
 
-We made the same kind of blind choice for the move gallery. Commit `b56f1349b` adds a featured bento above the gallery with five moves, chosen from a blind three-reviewer score of every clip.
+We made the same kind of blind choice for the move gallery. Commit `3587ae495` adds a featured bento above the gallery with five moves, chosen from a blind three-reviewer score of every clip.
 
 Remember the limits. This was one reviewer and one test run, with two frames for one fictional product. It tells us which sets to start from. It does not prove that the losers are bad skills.
 
@@ -67,4 +67,4 @@ If you build the frames with agents, the same ideas appear in our [prompting gui
 
 - `prompts/skill-combos.md`: the six combos, rungs, rejects and evidence.
 - The brief template and `DESIGN.md` advice carry the ladder.
-- Commits: [`7a1f1be10`](https://github.com/Vandit1604/vawe/commit/7a1f1be10) the ladder, [`39aaa85fb`](https://github.com/Vandit1604/vawe/commit/39aaa85fb) named combos, [`5b64295c6`](https://github.com/Vandit1604/vawe/commit/5b64295c6) blind test results, [`b56f1349b`](https://github.com/Vandit1604/vawe/commit/b56f1349b) featured moves.
+- Commits: [`edc7f6e0e`](https://github.com/Vandit1604/vawe/commit/edc7f6e0e) the ladder, [`8fcb51ee2`](https://github.com/Vandit1604/vawe/commit/8fcb51ee2) named combos, [`bce59c817`](https://github.com/Vandit1604/vawe/commit/bce59c817) blind test results, [`3587ae495`](https://github.com/Vandit1604/vawe/commit/3587ae495) featured moves.

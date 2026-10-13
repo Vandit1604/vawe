@@ -37,15 +37,15 @@ The critique step failed in a quieter way. A subagent critic read three sheets, 
 
 We made the reference the default, and we gave the agent instruments to read the page the way we read the reference.
 
-Default to the named reference. Commit [b5df5ed98](https://github.com/Vandit1604/vawe/commit/b5df5ed98) made `critique`, `compare` and `judge` default to the reference the brief names, added a reference card to `refs frames`, and made the `dev` next line name the next unmet step. 8 files changed, 214 lines added. `AGENTS.md` now says it in one line: the brief names the reference, and `critique`, `compare` and `judge` default to it.
+Default to the named reference. Commit [5b98da554](https://github.com/Vandit1604/vawe/commit/5b98da554) made `critique`, `compare` and `judge` default to the reference the brief names, added a reference card to `refs frames`, and made the `dev` next line name the next unmet step. 8 files changed, 214 lines added. `AGENTS.md` now says it in one line: the brief names the reference, and `critique`, `compare` and `judge` default to it.
 
-One instrument for both sides. Commit [fa9c2ddd2](https://github.com/Vandit1604/vawe/commit/fa9c2ddd2) renders the page and reads it with the same reference-spec reader as the reference, so the DOM only names the elements. A mismatch between two measurers cannot create a delta.
+One instrument for both sides. Commit [99916c823](https://github.com/Vandit1604/vawe/commit/99916c823) renders the page and reads it with the same reference-spec reader as the reference, so the DOM only names the elements. A mismatch between two measurers cannot create a delta.
 
-Measure what the eye saw. Commit [6af606c6c](https://github.com/Vandit1604/vawe/commit/6af606c6c) added `vawe look` (flashes, clipped share, bloom, chromatic offset, screen texture, glow colour, with advice) and `vawe zoom` (a nearest-neighbour crop of one region, beside the same region of a second film). 8 files, 824 lines. `look`, `zoom` and `see` take `--vs <ref>` and print deltas. Commit [c2e51a48c](https://github.com/Vandit1604/vawe/commit/c2e51a48c) made flash count deltas say how many.
+Measure what the eye saw. Commit [bbe1d2714](https://github.com/Vandit1604/vawe/commit/bbe1d2714) added `vawe look` (flashes, clipped share, bloom, chromatic offset, screen texture, glow colour, with advice) and `vawe zoom` (a nearest-neighbour crop of one region, beside the same region of a second film). 8 files, 824 lines. `look`, `zoom` and `see` take `--vs <ref>` and print deltas. Commit [4411a2b96](https://github.com/Vandit1604/vawe/commit/4411a2b96) made flash count deltas say how many.
 
-Blur that follows travel. The same trace review fed our render. Commit [97b39b871](https://github.com/Vandit1604/vawe/commit/97b39b871) measures the edge travel of a turn and an inset clip. In one test film, a clip edge moved 181 px a frame where the box moved 124 px, and the turn now gets 16 subframes, not 8. We wrote about it in [Motion blur from real travel](/blog/motion-blur). The [exposure flash move](/moves/exposure-flash) and the [lens move](/moves/lens) are the moves closest to this problem.
+Blur that follows travel. The same trace review fed our render. Commit [f5789a68a](https://github.com/Vandit1604/vawe/commit/f5789a68a) measures the edge travel of a turn and an inset clip. In one test film, a clip edge moved 181 px a frame where the box moved 124 px, and the turn now gets 16 subframes, not 8. We wrote about it in [Motion blur from real travel](/blog/motion-blur). The [exposure flash move](/moves/exposure-flash) and the [lens move](/moves/lens) are the moves closest to this problem.
 
-A tool for the whole film. [86b51bd17](https://github.com/Vandit1604/vawe/commit/86b51bd17) added `vawe see`, which reads a film completely and takes `--vs`. It is 22 files and 1,653 lines added. See [Teaching an agent to watch a film](/blog/watch-a-film).
+A tool for the whole film. [cbc71f813](https://github.com/Vandit1604/vawe/commit/cbc71f813) added `vawe see`, which reads a film completely and takes `--vs`. It is 22 files and 1,653 lines added. See [Teaching an agent to watch a film](/blog/watch-a-film).
 
 ## The result
 
@@ -69,7 +69,7 @@ The framework is open source at [github.com/Vandit1604/vawe](https://github.com/
 
 - `harness/lib/refs.mjs`: reference choice for the judge and compare.
 - `harness/media/see/`: `look`, `zoom` and `see`.
-- [b5df5ed98](https://github.com/Vandit1604/vawe/commit/b5df5ed98): default to the named reference.
-- [fa9c2ddd2](https://github.com/Vandit1604/vawe/commit/fa9c2ddd2): one instrument for both sides.
-- [6af606c6c](https://github.com/Vandit1604/vawe/commit/6af606c6c): `vawe look` and `vawe zoom`.
-- [97b39b871](https://github.com/Vandit1604/vawe/commit/97b39b871): edge travel in the blur pass.
+- [5b98da554](https://github.com/Vandit1604/vawe/commit/5b98da554): default to the named reference.
+- [99916c823](https://github.com/Vandit1604/vawe/commit/99916c823): one instrument for both sides.
+- [bbe1d2714](https://github.com/Vandit1604/vawe/commit/bbe1d2714): `vawe look` and `vawe zoom`.
+- [f5789a68a](https://github.com/Vandit1604/vawe/commit/f5789a68a): edge travel in the blur pass.

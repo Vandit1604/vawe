@@ -48,7 +48,7 @@ Three details matter more than they look:
 
 The clock also reports `pending()`, the number of animation-frame callbacks and timers still waiting. At zero, only animations can change the page, so the renderer can reuse a capture when their state repeats.
 
-The clock handles scripts. The other half is CSS and Web Animations, which the browser drives from the document timeline. We freeze that timeline too. The browser's compositor was rasterizing animated layers against real time before our first seek, so a first seek at 1.5 s after load painted different edge pixels than a first seek at 0.05 s. Setting the playback rate to 0 fixes it (commit `874af4972`). That story, and the backward-seek bugs, are in [Making CSS animations seekable](/blog/seekable-css).
+The clock handles scripts. The other half is CSS and Web Animations, which the browser drives from the document timeline. We freeze that timeline too. The browser's compositor was rasterizing animated layers against real time before our first seek, so a first seek at 1.5 s after load painted different edge pixels than a first seek at 0.05 s. Setting the playback rate to 0 fixes it (commit `1454df446`). That story, and the backward-seek bugs, are in [Making CSS animations seekable](/blog/seekable-css).
 
 ![Six boxes in order: set the clock, call window.seek, seek animations, run onFrame hooks, settle, screenshot.](/blog/page-clock/diagram.svg)
 
@@ -73,6 +73,6 @@ You can read the public explanation on [/determinism](/determinism) and the long
 - `core/engine/page-clock.js`: the virtual clock (75 lines).
 - `core/engine/page-seek.js`: the in-page seek that sets the clock and seeks every animation.
 - `tests/media/render-page-determinism.test.mjs`: render twice, compare frame hashes.
-- [`f92f5f59c`](https://github.com/Vandit1604/vawe/commit/f92f5f59c) (2026-09-30): the virtual clock, `window.seek`, the settle barrier, aspect and a 60 fps final.
-- [`06d63c5ce`](https://github.com/Vandit1604/vawe/commit/06d63c5ce) (2026-09-30): `page-clock` added.
-- [`874af4972`](https://github.com/Vandit1604/vawe/commit/874af4972) (2026-10-08): freeze the document timeline so a frame does not depend on the time before the first seek.
+- [`5a271307f`](https://github.com/Vandit1604/vawe/commit/5a271307f) (2026-09-30): the virtual clock, `window.seek`, the settle barrier, aspect and a 60 fps final.
+- [`f8eff86b0`](https://github.com/Vandit1604/vawe/commit/f8eff86b0) (2026-09-30): `page-clock` added.
+- [`1454df446`](https://github.com/Vandit1604/vawe/commit/1454df446) (2026-10-08): freeze the document timeline so a frame does not depend on the time before the first seek.

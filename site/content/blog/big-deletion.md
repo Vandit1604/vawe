@@ -19,7 +19,7 @@ An agent that greps for "how do I add a layer" finds a layer system. An agent th
 
 ## What we tried
 
-Our first step was to stop new work on JSON and mark it frozen. That is not the same as deleting it. For the site, we did exactly that for about 20 hours: commit `1c2d3e8fc` froze a vendored copy of the engine into `site/public` (+50,586 lines) so the pages built on it kept working while we sorted out what to keep. Freezing added a lot of code. It did not remove any pull on agents. At 21:19 the same day we deleted it as well.
+Our first step was to stop new work on JSON and mark it frozen. That is not the same as deleting it. For the site, we did exactly that for about 20 hours: commit `44be6195f` froze a vendored copy of the engine into `site/public` (+50,586 lines) so the pages built on it kept working while we sorted out what to keep. Freezing added a lot of code. It did not remove any pull on agents. At 21:19 the same day we deleted it as well.
 
 The lesson from the freeze is plain: a frozen copy is still code, and it still counts.
 
@@ -27,12 +27,12 @@ The lesson from the freeze is plain: a frozen copy is still code, and it still c
 
 We split the work by how safe each piece was to remove.
 
-1. One commit for the core. `ef1da265d` deleted the format, the engine, the tools, the gates, the tests, the skills and the Go renderer. The result was 1,415 files changed, +65 and -205,163. Tracked files fell from 3,534 to 2,133.
+1. One commit for the core. `420928c23` deleted the format, the engine, the tools, the gates, the tests, the skills and the Go renderer. The result was 1,415 files changed, +65 and -205,163. Tracked files fell from 3,534 to 2,133.
 2. A restore tag. The tag `json-final` marks the last state with the format. Any file comes back with `git checkout json-final -- <path>`. That gives a cheap answer to "what if we need it".
-3. Hooks next. `5572e9736` dropped the JSON gates from the pre-commit and pre-push hooks, so commits no longer ran checks for a format that was gone (-107 lines).
-4. Scripts and routers. `b4be7483b` made the Makefile a set of thin aliases and deleted routers and dead scripts: 70 files, -2,481 lines.
-5. The site. `2d5c905fb` removed the frozen engine copy, its data and the pages built on it: 1,792 files, -127,750 lines. `bdbbb91a0` then removed the JSON-era films and every mention of the format.
-6. The leftovers. A week later we stripped the scene registries, the three.js layer builder and the theme colour markers (`804f86f64`, `3253f53ef`, `708e79447`). These were small, but they were the bits an agent could still stumble into.
+3. Hooks next. `000366b1a` dropped the JSON gates from the pre-commit and pre-push hooks, so commits no longer ran checks for a format that was gone (-107 lines).
+4. Scripts and routers. `3913b499c` made the Makefile a set of thin aliases and deleted routers and dead scripts: 70 files, -2,481 lines.
+5. The site. `170c70020` removed the frozen engine copy, its data and the pages built on it: 1,792 files, -127,750 lines. `6506927c7` then removed the JSON-era films and every mention of the format.
+6. The leftovers. A week later we stripped the scene registries, the three.js layer builder and the theme colour markers (`70b79ef66`, `a5619a0d6`, `d70663eaa`). These were small, but they were the bits an agent could still stumble into.
 
 ![Timeline of the deletion commits on 2026-09-30 with the lines each one added or removed.](/blog/big-deletion/diagram.svg)
 
@@ -44,9 +44,9 @@ The numbers we can stand behind come straight from `git show --shortstat`:
 
 | Commit | Files | Added | Removed |
 |---|---|---|---|
-| `ef1da265d` delete the format | 1,415 | 65 | 205,163 |
-| `2d5c905fb` remove the site engine copy | 1,792 | 511 | 127,750 |
-| `b4be7483b` thin Makefile, hooks, scripts | 70 | 158 | 2,481 |
+| `420928c23` delete the format | 1,415 | 65 | 205,163 |
+| `170c70020` remove the site engine copy | 1,792 | 511 | 127,750 |
+| `3913b499c` thin Makefile, hooks, scripts | 70 | 158 | 2,481 |
 
 We do not have a before-and-after number for agent success that isolates this commit. Other changes landed the same week, so we will not claim one. What we can say is what the agents can no longer find: layer types, JSON validators and the old make targets are gone from the tree.
 
@@ -63,7 +63,7 @@ The rest of the move to a plain web page is in [The whole film format fits in on
 ## In the code
 
 - `git checkout json-final -- <path>`: restore any deleted file.
-- [`ef1da265d`](https://github.com/Vandit1604/vawe/commit/ef1da265d) (2026-09-30): the 1,415-file deletion.
-- [`2d5c905fb`](https://github.com/Vandit1604/vawe/commit/2d5c905fb) (2026-09-30): the site loses its engine copy and the pages built on it.
-- [`b4be7483b`](https://github.com/Vandit1604/vawe/commit/b4be7483b) (2026-09-30): thin Makefile aliases and fast hooks.
-- [`708e79447`](https://github.com/Vandit1604/vawe/commit/708e79447) (2026-10-07): the last theme markers and stage CSS go.
+- [`420928c23`](https://github.com/Vandit1604/vawe/commit/420928c23) (2026-09-30): the 1,415-file deletion.
+- [`170c70020`](https://github.com/Vandit1604/vawe/commit/170c70020) (2026-09-30): the site loses its engine copy and the pages built on it.
+- [`3913b499c`](https://github.com/Vandit1604/vawe/commit/3913b499c) (2026-09-30): thin Makefile aliases and fast hooks.
+- [`d70663eaa`](https://github.com/Vandit1604/vawe/commit/d70663eaa) (2026-10-07): the last theme markers and stage CSS go.

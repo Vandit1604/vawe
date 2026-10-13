@@ -27,9 +27,9 @@ In one session's log, 8 of 19 `sound` calls exited with code 2. The files were a
 
 ### The verb
 
-Commit `bf4252858` made `vawe sound` the one reader of sound for cutting to it. It takes a track, a film or a page. It prints a beat grid, the hits, and a cut table. It also absorbed the older `audio`, `sounds` and `beatmap` verbs. The change was 30 files, 695 lines added and 112 removed.
+Commit `a600cae64` made `vawe sound` the one reader of sound for cutting to it. It takes a track, a film or a page. It prints a beat grid, the hits, and a cut table. It also absorbed the older `audio`, `sounds` and `beatmap` verbs. The change was 30 files, 695 lines added and 112 removed.
 
-A hit gets a kind. Commit `f80b3869c` names each one: click, pop, swish, impact or sustained, and what moves in the frame at that time. The cut table has a verdict for each cut. A cut within 1 frame of a hit or a beat line is on beat. Within 3 frames it is near. Beyond that it is off, and the row gives the second to move it to.
+A hit gets a kind. Commit `b71bae255` names each one: click, pop, swish, impact or sustained, and what moves in the frame at that time. The cut table has a verdict for each cut. A cut within 1 frame of a hit or a beat line is on beat. Within 3 frames it is near. Beyond that it is off, and the row gives the second to move it to.
 
 ![Schematic cut table. Cuts within one frame of a hit are on beat, within three frames are near, beyond that are off, and an off cut shows the second to move to.](/blog/beat/grid.svg)
 
@@ -39,11 +39,11 @@ Draft advice reads the same table. The `cut-off-beat` check says how many cuts s
 
 ### The error message
 
-Commit `0eae5d9fb` fixed the bug. `decodeMono` takes a `minSeconds` option with a default of 1, and the sound reader passes 0.02, so a tick decodes. When a file is too short, the error now says `under N s of audio` and not "no output". The test for it asserts that the default error names the length.
+Commit `6ec0d5adc` fixed the bug. `decodeMono` takes a `minSeconds` option with a default of 1, and the sound reader passes 0.02, so a tick decodes. When a file is too short, the error now says `under N s of audio` and not "no output". The test for it asserts that the default error names the length.
 
 ### Small fixes in the same loop
 
-The verb now accepts a reference id from `vawe refs list` for its input and for `--cuts` (`6353c65ec`). In the traces, 3 of the 13 errors in one remix session came from `vawe sound`: one passed a reference id where a path was expected, and two ran on a page that had no music bed. With no music file, the verb now says there is no beat grid, so the cuts are checked against nothing.
+The verb now accepts a reference id from `vawe refs list` for its input and for `--cuts` (`f1453e1d4`). In the traces, 3 of the 13 errors in one remix session came from `vawe sound`: one passed a reference id where a path was expected, and two ran on a page that had no music bed. With no music file, the verb now says there is no beat grid, so the cuts are checked against nothing.
 
 ## The measured result
 
@@ -64,4 +64,4 @@ For the other half of audio, the film's own sounds, see [Background music for ge
 - `harness/lib/sound-read.mjs`: the one reader (hits, tempo, grid, cut table).
 - `harness/lib/audio-onsets.mjs`: `decodeMono` and its `minSeconds` option.
 - `harness/media/sound.mjs`: the `vawe sound` verb.
-- Commits: [`bf4252858`](https://github.com/Vandit1604/vawe/commit/bf4252858) the verb, [`f80b3869c`](https://github.com/Vandit1604/vawe/commit/f80b3869c) named hit kinds, [`0eae5d9fb`](https://github.com/Vandit1604/vawe/commit/0eae5d9fb) the short-cue fix, [`6353c65ec`](https://github.com/Vandit1604/vawe/commit/6353c65ec) reference ids.
+- Commits: [`a600cae64`](https://github.com/Vandit1604/vawe/commit/a600cae64) the verb, [`b71bae255`](https://github.com/Vandit1604/vawe/commit/b71bae255) named hit kinds, [`6ec0d5adc`](https://github.com/Vandit1604/vawe/commit/6ec0d5adc) the short-cue fix, [`f1453e1d4`](https://github.com/Vandit1604/vawe/commit/f1453e1d4) reference ids.

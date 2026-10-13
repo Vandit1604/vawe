@@ -30,7 +30,7 @@ It cost us real time. An agent fixed a draft that looked right, and the final th
 
 ## The fix: lay out big, capture small
 
-Commit `992aed43c` changed what a draft means. The page now always lays out at the aspect's full CSS size, and the browser captures it at a device scale of 0.5 for a draft and 1 for a final. `resolveFrame` returns the full size plus the scale. The values `--vw`, `--vh`, `data-aspect` and `window.vawe.width` and `height` always report the full size, so a page cannot tell it is in a draft.
+Commit `1f99365b6` changed what a draft means. The page now always lays out at the aspect's full CSS size, and the browser captures it at a device scale of 0.5 for a draft and 1 for a final. `resolveFrame` returns the full size plus the scale. The values `--vw`, `--vh`, `data-aspect` and `window.vawe.width` and `height` always report the full size, so a page cannot tell it is in a draft.
 
 In Puppeteer this is the `deviceScaleFactor` option of `page.setViewport`. A 1920x1080 viewport with a factor of 0.5 gives a 960x540 screenshot. The commit message notes that Chromium honored the factor for screenshots even under `--force-device-scale-factor=1`, so there was one capture path and no downscale step.
 
@@ -46,7 +46,7 @@ The commit also records a timing on the `three-star` example, a warm draft: capt
 
 ## What failed: a downscale that was not repeatable
 
-The scale factor worked for DOM pages. On a WebGL page it did not. Ten days later (`166771b93`) we found that Chrome's own downscale of a WebGL page gave different pixels from run to run. On the `colour-sting` example, 117 of 154 captures differed between two renders. A full-size capture of the same page was repeatable.
+The scale factor worked for DOM pages. On a WebGL page it did not. Ten days later (`a916e59d6`) we found that Chrome's own downscale of a WebGL page gave different pixels from run to run. On the `colour-sting` example, 117 of 154 captures differed between two renders. A full-size capture of the same page was repeatable.
 
 Because a draft that changes on each run cannot be debugged, we changed the capture again. A draft now captures at device scale 1 and the encode scales the result down with ffmpeg's `scale` filter and `flags=area`. The layout fix stays as it was: the page still sees the full size. Only the place where the pixels shrink moved, from the browser to ffmpeg.
 
@@ -73,6 +73,6 @@ The same principle sits behind the clock: the page must not know it is in a draf
 
 - `harness/media/render-page.mjs`: `resolveFrame`, and the draft encode with `flags=area`.
 - `tests/media/render-page-draft-layout.test.mjs` and `tests/media/render-draft-halfsize-determinism.test.mjs`.
-- Commit [992aed43c](https://github.com/Vandit1604/vawe/commit/992aed43c): lay out at full CSS size, capture at device scale 0.5.
-- Commit [166771b93](https://github.com/Vandit1604/vawe/commit/166771b93): capture at scale 1 and scale in ffmpeg.
-- Commit [f12b7955b](https://github.com/Vandit1604/vawe/commit/f12b7955b): JPEG capture and slices sized to the work.
+- Commit [1f99365b6](https://github.com/Vandit1604/vawe/commit/1f99365b6): lay out at full CSS size, capture at device scale 0.5.
+- Commit [a916e59d6](https://github.com/Vandit1604/vawe/commit/a916e59d6): capture at scale 1 and scale in ffmpeg.
+- Commit [e0da1a9b7](https://github.com/Vandit1604/vawe/commit/e0da1a9b7): JPEG capture and slices sized to the work.

@@ -19,11 +19,11 @@ The cost showed up later. An agent that was never told the subject, the message 
 
 ## What we tried
 
-We first handled it as a skill. On 2026-09-30 we added a `vawe-brief` skill ([19ce83e](https://github.com/Vandit1604/vawe/commit/19ce83e43)) that describes an interview: ask from a bank of questions, take defaults for the rest, write the brief in the right shape and name the first draft. A skill depends on the agent loading it, and the first command of the loop is the one place we can be sure every agent runs. So we moved the interview into the command.
+We first handled it as a skill. On 2026-09-30 we added a `vawe-brief` skill ([7577445](https://github.com/Vandit1604/vawe/commit/7577445dc)) that describes an interview: ask from a bank of questions, take defaults for the rest, write the brief in the right shape and name the first draft. A skill depends on the agent loading it, and the first command of the loop is the one place we can be sure every agent runs. So we moved the interview into the command.
 
 ## What we built
 
-[14670012](https://github.com/Vandit1604/vawe/commit/14670012e) changed `vawe new` so that it prints the unanswered details and writes nothing. Run today it looks like this, and the exit code is 0, because a question is not an error:
+[10bbe613](https://github.com/Vandit1604/vawe/commit/10bbe6132) changed `vawe new` so that it prints the unanswered details and writes nothing. Run today it looks like this, and the exit code is 0, because a question is not an error:
 
 ```
 vawe new: 5 facts needed before a good brief
@@ -49,11 +49,11 @@ There are three ways to answer, and each has a use.
 
 - `--answers <file>` takes a `key: value` file. An agent writes the file with its file tool and re-runs the command.
 - `--detail key=value`, repeated, answers inline.
-- `--questions-json` prints the questions as structured question calls (at most four each) for a client that has a question tool, so the human sees choices and not a wall of text. This arrived in [4c7636d](https://github.com/Vandit1604/vawe/commit/4c7636d1e).
+- `--questions-json` prints the questions as structured question calls (at most four each) for a client that has a question tool, so the human sees choices and not a wall of text. This arrived in [4e3fc43](https://github.com/Vandit1604/vawe/commit/4e3fc43d2).
 
 A fourth path exists for runs with nobody to ask: `--defaults` guesses every open detail and prints which ones it guessed. We kept it because unattended jobs and tests need it. The guess is never hidden: each one is marked in the brief and named in the command output. A call that only asks is also not logged as a new film in the run log, so the draft counts stay honest (see [run logs](/blog/run-logs)).
 
-The same week, [a9a821a](https://github.com/Vandit1604/vawe/commit/a9a821aa5) made the measured brief the default shape of the file `vawe new` writes. At that commit it carried Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. The tables hold numbers an agent can check against later drafts, which is why the questions up front matter: the numbers are only as good as the facts under them. We wrote about that scoreboard in [the measured brief](/blog/measured-brief).
+The same week, [f889153](https://github.com/Vandit1604/vawe/commit/f88915325) made the measured brief the default shape of the file `vawe new` writes. At that commit it carried Task, Look, Spec (with Shots, Words and Objects tables), Acceptance, Gates, Pitfalls and Deliver. The tables hold numbers an agent can check against later drafts, which is why the questions up front matter: the numbers are only as good as the facts under them. We wrote about that scoreboard in [the measured brief](/blog/measured-brief).
 
 ## The measured result
 
@@ -72,4 +72,4 @@ For the loop that follows the first command, read [a loop that names its own nex
 - `harness/cli/new.mjs`: `newFilm`, the questions text and the `--defaults` path.
 - `harness/lib/measured-brief.mjs`: the detail list, the `required` flags and the guess mark.
 - `bin/vawe`: skips the run-log entry when `newFilm` only asked.
-- Commits: [19ce83e](https://github.com/Vandit1604/vawe/commit/19ce83e43) (the brief interview skill), [1467001](https://github.com/Vandit1604/vawe/commit/14670012e) (ask before writing), [4c7636d](https://github.com/Vandit1604/vawe/commit/4c7636d1e) (questions as JSON), [a9a821a](https://github.com/Vandit1604/vawe/commit/a9a821aa5) (measured brief by default).
+- Commits: [7577445](https://github.com/Vandit1604/vawe/commit/7577445dc) (the brief interview skill), [10bbe61](https://github.com/Vandit1604/vawe/commit/10bbe6132) (ask before writing), [4e3fc43](https://github.com/Vandit1604/vawe/commit/4e3fc43d2) (questions as JSON), [f889153](https://github.com/Vandit1604/vawe/commit/f88915325) (measured brief by default).

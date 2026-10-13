@@ -25,10 +25,10 @@ We wrote one rule about rules: when you change a rule, cite the measurement. Tha
 
 Then we used it. These are the changes with commits:
 
-- **Ban synth beds.** We removed the bed, swell-soft and braam voices, the synth-bed module and `data-bpm`. A page that writes `data-synth="bed"` is refused with the rule and the fix ([f68dc7df2](https://github.com/Vandit1604/vawe/commit/f68dc7df2)). The audit had counted synth beds in 4 of 24 audio films.
-- **Remove "drift as the hold" from the docs.** After-effects techniques lost the moving-hold scale drift. The recipe chains now close on a still hold with a moving part. The Ken Burns push on a still picture and the `drift-hold` rows in two docs-site tables were removed ([e781b8484](https://github.com/Vandit1604/vawe/commit/e781b8484)).
-- **Merge duplicate rules.** `live-hold` absorbed `no-dead-stop` and `ambient-restraint`. `speed-bands` absorbed `speed-ceiling`. `gradient-grain` absorbed `gradient-or-flat`. The `dead-stop` and `speed-ceiling` check ids stay ([a1fc2af16](https://github.com/Vandit1604/vawe/commit/a1fc2af16)).
-- **One pitfalls list.** The taste digest became the single list, and AGENTS.md and the page-writing skill got shorter ([62c6e0c11](https://github.com/Vandit1604/vawe/commit/62c6e0c11)).
+- **Ban synth beds.** We removed the bed, swell-soft and braam voices, the synth-bed module and `data-bpm`. A page that writes `data-synth="bed"` is refused with the rule and the fix ([1feb1c38b](https://github.com/Vandit1604/vawe/commit/1feb1c38b)). The audit had counted synth beds in 4 of 24 audio films.
+- **Remove "drift as the hold" from the docs.** After-effects techniques lost the moving-hold scale drift. The recipe chains now close on a still hold with a moving part. The Ken Burns push on a still picture and the `drift-hold` rows in two docs-site tables were removed ([563516725](https://github.com/Vandit1604/vawe/commit/563516725)).
+- **Merge duplicate rules.** `live-hold` absorbed `no-dead-stop` and `ambient-restraint`. `speed-bands` absorbed `speed-ceiling`. `gradient-grain` absorbed `gradient-or-flat`. The `dead-stop` and `speed-ceiling` check ids stay ([5c05c667a](https://github.com/Vandit1604/vawe/commit/5c05c667a)).
+- **One pitfalls list.** The taste digest became the single list, and AGENTS.md and the page-writing skill got shorter ([aefdda74e](https://github.com/Vandit1604/vawe/commit/aefdda74e)).
 
 A rule change in a doc has to reach the check too, or the two disagree. So tests assert they agree. One test checks that `text-lingers`, `readable-hold` and the world limit give the same answer for lines of 1, 4 and 8 words (`tests/lib/bar-lint.test.mjs`).
 
@@ -36,7 +36,7 @@ A rule change in a doc has to reach the check too, or the two disagree. So tests
 
 Two ratchets track the effect. Each is a file under `quality/baselines/` that stores a number. The rule-length gate complains when its count goes up, and a doc change re-stamps the read-load number on purpose.
 
-The rule-length ratchet counts rules over 500 characters in the agent-facing docs. Its stamp fell from 324 to 42 in one commit ([93b9f8c14](https://github.com/Vandit1604/vawe/commit/93b9f8c14)).
+The rule-length ratchet counts rules over 500 characters in the agent-facing docs. Its stamp fell from 324 to 42 in one commit ([439b20b86](https://github.com/Vandit1604/vawe/commit/439b20b86)).
 
 The read-load ratchet counts the words an agent reads before it starts. It went the other way:
 
@@ -67,9 +67,9 @@ The measurement side is in [the measured brief](/blog/measured-brief), where a t
 - `quality/baselines/rule-length-ratchet.json` and `quality/gates/rule-length.mjs`: the over-length count, limit 500 characters (`harness/lib/rule-length.mjs`)
 - `quality/baselines/bench-ratchet.json`: read-load words and tokens
 - `tests/lib/bar-lint.test.mjs`: docs and checks agree
-- [f68dc7df2](https://github.com/Vandit1604/vawe/commit/f68dc7df2): ban synth beds
-- [e781b8484](https://github.com/Vandit1604/vawe/commit/e781b8484): drift is no longer the hold
-- [a1fc2af16](https://github.com/Vandit1604/vawe/commit/a1fc2af16): three rule merges
-- [93b9f8c14](https://github.com/Vandit1604/vawe/commit/93b9f8c14): rule-length ratchet falls to 42
+- [1feb1c38b](https://github.com/Vandit1604/vawe/commit/1feb1c38b): ban synth beds
+- [563516725](https://github.com/Vandit1604/vawe/commit/563516725): drift is no longer the hold
+- [5c05c667a](https://github.com/Vandit1604/vawe/commit/5c05c667a): three rule merges
+- [439b20b86](https://github.com/Vandit1604/vawe/commit/439b20b86): rule-length ratchet falls to 42
 
 The repo is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).

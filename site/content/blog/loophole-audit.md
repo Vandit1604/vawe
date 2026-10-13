@@ -46,13 +46,13 @@ Finally, 21 of 107 rules had no check at all. For those, nothing stops a film fr
 
 Each fix is a rule of the same shape: exclude the global cheap change from what counts.
 
-- Live-hold stopped counting a whole-frame camera move, and the starter page no longer drifts the camera (`f852ba76c`).
-- Living-ground and blank-frame now measure what a layer paints against the ground, so grain, a blend overlay or a faint gradient is not a ground (`cb2ba70c2`).
-- Advice stopped teaching tricks. The moving-tail, grain, acceptance and spectacle lines name the real fix instead (`4ef89a719`), and the docs no longer recommend a ground or lockup drift as the hold (`e781b8484`).
-- Waivers became one code per check, scoped to seconds. A reason has to say where and what was measured, and a generic, copied or dead waiver is refused (`805a5427c`).
-- The judge rubric lists each known trick and needs a cited second for a claim (`8af091647`).
+- Live-hold stopped counting a whole-frame camera move, and the starter page no longer drifts the camera (`bb965eb3e`).
+- Living-ground and blank-frame now measure what a layer paints against the ground, so grain, a blend overlay or a faint gradient is not a ground (`e959dd362`).
+- Advice stopped teaching tricks. The moving-tail, grain, acceptance and spectacle lines name the real fix instead (`fec66ba0e`), and the docs no longer recommend a ground or lockup drift as the hold (`563516725`).
+- Waivers became one code per check, scoped to seconds. A reason has to say where and what was measured, and a generic, copied or dead waiver is refused (`ecb537a46`).
+- The judge rubric lists each known trick and needs a cited second for a claim (`cf73a1c7a`).
 
-The change we trust most is a test. For each trick the audit found there is now a fixture page, with an honest page beside it, and a test runs the checks on each. A check that stops catching its trick then shows up as a failing test (`b2641afc0`). Fixing a loophole once does not stop it coming back, and until then nobody tested that the checks reject cheats.
+The change we trust most is a test. For each trick the audit found there is now a fixture page, with an honest page beside it, and a test runs the checks on each. A check that stops catching its trick then shows up as a failing test (`c8f4630e6`). Fixing a loophole once does not stop it coming back, and until then nobody tested that the checks reject cheats.
 
 <figure>
 <img src="/blog/loophole-audit/audit-loop.svg" alt="Diagram: ask each check the cheapest-change question, exclude global answers, then fixtures, advice, waivers and judge rubric" width="720" height="340" loading="lazy">
@@ -77,9 +77,9 @@ Write a fixture for each trick, and put an honest case beside it. The honest pag
 
 - `quality/gates/page-check.mjs` and `harness/lib/`: the checks the audit read
 - `tests/fixtures/tricks/` and `tests/media/tricks.test.mjs`: one page per trick, an honest page beside them, and the test that runs the checks
-- [`f852ba76c`](https://github.com/Vandit1604/vawe/commit/f852ba76c): live-hold ignores a whole-frame camera move
-- [`b2641afc0`](https://github.com/Vandit1604/vawe/commit/b2641afc0): a fixture page per trick and the honest page beside it
-- [`4ef89a719`](https://github.com/Vandit1604/vawe/commit/4ef89a719): advice stops teaching tricks
-- [`805a5427c`](https://github.com/Vandit1604/vawe/commit/805a5427c): waivers scoped to seconds with a measured reason
+- [`bb965eb3e`](https://github.com/Vandit1604/vawe/commit/bb965eb3e): live-hold ignores a whole-frame camera move
+- [`c8f4630e6`](https://github.com/Vandit1604/vawe/commit/c8f4630e6): a fixture page per trick and the honest page beside it
+- [`fec66ba0e`](https://github.com/Vandit1604/vawe/commit/fec66ba0e): advice stops teaching tricks
+- [`ecb537a46`](https://github.com/Vandit1604/vawe/commit/ecb537a46): waivers scoped to seconds with a measured reason
 
 The repo is [Vandit1604/vawe](https://github.com/Vandit1604/vawe). The agent-facing docs are under [/ai-agents](/ai-agents).
