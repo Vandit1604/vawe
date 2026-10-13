@@ -1,35 +1,20 @@
 ---
-title: "Deterministic rendering: time is the seek, never the clock"
-description: "How a 75-line virtual clock makes a web page that calls Math.random and Date.now render the same video twice, and the test that checks it on every run."
+title: "Seed Math.random and freeze Date.now: a virtual clock"
+description: "Seed Math.random from the seek time and fake Date.now, timers and requestAnimationFrame: a reference for the 75-line virtual clock in every page."
 date: 2026-10-08
+updated: 2026-10-13
 section: architecture
-tags: "deterministic rendering, virtual clock, headless chrome, web animations, architecture"
-keywords: "deterministic rendering, virtual clock javascript, headless chrome render video, math.random seed, requestanimationframe"
+tags: "virtual clock, math.random seed, deterministic rendering, headless chrome, javascript"
+keywords: "math random seed javascript, virtual clock javascript, fake date.now, requestanimationframe seek"
 hero: /blog/page-clock/hero.svg
 heroAlt: "A seek time t enters a virtual clock that sets Date, performance.now, requestAnimationFrame, timers and Math.random, and one identical frame comes out."
 ---
 
-Your page can call `Math.random()` and `Date.now()` and still render the same video twice. We got there with 75 lines of JavaScript that run before any of the page's own scripts. This post explains the idea behind deterministic rendering for a web page, shows how our virtual clock works, and describes the check that keeps it honest. If you render video from a browser, the same trick should work for you.
+Below is every browser API that our virtual clock replaces, what a page sees from each one, and the rules that make a seeded `Math.random` safe for video. The clock is `core/engine/page-clock.js`, 75 lines of JavaScript that run before any of the page's own scripts. With it, a page can call `Math.random()` and `Date.now()` and still render the same video twice.
 
-## The problem: a page is full of wall-clock behaviour
+It is one item of our [deterministic rendering checklist for headless Chrome](/blog/determinism). The rule behind it: every frame is a pure function of `t`, the film time in seconds. Ask for the frame at 4.2 s twice, in any order, and get the same pixels.
 
-A web page does not know it is being filmed. It reads the time from `Date.now()` and `performance.now()`. It schedules work with `setTimeout`, `setInterval` and `requestAnimationFrame`. It picks a random starting position with `Math.random()`. Each of these depends on when you happen to run the page.
-
-That is fine when a person watches. It is not fine when you capture a video frame by frame. If frame 120 is a function of "how long since the page loaded", then rendering frame 120 on its own, or rendering in a different order, or rendering with parallel workers, gives you a different picture. A render you cannot repeat is a render you cannot debug, cache or split across machines.
-
-The rule we wanted is simple: every frame is a pure function of `t`, the film time in seconds. Ask for the frame at 4.2 s twice, in any order, and get the same pixels.
-
-## What we tried
-
-The obvious fix is to tell authors not to use those APIs. We did not want that. Agents write what they know, and that includes `setTimeout` and `Math.random`. Our rule is that if something an agent writes naturally fails, that is a framework bug. A ban on common APIs is the opposite of that rule.
-
-The second option is to run the page in real time and record it. That makes every render as slow as the film, and frames then depend on how busy the machine is.
-
-So we replaced the clock instead of banning it.
-
-## What we built: a clock the renderer owns
-
-`core/engine/page-clock.js` is injected with `evaluateOnNewDocument`, so it runs before any page script. After that the page sees time and randomness as functions of the seek.
+## What the clock replaces
 
 | API | What the page sees |
 |---|---|
@@ -37,42 +22,66 @@ So we replaced the clock instead of banning it.
 | `requestAnimationFrame` | callbacks queue up and flush once per `set(t)`, with film time |
 | `setTimeout`, `setInterval` | fire when `set(t)` passes their due time, in due order |
 | `Math.random` | a mulberry32 generator, reseeded from `t` on every `set(t)` |
+| `window.__pageClock.real` | the real timers, kept for the renderer |
+| `pending()` | the count of animation-frame callbacks and timers still waiting |
 
-Reseeding from `t` is the part that makes random safe. The seed is derived from the time, so the same `t` always gives the same sequence, no matter what was rendered before. A page can scatter particles with `Math.random()` and they land in the same places every time.
+## How it gets in first
 
-Three details matter more than they look:
+The renderer injects the clock with Puppeteer's `evaluateOnNewDocument`, so it runs before any page script. A script that loads later would already have captured the real functions.
 
-- It keys on fractional seconds, not frame numbers. The clock was lifted from one in the old JSON engine, which keyed on frame numbers. A page is seeked in fractional seconds because we render subframe motion blur and 59.94 fps masters, so the clock moved to `t`.
-- It fires timers in due order, with a cap. When `t` jumps ahead, every timer whose time has passed fires, earliest first. One seek fires at most 1,000 timers, so a tight interval cannot hang the render.
-- The real timers stay reachable as `window.__pageClock.real`, because the renderer itself needs a real wait to know a frame has painted.
+## Date and performance.now
 
-The clock also reports `pending()`, the number of animation-frame callbacks and timers still waiting. At zero, only animations can change the page, so the renderer can reuse a capture when their state repeats.
+Both report film time in milliseconds. A page that measures elapsed time with `Date.now() - start` gets the elapsed film time, whatever the render order.
 
-The clock handles scripts. The other half is CSS and Web Animations, which the browser drives from the document timeline. We freeze that timeline too. The browser's compositor was rasterizing animated layers against real time before our first seek, so a first seek at 1.5 s after load painted different edge pixels than a first seek at 0.05 s. Setting the playback rate to 0 fixes it (commit `874af4972`). That story, and the backward-seek bugs, are in [Making CSS animations seekable](/blog/seekable-css).
+## requestAnimationFrame
+
+Callbacks queue up and flush once per `set(t)`, called with the film time. A page that draws in a rAF loop draws exactly one frame per seek.
+
+## setTimeout and setInterval
+
+When `t` jumps ahead, every timer whose due time has passed fires, earliest first. One seek fires at most 1,000 timers, so a tight interval cannot hang the render.
+
+## Math.random, seeded from t
+
+`Math.random` is a mulberry32 generator, reseeded from `t` on every `set(t)`. The seed is derived from the time, so the same `t` always gives the same sequence, no matter what was rendered before.
+
+Seed from time, not from a counter. A counter depends on how many calls came before, which depends on what you rendered first. With the seed tied to `t`, a page can scatter particles with `Math.random()` and they land in the same places every time.
+
+## Fractional seconds, not frame numbers
+
+The clock was lifted from one in the old JSON engine, which keyed on frame numbers. A page is seeked in fractional seconds because we render subframe motion blur and 59.94 fps masters, so the clock moved to `t`. Subframe blur is explained in [motion blur for HTML animation](/blog/motion-blur).
+
+## The real timers, and pending()
+
+The renderer needs a real wait to know a frame has painted, so the real timers stay reachable as `window.__pageClock.real`.
+
+`pending()` reports the number of animation-frame callbacks and timers still waiting. At zero, only animations can change the page, so the renderer can reuse a capture when their state repeats.
+
+## Why we did not ban the APIs
+
+Agents write what they know, and that includes `setTimeout` and `Math.random`. Our rule is that if something an agent writes naturally fails, that is a framework bug, and a ban on common APIs breaks that rule. Running the page in real time and recording it was the other option, but every render would then be as slow as the film, and frames would depend on how busy the machine is.
+
+## What the clock does not cover
+
+The clock handles scripts. CSS animations and Web Animations run on the document timeline, a second clock the browser drives. We freeze it by setting the animation playback rate to 0 (commit `874af4972`), because the compositor rasterized animated layers against real time before the first seek: a first seek 1.5 s after load painted different edge pixels than one at 0.05 s. The seek side is in [how to seek CSS animations frame by frame](/blog/seekable-css).
 
 ![Six boxes in order: set the clock, call window.seek, seek animations, run onFrame hooks, settle, screenshot.](/blog/page-clock/diagram.svg)
 
-## The measured result
+## The test that holds it
 
-We do not have a before-and-after number for the clock, and we will not make one up. What we have is a test. `tests/media/render-page-determinism.test.mjs` renders each fixture page twice and compares the frame hashes from ffmpeg. One fixture is a `window.seek(t)` canvas page. The other reads `Date.now`, `performance.now` and `Math.random`. The test checks three things: the two renders match, there are five frames, and the frames are not all identical, so the page really moved with the seek time.
+We have no before-and-after number for the clock. What we have is `tests/media/render-page-determinism.test.mjs`. It renders each fixture page twice and compares the frame hashes from ffmpeg. One fixture is a `window.seek(t)` canvas page. The other reads `Date.now`, `performance.now` and `Math.random`. The test checks that the two renders match, that there are five frames, and that the frames are not all identical, so the page really moved with the seek time.
 
-Determinism is also the one thing in vawe that can refuse a render. Everything else advises, which we explain in [Advise on everything, refuse on exactly three things](/blog/advise-refuse).
+Determinism is also the one thing in vawe that can refuse a render; everything else advises, as [AI agent guardrails: when a check should refuse](/blog/advise-refuse) explains. The other sources of drift, from GPU compositing to tab focus, are in the [headless Chrome determinism checklist](/blog/determinism).
 
-## What we would tell you if you render video from a browser
+## Source files
 
-- Replace the clock; do not ask for good behaviour. Authors and agents will use `setTimeout`. Make it deterministic for them.
-- Seed random from time, not from a counter. A counter depends on how many calls came before, which depends on what you rendered first.
-- Inject before the page runs. `evaluateOnNewDocument` is the right place. A script that loads later has already captured the real functions.
-- Freeze the document timeline. CSS animations are a second clock. If you leave it running, you still have a render that depends on timing.
-- Test it by rendering twice. Hash the frames and compare. It is cheap, and it catches the leaks.
+| File or commit | What it holds |
+|---|---|
+| `core/engine/page-clock.js` | the virtual clock (75 lines) |
+| `core/engine/page-seek.js` | the in-page seek that sets the clock and seeks every animation |
+| `tests/media/render-page-determinism.test.mjs` | render twice, compare frame hashes |
+| [`f92f5f59c`](https://github.com/Vandit1604/vawe/commit/f92f5f59c) (2026-09-30) | the virtual clock, `window.seek`, the settle barrier, aspect and a 60 fps final |
+| [`06d63c5ce`](https://github.com/Vandit1604/vawe/commit/06d63c5ce) (2026-09-30) | `page-clock` added |
+| [`874af4972`](https://github.com/Vandit1604/vawe/commit/874af4972) (2026-10-08) | freeze the document timeline |
 
-You can read the public explanation on [/determinism](/determinism) and the longer note on [when determinism matters](/when-determinism-matters). The user-facing rules are in the [determinism docs](/docs/determinism). The source is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe), and we compare approaches on [/remotion-alternatives](/remotion-alternatives).
-
-## In the code
-
-- `core/engine/page-clock.js`: the virtual clock (75 lines).
-- `core/engine/page-seek.js`: the in-page seek that sets the clock and seeks every animation.
-- `tests/media/render-page-determinism.test.mjs`: render twice, compare frame hashes.
-- [`f92f5f59c`](https://github.com/Vandit1604/vawe/commit/f92f5f59c) (2026-09-30): the virtual clock, `window.seek`, the settle barrier, aspect and a 60 fps final.
-- [`06d63c5ce`](https://github.com/Vandit1604/vawe/commit/06d63c5ce) (2026-09-30): `page-clock` added.
-- [`874af4972`](https://github.com/Vandit1604/vawe/commit/874af4972) (2026-10-08): freeze the document timeline so a frame does not depend on the time before the first seek.
+User-facing rules are in the [determinism docs](/docs/determinism), and the public explanation is on [/determinism](/determinism).

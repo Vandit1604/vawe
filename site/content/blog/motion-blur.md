@@ -1,15 +1,18 @@
 ---
-title: "Motion blur in the browser: spend subframes where it moves"
-description: "Our motion blur in the browser picks 1 to 16 subframes per frame from measured travel. A 5 s film took 4,017 subframes at a 16 cap and 7,805 at a cap of 32."
+title: "Motion blur for HTML animation: subframes by travel"
+description: "Motion blur for CSS and HTML animation by blending 1 to 32 subframes per frame from measured travel. A 5 s film took 4,017 subframes at a cap of 16."
 date: 2026-10-09
+updated: 2026-10-13
 section: speed
 tags: "motion blur, subframes, ffmpeg, headless chrome, rendering"
-keywords: "motion blur in browser, css motion blur, subframe motion blur, 180 degree shutter, ffmpeg frame blend"
+keywords: "motion blur css, subframe motion blur, 180 degree shutter, ffmpeg frame blend"
 hero: /blog/motion-blur/hero.svg
 heroAlt: "Schematic: three subframes of a fast circle show as three separate ghosts, eight subframes overlap into one streak."
 ---
 
-Motion blur in the browser is a budget. A browser has no shutter, so we make one: we capture several subframes per output frame and blend them. The question is how many. Too few and a fast object shows as separate ghost copies. Too many and a still frame costs 16 screenshots for nothing.
+A browser has no shutter, so CSS cannot give an animation real motion blur. To get it in a video, you capture several subframes per output frame and blend them. We pick the count per frame from how far things move in that frame: neighbouring subframes sit at most 3 px apart, so a fast frame gets up to 32 subframes and a still frame gets one.
+
+This explainer covers how the count is chosen, how the blend is built, and what it cost. It is part of our [headless Chrome video rendering pipeline](/blog/chrome-per-lane), where every subframe is a screenshot.
 
 <figure>
 
@@ -18,13 +21,13 @@ Motion blur in the browser is a budget. A browser has no shutter, so we make one
 <figcaption>A schematic of the failure and the fix. Positions are drawn for clarity, not taken from a render.</figcaption>
 </figure>
 
-## The problem
+## Why does a fixed subframe count fail?
 
-Our first blur used a fixed subframe count. On a fast move, 3 subframes show 3 separate objects, because neighbouring copies sit far apart. On a slow move or a held frame, the same count wastes capture time: the copies are identical.
+Our first blur used one count for every frame. On a fast move, 3 subframes show 3 separate objects, because neighbouring copies sit far apart. On a slow move or a held frame, the same count wastes capture time: the copies are identical.
 
-Capture is the expensive part of a render. Each subframe is a seek, a settle (fonts, image decode, two paints) and a screenshot. We wanted each frame to get what its own motion needs.
+Capture is the expensive part of a render. Each subframe is a seek, a settle (fonts, image decode, two paints) and a screenshot. Each frame should get what its own motion needs.
 
-## What we built
+## How many subframes does a frame need?
 
 Commit `c466e8631` made the count follow each frame's travel. The rule lives in `subframesForTravel`:
 
@@ -32,19 +35,35 @@ Commit `c466e8631` made the count follow each frame's travel. The rule lives in 
 - Neighbouring subframes should sit at most 3 px apart (`STEP_PX = 3`).
 - Start at one subframe and double it while `travel * 0.5 / k` is above 3, up to a cap.
 
-For 48 px of travel in a frame, the swept distance is 24 px. One subframe leaves 24 px between neighbours, 2 leave 12, 4 leave 6, and 8 leave 3. So that frame gets 8 subframes. A frame that moves 4 px gets 1.
+| Travel in one frame | Swept distance | Subframes | Gap between neighbours |
+|---|---|---|---|
+| 48 px | 24 px | 1 | 24 px |
+| 48 px | 24 px | 2 | 12 px |
+| 48 px | 24 px | 4 | 6 px |
+| 48 px | 24 px | 8 | 3 px (chosen) |
+| 4 px | 2 px | 1 | 2 px (chosen) |
 
-The travel itself comes from the page. A pre-pass reads the bounding boxes of paused animations at consecutive frame times and takes the largest move or resize over all animated elements. This needs no screenshots. When the boxes cannot be read, a cheaper pixel estimate bands frames by mean luma difference into still (1 subframe), medium (up to 4) and fast (up to 16).
+A target in pixels reads better than "16 samples" because it does not depend on the scene.
+
+## Where does the travel number come from?
+
+From the page, before any screenshot. A pre-pass reads the bounding boxes of paused animations at consecutive frame times and takes the largest move or resize over all animated elements.
+
+When the boxes cannot be read, a cheaper pixel estimate bands frames by mean luma difference into still (1 subframe), medium (up to 4) and fast (up to 16).
+
+## How are the subframes blended?
 
 Counts are powers of two and run-length encoded before capture. The ffmpeg filter graph then has one trim, tmix and select chain per run of equal counts, all in one ffmpeg process. If the counts alternate so often that the graph would pass 200 segments, the renderer falls back to one uniform count rather than build the graph.
 
-### Reusing captures
+## When can a subframe skip its screenshot?
 
-Commit `33038e674` raised the cap to 32 subframes and added reuse. After a seek the page reports whether anything still pending can change the pixels: timers, animation frame callbacks, canvas, video, SMIL. If not, two subframes with the same animation state paint the same pixels, and the second one reuses the first capture. A held frame costs one screenshot however many subframes it asks for. A `--profile` flag prints a table of frames, subframes, screenshots (and how many were reused) and capture seconds per second of film.
+Commit `33038e674` raised the cap to 32 subframes and added reuse. After a seek, the page reports whether anything still pending can change the pixels: timers, animation frame callbacks, canvas, video or SMIL. If nothing can, two subframes with the same animation state paint the same pixels, and the second one reuses the first capture. A held frame costs one screenshot however many subframes it asks for. The pending count comes from the [virtual clock that owns timers and requestAnimationFrame](/blog/page-clock).
 
-### The 32 cap and the pixel estimate
+A `--profile` flag prints a table of frames, subframes, screenshots (and how many were reused) and capture seconds per second of film. That table shows which second of a film is expensive.
 
-The pixel estimate cannot tell a frame that needs 32 subframes from one that needs 16, so its fast band stops at 16. A code comment records the measurement for a 5 second three.js film: 4,017 subframes at 16 and 7,805 at 32.
+## What does a cap of 16 or 32 cost?
+
+The pixel estimate cannot tell a frame that needs 32 subframes from one that needs 16, so its fast band stops at 16. A code comment records the measurement for a 5 second three.js film: 4,017 subframes at 16 and 7,805 at 32, a drop of about 49%.
 
 <figure>
 
@@ -52,33 +71,18 @@ The pixel estimate cannot tell a frame that needs 32 subframes from one that nee
 
 </figure>
 
-That is a drop of about 49% in subframes. We have not compared the two films side by side for quality, so we cannot claim the 16 band looks the same on every film.
+We have not compared the two renders side by side for quality, so we cannot claim the 16 band looks the same on every film.
 
-## What went wrong: dropped frames
+For big finals, commit `20e0c3377` prints advice when a final asks for more than 8,000 subframes: the count, an estimate in minutes (1,000 subframes per minute) and the `--blur` option that lowers the cap. The code comment records one measurement: 19,200 subframes took 15 to 23 minutes.
 
-The blended frames are encoded as segments. Each segment restarts its timestamps, so a one-frame segment carries no duration and the next segment overlaps it. With `-r` set to the frame rate, ffmpeg rate-converted the stream and dropped the overlapped frames. It dropped 7 to 24 frames per 6 seconds. Films came out short and drifted away from their audio.
+## What can go wrong in the encode?
 
-Commit `3184064c0` re-stamps the timestamps after the concat with `setpts=N/fps/TB` and uses `-fps_mode passthrough`, so ffmpeg never rate-converts. A later commit (`40091a783`) fixed a similar loss: Chromium saves some frames as RGBA, for example with `mix-blend-mode`, and a pixel-format change mid-sequence made ffmpeg rebuild its filter graph and drop frames. The encode now keeps one pixel format.
+Frames can vanish. The blended frames are encoded as segments, and each segment restarts its timestamps, so a one-frame segment carries no duration and the next segment overlaps it. With `-r` set to the frame rate, ffmpeg rate-converted the stream and dropped the overlapped frames: 7 to 24 frames per 6 seconds. Films came out short and drifted away from their audio, which is how we noticed.
 
-## A warning for big finals
+Commit `3184064c0` re-stamps the timestamps after the concat with `setpts=N/fps/TB` and uses `-fps_mode passthrough`, so ffmpeg never rate-converts. A later commit (`40091a783`) fixed a similar loss from a pixel-format change mid-sequence, covered in the [x264 preset benchmark](/blog/encode). Count your frames after encoding.
 
-Commit `20e0c3377` adds advice on a final with more than 8,000 subframes. It prints the count, an estimate in minutes (1,000 subframes per minute), and the `--blur` option that lowers the cap. The code comment records one measurement: 19,200 subframes took 15 to 23 minutes.
+## Limits, and where to try it
 
-## What we would tell someone building the same thing
+The quality cost of the 16 cap is unmeasured, and the minutes estimate comes from one measurement. The code is in `harness/media/render-page.mjs` (`subframesForTravel`, `bucketize`, `clampSegments`, `blendGraph`), with tests in `tests/media/render-blur-travel.test.mjs` and `tests/media/render-reuse.test.mjs`. Commits: [c466e8631](https://github.com/Vandit1604/vawe/commit/c466e8631), [33038e674](https://github.com/Vandit1604/vawe/commit/33038e674), [3184064c0](https://github.com/Vandit1604/vawe/commit/3184064c0), [20e0c3377](https://github.com/Vandit1604/vawe/commit/20e0c3377).
 
-- Drive the sample count from measured travel, not from a global setting. The rule fits in six lines.
-- Choose the step between neighbouring samples in pixels. A "3 px" target reads better than "16 samples" because it does not depend on the scene.
-- Reuse a capture when you can prove time cannot change the page. Held frames are common.
-- Count your frames after encoding. We lost 7 to 24 per 6 s and only found out because films drifted off their audio.
-- Print a cost table. It showed us which second of a film was expensive.
-
-The [smear stretch](/moves/smear-stretch) move is a fast motion to try this on, and the capture loop that spends these subframes is described in [four render workers were one worker](/blog/chrome-per-lane). For how to ask for blur from the command line, see the [CLI docs](/docs/cli). Source: [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).
-
-## In the code
-
-- `harness/media/render-page.mjs`: `subframesForTravel`, `bucketize`, `clampSegments`, `blendGraph`.
-- `tests/media/render-blur-travel.test.mjs` and `tests/media/render-reuse.test.mjs`.
-- Commit [c466e8631](https://github.com/Vandit1604/vawe/commit/c466e8631): blur follows each frame's travel.
-- Commit [33038e674](https://github.com/Vandit1604/vawe/commit/33038e674): the 32 cap, capture reuse and the profile table.
-- Commit [3184064c0](https://github.com/Vandit1604/vawe/commit/3184064c0): the pts re-stamp.
-- Commit [20e0c3377](https://github.com/Vandit1604/vawe/commit/20e0c3377): advice on very large finals.
+The [smear stretch](/moves/smear-stretch) move is a fast motion to try this on. For how to ask for blur from the command line, see the [CLI docs](/docs/cli). The capture loop that spends these subframes is benchmarked in [faster headless Chrome rendering: one browser per lane](/blog/chrome-per-lane).

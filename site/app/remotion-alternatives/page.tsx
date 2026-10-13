@@ -2,12 +2,13 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { GithubCta, OpenSourceMark } from "../components/Icon";
+import { AltEvidence, type QA } from "../components/AltEvidence";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "vawe · Remotion alternatives, categorized",
+  title: "Remotion alternatives: open source and hosted, compared",
   description:
-    "\"Remotion alternative\" returns two different products: a hosted JSON video API, or a self-hosted rendering engine. What Remotion's own license requires, what vawe and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.",
+    "Remotion alternatives sorted into self-hosted engines (vawe, HyperFrames) and hosted JSON video APIs, with Remotion's 3-employee license rule quoted.",
   path: "/remotion-alternatives",
 });
 
@@ -19,6 +20,41 @@ export const metadata = pageMetadata({
  * license, docs or pricing page, cited with the URL and the date read. No claim characterizes a
  * competitor's code quality, output quality or reliability, because none of that was verified.
  */
+
+const FAQ: QA[] = [
+  {
+    q: "Is there a free Remotion alternative for a company with more than three employees?",
+    a: "Yes. vawe and HyperFrames both ship under Apache-2.0, with no company-size clause and no paid tier. Remotion's own license asks a for-profit company past three employees for a paid Company License.",
+  },
+  {
+    q: "Can I keep my React components?",
+    a: "Not with vawe. A vawe film is one HTML page with CSS, Web Animations, SVG, canvas or three.js. If your team already writes video as React components, Remotion is the tool built for that, and the license question is the one to settle.",
+  },
+  {
+    q: "Do I have to run servers?",
+    a: "With a self-hosted engine you run the render yourself: vawe drives headless Chrome and encodes with ffmpeg on your machine. A hosted API such as JSON2Video or Shotstack runs the render for you and bills per minute or per credit.",
+  },
+  {
+    q: "Will the same input give the same video every time?",
+    a: (
+      <>
+        In vawe, yes: a virtual clock owns time and randomness, and the renderer seeks each frame. How we
+        measured it, and the six sources of drift we fixed, are in{" "}
+        <a href="/blog/determinism">deterministic rendering in headless Chrome</a>.
+      </>
+    ),
+  },
+  {
+    q: "Can an AI agent write the video?",
+    a: (
+      <>
+        Yes. Any coding agent can write an HTML page, and vawe ships a CLI and skills for the loop. Our
+        notes on <a href="/blog/weaker-model">building the harness for the weaker model</a> show where
+        agents still fail.
+      </>
+    ),
+  },
+];
 
 export default function RemotionAlternatives() {
   return (
@@ -118,6 +154,8 @@ paid "Company License":
             </div>
           </section>
 
+          <AltEvidence faq={FAQ} />
+
           <section className="isec">
             <div className="isec-text">
               <h2>Not publicly compared: everything neither project documents.</h2>
@@ -188,6 +226,7 @@ paid "Company License":
               <a href="/determinism">Why the same page always renders the same frames</a>
               <a href="/ai-agents">How an agent writes and checks a film</a>
               <a href="/when-determinism-matters">When determinism is the reason to pick an engine</a>
+              <a href="/blog/page-contract">How vawe renders HTML to video</a>
             </div>
           </section>
         </main>

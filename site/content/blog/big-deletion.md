@@ -1,46 +1,63 @@
 ---
-title: "How to delete dead code: our 205,163-line commit"
-description: "The most useful commit of our month added 65 lines and deleted 205,163. How to delete dead code safely: the order we used, and the restore tag we kept."
+title: "How to delete dead code safely: a 205,163-line commit"
+description: "How to remove dead code when it is a whole product direction: tag first, delete in one commit, drop the hooks, then leftovers. We removed 205,163 lines."
 date: 2026-10-07
+updated: 2026-10-13
 section: architecture
 tags: "delete dead code, refactoring, git, agents, architecture"
-keywords: "delete dead code, remove legacy code, large deletion commit, git restore tag, codebase cleanup"
+keywords: "how to remove dead code, delete legacy code, git restore tag, large deletion commit"
 hero: /blog/big-deletion/hero.svg
 heroAlt: "Bar chart of lines deleted by folder in one commit: core 34,139, films 33,733, tests 29,864, quality 29,733, harness 23,501, blocks 17,221."
 ---
 
-The most useful commit we made in a month had 65 additions and 205,163 deletions. It touched 1,415 files. Nothing in it makes a film look better, and it still changed every film we made afterwards. This post is about how to delete dead code when the dead code is a whole product direction, and why leaving it in place costs more than it seems.
+Removing dead code is hardest when the dead code is a whole product direction: an engine, its tests, its hooks and the docs that teach it. You end with a tree that no longer mentions the old path, and a tag that can bring any file back in one command. We did it on 2026-09-30 for our JSON scene format. The main commit touched 1,415 files, added 65 lines and deleted 205,163.
 
-## The problem: the old path kept pulling agents back
+Why bother, if the code is unused? Because our authors are agents, and agents read the tree. An agent that greps for "how do I add a layer" finds a layer system. An agent that opens `skills/` finds a skill for a format nobody should use. Every leftover file is an instruction, and a doc that says "do this" is hard to out-vote with another doc that says "do that". Its replacement is one web page per film, set out in the [HTML to video page contract](/blog/page-contract). The decision to drop the format came from a [blind A/B test of HTML against our JSON video format](/blog/html-over-json); this post is the cleanup.
 
-In [the A/B test](/blog/html-over-json) HTML beat our JSON scene format, and we decided to drop JSON. Deciding is cheap. The JSON engine, its gates, its skills, its tests and its Go renderer were all still in the tree, and our agents read the tree.
+## What you need before you start
 
-An agent that greps for "how do I add a layer" finds a layer system. An agent that opens `skills/` finds a skill for a format we no longer wanted anyone to use. Every leftover file is an instruction. A doc that says "do this" is hard to out-vote with a different doc that says "do that", so we did not try. We removed the old path.
+- A decision that is final. Ours was made on 2026-09-29.
+- A list of everything that only exists for the old path: engine, tools, gates, tests, skills, renderer, site pages.
+- A list of the hooks and CI checks that test the old path, since they break first.
+- Agreement that nothing gets "frozen" (Step 2 says why).
 
-## What we tried
+## Step 1: tag the last good state
 
-Our first step was to stop new work on JSON and mark it frozen. That is not the same as deleting it. For the site, we did exactly that for about 20 hours: commit `1c2d3e8fc` froze a vendored copy of the engine into `site/public` (+50,586 lines) so the pages built on it kept working while we sorted out what to keep. Freezing added a lot of code. It did not remove any pull on agents. At 21:19 the same day we deleted it as well.
+Create a tag on the last commit that still has the old code. Ours is `json-final`. Any file comes back with:
 
-The lesson from the freeze is plain: a frozen copy is still code, and it still counts.
+```
+git checkout json-final -- <path>
+```
 
-## What we built: one big commit, then ordered follow-ups
+The tag turns "what if we need it?" into a cheap question, and it removes the strongest reason to keep the files.
 
-We split the work by how safe each piece was to remove.
+## Step 2: do not freeze a copy
 
-1. One commit for the core. `ef1da265d` deleted the format, the engine, the tools, the gates, the tests, the skills and the Go renderer. The result was 1,415 files changed, +65 and -205,163. Tracked files fell from 3,534 to 2,133.
-2. A restore tag. The tag `json-final` marks the last state with the format. Any file comes back with `git checkout json-final -- <path>`. That gives a cheap answer to "what if we need it".
-3. Hooks next. `5572e9736` dropped the JSON gates from the pre-commit and pre-push hooks, so commits no longer ran checks for a format that was gone (-107 lines).
-4. Scripts and routers. `b4be7483b` made the Makefile a set of thin aliases and deleted routers and dead scripts: 70 files, -2,481 lines.
-5. The site. `2d5c905fb` removed the frozen engine copy, its data and the pages built on it: 1,792 files, -127,750 lines. `bdbbb91a0` then removed the JSON-era films and every mention of the format.
-6. The leftovers. A week later we stripped the scene registries, the three.js layer builder and the theme colour markers (`804f86f64`, `3253f53ef`, `708e79447`). These were small, but they were the bits an agent could still stumble into.
+Our first move was to freeze, and it was a mistake. Commit `1c2d3e8fc` vendored a copy of the engine into `site/public` (+50,586 lines) so the site pages built on it kept working while we sorted out what to keep. The copy added code and removed no pull on agents. At 21:19 the same day we deleted it as well. A frozen copy is still code, and it still counts.
+
+## Step 3: delete the core in one commit
+
+[ef1da265d](https://github.com/Vandit1604/vawe/commit/ef1da265d) deleted the format, the engine, the tools, the gates, the tests, the skills and the Go renderer: 1,415 files changed, +65 and -205,163. Tracked files fell from 3,534 to 2,133.
+
+The deleted lines were spread across the repo: `core/` lost 34,139, `films/` 33,733, `tests/` 29,864, `quality/` 29,733, `harness/` 23,501 and `blocks/` 17,221. A migration plan would have handled each folder one at a time. One deletion needed no plan per folder.
+
+## Step 4: drop the guards in the same hour
+
+Gates and hooks that check a deleted thing block every other commit. `5572e9736` dropped the JSON gates from the pre-commit and pre-push hooks (-107 lines), two minutes after the main commit.
+
+## Step 5: remove scripts, routers and the site copy
+
+[b4be7483b](https://github.com/Vandit1604/vawe/commit/b4be7483b) made the Makefile a set of thin aliases and deleted routers and dead scripts: 70 files, -2,481 lines. [2d5c905fb](https://github.com/Vandit1604/vawe/commit/2d5c905fb) removed the frozen engine copy, its data and the pages built on it: 1,792 files, -127,750 lines. `bdbbb91a0` then removed the JSON-era films and every mention of the format.
 
 ![Timeline of the deletion commits on 2026-09-30 with the lines each one added or removed.](/blog/big-deletion/diagram.svg)
 
-Across the repo the deleted lines were not concentrated in one place. `core/` lost 34,139 lines, `films/` 33,733, `tests/` 29,864, `quality/` 29,733, `harness/` 23,501 and `blocks/` 17,221. A migration plan would have taken each of those one by one. A single deletion did not need a plan for each.
+## Step 6: hunt the small leftovers
 
-## The measured result
+A week later we stripped the scene registries, the three.js layer builder and the theme colour markers (`804f86f64`, `3253f53ef`, and [708e79447](https://github.com/Vandit1604/vawe/commit/708e79447) on 2026-10-07, which removed the last theme markers and stage CSS). Each was small. Each was a place where the next agent could still stumble into the old path, because a registry with one stale entry reads like a live feature.
 
-The numbers we can stand behind come straight from `git show --shortstat`:
+## Check that the deletion worked
+
+Read the size of each commit straight from `git show --shortstat`:
 
 | Commit | Files | Added | Removed |
 |---|---|---|---|
@@ -48,22 +65,15 @@ The numbers we can stand behind come straight from `git show --shortstat`:
 | `2d5c905fb` remove the site engine copy | 1,792 | 511 | 127,750 |
 | `b4be7483b` thin Makefile, hooks, scripts | 70 | 158 | 2,481 |
 
-We do not have a before-and-after number for agent success that isolates this commit. Other changes landed the same week, so we will not claim one. What we can say is what the agents can no longer find: layer types, JSON validators and the old make targets are gone from the tree.
+Then grep for the old vocabulary. In our tree, layer types, JSON validators and the old make targets no longer turn up. We have no agent success number that isolates this commit, because other changes landed the same week, so we do not claim one.
 
-## What we would tell you if you are about to delete a lot of code
+The deletion also paid off somewhere we did not plan for: the end-to-end suite mostly tested the old format, and [the e2e run fell from about 175 s to 4.3 s](/blog/test-suite) once it was gone.
 
-- Tag before you delete. A restore tag turns "are we sure?" into a cheap question. It also removes the strongest reason to keep the files.
-- Delete, do not freeze. A frozen copy kept our site building for about 20 hours and then cost us a second deletion of 127,750 lines.
-- Remove the guards at the same time. Gates and hooks that check a deleted thing get in the way of every other commit. We dropped ours two minutes after the main commit.
-- Do the small leftovers too. A registry with one stale entry is a trap for the next agent. They are worth a short follow-up each.
-- If agents read your repo, your repo is your prompt. Dead code is dead prompt. For more on that idea see [Documentation as a budget](/blog/read-load) and [One owner per rule](/blog/one-owner).
+## Where this goes wrong
 
-The rest of the move to a plain web page is in [The whole film format fits in one screen](/blog/page-contract). The code is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe), and the current page format is in the [docs](/docs/the-page). If you are comparing frameworks, see [/remotion-alternatives](/remotion-alternatives).
+- The freeze trap. A vendored copy kept our site building for about 20 hours, then cost a second deletion of 127,750 lines.
+- Hooks left behind. A pre-push hook that runs checks for a deleted format fails every unrelated push.
+- Stale docs. If agents read your repo, the repo is your prompt, and dead code is dead prompt. Keeping the agent's reading short is its own discipline, covered in [how long AGENTS.md should be](/blog/read-load).
+- A second copy of a rule that survives in a helper somewhere. [One owner per rule](/blog/one-owner) is how we find those.
 
-## In the code
-
-- `git checkout json-final -- <path>`: restore any deleted file.
-- [`ef1da265d`](https://github.com/Vandit1604/vawe/commit/ef1da265d) (2026-09-30): the 1,415-file deletion.
-- [`2d5c905fb`](https://github.com/Vandit1604/vawe/commit/2d5c905fb) (2026-09-30): the site loses its engine copy and the pages built on it.
-- [`b4be7483b`](https://github.com/Vandit1604/vawe/commit/b4be7483b) (2026-09-30): thin Makefile aliases and fast hooks.
-- [`708e79447`](https://github.com/Vandit1604/vawe/commit/708e79447) (2026-10-07): the last theme markers and stage CSS go.
+What replaced the old format is one web page with a few agreed tags: the [page contract for rendering HTML to video](/blog/page-contract) describes all of it. If you are comparing frameworks, see [/remotion-alternatives](/remotion-alternatives).

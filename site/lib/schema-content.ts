@@ -21,7 +21,7 @@ export function faqSchema() {
 }
 
 const absolute = (url: string) => `${SITE_URL}${url.split("?")[0]}`;
-const publisher = { "@type": "Organization", name: "Vawe", url: SITE_URL };
+const publisher = { "@type": "Organization", name: "vawe", url: SITE_URL };
 
 // ISO 8601 duration from seconds, for a clip of a few seconds: 2 -> PT2S, 2.5 -> PT2.5S.
 const isoDuration = (seconds: number) => `PT${Number(seconds.toFixed(2))}S`;

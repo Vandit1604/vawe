@@ -1,82 +1,80 @@
 ---
-title: "Building an AI agent harness for the weaker model"
-description: "A strong model hides harness gaps and a weaker one shows them. Six weaker-model films: median 13 drafts, median first judged total 45, and 0 of 6 PASS."
+title: "AI agent harness engineering: build for the weaker model"
+description: "AI agent harness engineering should start from the weakest model you will run. Six weaker-model films: median 13 drafts, 0 of 6 passed the judge."
 date: 2026-10-11
+updated: 2026-10-13
 section: agent-experience
 tags: "ai agent harness, weaker model, advice, judge, agents"
-keywords: "ai agent harness, weaker model, llm agent tooling, agent feedback loop"
+keywords: "ai agent harness, agent harness engineering, weaker model, llm agent tooling"
 hero: /blog/weaker-model/symptoms.svg
 heroAlt: "Four rows pairing a weaker-model failure with the harness change that answers it: attractor check, stills judge in dev, advice and error prefixes, and a judge ledger."
 ---
 
-A strong model hides the gaps in your tools. It reads a vague line, guesses right and moves on. A weaker model reads the same line, guesses wrong, and shows you the gap. We found that out when we ran a weaker model through our video framework, vawe, and watched what it did with an AI agent harness built for a stronger one.
+Design your AI agent harness for the weakest model you expect to run through it. A strong model covers the gaps in your tools: it reads a vague line, guesses right and moves on. A weaker model reads the same line, guesses wrong, and shows you exactly where the harness is thin. We build [vawe](https://github.com/Vandit1604/vawe), a framework where an agent writes one HTML page and gets a film, and since 2026-10-01 we run a weaker model next to the stronger one in every round of harness work.
 
-This post lists what the weaker model did, what we changed, and what the numbers say after nine days.
+Harness here means everything around the model: the commands it runs, the lines those commands print, the checks, the judge and the docs it reads first. This page makes the case for the weaker-model rule and links to one post for each part of the harness it shaped.
 
-## What the weaker model did
+## Four failures that were harness gaps
 
-On 2026-10-01 we looked at one film from a weaker model. Four things stood out, and we wrote them into the body of commit [61ac19259](https://github.com/Vandit1604/vawe/commit/61ac19259):
+On 2026-10-01 we looked closely at one film from a weaker model. Commit [61ac19259](https://github.com/Vandit1604/vawe/commit/61ac19259) lists what we saw in its message:
 
-1. It named the brand with a name from our own attractor list, and it drew a banded disc. Both were listed as things to avoid.
+1. It named the brand with a name from our own attractor list, and it drew a banded disc. Both were on the list of things to avoid.
 2. It skipped the stills judge.
-3. It read advice lines as blocking.
+3. It read advice lines as blocking errors.
 4. The judge flipped its advice between rounds.
 
-We read each of these as a harness gap, not a model flaw. The attractor list named the traps and nothing checked for them. The advice lines looked like errors. The judge had no memory of what it had said before.
+None of these was a model flaw in the sense that a better prompt would fix it. The attractor list named the traps and nothing checked for them. The advice lines looked like errors. The judge had no memory of what it had said the round before. A stronger model had walked past all four without tripping, so we had never seen them.
 
 ![Four failures and the harness change for each](/blog/weaker-model/symptoms.svg)
 
-## What we tried
+## What the weaker model made us change
 
-We set one rule: make the weaker model succeed, and run it next to the stronger one in each hill-climb round. The aim is that the first draft passes the fresh judge, not the tenth. A fix loop hides weak defaults, and the weaker model does not fix them for you.
+The same commit answered each failure at the point of action, with the fix printed in the line.
 
-Our answer was to move each check to the point of action, with the exact fix printed in the line.
+The attractor check. `taste/attractors.json` (it lived in `engine-doctrine/` at the time) holds the stock names and hero shapes from the taste card's Attractors section, and a test checks that the card quotes them. The range check, `dev` and `new` flag a match in the brand name and in each direction, and print the fix.
 
-## What we built
+Prefixes that cannot be misread. Every advice line from `dev`, `new` and the stills range check starts with `advice:`, and its block ends with `(advice only: ...)`. An error that stops the run starts with `error:`. `harness/lib/advice.mjs` owns the wording.
 
-All of this went into one commit.
+The stills judge inside `dev`. `bin/vawe dev` runs the stills judge itself when `brief.md` has three filled directions, once per change of the directions or the slots, and prints its pick in three lines. `--no-judge` skips it.
 
-An attractor check. `taste/attractors.json` (it lived in `engine-doctrine/` at the time) holds the stock names and hero shapes that sit next to the taste card's Attractors section. A test checks that the card quotes them. The range check, `dev` and `new` flag a match in the brand name and in each direction, and print the fix.
+A judge ledger. The judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones, and it must say why a new fix reverses an old one. The report prints `ledger: N fixed, N partly, N still; N new`. A follow-up, [1810fc14a](https://github.com/Vandit1604/vawe/commit/1810fc14a), keeps what, now and want on each entry, and after three rounds on one target the ledger prints a stop line.
 
-Advice that cannot be misread. Every advice line from `dev`, `new` and the stills range check starts with `advice:`. Its block ends with `(advice only: ...)`. An error that stops the run starts with `error:`. The code is in `harness/lib/advice.mjs`.
+Motion lint for `window.seek` pages. The five motion rules now also run on element boxes sampled over time (`harness/lib/box-track.mjs`). Canvas contents are out of scope, and the output says so.
 
-The stills judge inside `dev`. `bin/vawe dev` runs the stills judge itself when `brief.md` has three filled directions. It runs once per change of the directions or the slots, and prints its pick in 3 lines. `--no-judge` skips it.
+Later, repeated judge findings became defaults in the starter page, the moves and the taste digest. The first 5 s sting that passed the fresh judge ([2c292300f](https://github.com/Vandit1604/vawe/commit/2c292300f)) became the gold example, [`films/examples/colour-sting`](https://github.com/Vandit1604/vawe/tree/main/films/examples/colour-sting).
 
-A judge ledger. The fresh judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones, and it must say why a new fix reverses an old one. The report prints a line such as `ledger: N fixed, N partly, N still; N new`. A follow-up, [1810fc14a](https://github.com/Vandit1604/vawe/commit/1810fc14a), stops a target from being asked back and forth: after three rounds the ledger prints a stop line.
+## The evidence nine days later
 
-Motion lint for `window.seek` pages. The same five motion rules now run on element boxes sampled over time (`harness/lib/box-track.mjs`). Canvas contents are out of scope, and the output says so.
+The commit body gives wall-clock numbers after the change, measured with `bin/vawe dev --no-judge`: a 5 s `window.seek` film took 26.1 s in total, 20.2 s of it capture, and a 3 s seek demo took 3.7 s to capture. The suite had 135 passing tests and `bin/vawe e2e` passed in 24.7 s. We have no before numbers for these timings, so they say nothing about speed.
 
-The principle behind it is short. Put defaults in code. Put checks at the moment of action, with the exact fix. Give each step one command.
+The quality numbers come from a trace review on 2026-10-10. `vawe runs --all` showed six weaker-model films with a median of 13 drafts, a median first judged total of 45, and 0 of 6 PASS.
 
-Later, repeated judge findings became upstream defaults in the starter page, the moves and the taste digest. The first 5 s sting to pass the fresh judge became the gold example. It is [`films/examples/colour-sting`](https://github.com/Vandit1604/vawe/tree/main/films/examples/colour-sting) in the repo.
+That review also showed where the new checks did not reach. On one film, 15 of 17 `dev` calls used `--no-judge`, and the one stills judge that ran scored 17 on stills. The acceptance count stayed at 7 of 14 or 15 rows for 10 drafts in a row, and 9 of 12 later drafts fixed no rule that had fired. Nothing counted the skip flag, so `vawe runs` showed "judge -" for every draft.
 
-## The measured result
+## The objection: why not just use the strong model?
 
-The commit body gives the wall clock after the change, measured with `bin/vawe dev --no-judge`. A 5 s `window.seek` film took 26.1 s in total, 20.2 s of it capture. A 3 s seek demo took 3.7 s to capture. The test suite had 135 passing tests, and `bin/vawe e2e` passed in 24.7 s. We have no before number for these timings, so we make no claim about speed.
+The fair objection is cost of effort. If the strong model passes, why spend days on failures it never makes?
 
-The quality numbers come from a trace review on 2026-10-10. `vawe runs --all` showed six weaker-model films with a median of 13 drafts, a median first judged total of 45, and 0 of 6 PASS. None of the six passed the judge, so the harness is not done.
+Our answer is that the strong model's success hides the cause. A loop that works because the model guessed right is a loop that fails on the next model, the next prompt or the next long session where context runs thin. The weaker model gives us those failures now, while each one points at a specific line of harness code. The changes it forced also cost the strong model nothing: `advice:` is two words, and a judge with a ledger is fairer to every author.
 
-The review also found where the new checks did not reach. On one film, 15 of 17 `dev` calls used `--no-judge`. The one stills judge that ran scored 17 on stills. The acceptance count then stayed at 7 of 14 or 15 rows for 10 drafts in a row, and 9 of 12 later drafts fixed no rule that had fired. The flag that skips the judge had no counter, so `vawe runs` showed "judge -" for every draft. We read this as a harness gap, not as a model flaw, and it fed the next round of fixes. The run-log story is in [Run logs: every verb writes one line](/blog/run-logs).
+There is a second reason. Our target is a first draft that passes a fresh judge, and a fix loop hides weak defaults. A strong model repairs a weak default by the third draft. A weaker one does not, so the default has to be good.
 
-## What we would tell someone building an AI agent harness
+## Where we could be wrong
 
-Run your weakest realistic reader through the loop, early. The stronger model will pass a loop that has holes in it, and you will not know.
+The 0 of 6 is the uncomfortable number. After nine days of fixes, no weaker-model film passed the judge, so we cannot yet show that designing for the weaker model makes it succeed. What we can show is a list of harness gaps it found that the stronger model did not, each closed by a commit. It is possible that some gaps only matter for weak models and that the effort would pay more elsewhere. We will know more when a weaker-model film passes, and we will count the drafts it took.
 
-Print the prefix. `advice:` and `error:` cost nothing and removed a whole class of misreads. If a line can be read as a stop, someone will read it as a stop.
+## The parts of the harness, one post each
 
-Do not give the judge a free hand. A judge with no ledger will reverse itself. Give each fix an id and make the next judge answer for it. [How we designed the judge](/blog/judge-design) goes into the rest.
+Each of these posts covers one piece of the harness that the weaker-model rule shaped:
 
-Treat a skip flag as a signal. If a check can be turned off with one flag, count the flag.
+- [CLI design for AI agents](/blog/one-binary): why one binary with one verb per step replaced a Makefile and four routers.
+- [Agent hooks that print the next command](/blog/stage-say): a hook and the verbs name the next stage, and what a trace showed about whether agents follow it.
+- [Shell for AI agents](/blog/shell): the hook we reverted in seven minutes, and why we now change the environment instead of the habit.
+- [Clarifying questions before the agent acts](/blog/new-asks): `vawe new` asks five questions and writes nothing until three are answered.
+- [Merging a git worktree branch to main](/blog/land): the six-step landing ritual as one command.
+- [AI agent guardrails](/blog/advise-refuse): every check advises, and only three things refuse.
+- [How long AGENTS.md should be](/blog/read-load): the words an agent reads first, measured and ratcheted.
+- [Reading AI agent traces](/blog/trace-reviews): 74% of one session was waiting, and the fixes for the wait.
+- [AI agent observability](/blog/run-logs): one JSONL line per command, written by the tool and never by the agent.
 
-Last, watch the length of your docs. Weaker models skipped our long rule docs. We kept the list short in [Taste as a one-page digest](/blog/taste-digest).
-
-The framework is open source at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe). The [moves library](/moves) is the best place to see what a passing film is built from.
-
-## In the code
-
-- `harness/lib/advice.mjs`: the `advice:` and `error:` wording.
-- `taste/attractors.json` and `taste/rules/attractors.md`: the attractor list and its rule.
-- `harness/lib/box-track.mjs`: the box sampler for the motion lint.
-- [61ac19259](https://github.com/Vandit1604/vawe/commit/61ac19259): advice, attractor check, stills judge in `dev`, judge ledger, motion lint.
-- [1810fc14a](https://github.com/Vandit1604/vawe/commit/1810fc14a): ledger entries keep what, now and want.
-- [2c292300f](https://github.com/Vandit1604/vawe/commit/2c292300f): the first sting that passed the fresh judge.
+The judge side of the loop is covered in [how we designed the LLM judge](/blog/judge-design), and the [moves library](/moves) shows what a passing film is built from.

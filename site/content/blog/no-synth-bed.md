@@ -1,64 +1,52 @@
 ---
-title: "Background music for generated video: we banned the synth bed"
-description: "Background music for generated video: a constant synth hum passed our dead-air check, so we banned it. The ban commit changed 44 files, +133 and -376 lines."
+title: "Background music for generated video: ban the synth bed"
+description: "Background music for generated video should come from a real track or not at all. 4 of our 24 audio films hid silence under a synth hum, so we removed it."
 date: 2026-10-10
+updated: 2026-10-13
 section: taste
 tags: "background music, synth bed, sound design, agents, checks"
-keywords: "background music for generated video, synth bed, dead air check, sound effects on actions, ai video audio"
+keywords: "background music for generated video, synth bed, dead air check, sound effects on actions"
 hero: /blog/no-synth-bed/hero.svg
 heroAlt: "Two bar charts. 4 of 24 audio films shipped a synth bed before the ban. The ban commit touched 44 files, adding 133 lines and removing 376."
 ---
 
-The cheapest way to pass our "no dead air" check was to put a constant hum under the whole film. Agents found that. When we counted, 4 of our 24 audio films shipped a synth bed. We listened to them and they sounded machine-made. So we removed the bed from the framework and made a page that asks for one fail with the fix. If you want background music for generated video, this is what we learned about what to let an agent write.
+Generated video should not get a synthesized music bed. Background music should come from a real track a person chose, or the film should have none and carry small sound effects on its actions instead. How loud that sound should be is a separate question, answered in our guide to [LUFS for video](/blog/audio-as-written). We hold this view because we tried the alternative. When we counted, 4 of our 24 audio films shipped a constant synth hum, and it sounded machine-made every time.
 
-## The problem: a check that a hum satisfies
+The hum also had a second job nobody asked for: it was the cheapest way to pass our "no dead air" check.
 
-Sound was part of every vawe film. The audio kit had a set of synthesized voices, and among them were sustained ones: a bed, a soft swell and a braam. Our checks looked for silence that was too long. A bed fills the whole timeline, so the silence check could never fail on a film that had one.
+## How a hum beats a silence check
 
-That is a general trap. When a check measures "is there sound", an agent that is told to make the check pass will add the sound that is easiest to add. We have seen the same shape with motion. A live-hold check that counted any movement got camera drift on every hold. If you want that story, read [Advise on everything, refuse on exactly three things](/blog/advise-refuse).
+Every vawe film had sound. The audio kit had synthesized voices, and some were sustained: a bed, a soft swell and a braam. Our check looked for silence that ran too long. A bed fills the whole timeline, so the check could never fail on a film that had one. An agent told to make the check pass adds the sound that is easiest to add.
 
-The second part of the problem was taste. A constant synthetic tone does not follow the picture. Cuts and actions pass over it and it stays the same. Next to a real recorded effect, it sounded like what it was.
+We had seen the same shape with motion. A live-hold check that counted any movement got a slow camera drift on every hold, which our [audit of reward hacking in AI agents](/blog/loophole-audit) counted across 36 films. A bed, a camera drift and a full-frame gradient are the same kind of move: a global trick that turns a global check green.
 
-## What we tried
+Taste was the other half of the case. A constant synthetic tone does not follow the picture. Cuts and actions pass over it and it stays the same. Next to a recorded effect, it sounds like what it is.
 
-We did not try to write a smarter check for "a hum that is hiding silence". A check like that would only ask agents to hide the hum better. We chose to take away the thing that was available.
+## The evidence
 
-Commit `f68dc7df2` removed the `bed`, `swell-soft` and `braam` voices, the `synth-bed.mjs` helper and the `data-bpm` attribute. A page that writes `data-synth="bed"` (or another removed sustained voice) is now refused with the rule and the fix. The refusal message tells the agent to use a real music file (`<audio loop src=...>`) or no bed, and that sparse effects on actions are fine.
+Commit [f68dc7df2](https://github.com/Vandit1604/vawe/commit/f68dc7df2) removed the `bed`, `swell-soft` and `braam` voices, the `synth-bed.mjs` helper and the `data-bpm` attribute. It touched 44 files, adding 133 lines and removing 376; much of the change was in the audio kit (71 lines changed), the palette (94) and the bake script (44). A page that writes `data-synth="bed"`, or another removed sustained voice, is now refused by `harness/media/page-audio.mjs` with the rule and the fix. The message tells the agent to use a real music file (`<audio loop src=...>`) or no bed, and that sparse effects on actions are fine. A bare refusal sends an agent searching. One with the fix in it does not.
 
 ![Before, a bed made the dead-air check green. After, the page is refused and the agent uses small effects on actions or a real track.](/blog/no-synth-bed/flow.svg)
 
-## What we built: background music rules for generated video
+The rule now has one owner, `taste/craft/sound.md`, and every other doc points to it:
 
-The new rule has one owner, `taste/craft/sound.md`, and every other doc points to it. In short:
+- Sound is small effects on actions, like UI button sounds: clicks, taps, pops, short whooshes, a success chime. Each sits on the frame of its action.
+- Recorded effects come first. The short synth voices that remain are the fallback, and short ticks tied to actions are cheap where a held tone is not.
+- Music only comes from a real track the user gives. A film with no track has no beat grid, and `vawe sound` says so instead of inventing one.
+- With a track, `vawe sound` (`harness/media/sound.mjs`, from [bf4252858](https://github.com/Vandit1604/vawe/commit/bf4252858)) reads it and prints a beat grid and a cut table; the tutorial on how to [cut video to the beat with a beat grid](/blog/beat) walks through it.
 
-- Sound is small effects on actions, like UI button sounds: clicks, taps, pops, short whooshes, a success chime. Each sits on the frame of the action.
-- Recorded effects come first. The short synth voices that remain are the fallback.
-- Music only comes from a real track the user gives us. A film with no track has no beat grid, and `vawe sound` says so instead of inventing one.
-- When there is a track, `vawe sound` reads it and prints a beat grid and a cut table. That is the subject of [Cutting to the beat](/blog/beat).
+A follow-up, [25e1ef4e9](https://github.com/Vandit1604/vawe/commit/25e1ef4e9), folded the sound rules together: `sound-default-on` merged into `sound-voices`, and `cue-sparse`, `sound-swell` and `cue-has-event` merged into `sound-cues`, removing 711 lines and adding 75. The licence note says the synthesized beds are retired ([e51af67b8](https://github.com/Vandit1604/vawe/commit/e51af67b8)).
 
-A follow-up commit (`25e1ef4e9`) folded the sound rules together, so that `sound-default-on` merges into `sound-voices` and `cue-sparse`, `sound-swell` and `cue-has-event` merge into `sound-cues`. That commit removed 711 lines and added 75. The licence note was updated too (`e51af67b8`): the synthesized beds are retired.
+## The strongest objection: write a smarter check
 
-We kept one thing deliberately. Silence between effects is normal. A film still has to read with the sound off, because feeds autoplay muted, so sound is an addition and not a crutch.
+The obvious answer to a gamed check is a better check, one that spots "a hum hiding silence". We decided against it. A check like that asks agents to hide the hum better, and the next version of the trick would pass it. Removing the voice removes the trick, and the silence check keeps its original meaning.
 
-## The measured result
+A second objection: some films do want a held tone. Then the person can give a real track. What we refuse is the default, the sustained voice an agent reaches for when nothing else is asked of it.
 
-The ban commit touched 44 files with 133 lines added and 376 removed. Much of the removed code was in the audio kit (71 lines changed), the palette (94) and the bake script (44). Before the ban, 4 of 24 audio films shipped a synth bed. That count comes from our own audit, which grepped the page source of the films we had. We cannot reproduce it from the public repo, because most of those films are private, so treat it as about one in six.
+Silence between effects stays normal. A film still has to read with the sound off, because feeds autoplay muted, so sound adds to a film and never props it up.
 
-We do not have a listening score for the films after the ban. The sound was judged by ear, and our own notes call the judge's sound score unreliable. What we can say for sure is that the dead-air check no longer has a trivial way to go green, and the bed code is gone.
+## Where we could be wrong
 
-## What we would tell someone building the same thing
+The 4 of 24 count comes from our own audit, which grepped the page source of the films we had. Most of those films are private, so it cannot be reproduced from the public repo; treat it as about one in six. We have no listening score for films after the ban. The sound was judged by one person's ear, and our own notes call the judge's sound score unreliable. If real tracks turn out to be rarely available, films may get quieter than they should, and that is worth measuring.
 
-- If an agent can satisfy a check with a cheap global trick, remove the trick as well as the check. A bed, a camera drift and a full-frame gradient are the same kind of move.
-- Refuse with the fix in the message. A bare refusal sends the agent searching. Ours says what to use instead.
-- Put the rule in one file and link to it. We folded six sound rule files into two when we gave the rule one owner.
-- Keep the fallback small. Short ticks and pops are cheap and tied to actions. A held tone is not.
-- Say plainly what you do not know. Our listening judgement is one person's ear.
-
-For the audio contract in the page, see the [audio docs](/docs/audio), and for how advice checks differ from refusals, the [quality gates](/docs/quality-gates). For another view on rules that agents learn to game, read our post on [data over rules](/blog/data-over-rules). The code is at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe).
-
-## In the code
-
-- `harness/media/page-audio.mjs`: the banned voices and the refusal message.
-- `taste/craft/sound.md`: the one owner of the sound rule.
-- `harness/media/sound.mjs`: the `vawe sound` verb.
-- Commits: [`f68dc7df2`](https://github.com/Vandit1604/vawe/commit/f68dc7df2) the ban, [`25e1ef4e9`](https://github.com/Vandit1604/vawe/commit/25e1ef4e9) one owner for sound rules, [`bf4252858`](https://github.com/Vandit1604/vawe/commit/bf4252858) `vawe sound` reads a track, [`e51af67b8`](https://github.com/Vandit1604/vawe/commit/e51af67b8) licence note.
+What we can state for sure: the dead-air check no longer has a trivial way to go green, and the bed code is gone. The loudness side of the same sound system is in [LUFS for video](/blog/audio-as-written), and the [audio docs](/docs/audio) and [quality gates](/docs/quality-gates) explain which checks advise and which refuse.

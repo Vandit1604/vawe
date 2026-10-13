@@ -1,69 +1,60 @@
 ---
-title: "HTML to video beat our own JSON scene format"
-description: "We built a 24-type JSON format for agents, then a blind A/B test showed plain HTML to video finished in 5.9 minutes against 10.75. So we deleted the format."
+title: "HTML vs a custom JSON video format: our A/B test"
+description: "A custom JSON video format lost a blind A/B test to one HTML page: 10.75 minutes against 5.9, and judge scores of 5 and 4.5 against 8 and 7.5."
 date: 2026-10-07
+updated: 2026-10-13
 section: architecture
-tags: "html to video, json, agents, web animations, architecture"
-keywords: "html to video, json video format, agent-native motion graphics, web animations api, css keyframes"
+tags: "json video format, html to video, agents, web animations, architecture"
+keywords: "json video format, html vs json for video, agent-native motion graphics, web animations api"
 hero: /blog/html-over-json/hero.svg
 heroAlt: "Bar chart. The JSON arm took 10.75 minutes and scored 5 and 4.5 from two judges. The HTML arm took 5.9 minutes and scored 8 and 7.5."
 ---
 
-We built a scene format for agents with 24 layer types, presets and a Go renderer. Then we gave the same brief to two fresh agents, one on our JSON and one on a single HTML file, and the HTML arm finished in 5.9 minutes against 10.75. Two blind judges scored the HTML film 8 and 7.5. They scored the JSON film 5 and 4.5. This post is about that test and why we stopped building a private format. If you are choosing how an agent should describe a video, HTML to video is where we ended up.
+Short answer: for an agent that writes video, plain HTML beat our own JSON video format on every number we took. Given the same brief, the HTML arm finished in 5.9 minutes against 10.75, used one render fewer, and two blind judges scored its film 8 and 7.5 against 5 and 4.5. We decided to drop the JSON format two days later and deleted it on 2026-09-30. What replaced it is the [page contract for rendering HTML to video](/blog/page-contract).
 
-## The problem: a format no model was trained on
+The test was one run per arm, so treat it as a strong signal and not a rate. This page sets out the two options side by side, then each criterion, then when a private format could still be the right call.
 
-vawe makes films from a description. Early on we gave agents a JSON vocabulary: 24 layer types, named presets, size roles, and a Go renderer that turned the JSON into frames. It was tidy. It was also something no model had seen during training.
+## The two formats side by side
 
-The agents paid for that in two ways. They spent time finding the right preset name for a plain-English idea ("make the letters flip"). And they used the format in a narrow way anyway. Our layer data showed that 4 of the 24 layer types made up 87% of all layers. Of 314 text elements that had a size, 0 used a size role. The vocabulary was large and mostly unused.
-
-## What we tried
-
-We ran one blind A/B test on 2026-09-27. The setup was the same for both arms:
-
-- One brief for a 6 second kinetic sting.
-- A fresh agent per arm, with no memory of the other.
-- A limit of 45 minutes and 5 renders.
-- Two blind judges who scored both films, in opposite order.
-
-Arm A used the JSON route from our AGENTS.md. Arm B wrote one HTML file with `element.animate` and CSS keyframes, and rendered it with a 40-line puppeteer script that seeks the page to each frame time and takes a screenshot.
+| | JSON scene format (Arm A) | One HTML page (Arm B) |
+|---|---|---|
+| What the agent writes | JSON with 24 layer types, named presets and size roles | `element.animate`, CSS keyframes, SVG, canvas |
+| Renderer | A Go renderer that turns JSON into frames | A 40-line puppeteer script that seeks the page and takes a screenshot per frame |
+| Seen in training | No | Yes |
+| Time to a film | 10.75 min | 5.9 min |
+| Renders used (limit 5) | 4 | 3 |
+| Blind judge scores | 5 and 4.5 | 8 and 7.5 |
 
 ![Two pipelines side by side. The JSON arm learns a vocabulary, writes JSON and hands it to a Go renderer. The HTML arm writes one page and a short script seeks and screenshots it.](/blog/html-over-json/diagram.svg)
 
-## The measured result
+The test ran on 2026-09-27. Both arms got one brief for a 6 second kinetic sting, a fresh agent with no memory of the other arm, a limit of 45 minutes and 5 renders, and two blind judges who scored both films in opposite order. Arm A followed the JSON route in our AGENTS.md at the time.
 
-| | JSON (Arm A) | HTML (Arm B) |
-|---|---|---|
-| Time | 10.75 min | 5.9 min |
-| Renders used | 4 | 3 |
-| Judge scores | 5 and 4.5 | 8 and 7.5 |
+## Vocabulary the agent must learn
 
-We have one run per arm. That makes this a signal, not a statistic, and we do not claim a rate from it. What made us act was that the faults in the JSON run were about the format itself. A `flap` preset showed random glyphs that read as noise, and about 8 of the 10.75 minutes went into finding preset names for devices the agent could already describe in words.
+The JSON format was tidy, and no model had seen it during training. The agent spent time finding a preset name for a plain-English idea such as "make the letters flip". About 8 of the 10.75 minutes went into finding preset names for devices the agent could already describe in words.
 
-The HTML run had one trap, and it cost 8 minutes. A Web Animations keyframe list with no end value slides back to the element's resting state, so the element snaps back instead of holding its last value. That is ordinary Web Animations behaviour, and the agent could look it up like any other web question.
+HTML needs no lookup for that. The agent writes the flip in CSS the way it would on any website.
 
-## What we built instead
+## How much of the format gets used
 
-We decided on 2026-09-29 to remove JSON and make every film one HTML page. The framework keeps its renderer, its checks and its harness. It drops the private language.
+Our layer data showed that 4 of the 24 layer types made up 87% of all layers. Of 314 text elements that had a size, 0 used a size role. A large vocabulary that is mostly unused costs reading time and buys little.
 
-The rule we wrote for ourselves is short: if something an agent would naturally write fails, that is a framework bug, not an agent mistake. A page can use CSS keyframes, `element.animate`, SVG, canvas or three.js. The renderer's job is to make time a seek instead of a clock, which we cover in [Time is the seek, never the clock](/blog/page-clock) and [Making CSS animations seekable](/blog/seekable-css). The same idea drives the [page contract](/blog/page-contract): a film is a web page with a few agreed `meta` tags.
+## Failure modes
 
-Deleting the old format was its own piece of work, and it was bigger than writing the new one. We cover it in [The biggest commit is a deletion](/blog/big-deletion).
+The faults in the JSON run came from the format. A `flap` preset showed random glyphs that read as noise, and the agent could not search the web for why.
 
-## What we would tell you if you are building the same thing
+The HTML run had one trap, and it cost 8 minutes. A Web Animations keyframe list with no end value slides back to the element's resting state, so the element snaps back instead of holding its last value. That is ordinary Web Animations behaviour, and the agent could look it up like any other web question. We later made the renderer handle cases like this, which the [tutorial on seeking CSS animations](/blog/seekable-css) walks through.
 
-- Test the format on a fresh agent before you invest in it. A cheap blind test beats a long design review.
-- Count what agents actually use. A 24-type vocabulary where 4 types carry 87% of the load is a hint that the surface is too wide.
-- Prefer a language the model already writes well. Agents handle HTML, CSS and the Web Animations API without a guide, and a missing end keyframe is a problem you can look up.
-- Keep the part that is yours. Our renderer, quality checks and judge are still ours. Only the input language moved to the web.
-- Be honest about sample size. One run per arm tells you where to look, not how big the gap is. We later ran films on a weaker model too, which we describe in [Building the harness for the weaker model](/blog/weaker-model).
+## What the framework keeps either way
 
-If you came here from a search for an alternative to a React-based video tool, see how we compare on [/remotion-alternatives](/remotion-alternatives) and [/hyperframes-alternatives](/hyperframes-alternatives). The code is open at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe), and the page format is described in the [docs](/docs/the-page).
+Moving the input language to the web did not move the rest. The renderer (`harness/media/render-page.mjs`), the quality checks, the judge and the harness stay ours. Two commits made the web side complete before the switch: [7baa223b9](https://github.com/Vandit1604/vawe/commit/7baa223b9) (2026-09-27) seeks CSS animations, transitions and Web Animations instead of killing them, and [c193aa32f](https://github.com/Vandit1604/vawe/commit/c193aa32f) (2026-09-28) lets a page's own `vawe.onFrame` drive real WebGL with no new attribute language.
 
-## In the code
+The renderer's main job is to make time a seek instead of a clock. The [virtual clock reference](/blog/page-clock) covers `Date`, timers and `Math.random`.
 
-- `harness/media/render-page.mjs`: the renderer that seeks a page and captures frames.
-- `AGENTS.md`: the page contract agents read first.
-- [`7baa223b9`](https://github.com/Vandit1604/vawe/commit/7baa223b9) (2026-09-27): CSS animation, transition and Web Animations are seeked, not killed.
-- [`c193aa32f`](https://github.com/Vandit1604/vawe/commit/c193aa32f) (2026-09-28): a page's own `vawe.onFrame` drives real WebGL, with no new attribute language.
-- [`ef1da265d`](https://github.com/Vandit1604/vawe/commit/ef1da265d) (2026-09-30): the commit that deleted the JSON format.
+## When to choose which
+
+Choose a web page when the author is a language model. It already writes HTML, CSS and the Web Animations API well, and a bug in that code is a bug the web has already answered. That is our case, and on 2026-09-29 we decided that every film is one HTML page. The house rule we wrote then: if something an agent would naturally write fails, that is a framework bug and not an agent mistake. The result is the small [page contract for rendering HTML to video](/blog/page-contract): a web page with a few agreed `meta` tags and one `data-world` attribute per beat.
+
+A private format can still make sense when people, not models, author through a UI that writes the file for them, or when you need a vocabulary the web cannot express. Test it on a fresh agent before you invest in it, since a blind test is cheaper than a long design review. Count which parts get used, too. And state your sample size: one run per arm tells you where to look, not how big the gap is. We later ran films on a weaker model as well, in the post on [building an AI agent harness for the weaker model](/blog/weaker-model).
+
+Deleting the old format was bigger work than writing the new one. Commit [ef1da265d](https://github.com/Vandit1604/vawe/commit/ef1da265d) (2026-09-30) removed it, and [how to delete dead code safely](/blog/big-deletion) describes the order we used. If you came here looking for an alternative to a React-based video tool, see our pages on [Remotion alternatives](/remotion-alternatives) and [HyperFrames alternatives](/hyperframes-alternatives). The page format is in the [docs](/docs/the-page).

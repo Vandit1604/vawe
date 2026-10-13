@@ -1,62 +1,60 @@
 ---
-title: "An agent hook that names the next command"
-description: "A hook reads the film in progress and prints the next command. The agent followed it from brief to board, until dev printed one line 13 times in a row."
+title: "Agent hooks that print the next command: a trace study"
+description: "Agent hooks that name the next command: our agent followed every line from brief to Board, then dev printed one line 13 times in a row. What we changed."
 date: 2026-10-11
+updated: 2026-10-13
 section: agent-experience
 tags: "agent hooks, ai agents, workflow, harness"
-keywords: "ai agent hooks, agent workflow, next step hook, ai agent harness, stage hook"
+keywords: "agent hooks, ai agent hooks, next step hook, agent workflow"
 hero: /blog/stage-say/hero.svg
 heroAlt: "Flow of the stage-say hook: git status finds the changed page, the hook reads the brief, design and render files, picks the first unmet stage and prints one next command."
 ---
 
-The best documentation for a long agent task is the line the tool prints at the moment the agent needs it. We built an AI agent hook that does one thing: after each prompt it reads the film the agent is working on and names the next command. In a trace review the agent followed every one of those lines from the brief to the Board. Then we found that one verb had printed the same line 13 times in a row.
+In a trace review on 2026-10-10, an agent building a film followed every "next command" line our tools printed, in order, from the brief to the Board. Then the same agent got the line "strip the cuts and read every one" after 13 of 13 draft renders, including the ones after it had already read 18 strips. This is the story of the agent hook that prints those lines, how we checked whether agents obey it, and the one line that turned into noise.
 
-## The problem: ten stages, and the agent skips two
+The hook is one piece of the [harness we build for the weaker model](/blog/weaker-model). A strong model can hold a ten-stage process in mind. A weaker one cannot, and that is where this started.
 
-A [vawe](https://github.com/Vandit1604/vawe) film goes through about ten stages. The table in AGENTS.md lists them: brief, reference study, design system and kit, states, board, draft, motion pass, critique, fix, final. A strong agent can hold that table in mind. A weaker one forgets which stage comes next, skips the brief and the Board and goes straight to a draft render, or does the motion pass before the states exist. The cost of a skipped stage shows up late, in a render that looks generic, which is the most expensive place to find it.
+## Ten stages and a model that skips two
 
-Adding more text to AGENTS.md did not help. The agent reads it once at the start and the stage table is one of dozens of things in context (see [the read-load post](/blog/read-load) for what that costs).
+A [vawe](https://github.com/Vandit1604/vawe) film goes through about ten stages, listed in a table in AGENTS.md: brief, reference study, design system and kit, states, board, draft, motion pass, critique, fix and final. A weaker model forgets which stage comes next. It skips the brief and the Board and goes straight to a draft render, or it runs the motion pass before the states exist. The cost shows up late, in a render that looks generic, which is the most expensive place to find it.
 
-## What we tried first
+More text in AGENTS.md did not help. The agent reads it once at the start, and the stage table is one of dozens of things in context. [How long AGENTS.md should be](/blog/read-load) covers what each added word costs.
 
-The JSON-era flow had two hooks. `stage-gate` ran before file writes and checked the film against its stage, and `stage-say` named the next step. The gate had already been turned from a refusal into advice: its source says it "used to deny unconditionally" and now allows the write and prints the reason, unless an environment variable restores the old behaviour. When we moved to HTML pages we removed the gate in the same merge ([75b2c57](https://github.com/Vandit1604/vawe/commit/75b2c5731)) and left `stage-say` as the only owner of the stage order. A second place that knew the order would have drifted from the first.
+## From a gate to a hook that only speaks
 
-## What we built
+The flow from the JSON era had two hooks. `stage-gate` ran before file writes and checked the film against its stage; its source says it "used to deny unconditionally" and by then only printed the reason, unless an environment variable restored the old behaviour. `stage-say` named the next step. When we moved to HTML pages we removed the gate in the same merge ([75b2c57](https://github.com/Vandit1604/vawe/commit/75b2c5731)), so `stage-say` became the only owner of the stage order. Two places that know the order will drift apart.
 
-`harness/live/stage-say.mjs` is a hook that runs on each prompt. It works in four steps.
+`harness/live/stage-say.mjs` runs on each prompt and works in four steps:
 
-1. It asks `git status` which `films/*/page.html` changed or is new. A fresh checkout rewrites file times, so only a page git sees as changed counts as the film in progress ([6afb94a](https://github.com/Vandit1604/vawe/commit/6afb94a17)). If no page changed in the last three hours the hook stays silent, so a framework session sees none of it.
-2. It reads the state of the film from files: whether `brief.md` exists, how many frames the "Taken from" table names, whether `DESIGN.md` is newer than the page, whether a frames sheet or a draft exists, whether the Board and Motion pass tables are filled.
-3. It returns the first unmet stage and the command for it. State lives in files, so the hook holds none of its own.
-4. It prints one line, such as `bin/vawe frames films/<name>/page.html`, with the reason.
+1. It asks `git status` which `films/*/page.html` changed or is new. A fresh checkout rewrites file times, so only a page git sees as changed counts as the film in progress ([6afb94a](https://github.com/Vandit1604/vawe/commit/6afb94a17)). If no page changed in the last three hours it stays silent, so a framework session never sees it.
+2. It reads the film's state from files: whether `brief.md` exists, how many frames the "Taken from" table names, whether `DESIGN.md` is newer than the page, whether a frames sheet or a draft exists, and whether the Board and Motion pass tables are filled.
+3. It picks the first unmet stage. State lives in files, so the hook holds none of its own.
+4. It prints one line with the reason, such as `bin/vawe frames films/<name>/page.html`.
 
-The same text reaches the agent through a second channel. The verbs in `harness/cli/verbs.mjs` import a `SAY` table from the hook and print its line after they run, so a verb and the hook cannot name different steps ([39a3932](https://github.com/Vandit1604/vawe/commit/39a3932f3)). `frames`, `dev`, `strip` and `critique` all do this, and `ship` warns when the Board or the Motion pass is still empty. Later commits added a line that says when the checkout is behind `origin/main` and names the command to update it, with the fetch cached for 10 minutes ([b5ab6f2](https://github.com/Vandit1604/vawe/commit/b5ab6f217)).
+`tests/hooks/stage-say.test.mjs` keeps that order under test.
 
-## What the traces showed
+The verbs carry the same text. `harness/cli/verbs.mjs` (where each verb's `next` function lives, including `devNext`) imports a `SAY` table from the hook and prints its line after each run, so a verb and the hook cannot name different steps ([39a3932](https://github.com/Vandit1604/vawe/commit/39a3932f3)). `frames`, `dev`, `strip` and `critique` all do this, and `ship` warns when the Board or the Motion pass is still empty. A later commit adds a line when the checkout is behind `origin/main`, with the command to update it and the fetch cached for 10 minutes ([b5ab6f2](https://github.com/Vandit1604/vawe/commit/b5ab6f217)).
 
-We read agent transcripts on 2026-10-10 and checked, line by line, whether the agent did what the next line said.
+## What the 2026-10-10 transcripts showed
 
-For the early stages it worked: every verb's `next:` was followed for brief, reference study, design, states and board, in order. The agent stopped only where its prompt told it to stop.
+We read the transcripts line by line and checked whether the agent did what each next line said.
 
-Three things did not work.
-
-- The hook is the weaker channel. It fires once per prompt, so a headless run that takes one prompt sees it between one and four times. The verb output, printed after each command, is the one that reaches the agent at the right moment. We now treat the verbs as the primary channel and the hook as the backstop.
-- Some lines were not satisfiable. After `strip` the line said to compare against the reference, and 0 of 6 `compare` calls carried the reference named in the brief. After `critique` the line asked for a fresh-session judge, which the agent skipped before shipping two minutes later.
-- One line never changed. After every `dev` result (13 of 13) the agent got "strip the cuts and read every one", even after it had stripped all the cuts and read 18 strips. The `dev` verb kept no state. An agent that sees the same advice 13 times learns to ignore the line, which is a worse outcome than having no line.
+For the early stages the answer was yes. Every verb's `next:` was followed for brief, reference study, design, states and board, in order. The agent stopped only where its prompt told it to stop.
 
 ![Which next lines the agent followed in the 2026-10-10 review.](/blog/stage-say/diagram.svg)
 
-The fix for the third one is in [b5df5ed](https://github.com/Vandit1604/vawe/commit/b5df5ed98): `dev` now asks the same state function as the hook, and `nextStep` checks whether `out/strip/<name>` changed since the last draft. If it did, the line moves on. We have not yet re-run a trace review that measures the effect, so we cannot give you an after-count.
+Three things went wrong.
 
-## What we would tell you if you build the same thing
+The hook turned out to be the weaker channel. It fires once per prompt, and a headless run with one prompt sees it between one and four times. The verb output arrives after every command, at the moment of the work, so we now treat the verbs as the main channel and the hook as the backstop.
 
-Derive the stage from files, not from a counter that can drift. Keep one owner of the order, and have every other place import its text. Print the line from the tool, because the tool runs at the moment of the work, and use the hook as a safety net. Make the line stateful, since a repeated line is noise. And read transcripts to check whether the line was followed, as we did: the answer is partly yes and partly no for every hook we have written.
+Some lines asked for things the agent could not or did not do. After `strip` the line said to compare against the reference, and 0 of 6 `compare` calls carried the reference the brief named. After `critique` the line asked for a fresh-session judge; the agent skipped it and shipped two minutes later.
 
-If you want the commands themselves, the [CLI reference](/docs/cli) lists the verbs. For why the verbs have one shape and a final `ok` or `FAILED` line, read [one binary, one verb per step](/blog/one-binary). The [quickstart](/docs/quickstart) walks the loop from the first command.
+And one line never changed. After 13 of 13 `dev` results the agent read "strip the cuts and read every one", even after it had stripped every cut and read 18 strips. `dev` kept no state. An agent that sees the same advice 13 times learns to skip the line, which is worse than no line.
 
-## In the code
+## The fix for the repeated line
 
-- `harness/live/stage-say.mjs`: the hook, the `SAY` table and `nextStep`.
-- `harness/cli/verbs.mjs`: each verb's `next` function, including `devNext`.
-- `tests/hooks/stage-say.test.mjs`: the stage order under test.
-- Commits: [75b2c57](https://github.com/Vandit1604/vawe/commit/75b2c5731) (stage-gate removed), [6afb94a](https://github.com/Vandit1604/vawe/commit/6afb94a17) (only a changed page counts), [39a3932](https://github.com/Vandit1604/vawe/commit/39a3932f3) (verbs print the next line), [b5df5ed](https://github.com/Vandit1604/vawe/commit/b5df5ed98) (dev names the next unmet step).
+[b5df5ed](https://github.com/Vandit1604/vawe/commit/b5df5ed98) made `dev` ask the same state function as the hook. `nextStep` now checks whether `out/strip/<name>` changed since the last draft, and when it did, the line moves on to the next unmet stage. The same commit made critique, compare and judge default to the reference the brief names, which answers the 0 of 6 `compare` calls from the other side; [can AI agents watch videos](/blog/watch-a-film) tells that part.
+
+## What we still do not know
+
+We have not run a trace review since the fix, so we cannot say how often the agent now follows the line after `dev`, or whether a stateful line holds up over a 20-draft session. The early-stage result (every line followed, in order) comes from one review of one film's sessions. The lesson we draw so far is narrow: the line a tool prints after it runs reaches the agent, and the same line printed by a per-prompt hook mostly does not. The rest of the harness that grew from the same traces is listed in [AI agent harness engineering](/blog/weaker-model), and the verbs themselves are in the [CLI reference](/docs/cli).

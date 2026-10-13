@@ -2,13 +2,14 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { GithubCta, OpenSourceMark } from "../components/Icon";
+import { AltEvidence, type QA } from "../components/AltEvidence";
 import "../components/intent.css";
 import "../components/study.css";
 
 export const metadata = pageMetadata({
-  title: "vawe · HyperFrames alternatives: vawe, Remotion, Motion Canvas, Lottie",
+  title: "HyperFrames alternatives: vawe, Remotion, Motion Canvas, Lottie",
   description:
-    "Four alternatives to HyperFrames, HeyGen's HTML-to-video framework: vawe, Remotion, Motion Canvas and Lottie. What each one is, how you author with it, and which job it fits. Read 2026-10-03.",
+    "Four alternatives to HyperFrames, HeyGen's HTML-to-video framework: vawe, Remotion, Motion Canvas and Lottie, with how you author each and the job it fits.",
   path: "/hyperframes-alternatives",
 });
 
@@ -44,6 +45,44 @@ const ALTERNATIVES = [
   },
 ];
 
+const FAQ: QA[] = [
+  {
+    q: "What is the main difference between vawe and HyperFrames?",
+    a: (
+      <>
+        How each handles time. HyperFrames forbids <code>Date</code>, timers and <code>Math.random</code> in
+        a composition. vawe lets a page call them and replaces them with versions that follow the seek;{" "}
+        <a href="/blog/page-clock">the virtual clock reference</a> lists what it owns.
+      </>
+    ),
+  },
+  {
+    q: "Which one renders faster?",
+    a: (
+      <>
+        Neither project publishes a side-by-side number, so we do not claim one. vawe&apos;s own figure:
+        capture of a 20 s film fell from 140 s to 47 s with one Chrome per lane, in{" "}
+        <a href="/blog/chrome-per-lane">faster headless Chrome rendering</a>.
+      </>
+    ),
+  },
+  {
+    q: "Which is better for an AI agent?",
+    a: (
+      <>
+        Both aim at an agent that writes the file. vawe&apos;s film is one plain HTML page with no private
+        attributes to learn; the rules are in{" "}
+        <a href="/blog/page-contract">render HTML to video: the page contract</a>. HyperFrames ships 21 agent
+        skills and a block catalog.
+      </>
+    ),
+  },
+  {
+    q: "Is Lottie an alternative if I need an MP4?",
+    a: "Not directly. Lottie is a playback format for apps, exported from After Effects. Pick one of the HTML-to-video tools when the output is a video file.",
+  },
+];
+
 export default function HyperframesAlternatives() {
   return (
     <div className="shell">
@@ -73,6 +112,8 @@ export default function HyperframesAlternatives() {
               </div>
             </section>
           ))}
+
+          <AltEvidence faq={FAQ} />
 
           <section className="tfacts">
             <h2>When to stay on HyperFrames.</h2>
@@ -143,6 +184,7 @@ export default function HyperframesAlternatives() {
               <a href="/remotion-alternatives">Remotion alternatives, categorized</a>
               <a href="/determinism">How vawe keeps renders deterministic</a>
               <a href="/ai-agents">How an agent writes and checks a film</a>
+              <a href="/blog/page-contract">How vawe renders HTML to video</a>
             </div>
           </section>
         </main>

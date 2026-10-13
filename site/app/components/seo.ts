@@ -26,7 +26,7 @@ export function pageMetadata(opts: {
       description,
       type,
       url: path,
-      siteName: "Vawe",
+      siteName: "vawe",
     },
     twitter: {
       card: "summary_large_image",

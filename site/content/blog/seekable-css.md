@@ -1,82 +1,84 @@
 ---
-title: "How to seek CSS animation, forward and backward"
-description: "To seek CSS animation and Web Animations frame by frame, you must handle seek-back, cancelled animations, fonts and a running timeline. Four bugs we fixed."
+title: "How to seek CSS animations frame by frame"
+description: "How to seek CSS animation and Web Animations forward and back: keep finished animations, drop cancelled ones, freeze the timeline, wait 10 s for fonts."
 date: 2026-10-09
+updated: 2026-10-13
 section: architecture
 tags: "seek css animation, web animations api, css keyframes, headless chrome, rendering"
-keywords: "seek css animation, web animations api currenttime, css keyframes render video, svg smil seek, document.getanimations"
+keywords: "seek css animation, web animations api currenttime, document.getanimations, svg smil seek"
 hero: /blog/seekable-css/hero.svg
 heroAlt: "One animation runs from 0 to 1 second on a 5 second axis. After a seek to 5 s and back to 0.25 s the effect must apply again, and it does because the renderer keeps every animation the page made."
 ---
 
-Seeking an animation forward is easy. Seeking it backward is the part of Web Animations that nobody tests. We render video by setting `currentTime` on every animation on a page, then taking a screenshot. That works on the first pass. It breaks when a render revisits an earlier time, when a page cancels an animation, when a font arrives late, or when the browser keeps its own clock running. This post is a short field guide to how to seek CSS animation reliably, from four bugs we hit and fixed.
+By the end of this guide you have one function, `seekTo(t)`, that puts every CSS keyframe, CSS transition, `element.animate()` call and SVG `<animate>` on a page at time `t`. It works in any order: forward, backward, or the same `t` twice, with the same pixels each time. That is what you need to render a web page to video one screenshot at a time.
 
-## The problem: agents write CSS keyframes and `element.animate`
+Seeking forward is easy. Seeking backward is the part of the Web Animations API that few people test, and we hit four bugs there. Each step below is one of them. The function is `core/engine/page-seek.js` in [vawe](https://github.com/Vandit1604/vawe), where agents write films as plain web pages, and it is one item on our [deterministic rendering checklist](/blog/determinism).
 
-Our agents write films as plain web pages ([HTML to video beat our own JSON scene format](/blog/html-over-json)). They use CSS `@keyframes`, CSS transitions, `element.animate()` and SVG. We want the renderer to accept all of it. The renderer has to put every animation at time `t`, in any order, and screenshot the result. That means forward seeks, backward seeks and repeated seeks to the same `t`, all giving the same pixels.
+## What you need before you start
 
-A page can also create and cancel animations whenever it likes. The renderer cannot assume the list of animations is stable.
+- A page whose scripts read time from a virtual clock, so `Date.now` and `requestAnimationFrame` follow the seek. Ours is described in [the virtual clock reference](/blog/page-clock).
+- Access to the DevTools protocol (Puppeteer gives you this).
+- No global rule that disables animation. Our early tokens file had `* { animation: none; transition: none }`, which stopped CSS animations before they existed, so there was nothing to seek. Commit `7baa223b9` (2026-09-27) removed it. The same commit made the seek drive SVG SMIL (`<animate>`) on its own separate timeline.
 
-## What we tried, and what broke
+## Step 1: freeze the document timeline
 
-### 1. We were killing animations
+The document timeline runs in real time from page load. Before the first seek paused anything, the compositor rasterized animated layers against that real time. A first seek at 1.5 s after load painted other edge pixels than a first seek at 0.05 s.
 
-Our early tokens file had a global `* { animation: none; transition: none }`. It stopped CSS animations before they existed, so there was nothing to seek. Commit `7baa223b9` (2026-09-27) removed it. After that, a CSS keyframe loop or transition on a page is seeked like any other animation. The same commit made the seek drive SVG SMIL (`<animate>`) on its own separate timeline.
+Set the animation playback rate to 0 through the DevTools protocol (`Animation.setPlaybackRate`, commit `874af4972`, 2026-10-08). After that, only a seek moves an animation.
 
-### 2. Finished animations disappeared
+## Step 2: remember every animation the page creates
 
-`document.getAnimations()` drops a finished animation with `fill: none`. If a render seeks to 5 s and then back to 0.25 s, the list no longer contains that animation, so the element misses its effect. Commit `76d28ec1b` (2026-10-07) keeps every animation the page made in a set, and seeks all of them each time. The regression test `tests/media/seek-fill-none.test.mjs` uses a CSS animation and a `waapi` one, both with `fill: none`. It seeks to 0.25 s on a fresh page and expects opacities of 0.2 and 0.3. It then seeks to 5 s on a second page, back to 0.25 s, and expects the same two values.
+`document.getAnimations()` drops a finished animation with `fill: none`. If a render seeks to 5 s and then back to 0.25 s, the list no longer contains that animation, so the element misses its effect.
 
-### 3. Dead animations stayed in the set
+Keep every animation the page made in a set, and seek all of them each time (commit `76d28ec1b`, 2026-10-07). Treat `getAnimations()` as a list of what is live now, not of everything the page made.
 
-Once we kept everything, we had to forget the right things. Commit `8e2200e05` drops an animation from the set if it is idle or its target is no longer in the document. A cancelled animation then stays cancelled on later seeks, and a removed element stops being touched.
+## Step 3: forget idle animations and removed targets
 
-### 4. The browser's own clock kept running
+Once you keep everything, you must forget the right things. Drop an animation from the set if it is idle or its target is no longer in the document (commit `8e2200e05`). A cancelled animation then stays cancelled on later seeks, and a removed element stops being touched.
 
-The document timeline runs in real time from page load. Before our first seek paused anything, the compositor rasterized animated layers against that real time. A first seek at 1.5 s after load painted other edge pixels than a first seek at 0.05 s. We set the animation playback rate to 0 through the DevTools protocol (`874af4972`, 2026-10-08), so only a seek moves an animation. The same pass is described from the clock side in [Time is the seek, never the clock](/blog/page-clock).
+## Step 4: wait for fonts, and fail loudly
+
+`awaitFonts` waits until every face in `document.fonts` has finished loading, including faces whose load starts while we wait. If a face is still loading after 10 seconds, the render fails and names the family (commit `be52c9a99`). A screenshot with a fallback font is a silent wrong answer, so we make it a loud error. The wait uses the real timer on purpose, because the virtual clock owns `setTimeout`.
+
+## Step 5: run the seek in a fixed order
+
+`seekTo(t)` does these things, in this order:
+
+1. wait for fonts,
+2. set the virtual clock,
+3. call `window.seek(t)` if the page defines it,
+4. wait for fonts again,
+5. pause every remembered animation and set `currentTime` to `t * 1000`,
+6. pause SVG animations and set their time,
+7. await every `vawe.onFrame` hook.
+
+The renderer and the studio both call this one function, so a scrub in the studio and a frame in the render cannot disagree about what time `t` means.
 
 ![Four fixes in order: stop killing animations, keep finished ones, drop cancelled and removed ones, freeze the document timeline. Fonts are awaited around each seek with a 10 second limit.](/blog/seekable-css/diagram.svg)
 
-## What we built: one seek function
+## Check that the seek works backward
 
-The seek is a single function, `seekTo(t)` in `core/engine/page-seek.js`. The renderer and the studio both use it, so a scrub in the studio and a frame in the render cannot disagree about what time `t` means. In order, it:
+Seek to the end, then to the middle, and compare with a fresh page seeked once to the middle. This one test found our `fill: none` bug.
 
-1. waits for fonts,
-2. sets the virtual clock,
-3. calls `window.seek(t)` if the page defines it,
-4. waits for fonts again,
-5. pauses every remembered animation and sets `currentTime` to `t * 1000`,
-6. pauses SVG animations and sets their time,
-7. awaits every `vawe.onFrame` hook.
+Our version is `tests/media/seek-fill-none.test.mjs`. It uses a CSS animation and a `waapi` one, both with `fill: none`. It seeks to 0.25 s on a fresh page and expects opacities of 0.2 and 0.3. It then seeks to 5 s on a second page, back to 0.25 s, and expects the same two values.
 
-Fonts get their own rule. `awaitFonts` waits until every face in `document.fonts` has finished loading, including faces whose load starts while we wait. If a face is still loading after 10 seconds, the render fails and names the family. A screenshot with a fallback font is a silent wrong answer, so we make it a loud error (commit `be52c9a99`). It uses the real timer on purpose, because the virtual clock owns `setTimeout`.
+## When a seeked frame still looks wrong
 
-## The measured result
-
-There is no aggregate number for this work, and we do not want to invent one. The concrete figures are two: a 10-second font deadline, and a 1.5 px frame-to-frame flip.
-
-The 1.5 px case came from the gooey filter, one of our [motion moves](/moves/gooey-filter). On a still shape the outline flipped by 1.5 px between frames. The fix (`0e30c9513`, 2026-10-09) gave the SVG filter a wide region (`x="-30%" y="-30%" width="160%" height="160%"`) and put `will-change: transform` on its wrapper. The default filter region is 10 percent of the box and cuts the blur. Here is the move after the fix:
+- An element shows its end state after a backward seek: the animation fell out of `getAnimations()`. See step 2.
+- A cancelled animation comes back: the set still holds it. See step 3.
+- Edge pixels differ between two renders of the first frame: the timeline ran before the first seek. See step 1.
+- Text is in the wrong face: the font was not ready. Step 4 turns that into an error that names the family.
+- An SVG filter outline flips by 1.5 px between frames on a still shape. This came from the gooey filter, one of our [motion moves](/moves/gooey-filter). The default filter region is 10 percent of the box and cuts the blur. The fix (`0e30c9513`, 2026-10-09) gave the filter a wide region (`x="-30%" y="-30%" width="160%" height="160%"`) and put `will-change: transform` on its wrapper.
 
 <figure>
 <video src="/blog/seekable-css/gooey-filter.mp4" poster="/blog/seekable-css/gooey-filter-poster.webp" muted loop playsinline autoplay width="680"></video>
-<figcaption>The gooey filter move, rendered from a page that is seeked to each frame.</figcaption>
+<figcaption>The gooey filter move after the fix, rendered from a page that is seeked to each frame.</figcaption>
 </figure>
 
-## What we would tell you if you build a seekable renderer
+We have no aggregate number for this work. The concrete figures are the 10-second font deadline and that 1.5 px flip.
 
-- Test the way back. Seek to the end, then to the middle, and compare with a fresh page seeked once to the middle. This one test found our `fill: none` bug.
-- Do not trust `getAnimations()` as a long-term list. It reports what is live now, not everything the page made.
-- Pause the browser's timeline. If a second clock runs, you have a second source of nondeterminism.
-- Fail loudly on fonts. A 10-second wait with a named family is easier to debug than a quietly wrong frame.
-- Seek, do not kill. Banning an API removes an authoring path. Seeking it keeps the page natural to write.
+## Next steps
 
-For the rest of the picture, see the [easing pages](/easing) for curves you can use in these animations, the [docs on motion](/docs/motion), and the source at [github.com/Vandit1604/vawe](https://github.com/Vandit1604/vawe). We compare this approach to other tools on [/hyperframes-alternatives](/hyperframes-alternatives).
+The other sources of pixel drift, from GPU compositing to tab focus, are in [the headless Chrome determinism checklist](/blog/determinism). For curves to use in these animations, see the [easing pages](/easing) and the [motion docs](/docs/motion). Why our agents write plain CSS at all is the subject of [HTML vs a custom JSON video format](/blog/html-over-json), and a comparison with other tools is on [HyperFrames alternatives](/hyperframes-alternatives).
 
-## In the code
-
-- `core/engine/page-seek.js`: `seekTo` and `awaitFonts`.
-- `tests/media/seek-fill-none.test.mjs`: seek past the end and back.
-- [`7baa223b9`](https://github.com/Vandit1604/vawe/commit/7baa223b9) (2026-09-27): CSS animation, transition and Web Animations are seeked, not killed.
-- [`76d28ec1b`](https://github.com/Vandit1604/vawe/commit/76d28ec1b) (2026-10-07): keep every animation so a finished `fill: none` one applies again.
-- [`874af4972`](https://github.com/Vandit1604/vawe/commit/874af4972) (2026-10-08): freeze the document timeline.
-- [`0e30c9513`](https://github.com/Vandit1604/vawe/commit/0e30c9513) (2026-10-09): the gooey filter region and wrapper.
+Commits: [`7baa223b9`](https://github.com/Vandit1604/vawe/commit/7baa223b9) seek instead of kill, [`76d28ec1b`](https://github.com/Vandit1604/vawe/commit/76d28ec1b) keep every animation, [`874af4972`](https://github.com/Vandit1604/vawe/commit/874af4972) freeze the timeline, [`0e30c9513`](https://github.com/Vandit1604/vawe/commit/0e30c9513) the gooey filter region.
