@@ -3,7 +3,9 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { blogSchema, breadcrumbSchema, jsonLdScript } from "../../lib/schema";
-import { allPosts, formatDate, postsBySection } from "../../lib/blog";
+import { allPosts, formatDate, postsBySection, type Post } from "../../lib/blog";
+import { Cover } from "./Cover";
+import { preload } from "react-dom";
 import "./blog.css";
 
 const TITLE = "vawe blog: building agent-native motion graphics";
@@ -16,10 +18,74 @@ export const metadata = {
   alternates: { ...base.alternates, types: { "application/rss+xml": "/blog/rss.xml" } },
 };
 
+// Card widths on the 12-column grid, repeated in order: a wide card and a narrow one, then a row of
+// three, then the pair mirrored. Dense packing keeps rows full when a filter hides cards.
+const RHYTHM = ["w7", "w5", "w4", "w4", "w4", "w5", "w7", "w6", "w6"];
+
+// A post page links to /blog#<section>; the hash selects that filter. Without script every post shows.
+const HASH_FILTER = `(()=>{const h=location.hash.slice(1);const r=h&&document.getElementById("f-"+h);if(r)r.checked=true})()`;
+
+const TICK = 6;
+
+function day(iso: string) {
+  return Date.parse(`${iso}T00:00:00Z`) / 86400000;
+}
+
+function Timeline({ posts }: { posts: Post[] }) {
+  const first = day(posts[posts.length - 1].date);
+  const span = Math.max(day(posts[0].date) - first, 1);
+  const stack = new Map<string, number>();
+  const perDay = new Map<string, number>();
+  for (const p of posts) perDay.set(p.date, (perDay.get(p.date) ?? 0) + 1);
+  const tallest = Math.max(...perDay.values());
+  return (
+    <div className="bl-tl" aria-hidden="true">
+      <div className="bl-tl-track" style={{ height: `${tallest * TICK + 2}px` }}>
+        {[...posts].reverse().map((p) => {
+          const n = stack.get(p.date) ?? 0;
+          stack.set(p.date, n + 1);
+          return (
+            <span
+              key={p.slug}
+              className="bl-tick"
+              data-s={p.section}
+              style={{ left: `${((day(p.date) - first) / span) * 100}%`, bottom: `${n * TICK}px` }}
+            />
+          );
+        })}
+      </div>
+      <div className="bl-tl-axis meta">
+        <span>{formatDate(posts[posts.length - 1].date)}</span>
+        <span>{formatDate(posts[0].date)}</span>
+      </div>
+    </div>
+  );
+}
+
+function Card({ post, w }: { post: Post; w: string }) {
+  return (
+    <li className={`panel bl-card ${w}`} data-s={post.section}>
+      <Cover post={post} />
+      <div className="bl-card-text">
+        <p className="meta bl-card-meta">
+          <time dateTime={post.date}>{formatDate(post.date)}</time>
+        </p>
+        <h3>
+          <Link href={`/blog/${post.slug}`} prefetch={false}>{post.title}</Link>
+        </h3>
+        <p className="bl-card-desc">{post.description}</p>
+        <p className="meta bl-card-foot">{post.minutes} min read</p>
+      </div>
+    </li>
+  );
+}
+
 export default function BlogIndex() {
   const sections = postsBySection();
   const posts = allPosts();
+  preload("/assets/fonts/PlusJakartaSans.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   const crumbs = [{ name: "Home", url: "/" }, { name: "Blog", url: "/blog" }];
+  const [lead, ...rest] = posts;
 
   return (
     <div className="shell">
@@ -28,48 +94,72 @@ export default function BlogIndex() {
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(blogSchema(posts.map((p) => ({ headline: p.title, path: `/blog/${p.slug}`, datePublished: p.date }))))} />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema(crumbs))} />
         <div className="bl">
-          <header className="phead bl-head">
-            <h1>The vawe blog</h1>
-            <p>
-              We build a framework where an agent writes one HTML page and the renderer turns it into a film. These posts
-              say what broke on the way, what we measured, and what we changed because of it.
+          <header className="bl-mast">
+            <p className="kicker">The vawe blog</p>
+            <h1>
+              What broke, what we measured, <span className="bl-h1-2">and what we changed.</span>
+            </h1>
+            <p className="bl-dek">
+              We build a framework where an agent writes one HTML page and the renderer turns it into a film. These are
+              the notes from building it, with the numbers.
             </p>
-            <p className="meta bl-feed">
-              <span>{posts.length} {posts.length === 1 ? "post" : "posts"}</span>
-              <a href="/blog/rss.xml">RSS feed</a>
-            </p>
-            {sections.length > 1 ? (
-              <nav className="bl-jump" aria-label="Sections">
-                {sections.map((s) => (
-                  <a key={s.id} href={`#${s.id}`}>
-                    {s.label} <span className="bl-count">{s.posts.length}</span>
-                  </a>
-                ))}
-              </nav>
+            {posts.length ? (
+              <>
+                <dl className="bl-stats">
+                  <div><dt className="meta">Posts</dt><dd>{posts.length}</dd></div>
+                  <div><dt className="meta">Sections</dt><dd>{sections.length}</dd></div>
+                  <div><dt className="meta">Latest</dt><dd>{formatDate(posts[0].date)}</dd></div>
+                  <div className="bl-rss"><dt className="meta">Feed</dt><dd><a href="/blog/rss.xml">RSS</a></dd></div>
+                </dl>
+                <Timeline posts={posts} />
+              </>
             ) : null}
           </header>
 
-          {sections.map((s) => (
-            <section key={s.id} className="bl-sec" aria-labelledby={s.id}>
-              <h2 id={s.id}>{s.label}</h2>
-              <p className="bl-intro">{s.intro}</p>
+          {posts.length ? (
+            <>
+              <fieldset className="bl-filter">
+                <legend className="sr-only">Show posts from</legend>
+                <input className="sr-only" type="radio" name="sec" id="f-all" defaultChecked />
+                <label htmlFor="f-all">All <span className="bl-count">{posts.length}</span></label>
+                {sections.map((s) => (
+                  <span key={s.id} className="bl-fchip" data-s={s.id}>
+                    <input className="sr-only" type="radio" name="sec" id={`f-${s.id}`} />
+                    <label htmlFor={`f-${s.id}`}>
+                      <span className="sw" />
+                      {s.label} <span className="bl-count">{s.posts.length}</span>
+                    </label>
+                  </span>
+                ))}
+              </fieldset>
+              <script dangerouslySetInnerHTML={{ __html: HASH_FILTER }} />
+              {sections.map((s) => (
+                <p key={s.id} className="bl-intro" data-s={s.id}>{s.intro}</p>
+              ))}
+
               <ul className="bl-grid">
-                {s.posts.map((p) => (
-                  <li key={p.slug} className="panel bl-card">
-                    <h3>
-                      <Link href={`/blog/${p.slug}`} prefetch={false}>{p.title}</Link>
-                    </h3>
-                    <p>{p.description}</p>
+                <li className="panel bl-lead" data-s={lead.section}>
+                  <Cover post={lead} eager />
+                  <div className="bl-lead-text">
                     <p className="meta bl-card-meta">
-                      <time dateTime={p.date}>{formatDate(p.date)}</time>
-                      <span>{p.minutes} min read</span>
+                      <span className="bl-new">Latest</span>
+                      <time dateTime={lead.date}>{formatDate(lead.date)}</time>
                     </p>
-                  </li>
+                    <h2>
+                      <Link href={`/blog/${lead.slug}`} prefetch={false}>{lead.title}</Link>
+                    </h2>
+                    <p className="bl-card-desc">{lead.description}</p>
+                    <p className="meta bl-card-foot">{lead.minutes} min read</p>
+                  </div>
+                </li>
+                {rest.map((p, i) => (
+                  <Card key={p.slug} post={p} w={RHYTHM[i % RHYTHM.length]} />
                 ))}
               </ul>
-            </section>
-          ))}
-          {posts.length === 0 ? <p className="bl-intro">The first posts are on their way.</p> : null}
+            </>
+          ) : (
+            <p className="bl-intro">The first posts are on their way.</p>
+          )}
         </div>
       </main>
       <Footer active="/blog" />

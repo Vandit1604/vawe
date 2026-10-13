@@ -174,19 +174,46 @@ a pill is 999px. Some older routes still use 6px and 10px.
 
 ## Blog
 
-`/blog` and `/blog/<slug>` (`app/blog/`, `blog.css`) read `content/blog/*.md` through `lib/blog.ts`, the one
-owner of the front matter, the Markdown render (`marked`, GFM) and the post order. A post is a `.phead`
-head, a hero on `surface` with the ring, then a 680 px body at 17px / 1.65 (about 70 characters) and,
-from 1000 px, a table of contents beside it. Prose links are the accent with an underline, because colour
-alone does not mark a link inside a paragraph. Code blocks, tables and `<details>` are panels or
-hairlines with tone and weight only, never hue. The index groups posts by section in two-column cards with
-one stretched link each.
+`/blog` and `/blog/<slug>` (`app/blog/`, `blog.css`, `Cover.tsx`) read `content/blog/*.md` through
+`lib/blog.ts`, the one owner of the front matter, the Markdown render (`marked`, GFM) and the post order.
 
-Shaped by ui-skills `jakubkrehel/better-typography`. Taken: a capped measure, unitless line-height by
-role, `text-wrap: balance` on headings and `pretty` on prose, `tabular-nums` in tables, underlines from
-the font. Rejected: its type-scale proposal (the site's known scale gap wants its own pass) and its
-Tailwind cheat sheet (no Tailwind here). The table of contents is not sticky: the studio rebuild rejected
-a sticky rail on content pages. No syntax-highlighting dependency, for the same no-hue rule.
+**Section colour.** Each of the five sections borrows one lane colour: architecture `lane-shape`, agent
+experience `lane-sound`, taste `lane-text`, measurement `lane-fx`, speed `lane-camera`
+(`[data-s]` in `blog.css`). The lane rule holds: the colour means that section and always sits beside
+its name (a swatch, the cover's unit or separator, a timeline tick whose legend is the filter row).
+
+**Index.** A masthead (an 800-weight h1 with its second half in `muted`, a dek, mono stats, and a
+timeline that stacks one tick per post on a date axis), a filter row of native radios in a fieldset
+(`:has()` hides the other sections and shows the chosen section's intro; `/blog#<section>` selects one
+with a five-line inline script, and without script every post shows), a lead card for the newest post,
+then a 12-column grid whose card widths repeat 7+5, 4+4+4, 5+7, 6+6 with `grid-auto-flow: dense`.
+Under 900 the grid is two columns, under 640 one. Each card has one stretched title link.
+
+**Type.** The blog routes set headings and body in Plus Jakarta Sans (OFL, `assets/fonts/PlusJakartaSans.woff2`,
+copied to `public/assets/fonts/` by `scripts/site/vendor-assets.mjs`, declared and preloaded by the blog
+pages only). The owner picked it over Archivo, Geist and Bricolage on 2026-10-13. JetBrains Mono stays for
+numbers and meta; the bar and footer keep Archivo.
+
+**The cover.** A post's cover is `public/blog/<slug>/thumb.webp`, the "dithered rays" style. `lib/blog.ts`
+uses it when the file exists: on the index cards, as the post's header image (the post's hero diagram
+then moves to the top of the body), as the Open Graph image (`[slug]/opengraph-image.tsx` converts it to
+PNG, because LinkedIn does not read WebP) and as the JSON-LD image. Its alt is empty, because the
+title always sits beside it. Without the file a card has no image and the share card is the generated one.
+
+**Post.** A head (title, dek, mono meta with the issue number), the cover, a 680 px body at 17px / 1.65
+and, from 1000 px, a numbered table of contents. The first paragraph is the lead (20px, `ink`). Each h2
+carries its mono number, matching the TOC. Figures are mounted on a `surface` panel with a `Fig. 01` mono
+caption; tables sit on a panel and scroll inside it; code blocks have a header strip with the language,
+tone and weight only, never hue; a blockquote is a pull quote. The end is a "Made with vawe" panel (the
+wave glyph, the repo and `/docs`), the newer and older pager, and three "Read next" cards with covers
+(same section first; there is no cluster field yet).
+
+**Rejected cover direction.** `scripts/site/blog-thumbs/thumb.html` (numbers in Archivo with a motif
+per section, every choice a `--cover-*` custom property, `node scripts/site/blog-thumbs.mjs` for six
+samples in `out/blog-thumbs/`) was the candidate the owner did not pick. It stays as a restylable template.
+
+Shaped by ui-skills `jakubkrehel/better-typography` (first pass), then `pbakaus/bolder` and
+`pbakaus/typeset` (pages) and `anthropics/canvas-design` (the rejected covers); see the provenance rows.
 
 ## Provenance: what shaped each surface
 
@@ -242,7 +269,9 @@ was tried.
 | `/problems`, `/roadmap`, `/vs/[slug]`, `/hyperframes-alternatives` (2026-10-03) | brand | ui-skills `pbakaus/typeset` (one skill); layout ideas only from VoltAgent/awesome-design-md `vercel` DESIGN.md | typeset: TAKEN, role contrast by size and tone (title, mono label, body, metadata), 45 to 75ch measure, 16px body, mono for every figure. Vercel spec: TAKEN as layout idea only, large gaps between panels and tight interior, 3-up collapsing to 1-up. REJECTED: its 4px spacing tokens, mesh gradient, pill buttons, and `impeccable detect` (not installed). Status chips use shape (filled, half, ring dot) not hue, because colour here means act-on-it or a lane. Rules in `app/components/study.css`, shared by the three routes. Second pass: icons are inline Lucide paths (ISC) in `app/components/Icon.tsx`, no dependency; images are only vawe's own move posters and clips, and the ease curve is drawn from `core/motion` `easeFn` points in `ease-curves.json`. Competitor logos are NOT used: no official page allows a logo in a comparison (Remotion terms reserve logos; HyperFrames, Motion Canvas and Lottie state nothing), so names are plain text. |
 
 
-| `/blog`, `/blog/[slug]`, RSS (2026-10-13) | brand | ui-skills `jakubkrehel/better-typography` | See the Blog section above: measure, line-height, wrap and underline rules taken; its scale and Tailwind specifics rejected; TOC not sticky by the rebuild rule. |
+| `/blog`, `/blog/[slug]`, RSS (2026-10-13) | brand | ui-skills `jakubkrehel/better-typography` | Measure, line-height, wrap and underline rules taken; its scale and Tailwind specifics rejected; TOC not sticky by the rebuild rule. |
+| `/blog`, `/blog/[slug]` type: Plus Jakarta Sans (2026-10-13) | brand | owner decision | The owner picked Plus Jakarta Sans over Archivo, Geist and Bricolage on 2026-10-13, for the blog routes only. Mono stays for numbers and meta; the bar and footer keep Archivo. Headline tracking loosened from -.045em to -.032em, because Jakarta is set tighter than Archivo. |
+| `/blog`, `/blog/[slug]` personality pass, blog covers (2026-10-13) | brand | ui-skills `pbakaus/bolder`, `pbakaus/typeset` (pages); `anthropics/canvas-design` (covers). Read `start`, `categories`, then `list` for visual, taste, typography and motion first | bolder: TAKEN, amplify what the system already owns (Archivo 800 at display size, mono read-outs, lane colours by meaning) instead of new effects; one decisive move per surface (the masthead h1 and the cover number) with everything around it quiet; the skeleton test (cards still read as ranked by size with the copy removed). REJECTED: its "touch only the named target" scope rule (the owner asked for the whole blog) and any new colour, font or radius. typeset: TAKEN, role contrast by size, weight and tone (title, dek, lead, body, mono meta), a 680 px measure, light-on-dark compensation (lead at 1.55, body at 1.65), tabular numbers. REJECTED: `impeccable detect` (not installed) and its live-mode `scale` param. canvas-design: TAKEN, the "systematic observation" register (registration marks, tick scales, mono labels, a dot lattice, dense repeated marks), a limited palette per cover, nothing overlaps, refine before adding. REJECTED: its philosophy .md and PDF output, thin type (Archivo 800 is the site's display face), downloading fonts, and its "masterpiece" framing. Motion: no skill loaded; the pages have no animation beyond 150 ms colour and ring hovers, off under reduced motion. Local tokens and faces win everywhere. |
 | `/easing`, `/easing/[slug]` (44 pages, 2026-10-03) | product | ui-skills `ibelick/fixing-metadata` (taken); `ibelick/baseline-ui` (fetched, rejected); layout read from the Vercel spec on getdesign.md (VoltAgent/awesome-design-md) | fixing-metadata: TAKEN, one `pageMetadata` call per page, title, description (under 155), canonical and JSON-LD agreeing, deterministic dates. baseline-ui: REJECTED, it assumes Tailwind, `cn` and `motion/react`, none of which this site uses. Vercel spec: TAKEN for the idea only, hairline panels and a spec-sheet layout of numbers then code; its Geist faces and monochrome palette rejected. Local tokens won: the curve line is the accent (it is live data), everything else is ink and muted; the `.mv-code` block and `moves.css` are reused. The charts are server-rendered SVG from `lib/easing.json`, built by `scripts/site/easing.mjs`. |
 
 **Two rules for filling a row in.**

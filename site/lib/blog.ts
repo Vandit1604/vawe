@@ -19,6 +19,9 @@ export type SectionId = (typeof SECTIONS)[number]["id"];
 
 export type Heading = { id: string; text: string };
 
+// A post's cover: public/blog/<slug>/thumb.webp when one has been rendered.
+export type Cover = { src: string; width: number; height: number };
+
 export type Post = {
   slug: string;
   title: string;
@@ -30,6 +33,9 @@ export type Post = {
   tags: string[];
   keywords: string[];
   hero?: { src: string; alt: string; width?: number; height?: number };
+  heroInBody: boolean;
+  cover?: Cover;
+  no: number;
   html: string;
   toc: Heading[];
   minutes: number;
@@ -199,6 +205,8 @@ function loadPost(file: string): Post {
   }
   const { html, toc } = render(file, body);
   return {
+    heroInBody: Boolean(data.hero && body.includes(data.hero)),
+    no: 0,
     slug,
     title: data.title,
     description: data.description,
@@ -219,13 +227,21 @@ const newestFirst = (a: Post, b: Post) => b.date.localeCompare(a.date) || a.titl
 
 let cache: Post[] | null = null;
 
+function coverFor(slug: string): Cover | undefined {
+  const src = `/blog/${slug}/thumb.webp`;
+  const size = imageSize(src);
+  return size ? { src, ...size } : undefined;
+}
+
 export function allPosts(): Post[] {
   if (cache) return cache;
   const files = fs.existsSync(CONTENT) ? fs.readdirSync(CONTENT).filter((f) => f.endsWith(".md")) : [];
   cache = files
     .filter((f) => showDrafts || !f.startsWith("_"))
     .map(loadPost)
-    .sort(newestFirst);
+    .sort(newestFirst)
+    // The issue number counts from the oldest post.
+    .map((p, i, all) => ({ ...p, no: all.length - i, cover: coverFor(p.slug) }));
   return cache;
 }
 
