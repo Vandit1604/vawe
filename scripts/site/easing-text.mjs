@@ -47,6 +47,11 @@ export const VAWE_TEXT = {
     use: ['A call to action, a check mark, a notification: one small thing that must feel alive.', 'Scale and position of a single focal element.'],
     avoid: ['Text blocks and anything with more than one item moving: overshoot on many things reads as shaking.', 'Opacity. A value past 1 is clamped, so the overshoot does nothing.'],
   },
+  nudge: {
+    blurb: 'A small pop: a fast start, a slight pass of its mark, then it settles.',
+    use: ['Every few items of a staggered group, so the row feels alive without each item bouncing.', 'Secondary elements next to a hero that uses pop: the same shape, less of it.'],
+    avoid: ['The hero itself, where the overshoot is too small to read. Use pop.', 'Opacity. A value past 1 is clamped, so the overshoot does nothing.'],
+  },
 };
 
 export const FAMILY = {
