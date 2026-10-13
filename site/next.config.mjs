@@ -43,6 +43,12 @@ const nextConfig = {
       // Wildcarded, because the slugs were content and a new one must not 404 either. The route's
       // own social card lives under /features too, so it is excluded from the catch-all.
       { source: "/features/:slug((?!opengraph-image$).+)", destination: "/features", permanent: true },
+      { source: "/blog/taste-digest", destination: "/blog/read-load", permanent: true },
+      { source: "/blog/data-over-rules", destination: "/blog/read-load", permanent: true },
+      { source: "/blog/cheap-wait", destination: "/blog/trace-reviews", permanent: true },
+      { source: "/blog/plan-vs-reference", destination: "/blog/watch-a-film", permanent: true },
+      { source: "/blog/calibrate-spec", destination: "/blog/see-truth", permanent: true },
+      { source: "/blog/headless-blocks", destination: "/blog/ten-looks", permanent: true },
     ];
   },
   // Clip files keep their names when a move is re-rendered, so the pages link them as ?v=<hash of the
