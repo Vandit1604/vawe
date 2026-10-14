@@ -186,25 +186,29 @@ Spike A, "full-bleed film scroll": the story is problem, page, render, result, t
 ## Features
 
 `app/features/page.tsx`, `features.css` (classes prefixed `ft-`). The page is a content page: `.wrap` > `main.ipage.xp`, the
-`.phead` with `PageTop` and the big h1, a `Toc` of the six sections, and it ends on CINDRE and then `Next` (the same ending as
-every `.xp` page, so the footer has no bookend). The width is the 1040px `.ipage` column. Six sections (Miller), one `.isec`
-panel each, 23 features in all: the page (4), same frames (4), light, blur and sound (4), moves and easing (3), the loop (5),
-agents (3). A feature is a hairline row: a short headline, one or two lines, and ONE proof (a code or command block, a real
-clip, a move strip or one number). Every claim reads off the repo or `bin/vawe <verb> --help`; the move, group and easing
-counts read `lib/moves.json` and `lib/easing.json`, so they cannot drift. The blur proof says 1 to 32 subframes (the final's cap
-in `render-page.mjs`); the older "1 to 3" was wrong. The CINDRE film is `/examples/cindre.*`, 10 s, audio stripped.
+`.phead` with `PageTop`, one h1 line, a `Toc` of three pillars and the showcase film, then CINDRE and `Next` (one button; the same
+ending as every `.xp` page). The width is the 1040px `.ipage` column. Three pillars, one `.isec` panel each, nine features in all
+(rebuilt 2026-10-14 from 23 features in six sections, on the owner's choice): agent experience (3, centrepiece a real
+`new`, `dev`, `critique` session), taste (3, the move strip), speed (3, bars of measured `bin/vawe dev` wall times). A feature is a
+hairline row: a short headline, one or two lines, and ONE proof (a code block, a real clip, an interactive demo or one number).
+No number is invented: the session is real output trimmed with an ellipsis, the speed bars are wall times from
+`out/<film>.runs.jsonl` (Apple M4, other renders running) and the page says so; the move, group and easing counts read
+`lib/moves.json` and `lib/easing.json`. The blur proof says 1 to 32 subframes (the final's cap in `render-page.mjs`). Moved off the
+page, each fact kept where it belongs: the page contract, studio and waivers in `/docs/the-page`; the aspect sizes in
+`/docs/aspect-ratios`; the ten looks and the lens in `/docs/motion`; the clock, hash test and slices in `/determinism`; the
+command list in `/docs/cli`. The CINDRE film is `/examples/cindre.*`, 10 s, audio stripped.
 
 ## Laws of UX on the landing and features
 
 One line per law: where it shaped a section (lawsofux.com). The house rules for every page are in "Laws of UX" below.
 
-- Jakob's law: the landing is a hero, chapters, FAQ and a close, the order every dev-tool page uses; features is a head, a section list and rows of text plus proof.
+- Jakob's law: the landing is a hero, chapters, FAQ and a close, the order every dev-tool page uses; features is a head, a three-pillar list and rows of text plus proof.
 - Hick's law and choice overload: the landing hero has two buttons, the close has two, the features page adds none beyond `Next`.
 - Fitts's law: every button and link is 44px tall; the hero and chapter films are the biggest targets on the page.
 - Proximity and common region: on features each decision's text, proof and source file sit together, and the proof sits in the same row.
 - Von Restorff: the pure black page has one standout per screen, a film frame or a 5xl number.
-- Serial position and peak-end: the landing opens on the HUD film and closes on "Write the page."; the result chapter plays the showcase, the peak; features ends on CINDRE.
-- Miller and chunking: six sections of seven features or fewer, four chapters, six moves.
+- Serial position and peak-end: the landing opens on the HUD film and closes on "Write the page."; the result chapter plays the showcase, the peak; features ends on CINDRE and one button.
+- Miller and chunking: three pillars of three features, four chapters, six moves.
 - Doherty threshold: films sit in fixed-ratio frames with a poster and `preload="none"`, so there is no shift and nothing blocks paint.
 - Aesthetic-usability: hairlines, one radius family and tight Geist type make the page read as easy to use.
 
