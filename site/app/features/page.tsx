@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Header, REPO_URL } from "../components/Header";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
@@ -6,9 +7,12 @@ import { pageMetadata } from "../components/seo";
 import { Clip } from "../components/Clip";
 import { MoveClips } from "../components/MoveClips";
 import { Next, PageTop, Toc } from "../components/Xp";
-import { clip, moveByName, GROUPS, MOVES } from "../../lib/moves";
+import { clip, moveByName, toCard, GROUPS, MOVES } from "../../lib/moves";
 import { EASES } from "../../lib/easing";
+import { Thumb } from "../easing/Charts";
+import { AspectDemo, BlurDemo, MoveFilter, SeekScrubber } from "./Demos";
 import "../components/intent.css";
+import "../easing/easing.css";
 import "./features.css";
 
 export const metadata = pageMetadata({
@@ -56,13 +60,14 @@ function Feature({ title, children, proof }: { title: string; children: ReactNod
   );
 }
 
-function Section({ id, title, lead, children }: { id: string; title: string; lead?: string; children: ReactNode }) {
+function Section({ id, title, lead, visual, children }: { id: string; title: string; lead?: string; visual?: ReactNode; children: ReactNode }) {
   return (
     <section className="isec ft-sec" id={id} aria-labelledby={`${id}-h`}>
       <div className="ft-head">
         <h2 id={`${id}-h`}>{title}</h2>
         {lead ? <p>{lead}</p> : null}
       </div>
+      {visual ? <div className="ft-visual">{visual}</div> : null}
       <ul className="ft-list">{children}</ul>
     </section>
   );
@@ -97,19 +102,6 @@ const LITERALS = `bin/vawe studio films/my-launch/page.html --port 8800
 const RATES = `bin/vawe dev  <page>   // half size, 30 fps, silent
 bin/vawe ship <page>   // 60 fps, blur, audio`;
 
-const LOOKS = `bin/vawe looks films/my-launch/page.html --at 4.5,9
-// clean dream-bloom film-halation anamorphic
-// pro-mist tilt-shift soft-focus vintage
-// cyanotype crt`;
-
-const AUDIO = `<audio src="sfx/hit.mp3" data-at="2.4">
-<audio src="vo.mp3" data-at="1" data-role="vo">
-// an example: mixed offline at data-at`;
-
-const EASE = ease
-  ? `${ease.name}\ncubic-bezier(${ease.bezier.params.join(", ")})   // exact\nlinear(${ease.linear.replace(/^linear\(/, "").split(", ").slice(0, 3).join(", ")}, ...)\n// ${ease.points} points`
-  : "";
-
 const NEW = `bin/vawe new my-launch --request "<the ask>"
 // asks for missing facts first
 // --defaults guesses them, unattended`;
@@ -140,6 +132,57 @@ skills/vawe-critique
 skills/vawe-transitions
 skills/vawe-reference`;
 
+const PIPELINE: [string, string][] = [
+  ["new", "page.html and brief.md"],
+  ["dev", "draft mp4, half size, 30 fps, silent"],
+  ["strip", "one image per cut"],
+  ["critique", "notes from a session that did not write the page"],
+  ["judge --fresh", "a score from key frames"],
+  ["approve", "the owner signs off"],
+  ["ship", "final mp4, 60 fps, blur, audio"],
+];
+
+function Pipeline() {
+  return (
+    <ol className="ftp panel" aria-label="The loop, command by command">
+      {PIPELINE.map(([cmd, out], i) => (
+        <li key={cmd}>
+          <span className="ftp-n mono">{i + 1}</span>
+          <code>bin/vawe {cmd}</code>
+          <span className="ftp-out">{out}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function HashProof() {
+  const cells = Array.from({ length: 12 }, (_, i) => i);
+  return (
+    <div className="panel fth" role="img" aria-label="Two renders of the same page produce the same frame hashes">
+      {["render A", "render B"].map((r) => (
+        <div className="fth-row" key={r}>
+          <span className="meta">{r}</span>
+          <div className="fth-cells">{cells.map((c) => <i key={c} style={{ opacity: 0.35 + ((c * 37) % 10) / 16 }} />)}</div>
+        </div>
+      ))}
+      <p className="meta fth-eq">every frame hash equal, and the frames differ over time</p>
+    </div>
+  );
+}
+
+function AudioLane() {
+  return (
+    <div className="panel fta" role="img" aria-label="A voice-over at 1 s and a hit at 2.4 s on a 4 s film, mixed offline">
+      <div className="fta-lane"><span className="meta">vo.mp3</span><i style={{ left: "25%", width: "48%" }} /></div>
+      <div className="fta-lane"><span className="meta">hit.mp3</span><i style={{ left: "60%", width: "6%" }} /></div>
+      <div className="fta-axis meta"><span>0 s</span><span>data-at 1</span><span>data-at 2.4</span><span>4 s</span></div>
+    </div>
+  );
+}
+
+const LOOK_NAMES = ["clean", "dream-bloom", "film-halation", "anamorphic", "pro-mist", "tilt-shift", "soft-focus", "vintage", "cyanotype", "crt"];
+
 const REF = `bin/vawe new my-copy --ref <ref.mp4>
 bin/vawe critique <page> --ref <ref.mp4>
 bin/vawe coverage`;
@@ -168,7 +211,7 @@ export default function Features() {
             ]} />
           </section>
 
-          <Section id="page" title="The page is the film." lead="If something you would naturally write fails, that is a framework bug.">
+          <Section id="page" title="The page is the film." lead="If something you would naturally write fails, that is a framework bug." visual={<AspectDemo />}>
             <Feature title="One HTML page in, one film out" proof={<Code label="page.html">{PAGE}</Code>}>
               A film is <code>films/&lt;name&gt;/page.html</code> plus its own assets folder. CSS, Web Animations, SVG, canvas and three.js
               all work. There is no private format.
@@ -201,7 +244,7 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="frames" title="Same frames, every render." lead="The clock is replaced before the page runs.">
+          <Section id="frames" title="Same frames, every render." lead="The clock is replaced before the page runs." visual={<SeekScrubber src="/examples/showcase.mp4" webm="/examples/showcase.webm" poster="/examples/showcase.webp" />}>
             <Feature
               title="The clock refuses wall time"
               proof={
@@ -218,7 +261,7 @@ export default function Features() {
               The renderer captures fixed 60-frame slices at once on one browser. The slice size never follows the worker count, so the
               pixels are identical for any number of workers.
             </Feature>
-            <Feature title="A test proves it" proof={<Code label="e2e">{"bin/vawe e2e\n// renders fixture pages twice,\n// compares the decoded frame hashes"}</Code>}>
+            <Feature title="A test proves it" proof={<HashProof />}>
               The end-to-end test renders pages twice and compares every frame. The frames must also differ over time, so a frozen page
               fails too.
             </Feature>
@@ -228,7 +271,7 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="look" title="Light, blur and sound." lead="Set by the renderer and the lens, not per element.">
+          <Section id="look" title="Light, blur and sound." lead="Set by the renderer and the lens, not per element." visual={<BlurDemo />}>
             <Feature
               title="Blur follows the motion"
               proof={
@@ -258,21 +301,21 @@ export default function Features() {
               Render the flat screen, then let one shader film it: perspective, depth of field with real bokeh shapes, bloom, LED grid,
               colour fringes, tear and grain. Noise is hashed from the seed and the time, so renders still match.
             </Feature>
-            <Feature title="Ten named looks" proof={<Code label="vawe looks">{LOOKS}</Code>}>
+            <Feature title="Ten named looks" proof={<ul className="ft-chips" aria-label="Looks">{LOOK_NAMES.map((l) => <li key={l} className="mono">{l}</li>)}</ul>}>
               Compare camera looks on your own page, one labelled grid per second. The look is set from outside; the page is not edited.
             </Feature>
-            <Feature title="Sound is mixed offline" proof={<Code label="audio tags">{AUDIO}</Code>}>
+            <Feature title="Sound is mixed offline" proof={<AudioLane />}>
               <code>&lt;audio&gt;</code> tags are never played live. The final render mixes them at their <code>data-at</code> times, and a
               voice-over track ducks a music track.
             </Feature>
           </Section>
 
-          <Section id="library" title="Moves and easing to copy." lead="Each move is markdown an agent reads and a clip you watch.">
+          <Section id="library" title="Moves and easing to copy." lead="Each move is markdown an agent reads and a clip you watch." visual={<MoveClips names={["caret-typing", "bracket-callout", "iris-wipe", "camera-moves", "text-on-path", "letter-stagger"]} />}>
             <Feature title={`${MOVES.length} moves in ${GROUPS.length} groups`} proof={<MoveClips names={["caret-typing", "bracket-callout", "iris-wipe", "camera-moves"]} />}>
               Each move is a clip and one markdown file: when to use it, the snippet, the notes and the sound cue.{" "}
               <a href="/moves">Browse the moves</a>.
             </Feature>
-            <Feature title={`${EASES.length} easing curves as CSS`} proof={<Code label="/easing/land">{EASE}</Code>}>
+            <Feature title={`${EASES.length} easing curves as CSS`} proof={ease ? <Link href="/easing/land" className="panel ft-curve"><Thumb e={ease} /><span className="meta">{ease.name}: cubic-bezier({ease.bezier.params.join(", ")}), {ease.points} linear() points</span></Link> : null}>
               Search the curves, watch one run, and copy its exact <code>linear()</code> string, nearest <code>cubic-bezier()</code>{" "}
               or Web Animations line. <a href="/easing">Browse the curves</a>.
             </Feature>
@@ -282,7 +325,7 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="loop" title="The loop." lead="A film goes through checks before it ships.">
+          <Section id="loop" title="The loop." lead="A film goes through checks before it ships." visual={<Pipeline />}>
             <Feature title="One command per stage" proof={<Code label="start">{NEW}</Code>}>
               <code>new</code>, <code>dev</code>, <code>strip</code>, <code>critique</code>, <code>ship</code>. Each step names the next.
             </Feature>
@@ -302,8 +345,8 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="agents" title="Built for coding agents.">
-            <Feature title="Skills that carry the contract" proof={<Code label="skills/">{SKILLS}</Code>}>
+          <Section id="agents" title="Built for coding agents." visual={<MoveFilter moves={MOVES.map(toCard)} groups={GROUPS} />}>
+            <Feature title="Skills that carry the contract" proof={<ul className="ft-chips" aria-label="Skills">{SKILLS.split("\n").map((s) => <li key={s} className="mono">{s.replace("skills/", "")}</li>)}</ul>}>
               Five skills cover the brief, the page, the critique, the cuts and a reference match. An agent writes a page from them without
               reading the engine.
             </Feature>
