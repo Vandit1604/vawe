@@ -18,6 +18,10 @@
   --lane-shape:#e0714f; --lane-comp:#cf5b98; --lane-camera:#4fb3d9; --lane-fx:#d9c34f;
   --lane-on:#16151a; --lane-media-on:#ffffff;
 
+  /* ---- STAR · the third voice, one use: the star on the GitHub button means "star the repo".
+     11.9:1 on the ground; a ground-coloured stroke separates it from the white button. */
+  --gold:#f5c542;
+
   /* ---- SURFACE ---- */
   --bg:#16151a;             /* studio ground */
   --bg-2:#212025;           /* a section that needs a surface */
@@ -114,6 +118,31 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
   transition:background-color .15s ease,scale .12s cubic-bezier(.2,0,0,1)}
 .ghbtn:hover{background:var(--ink-2)}
 .ghbtn:active{scale:.96}
+/* The star the repo hint: it pops out of the button's corner with a small overshoot and four sparks,
+   320 ms in, 140 ms out. Absolutely placed, so the button never changes size. */
+.ghbtn{position:relative}
+.gh-star{position:absolute;top:-10px;right:-10px;width:20px;height:20px;pointer-events:none;
+  opacity:0;transform:translate(-6px,6px) scale(.5) rotate(-30deg);
+  transition:opacity .14s cubic-bezier(.23,1,.32,1),transform .14s cubic-bezier(.23,1,.32,1)}
+.gh-star svg{display:block;width:100%;height:100%;overflow:visible}
+.gh-star path{fill:var(--gold);stroke:var(--bg);stroke-width:2;paint-order:stroke;stroke-linejoin:round}
+.gh-spark{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:1px;background:var(--gold);opacity:0;transform:rotate(45deg)}
+.ghbtn:is(:hover,:focus-visible) .gh-star{opacity:1;transform:none;
+  transition:opacity .12s cubic-bezier(.23,1,.32,1),transform .32s cubic-bezier(.34,1.56,.64,1)}
+.ghbtn:is(:hover,:focus-visible) .gh-spark{animation:gh-spark .38s cubic-bezier(.23,1,.32,1) .06s both}
+.gh-spark:nth-child(2){--dx:-15px;--dy:-9px}
+.gh-spark:nth-child(3){--dx:14px;--dy:-11px}
+.gh-spark:nth-child(4){--dx:-12px;--dy:12px}
+.gh-spark:nth-child(5){--dx:15px;--dy:10px}
+@keyframes gh-spark{
+  0%{opacity:0;transform:translate(0,0) rotate(45deg) scale(.6)}
+  30%{opacity:1}
+  100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(45deg) scale(1)}
+}
+@media (prefers-reduced-motion:reduce){
+  .gh-star,.ghbtn:is(:hover,:focus-visible) .gh-star{transition:none;transform:none}
+  .ghbtn:is(:hover,:focus-visible) .gh-spark{animation:none}
+}
 /* =========================================================
    BUTTONS
    ========================================================= */

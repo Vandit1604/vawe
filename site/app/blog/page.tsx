@@ -3,7 +3,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { blogSchema, breadcrumbSchema, jsonLdScript } from "../../lib/schema";
-import { allPosts, formatDate, postsBySection, type Post } from "../../lib/blog";
+import { allPosts, postsBySection, smart, type Post } from "../../lib/blog";
 import { Cover } from "./Cover";
 import { preload } from "react-dom";
 import "./blog.css";
@@ -25,55 +25,18 @@ const RHYTHM = ["w7", "w5", "w4", "w4", "w4", "w5", "w7", "w6", "w6"];
 // A post page links to /blog#<section>; the hash selects that filter. Without script every post shows.
 const HASH_FILTER = `(()=>{const h=location.hash.slice(1);const r=h&&document.getElementById("f-"+h);if(r)r.checked=true})()`;
 
-const TICK = 6;
-
-function day(iso: string) {
-  return Date.parse(`${iso}T00:00:00Z`) / 86400000;
-}
-
-function Timeline({ posts }: { posts: Post[] }) {
-  const first = day(posts[posts.length - 1].date);
-  const span = Math.max(day(posts[0].date) - first, 1);
-  const stack = new Map<string, number>();
-  const perDay = new Map<string, number>();
-  for (const p of posts) perDay.set(p.date, (perDay.get(p.date) ?? 0) + 1);
-  const tallest = Math.max(...perDay.values());
-  return (
-    <div className="bl-tl" aria-hidden="true">
-      <div className="bl-tl-track" style={{ height: `${tallest * TICK + 2}px` }}>
-        {[...posts].reverse().map((p) => {
-          const n = stack.get(p.date) ?? 0;
-          stack.set(p.date, n + 1);
-          return (
-            <span
-              key={p.slug}
-              className="bl-tick"
-              data-s={p.section}
-              style={{ left: `${((day(p.date) - first) / span) * 100}%`, bottom: `${n * TICK}px` }}
-            />
-          );
-        })}
-      </div>
-      <div className="bl-tl-axis meta">
-        <span>{formatDate(posts[posts.length - 1].date)}</span>
-        <span>{formatDate(posts[0].date)}</span>
-      </div>
-    </div>
-  );
-}
-
 function Card({ post, w }: { post: Post; w: string }) {
   return (
     <li className={`panel bl-card ${w}`} data-s={post.section}>
       <Cover post={post} />
       <div className="bl-card-text">
         <p className="meta bl-card-meta">
-          <time dateTime={post.date}>{formatDate(post.date)}</time>
+          <span className="bl-sec"><span className="sw" />{post.sectionLabel}</span>
         </p>
         <h3>
-          <Link href={`/blog/${post.slug}`} prefetch={false}>{post.title}</Link>
+          <Link href={`/blog/${post.slug}`} prefetch={false}>{smart(post.title)}</Link>
         </h3>
-        <p className="bl-card-desc">{post.description}</p>
+        <p className="bl-card-desc">{smart(post.description)}</p>
         <p className="meta bl-card-foot">{post.minutes} min read</p>
       </div>
     </li>
@@ -85,7 +48,9 @@ export default function BlogIndex() {
   const posts = allPosts();
   preload("/assets/fonts/PlusJakartaSans.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   const crumbs = [{ name: "Home", url: "/" }, { name: "Blog", url: "/blog" }];
-  const [lead, ...rest] = posts;
+  // The featured post leads; the rest group by section, newest first inside each. No date is shown.
+  const [lead] = posts;
+  const rest = sections.flatMap((sec) => sec.posts).filter((p) => p !== lead);
 
   return (
     <div className="shell">
@@ -104,15 +69,11 @@ export default function BlogIndex() {
               the notes from building it, with the numbers.
             </p>
             {posts.length ? (
-              <>
-                <dl className="bl-stats">
+              <dl className="bl-stats">
                   <div><dt className="meta">Posts</dt><dd>{posts.length}</dd></div>
                   <div><dt className="meta">Sections</dt><dd>{sections.length}</dd></div>
-                  <div><dt className="meta">Latest</dt><dd>{formatDate(posts[0].date)}</dd></div>
                   <div className="bl-rss"><dt className="meta">Feed</dt><dd><a href="/blog/rss.xml">RSS</a></dd></div>
-                </dl>
-                <Timeline posts={posts} />
-              </>
+              </dl>
             ) : null}
           </header>
 
@@ -142,13 +103,13 @@ export default function BlogIndex() {
                   <Cover post={lead} eager />
                   <div className="bl-lead-text">
                     <p className="meta bl-card-meta">
-                      <span className="bl-new">Latest</span>
-                      <time dateTime={lead.date}>{formatDate(lead.date)}</time>
+                      <span className="bl-new">Featured</span>
+                      <span className="bl-sec"><span className="sw" />{lead.sectionLabel}</span>
                     </p>
                     <h2>
-                      <Link href={`/blog/${lead.slug}`} prefetch={false}>{lead.title}</Link>
+                      <Link href={`/blog/${lead.slug}`} prefetch={false}>{smart(lead.title)}</Link>
                     </h2>
-                    <p className="bl-card-desc">{lead.description}</p>
+                    <p className="bl-card-desc">{smart(lead.description)}</p>
                     <p className="meta bl-card-foot">{lead.minutes} min read</p>
                   </div>
                 </li>

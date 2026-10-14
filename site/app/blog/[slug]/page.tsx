@@ -4,7 +4,7 @@ import { Header, DOCS_URL, REPO_URL, WaveGlyph } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { pageMetadata } from "../../components/seo";
 import { blogPostingSchema, breadcrumbSchema, jsonLdScript } from "../../../lib/schema";
-import { allPosts, formatDate, neighbours, postBySlug, relatedPosts } from "../../../lib/blog";
+import { allPosts, neighbours, postBySlug, relatedPosts, smart } from "../../../lib/blog";
 import { Cover } from "../Cover";
 import { preload } from "react-dom";
 import "../blog.css";
@@ -75,13 +75,11 @@ export default async function PostPage({ params }: Params) {
                 <span aria-hidden="true">/</span>
                 <Link className="bl-sec" href={`/blog#${post.section}`}><span className="sw" />{post.sectionLabel}</Link>
               </p>
-              <h1>{post.title}</h1>
-              <p className="bp-dek">{post.description}</p>
+              <h1>{smart(post.title)}</h1>
+              <p className="bp-dek">{smart(post.description)}</p>
               <p className="meta bp-meta">
                 {post.no ? <span>No. {String(post.no).padStart(2, "0")}</span> : null}
-                <time dateTime={post.date}>{formatDate(post.date)}</time>
                 <span>{post.minutes} min read</span>
-                {post.updated !== post.date ? <span>updated <time dateTime={post.updated}>{formatDate(post.updated)}</time></span> : null}
               </p>
             </div>
           </header>
@@ -160,10 +158,10 @@ export default async function PostPage({ params }: Params) {
                     <Cover post={p} />
                     <div className="bl-card-text">
                       <p className="meta bl-card-meta">
-                        <time dateTime={p.date}>{formatDate(p.date)}</time>
+                        <span className="bl-sec"><span className="sw" />{p.sectionLabel}</span>
                       </p>
                       <h3>
-                        <Link href={`/blog/${p.slug}`} prefetch={false}>{p.title}</Link>
+                        <Link href={`/blog/${p.slug}`} prefetch={false}>{smart(p.title)}</Link>
                       </h3>
                     </div>
                   </li>

@@ -72,7 +72,7 @@ A dark ground, panels a step lighter, and almost no colour. The clips are the co
 
 ## Colors
 
-Colour has two voices and each has one meaning.
+Colour has two voices and each has one meaning, plus one single-use third.
 
 - **The accent, `#0a87ff`, means you can act on it, or it is live.** Links, the focus ring, the
   active clip. Text on the accent is the ground (`accent-ink`, 5.12:1);
@@ -81,6 +81,9 @@ Colour has two voices and each has one meaning.
   JSON engine left the site; the tokens stay for the next surface that shows a timeline. A lane
   colour always sits next to a label, and as TEXT it is legal only on the ground: media fails there
   (2.35:1) and composite fails on a panel.
+- **Gold, `--gold` `#f5c542`, means "star the repo"** and appears only as the star on the GitHub
+  button's hover. A new voice because no existing token says "star"; 11.9:1 on the ground, and a
+  ground-coloured stroke keeps it apart from the white button.
 
 Nothing else gets colour. Buttons are ink on the ground (`btn-primary`) or ink on `raised`
 (`btn-ghost`); a selected row is `ink` on `raised`, never the accent on its own tint, which measured
@@ -180,14 +183,16 @@ a pill is 999px. Some older routes still use 6px and 10px.
 **Section colour.** Each of the five sections borrows one lane colour: architecture `lane-shape`, agent
 experience `lane-sound`, taste `lane-text`, measurement `lane-fx`, speed `lane-camera`
 (`[data-s]` in `blog.css`). The lane rule holds: the colour means that section and always sits beside
-its name (a swatch, the cover's unit or separator, a timeline tick whose legend is the filter row).
+its name (a swatch beside the section label on cards, filters and the post kicker).
 
-**Index.** A masthead (an 800-weight h1 with its second half in `muted`, a dek, mono stats, and a
-timeline that stacks one tick per post on a date axis), a filter row of native radios in a fieldset
+**Index.** A masthead (an 800-weight h1 with its second half in `muted`, a dek, mono stats), a filter row of native radios in a fieldset
 (`:has()` hides the other sections and shows the chosen section's intro; `/blog#<section>` selects one
-with a five-line inline script, and without script every post shows), a lead card for the newest post,
-then a 12-column grid whose card widths repeat 7+5, 4+4+4, 5+7, 6+6 with `grid-auto-flow: dense`.
+with a five-line inline script, and without script every post shows), a featured lead card,
+then the rest grouped by section in a 12-column grid whose card widths repeat 7+5, 4+4+4, 5+7, 6+6 with `grid-auto-flow: dense`.
 Under 900 the grid is two columns, under 640 one. Each card has one stretched title link.
+
+**No visible dates** (owner, 2026-10-13: dates showed posts clustered on a few days). Cards, "Read next"
+and the post head show section and reading time only; the true dates stay in JSON-LD, the sitemap and RSS.
 
 **Type.** The blog routes set headings and body in Plus Jakarta Sans (OFL, `assets/fonts/PlusJakartaSans.woff2`,
 copied to `public/assets/fonts/` by `scripts/site/vendor-assets.mjs`, declared and preloaded by the blog
@@ -200,13 +205,27 @@ then moves to the top of the body), as the Open Graph image (`[slug]/opengraph-i
 PNG, because LinkedIn does not read WebP) and as the JSON-LD image. Its alt is empty, because the
 title always sits beside it. Without the file a card has no image and the share card is the generated one.
 
-**Post.** A head (title, dek, mono meta with the issue number), the cover, a 680 px body at 17px / 1.65
-and, from 1000 px, a numbered table of contents. The first paragraph is the lead (20px, `ink`). Each h2
+**Post.** A head (title, dek, mono meta with the issue number), the cover, a 720 px body and, from
+1000 px, a numbered table of contents. The first paragraph is the lead by tone (`ink`), not by size. Each h2
 carries its mono number, matching the TOC. Figures are mounted on a `surface` panel with a `Fig. 01` mono
 caption; tables sit on a panel and scroll inside it; code blocks have a header strip with the language,
 tone and weight only, never hue; a blockquote is a pull quote. The end is a "Made with vawe" panel (the
 wave glyph, the repo and `/docs`), the newer and older pager, and three "Read next" cards with covers
 (same section first; there is no cluster field yet).
+
+**Typography (Butterick, *Practical Typography*, 2026-10-13).** Measured on `/blog/chrome-per-lane`:
+body 19 px / 1.42 at 1440 (69 characters per line, was 17 px / 1.65, 71), 17 px / 1.45 on a 390 px phone
+(36 characters: the 338 px column cannot reach 45 at a readable size). Kerning, `liga` and `calt` on;
+`optimizeLegibility` on headings; space between paragraphs (.75em), never also an indent; h2 24 px / 700,
+h3 19 px / 700, line-height 1.2 to 1.3, more space above a heading than below; display heads at 1.08 to
+1.1; all-caps mono meta, kickers, table heads and figure labels at 8% letterspacing, each item on one
+line; bold never with italic; links a 1 px underline at .2em offset; tables `tabular-nums`;
+`hanging-punctuation` where supported; `text-wrap: balance` on headings, `pretty` on prose.
+`smartHtml()` in `lib/blog.ts` sets curly quotes and apostrophes, `…` and en-dash number ranges (1–16, not
+dates) on text nodes only, never inside a tag, `<code>`, `<pre>` or a URL, and never writes an em dash;
+`smart()` does the same for titles and descriptions on the pages. Plus Jakarta Sans's `calt` draws "3x"
+as "3×". From typeset: role contrast by tone before size, which agreed with Butterick; its 45 to 75ch
+range taken as 60 to 75 at desktop.
 
 **Rejected cover direction.** `scripts/site/blog-thumbs/thumb.html` (numbers in Archivo with a motif
 per section, every choice a `--cover-*` custom property, `node scripts/site/blog-thumbs.mjs` for six
@@ -270,6 +289,8 @@ was tried.
 
 
 | `/blog`, `/blog/[slug]`, RSS (2026-10-13) | brand | ui-skills `jakubkrehel/better-typography` | Measure, line-height, wrap and underline rules taken; its scale and Tailwind specifics rejected; TOC not sticky by the rebuild rule. |
+| `/blog`, `/blog/[slug]` typography pass (2026-10-13) | brand | Butterick, *Practical Typography* (practicaltypography.com, summary of key rules and the headings page); ui-skills `pbakaus/typeset` where it agreed | Taken: body 15 to 25 px web range (19 px), 120 to 145% line spacing (142%), 45 to 90 characters (69 at desktop), curly quotes, bold or italic sparingly and never together, underline only links, 5 to 12% caps letterspacing (8%), kerning on, space or indent not both, headings bold and only as large as needed with space above. REJECTED: Butterick's dislike of free fonts (the owner chose Plus Jakarta Sans) and title-case advice (titles are front matter). |
+| GitHub button star hover (2026-10-13) | brand | ui-skills `emilkowalski/animate` (from `list --category motion`) | Taken: CSS transitions so a quick hover-out retargets; transform and opacity only; never `scale(0)` (starts at .5); its strong ease-out `cubic-bezier(.23,1,.32,1)` for the exit (140 ms) and an overshoot for the 320 ms entrance; reduced motion shows the star with no motion; hover and `:focus-visible` both trigger. REJECTED: its frequency gate ("hover: near-imperceptible or nothing"), because the owner asked for a visible star-the-repo hint, and its Motion library advice (CSS only, no dependency). Not loaded: `pbakaus/delight`, `emil-design-eng`. |
 | `/blog`, `/blog/[slug]` type: Plus Jakarta Sans (2026-10-13) | brand | owner decision | The owner picked Plus Jakarta Sans over Archivo, Geist and Bricolage on 2026-10-13, for the blog routes only. Mono stays for numbers and meta; the bar and footer keep Archivo. Headline tracking loosened from -.045em to -.032em, because Jakarta is set tighter than Archivo. |
 | `/blog`, `/blog/[slug]` personality pass, blog covers (2026-10-13) | brand | ui-skills `pbakaus/bolder`, `pbakaus/typeset` (pages); `anthropics/canvas-design` (covers). Read `start`, `categories`, then `list` for visual, taste, typography and motion first | bolder: TAKEN, amplify what the system already owns (Archivo 800 at display size, mono read-outs, lane colours by meaning) instead of new effects; one decisive move per surface (the masthead h1 and the cover number) with everything around it quiet; the skeleton test (cards still read as ranked by size with the copy removed). REJECTED: its "touch only the named target" scope rule (the owner asked for the whole blog) and any new colour, font or radius. typeset: TAKEN, role contrast by size, weight and tone (title, dek, lead, body, mono meta), a 680 px measure, light-on-dark compensation (lead at 1.55, body at 1.65), tabular numbers. REJECTED: `impeccable detect` (not installed) and its live-mode `scale` param. canvas-design: TAKEN, the "systematic observation" register (registration marks, tick scales, mono labels, a dot lattice, dense repeated marks), a limited palette per cover, nothing overlaps, refine before adding. REJECTED: its philosophy .md and PDF output, thin type (Archivo 800 is the site's display face), downloading fonts, and its "masterpiece" framing. Motion: no skill loaded; the pages have no animation beyond 150 ms colour and ring hovers, off under reduced motion. Local tokens and faces win everywhere. |
 | `/easing`, `/easing/[slug]` (44 pages, 2026-10-03) | product | ui-skills `ibelick/fixing-metadata` (taken); `ibelick/baseline-ui` (fetched, rejected); layout read from the Vercel spec on getdesign.md (VoltAgent/awesome-design-md) | fixing-metadata: TAKEN, one `pageMetadata` call per page, title, description (under 155), canonical and JSON-LD agreeing, deterministic dates. baseline-ui: REJECTED, it assumes Tailwind, `cn` and `motion/react`, none of which this site uses. Vercel spec: TAKEN for the idea only, hairline panels and a spec-sheet layout of numbers then code; its Geist faces and monochrome palette rejected. Local tokens won: the curve line is the accent (it is live data), everything else is ink and muted; the `.mv-code` block and `moves.css` are reused. The charts are server-rendered SVG from `lib/easing.json`, built by `scripts/site/easing.mjs`. |

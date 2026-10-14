@@ -137,6 +137,49 @@ function isExternal(href: string) {
   return /^https?:\/\//i.test(href) && !/^https?:\/\/(www\.)?vawe\.dev(\/|$)/i.test(href);
 }
 
+// Typographer's quotes, ellipses and en-dash ranges (Butterick, "Practical Typography"). Text only:
+// never inside a tag, <code>, <pre> or a bare URL. It never writes an em dash.
+const OPEN_BEFORE = /[\s([{\u2018\u201c/-]/;
+function smartText(text: string, before: string) {
+  if (/https?:\/\/|www\./.test(text)) return text;
+  let out = "";
+  let prev = before;
+  const t = text
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\.\.\./g, "\u2026")
+    // 1-16, not a date (2026-10-11) and not a word (10-bit)
+    .replace(/(^|[^\d-])(\d+)-(\d+)(?![\d-])/g, "$1$2\u2013$3");
+  for (const ch of t) {
+    if (ch === '"') out += !prev || OPEN_BEFORE.test(prev) ? "\u201c" : "\u201d";
+    else if (ch === "'") out += !prev || OPEN_BEFORE.test(prev) ? "\u2018" : "\u2019";
+    else out += ch;
+    prev = ch;
+  }
+  return out;
+}
+
+export function smartHtml(html: string) {
+  let skip = 0;
+  let last = "";
+  return html.split(/(<[^>]+>)/).map((part) => {
+    if (part.startsWith("<")) {
+      const m = /^<(\/?)(code|pre|script|style)\b/i.exec(part);
+      if (m) skip += m[1] ? -1 : 1;
+      return part;
+    }
+    if (skip > 0 || !part) {
+      if (part) last = part.slice(-1);
+      return part;
+    }
+    const done = smartText(part, last);
+    last = part.slice(-1);
+    return done;
+  }).join("");
+}
+
+export const smart = (text: string) => smartText(text, "");
+
 function render(file: string, body: string) {
   const toc: Heading[] = [];
   const used = new Map<string, number>();
@@ -175,8 +218,8 @@ function render(file: string, body: string) {
       },
     },
   });
-  const html = marked.parse(body, { async: false }) as string;
-  return { html, toc };
+  const html = smartHtml(marked.parse(body, { async: false }) as string);
+  return { html, toc: toc.map((h) => ({ ...h, text: smart(h.text) })) };
 }
 
 function readingMinutes(body: string) {
