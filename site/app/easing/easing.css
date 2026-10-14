@@ -170,3 +170,4 @@
 .ez-demo-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-4)}
 .ez-rel .ez-cmp{position:relative;z-index:var(--z-raise);display:inline-block;margin-top:var(--sp-2);font-family:var(--font-sans),sans-serif;font-weight:400;font-size:var(--fs-code);color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
 .ez-rel .ez-cmp::after{content:none}
+@media (max-width:640px){ .ez-card-act{flex-direction:column} .ez-card-act button{min-height:36px} }
