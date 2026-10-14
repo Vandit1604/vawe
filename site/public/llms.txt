@@ -3,6 +3,12 @@
 
 A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The renderer seeks it frame by frame under a virtual clock and encodes an mp4. Source and the page contract: https://github.com/Vandit1604/vawe (AGENTS.md).
 
+## Install and use (for agents)
+- Full guide as one Markdown file: https://vawe.dev/ai-agents.md. Everything in one text file: https://vawe.dev/llms-full.txt.
+- Install from source (no npm package, no hosted API, no account): `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
+- Make a film: `bin/vawe new hello --request "<the ask>"`, then `bin/vawe dev films/hello/page.html` (draft), `bin/vawe critique films/hello/page.html` (in a fresh session), `bin/vawe ship films/hello/page.html` (final mp4 in out/).
+- The page contract: one `films/<name>/page.html`, `<meta name="duration" content="seconds">`, time is the seek (CSS keyframes, Web Animations or `window.seek(t)`), no timers or unseeded random, relative assets, `<audio>` tags for sound. Read AGENTS.md in the repo first.
+
 ## Site
 - [Home](https://vawe.dev/): Write a web page, get a film. Move clips rendered by vawe, how a page becomes a film, and questions.
 - [features](https://vawe.dev/features): The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.

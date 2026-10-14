@@ -1,4 +1,5 @@
 import { Header, REPO_URL } from "../components/Header";
+import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
@@ -8,6 +9,7 @@ export const metadata = pageMetadata({
   description:
     "An agent writes a Vawe film as one HTML page, in the web platform it already knows, and one command renders, checks and ships it. A fresh session judges the result, never the one that wrote it.",
   path: "/ai-agents",
+  markdown: "/ai-agents.md",
 });
 
 /* /ai-agents · the intent page for "video rendering for AI agents". Every fact below is read off the
@@ -28,6 +30,7 @@ export default function AiAgents() {
   return (
     <div className="shell">
       <Header />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "AI agents", url: "/ai-agents" }]))} />
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
@@ -121,6 +124,8 @@ export default function AiAgents() {
             <div className="irelated">
               <a href={REPO_URL}>The source, on GitHub</a>
               <a href="/moves">Moves to copy, each with its clip</a>
+              <a href="/ai-agents.md">This guide as Markdown</a>
+              <a href="/llms-full.txt">llms-full.txt</a>
             </div>
           </section>
         </main>
