@@ -86,6 +86,23 @@ export function importLine(e: Ease) {
   return `import { ${e.name} } from '../../core/motion/curves.js';\nimport { curveToLinear } from '../../core/motion/springs.js';\n\nconst easing = curveToLinear(${e.name}, { tolerance: 0.002 }); // the linear() string above\nconst x = ${e.name}(u);                                         // per-frame code, u in 0..1`;
 }
 
+export const ROLES = ["Entrance", "Exit", "Move", "Overshoot"] as const;
+export type Role = (typeof ROLES)[number];
+
+const VAWE_ROLE: Record<string, Role> = { land: "Entrance", "land-soft": "Entrance", leave: "Exit", launch: "Exit", settle: "Move", swap: "Move", glide: "Move", carry: "Move", pop: "Overshoot", nudge: "Overshoot" };
+const CSS_ROLE: Record<string, Role> = { linear: "Move", ease: "Move", "ease-in": "Exit", "ease-out": "Entrance", "ease-in-out": "Move" };
+const DIR_ROLE = { in: "Exit", out: "Entrance", inOut: "Move" } as const;
+
+export function roleOf(e: Ease): Role {
+  if (e.kind === "vawe") return VAWE_ROLE[e.slug];
+  if (e.kind === "css") return CSS_ROLE[e.slug];
+  if (e.family === "back" || e.family === "elastic" || e.family === "bounce") return "Overshoot";
+  return DIR_ROLE[e.dir ?? "inOut"];
+}
+
+export const copyIsBezier = (e: Ease) => e.kind !== "classic" || e.bezier.express !== "no";
+export const copyValue = (e: Ease) => (copyIsBezier(e) ? bezierText(e) : e.linear);
+
 const ORG = { "@type": "Organization", name: "vawe", url: "https://vawe.dev" };
 
 export function techArticleSchema(e: Ease) {

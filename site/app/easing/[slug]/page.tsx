@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Header } from "../../components/Header";
@@ -7,8 +6,10 @@ import { Clip } from "../../components/Clip";
 import { pageMetadata } from "../../components/seo";
 import { jsonLdScript, breadcrumbSchema } from "../../../lib/schema";
 import { CopyCode } from "../../moves/[name]/CopyCode";
-import { EASES, STATS, bezierText, camelOf, easeBySlug, importLine, pageDescription, pageTitle, speedText, summary, techArticleSchema, waapi, type Ease } from "../../../lib/easing";
+import { EASES, STATS, bezierText, camelOf, copyIsBezier, copyValue, easeBySlug, importLine, pageDescription, pageTitle, roleOf, speedText, summary, techArticleSchema, waapi, type Ease } from "../../../lib/easing";
 import { CurveChart, VelocityChart } from "../Charts";
+import { CopyBtn } from "../CopyBtn";
+import { Demo } from "../Demo";
 import { Next, Toc } from "../../components/Xp";
 import "../../moves/moves.css";
 import "../easing.css";
@@ -60,7 +61,7 @@ function BezierBlock({ e }: { e: Ease }) {
     return (
       <>
         <Code label="cubic-bezier (exact)" text={`animation-timing-function: ${bezierText(e)};`} />
-        <p className="ez-note">This ease is a cubic bezier by construction: the two After Effects handles are its two control points. The site ships the <code>linear()</code> string above because it is what the renderer and <code>EASE.{camelOf(e.slug)}</code> use.</p>
+        <p className="ez-note">Exact: the two After Effects handles are the two control points. <code>EASE.{camelOf(e.slug)}</code> uses the <code>linear()</code> string above.</p>
       </>
     );
   }
@@ -72,7 +73,7 @@ function BezierBlock({ e }: { e: Ease }) {
       <>
         <Code label="cubic-bezier: no usable fit" text={`/* Best single fit, off by up to ${(worst * 100).toFixed(0)} points of travel: ${bezierText(e)} */`} />
         <p className="ez-note">
-          A <code>cubic-bezier()</code> has two control points and makes one smooth S. {e.name} changes direction {t} {t === 1 ? "time" : "times"}, so no four numbers draw it. Use the <code>linear()</code> string above.
+          A <code>cubic-bezier()</code> draws one smooth S. {e.name} changes direction {t} {t === 1 ? "time" : "times"}, so no four numbers draw it. Use the <code>linear()</code> string above.
         </p>
       </>
     );
@@ -81,7 +82,7 @@ function BezierBlock({ e }: { e: Ease }) {
     <>
       <Code label={e.bezier.express === "exact" ? "cubic-bezier (matches within 0.5%)" : "cubic-bezier (nearest fit)"} text={`animation-timing-function: ${bezierText(e)};`} />
       <p className="ez-note">
-        Least-squares fit to the {e.name} curve; the worst gap is {(worst * 100).toFixed(1)} points of travel. {e.bezier.express === "close" ? "It is close, not exact: use linear() when the end of the curve matters." : "The linear() string is exact."}
+        Least-squares fit; the worst gap is {(worst * 100).toFixed(1)} points of travel. {e.bezier.express === "close" ? "Use linear() when the end of the curve matters." : "The linear() string is exact."}
       </p>
     </>
   );
@@ -104,7 +105,7 @@ function Handles({ e }: { e: Ease }) {
     <section className="ez-sec" aria-labelledby="ae">
       <h2 id="ae">After Effects handles</h2>
       <p>
-        One segment between two keys has two handles. In After Effects, open Keyframe Velocity on each key: the outgoing handle belongs to the first key and the incoming handle to the second. <strong>Influence</strong> is how far along the segment the handle reaches, in per cent of its duration. <strong>Speed</strong> is the pace at the key as a multiple of the segment&apos;s average (0 stops dead, 1 is straight).
+        Set these in After Effects under Keyframe Velocity: the outgoing handle on the first key, the incoming handle on the second. <strong>Influence</strong> is how far along the segment the handle reaches, in per cent of its duration. <strong>Speed</strong> is the pace at the key as a multiple of the segment&apos;s average (0 stops dead, 1 is straight).
       </p>
       <div className="ez-scroll">
         <table className="ez-table">
@@ -118,10 +119,10 @@ function Handles({ e }: { e: Ease }) {
         </table>
       </div>
       <p className="ez-note">
-        Measured on {num(STATS.lottieSegments)} real segments ({num(STATS.lottieHandles)} handles) from Lottie files and {STATS.hfSegments} from HyperFrames blocks. Near means influence within 10 points and speed within 0.3 (25% above 1x).{" "}
+        Measured on {num(STATS.lottieSegments)} Lottie segments ({num(STATS.lottieHandles)} handles) and {STATS.hfSegments} HyperFrames segments. Near means influence within 10 points and speed within 0.3.{" "}
         {s.pairCount > 0
           ? `Both handles together: ${s.pairCount} segments (${s.pairShare}%), ${s.entranceShare}% of the ${STATS.entranceSegments} entrances and ${s.exitShare}% of the ${STATS.exitSegments} exits.`
-          : "No real Lottie segment has both handles near this pair, so it is a motion-design choice and not an icon default."}{" "}
+          : "No Lottie segment has both handles near this pair."}{" "}
         {s.hfCount > 0 ? `${s.hfCount} of the ${STATS.hfSegments} HyperFrames segments use it.` : ""}
       </p>
       <div className="ez-codes">
@@ -137,7 +138,6 @@ function Handles({ e }: { e: Ease }) {
 export default async function EasePage({ params }: Params) {
   const e = easeBySlug((await params).slug);
   if (!e) notFound();
-  const demoStyle = { "--ez": e.linear } as CSSProperties;
   const crumbs = [{ name: "Home", url: "/" }, { name: "Easing", url: "/easing" }, { name: e.name, url: `/easing/${e.slug}` }];
   const stats: [string, string, string][] = [
     ["50% of travel", pct(e.t50), "of the time"],
@@ -164,21 +164,24 @@ export default async function EasePage({ params }: Params) {
               <Link href={`/easing#${e.kind}`}>{GROUP[e.kind]}</Link>
             </p>
             <h1>{e.kind === "css" ? `CSS ${e.name}` : e.name}</h1>
-            <p className="ez-sum">{e.blurb}</p>
-            <p className="ez-sum">{summary(e)}</p>
+            <p className="ez-sum">{e.blurb} {summary(e)}</p>
             <p className="meta ez-meta">
-              <span>{GROUP[e.kind]}</span>
+              <span>{roleOf(e)}</span>
               {e.kind === "classic" ? <span>family: {e.family}</span> : null}
-              <span>peak {speedText(e).replace(" (it ends vertically)", "")}</span>
             </p>
+            <div className="ez-quick" role="group" aria-label="Copy a format">
+              <CopyBtn value={copyValue(e)} label={copyIsBezier(e) ? "Copy cubic-bezier" : "Copy linear()"} />
+              {copyIsBezier(e) ? <CopyBtn value={e.linear} label="Copy linear()" /> : null}
+              <CopyBtn value={waapi(e)} label="Copy Web Animations" />
+            </div>
             <Toc
               label="On this page"
               items={[
-                { href: "#demo", label: "Live demo" },
-                { href: "#code", label: "Copy the code" },
+                { href: "#demo", label: "Demo" },
+                { href: "#code", label: "Code" },
                 { href: "#numbers", label: "Numbers" },
                 ...(e.handles ? [{ href: "#ae", label: "Handles" }] : []),
-                { href: "#when", label: "When to use it" },
+                { href: "#when", label: "Use and avoid" },
               ]}
             />
           </header>
@@ -187,42 +190,31 @@ export default async function EasePage({ params }: Params) {
             <figure className="panel ez-chart">
               <span className="meta">Progress against time</span>
               <CurveChart e={e} />
-              <figcaption className="ez-cap">The dashed line is linear. The dots mark 50% and 90% of the travel.</figcaption>
+              <figcaption className="ez-cap">Dashed: linear. Dots: 50% and 90% of the travel.</figcaption>
             </figure>
             <figure className="panel ez-chart">
               <span className="meta">Velocity, in multiples of average speed</span>
               <VelocityChart e={e} />
-              <figcaption className="ez-cap">The dashed line is 1x, the speed of linear.{e.peakSpeed > 12 ? " The chart stops at 12x." : ""}</figcaption>
+              <figcaption className="ez-cap">Dashed: 1x, the speed of linear.{e.peakSpeed > 12 ? " The chart stops at 12x." : ""}</figcaption>
             </figure>
           </section>
 
           <section className="ez-sec" aria-labelledby="demo">
-            <h2 id="demo">Live demo</h2>
-            <p>The blue box uses the exact <code>linear()</code> string below, in your browser. The grey box is linear.</p>
-            <div className="panel ez-demo" style={demoStyle}>
-              <div className="ez-row">
-                <span className="ez-lab">{e.name}</span>
-                <div className="ez-track"><span className="ez-box" /></div>
-              </div>
-              <div className="ez-row">
-                <span className="ez-lab">linear</span>
-                <div className="ez-track"><span className="ez-box ez-box-ref" /></div>
-              </div>
-              <p className="ez-cap ez-stopnote">Your system asks for reduced motion, so the boxes rest at the end of the move.</p>
-            </div>
+            <h2 id="demo">Demo</h2>
+            <Demo name={e.name} ez={e.linear} />
             {e.kind === "vawe" ? (
               <figure className="panel ez-clip">
                 <div className="ez-stage">
                   <img src={`/easing/${e.slug}.webp`} alt="" width={640} height={360} loading="lazy" decoding="async" />
                   <Clip src={`/easing/${e.slug}.mp4`} webm={`/easing/${e.slug}.webm`} />
                 </div>
-                <figcaption className="ez-cap">Rendered with the vawe renderer: a 2 s film, {e.name} against linear. It plays while on screen.</figcaption>
+                <figcaption className="ez-cap">2 s film from the vawe renderer: {e.name} against linear.</figcaption>
               </figure>
             ) : null}
           </section>
 
           <section className="ez-sec" aria-labelledby="code">
-            <h2 id="code">Copy the code</h2>
+            <h2 id="code">Code</h2>
             <div className="ez-codes">
               <Code label="css linear() (exact)" text={`animation-timing-function: ${e.linear};`} />
               <BezierBlock e={e} />
@@ -246,14 +238,14 @@ export default async function EasePage({ params }: Params) {
           <Handles e={e} />
 
           <section className="ez-sec" aria-labelledby="when">
-            <h2 id="when">When to use it, and when to avoid it</h2>
+            <h2 id="when">Use and avoid</h2>
             <div className="ez-two">
               <div className="panel">
-                <h3>Use it for</h3>
+                <h3>Use for</h3>
                 <ul>{e.use.map((t) => <li key={t}>{t}</li>)}</ul>
               </div>
               <div className="panel">
-                <h3>Avoid it for</h3>
+                <h3>Avoid for</h3>
                 <ul>{e.avoid.map((t) => <li key={t}>{t}</li>)}</ul>
               </div>
             </div>
@@ -261,9 +253,9 @@ export default async function EasePage({ params }: Params) {
 
           {e.nearestVawe ? (
             <section className="ez-sec" aria-labelledby="vawe-near">
-              <h2 id="vawe-near">The nearest vawe ease</h2>
+              <h2 id="vawe-near">Nearest vawe ease</h2>
               <p>
-                The closest of the nine vawe After Effects eases is <Link href={`/easing/${e.nearestVawe.slug}`}>{e.nearestVawe.name}</Link>, an RMS gap of {e.nearestVawe.gap} in progress. After Effects and vawe set the shape with two handles, so it can be tuned where a named curve cannot.
+                <Link href={`/easing/${e.nearestVawe.slug}`}>{e.nearestVawe.name}</Link>, RMS gap {e.nearestVawe.gap} in progress.
               </p>
             </section>
           ) : null}
@@ -275,6 +267,7 @@ export default async function EasePage({ params }: Params) {
                 <li key={r.slug} className="panel">
                   <Link href={`/easing/${r.slug}`} prefetch={false}>{r.name}</Link>
                   <span className="meta">curve gap {r.gap}</span>
+                  <a className="ez-cmp" href={`/easing?compare=${e.slug},${r.slug}#compare`}>Compare with {e.name}</a>
                 </li>
               ))}
             </ul>
@@ -283,7 +276,7 @@ export default async function EasePage({ params }: Params) {
           {e.moves?.length ? (
             <section className="ez-sec" aria-labelledby="moves">
               <h2 id="moves">Moves that use {e.name}</h2>
-              <p>{e.moves.length} of the library&apos;s motion moves set <code>EASE.{camelOf(e.slug)}</code> in their snippet.</p>
+              <p>{e.moves.length} moves set <code>EASE.{camelOf(e.slug)}</code>.</p>
               <ul className="ez-moves">
                 {e.moves.slice(0, 12).map((m) => (
                   <li key={m.name}><Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link></li>
@@ -302,8 +295,7 @@ export default async function EasePage({ params }: Params) {
             </section>
           ) : null}
           <Next
-            title={`Use ${e.name} in a page.`}
-            lead="Copy the code above, or see the whole set."
+            title="More easing"
             primary={{ href: "/easing", label: "All easing functions" }}
             secondary={{ href: "/moves", label: "See the moves" }}
             related={[{ href: "/docs/motion", label: "Motion in the docs" }]}

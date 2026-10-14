@@ -207,7 +207,7 @@ const out = entries.map((e) => {
     else if (SPECIAL[e.slug]) Object.assign(entry, { blurb: `${DIRECTION[e.dir].role} ${SPECIAL[e.slug].feel}`, use: SPECIAL[e.slug].use, avoid: SPECIAL[e.slug].avoid });
     else {
       const f = FAMILY[e.family], d = DIRECTION[e.dir];
-      Object.assign(entry, { blurb: `${d.role} ${f.feel}`, use: [`${cap(d.use)}.`, `For ${e.family}: ${f.use}.`], avoid: [`${cap(d.avoid)}.`, `For ${e.family}: ${f.avoid}.`] });
+      Object.assign(entry, { blurb: `${d.role} ${f.feel}`, use: [`${cap(d.use)}.`, ...(e.dir === 'in' ? [] : [`${cap(f.use)}.`])], avoid: [`${cap(d.avoid)}.`, `${cap(f.avoid)}.`] });
     }
   }
   return entry;

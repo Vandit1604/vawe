@@ -13,17 +13,17 @@ export const VAWE_TEXT = {
     avoid: ['Hero moves over 0.6 s. The softer start loses the punch that land has.', 'Exits. Use launch or leave.'],
   },
   settle: {
-    blurb: 'A heavy move that eases at both ends, with long dead stops.',
+    blurb: 'Eases at both ends, with long dead stops.',
     use: ['Big or heavy objects crossing the frame in 0.5 to 1 s: panels, full-width bars, device frames.', 'Moves that start from rest and end at rest, where land would feel too fast at the start.'],
     avoid: ['Small, quick UI. Both ends are slow, so a 0.2 s move spends most of it standing still.', 'Anything that must start the instant the viewer looks: the first frames barely move.'],
   },
   swap: {
-    blurb: 'A snappy swap: the value waits at each key and the change happens in the middle.',
+    blurb: 'A swap: the value waits at each key and changes in the middle.',
     use: ['Replacing one thing with another: a label, a number, a tab, a crop.', 'Camera cuts on the move, where you want a crisp hit and a hold on both sides.'],
     avoid: ['Long travel. The middle is steep, so a big distance becomes a blur.', 'Slow, floating motion. It is the opposite of a drift.'],
   },
   glide: {
-    blurb: 'A slow drift: it starts gently and never quite comes to a stop.',
+    blurb: 'A slow drift: it starts gently and never fully stops.',
     use: ['Camera pushes and slow scale on a held shot, over 2 s or more.', 'A background layer behind a still title, where motion must be felt and not followed.'],
     avoid: ['Entrances. There is no clear arrival, so the viewer cannot tell when the thing has landed.', 'Short moves. The slow tail needs time to be seen.'],
   },
@@ -33,35 +33,35 @@ export const VAWE_TEXT = {
     avoid: ['A move that must come to rest. It ends at speed and looks cut off.', 'Moves with no next move to take the speed.'],
   },
   leave: {
-    blurb: 'A decelerating exit: it eases away and slows into its end.',
-    use: ['Exits of panels and labels that should settle out of the frame rather than snap away.', 'Real exits: in the After Effects data most tuned exits end on this shape.'],
+    blurb: 'An exit that eases away and slows into its end.',
+    use: ['Exits of panels and labels that should settle out of the frame rather than snap away.', 'Real exits: most tuned exits in the After Effects data end on this shape.'],
     avoid: ['Exits that must clear the frame fast. It is slow at the end. Use launch.', 'Entrances. It is built to finish, not to start.'],
   },
   launch: {
-    blurb: 'An accelerating exit: it starts gently and speeds up, at most 3x average at the cut.',
+    blurb: 'An exit that starts gently and speeds up, at most 3x average at the cut.',
     use: ['Exits shorter than the entrance (about 0.6 of it), where the element should be gone before the eye follows it.', 'Wipes and clears that hand the frame to the next beat.'],
     avoid: ['Any move that has to land. It ends at speed.', 'Exits the viewer should watch. Real exits in the data slow down at the end; use leave.'],
   },
   pop: {
-    blurb: 'A pop: a fast start, then it passes its mark by about 15 per cent and settles back.',
+    blurb: 'A fast start, then it passes its mark by about 15 per cent and settles back.',
     use: ['A call to action, a check mark, a notification: one small thing that must feel alive.', 'Scale and position of a single focal element.'],
     avoid: ['Text blocks and anything with more than one item moving: overshoot on many things reads as shaking.', 'Opacity. A value past 1 is clamped, so the overshoot does nothing.'],
   },
   nudge: {
-    blurb: 'A small pop: a fast start, a slight pass of its mark, then it settles.',
+    blurb: 'A fast start, a slight pass of its mark, then it settles.',
     use: ['Every few items of a staggered group, so the row feels alive without each item bouncing.', 'Secondary elements next to a hero that uses pop: the same shape, less of it.'],
     avoid: ['The hero itself, where the overshoot is too small to read. Use pop.', 'Opacity. A value past 1 is clamped, so the overshoot does nothing.'],
   },
 };
 
 export const FAMILY = {
-  sine: { feel: 'The gentlest family: the speed changes slowly, so it reads as breathing, not as a hit.', use: 'ambient loops, slow camera drift and background layers', avoid: 'moves that must hit hard: the gentle stop looks undecided' },
-  quad: { feel: 'A mild, even curve: a clear ease without drama.', use: 'small UI changes and hover states where a light ease is enough', avoid: 'hero moves: the stop is too soft to feel designed' },
-  cubic: { feel: 'The usual default curve: a firm start or stop that most viewers read as natural.', use: 'general UI and card moves between 200 and 500 ms', avoid: 'long travel across the frame: the stop is abrupt for the distance' },
+  sine: { feel: 'The gentlest family: the speed changes slowly.', use: 'ambient loops, slow camera drift and background layers', avoid: 'moves that must hit hard: the stop is too gentle' },
+  quad: { feel: 'A mild, even curve.', use: 'small UI changes and hover states', avoid: 'hero moves: the stop is too soft' },
+  cubic: { feel: 'A firm start or stop. The common default.', use: 'general UI and card moves between 200 and 500 ms', avoid: 'long travel across the frame: the stop is abrupt for the distance' },
   quart: { feel: 'A strong ease: most of the travel happens in the fast section.', use: 'panels and overlays that need a clear stop', avoid: 'short moves under 150 ms: the slow part is too short to see' },
-  quint: { feel: 'A very strong ease: the curve is almost a wall at the fast end.', use: 'hero entrances and large elements that should settle with weight', avoid: 'small elements: they seem to teleport and then crawl' },
-  expo: { feel: 'An extreme ease: the speed changes by orders of magnitude, so one tenth of the time carries most of the travel.', use: 'a title or number that must snap in and then rest', avoid: 'anything the viewer must follow with the eye: the fast section is too short to track' },
-  circ: { feel: 'A geometric curve: it starts or stops almost vertically, like a wall.', use: 'mechanical moves and wipes with a hard edge', avoid: 'soft, organic motion: the stop feels cut' },
+  quint: { feel: 'A very strong ease: almost vertical at the fast end.', use: 'large elements that should settle with weight', avoid: 'small elements: they seem to teleport and then crawl' },
+  expo: { feel: 'An extreme ease: one tenth of the time carries most of the travel.', use: 'a title or number that must snap in and then rest', avoid: 'anything the viewer must follow with the eye: the fast section is too short to track' },
+  circ: { feel: 'A circular arc: it starts or stops almost vertically.', use: 'mechanical moves and wipes with a hard edge', avoid: 'soft, organic motion: the stop feels cut' },
 };
 
 export const DIRECTION = {
@@ -85,7 +85,7 @@ export const SPECIAL = {
 
 export const CSS_TEXT = {
   linear: {
-    blurb: 'The straight line: constant speed from start to end.',
+    blurb: 'Constant speed from start to end.',
     use: ['Rotation spins, progress bars and loops, where a steady speed is the point.', 'Opacity cross-fades between two shots.'],
     avoid: ['Moving a thing across the screen: it starts and stops with no ease, so it reads as mechanical.', 'Any entrance or exit over 0.3 s. Use an EASE name from vawe.'],
   },
@@ -95,17 +95,17 @@ export const CSS_TEXT = {
     avoid: ['Film moves over 0.3 s: it is the browser default, not a choice. Use land or settle.', 'Loops. It ends slowly and starts fast, so a repeat shows a seam.'],
   },
   'ease-in': {
-    blurb: 'The CSS ease-in keyword: slow start, fast end, with no soft stop.',
+    blurb: 'Slow start, fast end, no soft stop.',
     use: ['An element leaving the screen, where it should be fastest as it goes.', 'A build-up before a cut.'],
     avoid: ['Entrances: the start is slow and the viewer waits.', 'A move that must end at rest: it stops dead at full speed.'],
   },
   'ease-out': {
-    blurb: 'The CSS ease-out keyword: fast start, slow end.',
+    blurb: 'Fast start, slow end.',
     use: ['Entrances and replies to a click, where the response should be at once.', 'Short UI moves of 150 to 300 ms.'],
     avoid: ['Moves over 0.5 s: the long slow tail looks like the element is stuck.', 'Exits: it is slowest as the element leaves.'],
   },
   'ease-in-out': {
-    blurb: 'The CSS ease-in-out keyword: slow at both ends, fast in the middle.',
+    blurb: 'Slow at both ends, fast in the middle.',
     use: ['Moves between two resting positions: a slide, a camera push, a toggle.', 'Looping back-and-forth motion.'],
     avoid: ['Quick UI feedback: the slow start delays the response.', 'Film entrances. Land gives a clearer arrival.'],
   },
