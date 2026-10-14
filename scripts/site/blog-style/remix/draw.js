@@ -1,7 +1,7 @@
 // thumb.html?post=<slug>[&font=<family>]: one 1200x630 blog cover, seeded per post.
 const displayFont = new URLSearchParams(location.search).get('font');
 if (displayFont) document.documentElement.style.setProperty('--display', `'${displayFont}'`);
-const fontLoaded = displayFont ? document.fonts.load(`800 64px '${displayFont}'`) : Promise.resolve();
+const fontLoaded = displayFont ? document.fonts.load(`600 64px '${displayFont}'`) : Promise.resolve();
 const post = window.POSTS.find((x) => x.slug === new URLSearchParams(location.search).get('post'));
 if (!post) throw new Error(`no post ${location.search}`);
 

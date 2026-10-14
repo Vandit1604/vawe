@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "alternatives",
-    title: "vawe · HyperFrames alternatives",
+    title: "HyperFrames alternatives.",
     description:
-      "Four alternatives to HyperFrames: vawe, Remotion, Motion Canvas and Lottie. What each is and which job it fits.",
+      "HyperFrames is HeyGen\u2019s open-source framework that turns HTML, CSS and seekable animations into MP4. Four tools are worth a look.",
     path: "/hyperframes-alternatives",
   });
 }

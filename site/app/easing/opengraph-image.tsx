@@ -7,7 +7,8 @@ export default function Image() {
   return staticOgImage({
     tag: "easing",
     title: "Easing functions as CSS",
-    description: "Curve, velocity, cubic-bezier, linear() and a live demo for every ease.",
+    description:
+      "Hover a curve to preview it, copy its cubic-bezier() or linear(), or compare up to three side by side.",
     path: "/easing",
   });
 }

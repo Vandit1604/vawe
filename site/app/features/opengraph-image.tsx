@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "features",
-    title: "Vawe · features",
+    title: "What the engine decides.",
     description:
-      "The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.",
+      "What one HTML page can use, why it renders the same frames every time, how it looks and sounds, and the loop that judges a film before it ships.",
     path: "/features",
   });
 }

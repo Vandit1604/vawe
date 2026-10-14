@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "launch video",
-    title: "Vawe · launch video",
+    title: "A product launch video, built from the real site.",
     description:
-      "How Vawe builds a product launch video: real captured UI, not invented mockups, one message per beat, from the site’s own palette and type.",
+      "Built from capture: the real UI, logo and palette of the product, carried into motion. The film reflects the site and never redesigns it.",
     path: "/launch-video",
   });
 }

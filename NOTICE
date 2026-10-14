@@ -36,7 +36,7 @@ Fonts:
 
 No font binary is committed to this repository. `node generators/media/fonts.mjs` downloads the
 free, openly-licensed faces (OFL 1.1 / Apache) from Fontsource at build time,
-into the gitignored assets/fonts/: Inter, Geist, Geist Mono, JetBrains Mono,
+into the gitignored assets/fonts/: Inter, Geist, Geist Mono, IBM Plex Mono, JetBrains Mono,
 Plus Jakarta Sans, Hanken Grotesk, Archivo, Caveat, Space Grotesk, Instrument
 Serif (all OFL 1.1).
 

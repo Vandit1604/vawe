@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "determinism",
-    title: "Vawe · deterministic video rendering",
+    title: "Same page in. Same frames out.",
     description:
-      "A page seeked, never played: a virtual clock, the same frames on every render in any order, and a test that renders twice and compares.",
+      "Ask for the frame at 4.2\u00a0seconds twice, in any order, and it comes back the same. The clock is replaced before the page runs.",
     path: "/determinism",
   });
 }

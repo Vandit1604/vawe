@@ -16,7 +16,7 @@ export default async function Image({ params }: { params: Promise<{ name: string
   return new ImageResponse(
     renderOgCard({
       tag: "move",
-      title: move?.title ?? "Vawe · moves",
+      title: move?.title ?? "Moves",
       description: move ? `Use when ${move.use}.` : "",
       path: `/moves/${name}`,
       panel: move?.snippet ? { kind: "code", text: move.snippet } : null,

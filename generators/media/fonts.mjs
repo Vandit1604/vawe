@@ -56,6 +56,7 @@ const FONTS = [
   ['Geist-400.woff',                '@fontsource/geist',                       '5.3.0', 'geist-latin-400-normal.woff',                 'OFL 1.1'],
   ['Geist-600.woff',                '@fontsource/geist',                       '5.3.0', 'geist-latin-600-normal.woff',                 'OFL 1.1'],
   ['GeistMono-400.woff',            '@fontsource/geist-mono',                  '5.3.0', 'geist-mono-latin-400-normal.woff',            'OFL 1.1'],
+  ['IBMPlexMono-400.woff',          '@fontsource/ibm-plex-mono',               '5.3.0', 'ibm-plex-mono-latin-400-normal.woff',         'OFL 1.1'],
   ['PlusJakartaSans.woff2',         '@fontsource-variable/plus-jakarta-sans',   '5.3.0', 'plus-jakarta-sans-latin-wght-normal.woff2',   'OFL 1.1'],
   ['HankenGrotesk.woff2',           '@fontsource-variable/hanken-grotesk',      '5.3.0', 'hanken-grotesk-latin-wght-normal.woff2',      'OFL 1.1'],
   ['BricolageGrotesque.woff2',      '@fontsource-variable/bricolage-grotesque', '5.3.0', 'bricolage-grotesque-latin-wght-normal.woff2', 'OFL 1.1'],

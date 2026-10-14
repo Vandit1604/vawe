@@ -168,6 +168,13 @@
       "file": "geist-mono-latin-400-normal.woff",
       "bytes": 13044,
       "sha256": "ec7ecd39327c39a2b2792c8b402d094619b6c1e517a74420cde8fd67a71ed083"
+    },
+    "IBMPlexMono-400.woff": {
+      "pkg": "@fontsource/ibm-plex-mono",
+      "version": "5.3.0",
+      "file": "ibm-plex-mono-latin-400-normal.woff",
+      "bytes": 13144,
+      "sha256": "328d50b6ece9ca25c46eea3e885ba497f6237f2fb84ef7b92f88e14a1a25e381"
     }
   }
 }

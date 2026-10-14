@@ -13,8 +13,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const r = RIVAL_BY_SLUG[slug];
   return staticOgImage({
     tag: "compare",
-    title: `vawe vs ${r.name}`,
-    description: r.metaDescription,
+    title: r.h1,
+    description: r.intro.split(". ").slice(0, 3).join(". ").replace(/\.$/, "") + ".",
     path: `/vs/${r.slug}`,
   });
 }

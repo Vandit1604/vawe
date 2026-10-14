@@ -72,7 +72,7 @@ fs.writeFileSync(pageFile, `<!doctype html>
 </head>
 <body>
 <main>
-<header><h1>Blog covers</h1><p>Dithered rays in Plus Jakarta Sans, one number and at most four words per post, set large enough to read on a 360 px card.</p></header>
+<header><h1>Blog covers</h1><p>Dithered rays in Geist 600, one number and at most four words per post, set large enough to read on a 360 px card.</p></header>
 <h2>At 360 px</h2>
 <p>The size of a card on the blog index or a phone feed.</p>
 <div class="strip">${STRIP.map((s) => img(bySlug[s], 360)).join('')}</div>

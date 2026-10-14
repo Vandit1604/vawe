@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "decision",
-    title: "Vawe · when determinism actually matters",
+    title: "When determinism matters.",
     description:
-      "Byte-identical rendering is a real property, not a universal one. When it decides which engine to pick, and when it does not.",
+      "Byte-identical rendering is a real, checkable property. It is also not the reason to pick a rendering engine most of the time.",
     path: "/when-determinism-matters",
   });
 }
