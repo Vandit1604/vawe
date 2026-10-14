@@ -42,7 +42,7 @@ function easeTable(eases: Ease[]) {
     .map((e) => `<tr><th scope="row"><a href="/easing/${kebab(e.name)}"><code>${e.name}</code></a></th><td>${handle(e.out)}</td><td>${handle(e.into)}</td></tr>`)
     .join("");
   return [
-    `<p>The clip uses ${eases.length === 1 ? "one named ease" : `${eases.length} named eases`} from <code>core/motion/presets.js</code>. Each is a pair of After Effects handles: influence is how far along the segment the handle reaches, and speed is how fast the value moves at the key, as a multiple of the segment's average speed. <a href="/docs/motion">Motion in the docs</a> explains both.</p>`,
+    `<p>The clip uses ${eases.length === 1 ? "one named ease" : `${eases.length} named eases`} from <code>core/motion/presets.js</code>. Each is a pair of After Effects handles: influence is how far along the segment the handle reaches, and speed is how fast the value moves at the key, as a multiple of the segment's average speed. <a href="/docs/motion">Motion in the docs</a> explains both. See every curve on <a href="/easing">Easing functions as CSS</a>.</p>`,
     `<div class="mvd-table"><table><thead><tr><th scope="col">Ease</th><th scope="col">Leaving a key</th><th scope="col">Arriving at a key</th></tr></thead><tbody>${rows}</tbody></table></div>`,
   ].join("\n");
 }

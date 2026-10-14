@@ -24,7 +24,7 @@ export default function Moves() {
           <h1>Moves</h1>
           <p className="ls-sub">
             Each move is a clip and one markdown file: when to use it, the snippet, the notes and the
-            sound cue. Agents can filter the same list in <a href="/moves/index.json">index.json</a>.
+            sound cue. Agents can filter the same list in <a href="/moves/index.json">index.json</a>. The eases the moves use are listed as <a href="/easing">easing functions as CSS</a>.
           </p>
           <MovesGallery
             moves={MOVES.map(toCard)}
