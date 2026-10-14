@@ -34,22 +34,22 @@ typography:
   sans:
     fontFamily: Geist
     fontSize: 16px
-    lineHeight: 1.55
+    lineHeight: 1.45
     fontWeight: 400
     letterSpacing: -0.004em
   display:
     fontFamily: Geist
-    lineHeight: 1
-    fontWeight: 800
-    letterSpacing: -0.05em
+    lineHeight: 1.05
+    fontWeight: 600
+    letterSpacing: -0.045em
   heading:
     fontFamily: Geist
-    lineHeight: 1.04
-    fontWeight: 800
-    letterSpacing: -0.04em
+    lineHeight: 1.1
+    fontWeight: 600
+    letterSpacing: -0.03em
   title:
     fontFamily: Geist
-    fontWeight: 500
+    fontWeight: 600
   mono:
     fontFamily: Geist Mono
 rounded:
@@ -105,18 +105,42 @@ The site is black only, by decision (`IDENTITY.md`), and declares `color-scheme:
 
 Two faces, two jobs (`app/layout.tsx`, `next/font/google`):
 
-- **Geist** carries headings, titles and prose. Headings are 800 with tight tracking (`--track-head` -.04em,
-  `--track-display` -.05em; the landing display lines go to -.06 and -.07em); body is 400 at 16px / 1.55. Card
-  and FAQ titles are 500. It has no width axis, so nothing reflows.
+- **Geist** carries headings, titles and prose. Headings and titles are 600 (`--fw-head`, the landing's weight) with
+  tight tracking by size (`--track-display` -.045em, `--track-head` -.03em, `--track-sub` -.02em; the landing display
+  lines go to -.06 and -.07em); body is 400 at 16px / 1.45. It has no width axis, so nothing reflows.
 - **Geist Mono** is for anything literal: a count, a clock, a file path, a lane name, a code block. The `.meta`
   class is its uppercase read-out form, 11px with tabular numbers.
 
 `--font-title` is kept as an alias of `--font-sans`, so a rule that asks for a title face still resolves.
 
-Headings are fluid: a page h1 is `clamp(2.2rem, 4.6vw, 3.5rem)`, a section h2
+Headings are fluid: every page h1 (content pages and `/blog`) is `--fs-h1`, `clamp(2.2rem, 4.6vw, 3.5rem)`, a section h2
 `clamp(1.9rem, 3.4vw, 2.75rem)`, a panel h2 `clamp(1.5rem, 2.6vw, 2rem)`. Prose is capped at a
-measure of 52 to 66ch, set on the element that carries the type, because `ch` resolves against its
-own font size. No functional text is under 11px.
+measure of `--measure` (46ch), set on the element that carries the type, because `ch` resolves against its
+own font size. No functional text is under 12px.
+
+## Typography rules
+
+Two sources, one rule set: Matthew Butterick, *Practical Typography* (practicaltypography.com), and Pierrick Calvez,
+"A Five-Minute Guide to Better Typography". Where they differ the stricter value holds. The house rule that overrides
+both: no em dash (U+2014) anywhere. `quality/gates/site-typography.mjs` enforces rows 1, 3, 4, 6 and 7 from the source;
+`scripts/site/typography-audit.mjs` measures the rest on a live server at 1440 and 390.
+
+1. Body 16px (15px under 640), never under 14px for a sentence, 12px floor for a mono label: `--fs-body`, `--fs-label`.
+2. Line length 45 to 70 characters (Butterick 45 to 90, Calvez 40 to 70): `--measure` on every text column, the blog column `--read-col`.
+3. Line spacing 1.45 for reading text (Butterick 1.2 to 1.45, Calvez about 1.5), 1.3 for short text, 1.05 to 1.25 for headings: `--lh-body`, `--lh-ui`, `--lh-sub`, `--lh-head`, `--lh-display`.
+4. Headings are 600, body 400, one skipped weight (Calvez): `--fw-head`, the only weight above 500; a CSS 700 to 900 fails the gate.
+5. Hierarchy of at most three levels per page, sizes near a ratio of 2 (56, 32, 16): `--fs-h1`, `--fs-panel`, `--fs-body`; one h1 size on every content page.
+6. Tracking by size, tighter as type grows: `--track-display`, `--track-head`, `--track-sub`; kerning and ligatures on in `body`.
+7. All caps and small labels take 5 to 12 percent letterspacing and stay short: `--track-caps` .06em (.08em in the blog).
+8. Headings balance, paragraphs avoid one-word last lines: `text-wrap: balance` on h1 to h3, `pretty` on p, li, dd, figcaption; `hanging-punctuation` on `body`.
+9. Bold or italic, never both; underline only on links; centered text only for a short headline or a button row; paragraphs are separated by space, never indented.
+10. Curly quotes and apostrophes, a real ellipsis, an en dash in number ranges, a nonbreaking space between a number and its unit, the multiplication sign between sizes: `site/lib/typo.mjs` (blog, move and ease data, move pages), `scripts/site/typo-fix.mjs` for page copy. Code keeps straight quotes.
+11. Tables use tabular figures (`font-variant-numeric: tabular-nums`) and hairlines, not boxes.
+12. Space above a heading exceeds the space below it in prose (`.bp-prose h2` 2.2em above, .4em below).
+
+Not applied: Calvez's em dash (house rule); a line length of 45 inside cards and columns that sit beside a proof (a
+card text column is 20 to 40 characters by design, set at 14 to 16px); optical alignment beyond `hanging-punctuation`
+(Chrome ignores it, Safari honours it).
 
 ## Layout
 
@@ -479,6 +503,7 @@ was tried.
 | same | brand | raphaelsalaja.com/library/the-concept-of-taste | TAKEN: hierarchy, proportion and clarity as checks: one display size, one lead, one body, labels in mono. REJECTED: nothing checkable beyond that. |
 | same | product | devouringdetails.com | TAKEN: its public principle list only (inferring intent, responsive interfaces): the pressed tab and sound toggle answer at once. REJECTED: the paid chapters were not read, so nothing else is claimed from it. |
 | same | brand | benji.org/family-values | TAKEN: one family: every control on the page now shares radius `--r-ctl`, the press scale, the hover step and the timing (the hero buttons were 12px radius and 15px beside 8px tabs at 13px). Delight inverse to frequency, same as Emil. REJECTED: trays, text morphing and easter eggs (a marketing page, nothing repeated enough to earn them). |
+| same | product | practicaltypography.com (Butterick: Typography in ten minutes, Summary of key rules, body text, line length, line spacing, all caps, letterspacing, kerning, hierarchy, quotes, dashes, ellipses, nonbreaking spaces, bold or italic, underlining, centered text, tables) and pierrickcalvez.com/journal/a-five-minute-guide-to-better-typography | TAKEN: the "Typography rules" section, the type tokens (`--measure`, `--lh-*`, `--fw-head`, `--track-*`), `lib/typo.mjs`, the audit and the gate; the stricter value where the two differ (line length 45 to 70, 12px label floor, a skipped weight). REJECTED: the em dash both guides use (house rule), first-line indents, 800-weight headings. The owner's reference weight is the landing's 600. |
 
 | every remaining route on the scales (2026-10-14) | product | the 14 sources of the landing pass (rows above, same text) applied to `/moves`, `/easing`, the intent pages, `/problems`, `/roadmap`, `/vs/*`, `/blog`, the bar; ui-skills `pbakaus/polish` (fetched) | polish: TAKEN, classify each drift (missing token, one-off, local defect) and fix at the narrowest level: a missing token became `--fs-panel`, `--hit` and friends, one-offs became existing tokens, the local defect was the `.ez-note` class used for both SVG labels and a paragraph, so the paragraph rendered in mono. Also TAKEN from the sources: 40/44 px targets on every control, hover only inside `(hover: hover)`, the house focus ring, press scale on buttons and pill controls, tabular numbers on tables, no layout shift. REJECTED: polish's critique-storage commands (no impeccable install here), `impeccable detect`. The blog kept its Butterick sizes as local custom properties. Verified with before and after shots at 1440 and 390 of 17 routes (`out/site-scales/`). |
 
