@@ -38,20 +38,9 @@ const SECTIONS = [
   { id: "faq", label: "FAQ" },
 ];
 
-// Lucide icons (ISC), the family site/public/assets/icons/ui already uses.
-const ICONS = {
-  pr: <><circle cx="18" cy="18" r="3" /><circle cx="6" cy="6" r="3" /><path d="M13 6h3a2 2 0 0 1 2 2v7" /><line x1="6" x2="6" y1="9" y2="21" /></>,
-  bot: <><path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></>,
-  ratio: <><rect width="12" height="20" x="6" y="2" rx="2" /><rect width="20" height="12" x="2" y="6" rx="2" /></>,
-  repeat: <><path d="m17 2 4 4-4 4" /><path d="M3 11v-1a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v1a4 4 0 0 1-4 4H3" /></>,
-};
-const Icon = ({ name }: { name: keyof typeof ICONS }) => (
-  <span className="ls-icon"><svg viewBox="0 0 24 24" aria-hidden="true">{ICONS[name]}</svg></span>
-);
-
 export default function Home() {
   return (
-    <div className="shell">
+    <div className="shell home">
       {/* Organization, WebSite, SoftwareApplication and FAQPage, built in site/lib/schema.ts from real repo data. */}
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(organizationSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(websiteSchema())} />
@@ -62,7 +51,7 @@ export default function Home() {
         <HeroSplit />
 
         <section className="ls" id="how">
-          <h2>Write a page. Get a film.</h2>
+          <h2>How it works.</h2>
           <div className="ls-grid ls-2">
             <div className="panel ls-card ls-wide">
               <div className="ls-vis"><div className="ls-code">{"<"}<b>meta</b>{` name="duration" content="3">\n<`}<b>h1</b>{">One page. One film.</"}<b>h1</b>{">\nh1 { "}<b>animation</b>{": rise 0.7s both }"}</div></div>
@@ -74,7 +63,7 @@ export default function Home() {
             <div className="panel ls-card">
               <div className="ls-vis"><ProofHash /></div>
               <h3>Render</h3>
-              <p>The renderer seeks the page to each frame&apos;s time, so frame 412 comes out the same in any order.</p>
+              <p>The renderer seeks the page to each frame’s time, so frame 412 comes out the same in any order.</p>
             </div>
             <div className="panel ls-card">
               <div className="ls-vis"><ProofAspect /></div>
@@ -91,12 +80,12 @@ export default function Home() {
             <div className="panel ls-card">
               <h3>Read it</h3>
               <p>Nothing here is a private format. It is the HTML and CSS you already write.</p>
-              <h3 style={{ marginTop: 22 }}>Review it</h3>
+              <h3>Review it</h3>
               <p>A change to the motion is a diff you can read before it ships.</p>
-              <div className="hs-actions"><a className="btn btn-ghost" href={REPO_URL}>Read the page contract</a></div>
+              <div className="ls-act"><a className="btn btn-ghost" href={REPO_URL}>Read the page contract</a></div>
             </div>
             <div className="panel ls-card">
-              <div className="ls-vis" style={{ placeItems: "start", maxHeight: 360, overflow: "auto", borderBottom: 0, margin: 0, padding: 0 }}>
+              <div className="ls-vis ls-vis-code">
                 <pre className="ls-code">{PAGE_TEXT}</pre>
               </div>
             </div>
@@ -106,10 +95,10 @@ export default function Home() {
         <section className="ls" id="perks">
           <h2>What you get.</h2>
           <div className="ls-grid ls-2">
-            <div className="panel ls-card ls-benefit"><Icon name="pr" /><div><h3>Review like code</h3><p>Motion changes arrive as a readable diff, not a binary project file.</p></div></div>
-            <div className="panel ls-card ls-benefit"><Icon name="bot" /><div><h3>Hand it to an agent</h3><p>An agent writes the page, checks read the draft, and a fresh session judges the frames.</p></div></div>
-            <div className="panel ls-card ls-benefit"><Icon name="ratio" /><div><h3>Every canvas, one file</h3><p>16:9 through 9:16 from the same page, laid out with CSS.</p></div></div>
-            <div className="panel ls-card ls-benefit"><Icon name="repeat" /><div><h3>Same frames, every run</h3><p>The clock and the randomness are virtual. Frame 412 is always frame 412.</p></div></div>
+            <div className="panel ls-card"><h3>Review like code</h3><p>Motion changes arrive as a readable diff, not a binary project file.</p></div>
+            <div className="panel ls-card"><h3>Hand it to an agent</h3><p>An agent writes the page, checks read the draft, and a fresh session judges the frames.</p></div>
+            <div className="panel ls-card"><h3>Every canvas, one file</h3><p>16:9 through 9:16 from the same page, laid out with CSS.</p></div>
+            <div className="panel ls-card"><h3>Same frames, every run</h3><p>The clock and the randomness are virtual. Frame 412 is always frame 412.</p></div>
           </div>
         </section>
 

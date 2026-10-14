@@ -48,6 +48,25 @@ Sites for the material a film is made of. Each line: name, link, what it has. Ch
 
 - LottieFiles: https://lottiefiles.com : Lottie animations and icons
 
+## Design craft
+
+Rules for interface and site work (type, motion, interaction, taste). `site/DESIGN.md` records what the vawe site took from each.
+
+- Practical Typography: https://practicaltypography.com/summary-of-key-rules.html : body size, line spacing, line length, caps tracking, quotes
+- Interfaces cheat sheet: https://interfaces.dev/cheat-sheet : hit areas, focus, press scale, spacing between groups, font smoothing
+- Web Interface Guidelines (Rauno): https://interfaces.rauno.me/ : hover on touch, 200 ms interactions, no weight change on select
+- Interaction design (Rauno): https://rauno.me/craft/interaction-design : frequency and novelty, interruptible motion, Fitts on edges
+- You don't need animations (Emil Kowalski): https://emilkowal.ski/ui/you-dont-need-animations : when not to animate, under 300 ms
+- userinterface.wiki (Raphael Salaja): https://www.userinterface.wiki/ : durations by kind (press 120-180 ms), easing by direction; rules in github.com/raphaelsalaja/userinterface-wiki/skills
+- Easing Graphs: https://www.easing.dev/ : named cubic-bezier curves (Out Quint, Quick Out, In Cubic) to copy exactly
+- Laws of UX: https://lawsofux.com/ : Fitts, Hick, Jakob, Doherty (under 400 ms), proximity, Von Restorff
+- Design System Checklist: https://www.designsystemchecklist.com/ : what a token set must cover (units, type, elevation, z-index, motion); text in github.com/ardakaracizmeli/design-system-checklist
+- Taste Skill: https://www.tasteskill.dev/ : an agent skill against templated UI; pre-flight checks, audit-first redesigns
+- Taste (shedsgns): https://shedsgns.me/taste : rhythm, hierarchy, restraint, "the right amount of nothing"
+- The concept of taste (Raphael Salaja): https://www.raphaelsalaja.com/library/the-concept-of-taste : taste as learnable principles: hierarchy, proportion, clarity
+- Devouring Details (Rauno): https://devouringdetails.com/ : paid interaction-design course with prototypes; principles list only is public
+- Family values (Benji Taylor): https://benji.org/family-values : one family of components, delight inverse to frequency, motion that links screens
+
 ## Code and palettes: what may ship
 
 Search before you build a gradient, easing, noise function, SVG filter or palette. "Verified" means the licence text was opened. Never compile code from a study-only source into a shipped film: read the technique and reimplement the idea.

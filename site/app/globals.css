@@ -41,9 +41,35 @@
   /* ---- TYPE ---- */
   --font-title:var(--font-unbounded),system-ui,sans-serif;
 
-  /* ---- SYSTEM ---- */
-  --r:12px; --r-in:4px; --maxw:1160px;
-  --ease:cubic-bezier(.23,1,.32,1);
+  /* ---- TYPE SCALE (DESIGN.md "Type scale"): body 16 sits in Butterick's 15-25px web range ---- */
+  --fs-label:11px;          /* mono caps read-outs only */
+  --fs-code:12px;           /* mono code and strip clips */
+  --fs-ui:14px;             /* controls, captions, nav, footer */
+  --fs-body:16px;
+  --fs-lead:18px;
+  --fs-h3:16px;             /* Unbounded titles: the face carries the rank, not the size */
+  --fs-h2:clamp(1.9rem,3.4vw,2.75rem);
+  --fs-h1:clamp(2.2rem,4.6vw,3.5rem);
+  --fs-display:clamp(2.2rem,4.2vw,3.6rem);
+  --lh-body:1.55; --lh-ui:1.35; --lh-head:1.04;
+  --track-caps:.06em;       /* Butterick: 5-12% extra on all caps */
+
+  /* ---- SPACE SCALE: 4 px steps, group gap at least twice the item gap ---- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+
+  /* ---- RADIUS SCALE: concentric, outer = inner + padding ---- */
+  --r:12px; --r-ctl:8px; --r-in:4px; --r-pill:999px; --maxw:1160px;
+
+  /* ---- MOTION (DESIGN.md "Motion"): curves from easing.dev, durations under 300 ms ---- */
+  --ease-out:cubic-bezier(.23,1,.32,1);       /* Out Quint: enters, hovers */
+  --ease-in:cubic-bezier(.55,.055,.675,.19);  /* In Cubic: exits */
+  --ease-in-out:cubic-bezier(.645,.045,.355,1);
+  --ease-press:cubic-bezier(0,0,.2,1);        /* Quick Out */
+  --ease:var(--ease-out);
+  --dur-press:120ms; --dur-hover:150ms; --dur-state:200ms; --dur-exit:150ms;
+  --press:.96;
+  --focus-ring:2px solid var(--accent);
   --ring:0 0 0 1px rgba(255,255,255,.06);
   --outline:0 0 0 1px oklch(1 0 0 / .1);
   --shadow-1:var(--ring);
@@ -69,8 +95,9 @@ body{
   background:var(--field); color:var(--ink);
   font-family:var(--font-sans),system-ui,sans-serif;
   font-variation-settings:"wdth" var(--wd-body);
-  font-weight:400; line-height:1.55; letter-spacing:-.004em;
-  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  font-weight:400; font-size:var(--fs-body); line-height:var(--lh-body); letter-spacing:-.004em;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility;
+  font-kerning:normal;
   overflow-x:hidden; min-height:100dvh;
 }
 a{color:inherit;text-decoration:none}
@@ -87,7 +114,7 @@ a{color:inherit;text-decoration:none}
 .skip:focus{left:0}
 /* THE HOUSE RING, FOR LINKS. A bare <a> otherwise falls back to the browser's own ring. Links, not
    `*`: two fields answer focus with a border plus a tinted ring instead (.ar-find, .ed-cm). */
-a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{outline:var(--focus-ring);outline-offset:2px;border-radius:var(--r-in)}
 /* The skip chip IS the accent and sits flush to the shell edge, so its ring goes inside. */
 .skip:focus-visible{outline-color:#fff;outline-offset:-4px}
 /* ===== THE SHELL ========================================================================== */
@@ -95,7 +122,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* Skip target. tabindex=-1 makes it programmatically focusable; without this rule the browser
    paints a focus ring around the whole hero when the skip link is used. */
 #content:focus{outline:none}
-#content:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+#content:focus-visible{outline:var(--focus-ring);outline-offset:4px;border-radius:6px}
 .wrap{position:relative;z-index:var(--z-base);max-width:var(--maxw);margin:0 auto;padding:0 26px}
 /* Several routes render the Footer inside their own .wrap; a nested wrap adds no second gutter. */
 .wrap .wrap{padding-inline:0;max-width:none}
@@ -108,16 +135,16 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 .glyph{width:24px;height:13px;color:var(--ink)}
 .nav{display:flex;align-items:center;gap:2px;font-size:14px;font-weight:500}
 .nav a,.nav [aria-current="page"]{padding:8px 12px;border-radius:8px}
-.nav a{color:var(--ink-2);transition:background-color .15s ease,color .15s ease}
-.nav a:hover{background:var(--raised);color:var(--ink)}
+.nav a{color:var(--ink-2);transition:background-color var(--dur-hover) var(--ease-out),color var(--dur-hover) var(--ease-out)}
+@media (hover:hover){ .nav a:hover{background:var(--raised);color:var(--ink)} }
 /* The current page: a span, never a link (site rule, see Footer.tsx), so no hover or press. */
 .nav [aria-current="page"]{color:var(--ink);background:var(--raised);cursor:default}
 /* The one filled action in the bar. */
 .ghbtn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;
   background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;
-  transition:background-color .15s ease,scale .12s cubic-bezier(.2,0,0,1)}
-.ghbtn:hover{background:var(--ink-2)}
-.ghbtn:active{scale:.96}
+  transition:background-color var(--dur-hover) var(--ease-out),scale var(--dur-press) var(--ease-press)}
+@media (hover:hover){ .ghbtn:hover{background:var(--ink-2)} }
+.ghbtn:active{scale:var(--press)}
 /* The star the repo hint: it pops out of the button's corner with a small overshoot and four sparks,
    320 ms in, 140 ms out. Absolutely placed, so the button never changes size. */
 .ghbtn{position:relative}
@@ -146,19 +173,19 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* =========================================================
    BUTTONS
    ========================================================= */
-.btn{display:inline-flex;align-items:center;gap:8px;font-family:inherit;font-size:15px;font-weight:600;
-  letter-spacing:-.01em;padding:13px 22px;border-radius:12px;cursor:pointer;border:1px solid transparent;
-/* The lift and its shadow are ONE event, so they share one curve and one duration: at .14s against
-   .25s the shadow visibly trailed the button it belongs to. The two colour segments keep the CSS
-   default `ease`, which is the right curve for a hover tint and needs no token. */
-  transition:transform .14s var(--ease),background .2s,border-color .2s,box-shadow .14s var(--ease)}
-.btn .arw{transition:transform .25s var(--ease)}
-.btn:hover .arw{transform:translateX(3px)}
-.btn:active{transform:translateY(1px) scale(.99)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);min-height:44px;font-family:inherit;font-size:var(--fs-ui);font-weight:600;
+  line-height:var(--lh-ui);padding:var(--sp-3) var(--sp-5);border-radius:var(--r-ctl);cursor:pointer;border:1px solid transparent;user-select:none;
+  transition:background-color var(--dur-hover) var(--ease-out),scale var(--dur-press) var(--ease-press)}
+.btn .arw{transition:translate var(--dur-state) var(--ease-out)}
+.btn:active{scale:var(--press)}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.5;pointer-events:none}
 .btn-primary{background:var(--ink);color:var(--bg)}
-.btn-primary:hover{background:var(--ink-2)}
 .btn-ghost{background:var(--raised);color:var(--ink);border-color:transparent}
-.btn-ghost:hover{background:var(--raised-2)}
+@media (hover:hover){
+  .btn:hover .arw{translate:3px 0}
+  .btn-primary:hover{background:var(--ink-2)}
+  .btn-ghost:hover{background:var(--raised-2)}
+}
 /* An action row: the landing hero, the footer panel and the content pages' closing panels. */
 .hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 /* =========================================================
@@ -173,27 +200,28 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 /* ===== FOOTER · studio panels on the ground, the generated route groups inside ===== */
 .panel{background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
 /* A literal read-out (a clock, a count, a lane name), and the lane colour that marks a layer type. */
-.meta{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);
+.meta{font-family:var(--font-mono),monospace;font-size:var(--fs-label);letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--muted);
   font-variant-numeric:tabular-nums;white-space:nowrap}
 .lane-text{--lane:var(--lane-text)} .lane-media{--lane:var(--lane-media)} .lane-shape{--lane:var(--lane-shape)}
 .lane-comp{--lane:var(--lane-comp)} .lane-cap{--lane:var(--lane-cap)} .lane-sound{--lane:var(--lane-sound)}
-.foot{display:grid;gap:12px;padding-top:96px;padding-bottom:24px}
-.foot-cta-panel{padding:32px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.foot{display:grid;gap:var(--sp-3);padding-top:var(--sp-9);padding-bottom:var(--sp-5)}
+.foot-cta-panel{padding:var(--sp-6);display:flex;justify-content:space-between;align-items:center;gap:var(--sp-5);flex-wrap:wrap}
 .foot-cta{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.04;text-wrap:balance;max-width:18ch}
-.foot-act{display:flex;gap:8px;flex-wrap:wrap}
+.foot-act{display:flex;gap:var(--sp-2);flex-wrap:wrap}
 .foot-panel{padding:28px 28px 20px}
 .foot-nav{display:grid;gap:28px 40px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 .foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
-.foot-h{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.foot-col a,.foot-col [aria-current="page"]{display:inline-flex;align-items:center;min-height:32px;font-size:14px;line-height:1.3}
-.foot-col a{color:var(--ink-2);transition:color .15s ease}
-.foot-col a:hover{color:var(--ink)}
+.foot-h{font-family:var(--font-mono),monospace;font-size:var(--fs-label);letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.foot-col a,.foot-col [aria-current="page"]{display:inline-flex;align-items:center;min-height:32px;font-size:var(--fs-ui);line-height:var(--lh-ui)}
+.foot-col a{color:var(--ink-2);transition:color var(--dur-hover) var(--ease-out)}
+@media (hover:hover){ .foot-col a:hover{color:var(--ink)} }
+@media (max-width:640px){ .foot-col a,.foot-col [aria-current="page"]{min-height:40px} }
 /* The current page's own entry: not a link, set apart by ink and weight, never by the accent. */
 .foot-col [aria-current="page"]{color:var(--ink);font-weight:600}
 .foot-meta{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:28px;padding-top:18px;
-  border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
-.foot-meta a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px}
-.foot-meta .mono{font-family:var(--font-mono),monospace;font-size:12px}
+  border-top:1px solid var(--line);font-size:var(--fs-ui);color:var(--muted)}
+.foot-meta a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;text-decoration-skip-ink:auto}
+.foot-meta .mono{font-family:var(--font-mono),monospace;font-size:var(--fs-code)}
 /* =========================================================
    INTERIOR PAGE HEAD + editorial rows
    ========================================================= */
@@ -276,9 +304,9 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius
 }
 /* ===== SECTIONS: one centred column of studio panels, shared by every page =================== */
 .ls{max-width:1040px;margin:0 auto;padding-top:112px}
-.ls > h2{font-size:clamp(1.9rem,3.4vw,2.75rem);font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:balance;max-width:20ch}
-.ls > .ls-sub{color:var(--muted);font-size:16px;line-height:1.6;margin-top:12px;max-width:52ch}
-.ls-grid{display:grid;gap:12px;margin-top:36px}
+.ls > h2{font-size:var(--fs-h2);font-weight:800;letter-spacing:-.03em;line-height:var(--lh-head);text-wrap:balance;max-width:20ch}
+.ls > .ls-sub{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:52ch;text-wrap:pretty}
+.ls-grid{display:grid;gap:var(--sp-3);margin-top:var(--sp-6)}
 .ls-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .ls-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 /* An inner page opens with its own h1 in the same column, closer to the bar than a landing section. */

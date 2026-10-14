@@ -43,8 +43,9 @@ tag `arsenal-final` and match that register.
 
 ## Known gaps, so you do not rediscover them
 
-- **No spacing, type or radius scale.** Seven font sizes ship inside a 3px band. The evidence tables
-  are in `DESIGN.md`; defining the scales means changing about 200 declarations, so it wants its own
-  pass rather than a drive-by.
+- **Scales exist; not every route uses them.** Type, space, radius, motion and state tokens are in
+  `globals.css` and `DESIGN.md`. The landing page and the shared components use them; the routes
+  still on literal values are listed in `DESIGN.md` "Migration to the scales". Migrate a route when
+  you next touch it.
 - **Dark only.** The site is the studio's dark ground by decision (`IDENTITY.md`), with
   `color-scheme: dark`. There is no light mode to keep in sync.
