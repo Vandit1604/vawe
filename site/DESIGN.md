@@ -168,9 +168,9 @@ subframe diagram. Row 3 shows the five-command loop as a ladder. The page ends o
 (`/examples/cindre.*`, 10 s, audio stripped), then the footer bookend with the one call to action. Each row keeps its
 cited source file and its extra facts as one short muted note.
 
-## Laws of UX
+## Laws of UX on the landing and features
 
-One line per law: where it shaped a section (lawsofux.com).
+One line per law: where it shaped a section (lawsofux.com). The house rules for every page are in "Laws of UX" below.
 
 - Jakob's law: the landing is a hero, chapters, FAQ and a close, the order every dev-tool page uses; features is a stat strip and alternating rows.
 - Hick's law and choice overload: the landing hero has two buttons, the close has two, the features page adds none beyond the footer bookend.

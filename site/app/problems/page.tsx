@@ -132,7 +132,7 @@ export default function Problems() {
           <Next
             title="See the engine at work."
             lead="Every move in the library uses the eases from problem 4. The determinism page shows the clock from problem 1."
-            primary={{ href: "/moves", label: "Browse the 94 moves" }}
+            primary={{ href: "/moves", label: `Browse the ${MOVES.length} moves` }}
             secondary={{ href: "/roadmap", label: "Read the roadmap" }}
             related={[
               { href: "/determinism", label: "Why the same page renders the same frames" },

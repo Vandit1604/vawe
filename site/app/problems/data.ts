@@ -1,3 +1,4 @@
+import { MOVES } from "../../lib/moves";
 export type Status = "solved" | "progress" | "parked";
 
 export type Problem = {
@@ -49,7 +50,7 @@ export const PROBLEMS: Problem[] = [
     title: "Designed motion",
     status: "solved",
     why: "Browser eases suit interface changes. Film motion needs the speed and influence handles that motion designers set in After Effects.",
-    does: "vawe uses After Effects speed and influence eases, fitted to real keyframes. All 94 moves use them.",
+    does: `vawe uses After Effects speed and influence eases, fitted to real keyframes. All ${MOVES.length} moves use them.`,
     figure: "1,339",
     figureLabel: "real keyframe segments used for the fit",
   },
