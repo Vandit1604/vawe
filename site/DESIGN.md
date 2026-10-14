@@ -161,24 +161,26 @@ Spike A, "full-bleed film scroll": the story is problem, page, render, result, t
 
 ## Features
 
-`app/features/page.tsx`, `features.css` (classes prefixed `ft-`). Every decision gets its own proof, not a wall of text:
-a stat strip (5 time sources replaced, 1 to 3 subframes, 5 stages), then one row per decision. Row 1 shows two render
-orders that give the same four frames and the `seek(t)` snippet. Row 2 shows a fast move clip and a still-versus-fast
-subframe diagram. Row 3 shows the five-command loop as a ladder. The page ends on the CINDRE film
-(`/examples/cindre.*`, 10 s, audio stripped), then the footer bookend with the one call to action. Each row keeps its
-cited source file and its extra facts as one short muted note.
+`app/features/page.tsx`, `features.css` (classes prefixed `ft-`). The page is a content page: `.wrap` > `main.ipage.xp`, the
+`.phead` with `PageTop` and the big h1, a `Toc` of the six sections, and it ends on CINDRE and then `Next` (the same ending as
+every `.xp` page, so the footer has no bookend). The width is the 1040px `.ipage` column. Six sections (Miller), one `.isec`
+panel each, 23 features in all: the page (4), same frames (4), light, blur and sound (4), moves and easing (3), the loop (5),
+agents (3). A feature is a hairline row: a short headline, one or two lines, and ONE proof (a code or command block, a real
+clip, a move strip or one number). Every claim reads off the repo or `bin/vawe <verb> --help`; the move, group and easing
+counts read `lib/moves.json` and `lib/easing.json`, so they cannot drift. The blur proof says 1 to 32 subframes (the final's cap
+in `render-page.mjs`); the older "1 to 3" was wrong. The CINDRE film is `/examples/cindre.*`, 10 s, audio stripped.
 
 ## Laws of UX on the landing and features
 
 One line per law: where it shaped a section (lawsofux.com). The house rules for every page are in "Laws of UX" below.
 
-- Jakob's law: the landing is a hero, chapters, FAQ and a close, the order every dev-tool page uses; features is a stat strip and alternating rows.
-- Hick's law and choice overload: the landing hero has two buttons, the close has two, the features page adds none beyond the footer bookend.
+- Jakob's law: the landing is a hero, chapters, FAQ and a close, the order every dev-tool page uses; features is a head, a section list and rows of text plus proof.
+- Hick's law and choice overload: the landing hero has two buttons, the close has two, the features page adds none beyond `Next`.
 - Fitts's law: every button and link is 44px tall; the hero and chapter films are the biggest targets on the page.
-- Proximity and common region: on features each decision's text, proof and source file sit together, and the proof sits in one hairline well.
+- Proximity and common region: on features each decision's text, proof and source file sit together, and the proof sits in the same row.
 - Von Restorff: the pure black page has one standout per screen, a film frame or a 5xl number.
 - Serial position and peak-end: the landing opens on the HUD film and closes on "Write the page."; the result chapter plays the showcase, the peak; features ends on CINDRE.
-- Miller and chunking: three stats, three decisions, five steps, four chapters, six moves.
+- Miller and chunking: six sections of seven features or fewer, four chapters, six moves.
 - Doherty threshold: films sit in fixed-ratio frames with a poster and `preload="none"`, so there is no shift and nothing blocks paint.
 - Aesthetic-usability: hairlines, one radius family and tight Geist type make the page read as easy to use.
 
@@ -287,7 +289,7 @@ and `--hit` (40 px, 44 px under 640), which every control's `min-height` uses.
 
 ## Components
 
-- **Bar:** the wordmark, four links (Moves, Features, Blog, Docs), and GitHub as the one
+- **Bar:** the wordmark, five links (Moves, Features, Easing, Blog, Docs), and GitHub as the one
   filled action. The current page is a `<span aria-current="page">` on `raised`, never a link.
 - **Footer:** one panel with the generated link groups (`lib/site-pages.json`) and the Apache 2.0
   line. Pages that end a journey add a closing panel above it (`<Footer bookend />`).
@@ -348,7 +350,7 @@ PNG, because LinkedIn does not read WebP) and as the JSON-LD image. Its alt is e
 title always sits beside it. Without the file a card has no image and the share card is the generated one.
 
 **Post.** A head (title, dek, mono meta with the issue number), the cover, a 720 px body and, from
-1000 px, a numbered table of contents. The first paragraph is the lead by tone (`ink`), not by size. Each h2
+1000 px, a numbered table of contents on the LEFT (240 px, sticky, the article to its right; under 1000 px it is hidden). The first paragraph is the lead by tone (`ink`), not by size. Each h2
 carries its mono number, matching the TOC. Figures are mounted on a `surface` panel with a `Fig. 01` mono
 caption; tables sit on a panel and scroll inside it; code blocks have a header strip with the language,
 tone and weight only, never hue; a blockquote is a pull quote. The end is a "Made with vawe" panel (the
@@ -455,6 +457,7 @@ was tried.
 | `/problems`, `/roadmap`, `/vs/[slug]`, `/hyperframes-alternatives` (2026-10-03) | brand | ui-skills `pbakaus/typeset` (one skill); layout ideas only from VoltAgent/awesome-design-md `vercel` DESIGN.md | typeset: TAKEN, role contrast by size and tone (title, mono label, body, metadata), 45 to 75ch measure, 16px body, mono for every figure. Vercel spec: TAKEN as layout idea only, large gaps between panels and tight interior, 3-up collapsing to 1-up. REJECTED: its 4px spacing tokens, mesh gradient, pill buttons, and `impeccable detect` (not installed). Status chips use shape (filled, half, ring dot) not hue, because colour here means act-on-it or a lane. Rules in `app/components/study.css`, shared by the three routes. Second pass: icons are inline Lucide paths (ISC) in `app/components/Icon.tsx`, no dependency; images are only vawe's own move posters and clips, and the ease curve is drawn from `core/motion` `easeFn` points in `ease-curves.json`. Competitor logos are NOT used: no official page allows a logo in a comparison (Remotion terms reserve logos; HyperFrames, Motion Canvas and Lottie state nothing), so names are plain text. |
 
 
+| `/features` rebuild, blog TOC left, `/easing` in the nav (2026-10-14) | product | no new fetch; the `.xp` layer, `.isec` and `.codeblock` reused | Features joined the content pages instead of keeping its own 1160px layout. The blog TOC moved left and sticky (an earlier rule rejected a sticky rail on content pages; the owner asked for it on posts, where the article is long). `/easing` was in the footer but not the header; the header stays at five items. |
 | `/blog`, `/blog/[slug]`, RSS (2026-10-13) | brand | ui-skills `jakubkrehel/better-typography` | Measure, line-height, wrap and underline rules taken; its scale and Tailwind specifics rejected; TOC not sticky by the rebuild rule. |
 | `/blog`, `/blog/[slug]` typography pass (2026-10-13) | brand | Butterick, *Practical Typography* (practicaltypography.com, summary of key rules and the headings page); ui-skills `pbakaus/typeset` where it agreed | Taken: body 15 to 25 px web range (19 px), 120 to 145% line spacing (142%), 45 to 90 characters (69 at desktop), curly quotes, bold or italic sparingly and never together, underline only links, 5 to 12% caps letterspacing (8%), kerning on, space or indent not both, headings bold and only as large as needed with space above. REJECTED: Butterick's dislike of free fonts (the owner chose Plus Jakarta Sans) and title-case advice (titles are front matter). |
 | GitHub button star hover (2026-10-13) | brand | ui-skills `emilkowalski/animate` (from `list --category motion`) | Taken: CSS transitions so a quick hover-out retargets; transform and opacity only; never `scale(0)` (starts at .5); its strong ease-out `cubic-bezier(.23,1,.32,1)` for the exit (140 ms) and an overshoot for the 320 ms entrance; reduced motion shows the star with no motion; hover and `:focus-visible` both trigger. REJECTED: its frequency gate ("hover: near-imperceptible or nothing"), because the owner asked for a visible star-the-repo hint, and its Motion library advice (CSS only, no dependency). Not loaded: `pbakaus/delight`, `emil-design-eng`. |
