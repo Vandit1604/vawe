@@ -145,11 +145,11 @@ Spike A, "full-bleed film scroll": the story is problem, page, render, result, t
 - **Hero:** one rounded frame the height of the viewport (`100svh`) holding the tracking HUD film, the h1
   at `clamp(3rem, 10.5vw, 11rem)`, one line of copy and two buttons. The bar floats over it
   (`.bar-overlay`: fixed, 72% black, 12px blur, one hairline). Under 760 the film is a 16:9 frame and the copy sits below it.
-- **Four chapters** (the fourth, the result, plays the multi-beat showcase film, `/examples/showcase.*`, 14 s, audio stripped) (`.lp-ch`, 240svh tall; under 760 they do not pin and sit in normal flow): each pins a `100svh` stage (`position: sticky`) with one large
+- **Three chapters**, each a whole film, never a move clip (the problem: retro-remix; the page: CINDRE; the result: the multi-beat showcase film, `/examples/showcase.*`, 14 s, audio stripped) (`.lp-ch`, 240svh tall; under 760 they do not pin and sit in normal flow): each pins a `100svh` stage (`position: sticky`) with one large
   film in a frame of 28px radius (16px under 640). `LandingMotion` writes `--in` (0 to 1 as the chapter enters)
   and `--out` (0 to 1 over the last 15%) on the chapter: the frame scales `.84 + .16 * in - .05 * out` and the caption
   fades and rises with `--in`. Plain CSS sticky and one rAF-throttled scroll handler, no animation library.
-- **A rail** of four dots on the right edge (hidden under 900) shows the chapter; `aria-current` marks it.
+- **A rail** of one dot per chapter on the right edge (hidden under 900) shows the chapter; `aria-current` marks it.
 - **Then:** the page contract (code and three commands on a faint grid), a 3-column grid of six move clips (2 under 900), the FAQ
   (the same `lib/faq.ts` data the FAQPage JSON-LD reads), and the way in.
 - **Reduced motion:** the chapters do not pin, scale or fade, reveals show at once, and every clip holds its poster

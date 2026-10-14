@@ -9,7 +9,7 @@ import { FAQ } from "../lib/faq";
 import { MOVES, clip, moveByName } from "../lib/moves";
 import "./landing.css";
 
-/* THE LANDING PAGE (site/IDENTITY.md, DESIGN.md "Landing"). A full-bleed film, four pinned chapters with
+/* THE LANDING PAGE (site/IDENTITY.md, DESIGN.md "Landing"). A full-bleed film, three pinned chapters with
  * one large film each (problem, page, render, result), the page contract, the moves, questions, and the
  * way in. The films carry the story; the copy stays short.
  */
@@ -17,13 +17,6 @@ import "./landing.css";
 type Film = { webm: string; mp4: string; poster: string };
 
 const example = (id: string): Film => ({ webm: `/examples/${id}.webm`, mp4: `/examples/${id}.mp4`, poster: `/examples/${id}.webp` });
-const move = (name: string): Film => {
-  const m = moveByName(name);
-  if (!m) throw new Error(`landing: unknown move ${name}`);
-  const f = clip(m);
-  return { webm: f.webm, mp4: f.mp4, poster: f.poster };
-};
-
 const HERO = example("tracking-hud");
 
 const CHAPTERS = [
@@ -36,21 +29,14 @@ const CHAPTERS = [
   },
   {
     id: "c2",
-    tag: "02 / The page",
+    tag: "02 / The page · CINDRE, one page.html",
     title: "So write a page.",
     text: "HTML, CSS, Web Animations, SVG, canvas or three.js. You already know it. Nothing private to learn.",
-    film: move("caret-typing"),
+    film: example("cindre"),
   },
   {
     id: "c3",
-    tag: "03 / The render",
-    title: "Time is the seek, not the clock.",
-    text: "The renderer seeks the page to each frame and screenshots it. Frame 412 is the same frame on every run.",
-    film: move("chain-beats"),
-  },
-  {
-    id: "c4",
-    tag: "04 / The result · showcase, 14 s",
+    tag: "03 / The result · showcase, 14 s",
     title: "One mp4. Every canvas.",
     text: "16:9, 9:16, 1:1, 4:5 and 4:3 from the same page. Audio mixed offline.",
     film: example("showcase"),
@@ -121,7 +107,7 @@ export default function Home() {
             <p className="mono lp-code-note">films/hello/page.html</p>
           </div>
           <div className="lp-side lp-rv">
-            <p>Open it in a browser and it plays. Hand it to vawe and it renders. A change to the motion is a diff you can read before it ships.</p>
+            <p>Open it in a browser and it plays. Hand it to vawe and it seeks the page to each frame, so frame 412 is the same on every run. A change to the motion is a diff you can read before it ships.</p>
             <div>
               <div className="lp-cmd"><span>$</span>bin/vawe new hello<em>a valid starter</em></div>
               <div className="lp-cmd"><span>$</span>bin/vawe dev films/hello/page.html<em>draft, 30 fps</em></div>

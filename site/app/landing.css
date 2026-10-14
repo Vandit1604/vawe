@@ -1,4 +1,4 @@
-/* THE LANDING PAGE (site/DESIGN.md "Landing"): a full-bleed film, four pinned chapters with one large film
+/* THE LANDING PAGE (site/DESIGN.md "Landing"): a full-bleed film, three pinned chapters with one large film
    each, then the page, the moves, questions and the way in. Scroll behaviour is components/LandingMotion.tsx,
    which writes --in and --out on each .lp-ch. Every rule is scoped to .lp so no other route inherits it. */
 
