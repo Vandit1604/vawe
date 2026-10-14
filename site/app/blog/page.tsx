@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { blogSchema, breadcrumbSchema, jsonLdScript } from "../../lib/schema";
-import { allPosts, postsBySection, smart, type Post } from "../../lib/blog";
-import { Cover } from "./Cover";
+import { allPosts, postsBySection } from "../../lib/blog";
+import { Card } from "./Card";
 import "./blog.css";
 
 const TITLE = "vawe blog: building agent-native motion graphics";
@@ -17,38 +16,13 @@ export const metadata = {
   alternates: { ...base.alternates, types: { "application/rss+xml": "/blog/rss.xml" } },
 };
 
-// Card widths on the 12-column grid, repeated in order: a wide card and a narrow one, then a row of
-// three, then the pair mirrored. Dense packing keeps rows full when a filter hides cards.
-const RHYTHM = ["w7", "w5", "w4", "w4", "w4", "w5", "w7", "w6", "w6"];
-
 // A post page links to /blog#<section>; the hash selects that filter. Without script every post shows.
 const HASH_FILTER = `(()=>{const h=location.hash.slice(1);const r=h&&document.getElementById("f-"+h);if(r)r.checked=true})()`;
-
-function Card({ post, w }: { post: Post; w: string }) {
-  return (
-    <li className={`panel bl-card ${w}`} data-s={post.section}>
-      <Cover post={post} />
-      <div className="bl-card-text">
-        <p className="meta bl-card-meta">
-          <span className="bl-sec"><span className="sw" />{post.sectionLabel}</span>
-        </p>
-        <h3>
-          <Link href={`/blog/${post.slug}`} prefetch={false}>{smart(post.title)}</Link>
-        </h3>
-        <p className="bl-card-desc">{smart(post.description)}</p>
-        <p className="meta bl-card-foot">{post.minutes} min read</p>
-      </div>
-    </li>
-  );
-}
 
 export default function BlogIndex() {
   const sections = postsBySection();
   const posts = allPosts();
   const crumbs = [{ name: "Home", url: "/" }, { name: "Blog", url: "/blog" }];
-  // The featured post leads; the rest group by section, newest first inside each. No date is shown.
-  const [lead] = posts;
-  const rest = sections.flatMap((sec) => sec.posts).filter((p) => p !== lead);
 
   return (
     <div className="shell">
@@ -66,13 +40,7 @@ export default function BlogIndex() {
               We build a framework where an agent writes one HTML page and the renderer turns it into a film. These are
               the notes from building it, with the numbers.
             </p>
-            {posts.length ? (
-              <dl className="bl-stats">
-                  <div><dt className="meta">Posts</dt><dd>{posts.length}</dd></div>
-                  <div><dt className="meta">Sections</dt><dd>{sections.length}</dd></div>
-                  <div className="bl-rss"><dt className="meta">Feed</dt><dd><a href="/blog/rss.xml">RSS</a></dd></div>
-              </dl>
-            ) : null}
+            <p className="meta bl-rss"><a href="/blog/rss.xml">RSS feed</a></p>
           </header>
 
           {posts.length ? (
@@ -97,22 +65,8 @@ export default function BlogIndex() {
               ))}
 
               <ul className="bl-grid">
-                <li className="panel bl-lead" data-s={lead.section}>
-                  <Cover post={lead} eager />
-                  <div className="bl-lead-text">
-                    <p className="meta bl-card-meta">
-                      <span className="bl-new">Featured</span>
-                      <span className="bl-sec"><span className="sw" />{lead.sectionLabel}</span>
-                    </p>
-                    <h2>
-                      <Link href={`/blog/${lead.slug}`} prefetch={false}>{smart(lead.title)}</Link>
-                    </h2>
-                    <p className="bl-card-desc">{smart(lead.description)}</p>
-                    <p className="meta bl-card-foot">{lead.minutes} min read</p>
-                  </div>
-                </li>
-                {rest.map((p, i) => (
-                  <Card key={p.slug} post={p} w={RHYTHM[i % RHYTHM.length]} />
+                {posts.map((post, i) => (
+                  <Card key={post.slug} post={post} eager={i < 3} />
                 ))}
               </ul>
             </>
