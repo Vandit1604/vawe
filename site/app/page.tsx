@@ -50,10 +50,10 @@ const CHAPTERS = [
   },
   {
     id: "c4",
-    tag: "04 / The result",
+    tag: "04 / The result · showcase, 14 s",
     title: "One mp4. Every canvas.",
     text: "16:9, 9:16, 1:1, 4:5 and 4:3 from the same page. Audio mixed offline.",
-    film: move("match-cut"),
+    film: example("showcase"),
   },
 ];
 
