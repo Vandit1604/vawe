@@ -93,8 +93,8 @@ export default function EasingIndex() {
             <p>The 30 Penner easings from easings.net: ten families in three directions. Eight families can be drawn by one <code>cubic-bezier()</code>; elastic and bounce cannot, so they ship as <code>linear()</code>.</p>
             <p className="ez-fam">{FAMILIES.map((f) => <a key={f} href={`#f-${f}`}>{f}</a>)}</p>
             {FAMILIES.map((f) => (
-              <div key={f} id={`f-${f}`} className="ez-group" style={{ marginTop: 32 }}>
-                <h3 className="meta" style={{ whiteSpace: "normal" }}>{f}: {FAMILY_NOTE[f]}</h3>
+              <div key={f} id={`f-${f}`} className="ez-group ez-group-tight">
+                <h3 className="meta ez-h3">{f}: {FAMILY_NOTE[f]}</h3>
                 <ul className="ez-grid-cards">{classicIn(f).map((e) => <Card key={e.slug} e={e} />)}</ul>
               </div>
             ))}

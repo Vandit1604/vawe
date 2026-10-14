@@ -205,7 +205,7 @@ export default async function EasePage({ params }: Params) {
                   <img src={`/easing/${e.slug}.webp`} alt="" width={640} height={360} loading="lazy" decoding="async" />
                   <Clip src={`/easing/${e.slug}.mp4`} webm={`/easing/${e.slug}.webm`} />
                 </div>
-                <figcaption className="ez-cap" style={{ padding: "10px 16px 12px" }}>Rendered with the vawe renderer: a 2 s film, {e.name} against linear. It plays while on screen.</figcaption>
+                <figcaption className="ez-cap">Rendered with the vawe renderer: a 2 s film, {e.name} against linear. It plays while on screen.</figcaption>
               </figure>
             ) : null}
           </section>
