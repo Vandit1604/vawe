@@ -2,7 +2,7 @@
   "name": "vawe",
   "version": "2.0.0",
   "type": "module",
-  "description": "Deterministic motion-graphics engine: one HTML page in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
+  "description": "Open-source HTML to video: deterministic motion graphics as code for developers and AI agents. One HTML page in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
   "bin": {
     "vawe": "bin/vawe"
   },
@@ -35,7 +35,11 @@
     "ffmpeg",
     "headless-chrome",
     "mp4",
-    "html"
+    "html",
+    "html-to-video",
+    "programmatic-video",
+    "ai-agent",
+    "remotion-alternative"
   ],
   "optionalDependencies": {
     "ffmpeg-static": "^5.2.0"

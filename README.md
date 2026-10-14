@@ -6,7 +6,10 @@ group: project
 
 # vawe: one page in, one film out
 
-vawe is the framework for agent-native motion graphics. A film is one HTML page that an agent (or
+vawe is an open-source (Apache-2.0) HTML to video framework for agent-native motion graphics: a free,
+self-hosted, programmatic-video alternative to Remotion, HyperFrames and Motion Canvas. Site and docs:
+[vawe.dev](https://vawe.dev). For an AI agent: [vawe.dev/ai-agents](https://vawe.dev/ai-agents) or
+[llms.txt](https://vawe.dev/llms.txt). A film is one HTML page that an agent (or
 you) writes in HTML, CSS, Web Animations, SVG, canvas or three.js. The renderer seeks the page frame
 by frame, screenshots every frame, mixes the page's `<audio>` tags offline and encodes one mp4. No
 timeline, no editor, no private format: the page is the film, and the same page renders the same
