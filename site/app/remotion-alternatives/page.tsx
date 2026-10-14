@@ -1,4 +1,5 @@
 import { Header } from "../components/Header";
+import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { GithubCta, OpenSourceMark } from "../components/Icon";
@@ -60,6 +61,7 @@ export default function RemotionAlternatives() {
   return (
     <div className="shell">
       <Header />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "Remotion alternatives", url: "/remotion-alternatives" }]))} />
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">

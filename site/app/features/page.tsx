@@ -1,4 +1,5 @@
 import { Header } from "../components/Header";
+import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
@@ -34,6 +35,7 @@ export default function Features() {
   return (
     <div className="shell">
       <Header active="features" />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "Features", url: "/features" }]))} />
       <main className="wrap" id="content" tabIndex={-1}>
         <div className="ls ls-top">
           <h1>What the engine decides.</h1>

@@ -68,7 +68,23 @@ export function softwareApplicationSchema() {
       priceCurrency: "USD",
     },
     codeRepository: REPO_URL,
+    downloadUrl: REPO_URL,
+    isAccessibleForFree: true,
     image: `${SITE_URL}/assets/og.png`,
+  };
+}
+
+export function softwareSourceCodeSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: "vawe",
+    description: pkg.description,
+    codeRepository: REPO_URL,
+    programmingLanguage: "JavaScript",
+    runtimePlatform: "Node.js",
+    license: "https://www.apache.org/licenses/LICENSE-2.0",
+    url: SITE_URL,
   };
 }
 

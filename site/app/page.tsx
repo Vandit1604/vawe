@@ -3,7 +3,7 @@ import { HeroSplit } from "./components/HeroSplit";
 import { SectionStrip } from "./components/SectionStrip";
 import { Footer } from "./components/Footer";
 import { ProofHash, ProofAspect } from "./components/proofs";
-import { organizationSchema, websiteSchema, softwareApplicationSchema, jsonLdScript } from "../lib/schema";
+import { organizationSchema, websiteSchema, softwareApplicationSchema, softwareSourceCodeSchema, jsonLdScript } from "../lib/schema";
 import { faqSchema } from "../lib/schema-content";
 import { FAQ } from "../lib/faq";
 import "./landing.css";
@@ -45,6 +45,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(organizationSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(websiteSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(softwareApplicationSchema())} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(softwareSourceCodeSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(faqSchema())} />
       <Header />
       <main className="wrap" id="content" tabIndex={-1}>

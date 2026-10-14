@@ -1,4 +1,5 @@
 import { Header } from "../components/Header";
+import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { GithubCta, OpenSourceMark } from "../components/Icon";
@@ -87,6 +88,7 @@ export default function HyperframesAlternatives() {
   return (
     <div className="shell">
       <Header />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "HyperFrames alternatives", url: "/hyperframes-alternatives" }]))} />
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">

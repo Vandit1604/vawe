@@ -1,4 +1,5 @@
 import { Header, REPO_URL } from "../components/Header";
+import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { MoveClips } from "../components/MoveClips";
 import { pageMetadata } from "../components/seo";
@@ -20,6 +21,7 @@ export default function LaunchVideo() {
   return (
     <div className="shell">
       <Header />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "Launch video", url: "/launch-video" }]))} />
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
