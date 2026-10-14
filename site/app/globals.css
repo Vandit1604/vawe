@@ -51,12 +51,19 @@
   --fs-h2:clamp(1.9rem,3.4vw,2.75rem);
   --fs-h1:clamp(2.2rem,4.6vw,3.5rem);
   --fs-display:clamp(2.2rem,4.2vw,3.6rem);
-  --lh-body:1.55; --lh-ui:1.35; --lh-head:1.04;
+  --fs-panel:clamp(1.5rem,2.6vw,2rem);      /* a panel's h2 on the content pages */
+  --fs-sub:clamp(1.3rem,2.2vw,1.65rem);     /* a sub-heading inside a panel or a document */
+  --fs-figure:clamp(1.5rem,2.8vw,2rem);     /* a big mono number */
+  --lh-body:1.55; --lh-ui:1.35; --lh-head:1.04; --lh-sub:1.2;
   --track-caps:.06em;       /* Butterick: 5-12% extra on all caps */
+  --track-head:-.025em; --track-display:-.035em;
 
   /* ---- SPACE SCALE: 4 px steps, group gap at least twice the item gap ---- */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
   --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+  --sp-panel:clamp(var(--sp-5),3vw,var(--sp-6));   /* a content panel's padding */
+  --gap-panel:clamp(var(--sp-5),4vw,var(--sp-7));  /* the gap between a panel's two columns */
+  --hit:40px;               /* the smallest target: 40 on desktop, 44 under 640 */
 
   /* ---- RADIUS SCALE: concentric, outer = inner + padding ---- */
   --r:12px; --r-ctl:8px; --r-in:4px; --r-pill:999px; --maxw:1160px;
@@ -109,8 +116,8 @@ a{color:inherit;text-decoration:none}
 :root{ --wd-display:100; --wd-body:100; }
 /* WCAG 2.4.1 — visible only on focus, but always the first tab stop. */
 .skip{position:absolute;left:-9999px;top:0;z-index:var(--z-skip);
-  background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:14px;
-  padding:11px 18px;border-radius:0 0 10px 0}
+  background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:var(--fs-ui);
+  padding:var(--sp-3) var(--sp-4);border-radius:0 0 var(--r-ctl) 0}
 .skip:focus{left:0}
 /* THE HOUSE RING, FOR LINKS. A bare <a> otherwise falls back to the browser's own ring. Links, not
    `*`: two fields answer focus with a border plus a tinted ring instead (.ar-find, .ed-cm). */
@@ -122,7 +129,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* Skip target. tabindex=-1 makes it programmatically focusable; without this rule the browser
    paints a focus ring around the whole hero when the skip link is used. */
 #content:focus{outline:none}
-#content:focus-visible{outline:var(--focus-ring);outline-offset:4px;border-radius:6px}
+#content:focus-visible{outline:var(--focus-ring);outline-offset:4px;border-radius:var(--r-in)}
 .wrap{position:relative;z-index:var(--z-base);max-width:var(--maxw);margin:0 auto;padding:0 26px}
 /* Several routes render the Footer inside their own .wrap; a nested wrap adds no second gutter. */
 .wrap .wrap{padding-inline:0;max-width:none}
@@ -130,18 +137,18 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* =========================================================
    NAV
    ========================================================= */
-.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px;position:relative;z-index:var(--z-sticky)}
-.mark{display:flex;align-items:center;gap:9px;font-family:var(--font-title);font-weight:600;font-size:19px;letter-spacing:-.02em;color:var(--ink)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);height:60px;position:relative;z-index:var(--z-sticky)}
+.mark{display:flex;align-items:center;gap:var(--sp-2);font-family:var(--font-title);font-weight:600;font-size:var(--fs-lead);letter-spacing:-.02em;color:var(--ink)}
 .glyph{width:24px;height:13px;color:var(--ink)}
-.nav{display:flex;align-items:center;gap:2px;font-size:14px;font-weight:500}
-.nav a,.nav [aria-current="page"]{padding:8px 12px;border-radius:8px}
+.nav{display:flex;align-items:center;gap:var(--sp-1);font-size:var(--fs-ui);font-weight:500}
+.nav a,.nav [aria-current="page"]{display:inline-flex;align-items:center;min-height:var(--hit);padding:0 var(--sp-3);border-radius:var(--r-ctl)}
 .nav a{color:var(--ink-2);transition:background-color var(--dur-hover) var(--ease-out),color var(--dur-hover) var(--ease-out)}
 @media (hover:hover){ .nav a:hover{background:var(--raised);color:var(--ink)} }
 /* The current page: a span, never a link (site rule, see Footer.tsx), so no hover or press. */
 .nav [aria-current="page"]{color:var(--ink);background:var(--raised);cursor:default}
 /* The one filled action in the bar. */
-.ghbtn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;
-  background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;
+.ghbtn{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:var(--hit);padding:0 var(--sp-3);border-radius:var(--r-ctl);
+  background:var(--ink);color:var(--bg);font-weight:600;font-size:var(--fs-ui);
   transition:background-color var(--dur-hover) var(--ease-out),scale var(--dur-press) var(--ease-press)}
 @media (hover:hover){ .ghbtn:hover{background:var(--ink-2)} }
 .ghbtn:active{scale:var(--press)}
@@ -150,13 +157,13 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .ghbtn{position:relative}
 .gh-star{position:absolute;top:-10px;right:-10px;width:20px;height:20px;pointer-events:none;
   opacity:0;transform:translate(-6px,6px) scale(.5) rotate(-30deg);
-  transition:opacity .14s cubic-bezier(.23,1,.32,1),transform .14s cubic-bezier(.23,1,.32,1)}
+  transition:opacity var(--dur-exit) var(--ease-out),transform var(--dur-exit) var(--ease-out)}
 .gh-star svg{display:block;width:100%;height:100%;overflow:visible}
 .gh-star path{fill:var(--gold);stroke:var(--bg);stroke-width:2;paint-order:stroke;stroke-linejoin:round}
 .gh-spark{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:1px;background:var(--gold);opacity:0;transform:rotate(45deg)}
 .ghbtn:is(:hover,:focus-visible) .gh-star{opacity:1;transform:none;
-  transition:opacity .12s cubic-bezier(.23,1,.32,1),transform .32s cubic-bezier(.34,1.56,.64,1)}
-.ghbtn:is(:hover,:focus-visible) .gh-spark{animation:gh-spark .38s cubic-bezier(.23,1,.32,1) .06s both}
+  transition:opacity var(--dur-press) var(--ease-out),transform 320ms cubic-bezier(.34,1.56,.64,1)}
+.ghbtn:is(:hover,:focus-visible) .gh-spark{animation:gh-spark 380ms var(--ease-out) 60ms both}
 .gh-spark:nth-child(2){--dx:-15px;--dy:-9px}
 .gh-spark:nth-child(3){--dx:14px;--dy:-11px}
 .gh-spark:nth-child(4){--dx:-12px;--dy:12px}
@@ -187,16 +194,14 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
   .btn-ghost:hover{background:var(--raised-2)}
 }
 /* An action row: the landing hero, the footer panel and the content pages' closing panels. */
-.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero-cta{display:flex;gap:var(--sp-3);justify-content:center;flex-wrap:wrap}
 /* =========================================================
    SECTIONS
    ========================================================= */
-.section{padding:70px 0}
-.section.alt{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.kicker{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.02em;color:var(--accent);margin-bottom:14px}
-.h2{font-size:clamp(1.7rem,3.4vw,2.5rem);font-weight:700;letter-spacing:-.018em;line-height:1.06;text-wrap:balance;
+.kicker{font-family:var(--font-mono),monospace;font-size:var(--fs-code);letter-spacing:.02em;color:var(--accent);margin-bottom:var(--sp-3)}
+.h2{font-size:var(--fs-panel);font-weight:800;letter-spacing:var(--track-head);line-height:var(--lh-head);text-wrap:balance;
   font-variation-settings:"wdth" var(--wd-display)}
-.lead{color:var(--ink-2);font-size:1.08rem;line-height:1.6;max-width:56ch}
+.lead{color:var(--ink-2);font-size:var(--fs-lead);line-height:var(--lh-body);max-width:56ch;text-wrap:pretty}
 /* ===== FOOTER · studio panels on the ground, the generated route groups inside ===== */
 .panel{background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
 /* A literal read-out (a clock, a count, a lane name), and the lane colour that marks a layer type. */
@@ -208,17 +213,16 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .foot-cta-panel{padding:var(--sp-6);display:flex;justify-content:space-between;align-items:center;gap:var(--sp-5);flex-wrap:wrap}
 .foot-cta{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.04;text-wrap:balance;max-width:18ch}
 .foot-act{display:flex;gap:var(--sp-2);flex-wrap:wrap}
-.foot-panel{padding:28px 28px 20px}
-.foot-nav{display:grid;gap:28px 40px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
-.foot-h{font-family:var(--font-mono),monospace;font-size:var(--fs-label);letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.foot-col a,.foot-col [aria-current="page"]{display:inline-flex;align-items:center;min-height:32px;font-size:var(--fs-ui);line-height:var(--lh-ui)}
+.foot-panel{padding:var(--sp-5) var(--sp-5) var(--sp-4)}
+.foot-nav{display:grid;gap:var(--sp-6) var(--sp-7);grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.foot-col{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.foot-h{font-family:var(--font-mono),monospace;font-size:var(--fs-label);letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--muted);margin-bottom:var(--sp-2)}
+.foot-col a,.foot-col [aria-current="page"]{display:inline-flex;align-items:center;min-height:var(--hit);font-size:var(--fs-ui);line-height:var(--lh-ui)}
 .foot-col a{color:var(--ink-2);transition:color var(--dur-hover) var(--ease-out)}
 @media (hover:hover){ .foot-col a:hover{color:var(--ink)} }
-@media (max-width:640px){ .foot-col a,.foot-col [aria-current="page"]{min-height:40px} }
 /* The current page's own entry: not a link, set apart by ink and weight, never by the accent. */
 .foot-col [aria-current="page"]{color:var(--ink);font-weight:600}
-.foot-meta{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:28px;padding-top:18px;
+.foot-meta{display:flex;justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap;margin-top:var(--sp-6);padding-top:var(--sp-4);
   border-top:1px solid var(--line);font-size:var(--fs-ui);color:var(--muted)}
 .foot-meta a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;text-decoration-skip-ink:auto}
 .foot-meta .mono{font-family:var(--font-mono),monospace;font-size:var(--fs-code)}
@@ -226,21 +230,13 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
    INTERIOR PAGE HEAD + editorial rows
    ========================================================= */
 /* One column: the heading, then its lead. A kicker, where a page keeps one, is a quiet breadcrumb. */
-.phead{padding:64px 0 8px}
-.phead .kicker{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);margin-bottom:14px}
+.phead{padding:var(--sp-8) 0 var(--sp-2)}
+.phead .kicker{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;color:var(--muted);margin-bottom:var(--sp-3)}
 .phead .kicker .dot{display:none}
-.phead h1{font-size:clamp(2.2rem,4.6vw,3.5rem);line-height:1;font-weight:800;letter-spacing:-.035em;text-wrap:balance;max-width:20ch}
-.phead p{color:var(--muted);font-size:1.05rem;line-height:1.6;margin-top:14px;max-width:62ch}
-.phead .bnote{margin-top:14px}
-@media (max-width:640px){ .phead{padding-top:40px} }
-.row{display:grid;grid-template-columns:1.5fr 1fr;gap:44px;align-items:center;padding:48px 0;border-top:1px solid var(--line)}
-.media{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg-2);box-shadow:var(--shadow-2);
-  transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
-.media:hover{transform:translateY(-3px);box-shadow:var(--shadow-3)}
-.media video{width:100%;display:block;aspect-ratio:16/9;object-fit:contain}
-.num{font-family:var(--font-mono),monospace;font-size:12px;color:var(--accent);letter-spacing:.03em;margin-bottom:12px}
-.copy h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
-.copy p{color:var(--ink-2);font-size:15px;line-height:1.55;max-width:40ch}
+.phead h1{font-size:var(--fs-h1);line-height:1;font-weight:800;letter-spacing:var(--track-display);text-wrap:balance;max-width:20ch}
+.phead p{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:62ch;text-wrap:pretty}
+.phead .bnote{margin-top:var(--sp-3)}
+@media (max-width:640px){ .phead{padding-top:var(--sp-7)} }
 /* Inert metadata, per THE AFFORDANCE RULE below: no box, no accent, no verb. It was a bordered
    chip identical to the control beneath it. These strings already announce themselves as specs
    ("cut: whip · punch"), so they need no chrome to be read as data, only to be kept quiet.
@@ -249,7 +245,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* flex + fit-content, NOT inline-flex: block-level so it takes its own line in the block contexts
    (.copy, .filmcard figcaption), and shrink-to-fit so it is still
    only as wide as its text. As inline-flex the two sat on one line and collided. */
-.tag{display:flex;width:fit-content;margin-top:16px;font-family:var(--font-mono),monospace;font-size:12px;
+.tag{display:flex;width:fit-content;margin-top:var(--sp-4);font-family:var(--font-mono),monospace;font-size:var(--fs-code);
   color:var(--muted);letter-spacing:.01em}
 /* ===== THE AFFORDANCE RULE ================================================================
    A bordered mono chip on --bg-2 meant two opposite things on the same card: `.tag` was inert
@@ -265,22 +261,15 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* An in-prose link inside an .isec paragraph: the accent with no underline at rest, underlined on
    hover and focus. */
 .ilink{color:var(--accent);font-weight:600;text-decoration:none;white-space:nowrap}
-.ilink:hover,.ilink:focus-visible{text-decoration:underline;text-underline-offset:3px}
-.codeblock{background:var(--bg);border-radius:12px;padding:18px 20px;margin:26px 0 6px;box-shadow:var(--shadow-1);overflow-x:auto;max-width:560px}
-.codeblock .lbl{font-family:var(--font-mono),monospace;font-size:11px;color:var(--muted);margin-bottom:11px}
-.codeblock pre{font-family:var(--font-mono),monospace;font-size:12px;line-height:1.75;color:var(--ink-2);white-space:pre;margin:0}
-/* =========================================================
-   MICRO-ANIMATIONS
-   ========================================================= */
-.pop{opacity:0;transform:translateY(30px) scale(.985);animation:pop 1s var(--ease) .34s forwards}
-@keyframes rise{to{opacity:1;transform:none}}
-@keyframes pop{to{opacity:1;transform:none}}
+.ilink:focus-visible{text-decoration:underline;text-underline-offset:3px}
+@media (hover:hover){ .ilink:hover{text-decoration:underline;text-underline-offset:3px} }
+.codeblock{background:var(--bg);border-radius:var(--r);padding:var(--sp-4) var(--sp-5);margin:var(--sp-5) 0 var(--sp-1);box-shadow:var(--shadow-1);overflow-x:auto;max-width:560px}
+.codeblock .lbl{font-family:var(--font-mono),monospace;font-size:var(--fs-label);color:var(--muted);margin-bottom:var(--sp-3)}
+.codeblock pre{font-family:var(--font-mono),monospace;font-size:var(--fs-code);line-height:1.75;color:var(--ink-2);white-space:pre;margin:0}
 @media (max-width:900px){
   .strip{grid-template-columns:1fr}
-  .row{grid-template-columns:1fr;gap:22px}
 }
 @media (prefers-reduced-motion:reduce){
-  .pop{animation:none;opacity:1;transform:none}
   html{scroll-behavior:auto}
   /* The clips STAY. components/Clip.tsx simply never plays them, so each one holds its poster —
      a real frame of the real render. The old rule hid the video outright, which took the poster
@@ -289,28 +278,28 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 }
 /* The nav tightens before it wraps, and wraps before it hides a link behind a menu. */
 @media (max-width:900px){
-  .nav{gap:2px;font-size:13.5px}
-  .nav a{padding:6px 9px}
-  .ghbtn{padding:6px 10px}
+  .nav{gap:0}
+  .nav a,.nav [aria-current="page"]{padding:0 var(--sp-2)}
 }
 /* Below 700 the nav takes its own full-width row under the mark and the GitHub action, and wraps
    rather than scrolls, so no link hides past an edge with no cue. 44px thumb targets. */
-@media (max-width:700px){
-  .bar{flex-wrap:wrap;height:auto;gap:4px 10px;padding:12px 0}
-  .mark{order:1;font-size:18px}
+@media (max-width:640px){
+  :root{--hit:44px}
+  .bar{flex-wrap:wrap;height:auto;gap:var(--sp-1) var(--sp-3);padding:var(--sp-3) 0}
+  .mark{order:1}
   .ghbtn{order:2;margin-left:auto}
-  .nav{order:3;width:100%;flex-wrap:wrap;font-size:14px}
-  .nav a,.nav [aria-current="page"]{display:inline-flex;align-items:center;min-height:44px;padding:0 10px}
+  .nav{order:3;width:100%;flex-wrap:wrap}
+  .nav a,.nav [aria-current="page"]{padding:0 var(--sp-3)}
 }
 /* ===== SECTIONS: one centred column of studio panels, shared by every page =================== */
 .ls{max-width:1040px;margin:0 auto;padding-top:112px}
-.ls > h2{font-size:var(--fs-h2);font-weight:800;letter-spacing:-.03em;line-height:var(--lh-head);text-wrap:balance;max-width:20ch}
+.ls > h2{font-size:var(--fs-h2);font-weight:800;letter-spacing:var(--track-head);line-height:var(--lh-head);text-wrap:balance;max-width:20ch}
 .ls > .ls-sub{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:52ch;text-wrap:pretty}
 .ls-grid{display:grid;gap:var(--sp-3);margin-top:var(--sp-6)}
 .ls-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .ls-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 /* An inner page opens with its own h1 in the same column, closer to the bar than a landing section. */
-.ls-top{padding-top:64px}
-.ls-top > h1{font-size:clamp(2.2rem,4.6vw,3.5rem);font-weight:800;letter-spacing:-.035em;line-height:1;text-wrap:balance;max-width:18ch}
+.ls-top{padding-top:var(--sp-8)}
+.ls-top > h1{font-size:var(--fs-h1);font-weight:800;letter-spacing:var(--track-display);line-height:1;text-wrap:balance;max-width:18ch}
 @media (max-width:900px){ .ls-3{grid-template-columns:1fr 1fr} }
-@media (max-width:640px){ .ls-3,.ls-2{grid-template-columns:minmax(0,1fr)} .ls{padding-top:80px} .ls-top{padding-top:40px} }
+@media (max-width:640px){ .ls-3,.ls-2{grid-template-columns:minmax(0,1fr)} .ls{padding-top:80px} .ls-top{padding-top:var(--sp-7)} }
