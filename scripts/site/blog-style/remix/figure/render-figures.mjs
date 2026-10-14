@@ -1,5 +1,5 @@
 // Renders blog figures from specs/<slug>/<name>.json to site/public/blog/<slug>/<name>.webp (2x of 680 px):
-// node scripts/site/blog-style/remix/figure/render-figures.mjs [<slug>/<name> ...] [--out <dir>] [--page <review.html>]
+// node scripts/site/blog-style/remix/figure/render-figures.mjs [<slug>/<name> ...] [--style vawe|warm|minimal] [--out <dir>] [--page <review.html>]
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -18,6 +18,8 @@ const pageAt = args.indexOf('--page');
 const pageFile = pageAt >= 0 ? args.splice(pageAt, 2)[1] : null;
 const outAt = args.indexOf('--out');
 const outDir = outAt >= 0 ? args.splice(outAt, 2)[1] : blogDir;
+const styleAt = args.indexOf('--style');
+const style = styleAt >= 0 ? args.splice(styleAt, 2)[1] : 'vawe';
 const all = fs.readdirSync(specDir).flatMap((s) => fs.readdirSync(path.join(specDir, s)).filter((f) => f.endsWith('.json')).map((f) => `${s}/${f.slice(0, -5)}`)).sort();
 const ids = args.length ? args : all;
 
@@ -38,7 +40,7 @@ try {
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.setViewport({ width: 680, height: 400, deviceScaleFactor: 2 });
-    await page.goto(`http://127.0.0.1:${port}/scripts/site/blog-style/remix/figure/figure.html?spec=${id}`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/scripts/site/blog-style/remix/figure/figure.html?spec=${id}&style=${style}`, { waitUntil: 'load' });
     await page.waitForFunction('window.__ready === true || window.__error', { timeout: 30000 });
     const error = await page.evaluate('window.__error') || errors[0];
     if (error) { failed.push(`${id}: ${error}`); await page.close(); continue; }

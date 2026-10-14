@@ -6,6 +6,9 @@
 @font-face { font-family: 'Plus Jakarta Sans'; src: url('../../../assets/fonts/PlusJakartaSans.woff2') format('woff2'); font-weight: 200 800; }
 @font-face { font-family: 'Bricolage Grotesque'; src: url('../../../assets/fonts/BricolageGrotesque.woff2') format('woff2'); font-weight: 200 800; }
 
+@font-face { font-family: 'Source Serif 4'; src: url('../../../assets/fonts/SourceSerif4-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; }
+@font-face { font-family: 'Source Serif 4'; src: url('../../../assets/fonts/SourceSerif4-SemiBold.woff2') format('woff2'); font-weight: 600; font-style: normal; }
+@font-face { font-family: 'Source Serif 4'; src: url('../../../assets/fonts/SourceSerif4-Italic.woff2') format('woff2'); font-weight: 400; font-style: italic; }
 :root {
   --bg: #16151a; --surface: #212025; --surface-2: #27262c; --raised: #2f2e35;
   --ink: #ffffff; --ink-2: #d8d8da; --muted: #97969b;

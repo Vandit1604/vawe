@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../../fonts.css">
-<link rel="stylesheet" href="figure.css">
+<link rel="stylesheet" id="style">
+<script>document.getElementById('style').href = { minimal: 'figure.css', warm: 'warm.css' }[new URLSearchParams(location.search).get('style')] || 'vawe.css';</script>
 </head>
 <body>
 <main class="fig" id="fig">

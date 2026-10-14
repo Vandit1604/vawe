@@ -18,10 +18,30 @@
 const q = new URLSearchParams(location.search);
 const specPath = q.get('spec');
 
+const UNIT = /(\d)[ \u00a0](s|ms|min|px|%|dB|MB|KB|GB|fps|x)(?=$|[\s.,;:!?)\]/])/g;
+const DATE = /\b\d{4}-\d{2}(?:-\d{2})?\b/g;
+// A hyphen between two numbers is a range (en dash); a date or a hyphen before a letter stays a hyphen.
+function typeset(text) {
+  const dates = [];
+  const masked = text.replace(DATE, (d) => `\u0000${dates.push(d) - 1}\u0000`);
+  return masked
+    .replace(/(^|[^\w.-])(\d[\d.,]*)-(\d[\d.,]*)(?![\w-])/g, '$1$2\u2013$3')
+    .replace(UNIT, '$1\u00a0$2')
+    .replace(/\u0000(\d+)\u0000/g, (_, i) => dates[i]);
+}
+
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
-  if (text !== undefined && text !== null) { e.textContent = String(text); e.style.whiteSpace = 'pre-line'; }
+  if (text !== undefined && text !== null) {
+    e.style.whiteSpace = 'pre-line';
+    if (tag === 'code') { e.textContent = String(text); return e; }
+    // Plus Jakarta Sans draws its hyphen nearly as wide as an en dash; a compound hyphen gets a narrower glyph box.
+    typeset(String(text)).split(/(?<=\w)-(?=\w)/).forEach((part, i) => {
+      if (i) e.appendChild(Object.assign(document.createElement('span'), { className: 'hy', textContent: '-' }));
+      e.appendChild(document.createTextNode(part));
+    });
+  }
   return e;
 }
 const add = (parent, ...kids) => { kids.filter(Boolean).forEach((k) => parent.appendChild(k)); return parent; };
@@ -140,18 +160,19 @@ const KINDS = {
   },
   code(p) {
     const box = el('div', 'glass code');
+    add(box, add(el('div', 'bar'), el('i'), el('i'), el('i')));
     const notes = p.lines.some((l) => l.note);
     for (const l of p.lines) add(box, add(el('div', notes ? 'code-line' : 'code-line solo'), el('code', '', l.code), notes && el('div', 'sub mono', l.note || '')));
     return box;
   },
   text(p) {
-    return el('div', 'note', p.text);
+    return el('div', p.text.length <= 60 && !p.text.includes('\n') ? 'note short' : 'note', p.text);
   },
   plot(p) {
     const W = 600, H = 300, L = 62, R = 16, T = 14, B = 52;
     const sx = (v) => L + ((v - p.x.min) / (p.x.max - p.x.min)) * (W - L - R);
     const sy = (v) => H - B - ((v - p.y.min) / (p.y.max - p.y.min)) * (H - T - B);
-    const colours = ['#ffffff', '#97969b', '#d8d8da', '#ffffff', '#97969b', '#d8d8da'];
+    const colours = [0, 1, 2, 0, 1, 2].map((i) => `var(--s${i})`);
     const dashes = ['', '', '', '8 6', '8 6', '8 6'];
     const ticks = (a) => a.ticks || [a.min, a.max];
     let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
@@ -163,7 +184,7 @@ const KINDS = {
     if (p.x.label) s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle"></text>`;
     p.series.forEach((ser, k) => {
       const pts = ser.points || bezierPoints(ser.bezier);
-      s += `<polyline fill="none" stroke="${colours[k % 6]}" stroke-width="3" stroke-dasharray="${dashes[k % 6]}" stroke-linejoin="round" points="${pts.map(([x, y]) => `${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join(' ')}"/>`;
+      s += `<polyline fill="none" style="stroke: ${colours[k % 6]}" stroke-width="3" stroke-dasharray="${dashes[k % 6]}" stroke-linejoin="round" points="${pts.map(([x, y]) => `${sx(x).toFixed(1)},${sy(y).toFixed(1)}`).join(' ')}"/>`;
     });
     for (const m of p.marks || []) s += `<circle cx="${sx(m.x)}" cy="${sy(m.y)}" r="5" fill="#fff"/><text x="${sx(m.x) + 10}" y="${sy(m.y) - 10}"></text>`;
     s += '</svg>';
