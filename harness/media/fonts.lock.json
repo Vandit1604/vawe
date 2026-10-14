@@ -147,6 +147,27 @@
       "file": "big-shoulders-latin-wght-normal.woff2",
       "bytes": 36524,
       "sha256": "b0cb3d2f6c96bce799a1f8d9f67eae447d84e2da14d592de186f2ede1c038d50"
+    },
+    "Geist-400.woff": {
+      "pkg": "@fontsource/geist",
+      "version": "5.3.0",
+      "file": "geist-latin-400-normal.woff",
+      "bytes": 16760,
+      "sha256": "b3f9725f946d712db8a411a4ec1bbac766ce87baac703d4a8dcb9f38a89b2cfc"
+    },
+    "Geist-600.woff": {
+      "pkg": "@fontsource/geist",
+      "version": "5.3.0",
+      "file": "geist-latin-600-normal.woff",
+      "bytes": 17148,
+      "sha256": "a08b94ffdc16be071cc85ace7ea5884463fc05775346ec2a292be651b3665a25"
+    },
+    "GeistMono-400.woff": {
+      "pkg": "@fontsource/geist-mono",
+      "version": "5.3.0",
+      "file": "geist-mono-latin-400-normal.woff",
+      "bytes": 13044,
+      "sha256": "ec7ecd39327c39a2b2792c8b402d094619b6c1e517a74420cde8fd67a71ed083"
     }
   }
 }

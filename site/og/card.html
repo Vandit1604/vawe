@@ -6,10 +6,10 @@
     --accent:#3291ff; --bg:#000000; --line:#242424;
     --ink:#ffffff; --ink-2:#d8d8da; --muted:#97969b;
   }
-  @font-face{font-family:Archivo;src:url('/site/public/assets/fonts/Archivo.woff2')format('woff2');font-weight:100 900;font-stretch:62% 125%;font-display:block}
-  @font-face{font-family:JetBrainsMono;src:url('/site/public/assets/fonts/JetBrainsMono.woff2')format('woff2');font-weight:100 800;font-display:block}
+  @font-face{font-family:Geist;src:url('/site/public/assets/fonts/Geist.woff2')format('woff2');font-weight:100 900;font-display:block}
+  @font-face{font-family:GeistMono;src:url('/site/public/assets/fonts/GeistMono.woff2')format('woff2');font-weight:100 900;font-display:block}
   *{margin:0;padding:0;box-sizing:border-box}
-  body{width:1200px;height:630px;background:var(--bg);font-family:Archivo,system-ui;
+  body{width:1200px;height:630px;background:var(--bg);font-family:Geist,system-ui;
        color:var(--ink);overflow:hidden;position:relative}
 
   /* One rule, under the masthead. The earlier version drew a four-column grid the content then
@@ -20,21 +20,20 @@
   .top{position:absolute;left:72px;right:72px;top:56px;display:flex;align-items:center;gap:13px}
   .mark{width:25px;height:25px;background:var(--accent);
         clip-path:polygon(0 62%,25% 22%,50% 62%,75% 22%,100% 62%,100% 100%,0 100%)}
-  .word{font-size:22px;font-weight:600;font-variation-settings:'wdth' 105;letter-spacing:-.015em}
-  .host{margin-left:auto;font-family:JetBrainsMono;font-size:14px;color:var(--muted);letter-spacing:.02em}
+  .word{font-size:22px;font-weight:600;letter-spacing:-.02em}
+  .host{margin-left:auto;font-family:GeistMono;font-size:14px;color:var(--muted);letter-spacing:.02em}
 
-  /* LEFT: the input. Heavy Archivo headings, as on the site (site/IDENTITY.md). */
+  /* LEFT: the input. Geist 600 headings, as on the site. */
   /* Both columns start at 168 and end at 574, so the type block and the frame block are justified
      to the same two horizontals. The gap inside the left column then sits BETWEEN the claim and the
      input that backs it, which is a decision; a ragged bottom edge would just be a leftover. */
   .left{position:absolute;left:72px;top:168px;width:474px;height:406px;
         display:flex;flex-direction:column;justify-content:space-between}
-  h1{font-size:78px;line-height:.94;font-weight:800;letter-spacing:-.035em}
+  h1{font-size:78px;line-height:1;font-weight:600;letter-spacing:-.045em}
   h1 em{font-style:normal}
-  .say{margin-top:20px;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:34ch;
-       font-variation-settings:'wdth' 100}
+  .say{margin-top:20px;font-size:18px;line-height:1.5;color:var(--ink-2);max-width:34ch}
   /* Mono says the string is LITERAL, which is why the input gets it and the prose above never does. */
-  .json{font-family:JetBrainsMono;font-size:13.5px;line-height:1.75;
+  .json{font-family:GeistMono;font-size:13.5px;line-height:1.75;
         color:var(--ink-2);white-space:pre}
   .json b{color:var(--ink);font-weight:500}
   .json i{font-style:normal;color:var(--muted)}

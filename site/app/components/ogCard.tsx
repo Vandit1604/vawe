@@ -20,19 +20,19 @@ import { ImageResponse } from "next/og";
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
 const FONT_DIR = path.join(process.cwd(), "public/assets/fonts");
-let fontsCache: { name: string; data: Buffer; weight: 400 | 800; style: "normal" }[] | null = null;
+let fontsCache: { name: string; data: Buffer; weight: 400 | 600; style: "normal" }[] | null = null;
 
 export async function loadOgFonts() {
   if (fontsCache) return fontsCache;
-  const [bold, regular, mono] = await Promise.all([
-    fs.readFile(path.join(FONT_DIR, "Archivo-800.woff")),
-    fs.readFile(path.join(FONT_DIR, "Archivo-400.woff")),
-    fs.readFile(path.join(FONT_DIR, "JetBrainsMono-400.woff")),
+  const [semibold, regular, mono] = await Promise.all([
+    fs.readFile(path.join(FONT_DIR, "Geist-600.woff")),
+    fs.readFile(path.join(FONT_DIR, "Geist-400.woff")),
+    fs.readFile(path.join(FONT_DIR, "GeistMono-400.woff")),
   ]);
   fontsCache = [
-    { name: "Archivo", data: bold, weight: 800, style: "normal" },
-    { name: "Archivo", data: regular, weight: 400, style: "normal" },
-    { name: "JetBrains Mono", data: mono, weight: 400, style: "normal" },
+    { name: "Geist", data: semibold, weight: 600, style: "normal" },
+    { name: "Geist", data: regular, weight: 400, style: "normal" },
+    { name: "Geist Mono", data: mono, weight: 400, style: "normal" },
   ];
   return fontsCache;
 }
@@ -91,15 +91,15 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
         display: "flex",
         flexDirection: "column",
         background: TOKENS.bg,
-        fontFamily: "Archivo",
+        fontFamily: "Geist",
         color: TOKENS.ink,
       }}
     >
       {/* Masthead: the wordmark, quiet, and the path it belongs to. */}
       <div style={{ display: "flex", alignItems: "center", padding: "40px 64px 0 64px" }}>
         <Mark />
-        <div style={{ marginLeft: 10, fontSize: 19, fontWeight: 800, letterSpacing: "-0.015em" }}>vawe</div>
-        <div style={{ display: "flex", marginLeft: "auto", fontFamily: "JetBrains Mono", fontSize: 14, color: TOKENS.muted, letterSpacing: "0.02em" }}>
+        <div style={{ marginLeft: 10, fontSize: 19, fontWeight: 600, letterSpacing: "-0.02em" }}>vawe</div>
+        <div style={{ display: "flex", marginLeft: "auto", fontFamily: "Geist Mono", fontSize: 14, color: TOKENS.muted, letterSpacing: "0.02em" }}>
           {`vawe.dev${urlPath}`}
         </div>
       </div>
@@ -118,7 +118,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
         <div style={{ display: "flex", flexDirection: "column", width: hasPanel ? 480 : 1056 }}>
           <div
             style={{
-              fontFamily: "JetBrains Mono",
+              fontFamily: "Geist Mono",
               fontSize: 14,
               color: TOKENS.muted,
               letterSpacing: "0.06em",
@@ -132,9 +132,9 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
             style={{
               marginTop: 14,
               fontSize: hasPanel ? 56 : 64,
-              fontWeight: 800,
+              fontWeight: 600,
               lineHeight: 1.06,
-              letterSpacing: "-0.022em",
+              letterSpacing: "-0.04em",
               display: "flex",
             }}
           >
@@ -144,7 +144,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
             style={{
               marginTop: 18,
               fontSize: 21,
-              lineHeight: 1.5,
+              lineHeight: 1.45,
               color: TOKENS.ink2,
               fontWeight: 400,
               maxWidth: hasPanel ? 480 : 780,
@@ -181,7 +181,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
                   background: TOKENS.bg2,
                   borderRadius: PANEL_RADIUS,
                   border: "1px solid rgba(255,255,255,0.08)",
-                  fontFamily: "JetBrains Mono",
+                  fontFamily: "Geist Mono",
                   fontSize: 15,
                   lineHeight: 1.7,
                   color: TOKENS.ink2,
