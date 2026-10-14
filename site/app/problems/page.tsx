@@ -100,7 +100,7 @@ export default function Problems() {
             </p>
             <p className="bnote">
               The plan for the open problems is on the <a href="/roadmap">roadmap</a>. Numbers come
-              from vawe&apos;s own runs and tests. vawe runs on your machine, needs no account and has
+              from vawe’s own runs and tests. vawe runs on your machine, needs no account and has
               no per-render fee.
             </p>
             <Toc label="Jump to" items={[

@@ -64,7 +64,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
             <h1>{r.h1}</h1>
             <p>{r.intro}</p>
             <p className="bnote">
-              Facts read from {r.name}&apos;s own pages on {r.read}. Sources are listed at the end. vawe
+              Facts read from {r.name}’s own pages on {r.read}. Sources are listed at the end. vawe
               runs on your machine, needs no account and has no per-render fee.
             </p>
             <Toc items={[

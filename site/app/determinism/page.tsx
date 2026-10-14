@@ -8,7 +8,7 @@ import "../components/intent.css";
 export const metadata = pageMetadata({
   title: "Deterministic video rendering from HTML | vawe",
   description:
-    "A Vawe film is a page seeked to each frame's time, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true, how it checks it, and why that lets a render split into parallel slices.",
+    "A Vawe film is a page seeked to each frame’s time, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true, how it checks it, and why that lets a render split into parallel slices.",
   path: "/determinism",
 });
 
@@ -38,15 +38,15 @@ export default function Determinism() {
             <PageTop group="Learn" current="Determinism" />
             <h1>Same page in. Same frames out.</h1>
             <p>
-              A Vawe film is an HTML page that the renderer seeks to each frame&apos;s time. Ask for
-              the frame at 4.2 seconds twice, in any order, and it comes back the same. The clock is
+              A Vawe film is an HTML page that the renderer seeks to each frame’s time. Ask for
+              the frame at 4.2&nbsp;seconds twice, in any order, and it comes back the same. The clock is
               replaced before the page runs, and a test renders pages twice and compares every frame.
             </p>
             <Toc items={[
               { href: "#clock", label: "The fake clock" },
               { href: "#test", label: "The test" },
               { href: "#slices", label: "Parallel slices" },
-              { href: "#rates", label: "60 and 30 fps" },
+              { href: "#rates", label: "60 and 30\u00a0fps" },
             ]} />
           </section>
 

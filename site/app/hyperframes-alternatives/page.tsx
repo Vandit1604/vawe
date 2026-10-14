@@ -11,7 +11,7 @@ import "../components/study.css";
 export const metadata = pageMetadata({
   title: "HyperFrames alternatives: vawe, Remotion, Motion Canvas, Lottie",
   description:
-    "Four alternatives to HyperFrames, HeyGen's HTML-to-video framework: vawe, Remotion, Motion Canvas and Lottie, with how you author each and the job it fits.",
+    "Four alternatives to HyperFrames, HeyGen’s HTML-to-video framework: vawe, Remotion, Motion Canvas and Lottie, with how you author each and the job it fits.",
   path: "/hyperframes-alternatives",
 });
 
@@ -62,8 +62,8 @@ const FAQ: QA[] = [
     q: "Which one renders faster?",
     a: (
       <>
-        Neither project publishes a side-by-side number, so we do not claim one. vawe&apos;s own figure:
-        capture of a 20 s film fell from 140 s to 47 s with one Chrome per lane, in{" "}
+        Neither project publishes a side-by-side number, so we do not claim one. vawe’s own figure:
+        capture of a 20&nbsp;s film fell from 140&nbsp;s to 47&nbsp;s with one Chrome per lane, in{" "}
         <a href="/blog/chrome-per-lane">faster headless Chrome rendering</a>.
       </>
     ),
@@ -72,7 +72,7 @@ const FAQ: QA[] = [
     q: "Which is better for an AI agent?",
     a: (
       <>
-        Both aim at an agent that writes the file. vawe&apos;s film is one plain HTML page with no private
+        Both aim at an agent that writes the file. vawe’s film is one plain HTML page with no private
         attributes to learn; the rules are in{" "}
         <a href="/blog/page-contract">render HTML to video: the page contract</a>. HyperFrames ships 21 agent
         skills and a block catalog.
@@ -96,7 +96,7 @@ export default function HyperframesAlternatives() {
             <PageTop group="Compare" current="HyperFrames alternatives" />
             <h1>HyperFrames alternatives.</h1>
             <p>
-              HyperFrames is HeyGen&apos;s open-source framework that turns HTML, CSS and seekable
+              HyperFrames is HeyGen’s open-source framework that turns HTML, CSS and seekable
               animations into MP4. People look for an alternative for an authoring model, a determinism rule or a different job. Four tools are
               worth a look. Each has its own comparison page.
             </p>

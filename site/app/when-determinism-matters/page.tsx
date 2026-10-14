@@ -50,7 +50,7 @@ export default function WhenDeterminismMatters() {
               <p>Three cases. In all three, nobody is scrubbing a timeline to catch a difference by eye, so the guarantee has to be structural.</p>
               <ol className="xp-list">
                 <li><span><strong>An agent approves a draft.</strong> It expects the final render to show the same moments, not a re-render that might drift.</span></li>
-                <li><span><strong>A thousand personalized ad variants.</strong> One template needs the shared background to be identical across all of them, or the &quot;shared&quot; part is a lie.</span></li>
+                <li><span><strong>A thousand personalized ad variants.</strong> One template needs the shared background to be identical across all of them, or the “shared” part is a lie.</span></li>
                 <li><span><strong>A render split across parallel machines.</strong> It only produces one correct video if frame 4000 rendered on machine B matches frame 4000 rendered on machine A.</span></li>
               </ol>
             </div>
@@ -62,7 +62,7 @@ export default function WhenDeterminismMatters() {
               <p>
                 A render pipeline that changes over time (a new effect, a font update, a library
                 bump) can diff two renders of the same input and treat any pixel difference as a
-                bug report. That only works if &quot;the same input&quot; is actually guaranteed to
+                bug report. That only works if “the same input” is actually guaranteed to
                 produce the same bytes absent a real change: without it, every diff is noise, and
                 the team stops trusting the check within a month. This is the same reason software
                 tests are deterministic before they are useful; video is not exempt from it just
@@ -77,7 +77,7 @@ export default function WhenDeterminismMatters() {
               <p>
                 A single creative edit that a person opens, watches, and approves by eye gets
                 nothing from byte-identical replay: the human is already the check. Live
-                compositing and broadcast have no &quot;render it again&quot; step to be
+                compositing and broadcast have no “render it again” step to be
                 identical to. And a generative pixel model producing variation on purpose is
                 solving a different problem than reproduction: asking it to be deterministic
                 would remove the reason to use it. None of this is a weakness in those tools, it is

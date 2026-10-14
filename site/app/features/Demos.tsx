@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 const ASPECTS: { id: string; w: number; h: number; px: string }[] = [
-  { id: "16:9", w: 16, h: 9, px: "1920 x 1080" },
-  { id: "9:16", w: 9, h: 16, px: "1080 x 1920" },
-  { id: "1:1", w: 1, h: 1, px: "1080 x 1080" },
-  { id: "4:5", w: 4, h: 5, px: "1080 x 1350" },
-  { id: "4:3", w: 4, h: 3, px: "1440 x 1080" },
+  { id: "16:9", w: 16, h: 9, px: "1920\u00a0×\u00a01080" },
+  { id: "9:16", w: 9, h: 16, px: "1080\u00a0×\u00a01920" },
+  { id: "1:1", w: 1, h: 1, px: "1080\u00a0×\u00a01080" },
+  { id: "4:5", w: 4, h: 5, px: "1080\u00a0×\u00a01350" },
+  { id: "4:3", w: 4, h: 3, px: "1440\u00a0×\u00a01080" },
 ];
 
 // One small page, laid out by CSS for each canvas: the same markup, the size comes from the box.

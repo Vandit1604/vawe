@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 /* One rendered clip. Solves two things that were the same bug wearing different hats:
  *
- *   1. Reduced motion. The old CSS did `video{display:none}` — but `poster` is an attribute OF
+ *   1. Reduced motion. The old CSS did `video{display:none}`, but `poster` is an attribute OF
  *      the video, so hiding it took the poster too and left a flat gray box where the product
  *      should be. A <video> that never plays already shows its poster: that IS the static-frame
  *      alternative, and it costs nothing because the posters are generated.

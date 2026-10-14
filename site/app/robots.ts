@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-/* site/app/robots.ts — the crawl stance, stated on purpose rather than by omission.
+/* site/app/robots.ts, the crawl stance, stated on purpose rather than by omission.
  *
  * vawe.dev/robots.txt returned 404 until 2026-09-19. With no file, crawlers treat a site as fully
  * open, so nothing was being blocked; but "allowed by accident" and "allowed on purpose" look the

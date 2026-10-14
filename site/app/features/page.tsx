@@ -88,11 +88,11 @@ setTimeout/setInterval  fire when t passes them
 Math.random             reseeded from t`;
 
 const ASPECTS: [string, string][] = [
-  ["16:9", "1920 x 1080"],
-  ["9:16", "1080 x 1920"],
-  ["1:1", "1080 x 1080"],
-  ["4:5", "1080 x 1350"],
-  ["4:3", "1440 x 1080"],
+  ["16:9", "1920\u00a0×\u00a01080"],
+  ["9:16", "1080\u00a0×\u00a01920"],
+  ["1:1", "1080\u00a0×\u00a01080"],
+  ["4:5", "1080\u00a0×\u00a01350"],
+  ["4:3", "1440\u00a0×\u00a01080"],
 ];
 
 const LITERALS = `bin/vawe studio films/my-launch/page.html --port 8800
@@ -134,12 +134,12 @@ skills/vawe-reference`;
 
 const PIPELINE: [string, string][] = [
   ["new", "page.html and brief.md"],
-  ["dev", "draft mp4, half size, 30 fps, silent"],
+  ["dev", "draft mp4, half size, 30\u00a0fps, silent"],
   ["strip", "one image per cut"],
   ["critique", "notes from a session that did not write the page"],
   ["judge --fresh", "a score from key frames"],
   ["approve", "the owner signs off"],
-  ["ship", "final mp4, 60 fps, blur, audio"],
+  ["ship", "final mp4, 60\u00a0fps, blur, audio"],
 ];
 
 function Pipeline() {
@@ -173,10 +173,10 @@ function HashProof() {
 
 function AudioLane() {
   return (
-    <div className="panel fta" role="img" aria-label="A voice-over at 1 s and a hit at 2.4 s on a 4 s film, mixed offline">
+    <div className="panel fta" role="img" aria-label="A voice-over at 1\u00a0s and a hit at 2.4\u00a0s on a 4\u00a0s film, mixed offline">
       <div className="fta-lane"><span className="meta">vo.mp3</span><i style={{ left: "25%", width: "48%" }} /></div>
       <div className="fta-lane"><span className="meta">hit.mp3</span><i style={{ left: "60%", width: "6%" }} /></div>
-      <div className="fta-axis meta"><span>0 s</span><span>data-at 1</span><span>data-at 2.4</span><span>4 s</span></div>
+      <div className="fta-axis meta"><span>0&nbsp;s</span><span>data-at 1</span><span>data-at 2.4</span><span>4&nbsp;s</span></div>
     </div>
   );
 }
@@ -265,7 +265,7 @@ export default function Features() {
               The end-to-end test renders pages twice and compares every frame. The frames must also differ over time, so a frozen page
               fails too.
             </Feature>
-            <Feature title="Draft fast, ship at 60 fps" proof={<Code label="two renders">{RATES}</Code>}>
+            <Feature title="Draft fast, ship at 60\u00a0fps" proof={<Code label="two renders">{RATES}</Code>}>
               Frames are seeked at fractional times, so the render rate is independent of the page. A draft is for a quick look; the final
               mixes the audio and adds motion blur.
             </Feature>
@@ -364,7 +364,7 @@ export default function Features() {
             <div className="ft-film">
               <Clip webm="/examples/cindre.webm" src="/examples/cindre.mp4" poster="/examples/cindre.webp" decorative />
             </div>
-            <span className="meta">CINDRE, a 10 s perfume film. One page, rendered by vawe.</span>
+            <span className="meta">CINDRE, a 10&nbsp;s perfume film. One page, rendered by vawe.</span>
           </section>
 
           <Next

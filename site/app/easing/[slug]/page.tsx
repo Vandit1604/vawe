@@ -105,7 +105,7 @@ function Handles({ e }: { e: Ease }) {
     <section className="ez-sec" aria-labelledby="ae">
       <h2 id="ae">After Effects handles</h2>
       <p>
-        Set these in After Effects under Keyframe Velocity: the outgoing handle on the first key, the incoming handle on the second. <strong>Influence</strong> is how far along the segment the handle reaches, in per cent of its duration. <strong>Speed</strong> is the pace at the key as a multiple of the segment&apos;s average (0 stops dead, 1 is straight).
+        Set these in After Effects under Keyframe Velocity: the outgoing handle on the first key, the incoming handle on the second. <strong>Influence</strong> is how far along the segment the handle reaches, in per cent of its duration. <strong>Speed</strong> is the pace at the key as a multiple of the segment’s average (0 stops dead, 1 is straight).
       </p>
       <div className="ez-scroll">
         <table className="ez-table">
@@ -208,7 +208,7 @@ export default async function EasePage({ params }: Params) {
                   <img src={`/easing/${e.slug}.webp`} alt="" width={640} height={360} loading="lazy" decoding="async" />
                   <Clip src={`/easing/${e.slug}.mp4`} webm={`/easing/${e.slug}.webm`} />
                 </div>
-                <figcaption className="ez-cap">2 s film from the vawe renderer: {e.name} against linear.</figcaption>
+                <figcaption className="ez-cap">2&nbsp;s film from the vawe renderer: {e.name} against linear.</figcaption>
               </figure>
             ) : null}
           </section>

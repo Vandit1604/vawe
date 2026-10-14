@@ -114,7 +114,7 @@ export const RIVALS: Rival[] = [
       "HyperFrames and vawe both render HTML to MP4 under Apache-2.0 with an agent in mind. They differ in timing, determinism and ecosystem. A fact-checked comparison, including where HyperFrames is stronger.",
     h1: "vawe vs HyperFrames.",
     intro:
-      "HyperFrames is HeyGen's open-source framework for rendering HTML to video. It is vawe's closest peer: Apache-2.0, headless Chrome, and a pitch aimed at agents. This page lists the differences that remain.",
+      "HyperFrames is HeyGen’s open-source framework for rendering HTML to video. It is vawe’s closest peer: Apache-2.0, headless Chrome, and a pitch aimed at agents. This page lists the differences that remain.",
     what:
       "HyperFrames turns HTML, CSS, media and seekable animations into MP4. A composition is plain HTML with data attributes for timing and tracks, animated by GSAP, CSS, Lottie, Three.js, Anime.js or the Web Animations API.",
     stronger: [
@@ -209,7 +209,7 @@ export const RIVALS: Rival[] = [
       { feature: "What it is", them: "TypeScript library and editor for vector animation", vawe: "Framework to make films from one HTML page" },
       { feature: "Licence", them: "MIT", vawe: "Apache-2.0", t: "yes", v: "yes" },
       { feature: "Authoring model", them: "TypeScript generator functions that describe the animation step by step", vawe: "One HTML page: CSS, Web Animations, SVG, canvas, three.js" },
-      { feature: "Rendering", them: "Editor renders an image sequence to /output; an FFmpeg exporter makes a video", vawe: "Headless Chrome seeks and screenshots each frame; encodes one MP4 with the page's audio" },
+      { feature: "Rendering", them: "Editor renders an image sequence to /output; an FFmpeg exporter makes a video", vawe: "Headless Chrome seeks and screenshots each frame; encodes one MP4 with the page’s audio" },
       { feature: "Agent support", them: "None found in its official docs or site", vawe: "bin/vawe CLI and skills for writing, critiquing and judging a film", t: "no", v: "yes" },
       { feature: "Editor", them: "Web editor with real-time preview and audio sync", vawe: "No timeline editor: the page is the film", t: "yes", v: "no" },
     ],

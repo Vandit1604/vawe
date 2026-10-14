@@ -102,7 +102,7 @@ export default function EasingIndex() {
           <details className="panel ez-why">
             <summary>How the vawe eases were chosen</summary>
             <p>
-              A <code>cubic-bezier()</code> is four numbers. An After Effects keyframe has two handles. <strong>Influence</strong> is how far along the segment the handle reaches, in per cent of its duration. <strong>Speed</strong> is the pace at the key, as a multiple of the segment&apos;s average.
+              A <code>cubic-bezier()</code> is four numbers. An After Effects keyframe has two handles. <strong>Influence</strong> is how far along the segment the handle reaches, in per cent of its duration. <strong>Speed</strong> is the pace at the key, as a multiple of the segment’s average.
             </p>
             <p>
               The nine vawe eases are the handle pairs found in {num(STATS.lottieSegments)} Lottie segments and {STATS.hfSegments} HyperFrames segments. Each is exact as a cubic bezier and ships as a <code>linear()</code> string that runs in any browser.

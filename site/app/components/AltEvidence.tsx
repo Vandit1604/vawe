@@ -3,17 +3,17 @@ import Link from "next/link";
 // Every number here is measured in the linked blog post; change both together.
 const EVIDENCE = [
   {
-    fact: "One blind A/B run on the same brief: a fresh agent finished the film in 5.9 minutes with one HTML page and in 10.75 minutes with our old custom JSON format.",
+    fact: "One blind A/B run on the same brief: a fresh agent finished the film in 5.9\u00a0minutes with one HTML page and in 10.75\u00a0minutes with our old custom JSON format.",
     href: "/blog/html-over-json",
     label: "HTML vs a custom JSON video format",
   },
   {
-    fact: "Two renders of one SVG-filter page differed in 70 of 216 frames in a shared browser, and in 0 of 648 after a Chrome per lane and software compositing.",
+    fact: "Two renders of one SVG-filter page differed in 70 of 216\u00a0frames in a shared browser, and in 0 of 648 after a Chrome per lane and software compositing.",
     href: "/blog/determinism",
     label: "Deterministic rendering in headless Chrome",
   },
   {
-    fact: "One headless Chrome per render lane cut frame capture for a 20 s film from 140 s to 47 s.",
+    fact: "One headless Chrome per render lane cut frame capture for a 20\u00a0s film from 140\u00a0s to 47\u00a0s.",
     href: "/blog/chrome-per-lane",
     label: "Faster headless Chrome rendering",
   },

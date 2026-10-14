@@ -36,7 +36,7 @@ const CHAPTERS = [
   },
   {
     id: "c3",
-    tag: "03 / The result · showcase, 14 s",
+    tag: "03 / The result · showcase, 14\u00a0s",
     title: "One mp4. Every canvas.",
     text: "16:9, 9:16, 1:1, 4:5 and 4:3 from the same page. Audio mixed offline.",
     film: example("showcase"),
@@ -110,8 +110,8 @@ export default function Home() {
             <p>Open it in a browser and it plays. Hand it to vawe and it seeks the page to each frame, so frame 412 is the same on every run. A change to the motion is a diff you can read before it ships.</p>
             <div>
               <div className="lp-cmd"><span>$</span>bin/vawe new hello<em>a valid starter</em></div>
-              <div className="lp-cmd"><span>$</span>bin/vawe dev films/hello/page.html<em>draft, 30 fps</em></div>
-              <div className="lp-cmd"><span>$</span>bin/vawe ship films/hello/page.html<em>final, 60 fps</em></div>
+              <div className="lp-cmd"><span>$</span>bin/vawe dev films/hello/page.html<em>draft, 30&nbsp;fps</em></div>
+              <div className="lp-cmd"><span>$</span>bin/vawe ship films/hello/page.html<em>final, 60&nbsp;fps</em></div>
             </div>
             <a className="btn lp-btn-line" href={REPO_URL}>Read the page contract</a>
           </div>

@@ -8,7 +8,7 @@ export default function Image() {
     tag: "launch video",
     title: "Vawe · launch video",
     description:
-      "How Vawe builds a product launch video: real captured UI, not invented mockups, one message per beat, from the site's own palette and type.",
+      "How Vawe builds a product launch video: real captured UI, not invented mockups, one message per beat, from the site’s own palette and type.",
     path: "/launch-video",
   });
 }

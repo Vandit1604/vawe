@@ -10,7 +10,7 @@ import "../components/intent.css";
 export const metadata = pageMetadata({
   title: "Remotion alternative: vawe, HyperFrames and hosted APIs",
   description:
-    "Remotion alternatives sorted into self-hosted engines (vawe, HyperFrames) and hosted JSON video APIs, with Remotion's 3-employee license rule quoted.",
+    "Remotion alternatives sorted into self-hosted engines (vawe, HyperFrames) and hosted JSON video APIs, with Remotion’s 3-employee license rule quoted.",
   path: "/remotion-alternatives",
 });
 
@@ -26,7 +26,7 @@ export const metadata = pageMetadata({
 const FAQ: QA[] = [
   {
     q: "Is there a free Remotion alternative for a company with more than three employees?",
-    a: "Yes. vawe and HyperFrames both ship under Apache-2.0, with no company-size clause and no paid tier. Remotion's own license asks a for-profit company past three employees for a paid Company License.",
+    a: "Yes. vawe and HyperFrames both ship under Apache-2.0, with no company-size clause and no paid tier. Remotion’s own license asks a for-profit company past three employees for a paid Company License.",
   },
   {
     q: "Can I keep my React components?",
@@ -69,7 +69,7 @@ export default function RemotionAlternatives() {
             <PageTop group="Compare" current="Remotion alternatives" />
             <h1>Remotion alternatives, by category.</h1>
             <p>
-              &quot;Remotion alternative&quot; returns two different products under one query:
+              “Remotion alternative” returns two different products under one query:
               a hosted API you POST a JSON file to, and a self-hosted engine you run yourself.
               They solve different problems, so this page sorts the field first.
             </p>
@@ -79,7 +79,7 @@ export default function RemotionAlternatives() {
             <Toc items={[
               { href: "#table", label: "The table" },
               { href: "#shapes", label: "Two shapes" },
-              { href: "#license", label: "Remotion's license" },
+              { href: "#license", label: "Remotion’s license" },
               { href: "#faq", label: "Questions" },
             ]} />
           </section>
@@ -153,11 +153,11 @@ export default function RemotionAlternatives() {
 
           <section className="isec" id="license">
             <div className="isec-text">
-              <h2>Remotion&apos;s own license, quoted directly.</h2>
+              <h2>Remotion’s own license, quoted directly.</h2>
               <p>
-                Remotion&apos;s <code>LICENSE.md</code> grants a free license to an individual, a
-                non-profit, a company still evaluating the software, or &quot;a for-profit
-                organization with up to 3 employees.&quot; A for-profit company past three
+                Remotion’s <code>LICENSE.md</code> grants a free license to an individual, a
+                non-profit, a company still evaluating the software, or “a for-profit
+                organization with up to 3 employees.” A for-profit company past three
                 employees needs a paid Company License to use it. That threshold is the single
                 most common reason a team searches for a Remotion alternative in the first place:
                 it is not a limitation of the software, it is a term of the license.
@@ -200,9 +200,9 @@ paid "Company License":
             <div className="isec-text">
               <h2>JSON2Video: a hosted API, priced by the minute.</h2>
               <p>
-                JSON2Video&apos;s public pricing page offers a free plan (600 credits, no card
+                JSON2Video’s public pricing page offers a free plan (600 credits, no card
                 required), then subscriptions starting at $16.95/month for 3,000 credits and up to
-                50 minutes of rendered output, rising to $99.95/month for 30,000 credits. It is a
+                50&nbsp;minutes of rendered output, rising to $99.95/month for 30,000 credits. It is a
                 reasonable choice for a team that wants zero infrastructure and does not need a
                 custom effect vocabulary: the tradeoff is a running bill per minute rendered, and no
                 self-hosting option on that page.
@@ -219,7 +219,7 @@ paid "Company License":
               <p>
                 This page does not state a render-speed number, a reliability figure, or an
                 output-quality opinion for any competitor, because none of that is published
-                anywhere citable. Where a fact was not found on the project&apos;s own site, it is
+                anywhere citable. Where a fact was not found on the project’s own site, it is
                 left out rather than guessed. If one of the facts above has changed, the source it
                 was read from is linked above so it can be checked again.
               </p>
