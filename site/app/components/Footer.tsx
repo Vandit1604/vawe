@@ -11,7 +11,6 @@ const ROUTES = (sitePages.routes as Route[]).filter((r): r is Required<Route> =>
 const NAV_GROUPS: { title: string; group: string }[] = [
   { title: "Product", group: "product" },
   { title: "Learn", group: "topic" },
-  { title: "Use cases", group: "job" },
   { title: "Compare", group: "comparison" },
   { title: "Project", group: "project" },
 ];
