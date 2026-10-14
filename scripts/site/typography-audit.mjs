@@ -18,7 +18,7 @@ const BASE = arg('--base', 'http://localhost:3000');
 const SHOTS = arg('--shots', '');
 const JSON_OUT = arg('--json', '');
 const ONLY = arg('--only', '');
-const SHOT_ROUTES = ['/', '/features', '/moves', '/moves/mask-rise', '/easing', '/blog', '/vs/remotion'];
+const SHOT_ROUTES = ['/', '/features', '/moves', '/moves/mask-rise', '/easing', '/blog', '/vs/remotion', '/blog/advise-refuse'];
 const BROWSER_SRC = fs.readFileSync(path.join(ROOT, 'scripts/site/typography-audit.browser.js'), 'utf8');
 
 function routeList() {
