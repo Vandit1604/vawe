@@ -32,14 +32,10 @@ export default function BlogIndex() {
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema(crumbs))} />
         <div className="bl">
           <header className="bl-mast">
-            <p className="kicker">The vawe blog</p>
             <h1>
-              What broke, what we measured, <span className="bl-h1-2">and what we changed.</span>
+              Notes from building vawe, <span className="bl-h1-2">with the numbers.</span>
             </h1>
-            <p className="bl-dek">
-              We build a framework where an agent writes one HTML page and the renderer turns it into a film. These are
-              the notes from building it, with the numbers.
-            </p>
+            <p className="bl-dek">An agent writes one HTML page and the renderer turns it into a film.</p>
             <p className="meta bl-rss"><a href="/blog/rss.xml">RSS feed</a></p>
           </header>
 
@@ -71,7 +67,7 @@ export default function BlogIndex() {
               </ul>
             </>
           ) : (
-            <p className="bl-intro">The first posts are on their way.</p>
+            <p className="bl-intro">No posts yet.</p>
           )}
         </div>
       </main>

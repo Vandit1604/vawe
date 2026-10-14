@@ -11,7 +11,7 @@ export const SECTIONS = [
   { id: "architecture", label: "Architecture", intro: "How the engine is shaped: one HTML page in, one film out, and the formats and owners we removed on the way." },
   { id: "agent-experience", label: "Agent experience", intro: "What an agent gets wrong on its own, and the commands, defaults and checks that make a weaker model succeed." },
   { id: "taste", label: "Taste", intro: "Motion, type and colour: how we turned judgement about a good film into rules, references and checks." },
-  { id: "measurement", label: "Measurement", intro: "Judges, benchmarks and numbers: how we know a change made films better and not only different." },
+  { id: "measurement", label: "Measurement", intro: "Judges, benchmarks and numbers: how we know a change made films better." },
   { id: "speed", label: "Speed", intro: "Render time, draft loops and the work we stopped doing twice." },
 ] as const;
 

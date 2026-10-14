@@ -35,7 +35,7 @@ export default function Moves() {
           />
           <Next
             title="Copy one into a page."
-            lead="Every move page ends in a snippet. Chain moves with the recipes, or hand the list to an agent."
+            lead="Chain moves with the recipes, or hand the list to an agent."
             primary={{ href: "/docs/recipes", label: "Chain moves with recipes" }}
             secondary={{ href: "/ai-agents", label: "Let an agent use them" }}
             related={[
