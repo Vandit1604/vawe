@@ -145,7 +145,7 @@ Spike A, "full-bleed film scroll": the story is problem, page, render, result, t
 - **Hero:** one rounded frame the height of the viewport (`100svh`) holding the tracking HUD film, the h1
   at `clamp(3rem, 10.5vw, 11rem)`, one line of copy and two buttons. The bar floats over it
   (`.bar-overlay`: fixed, 72% black, 12px blur, one hairline). Under 760 the film is a 16:9 frame and the copy sits below it.
-- **Four chapters** (`.lp-ch`, 240svh tall; under 760 they do not pin and sit in normal flow): each pins a `100svh` stage (`position: sticky`) with one large
+- **Four chapters** (the fourth, the result, plays the multi-beat showcase film, `/examples/showcase.*`, 14 s, audio stripped) (`.lp-ch`, 240svh tall; under 760 they do not pin and sit in normal flow): each pins a `100svh` stage (`position: sticky`) with one large
   film in a frame of 28px radius (16px under 640). `LandingMotion` writes `--in` (0 to 1 as the chapter enters)
   and `--out` (0 to 1 over the last 15%) on the chapter: the frame scales `.84 + .16 * in - .05 * out` and the caption
   fades and rises with `--in`. Plain CSS sticky and one rAF-throttled scroll handler, no animation library.
@@ -158,6 +158,29 @@ Spike A, "full-bleed film scroll": the story is problem, page, render, result, t
 - The scroll reveal (600 ms) and the chapter scale break the "under 300 ms" motion rule on purpose: they run once per
   scroll position and carry the story, they are not feedback to an action.
 - Landing-only sizes are custom properties on `.lp` (`--fs-mega`, `--fs-chapter`, `--fs-section`, `--fs-end`, `--r-frame`).
+
+## Features
+
+`app/features/page.tsx`, `features.css` (classes prefixed `ft-`). Every decision gets its own proof, not a wall of text:
+a stat strip (5 time sources replaced, 1 to 3 subframes, 5 stages), then one row per decision. Row 1 shows two render
+orders that give the same four frames and the `seek(t)` snippet. Row 2 shows a fast move clip and a still-versus-fast
+subframe diagram. Row 3 shows the five-command loop as a ladder. The page ends on the CINDRE film
+(`/examples/cindre.*`, 10 s, audio stripped), then the footer bookend with the one call to action. Each row keeps its
+cited source file and its extra facts as one short muted note.
+
+## Laws of UX
+
+One line per law: where it shaped a section (lawsofux.com).
+
+- Jakob's law: the landing is a hero, chapters, FAQ and a close, the order every dev-tool page uses; features is a stat strip and alternating rows.
+- Hick's law and choice overload: the landing hero has two buttons, the close has two, the features page adds none beyond the footer bookend.
+- Fitts's law: every button and link is 44px tall; the hero and chapter films are the biggest targets on the page.
+- Proximity and common region: on features each decision's text, proof and source file sit together, and the proof sits in one hairline well.
+- Von Restorff: the pure black page has one standout per screen, a film frame or a 5xl number.
+- Serial position and peak-end: the landing opens on the HUD film and closes on "Write the page."; the result chapter plays the showcase, the peak; features ends on CINDRE.
+- Miller and chunking: three stats, three decisions, five steps, four chapters, six moves.
+- Doherty threshold: films sit in fixed-ratio frames with a poster and `preload="none"`, so there is no shift and nothing blocks paint.
+- Aesthetic-usability: hairlines, one radius family and tight Geist type make the page read as easy to use.
 
 ## Elevation & Depth
 
@@ -435,3 +458,9 @@ Say what you REJECTED, not only what you took. A fetched skill arrives with defa
 this project: a font stack, an icon set, a colour strategy. The local system wins on specifics, because
 it has read these tokens and that register. Recording the rejection is what stops the next author
 re-importing the default and calling it the house style.
+
+### Features page and Laws of UX (2026-10-14)
+
+Used: `pbakaus/layout` (group by proximity before adding containers; one spacing scale) and `danilaa1/compact-landing`
+(real product content, no fake metrics; one product-native artifact per section). Rejected: compact-landing's random design
+fingerprint, its 440px column and its button-size question; the local tokens win.
