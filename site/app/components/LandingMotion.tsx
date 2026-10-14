@@ -23,7 +23,7 @@ export function LandingMotion() {
         const r = c.getBoundingClientRect();
         if (r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.5) inChapter = true;
         if (calm.matches) continue;
-        const progress = clamp(-r.top / (r.height - innerHeight));
+        const progress = clamp(-r.top / Math.max(1, r.height - innerHeight));
         const entered = 1 - Math.pow(1 - clamp((innerHeight - r.top) / (innerHeight * 0.9)), 3);
         c.style.setProperty("--in", entered.toFixed(3));
         c.style.setProperty("--out", clamp((progress - 0.85) / 0.15).toFixed(3));

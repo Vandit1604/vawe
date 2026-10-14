@@ -30,7 +30,7 @@
 .lp-hero-frame::after{content:"";position:absolute;inset:35% 0 0 0;background:linear-gradient(to top,#000 2%,rgba(0,0,0,0));pointer-events:none}
 .lp-hero-copy{position:absolute;z-index:var(--z-raise);left:var(--gutter);right:var(--gutter);bottom:clamp(24px,5vh,56px);display:grid;gap:22px;justify-items:start}
 .lp-display{font-size:var(--fs-mega);line-height:.88;letter-spacing:-.07em}
-.lp .lp-hero-brand{display:inline-block;margin-bottom:var(--sp-5);padding:var(--sp-1) var(--sp-3);border-radius:var(--r-pill);background:rgba(0,0,0,.6);color:var(--ink-2)}
+.lp .lp-hero-brand{display:block;width:fit-content;margin-bottom:var(--sp-5);padding:var(--sp-1) var(--sp-3);border-radius:var(--r-pill);background:rgba(0,0,0,.6);color:var(--ink-2)}
 .lp-lede{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.5;color:var(--ink-2);max-width:46ch;text-wrap:pretty}
 @media (max-width:760px){
   .lp-hero{height:auto;min-height:0;padding:var(--sp-2) var(--sp-3) 0}
@@ -52,13 +52,13 @@
 .lp-cap h2{font-size:var(--fs-chapter);line-height:.92;letter-spacing:-.06em}
 .lp-cap p{color:var(--ink-2);font-size:clamp(1rem,1.4vw,1.1875rem);line-height:1.5;max-width:48ch;text-wrap:pretty}
 @media (max-width:760px){
-  .lp-ch{height:150svh}
-  .lp-stage{display:flex;flex-direction:column;justify-content:center;padding:var(--sp-3)}
-  .lp .lp-pane{height:auto;border:0;border-radius:0;overflow:visible;transform-origin:50% 0}
+  .lp-ch{height:auto}
+  .lp-stage{position:static;height:auto;padding:var(--sp-8) var(--sp-3) 0}
+  .lp .lp-pane{height:auto;border:0;border-radius:0;overflow:visible;transform:none;will-change:auto}
   .lp-pane::after{display:none}
   .lp-pane .lp-film{position:static;aspect-ratio:16/9;height:auto;border-radius:var(--r-frame);border:1px solid var(--line-2)}
   .lp-pane .lp-tag{position:static;display:inline-block;margin:var(--sp-4) 0 0 var(--sp-1);padding:0;background:none}
-  .lp-cap{position:static;padding:var(--sp-3) var(--sp-1) 0}
+  .lp-cap{position:static;padding:var(--sp-3) var(--sp-1) 0;opacity:1;translate:none}
 }
 @media (prefers-reduced-motion:reduce){
   .lp-ch{height:auto}
