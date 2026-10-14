@@ -67,7 +67,7 @@
       "path": "/launch-video",
       "priority": 0.7,
       "changeFrequency": "monthly",
-      "group": "job",
+      "group": "topic",
       "label": "Launch video"
     },
     {

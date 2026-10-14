@@ -5,6 +5,7 @@ import { pageMetadata } from "../components/seo";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { CSS, EASES, FAMILIES, STATS, VAWE, classicIn, itemListSchema, speedText, type Ease } from "../../lib/easing";
 import { Thumb } from "./Charts";
+import { Next } from "../components/Xp";
 import "./easing.css";
 
 export const metadata = pageMetadata({
@@ -53,11 +54,11 @@ export default function EasingIndex() {
             <p className="ez-sum">
               {EASES.length} easing curves, each with its progress curve, its velocity curve, a live demo and the code to copy: the CSS <code>linear()</code> string, the nearest <code>cubic-bezier()</code>, and the Web Animations line. Every number on these pages is computed from the vawe motion library.
             </p>
-            <p className="meta ez-meta">
+            <nav className="xp-toc" aria-label="On this page">
               <a href="#vawe">vawe After Effects eases</a>
               <a href="#css">CSS keywords</a>
               <a href="#classic">Classic eases</a>
-            </p>
+            </nav>
           </header>
 
           <section className="panel ez-intro" aria-labelledby="why">
@@ -99,6 +100,13 @@ export default function EasingIndex() {
               </div>
             ))}
           </section>
+
+          <Next
+            title="Put one in a page."
+            lead="Every curve here ships as a linear() string that runs in any browser."
+            primary={{ href: "/moves", label: "See the moves" }}
+            secondary={{ href: "/docs/motion", label: "Motion in the docs" }}
+          />
         </div>
       </main>
       <Footer active="/easing" />

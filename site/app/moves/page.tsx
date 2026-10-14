@@ -5,6 +5,7 @@ import { FEATURED, GROUPS, JOBS, LOOKS, MOVES, moveByName, toCard } from "../../
 import { jsonLdScript } from "../../lib/schema";
 import { movesItemListSchema } from "../../lib/schema-content";
 import { MovesGallery } from "./MovesGallery";
+import { Next } from "../components/Xp";
 import "./moves.css";
 
 export const metadata = pageMetadata({
@@ -31,6 +32,17 @@ export default function Moves() {
             groups={GROUPS}
             looks={LOOKS}
             jobs={JOBS.map(({ id, label }) => ({ id, label }))}
+          />
+          <Next
+            title="Copy one into a page."
+            lead="Every move page ends in a snippet. Chain moves with the recipes, or hand the list to an agent."
+            primary={{ href: "/docs/recipes", label: "Chain moves with recipes" }}
+            secondary={{ href: "/ai-agents", label: "Let an agent use them" }}
+            related={[
+              { href: "/easing", label: "Easing functions as CSS" },
+              { href: "/docs/motion", label: "The motion guide" },
+              { href: "/launch-video", label: "A launch film, built from these moves" },
+            ]}
           />
         </section>
       </main>

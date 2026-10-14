@@ -1,7 +1,8 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import { OpenSourceMark } from "../components/Icon";
+import { REPO_URL } from "../components/Header";
+import { Next, PageTop } from "../components/Xp";
 import "../components/intent.css";
 import "../components/study.css";
 
@@ -52,9 +53,9 @@ export default function Roadmap() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" className="ipage" tabIndex={-1}>
+        <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
-            <OpenSourceMark />
+            <PageTop group="Project" current="Roadmap" />
             <h1>Roadmap: now, next, later.</h1>
             <p>
               The order of work on vawe. There are no dates: Now comes before Next, and Next before Later.
@@ -66,8 +67,8 @@ export default function Roadmap() {
           </section>
 
           <div className="cols">
-            {COLUMNS.map((c) => (
-              <section className="col" key={c.title} aria-labelledby={`r-${c.title}`}>
+            {COLUMNS.map((c, n) => (
+              <section className="col" key={c.title} data-now={n === 0 || undefined} aria-labelledby={`r-${c.title}`}>
                 <h2 id={`r-${c.title}`}>{c.title}</h2>
                 <p>{c.lead}</p>
                 <ul>
@@ -83,18 +84,12 @@ export default function Roadmap() {
             ))}
           </div>
 
-          <section className="iend">
-            <h2 className="h2">Follow the work.</h2>
-            <p className="lead">
-              vawe is open source under Apache-2.0, runs on your machine, needs no account and has no per-render fee. Open an issue if a problem here costs you a film.
-            </p>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="https://github.com/Vandit1604/vawe">
-                vawe on GitHub <span className="arw">→</span>
-              </a>
-              <a className="btn btn-ghost" href="/problems">Read the problems</a>
-            </div>
-          </section>
+          <Next
+            title="Follow the work."
+            lead="vawe is open source under Apache-2.0, runs on your machine, needs no account and has no per-render fee. Open an issue if a problem here costs you a film."
+            primary={{ href: REPO_URL, label: "vawe on GitHub" }}
+            secondary={{ href: "/problems", label: "Read the problems" }}
+          />
         </main>
       </div>
       <Footer active="/roadmap" />

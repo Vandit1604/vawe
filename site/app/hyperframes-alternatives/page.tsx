@@ -2,7 +2,8 @@ import { Header } from "../components/Header";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import { GithubCta, OpenSourceMark } from "../components/Icon";
+import { REPO_URL } from "../components/Header";
+import { Next, PageTop, Toc } from "../components/Xp";
 import { AltEvidence, type QA } from "../components/AltEvidence";
 import "../components/intent.css";
 import "../components/study.css";
@@ -90,9 +91,9 @@ export default function HyperframesAlternatives() {
       <Header />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "HyperFrames alternatives", url: "/hyperframes-alternatives" }]))} />
       <div className="wrap">
-        <main id="content" className="ipage" tabIndex={-1}>
+        <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
-            <OpenSourceMark />
+            <PageTop group="Compare" current="HyperFrames alternatives" />
             <h1>HyperFrames alternatives.</h1>
             <p>
               HyperFrames is HeyGen&apos;s open-source framework that turns HTML, CSS and seekable
@@ -101,36 +102,15 @@ export default function HyperframesAlternatives() {
               a look. Each has its own comparison page.
             </p>
             <p className="bnote">Read 2026-10-03.</p>
+            <Toc items={[
+              { href: "#table", label: "The table" },
+              { href: "#alternatives", label: "Four alternatives" },
+              { href: "#faq", label: "Questions" },
+              { href: "#stay", label: "Stay on HyperFrames" },
+            ]} />
           </section>
 
-          {ALTERNATIVES.map((a) => (
-            <section className="isec" key={a.name}>
-              <div className="isec-text">
-                <h2>{a.name}</h2>
-                <p>{a.body}</p>
-                <div className="irelated">
-                  <a href={a.href}>{a.cta}</a>
-                </div>
-              </div>
-            </section>
-          ))}
-
-          <AltEvidence faq={FAQ} />
-
-          <section className="tfacts">
-            <h2>When to stay on HyperFrames.</h2>
-            <p>
-              HyperFrames has a Studio browser editor, a catalog of reusable blocks, 21 agent skills,
-              and cloud rendering on Lambda, Cloud Run and HeyGen. If you want those, stay. The
-              HyperFrames comparison page lists them with sources.
-            </p>
-            <div className="srcs">
-              <a href="https://github.com/heygen-com/hyperframes" rel="noopener">HyperFrames README</a>
-              <a href="https://hyperframes.heygen.com/introduction" rel="noopener">HyperFrames introduction</a>
-            </div>
-          </section>
-
-          <section className="iend">
+          <section className="iend" id="table">
             <h2 className="h2">The short table.</h2>
             <div className="itable-wrap">
               <table className="itable">
@@ -149,7 +129,7 @@ export default function HyperframesAlternatives() {
                     <td>Apache-2.0</td>
                     <td>MP4</td>
                   </tr>
-                  <tr>
+                  <tr className="is-vawe">
                     <td>vawe</td>
                     <td>One HTML page</td>
                     <td>Apache-2.0</td>
@@ -176,19 +156,44 @@ export default function HyperframesAlternatives() {
                 </tbody>
               </table>
             </div>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="/vs/hyperframes">
-                vawe vs HyperFrames <span className="arw">→</span>
-              </a>
-              <GithubCta />
-            </div>
-            <div className="irelated">
-              <a href="/remotion-alternatives">Remotion alternatives, categorized</a>
-              <a href="/determinism">How vawe keeps renders deterministic</a>
-              <a href="/ai-agents">How an agent writes and checks a film</a>
-              <a href="/blog/page-contract">How vawe renders HTML to video</a>
+          </section>
+
+          <ul className="xp-alts" id="alternatives">
+            {ALTERNATIVES.map((a) => (
+              <li className="xp-alt" key={a.name}>
+                <h2>{a.name}</h2>
+                <p>{a.body}</p>
+                <a href={a.href}>{a.cta} <span className="arw" aria-hidden="true">→</span></a>
+              </li>
+            ))}
+          </ul>
+
+          <AltEvidence faq={FAQ} />
+
+          <section className="tfacts" id="stay">
+            <h2>When to stay on HyperFrames.</h2>
+            <p>
+              HyperFrames has a Studio browser editor, a catalog of reusable blocks, 21 agent skills,
+              and cloud rendering on Lambda, Cloud Run and HeyGen. If you want those, stay. The
+              HyperFrames comparison page lists them with sources.
+            </p>
+            <div className="srcs">
+              <a href="https://github.com/heygen-com/hyperframes" rel="noopener">HyperFrames README</a>
+              <a href="https://hyperframes.heygen.com/introduction" rel="noopener">HyperFrames introduction</a>
             </div>
           </section>
+
+          <Next
+            title="Compare vawe with HyperFrames."
+            primary={{ href: "/vs/hyperframes", label: "vawe vs HyperFrames" }}
+            secondary={{ href: REPO_URL, label: "Star vawe on GitHub" }}
+            related={[
+              { href: "/remotion-alternatives", label: "Remotion alternatives, categorized" },
+              { href: "/determinism", label: "How vawe keeps renders deterministic" },
+              { href: "/ai-agents", label: "How an agent writes and checks a film" },
+              { href: "/blog/page-contract", label: "How vawe renders HTML to video" },
+            ]}
+          />
         </main>
       </div>
       <Footer active="/hyperframes-alternatives" />

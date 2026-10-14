@@ -29,7 +29,7 @@ export type QA = { q: string; a: React.ReactNode };
 export function AltEvidence({ faq }: { faq: QA[] }) {
   return (
     <>
-      <section className="isec">
+      <section className="isec" id="evidence">
         <div className="isec-text">
           <h2>What vawe measured about itself.</h2>
           <p>
@@ -45,7 +45,7 @@ export function AltEvidence({ faq }: { faq: QA[] }) {
           </ul>
         </div>
       </section>
-      <section className="isec ifaq">
+      <section className="isec ifaq" id="faq">
         <div className="isec-text">
           <h2>Questions people ask before they switch.</h2>
           {faq.map((item) => (

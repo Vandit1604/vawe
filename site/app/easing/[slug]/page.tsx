@@ -9,6 +9,7 @@ import { jsonLdScript, breadcrumbSchema } from "../../../lib/schema";
 import { CopyCode } from "../../moves/[name]/CopyCode";
 import { EASES, STATS, bezierText, camelOf, easeBySlug, importLine, pageDescription, pageTitle, speedText, summary, techArticleSchema, waapi, type Ease } from "../../../lib/easing";
 import { CurveChart, VelocityChart } from "../Charts";
+import { Next, Toc } from "../../components/Xp";
 import "../../moves/moves.css";
 import "../easing.css";
 
@@ -170,6 +171,16 @@ export default async function EasePage({ params }: Params) {
               {e.kind === "classic" ? <span>family: {e.family}</span> : null}
               <span>peak {speedText(e).replace(" (it ends vertically)", "")}</span>
             </p>
+            <Toc
+              label="On this page"
+              items={[
+                { href: "#demo", label: "Live demo" },
+                { href: "#code", label: "Copy the code" },
+                { href: "#numbers", label: "Numbers" },
+                ...(e.handles ? [{ href: "#ae", label: "Handles" }] : []),
+                { href: "#when", label: "When to use it" },
+              ]}
+            />
           </header>
 
           <section className="ez-charts" aria-label="Curve and velocity">
@@ -210,6 +221,16 @@ export default async function EasePage({ params }: Params) {
             ) : null}
           </section>
 
+          <section className="ez-sec" aria-labelledby="code">
+            <h2 id="code">Copy the code</h2>
+            <div className="ez-codes">
+              <Code label="css linear() (exact)" text={`animation-timing-function: ${e.linear};`} />
+              <BezierBlock e={e} />
+              <Code label="web animations api" text={waapi(e)} />
+              <Code label={e.kind === "css" ? "css" : "vawe"} text={importLine(e)} />
+            </div>
+          </section>
+
           <section className="ez-sec" aria-labelledby="numbers">
             <h2 id="numbers">Numbers</h2>
             <dl className="ez-stats">
@@ -220,16 +241,6 @@ export default async function EasePage({ params }: Params) {
                 </div>
               ))}
             </dl>
-          </section>
-
-          <section className="ez-sec" aria-labelledby="code">
-            <h2 id="code">Copy the code</h2>
-            <div className="ez-codes">
-              <Code label="css linear() (exact)" text={`animation-timing-function: ${e.linear};`} />
-              <BezierBlock e={e} />
-              <Code label="web animations api" text={waapi(e)} />
-              <Code label={e.kind === "css" ? "css" : "vawe"} text={importLine(e)} />
-            </div>
           </section>
 
           <Handles e={e} />
@@ -274,12 +285,29 @@ export default async function EasePage({ params }: Params) {
               <h2 id="moves">Moves that use {e.name}</h2>
               <p>{e.moves.length} of the library&apos;s motion moves set <code>EASE.{camelOf(e.slug)}</code> in their snippet.</p>
               <ul className="ez-moves">
-                {e.moves.map((m) => (
+                {e.moves.slice(0, 12).map((m) => (
                   <li key={m.name}><Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link></li>
                 ))}
               </ul>
+              {e.moves.length > 12 ? (
+                <details className="ez-more">
+                  <summary>Show the other {e.moves.length - 12}</summary>
+                  <ul className="ez-moves">
+                    {e.moves.slice(12).map((m) => (
+                      <li key={m.name}><Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link></li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
             </section>
           ) : null}
+          <Next
+            title={`Use ${e.name} in a page.`}
+            lead="Copy the code above, or see the whole set."
+            primary={{ href: "/easing", label: "All easing functions" }}
+            secondary={{ href: "/moves", label: "See the moves" }}
+            related={[{ href: "/docs/motion", label: "Motion in the docs" }]}
+          />
           <CopyCode rootId="ez-main" />
         </article>
       </main>

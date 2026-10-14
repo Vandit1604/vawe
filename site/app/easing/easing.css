@@ -122,3 +122,4 @@
 .ez-group.ez-group-tight{margin-top:var(--sp-6)}
 .ez-h3{white-space:normal}
 .ez-clip .ez-cap{margin-top:0;padding:var(--sp-3) var(--sp-4)}
+.ez-more summary{display:inline-flex;align-items:center;min-height:var(--hit);margin-top:var(--sp-3);cursor:pointer;font-size:var(--fs-ui);font-weight:600;color:var(--ink);border-radius:var(--r-in)}

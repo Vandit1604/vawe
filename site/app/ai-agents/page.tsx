@@ -1,4 +1,6 @@
 import { Header, REPO_URL } from "../components/Header";
+import { MoveClips } from "../components/MoveClips";
+import { Next, PageTop, Toc } from "../components/Xp";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
@@ -32,8 +34,9 @@ export default function AiAgents() {
       <Header />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "AI agents", url: "/ai-agents" }]))} />
       <div className="wrap">
-        <main id="content" className="ipage" tabIndex={-1}>
+        <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
+            <PageTop group="Learn" current="AI agents" />
             <h1>Let an agent write the video.</h1>
             <p>
               A Vawe film is one HTML page: CSS, Web Animations, SVG, canvas or three.js. An agent
@@ -41,9 +44,15 @@ export default function AiAgents() {
               guesses at a schema. If something it would naturally write fails, that is a bug in
               the engine, not in the agent.
             </p>
+            <Toc items={[
+              { href: "#loop", label: "The loop" },
+              { href: "#judge", label: "The judge" },
+              { href: "#skills", label: "Skills" },
+              { href: "#wire", label: "Wire it in" },
+            ]} />
           </section>
 
-          <section className="isec">
+          <section className="isec" id="loop">
             <div className="isec-text">
               <h2>One command, one loop.</h2>
               <p>
@@ -63,7 +72,7 @@ export default function AiAgents() {
             </div>
           </section>
 
-          <section className="isec">
+          <section className="isec" id="judge">
             <div className="isec-text">
               <h2>The writer never grades its own film.</h2>
               <p>
@@ -77,7 +86,7 @@ export default function AiAgents() {
             </div>
           </section>
 
-          <section className="isec">
+          <section className="isec" id="skills">
             <div className="isec-text">
               <h2>Skills teach the parts that are not defaults.</h2>
               <p>
@@ -92,7 +101,7 @@ export default function AiAgents() {
             </div>
           </section>
 
-          <section className="isec">
+          <section className="isec" id="wire">
             <div className="isec-text">
               <h2>Wire it into an agent.</h2>
               <p>
@@ -110,24 +119,23 @@ export default function AiAgents() {
             </div>
           </section>
 
-          <section className="iend">
-            <h2 className="h2">Why the draft matches the final.</h2>
-            <p className="lead">
-              The page runs under a virtual clock, so a moment the agent approves in a draft is the
-              same moment in the final.
-            </p>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="/determinism">
-                Read the mechanism <span className="arw">→</span>
-              </a>
-            </div>
-            <div className="irelated">
-              <a href={REPO_URL}>The source, on GitHub</a>
-              <a href="/moves">Moves to copy, each with its clip</a>
-              <a href="/ai-agents.md">This guide as Markdown</a>
-              <a href="/llms-full.txt">llms-full.txt</a>
-            </div>
+          <section className="ifilms">
+            <h2>What an agent writes: moves to copy.</h2>
+            <p>Each move is a clip and a markdown file with the snippet. An agent copies one into the page.</p>
+            <MoveClips names={["agent-progress", "cursor-click", "text-scramble-decode", "counter-dive"]} />
           </section>
+
+          <Next
+            title="Why the draft matches the final."
+            lead="The page runs under a virtual clock, so a moment the agent approves in a draft is the same moment in the final."
+            primary={{ href: "/determinism", label: "Read the mechanism" }}
+            secondary={{ href: REPO_URL, label: "The source, on GitHub" }}
+            related={[
+              { href: "/moves", label: "Moves to copy, each with its clip" },
+              { href: "/ai-agents.md", label: "This guide as Markdown" },
+              { href: "/llms-full.txt", label: "llms-full.txt" },
+            ]}
+          />
         </main>
       </div>
       <Footer active="/ai-agents" />
