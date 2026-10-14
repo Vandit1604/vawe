@@ -20,7 +20,7 @@ tells a story: the problem, the page, the render, the result, then try it.
    a faint grid behind two sections. No shadows, no colour on surfaces.
 3. **Framer's staging.** Huge bold headlines with tight tracking. Films sit in frames that scale and fade in as
    you scroll. Four chapters pin to the screen while their film plays.
-4. **Two faces.** Geist for headings and body, Geist Mono for every number, label, command and code line.
+4. **Two faces.** Geist for headings and body, IBM Plex Mono for every number, label, command and code line.
 5. **One accent, used rarely.** `#3291ff` means you can act on it, or it is live. Lane colours mean a layer
    type and always sit beside a label.
 

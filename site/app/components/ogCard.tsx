@@ -27,12 +27,12 @@ export async function loadOgFonts() {
   const [semibold, regular, mono] = await Promise.all([
     fs.readFile(path.join(FONT_DIR, "Geist-600.woff")),
     fs.readFile(path.join(FONT_DIR, "Geist-400.woff")),
-    fs.readFile(path.join(FONT_DIR, "GeistMono-400.woff")),
+    fs.readFile(path.join(FONT_DIR, "IBMPlexMono-400.woff")),
   ]);
   fontsCache = [
     { name: "Geist", data: semibold, weight: 600, style: "normal" },
     { name: "Geist", data: regular, weight: 400, style: "normal" },
-    { name: "Geist Mono", data: mono, weight: 400, style: "normal" },
+    { name: "IBM Plex Mono", data: mono, weight: 400, style: "normal" },
   ];
   return fontsCache;
 }
@@ -99,7 +99,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
       <div style={{ display: "flex", alignItems: "center", padding: "40px 64px 0 64px" }}>
         <Mark />
         <div style={{ marginLeft: 10, fontSize: 19, fontWeight: 600, letterSpacing: "-0.02em" }}>vawe</div>
-        <div style={{ display: "flex", marginLeft: "auto", fontFamily: "Geist Mono", fontSize: 14, color: TOKENS.muted, letterSpacing: "0.02em" }}>
+        <div style={{ display: "flex", marginLeft: "auto", fontFamily: "IBM Plex Mono", fontSize: 14, color: TOKENS.muted, letterSpacing: "0.02em" }}>
           {`vawe.dev${urlPath}`}
         </div>
       </div>
@@ -118,7 +118,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
         <div style={{ display: "flex", flexDirection: "column", width: hasPanel ? 480 : 1056 }}>
           <div
             style={{
-              fontFamily: "Geist Mono",
+              fontFamily: "IBM Plex Mono",
               fontSize: 14,
               color: TOKENS.muted,
               letterSpacing: "0.06em",
@@ -181,7 +181,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
                   background: TOKENS.bg2,
                   borderRadius: PANEL_RADIUS,
                   border: "1px solid rgba(255,255,255,0.08)",
-                  fontFamily: "Geist Mono",
+                  fontFamily: "IBM Plex Mono",
                   fontSize: 15,
                   lineHeight: 1.7,
                   color: TOKENS.ink2,
