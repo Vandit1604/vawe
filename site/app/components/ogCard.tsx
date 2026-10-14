@@ -39,13 +39,13 @@ export async function loadOgFonts() {
 
 // The site's own tokens (DESIGN.md), never a second palette for this one surface.
 const TOKENS = {
-  bg: "#16151a",
+  bg: "#000000",
   ink: "#ffffff",
-  ink2: "#d8d8da",
-  muted: "#97969b",
-  line: "#2f2e35",
-  accent: "#0a87ff",
-  bg2: "#212025",
+  ink2: "#ededed",
+  muted: "#a1a1a1",
+  line: "#242424",
+  accent: "#3291ff",
+  bg2: "#0a0a0a",
 };
 
 // The same clip-path mark site/og/card.html draws for the homepage card, so the two image-generation

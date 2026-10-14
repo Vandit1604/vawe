@@ -1,12 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, JetBrains_Mono, Unbounded } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// Three faces, three jobs (site/IDENTITY.md): Archivo for headings and body, Unbounded only for
-// titles, JetBrains Mono for every number and label.
-const sans = Archivo({ subsets: ["latin"], variable: "--font-sans", display: "swap", axes: ["wdth"] });
-const title = Unbounded({ subsets: ["latin"], variable: "--font-unbounded", display: "swap" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
+// Two faces, two jobs (site/IDENTITY.md): Geist for headings and body, Geist Mono for every number and label.
+const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 // METADATA IS THE HEADLINE FOR PEOPLE WHO NEVER REACH THE PAGE. It read "one JSON, one video" and
 // "a deterministic motion-graphics engine", which is the mechanism, and it is what a search result and
@@ -54,11 +52,11 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: "#16151a", colorScheme: "dark" };
+export const viewport: Viewport = { themeColor: "#000000", colorScheme: "dark" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${title.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body>
         {/* WCAG 2.4.1. Lives here, not in Header, so it is the document's first focusable element
             without constraining where the nav sits in the tree. It targets #content, the first

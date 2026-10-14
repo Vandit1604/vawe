@@ -5,7 +5,6 @@ import { pageMetadata } from "../components/seo";
 import { blogSchema, breadcrumbSchema, jsonLdScript } from "../../lib/schema";
 import { allPosts, postsBySection, smart, type Post } from "../../lib/blog";
 import { Cover } from "./Cover";
-import { preload } from "react-dom";
 import "./blog.css";
 
 const TITLE = "vawe blog: building agent-native motion graphics";
@@ -46,7 +45,6 @@ function Card({ post, w }: { post: Post; w: string }) {
 export default function BlogIndex() {
   const sections = postsBySection();
   const posts = allPosts();
-  preload("/assets/fonts/PlusJakartaSans.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   const crumbs = [{ name: "Home", url: "/" }, { name: "Blog", url: "/blog" }];
   // The featured post leads; the rest group by section, newest first inside each. No date is shown.
   const [lead] = posts;

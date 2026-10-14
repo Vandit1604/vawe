@@ -6,7 +6,6 @@ import { pageMetadata } from "../../components/seo";
 import { blogPostingSchema, breadcrumbSchema, jsonLdScript } from "../../../lib/schema";
 import { allPosts, neighbours, postBySlug, relatedPosts, smart } from "../../../lib/blog";
 import { Cover } from "../Cover";
-import { preload } from "react-dom";
 import "../blog.css";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -43,7 +42,6 @@ export default async function PostPage({ params }: Params) {
   const path = `/blog/${post.slug}`;
   const { older, newer } = neighbours(post.slug);
   const related = relatedPosts(post);
-  preload("/assets/fonts/PlusJakartaSans.woff2", { as: "font", type: "font/woff2", crossOrigin: "anonymous" });
   const crumbs = [
     { name: "Home", url: "/" },
     { name: "Blog", url: "/blog" },

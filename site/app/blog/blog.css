@@ -1,7 +1,5 @@
 /* blog.css: /blog and /blog/<slug> (DESIGN.md "Blog"). */
-/* Plus Jakarta Sans on the blog routes only, vendored by scripts/site/vendor-assets.mjs. */
-@font-face{font-family:"Plus Jakarta Sans";src:url("/assets/fonts/PlusJakartaSans.woff2") format("woff2");font-weight:200 800;font-display:swap}
-.bl,.bp{max-width:1040px;margin:0 auto;font-family:"Plus Jakarta Sans",var(--font-sans),system-ui,sans-serif;
+.bl,.bp{max-width:1040px;margin:0 auto;font-family:var(--font-sans),system-ui,sans-serif;
   font-kerning:normal;font-feature-settings:"kern","liga","calt";hanging-punctuation:first allow-end last;
   /* The reading sizes, measured on /blog/chrome-per-lane (DESIGN.md "Blog"): 19 px body at 1.42, 17 px on a phone. */
   --fs-read:1.1875rem; --fs-read-sm:1.0625rem; --fs-card:1.25rem; --fs-card-lg:1.5rem; --lh-read:1.42; --track-caps:.08em}
