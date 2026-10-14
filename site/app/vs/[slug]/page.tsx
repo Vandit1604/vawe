@@ -138,7 +138,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
           </section>
 
           <section className="faq" aria-labelledby="faq">
-            <h2 id="faq">Questions people ask.</h2>
+            <h2 id="faq">Questions.</h2>
             <dl>
               {r.faq.map((f) => (
                 <div key={f.q}>
@@ -151,7 +151,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
 
           <Next
             title="Try vawe on one page."
-            lead="Write a page, run one command, get an MP4. The quickstart takes a few minutes."
+            lead="Write a page, run one command, get an MP4."
             primary={{ href: "/docs/html-to-mp4-with-claude-code", label: "HTML to MP4 with Claude Code" }}
             secondary={{ href: REPO_URL, label: "Star vawe on GitHub" }}
             related={[...r.related, { href: "/moves", label: "See the moves" }, { href: "/problems", label: "Hard problems and where vawe stands" }]}

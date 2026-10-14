@@ -29,10 +29,8 @@ export default function LaunchVideo() {
             <PageTop group="Learn" current="Launch video" />
             <h1>A product launch video, built from the real site.</h1>
             <p>
-              A launch film in this engine is not written from a description of the product. It is
-              built from CAPTURE: the real UI, the real logo, the real palette, carried into
-              motion. The taste already exists on the site; the film&apos;s job is to reflect it,
-              never redesign it.
+              A launch film is built from CAPTURE: the real UI, the real logo and the real palette of
+              the product, carried into motion. The film reflects the site and never redesigns it.
             </p>
             <Toc items={[
               { href: "#route", label: "The route" },

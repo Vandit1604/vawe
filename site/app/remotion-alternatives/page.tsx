@@ -67,11 +67,11 @@ export default function RemotionAlternatives() {
         <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
             <PageTop group="Compare" current="Remotion alternatives" />
-            <h1>Remotion alternatives, actually categorized.</h1>
+            <h1>Remotion alternatives, by category.</h1>
             <p>
               &quot;Remotion alternative&quot; returns two different products under one query:
               a hosted API you POST a JSON file to, and a self-hosted engine you run yourself.
-              They solve different problems. This page sorts the field before comparing anything.
+              They solve different problems, so this page sorts the field first.
             </p>
             <p className="bnote">
               Every claim below carries the page it was read on and the date. Read 2026-09-19.
@@ -134,7 +134,7 @@ export default function RemotionAlternatives() {
 
           <section className="isec" id="shapes">
             <div className="isec-text">
-              <h2>Two shapes, not one list.</h2>
+              <h2>Two shapes of tool.</h2>
               <p>
                 <strong>Hosted JSON video APIs</strong> (JSON2Video, Shotstack) take a JSON
                 request over HTTPS and hand back a rendered file: no server to run, no Chrome to

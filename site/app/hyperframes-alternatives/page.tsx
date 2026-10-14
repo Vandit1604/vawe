@@ -97,9 +97,8 @@ export default function HyperframesAlternatives() {
             <h1>HyperFrames alternatives.</h1>
             <p>
               HyperFrames is HeyGen&apos;s open-source framework that turns HTML, CSS and seekable
-              animations into MP4. People look for an alternative for different reasons: a different
-              authoring model, a different determinism rule, or a different job. Four tools are worth
-              a look. Each has its own comparison page.
+              animations into MP4. People look for an alternative for an authoring model, a determinism rule or a different job. Four tools are
+              worth a look. Each has its own comparison page.
             </p>
             <p className="bnote">Read 2026-10-03.</p>
             <Toc items={[

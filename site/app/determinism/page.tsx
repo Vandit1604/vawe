@@ -39,9 +39,8 @@ export default function Determinism() {
             <h1>Same page in. Same frames out.</h1>
             <p>
               A Vawe film is an HTML page that the renderer seeks to each frame&apos;s time. Ask for
-              the frame at 4.2 seconds twice, in any order, and it comes back the same. That is not
-              a tuning goal: the clock is replaced before the page runs, and a test renders pages
-              twice and compares every frame.
+              the frame at 4.2 seconds twice, in any order, and it comes back the same. The clock is
+              replaced before the page runs, and a test renders pages twice and compares every frame.
             </p>
             <Toc items={[
               { href: "#clock", label: "The fake clock" },
@@ -53,7 +52,7 @@ export default function Determinism() {
 
           <section className="isec" id="clock">
             <div className="isec-text">
-              <h2>The clock is fake, on purpose.</h2>
+              <h2>The clock is virtual.</h2>
               <p>
                 Before any script on the page runs, a virtual clock replaces every source of ambient
                 state. <code>Date</code> and <code>performance.now</code> return film time, not the
@@ -80,7 +79,7 @@ export default function Determinism() {
 
           <section className="isec" id="test">
             <div className="isec-text">
-              <h2>A test proves it, not a claim.</h2>
+              <h2>A test proves it.</h2>
               <p>
                 <code>tests/media/render-page-determinism.test.mjs</code> renders two fixture pages
                 twice each and compares the decoded frame hashes. One page paints from{" "}
@@ -129,7 +128,7 @@ export default function Determinism() {
           </section>
 
           <Next
-            title="When this property decides which engine to pick."
+            title="When this decides the engine"
             lead="Byte-identical output matters most where nobody looks at every frame."
             primary={{ href: "/when-determinism-matters", label: "When determinism matters" }}
             related={[

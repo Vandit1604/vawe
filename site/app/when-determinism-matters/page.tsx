@@ -30,7 +30,7 @@ export default function WhenDeterminismMatters() {
         <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
             <PageTop group="Compare" current="When determinism matters" />
-            <h1>When determinism actually matters.</h1>
+            <h1>When determinism matters.</h1>
             <p>
               Byte-identical rendering is a real, checkable property. It is also not the reason
               to pick a rendering engine most of the time. Here is what changes when it is, and
@@ -58,7 +58,7 @@ export default function WhenDeterminismMatters() {
 
           <section className="isec" id="regression">
             <div className="isec-text">
-              <h2>It matters for catching a regression, not just producing a video.</h2>
+              <h2>It matters for catching a regression.</h2>
               <p>
                 A render pipeline that changes over time (a new effect, a font update, a library
                 bump) can diff two renders of the same input and treat any pixel difference as a
@@ -88,7 +88,7 @@ export default function WhenDeterminismMatters() {
 
           <section className="isec" id="built-in">
             <div className="isec-text">
-              <h2>The property has to be built in, not assumed.</h2>
+              <h2>It has to be built into the renderer.</h2>
               <p>
                 Determinism is not a side effect of using a headless browser; a real clock, an
                 unseeded random call, or a mid-render network fetch breaks it immediately, which is

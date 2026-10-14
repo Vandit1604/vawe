@@ -40,9 +40,8 @@ export default function AiAgents() {
             <h1>Let an agent write the video.</h1>
             <p>
               A Vawe film is one HTML page: CSS, Web Animations, SVG, canvas or three.js. An agent
-              already writes all of that well, so it never learns a private format and never
-              guesses at a schema. If something it would naturally write fails, that is a bug in
-              the engine, not in the agent.
+              already writes all of that, so it learns no private format and guesses no schema. If
+              something it would naturally write fails, that is a bug in the engine.
             </p>
             <Toc items={[
               { href: "#loop", label: "The loop" },
