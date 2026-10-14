@@ -2,7 +2,8 @@ import { Header } from "../components/Header";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import { GithubCta, OpenSourceMark } from "../components/Icon";
+import { REPO_URL } from "../components/Header";
+import { Next, PageTop, Toc } from "../components/Xp";
 import { AltEvidence, type QA } from "../components/AltEvidence";
 import "../components/intent.css";
 
@@ -63,9 +64,9 @@ export default function RemotionAlternatives() {
       <Header />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "Remotion alternatives", url: "/remotion-alternatives" }]))} />
       <div className="wrap">
-        <main id="content" className="ipage" tabIndex={-1}>
+        <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
-            <OpenSourceMark />
+            <PageTop group="Compare" current="Remotion alternatives" />
             <h1>Remotion alternatives, actually categorized.</h1>
             <p>
               &quot;Remotion alternative&quot; returns two different products under one query:
@@ -75,9 +76,63 @@ export default function RemotionAlternatives() {
             <p className="bnote">
               Every claim below carries the page it was read on and the date. Read 2026-09-19.
             </p>
+            <Toc items={[
+              { href: "#table", label: "The table" },
+              { href: "#shapes", label: "Two shapes" },
+              { href: "#license", label: "Remotion's license" },
+              { href: "#faq", label: "Questions" },
+            ]} />
           </section>
 
-          <section className="isec">
+          <section className="iend" id="table">
+            <h2 className="h2">The comparison in one row.</h2>
+            <p className="lead">Every cell traces to a source cited on this page.</p>
+            <div className="itable-wrap">
+              <table className="itable">
+                <thead>
+                  <tr>
+                    <th>project</th>
+                    <th>license</th>
+                    <th>self-hosted</th>
+                    <th>composition</th>
+                    <th>agent integration</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="is-vawe">
+                    <td>vawe</td>
+                    <td>Apache-2.0, no size clause</td>
+                    <td>yes</td>
+                    <td>one HTML page: CSS, Web Animations, SVG, canvas, three.js</td>
+                    <td>CLI and skills (<code>bin/vawe</code>, <code>skills/</code>)</td>
+                  </tr>
+                  <tr>
+                    <td>Remotion</td>
+                    <td>free ≤3 employees, paid above</td>
+                    <td>yes</td>
+                    <td>React</td>
+                    <td>Agent Skills (remotion.dev/docs/ai/skills)</td>
+                  </tr>
+                  <tr>
+                    <td>HyperFrames</td>
+                    <td>Apache-2.0, no size clause</td>
+                    <td>yes</td>
+                    <td>HTML, CSS, GSAP</td>
+                    <td>agent-native, per its own docs</td>
+                  </tr>
+                  <tr>
+                    <td>JSON2Video</td>
+                    <td>free tier + paid credits</td>
+                    <td>no, hosted only</td>
+                    <td>JSON to a template API</td>
+                    <td>not publicly stated</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="isec" id="shapes">
             <div className="isec-text">
               <h2>Two shapes, not one list.</h2>
               <p>
@@ -96,7 +151,7 @@ export default function RemotionAlternatives() {
             </div>
           </section>
 
-          <section className="isec">
+          <section className="isec" id="license">
             <div className="isec-text">
               <h2>Remotion&apos;s own license, quoted directly.</h2>
               <p>
@@ -171,66 +226,18 @@ paid "Company License":
             </div>
           </section>
 
-          <section className="iend">
-            <h2 className="h2">The comparison in one row.</h2>
-            <p className="lead">Every cell below traces to a source cited above.</p>
-            <div className="itable-wrap">
-              <table className="itable">
-                <thead>
-                  <tr>
-                    <th>project</th>
-                    <th>license</th>
-                    <th>self-hosted</th>
-                    <th>composition</th>
-                    <th>agent integration</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>vawe</td>
-                    <td>Apache-2.0, no size clause</td>
-                    <td>yes</td>
-                    <td>one HTML page: CSS, Web Animations, SVG, canvas, three.js</td>
-                    <td>CLI and skills (<code>bin/vawe</code>, <code>skills/</code>)</td>
-                  </tr>
-                  <tr>
-                    <td>Remotion</td>
-                    <td>free ≤3 employees, paid above</td>
-                    <td>yes</td>
-                    <td>React</td>
-                    <td>Agent Skills (remotion.dev/docs/ai/skills)</td>
-                  </tr>
-                  <tr>
-                    <td>HyperFrames</td>
-                    <td>Apache-2.0, no size clause</td>
-                    <td>yes</td>
-                    <td>HTML, CSS, GSAP</td>
-                    <td>agent-native, per its own docs</td>
-                  </tr>
-                  <tr>
-                    <td>JSON2Video</td>
-                    <td>free tier + paid credits</td>
-                    <td>no, hosted only</td>
-                    <td>JSON to a template API</td>
-                    <td>not publicly stated</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="/vs/remotion">
-                vawe vs Remotion <span className="arw">→</span>
-              </a>
-              <GithubCta />
-            </div>
-            <div className="irelated">
-              <a href="/hyperframes-alternatives">HyperFrames alternatives</a>
-              <a href="/determinism">Why the same page always renders the same frames</a>
-              <a href="/ai-agents">How an agent writes and checks a film</a>
-              <a href="/when-determinism-matters">When determinism is the reason to pick an engine</a>
-              <a href="/blog/page-contract">How vawe renders HTML to video</a>
-            </div>
-          </section>
+          <Next
+            title="Compare vawe with one tool."
+            primary={{ href: "/vs/remotion", label: "vawe vs Remotion" }}
+            secondary={{ href: REPO_URL, label: "Star vawe on GitHub" }}
+            related={[
+              { href: "/hyperframes-alternatives", label: "HyperFrames alternatives" },
+              { href: "/determinism", label: "Why the same page always renders the same frames" },
+              { href: "/ai-agents", label: "How an agent writes and checks a film" },
+              { href: "/when-determinism-matters", label: "When determinism is the reason to pick an engine" },
+              { href: "/blog/page-contract", label: "How vawe renders HTML to video" },
+            ]}
+          />
         </main>
       </div>
       <Footer active="/remotion-alternatives" />

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header, WaveGlyph } from "../../components/Header";
-import { GithubCta, Icon, OpenSourceMark } from "../../components/Icon";
+import { Icon } from "../../components/Icon";
+import { REPO_URL } from "../../components/Header";
+import { Next, PageTop, Sources, Toc } from "../../components/Xp";
 import { Footer } from "../../components/Footer";
 import { pageMetadata } from "../../components/seo";
 import { jsonLdScript, breadcrumbSchema } from "../../../lib/schema";
@@ -13,9 +15,9 @@ export const dynamicParams = false;
 
 const MARK_LABEL: Record<Mark, string> = { yes: "Yes", no: "No", partial: "Partly" };
 
-function Cell({ text, mark }: { text: string; mark?: Mark }) {
+function Cell({ text, mark, vawe }: { text: string; mark?: Mark; vawe?: boolean }) {
   return (
-    <td>
+    <td className={vawe ? "is-vawe" : undefined}>
       {mark && (
         <span className={`mk mk-${mark}`}>
           <Icon name={mark === "yes" ? "check" : mark === "no" ? "x" : "minus"} size={14} label={MARK_LABEL[mark]} />
@@ -46,7 +48,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" className="ipage" tabIndex={-1}>
+        <main id="content" className="ipage xp" tabIndex={-1}>
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={jsonLdScript(
@@ -58,16 +60,22 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
             )}
           />
           <section className="phead">
-            <OpenSourceMark />
+            <PageTop parent={{ href: "/remotion-alternatives", label: "Compare" }} current={`vawe vs ${r.name}`} />
             <h1>{r.h1}</h1>
             <p>{r.intro}</p>
             <p className="bnote">
               Facts read from {r.name}&apos;s own pages on {r.read}. Sources are listed at the end. vawe
               runs on your machine, needs no account and has no per-render fee.
             </p>
+            <Toc items={[
+              { href: "#choose", label: "Which to choose" },
+              { href: "#table", label: "Side by side" },
+              { href: "#stronger", label: `Where ${r.name} is stronger` },
+              { href: "#faq", label: "Questions" },
+            ]} />
           </section>
 
-          <section className="tldr" aria-label="Which one to choose">
+          <section className="tldr" id="choose" aria-label="Which one to choose">
             <div>
               <h2>Choose {r.name} when</h2>
               <ul>
@@ -101,7 +109,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
                     <th scope="col">
                       {r.name}
                     </th>
-                    <th scope="col">
+                    <th scope="col" className="is-vawe">
                       <WaveGlyph className="glyph-sm" />
                       vawe
                     </th>
@@ -112,7 +120,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
                     <tr key={row.feature}>
                       <td>{row.feature}</td>
                       <Cell text={row.them} mark={row.t} />
-                      <Cell text={row.vawe} mark={row.v} />
+                      <Cell text={row.vawe} mark={row.v} vawe />
                     </tr>
                   ))}
                 </tbody>
@@ -120,7 +128,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
             </div>
           </section>
 
-          <section className="tfacts">
+          <section className="tfacts" id="stronger">
             <h2>Where {r.name} is stronger.</h2>
             <ul className="tldr-list">
               {r.stronger.map((s) => (
@@ -141,30 +149,18 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
             </dl>
           </section>
 
-          <section className="iend">
-            <h2 className="h2">Try vawe on one page.</h2>
-            <p className="lead">
-              Write a page, run one command, get an MP4. The quickstart takes a few minutes.
-            </p>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="/docs/html-to-mp4-with-claude-code">
-                HTML to MP4 with Claude Code <span className="arw">→</span>
-              </a>
-              <a className="btn btn-ghost" href="/moves">See the moves</a>
-              <GithubCta />
-            </div>
-            <div className="irelated">
-              {r.related.map((l) => (
-                <a key={l.href} href={l.href}>{l.label}</a>
-              ))}
-              <a href="/problems">Hard problems and where vawe stands</a>
-            </div>
-            <div className="srcs" aria-label="Sources">
-              {[...r.sources, ...VAWE_SOURCES].map((s) => (
-                <a key={s.url} href={s.url} rel="noopener">{s.label}</a>
-              ))}
-            </div>
-          </section>
+          <Next
+            title="Try vawe on one page."
+            lead="Write a page, run one command, get an MP4. The quickstart takes a few minutes."
+            primary={{ href: "/docs/html-to-mp4-with-claude-code", label: "HTML to MP4 with Claude Code" }}
+            secondary={{ href: REPO_URL, label: "Star vawe on GitHub" }}
+            related={[...r.related, { href: "/moves", label: "See the moves" }, { href: "/problems", label: "Hard problems and where vawe stands" }]}
+          />
+          <Sources count={r.sources.length + VAWE_SOURCES.length}>
+            {[...r.sources, ...VAWE_SOURCES].map((s) => (
+              <a key={s.url} href={s.url} rel="noopener">{s.label}</a>
+            ))}
+          </Sources>
         </main>
       </div>
       <Footer active={`/vs/${r.slug}`} />
