@@ -23,8 +23,8 @@ Each remains under its own license.
 
 Vendored code and skills:
 
-- impeccable (design skill), skills/impeccable/ - Apache License 2.0.
-  License text vendored alongside it at skills/impeccable/LICENSE.
+- impeccable (design skill), vendor/impeccable/ - Apache License 2.0.
+  License text vendored alongside it at vendor/impeccable/LICENSE.
 
 - lottie-web (runtime), assets/vendor/ - MIT License. Copyright Airbnb.
 

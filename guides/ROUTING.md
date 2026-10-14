@@ -27,7 +27,7 @@ into the session and load its skill. Every template stops before code at least o
 A request with no `brief.md` yet starts with `vawe-brief`. Every type then goes through the same loop: stills, draft, a fresh critique (`vawe-critique`), fix the named seconds, final. Under 15 s most types are one continuous action.
 A client brief with rights and claims to check takes
 `production-brief-acceptance.md` before any row. A sprite loop takes `pixel-art-sprite.md`. A still
-that "looks AI" or a product UI surface takes `impeccable` (`skills/impeccable/SKILL.md`).
+that "looks AI" or a product UI surface takes `impeccable` (`vendor/impeccable/SKILL.md`).
 
 ## Resolve the common ambiguities
 

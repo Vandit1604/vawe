@@ -15,7 +15,7 @@ the register. Do not mix ([visual-style-one](../rules/visual-style-one.md), [sur
 A surface you reuse, or that must look impeccable, is built and looked at on its own before it enters the
 page. Do not tweak coordinates blind inside a long render. Write the fragment as plain HTML and CSS,
 open it standalone (`bin/vawe compare --page <page> --at t` renders one frame in seconds), run
-`skills/impeccable/scripts/detect.mjs` on it as the anti-slop check, then drop it in. Glass needs something
+`vendor/impeccable/scripts/detect.mjs` on it as the anti-slop check, then drop it in. Glass needs something
 behind it: put a moving gradient under a frosted panel or the blur has nothing to work on. A moving
 surface (a light travelling a card border) comes from an animation, not a frozen style.
 
