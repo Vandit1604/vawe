@@ -3,13 +3,13 @@
 .ez-head h1{overflow-wrap:anywhere}
 .ez-head .kicker{font-size:var(--fs-code);line-height:var(--lh-ui);margin-top:0}
 .ez-head .kicker a{color:var(--muted);transition:color var(--dur-hover) var(--ease-out)}
-.ez-head .ez-sum{color:var(--ink-2);font-size:var(--fs-lead);line-height:var(--lh-body);max-width:60ch;margin-top:var(--sp-4);text-wrap:pretty}
+.ez-head .ez-sum{color:var(--ink-2);font-size:var(--fs-lead);line-height:var(--lh-body);max-width:var(--measure);margin-top:var(--sp-4)}
 .ez-head .ez-meta{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-5);margin-top:var(--sp-4);font-size:var(--fs-label);line-height:var(--lh-ui)}
-.ez h2{font-size:var(--fs-sub);font-weight:800;letter-spacing:var(--track-head);line-height:var(--lh-sub);color:var(--ink);text-wrap:balance}
+.ez h2{font-size:var(--fs-sub);font-weight:var(--fw-head);letter-spacing:var(--track-sub);line-height:var(--lh-sub);color:var(--ink)}
 .ez-sec{margin-top:var(--sp-8)}
-.ez-sec > p{color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);max-width:66ch;margin-top:var(--sp-3);text-wrap:pretty}
+.ez-sec > p{color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--measure);margin-top:var(--sp-3)}
 .ez-sec > p a,.ez-note a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
-.ez code{font-family:var(--font-mono),monospace;font-size:.86em;color:var(--ink);background:var(--surface-2);padding:1px var(--sp-1);border-radius:var(--r-in);overflow-wrap:anywhere}
+.ez code{font-family:var(--font-mono),monospace;font-size:max(12px,.86em);color:var(--ink);background:var(--surface-2);padding:1px var(--sp-1);border-radius:var(--r-in);overflow-wrap:anywhere}
 
 .ez-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3);margin-top:var(--sp-6)}
 .ez-chart{padding:var(--sp-4) var(--sp-4) var(--sp-3)}
@@ -20,7 +20,7 @@
 .ez-diag{stroke:var(--muted);stroke-opacity:.45;stroke-dasharray:2 4}
 .ez-line{stroke:var(--accent);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round}
 .ez-dot{fill:var(--bg);stroke:var(--accent);stroke-width:2}
-.ez-tick,.ez-axis,.ez-svg .ez-note{font-family:var(--font-mono),monospace;font-size:10px;fill:var(--muted)}
+.ez-tick,.ez-axis,.ez-svg .ez-note{font-family:var(--font-mono),monospace;font-size:12px;fill:var(--muted)}
 .ez-svg .ez-note{fill:var(--ink-2);font-size:12px}
 .ez-thumb{display:block;width:100%;height:auto;aspect-ratio:88/56;background:var(--bg);border-radius:var(--r-in)}
 .ez-thumb .ez-line{stroke-width:2.2}
@@ -55,9 +55,9 @@
 .ez-codes{display:grid;gap:var(--sp-3);margin-top:var(--sp-5)}
 .ez-codes .mv-code pre{max-height:240px;white-space:pre;word-break:normal}
 .ez-codes .mv-code-bar span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ez-note{color:var(--muted);font-size:var(--fs-ui);line-height:var(--lh-body);max-width:66ch;margin-top:var(--sp-3)}
+.ez-note{color:var(--muted);font-size:var(--fs-ui);line-height:var(--lh-body);max-width:var(--measure);margin-top:var(--sp-3)}
 
-.ez-table{width:100%;border-collapse:collapse;margin-top:var(--sp-5);font-size:var(--fs-ui)}
+.ez-table{width:100%;border-collapse:collapse;margin-top:var(--sp-5);font-size:var(--fs-ui);font-variant-numeric:tabular-nums}
 .ez-table th,.ez-table td{text-align:left;padding:var(--sp-3);border-bottom:1px solid var(--line);vertical-align:top}
 .ez-table th{font-family:var(--font-mono),monospace;font-size:var(--fs-label);font-weight:400;letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--muted)}
 .ez-table td{color:var(--ink-2)}
@@ -74,7 +74,7 @@
 .ez-rel{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-3);margin-top:var(--sp-4)}
 .ez-rel li{position:relative;padding:var(--sp-3);transition:box-shadow var(--dur-hover) var(--ease-out)}
 .ez-rel li:has(a:focus-visible){outline:var(--focus-ring);outline-offset:2px}
-.ez-rel a{font-family:var(--font-title);font-weight:500;font-size:var(--fs-ui);outline:none}
+.ez-rel a{font-family:var(--font-title);font-weight:var(--fw-head);font-size:var(--fs-ui);outline:none}
 .ez-rel a::after{content:"";position:absolute;inset:0}
 .ez-rel .meta{display:block;margin-top:var(--sp-2)}
 .ez-moves{list-style:none;margin-top:var(--sp-4);display:flex;flex-wrap:wrap;gap:var(--sp-2)}
@@ -89,11 +89,11 @@
 .ez-facts span{display:block;margin-top:var(--sp-1);color:var(--muted);font-size:var(--fs-ui);line-height:var(--lh-body)}
 
 .ez-group{margin-top:var(--sp-8);scroll-margin-top:var(--sp-5)}
-.ez-group > p{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);max-width:62ch;margin-top:var(--sp-2);text-wrap:pretty}
+.ez-group > p{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--measure);margin-top:var(--sp-2)}
 .ez-grid-cards{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:var(--sp-3);margin-top:var(--sp-4)}
 .ez-card{position:relative;padding:var(--sp-3);content-visibility:auto;contain-intrinsic-size:auto 150px;transition:box-shadow var(--dur-hover) var(--ease-out)}
 .ez-card:has(a:focus-visible){outline:var(--focus-ring);outline-offset:2px}
-.ez-card a{display:block;margin-top:var(--sp-3);font-family:var(--font-title);font-weight:500;font-size:var(--fs-ui);line-height:var(--lh-sub);letter-spacing:-.01em;outline:none;overflow-wrap:anywhere}
+.ez-card a{display:block;margin-top:var(--sp-3);font-family:var(--font-title);font-weight:var(--fw-head);font-size:var(--fs-ui);line-height:var(--lh-sub);letter-spacing:-.01em;outline:none;overflow-wrap:anywhere}
 .ez-card a::after{content:"";position:absolute;inset:0}
 .ez-card .meta{display:block;margin-top:var(--sp-2);white-space:normal;line-height:var(--lh-body)}
 .ez-fam{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);margin-top:var(--sp-5);font-size:var(--fs-ui)}
@@ -162,7 +162,7 @@
 
 .ez-why{margin-top:var(--sp-8);padding:var(--sp-4) var(--sp-5)}
 .ez-why summary{cursor:pointer;min-height:var(--hit);display:flex;align-items:center;font-weight:600;color:var(--ink)}
-.ez-why p{color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);max-width:66ch;margin-top:var(--sp-3);text-wrap:pretty}
+.ez-why p{color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--measure);margin-top:var(--sp-3)}
 .ez-why .ez-facts{margin-top:var(--sp-5)}
 @media (max-width:640px){ .ez-count{margin-left:0} .ez-tray{padding:var(--sp-3)} .ez-why{padding:var(--sp-3) var(--sp-4)} }
 

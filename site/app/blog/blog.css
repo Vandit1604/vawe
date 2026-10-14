@@ -2,10 +2,10 @@
 .bl,.bp{max-width:1040px;margin:0 auto;font-family:var(--font-sans),system-ui,sans-serif;
   font-kerning:normal;font-feature-settings:"kern","liga","calt";hanging-punctuation:first allow-end last;
   /* The reading sizes, measured on /blog/chrome-per-lane (DESIGN.md "Blog"): 19 px body at 1.42, 17 px on a phone. */
-  --fs-read:1.1875rem; --fs-read-sm:1.0625rem; --fs-card:1.25rem; --fs-card-lg:1.5rem; --lh-read:1.42; --track-caps:.08em}
+  --fs-read:1.1875rem; --fs-read-sm:1rem; --fs-card:1.25rem; --fs-card-lg:1.5rem; --lh-read:1.45; --track-caps:.08em; --read-col:34rem}
 .bl :is(h1,h2,h3),.bp :is(h1,h2,h3){text-rendering:optimizeLegibility;hyphens:manual}
 /* All caps take 5 to 12% letterspacing (Butterick): mono caps here get 8%, and stay on one line. */
-.bl .meta,.bp .meta,.bl .kicker,.bp .kicker{letter-spacing:.08em}
+.bl .meta,.bp .meta{letter-spacing:.08em}
 .bl .meta > *,.bp .meta > *{white-space:nowrap}
 .bl :is(strong,b) :is(em,i),.bp :is(strong,b) :is(em,i),.bl :is(em,i) :is(strong,b),.bp :is(em,i) :is(strong,b){font-style:normal}
 
@@ -22,9 +22,9 @@
 /* ===== INDEX: masthead ===== */
 .bl-mast{padding:var(--sp-8) 0 0}
 .bl-mast .kicker{color:var(--muted)}
-.bl-mast h1{font-size:clamp(2.2rem,4.6vw,3.5rem);line-height:1.08;font-weight:800;letter-spacing:-.028em;max-width:22ch;text-wrap:balance}
+.bl-mast h1{font-size:var(--fs-h1);line-height:var(--lh-display);font-weight:var(--fw-head);letter-spacing:var(--track-display);max-width:18ch}
 .bl-h1-2{color:var(--muted)}
-.bl-dek{margin-top:var(--sp-5);max-width:62ch;font-size:var(--fs-read);line-height:var(--lh-read);color:var(--ink-2);text-wrap:pretty}
+.bl-dek{margin-top:var(--sp-5);max-width:var(--measure);font-size:var(--fs-read);line-height:var(--lh-read);color:var(--ink-2);text-wrap:pretty}
 .bl-rss{margin-top:var(--sp-5)}
 .bl-rss a{color:var(--muted);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px;transition:color var(--dur-hover) var(--ease-out)}
 @media (hover:hover){ .bl-rss a:hover{color:var(--ink)} }
@@ -40,7 +40,7 @@
 .bl-filter input:checked + label{background:var(--ink);color:var(--bg);box-shadow:none}
 .bl-filter input:checked + label .bl-count{color:var(--bg)}
 .bl-count{font-family:var(--font-mono),monospace;font-size:var(--fs-label);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
-.bl-intro{display:none;margin-top:var(--sp-4);max-width:62ch;color:var(--muted);text-wrap:pretty}
+.bl-intro{display:none;margin-top:var(--sp-4);max-width:var(--measure);color:var(--muted)}
 .bl:has(#f-architecture:checked) .bl-grid > li:not([data-s="architecture"]),
 .bl:has(#f-agent-experience:checked) .bl-grid > li:not([data-s="agent-experience"]),
 .bl:has(#f-taste:checked) .bl-grid > li:not([data-s="taste"]),
@@ -62,13 +62,13 @@
   transition:box-shadow var(--dur-hover) var(--ease-out),background-color var(--dur-hover) var(--ease-out)}
 .bl-card .cv{border-radius:0}
 .bl-card-text{display:flex;flex-direction:column;gap:var(--sp-2);flex:1;padding:var(--sp-4)}
-.bl-card h3{font-size:var(--fs-card);line-height:var(--lh-sub);font-weight:800;letter-spacing:-.018em;text-wrap:balance;
+.bl-card h2{font-size:var(--fs-card);line-height:var(--lh-sub);font-weight:var(--fw-head);letter-spacing:var(--track-sub);
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;min-height:calc(3 * var(--lh-sub) * 1em)}
 .bl-card-desc{color:var(--muted);font-size:var(--fs-ui);line-height:var(--lh-ui);
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 /* One target per card: the title link stretches over the whole card. */
-.bl-card h3 a::after{content:"";position:absolute;inset:0}
-.bl-card h3 a:focus-visible{outline:none}
+.bl-card h2 a::after{content:"";position:absolute;inset:0}
+.bl-card h2 a:focus-visible{outline:none}
 .bl-card:has(a:focus-visible){outline:var(--focus-ring);outline-offset:2px}
 @media (hover:hover) and (pointer:fine){
   .bl-card:hover{background:var(--surface-2);box-shadow:0 0 0 1px var(--line-2)}
@@ -84,8 +84,8 @@
 .bp-head .kicker{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted);margin-bottom:var(--sp-4)}
 .bp-head .kicker a{color:var(--muted);transition:color var(--dur-hover) var(--ease-out)}
 @media (hover:hover){ .bp-head .kicker a:hover{color:var(--ink)} }
-.bp-head h1{font-size:var(--fs-h1);line-height:1.1;font-weight:800;letter-spacing:-.024em;text-wrap:balance;max-width:20ch}
-.bp-dek{margin-top:var(--sp-4);max-width:62ch;font-size:var(--fs-read);line-height:var(--lh-read);color:var(--ink-2);text-wrap:pretty}
+.bp-head h1{font-size:var(--fs-h1);line-height:var(--lh-display);font-weight:var(--fw-head);letter-spacing:var(--track-display);max-width:18ch}
+.bp-dek{margin-top:var(--sp-4);max-width:var(--measure);font-size:var(--fs-read);line-height:var(--lh-read);color:var(--ink-2);text-wrap:pretty}
 .bp-meta{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);margin-top:var(--sp-5)}
 .bp-hero{margin-top:var(--sp-7)}
 .bp-hero .cv,.bp-hero-fig img{border-radius:var(--r);box-shadow:var(--ring)}
@@ -93,11 +93,11 @@
 .bp-hero-fig img{display:block;width:100%;height:auto;border-radius:var(--r-in);box-shadow:none}
 
 /* ===== POST: body and TOC ===== */
-.bp-grid{display:grid;grid-template-columns:minmax(0,720px);gap:var(--sp-7);margin-top:var(--sp-7)}
-/* The TOC sits left of the article and sticks while it is read. It needs 240 + 48 + 720 px beside the gutters. */
+.bp-grid{display:grid;grid-template-columns:minmax(0,var(--read-col));gap:var(--sp-7);margin-top:var(--sp-7)}
+/* The TOC sits left of the article and sticks while it is read. */
 .bp-toc{display:none}
 @media (min-width:1000px){
-  .bp-grid:has(.bp-toc){grid-template-columns:240px minmax(0,720px)}
+  .bp-grid:has(.bp-toc){grid-template-columns:240px minmax(0,var(--read-col))}
   .bp-toc{display:block;position:sticky;top:var(--sp-7);align-self:start;padding-right:var(--sp-4);border-right:1px solid var(--line)}
 }
 .bp-toc ol{list-style:none;display:grid;gap:0;margin-top:var(--sp-3)}
@@ -105,21 +105,20 @@
 @media (hover:hover){ .bp-toc a:hover{color:var(--ink)} }
 .bp-toc-n{font-family:var(--font-mono),monospace;font-size:var(--fs-label);color:var(--muted);font-variant-numeric:tabular-nums}
 
-/* The prose (Butterick): 19 px at 1.42 on a 720 px line, measured at about 65 characters; 17 px on phones.
+/* The prose: 19 px at 1.45 on a 34rem (544 px) line, about 65 characters (Butterick 45-90, Calvez 40-70); 16 px on phones.
    Paragraphs are separated by space, never also indented. */
 .bp-body{min-width:0;counter-reset:fig h2}
 .bp-prose{font-size:var(--fs-read);line-height:var(--lh-read);color:var(--ink-2);overflow-wrap:break-word}
 .bp-prose > * + *{margin-top:.75em}
 /* The opening paragraph reads as the lead by tone, not by a second size. */
 .bp-prose > p:first-child{color:var(--ink)}
-.bp-prose p,.bp-prose li{text-wrap:pretty}
-.bp-prose strong{color:var(--ink);font-weight:700}
-.bp-prose h2,.bp-prose h3{color:var(--ink);scroll-margin-top:24px;text-wrap:balance}
-.bp-prose h2{font-size:var(--fs-card-lg);line-height:var(--lh-sub);letter-spacing:-.015em;font-weight:700;margin-top:2.2em;counter-increment:h2}
+.bp-prose strong{color:var(--ink);font-weight:var(--fw-head)}
+.bp-prose h2,.bp-prose h3{color:var(--ink);scroll-margin-top:24px}
+.bp-prose h2{font-size:var(--fs-card-lg);line-height:var(--lh-sub);letter-spacing:var(--track-sub);font-weight:var(--fw-head);margin-top:2.2em;counter-increment:h2}
 /* Numbered like the TOC beside it. */
 .bp-prose h2::before{content:counter(h2,decimal-leading-zero);display:block;margin-bottom:var(--sp-2);font-family:var(--font-mono),monospace;
   font-size:var(--fs-code);font-weight:400;letter-spacing:var(--track-caps);color:var(--muted);font-variant-numeric:tabular-nums}
-.bp-prose h3{font-size:var(--fs-read);line-height:1.3;font-weight:700;margin-top:1.6em}
+.bp-prose h3{font-size:var(--fs-read);line-height:1.3;font-weight:var(--fw-head);margin-top:1.6em}
 .bp-prose h2 + *,.bp-prose h3 + *{margin-top:.4em}
 /* In prose a link carries an underline as well as the accent: colour alone does not mark it. */
 .bp-prose a{color:var(--accent-2);text-decoration:underline;text-decoration-color:var(--accent-line);
@@ -130,9 +129,9 @@
 .bp-prose li::marker{color:var(--muted)}
 /* A blockquote is a pull quote: big type, a hairline rule, no italics. */
 .bp-prose blockquote{margin:2em 0;padding:var(--sp-1) 0 var(--sp-1) var(--sp-5);border-left:3px solid var(--sec,var(--line-2));font-size:var(--fs-card-lg);line-height:1.3;
-  font-weight:600;letter-spacing:-.018em;color:var(--ink);text-wrap:balance}
+  font-weight:var(--fw-head);letter-spacing:var(--track-sub);color:var(--ink);text-wrap:balance}
 .bp-prose hr{border:0;border-top:1px solid var(--line);margin:2.4em 0}
-.bp-prose :not(pre) > code{font-family:var(--font-mono),monospace;font-size:.86em;background:var(--raised);border-radius:var(--r-in);
+.bp-prose :not(pre) > code{font-family:var(--font-mono),monospace;font-size:max(12px,.86em);background:var(--raised);border-radius:var(--r-in);
   padding:1px var(--sp-2);color:var(--ink);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 
 /* Code: a panel with a header strip. Syntax by tone and weight only, never by hue (DESIGN.md). */
@@ -146,7 +145,7 @@
 .bp-body figure{margin:2em 0;padding:var(--sp-3);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);counter-increment:fig}
 .bp-body figure:first-child{margin-top:0}
 .bp-body figure img,.bp-body figure video{display:block;width:100%;height:auto;border-radius:var(--r-in)}
-.bp-body figcaption{margin-top:var(--sp-3);padding:0 var(--sp-1);font-size:var(--fs-ui);line-height:var(--lh-body);color:var(--muted);text-wrap:pretty}
+.bp-body figcaption{margin-top:var(--sp-3);padding:0 var(--sp-1);font-size:var(--fs-ui);line-height:var(--lh-body);color:var(--muted)}
 .bp-body figcaption::before{content:"Fig. " counter(fig,decimal-leading-zero);margin-right:var(--sp-3);font-family:var(--font-mono),monospace;font-size:var(--fs-label);
   letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--ink-2)}
 .bp-prose > p > img,.bp-prose > img,.bp-prose > video{display:block;max-width:100%;height:auto;padding:var(--sp-3);background:var(--surface);
@@ -169,17 +168,17 @@
 /* ===== POST: end ===== */
 .bp-made{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--sp-5);align-items:center;margin-top:var(--sp-8);padding:var(--sp-6)}
 .bp-made-glyph{width:58px;height:30px;color:var(--ink)}
-.bp-made h2{font-size:var(--fs-card);font-weight:800;letter-spacing:-.02em}
-.bp-made p{margin-top:var(--sp-2);max-width:58ch;color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-read);text-wrap:pretty}
+.bp-made h2{font-size:var(--fs-card);font-weight:var(--fw-head);letter-spacing:var(--track-sub)}
+.bp-made p{margin-top:var(--sp-2);max-width:var(--measure);color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-read)}
 .bp-made-act{display:flex;flex-wrap:wrap;gap:var(--sp-3)}
 @media (max-width:900px){ .bp-made{grid-template-columns:auto minmax(0,1fr)} .bp-made-act{grid-column:1 / -1} }
 @media (max-width:640px){ .bp-made{grid-template-columns:minmax(0,1fr);padding:var(--sp-5)} .bp-made-act .btn{flex:1;justify-content:center} }
 
 .bp-related{margin-top:var(--sp-9)}
-.bp-related > h2{font-size:var(--fs-panel);letter-spacing:var(--track-head);font-weight:800}
+.bp-related > h2{font-size:var(--fs-panel);letter-spacing:var(--track-head);font-weight:var(--fw-head)}
 @media (max-width:640px){
   .bp-head{padding-top:var(--sp-7)}
-  .bp-prose{font-size:var(--fs-read-sm);line-height:1.45}
+  .bp-prose{font-size:var(--fs-read-sm)}
   .bp-dek,.bl-dek{font-size:var(--fs-read-sm)}
   .bp-body figure{padding:var(--sp-2);margin-inline:calc(var(--sp-1) * -1)}
 }

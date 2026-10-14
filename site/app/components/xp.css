@@ -1,16 +1,14 @@
 /* xp.css: the content pages' shared layer (Laws of UX pass, DESIGN.md "Laws of UX").
    Scoped to .xp and to the heads of /moves and /easing, so /features and the blog keep their own look. */
-:root{--fs-page:clamp(2.6rem,6.6vw,5rem)}
-
-/* BIG HEADLINE: the h1 is the peak of every content page. */
+/* The h1 is the peak of every content page: one size, --fs-h1, on all of them. */
 .xp .phead,.mvd-head,.ez-head{padding-top:var(--sp-7)}
-.xp .phead h1,.mvd-head h1,.ez-head h1,.mv.ls-top > h1{font-size:var(--fs-page);line-height:.98;letter-spacing:var(--track-display);max-width:16ch;text-wrap:balance}
+.xp .phead h1,.mvd-head h1,.ez-head h1,.mv.ls-top > h1{font-size:var(--fs-h1);line-height:var(--lh-display);letter-spacing:var(--track-display);max-width:18ch}
 .xp .phead h1{overflow-wrap:anywhere}
 .mv.ls-top > h1{max-width:none}
-.xp .phead p:not(.kicker):not(.bnote){color:var(--ink-2);font-size:var(--fs-lead);max-width:58ch;margin-top:var(--sp-5)}
-.xp .phead .bnote{color:var(--muted);font-size:var(--fs-ui);margin-top:var(--sp-4);max-width:62ch}
+.xp .phead p:not(.kicker):not(.bnote){color:var(--ink-2);font-size:var(--fs-lead);max-width:var(--measure);margin-top:var(--sp-5)}
+.xp .phead .bnote{color:var(--muted);font-size:var(--fs-ui);margin-top:var(--sp-4);max-width:var(--measure)}
 .xp .phead .bnote a,.xp .ievidence a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-2)}
-.mv .ls-sub{font-size:var(--fs-lead);color:var(--ink-2);max-width:58ch}
+.mv .ls-sub{font-size:var(--fs-lead);color:var(--ink-2);max-width:var(--measure)}
 
 /* WHERE YOU ARE (Jakob): the same trail on every content page. */
 .xp-crumbs{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-5)}
@@ -43,8 +41,8 @@
 .xp .isec-text > p + p{margin-top:var(--sp-4)}
 
 /* A list in place of a wall (Miller): bold lead-in, one idea per row. */
-.xp-list{list-style:none;margin-top:var(--sp-4);display:grid;gap:0;max-width:66ch;counter-reset:xp}
-.xp-list li{counter-increment:xp;display:grid;grid-template-columns:2.2em minmax(0,1fr);padding:var(--sp-3) 0;border-top:1px solid var(--line);color:var(--ink-2);line-height:var(--lh-body);text-wrap:pretty}
+.xp-list{list-style:none;margin-top:var(--sp-4);display:grid;gap:0;max-width:var(--measure);counter-reset:xp}
+.xp-list li{counter-increment:xp;display:grid;grid-template-columns:2.2em minmax(0,1fr);padding:var(--sp-3) 0;border-top:1px solid var(--line);color:var(--ink-2);line-height:var(--lh-body)}
 .xp-list li::before{content:counter(xp,decimal-leading-zero);font-family:var(--font-mono),monospace;font-size:var(--fs-code);color:var(--muted);padding-top:.2em;font-variant-numeric:tabular-nums}
 .xp-list li:last-child{border-bottom:1px solid var(--line)}
 .xp-list strong{color:var(--ink);font-weight:600}
@@ -71,8 +69,8 @@
 .xp-alts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-3);margin-top:var(--sp-4);list-style:none}
 .xp-alt{padding:var(--sp-panel);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);display:flex;flex-direction:column;position:relative;
   transition:box-shadow var(--dur-hover) var(--ease-out)}
-.xp-alt h2{font-size:var(--fs-sub);font-weight:800;letter-spacing:var(--track-head);line-height:var(--lh-sub)}
-.xp-alt p{color:var(--ink-2);margin-top:var(--sp-3);text-wrap:pretty;max-width:60ch}
+.xp-alt h2{font-size:var(--fs-sub);font-weight:var(--fw-head);letter-spacing:var(--track-sub);line-height:var(--lh-sub)}
+.xp-alt p{color:var(--ink-2);margin-top:var(--sp-3);max-width:var(--measure)}
 .xp-alt a{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-top:auto;padding-top:var(--sp-4);min-height:var(--hit);color:var(--ink);font-weight:600;font-size:var(--fs-ui)}
 .xp-alt p + a{margin-top:var(--sp-4);border-top:1px solid var(--line);padding-top:0}
 .xp-alt a::after{content:"";position:absolute;inset:0}
@@ -83,8 +81,8 @@
 
 /* THE ENDING (peak-end, Von Restorff): one white button in the page, then a ruled list of next stops. */
 .xp-next{margin-top:var(--sp-8);padding:var(--sp-panel);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
-.xp-next h2{font-size:var(--fs-display);font-weight:800;letter-spacing:var(--track-display);line-height:var(--lh-head);text-wrap:balance;max-width:20ch}
-.xp-next-lead{color:var(--ink-2);font-size:var(--fs-lead);margin-top:var(--sp-4);max-width:56ch;text-wrap:pretty}
+.xp-next h2{font-size:var(--fs-h2);font-weight:var(--fw-head);letter-spacing:var(--track-head);line-height:var(--lh-head);max-width:20ch}
+.xp-next-lead{color:var(--ink-2);font-size:var(--fs-lead);margin-top:var(--sp-4);max-width:var(--measure)}
 .xp-next-lead code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--raised);border-radius:var(--r-in);padding:1px var(--sp-2);color:var(--ink)}
 .xp-next-act{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-5)}
 .xp-rel{list-style:none;margin-top:var(--sp-6)}

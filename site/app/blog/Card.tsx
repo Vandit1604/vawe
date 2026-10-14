@@ -9,9 +9,9 @@ export function Card({ post, eager = false }: { post: Post; eager?: boolean }) {
       <Cover post={post} eager={eager} />
       <div className="bl-card-text">
         <p className="meta bl-sec"><span className="sw" />{post.sectionLabel}</p>
-        <h3>
+        <h2>
           <Link href={`/blog/${post.slug}`} prefetch={false}>{smart(post.title)}</Link>
-        </h3>
+        </h2>
         <p className="bl-card-desc">{smart(post.description)}</p>
       </div>
     </li>

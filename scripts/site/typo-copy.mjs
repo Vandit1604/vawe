@@ -44,7 +44,7 @@ export function copyNodes(file) {
     const kind = kindOf(n);
     if (kind && isCopy(n, kind)) {
       const quote = kind === 'str' ? text[n.getStart()] : '';
-      out.push({ kind, quote, start: n.getStart(), end: n.getEnd(), text: decode(n.text ?? ''), after: prevIsElement(n) ? 'x' : '', at: sf.getLineAndCharacterOfPosition(n.getStart()).line + 1 });
+      out.push({ kind, attr: ts.isJsxAttribute(n.parent), quote, start: n.getStart(), end: n.getEnd(), text: decode(n.text ?? ''), after: prevIsElement(n) ? 'x' : '', at: sf.getLineAndCharacterOfPosition(n.getStart()).line + 1 });
     }
     ts.forEachChild(n, visit);
   };

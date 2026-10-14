@@ -1,3 +1,4 @@
+import { smartHtml } from "../../../lib/typo.mjs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Header } from "../../components/Header";
@@ -60,7 +61,7 @@ function docHtml(m: Move) {
     m.notesHtml ? `<h2 id="notes">Notes</h2>\n${m.notesHtml}` : "",
     m.soundHtml ? `<h2 id="sound">Sound</h2>\n${m.soundHtml}` : "",
   ];
-  return parts.filter(Boolean).join("\n");
+  return smartHtml(parts.filter(Boolean).join("\n"));
 }
 
 export default async function MovePage({ params }: Params) {

@@ -42,7 +42,7 @@
   --font-title:var(--font-sans),system-ui,sans-serif;
 
   /* ---- TYPE SCALE (DESIGN.md "Type scale"): body 16 sits in Butterick's 15-25px web range ---- */
-  --fs-label:11px;          /* mono caps read-outs only */
+  --fs-label:12px;          /* mono caps read-outs only; 12 is the floor for any text (Calvez) */
   --fs-code:12px;           /* mono code and clip captions */
   --fs-ui:14px;             /* controls, captions, nav, footer */
   --fs-body:16px;
@@ -54,9 +54,14 @@
   --fs-panel:clamp(1.5rem,2.6vw,2rem);      /* a panel's h2 on the content pages */
   --fs-sub:clamp(1.3rem,2.2vw,1.65rem);     /* a sub-heading inside a panel or a document */
   --fs-figure:clamp(1.5rem,2.8vw,2rem);     /* a big mono number */
-  --lh-body:1.55; --lh-ui:1.35; --lh-head:1.04; --lh-sub:1.2;
+  --lh-body:1.45;           /* Butterick 120-145%; Calvez about 150% for long text */
+  --lh-ui:1.3; --lh-sub:1.25; --lh-head:1.1; --lh-display:1.05;
+  --fw-head:600;            /* every heading and title, as on the landing; body is 400 (skip a weight, Calvez) */
   --track-caps:.06em;       /* Butterick: 5-12% extra on all caps */
-  --track-head:-.04em; --track-display:-.05em;
+  --track-display:-.045em;  /* an h1 at 56 px, the landing's section size */
+  --track-head:-.03em;      /* a panel or section h2, 32 to 44 px */
+  --track-sub:-.02em;       /* a sub-heading, 20 to 26 px */
+  --measure:46ch;           /* a text column holds 45 to 70 characters (Butterick 45-90, Calvez 40-70) */
 
   /* ---- SPACE SCALE: 4 px steps, group gap at least twice the item gap ---- */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
@@ -103,14 +108,16 @@ body{
   font-family:var(--font-sans),system-ui,sans-serif;
   font-weight:400; font-size:var(--fs-body); line-height:var(--lh-body); letter-spacing:-.004em;
   -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility;
-  font-kerning:normal;
+  font-kerning:normal; font-feature-settings:"kern","liga","calt"; hanging-punctuation:first last;
   overflow-x:hidden; min-height:100dvh;
 }
+h1,h2,h3{text-wrap:balance}
+p,li,dd,figcaption,blockquote{text-wrap:pretty}
 a{color:inherit;text-decoration:none}
 ::selection{background:var(--accent);color:var(--accent-ink)}
 .mono{font-family:var(--font-mono),monospace}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-/* WCAG 2.4.1 — visible only on focus, but always the first tab stop. */
+/* WCAG 2.4.1, visible only on focus, but always the first tab stop. */
 .skip{position:absolute;left:-9999px;top:0;z-index:var(--z-skip);
   background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:var(--fs-ui);
   padding:var(--sp-3) var(--sp-4);border-radius:0 0 var(--r-ctl) 0}
@@ -195,8 +202,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
    SECTIONS
    ========================================================= */
 .kicker{font-family:var(--font-mono),monospace;font-size:var(--fs-code);letter-spacing:.02em;color:var(--accent);margin-bottom:var(--sp-3)}
-.h2{font-size:var(--fs-panel);font-weight:800;letter-spacing:var(--track-head);line-height:var(--lh-head);text-wrap:balance;}
-.lead{color:var(--ink-2);font-size:var(--fs-lead);line-height:var(--lh-body);max-width:56ch;text-wrap:pretty}
+.h2{font-size:var(--fs-panel);font-weight:var(--fw-head);letter-spacing:var(--track-head);line-height:var(--lh-head)}
+.lead{color:var(--ink-2);font-size:var(--fs-lead);line-height:var(--lh-body);max-width:var(--measure)}
 /* ===== FOOTER · studio panels on the ground, the generated route groups inside ===== */
 .panel{background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
 /* A literal read-out (a clock, a count, a lane name), and the lane colour that marks a layer type. */
@@ -206,7 +213,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .lane-comp{--lane:var(--lane-comp)} .lane-cap{--lane:var(--lane-cap)} .lane-sound{--lane:var(--lane-sound)}
 .foot{display:grid;gap:var(--sp-3);padding-top:var(--sp-9);padding-bottom:var(--sp-5)}
 .foot-cta-panel{padding:var(--sp-6);display:flex;justify-content:space-between;align-items:center;gap:var(--sp-5);flex-wrap:wrap}
-.foot-cta{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.04;text-wrap:balance;max-width:18ch}
+.foot-cta{font-size:var(--fs-panel);font-weight:var(--fw-head);letter-spacing:var(--track-head);line-height:var(--lh-head);max-width:18ch}
 .foot-act{display:flex;gap:var(--sp-2);flex-wrap:wrap}
 .foot-panel{padding:var(--sp-5) var(--sp-5) var(--sp-4)}
 .foot-nav{display:grid;gap:var(--sp-6) var(--sp-7);grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
@@ -228,8 +235,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .phead{padding:var(--sp-8) 0 var(--sp-2)}
 .phead .kicker{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;color:var(--muted);margin-bottom:var(--sp-3)}
 .phead .kicker .dot{display:none}
-.phead h1{font-size:var(--fs-h1);line-height:1;font-weight:800;letter-spacing:var(--track-display);text-wrap:balance;max-width:20ch}
-.phead p{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:62ch;text-wrap:pretty}
+.phead h1{font-size:var(--fs-h1);line-height:var(--lh-display);font-weight:var(--fw-head);letter-spacing:var(--track-display);max-width:20ch}
+.phead p{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:var(--measure)}
 .phead .bnote{margin-top:var(--sp-3)}
 @media (max-width:640px){ .phead{padding-top:var(--sp-7)} }
 /* Inert metadata, per THE AFFORDANCE RULE below: no box, no accent, no verb. It was a bordered
@@ -263,7 +270,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .codeblock pre{font-family:var(--font-mono),monospace;font-size:var(--fs-code);line-height:1.75;color:var(--ink-2);white-space:pre;margin:0}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  /* The clips STAY. components/Clip.tsx simply never plays them, so each one holds its poster —
+  /* The clips STAY. components/Clip.tsx simply never plays them, so each one holds its poster ,
      a real frame of the real render. The old rule hid the video outright, which took the poster
      with it and left flat gray boxes where the entire argument should be. */
   *{transition-duration:.01ms !important}
@@ -276,7 +283,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* Below 700 the nav takes its own full-width row under the mark and the GitHub action, and wraps
    rather than scrolls, so no link hides past an edge with no cue. 44px thumb targets. */
 @media (max-width:640px){
-  :root{--hit:44px}
+  :root{--hit:44px;--fs-body:15px;--fs-lead:17px;--sp-panel:var(--sp-4)}
+  .wrap{padding:0 var(--sp-4)}
   .bar{flex-wrap:wrap;height:auto;gap:var(--sp-1) var(--sp-3);padding:var(--sp-3) 0}
   .mark{order:1}
   .ghbtn{order:2;margin-left:auto}
@@ -285,13 +293,13 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 }
 /* ===== SECTIONS: one centred column of studio panels, shared by every page =================== */
 .ls{max-width:1040px;margin:0 auto;padding-top:112px}
-.ls > h2{font-size:var(--fs-h2);font-weight:800;letter-spacing:var(--track-head);line-height:var(--lh-head);text-wrap:balance;max-width:20ch}
-.ls > .ls-sub{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:52ch;text-wrap:pretty}
+.ls > h2{font-size:var(--fs-h2);font-weight:var(--fw-head);letter-spacing:var(--track-head);line-height:var(--lh-head);max-width:20ch}
+.ls > .ls-sub{color:var(--muted);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:var(--measure)}
 .ls-grid{display:grid;gap:var(--sp-3);margin-top:var(--sp-6)}
 .ls-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .ls-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 /* An inner page opens with its own h1 in the same column, closer to the bar than a landing section. */
 .ls-top{padding-top:var(--sp-8)}
-.ls-top > h1{font-size:var(--fs-h1);font-weight:800;letter-spacing:var(--track-display);line-height:1;text-wrap:balance;max-width:18ch}
+.ls-top > h1{font-size:var(--fs-h1);font-weight:var(--fw-head);letter-spacing:var(--track-display);line-height:var(--lh-display);max-width:18ch}
 @media (max-width:900px){ .ls-3{grid-template-columns:1fr 1fr} }
 @media (max-width:640px){ .ls-3,.ls-2{grid-template-columns:minmax(0,1fr)} .ls{padding-top:80px} .ls-top{padding-top:var(--sp-7)} }

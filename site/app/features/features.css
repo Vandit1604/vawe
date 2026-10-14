@@ -1,18 +1,18 @@
 /* /features (site/DESIGN.md "Features"): the .xp content layer, then one panel per section. Inside a panel each
    feature is a hairline row: headline and two lines on the left, one proof on the right. */
 .ft-sec{display:block}
-.ft-head p{margin-top:var(--sp-3);color:var(--ink-2);max-width:60ch}
+.ft-head p{margin-top:var(--sp-3);color:var(--ink-2);max-width:var(--measure)}
 .ft-list{list-style:none;margin-top:var(--sp-5)}
 .ft-row{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,6fr);gap:var(--gap-panel);align-items:start;padding:var(--sp-5) 0;border-top:1px solid var(--line)}
 .ft-text h3{font-size:var(--fs-body);font-weight:600;color:var(--ink);line-height:var(--lh-sub)}
-.ft-text p{margin-top:var(--sp-2);color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);max-width:56ch;text-wrap:pretty}
+.ft-text p{margin-top:var(--sp-2);color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--measure)}
 .ft-text a{color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-2)}
 .ft-text code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--raised);border-radius:var(--r-in);padding:1px var(--sp-2);color:var(--ink);overflow-wrap:anywhere}
 .ft-proof{display:grid;gap:var(--sp-3);min-width:0;align-content:start}
 .ft-proof .codeblock{margin:0;max-width:none;box-shadow:var(--ring)}
 .ft-proof .imoves{margin-top:0;grid-template-columns:repeat(2,minmax(0,1fr))}
 .isec .ft-stat{margin:0;max-width:none;display:flex;align-items:baseline;gap:var(--sp-3);flex-wrap:wrap}
-.ft-stat b{font-size:var(--fs-display);line-height:1;letter-spacing:var(--track-display);font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.ft-stat b{font-size:var(--fs-display);line-height:1;letter-spacing:var(--track-display);font-weight:var(--fw-head);color:var(--ink);font-variant-numeric:tabular-nums}
 .ft-stat span{color:var(--muted);font-size:var(--fs-ui)}
 .ft-tab{border-collapse:collapse;font-family:var(--font-mono),monospace;font-size:var(--fs-code);font-variant-numeric:tabular-nums}
 .ft-tab th,.ft-tab td{text-align:left;padding:var(--sp-1) var(--sp-5) var(--sp-1) 0;font-weight:400;color:var(--ink-2)}
@@ -36,7 +36,7 @@
 .ftv-aspect{height:min(340px,70vw)}
 .ftv-page{height:100%;max-width:100%;background:var(--surface-2);box-shadow:var(--ring);container-type:size;transition:aspect-ratio var(--dur-state) var(--ease-out)}
 .ftv-page-in{height:100%;display:grid;align-content:center;justify-items:start;gap:2cqmin;padding:0 8cqw}
-.ftv-page-in b{font-size:12cqmin;line-height:1;font-weight:800;letter-spacing:var(--track-display);color:var(--ink)}
+.ftv-page-in b{font-size:12cqmin;line-height:1;font-weight:var(--fw-head);letter-spacing:var(--track-display);color:var(--ink)}
 .ftv-page-in i{width:30cqw;height:1.6cqmin;background:var(--accent);margin-top:3cqmin}
 .ftv-film{aspect-ratio:16/9}
 .ftv-film video{width:100%;height:100%;object-fit:cover;display:block}

@@ -173,7 +173,7 @@ function HashProof() {
 
 function AudioLane() {
   return (
-    <div className="panel fta" role="img" aria-label="A voice-over at 1\u00a0s and a hit at 2.4\u00a0s on a 4\u00a0s film, mixed offline">
+    <div className="panel fta" role="img" aria-label="A voice-over at 1&nbsp;s and a hit at 2.4&nbsp;s on a 4&nbsp;s film, mixed offline">
       <div className="fta-lane"><span className="meta">vo.mp3</span><i style={{ left: "25%", width: "48%" }} /></div>
       <div className="fta-lane"><span className="meta">hit.mp3</span><i style={{ left: "60%", width: "6%" }} /></div>
       <div className="fta-axis meta"><span>0&nbsp;s</span><span>data-at 1</span><span>data-at 2.4</span><span>4&nbsp;s</span></div>
@@ -265,7 +265,7 @@ export default function Features() {
               The end-to-end test renders pages twice and compares every frame. The frames must also differ over time, so a frozen page
               fails too.
             </Feature>
-            <Feature title="Draft fast, ship at 60\u00a0fps" proof={<Code label="two renders">{RATES}</Code>}>
+            <Feature title="Draft fast, ship at 60&nbsp;fps" proof={<Code label="two renders">{RATES}</Code>}>
               Frames are seeked at fractional times, so the render rate is independent of the page. A draft is for a quick look; the final
               mixes the audio and adds motion blur.
             </Feature>

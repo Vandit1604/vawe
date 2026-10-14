@@ -28,7 +28,7 @@ function rewrite(node, source) {
   const done = smartText(before, node.after);
   if (done === before) return null;
   if (node.kind === 'jsx') return done.split(NBSP).join('&nbsp;');
-  if (node.kind === 'str') return literal(done, node.quote);
+  if (node.kind === 'str') return node.attr ? node.quote + done.split(NBSP).join('&nbsp;') + node.quote : literal(done, node.quote);
   return null;
 }
 

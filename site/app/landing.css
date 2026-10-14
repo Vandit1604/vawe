@@ -12,13 +12,13 @@
   --fs-mega:clamp(3rem,10.5vw,11rem);--fs-chapter:clamp(2.25rem,7vw,7rem);--fs-section:clamp(2rem,4.6vw,4rem);--fs-end:clamp(3rem,10vw,10rem);
   position:relative;color:var(--ink-2);letter-spacing:-.006em}
 .lp:focus{outline:none}
-.lp h1,.lp h2{color:var(--ink);font-weight:600;text-wrap:balance}
+.lp h1,.lp h2{color:var(--ink);font-weight:var(--fw-head);text-wrap:balance}
 @media (max-width:640px){ .lp{--nav-h:0px;--r-frame:16px} }
 
 /* ===== FRAMES: a big rounded hairline frame holds each film ===== */
 .lp .lp-frame{position:relative;border-radius:var(--r-frame);border:1px solid var(--line-2);overflow:hidden;background:#000}
 .lp .lp-film{display:block;width:100%;height:100%;object-fit:cover;background:#000}
-.lp .mono{font-family:var(--font-mono),monospace;font-size:var(--fs-code);line-height:1.4;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
+.lp .mono{font-family:var(--font-mono),monospace;font-size:var(--fs-code);line-height:1.4;letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
 .lp .lp-row{display:flex;gap:var(--sp-3);flex-wrap:wrap}
 .lp .lp-btn-line{border-color:var(--line-2);color:var(--ink)}
 @media (hover:hover){ .lp .lp-btn-line:hover{border-color:var(--muted);background:var(--raised)} }
@@ -31,7 +31,7 @@
 .lp-hero-copy{position:absolute;z-index:var(--z-raise);left:var(--gutter);right:var(--gutter);bottom:clamp(24px,5vh,56px);display:grid;gap:22px;justify-items:start}
 .lp-display{font-size:var(--fs-mega);line-height:.88;letter-spacing:-.07em}
 .lp .lp-hero-brand{display:block;width:fit-content;margin-bottom:var(--sp-5);padding:var(--sp-1) var(--sp-3);border-radius:var(--r-pill);background:rgba(0,0,0,.6);color:var(--ink-2)}
-.lp-lede{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.5;color:var(--ink-2);max-width:46ch;text-wrap:pretty}
+.lp-lede{font-size:clamp(1rem,1.5vw,1.25rem);line-height:var(--lh-body);color:var(--ink-2);max-width:46ch;text-wrap:pretty}
 @media (max-width:760px){
   .lp-hero{height:auto;min-height:0;padding:var(--sp-2) var(--sp-3) 0}
   .lp .lp-hero-frame{height:auto;border:0;border-radius:0;overflow:visible}
@@ -50,7 +50,7 @@
 .lp-pane .lp-tag{position:absolute;z-index:var(--z-raise);left:clamp(20px,3.5vw,56px);top:var(--sp-5);margin:0;padding:var(--sp-1) var(--sp-3);border-radius:var(--r-pill);background:rgba(0,0,0,.6);color:var(--ink-2)}
 .lp-cap{position:absolute;z-index:var(--z-raise);left:clamp(20px,3.5vw,56px);right:clamp(20px,3.5vw,56px);bottom:clamp(24px,6vh,64px);display:grid;gap:14px;max-width:900px;opacity:var(--in);translate:0 calc((1 - var(--in)) * 40px)}
 .lp-cap h2{font-size:var(--fs-chapter);line-height:.92;letter-spacing:-.06em}
-.lp-cap p{color:var(--ink-2);font-size:clamp(1rem,1.4vw,1.1875rem);line-height:1.5;max-width:48ch;text-wrap:pretty}
+.lp-cap p{color:var(--ink-2);font-size:clamp(1rem,1.4vw,1.1875rem);line-height:var(--lh-body);max-width:48ch;text-wrap:pretty}
 @media (max-width:760px){
   .lp-ch{height:auto}
   .lp-stage{position:static;height:auto;padding:var(--sp-8) var(--sp-3) 0}
@@ -94,7 +94,8 @@
 .lp-how h2{margin-bottom:var(--sp-5)}
 .lp-how .lp-side{display:grid;gap:var(--sp-6);justify-items:start;position:sticky;top:calc(var(--nav-h) + var(--sp-6))}
 .lp-how .lp-side > div{width:100%}
-.lp-how .lp-side p{color:var(--muted);max-width:42ch;text-wrap:pretty}
+.lp-how p{max-width:var(--measure)}
+.lp-how .lp-side p{color:var(--muted)}
 .lp-code{font:400 13px/1.7 var(--font-mono),monospace;color:var(--muted);white-space:pre;overflow-x:auto;tab-size:2;background:#000;border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
 .lp-code b{color:var(--ink);font-weight:400}
 .lp-code i{color:var(--dim);font-style:normal}
@@ -133,7 +134,7 @@
 .lp-faq summary::after{content:"+";font-family:var(--font-mono),monospace;color:var(--muted)}
 .lp-faq details[open] summary::after{content:"\2212"}
 @media (hover:hover){ .lp-faq summary:hover::after{color:var(--ink)} }
-.lp-faq details p{padding-bottom:var(--sp-5);color:var(--muted);max-width:66ch;text-wrap:pretty}
+.lp-faq details p{padding-bottom:var(--sp-5);color:var(--muted);max-width:var(--measure)}
 .lp-faq details a{color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;text-underline-position:from-font;text-decoration-skip-ink:auto}
 
 /* ===== THE WAY IN ===== */
