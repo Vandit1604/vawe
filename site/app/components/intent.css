@@ -3,60 +3,61 @@
 .ipage{max-width:1040px;margin:0 auto}
 
 /* One studio panel per argument: the text at its measure on the left, the proof beside it. */
-.isec{margin-top:12px;padding:clamp(22px,3vw,36px);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);
+.isec{margin-top:var(--sp-3);padding:var(--sp-panel);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);
   display:grid;grid-template-columns:minmax(0,7fr) minmax(0,6fr);
-  gap:clamp(24px,4vw,48px);align-items:start}
+  gap:var(--gap-panel);align-items:start}
 .isec:not(:has(> .isec-art)){grid-template-columns:minmax(0,1fr)}
 .isec:not(:has(> .isec-art)) p{max-width:70ch}
-.phead + .isec,.ls-top > .isec:first-of-type{margin-top:36px}
-.isec h2{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.05;letter-spacing:-.025em;
+.phead + .isec,.ls-top > .isec:first-of-type{margin-top:var(--sp-6)}
+.isec h2{font-size:var(--fs-panel);line-height:var(--lh-head);letter-spacing:var(--track-head);
   font-weight:800;text-wrap:balance;max-width:20ch}
 /* The measure sits on the element carrying the type: `ch` resolves against its own font size. */
-.isec p{color:var(--ink-2);font-size:1.02rem;line-height:1.65;margin-top:14px;max-width:60ch}
+.isec p{color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);margin-top:var(--sp-3);max-width:60ch;text-wrap:pretty}
 .isec p code,.iend .lead code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--raised);
-  border-radius:var(--r-in);padding:1px 6px;color:var(--ink)}
+  border-radius:var(--r-in);padding:1px var(--sp-2);color:var(--ink);overflow-wrap:anywhere}
 /* Inside a panel the proof is a recessed well, not a second raised card. */
 .isec-art > .codeblock{margin:0;max-width:none;box-shadow:none}
-.isec .cite{display:block;margin-top:12px;font-family:var(--font-mono),monospace;font-size:12px;color:var(--muted)}
+.isec .cite{display:block;margin-top:var(--sp-3);font-family:var(--font-mono),monospace;font-size:var(--fs-code);color:var(--muted)}
 
 /* Films inside a content page: a heading at the section size, then the cards. */
-.ifilms{margin-top:48px}
-.ifilms > h2{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.05;letter-spacing:-.025em;font-weight:800}
-.ifilms > p{color:var(--muted);margin-top:10px;max-width:60ch}
-.imoves{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:20px}
-.imoves li{position:relative;overflow:hidden;transition:box-shadow .15s ease}
-.imoves li:hover{box-shadow:0 0 0 1px var(--line-2)}
-.imoves li:has(a:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.ifilms{margin-top:var(--sp-7)}
+.ifilms > h2{font-size:var(--fs-panel);line-height:var(--lh-head);letter-spacing:var(--track-head);font-weight:800}
+.ifilms > p{color:var(--muted);margin-top:var(--sp-2);max-width:60ch;text-wrap:pretty}
+.imoves{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-3);margin-top:var(--sp-4)}
+.imoves li{position:relative;overflow:hidden;transition:box-shadow var(--dur-hover) var(--ease-out)}
+@media (hover:hover) and (pointer:fine){ .imoves li:hover{box-shadow:0 0 0 1px var(--line-2)} }
+.imoves li:has(a:focus-visible){outline:var(--focus-ring);outline-offset:2px}
 .imoves video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg);border-bottom:1px solid var(--line)}
-.imoves a{display:block;padding:10px 12px;font-family:var(--font-title);font-weight:500;font-size:13px;outline:none}
+.imoves a{display:block;padding:var(--sp-3);font-family:var(--font-title);font-weight:500;font-size:var(--fs-ui);line-height:var(--lh-ui);outline:none}
 .imoves a::after{content:"";position:absolute;inset:0}
 @media (max-width:900px){ .imoves{grid-template-columns:repeat(2,minmax(0,1fr))} }
-.ifilms + .isec{margin-top:48px}
+.ifilms + .isec{margin-top:var(--sp-7)}
 
 /* The page's own next step, and the cross-links between the content pages. */
-.iend{margin-top:12px;padding:clamp(22px,3vw,36px);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
-.iend .h2{max-width:24ch;font-size:clamp(1.5rem,2.6vw,2rem);font-weight:800}
-.iend .lead{margin-top:12px;max-width:64ch;color:var(--ink-2)}
-.iend .hero-cta{justify-content:flex-start;margin-top:22px}
-.irelated{margin-top:20px;display:flex;gap:10px 22px;flex-wrap:wrap}
-.irelated a{font-size:14px;color:var(--accent);text-decoration:none}
-.irelated a:hover{text-decoration:underline;text-underline-offset:3px}
+.iend{margin-top:var(--sp-3);padding:var(--sp-panel);background:var(--surface);border-radius:var(--r);box-shadow:var(--ring)}
+.iend .h2{max-width:24ch}
+.iend .lead{margin-top:var(--sp-3);max-width:64ch;color:var(--ink-2)}
+.iend .hero-cta{justify-content:flex-start;margin-top:var(--sp-5)}
+.iend-gap{margin-top:var(--sp-7)}
+.irelated{margin-top:var(--sp-4);display:flex;gap:0 var(--sp-5);flex-wrap:wrap}
+.irelated a{display:inline-flex;align-items:center;min-height:var(--hit);font-size:var(--fs-ui);color:var(--accent);text-decoration:none}
+@media (hover:hover){ .irelated a:hover{text-decoration:underline;text-underline-offset:3px} }
 @media (max-width:900px){
   .isec{grid-template-columns:minmax(0,1fr)}
 }
 
 /* .itable: the comparison table. Hairlines only; a wide row scrolls inside its wrapper on a phone.
    The header row is a label, so it takes the quiet mono register, not the accent. */
-.itable-wrap{margin-top:22px;overflow-x:auto;border-radius:var(--r-in)}
-.itable{width:100%;border-collapse:collapse;font-size:.94rem;min-width:640px}
-.itable th,.itable td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line)}
-.itable th{font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.04em;
+.itable-wrap{margin-top:var(--sp-5);overflow-x:auto;border-radius:var(--r-in)}
+.itable{width:100%;border-collapse:collapse;font-size:var(--fs-ui);line-height:var(--lh-ui);min-width:640px;font-variant-numeric:tabular-nums}
+.itable th,.itable td{text-align:left;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}
+.itable th{font-family:var(--font-mono),monospace;font-size:var(--fs-code);letter-spacing:var(--track-caps);
   text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
 .itable td{color:var(--ink-2)}
 .itable td:first-child{color:var(--ink);font-weight:700}
 .itable tr:last-child td{border-bottom:0}
 
-.ievidence{margin:14px 0 0;padding-left:18px;display:grid;gap:10px;max-width:68ch}
-.ievidence li{color:var(--muted);line-height:1.6}
-.ievidence a,.ifaq a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
-.ifaq h3{font-size:17px;margin:22px 0 6px}
+.ievidence{margin:var(--sp-3) 0 0;padding-left:var(--sp-4);display:grid;gap:var(--sp-2);max-width:68ch}
+.ievidence li{color:var(--muted);line-height:var(--lh-body)}
+.ievidence a,.ifaq a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;text-decoration-skip-ink:auto}
+.ifaq h3{font-size:var(--fs-body);line-height:var(--lh-sub);margin:var(--sp-5) 0 var(--sp-2)}
