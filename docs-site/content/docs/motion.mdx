@@ -76,3 +76,11 @@ The rules live in `taste/rules/`, one per file (`readable-hold.md`, `speed-bands
 The gallery is on the [moves page](/moves). `bin/vawe moves` renders the clips again when a demo changes.
 
 To draft only the seconds you work on, run `bin/vawe dev <page> --from s --to s`.
+
+## Looks and the lens
+
+One shader films the flat screen: perspective, depth of field with real bokeh shapes, bloom, LED grid, colour fringes, tear and grain. Its noise is hashed from the seed and the time, so renders still match. The page is not edited to change the look. Ten named looks ship: `clean`, `dream-bloom`, `film-halation`, `anamorphic`, `pro-mist`, `tilt-shift`, `soft-focus`, `vintage`, `cyanotype` and `crt`. The list is `LOOKS` in `core/surfaces/lens.js`.
+
+## Motion blur
+
+A final render measures how far things move in each frame. A still frame gets one sample. A fast frame gets up to 32 subframes, blended with a 180 degree shutter. A draft has no blur.

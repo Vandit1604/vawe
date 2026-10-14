@@ -7,10 +7,10 @@ import { pageMetadata } from "../components/seo";
 import { Clip } from "../components/Clip";
 import { MoveClips } from "../components/MoveClips";
 import { Next, PageTop, Toc } from "../components/Xp";
-import { clip, moveByName, toCard, GROUPS, MOVES } from "../../lib/moves";
+import { GROUPS, MOVES } from "../../lib/moves";
 import { EASES } from "../../lib/easing";
 import { Thumb } from "../easing/Charts";
-import { AspectDemo, BlurDemo, MoveFilter, SeekScrubber } from "./Demos";
+import { BlurDemo } from "./Demos";
 import "../components/intent.css";
 import "../easing/easing.css";
 import "./features.css";
@@ -18,20 +18,19 @@ import "./features.css";
 export const metadata = pageMetadata({
   title: "vawe features: deterministic HTML to video rendering",
   description:
-    "vawe features: a virtual clock that refuses wall time, motion blur that follows the motion, every aspect from one page, a camera lens, a moves library, and a loop that judges a film in a fresh session.",
+    "vawe features, in three groups: agents write a film in plain HTML and every command names the next step, a moves library and a fresh-session critique keep it from looking generated, and drafts render in seconds.",
   path: "/features",
 });
 
-/* /features · THE TOUR. Every claim reads off the repo: AGENTS.md, core/engine/page-clock.js, core/layout/aspects.js,
- * core/surfaces/lens.js, harness/media/render-page.mjs, and `bin/vawe <verb> --help` (the command lines below are
- * copied from those help texts). The moves and easing counts read lib/moves.json and lib/easing.json.
+/* /features · THREE PILLARS: agent experience, taste, speed. Every claim reads off the repo: AGENTS.md,
+ * harness/media/render-page.mjs, core/surfaces/lens.js, and `bin/vawe <verb> --help`. The session under "AX" is
+ * real output of bin/vawe new, dev and critique on a 6 s page (lines trimmed with an ellipsis). The speed bars are
+ * wall times measured with bin/vawe dev on 2026-10-14 (out/<film>.runs.jsonl, wallS). The moves and easing counts
+ * read lib/moves.json and lib/easing.json.
  */
 
 const ease = EASES.find((e) => e.slug === "land");
-const fast = moveByName("iris-wipe");
-const fastClip = fast ? clip(fast) : null;
-const lens = moveByName("lens");
-const lensClip = lens ? clip(lens) : null;
+const showcase = { webm: "/examples/showcase.webm", mp4: "/examples/showcase.mp4", poster: "/examples/showcase.webp" };
 
 function Code({ label, children }: { label: string; children: string }) {
   return (
@@ -60,132 +59,123 @@ function Feature({ title, children, proof }: { title: string; children: ReactNod
   );
 }
 
-function Section({ id, title, lead, visual, children }: { id: string; title: string; lead?: string; visual?: ReactNode; children: ReactNode }) {
+function Section({ id, title, lead, visual, children }: { id: string; title: string; lead: string; visual: ReactNode; children: ReactNode }) {
   return (
     <section className="isec ft-sec" id={id} aria-labelledby={`${id}-h`}>
       <div className="ft-head">
         <h2 id={`${id}-h`}>{title}</h2>
-        {lead ? <p>{lead}</p> : null}
+        <p>{lead}</p>
       </div>
-      {visual ? <div className="ft-visual">{visual}</div> : null}
+      <div className="ft-visual">{visual}</div>
       <ul className="ft-list">{children}</ul>
     </section>
+  );
+}
+
+const SESSION: { cmd: string; out: string[] }[] = [
+  {
+    cmd: `bin/vawe new ax-demo --request "A 6 second sting for Ember coffee…" --defaults`,
+    out: [
+      `wrote films/ax-demo/page.html, films/ax-demo/brief.md and …/directions.html`,
+      `--defaults: details guessed, not asked: subject, message, show, assets, ending`,
+      `next: bin/vawe refs list, bin/vawe refs frames <id>, Read the frames at full size, …`,
+      `vawe: new ok in 0.1s`,
+    ],
+  },
+  {
+    cmd: `bin/vawe dev films/ax-demo/page.html`,
+    out: [
+      `✓ out/ax-demo-draft.mp4: 180 frame(s) at 30fps, 960x540 (16:9), 0s-6.00s`,
+      `@0.7s static window 0.7-2.6 s (1.9 s, limit 0.5 s): nothing moves; give the hold an element motion …`,
+      `next: bin/vawe strip films/ax-demo/page.html --cuts and Read every cut at full size; …`,
+      `vawe: dev ok in 18.1s`,
+    ],
+  },
+  {
+    cmd: `bin/vawe critique films/ax-demo/page.html`,
+    out: [
+      `- no-settle: S1 h1 "Say the one thing" is still moving at 7.9 px/f when the shot ends [f89 (2.97s)]. Fix: end the move 4 frames before the cut, …`,
+      `next: … bin/vawe judge films/ax-demo/page.html --struct --runs A,B in a fresh session, then fix the named seconds with bin/vawe dev films/ax-demo/page.html --from s --to s`,
+      `vawe: critique ok in 20.6s`,
+    ],
+  },
+];
+
+function Session() {
+  return (
+    <figure className="ftt panel">
+      <div className="lbl">a real agent session, trimmed with …</div>
+      <pre className="code" tabIndex={0}>
+        {SESSION.map((s) => (
+          <span className="ftt-step" key={s.cmd}>
+            <span className="ftt-cmd">{s.cmd}</span>
+            {s.out.map((l) => (
+              <span className="ftt-out" key={l}>{l}</span>
+            ))}
+          </span>
+        ))}
+      </pre>
+    </figure>
   );
 }
 
 const PAGE = `<meta name="duration" content="12.4">
 <html data-aspect="16:9">
 <!-- CSS @keyframes, element.animate(),
-     SVG, canvas, three.js -->`;
+     SVG, canvas, three.js -->
+<script>window.seek = (t) => draw(t)</script>`;
 
-const SEEK = `window.seek = (t) => draw(t);
-// t in seconds; frames are fractional
-// no timers, no state between frames`;
+const CHECK = `@0.7s static window 0.7-2.6 s (1.9 s, limit 0.5 s):
+nothing moves; give the hold an element motion
+instead: put one element move in every span that
+sits still over 0.5 s (type a line, tick a counter,
+pass a glint), never a camera drift`;
 
-const CLOCK = `Date, performance.now   film time in ms
-requestAnimationFrame   flushed once per seek
-setTimeout/setInterval  fire when t passes them
-Math.random             reseeded from t`;
+const READ = `/llms.txt
+/ai-agents.md
+/llms-full.txt
+/moves/index.json
+/moves/<name>.md   // one per move`;
 
-const ASPECTS: [string, string][] = [
-  ["16:9", "1920\u00a0×\u00a01080"],
-  ["9:16", "1080\u00a0×\u00a01920"],
-  ["1:1", "1080\u00a0×\u00a01080"],
-  ["4:5", "1080\u00a0×\u00a01350"],
-  ["4:3", "1440\u00a0×\u00a01080"],
-];
-
-const LITERALS = `bin/vawe studio films/my-launch/page.html --port 8800
-// live scrubbable preview,
-// edits the page literals in place`;
+const SKILLS = "vawe-brief, vawe-page, vawe-critique, vawe-transitions and vawe-reference";
 
 const RATES = `bin/vawe dev  <page>   // half size, 30 fps, silent
 bin/vawe ship <page>   // 60 fps, blur, audio`;
 
-const NEW = `bin/vawe new my-launch --request "<the ask>"
-// asks for missing facts first
-// --defaults guesses them, unattended`;
+const REDO = `bin/vawe dev <page> --from 4 --to 6
+✓ …-draft-4-6.mp4: 60 frame(s) at 30fps, 4s-6.00s
+time: capture 3.2 s · checks 1.0 s · encode 0.8 s`;
 
-const SEE = `bin/vawe see   <mp4 | page | ref-id>
-bin/vawe strip <page> --cuts
-bin/vawe sheet <page>
-bin/vawe compare`;
-
-const WAIVER = `<script type="application/json" id="authoring">
-{"allow": ["world-held@3.5-6.2"],
- "_why": {"world-held@3.5-6.2":
-  "world s4, 2.7 s: the wordmark is the last beat"}}
-</script>`;
-
-const JUDGE = `bin/vawe critique <page>
+const GATE = `bin/vawe critique <page>
 // in a session that did not write the page
 bin/vawe judge <page> --fresh
-// a separate headless session scores`;
+// a separate headless session scores
+bin/vawe approve <page>
+// only the owner runs it; ship refuses without it`;
 
-const APPROVE = `bin/vawe ship films/my-launch/page.html
-// refused until the owner runs:
-bin/vawe approve`;
-
-const SKILLS = `skills/vawe-brief
-skills/vawe-page
-skills/vawe-critique
-skills/vawe-transitions
-skills/vawe-reference`;
-
-const PIPELINE: [string, string][] = [
-  ["new", "page.html and brief.md"],
-  ["dev", "draft mp4, half size, 30\u00a0fps, silent"],
-  ["strip", "one image per cut"],
-  ["critique", "notes from a session that did not write the page"],
-  ["judge --fresh", "a score from key frames"],
-  ["approve", "the owner signs off"],
-  ["ship", "final mp4, 60\u00a0fps, blur, audio"],
+const BARS: { label: string; s: number }[] = [
+  { label: "colour-sting, 5\u00a0s film, whole draft", s: 24.9 },
+  { label: "moth-photogram, 12\u00a0s film, whole draft", s: 23.1 },
+  { label: "moth-photogram, seconds 4 to 6 only", s: 6.8 },
 ];
 
-function Pipeline() {
+function SpeedBars() {
+  const max = Math.max(...BARS.map((b) => b.s));
   return (
-    <ol className="ftp panel" aria-label="The loop, command by command">
-      {PIPELINE.map(([cmd, out], i) => (
-        <li key={cmd}>
-          <span className="ftp-n mono">{i + 1}</span>
-          <code>bin/vawe {cmd}</code>
-          <span className="ftp-out">{out}</span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-function HashProof() {
-  const cells = Array.from({ length: 12 }, (_, i) => i);
-  return (
-    <div className="panel fth" role="img" aria-label="Two renders of the same page produce the same frame hashes">
-      {["render A", "render B"].map((r) => (
-        <div className="fth-row" key={r}>
-          <span className="meta">{r}</span>
-          <div className="fth-cells">{cells.map((c) => <i key={c} style={{ opacity: 0.35 + ((c * 37) % 10) / 16 }} />)}</div>
+    <figure className="fts panel">
+      {BARS.map((b, i) => (
+        <div className="fts-row" key={b.label}>
+          <span className="fts-l">{b.label}</span>
+          <div className="fts-bar" aria-hidden="true"><i data-last={i === BARS.length - 1} style={{ width: `${(b.s / max) * 100}%` }} /></div>
+          <b className="mono">{b.s.toFixed(1)}&nbsp;s</b>
         </div>
       ))}
-      <p className="meta fth-eq">every frame hash equal, and the frames differ over time</p>
-    </div>
+      <figcaption className="meta">
+        <code>bin/vawe dev</code> wall time, measured 2026-10-14 on an Apple M4 laptop (10 cores) with other renders running. Your numbers will differ; the ratio is the point.
+      </figcaption>
+    </figure>
   );
 }
-
-function AudioLane() {
-  return (
-    <div className="panel fta" role="img" aria-label="A voice-over at 1&nbsp;s and a hit at 2.4&nbsp;s on a 4&nbsp;s film, mixed offline">
-      <div className="fta-lane"><span className="meta">vo.mp3</span><i style={{ left: "25%", width: "48%" }} /></div>
-      <div className="fta-lane"><span className="meta">hit.mp3</span><i style={{ left: "60%", width: "6%" }} /></div>
-      <div className="fta-axis meta"><span>0&nbsp;s</span><span>data-at 1</span><span>data-at 2.4</span><span>4&nbsp;s</span></div>
-    </div>
-  );
-}
-
-const LOOK_NAMES = ["clean", "dream-bloom", "film-halation", "anamorphic", "pro-mist", "tilt-shift", "soft-focus", "vintage", "cyanotype", "crt"];
-
-const REF = `bin/vawe new my-copy --ref <ref.mp4>
-bin/vawe critique <page> --ref <ref.mp4>
-bin/vawe coverage`;
 
 export default function Features() {
   return (
@@ -196,167 +186,77 @@ export default function Features() {
         <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
             <PageTop group="Product" current="Features" />
-            <h1>What the engine decides.</h1>
-            <p>
-              What one HTML page can use, why it renders the same frames every time, how it looks and sounds,
-              the {MOVES.length} moves and {EASES.length} curves you copy, and the loop that judges a film before it ships.
-            </p>
+            <h1>Agents write it. It looks made. It renders fast.</h1>
             <Toc items={[
-              { href: "#page", label: "The page" },
-              { href: "#frames", label: "Same frames" },
-              { href: "#look", label: "Light and sound" },
-              { href: "#library", label: "Moves and easing" },
-              { href: "#loop", label: "The loop" },
-              { href: "#agents", label: "For agents" },
+              { href: "#ax", label: "Agent experience" },
+              { href: "#taste", label: "Taste" },
+              { href: "#speed", label: "Speed" },
             ]} />
+            <div className="ft-film ft-hero">
+              <Clip webm={showcase.webm} src={showcase.mp4} poster={showcase.poster} decorative />
+            </div>
           </section>
 
-          <Section id="page" title="The page is the film." lead="If something you would naturally write fails, that is a framework bug." visual={<AspectDemo />}>
-            <Feature title="One HTML page in, one film out" proof={<Code label="page.html">{PAGE}</Code>}>
-              A film is <code>films/&lt;name&gt;/page.html</code> plus its own assets folder. CSS, Web Animations, SVG, canvas and three.js
-              all work. There is no private format.
+          <Section
+            id="ax"
+            title="Agents write it well."
+            lead="A film is plain HTML, and each command tells the agent what to run next."
+            visual={<Session />}
+          >
+            <Feature title="Plain HTML, no private format" proof={<Code label="page.html">{PAGE}</Code>}>
+              A film is <code>films/&lt;name&gt;/page.html</code> plus an assets folder. CSS, Web Animations, SVG, canvas and three.js all
+              work. If something an agent would naturally write fails, that is a bug in vawe. <a href="/docs/the-page">The page contract</a>.
             </Feature>
-            <Feature title="Time is the seek" proof={<Code label="window.seek">{SEEK}</Code>}>
-              The renderer sets the time of every CSS and Web Animation, and calls <code>window.seek(t)</code> when the page defines one.
-              The page paints frame t as a pure function of t.
+            <Feature title="Every command names the next step" proof={<Code label="a check, with its fix">{CHECK}</Code>}>
+              Each verb ends with a <code>next:</code> line, and each check names the problem, the second and the fix. The agent never
+              guesses the next command.
             </Feature>
-            <Feature
-              title="Every aspect from one page"
-              proof={
-                <div className="codeblock">
-                  <div className="lbl">core/layout/aspects.js</div>
-                  <table className="ft-tab">
-                    <tbody>
-                      {ASPECTS.map(([a, px]) => (
-                        <tr key={a}><th scope="row">{a}</th><td>{px}</td></tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              }
-            >
-              <code>--vw</code> and <code>--vh</code> are set on <code>:root</code> before your scripts run, so CSS lays the page out for each
-              canvas. <code>bin/vawe ship --aspect all</code> writes one file per aspect.
-            </Feature>
-            <Feature title="Every number is a literal" proof={<Code label="studio">{LITERALS}</Code>}>
-              A tunable number is a literal in the page: a keyframe stop, a <code>:root</code> custom property, a table row. The studio
-              edits those literals in place.
+            <Feature title="An agent reads vawe directly" proof={<Code label="plain files">{READ}</Code>}>
+              The site serves the guide as <code>llms.txt</code> and markdown. Five skills carry the parts an agent gets wrong:{" "}
+              {SKILLS}. <a href="/ai-agents">How an agent writes the page</a>.
             </Feature>
           </Section>
 
-          <Section id="frames" title="Same frames, every render." lead="The clock is replaced before the page runs." visual={<SeekScrubber src="/examples/showcase.mp4" webm="/examples/showcase.webm" poster="/examples/showcase.webp" />}>
+          <Section
+            id="taste"
+            title="It looks made, not generated."
+            lead="Copy a proven move, let the renderer film it, and let a fresh session judge."
+            visual={<MoveClips names={["caret-typing", "bracket-callout", "iris-wipe", "camera-moves", "text-on-path", "letter-stagger"]} />}
+          >
             <Feature
-              title="The clock refuses wall time"
-              proof={
-                <>
-                  <Code label="core/engine/page-clock.js">{CLOCK}</Code>
-                  <Stat n="5" label="time sources the clock replaces" />
-                </>
-              }
+              title={`${MOVES.length} moves and ${EASES.length} easing curves`}
+              proof={ease ? <Link href="/easing/land" className="panel ft-curve"><Thumb e={ease} /><span className="meta">{ease.name}: cubic-bezier({ease.bezier.params.join(", ")}), {ease.points} linear() points</span></Link> : null}
             >
-              A frame is seeked, not played. So the picture at time t is the same whether it renders first or last.{" "}
-              <a href="/determinism">How that works, in full</a>.
+              The moves sit in {GROUPS.length} groups. Each is a clip and one markdown file with the snippet and its sound cue. Every curve
+              copies as CSS. 15 recipes chain moves into a film type. <a href="/moves">Browse the moves</a>, <a href="/easing">the curves</a>{" "}
+              and <a href="/docs/recipes">the recipes</a>.
+            </Feature>
+            <Feature title="Real motion blur and a lens" proof={<BlurDemo />}>
+              A final measures how far things move and takes 1–32 subframes per frame, so a fast move smears and a still frame stays sharp.
+              One lens shader then films the screen: depth of field, bloom, grain and ten named looks.{" "}
+              <a href="/docs/motion">Looks and blur</a>.
+            </Feature>
+            <Feature title="A fresh session judges; the owner approves" proof={<Code label="the gate">{GATE}</Code>}>
+              A pass is never self-recorded. The critique runs in a session that did not write the page, and <code>ship</code> refuses until
+              the owner approves the full draft.
+            </Feature>
+          </Section>
+
+          <Section
+            id="speed"
+            title="Fast drafts, exact re-renders."
+            lead={"A 2\u00a0s slice of a 12\u00a0s film re-rendered in 6.8\u00a0s. The whole draft took 23.1\u00a0s."}
+            visual={<SpeedBars />}
+          >
+            <Feature title="Drafts at half size" proof={<Code label="two renders">{RATES}</Code>}>
+              A draft is half size, 30&nbsp;fps and silent, for a quick look. Only the final adds the audio mix and motion blur.
             </Feature>
             <Feature title="Parallel slices, the same pixels" proof={<Stat n="60" label="frames per slice, for any worker count" />}>
-              The renderer captures fixed 60-frame slices at once on one browser. The slice size never follows the worker count, so the
-              pixels are identical for any number of workers.
+              The clock is replaced before the page runs, so a frame does not depend on the others. The renderer captures fixed 60-frame
+              slices at once, and a test renders pages twice and compares every frame. <a href="/determinism">How that works</a>.
             </Feature>
-            <Feature title="A test proves it" proof={<HashProof />}>
-              The end-to-end test renders pages twice and compares every frame. The frames must also differ over time, so a frozen page
-              fails too.
-            </Feature>
-            <Feature title="Draft fast, ship at 60&nbsp;fps" proof={<Code label="two renders">{RATES}</Code>}>
-              Frames are seeked at fractional times, so the render rate is independent of the page. A draft is for a quick look; the final
-              mixes the audio and adds motion blur.
-            </Feature>
-          </Section>
-
-          <Section id="look" title="Light, blur and sound." lead="Set by the renderer and the lens, not per element." visual={<BlurDemo />}>
-            <Feature
-              title="Blur follows the motion"
-              proof={
-                <>
-                  {fastClip ? (
-                    <div className="ft-film">
-                      <Clip webm={fastClip.webm} src={fastClip.mp4} poster={fastClip.poster} decorative />
-                    </div>
-                  ) : null}
-                  <Stat n="1–32" label="subframes per frame in a final, set by speed" />
-                </>
-              }
-            >
-              A speed pass measures how far things move in each frame: a still frame gets one sample, a fast one enough subframes to blend
-              into one streak. The shutter is 180 degrees. A draft has no blur.
-            </Feature>
-            <Feature
-              title="A lens that films the screen"
-              proof={
-                lensClip ? (
-                  <div className="ft-film">
-                    <Clip webm={lensClip.webm} src={lensClip.mp4} poster={lensClip.poster} decorative />
-                  </div>
-                ) : null
-              }
-            >
-              Render the flat screen, then let one shader film it: perspective, depth of field with real bokeh shapes, bloom, LED grid,
-              colour fringes, tear and grain. Noise is hashed from the seed and the time, so renders still match.
-            </Feature>
-            <Feature title="Ten named looks" proof={<ul className="ft-chips" aria-label="Looks">{LOOK_NAMES.map((l) => <li key={l} className="mono">{l}</li>)}</ul>}>
-              Compare camera looks on your own page, one labelled grid per second. The look is set from outside; the page is not edited.
-            </Feature>
-            <Feature title="Sound is mixed offline" proof={<AudioLane />}>
-              <code>&lt;audio&gt;</code> tags are never played live. The final render mixes them at their <code>data-at</code> times, and a
-              voice-over track ducks a music track.
-            </Feature>
-          </Section>
-
-          <Section id="library" title="Moves and easing to copy." lead="Each move is markdown an agent reads and a clip you watch." visual={<MoveClips names={["caret-typing", "bracket-callout", "iris-wipe", "camera-moves", "text-on-path", "letter-stagger"]} />}>
-            <Feature title={`${MOVES.length} moves in ${GROUPS.length} groups`} proof={<MoveClips names={["caret-typing", "bracket-callout", "iris-wipe", "camera-moves"]} />}>
-              Each move is a clip and one markdown file: when to use it, the snippet, the notes and the sound cue.{" "}
-              <a href="/moves">Browse the moves</a>.
-            </Feature>
-            <Feature title={`${EASES.length} easing curves as CSS`} proof={ease ? <Link href="/easing/land" className="panel ft-curve"><Thumb e={ease} /><span className="meta">{ease.name}: cubic-bezier({ease.bezier.params.join(", ")}), {ease.points} linear() points</span></Link> : null}>
-              Search the curves, watch one run, and copy its exact <code>linear()</code> string, nearest <code>cubic-bezier()</code>{" "}
-              or Web Animations line. <a href="/easing">Browse the curves</a>.
-            </Feature>
-            <Feature title="15 recipes chain the moves" proof={<Stat n="15" label="film shapes, from a 3 s spectacle to a 22 s demo" />}>
-              A recipe orders moves into one film type: a brand sting, a launch, a feature tour, a proof film.{" "}
-              <a href="/docs/recipes">Open the recipes</a>.
-            </Feature>
-          </Section>
-
-          <Section id="loop" title="The loop." lead="A film goes through checks before it ships." visual={<Pipeline />}>
-            <Feature title="One command per stage" proof={<Code label="start">{NEW}</Code>}>
-              <code>new</code>, <code>dev</code>, <code>strip</code>, <code>critique</code>, <code>ship</code>. Each step names the next.
-            </Feature>
-            <Feature title="See a film completely" proof={<Code label="look">{SEE}</Code>}>
-              <code>see</code> reads a film completely: shots, motion, light, type and sound, with the numbers. The others show one part.
-            </Feature>
-            <Feature title="Checks name the problem" proof={<Code label="a waiver, with its reason">{WAIVER}</Code>}>
-              A draft check names static windows, blank runs, small text and a mix that is too quiet or too loud. A rule can be waived in
-              the page, and the waiver has to state where and what was measured, or the render refuses.
-            </Feature>
-            <Feature title="A fresh session judges" proof={<Code label="critique, judge">{JUDGE}</Code>}>
-              A pass is never self-recorded. A critique runs in a session that did not write the page, and the judge scores key frames
-              in a fresh one.
-            </Feature>
-            <Feature title="The owner approves the final" proof={<Code label="approval">{APPROVE}</Code>}>
-              <code>ship</code> refuses until the owner approves the full draft. A film session never runs the approval.
-            </Feature>
-          </Section>
-
-          <Section id="agents" title="Built for coding agents." visual={<MoveFilter moves={MOVES.map(toCard)} groups={GROUPS} />}>
-            <Feature title="Skills that carry the contract" proof={<ul className="ft-chips" aria-label="Skills">{SKILLS.split("\n").map((s) => <li key={s} className="mono">{s.replace("skills/", "")}</li>)}</ul>}>
-              Five skills cover the brief, the page, the critique, the cuts and a reference match. An agent writes a page from them without
-              reading the engine.
-            </Feature>
-            <Feature title="Recreate a reference" proof={<Code label="match a film">{REF}</Code>}>
-              Mark each line of the reference spec keep or change, rebuild, and loop the critique until it passes. <code>ship</code>{" "}
-              refuses until it does.
-            </Feature>
-            <Feature title="Moves an agent can filter" proof={<Code label="moves">{"/moves/index.json\n/moves/<name>.md   // one per move"}</Code>}>
-              The move list is plain JSON and each move is markdown, so an agent fetches only what it needs.{" "}
-              <a href="/ai-agents">How an agent writes the page</a>.
+            <Feature title="Re-render only the seconds named" proof={<Code label="a partial draft">{REDO}</Code>}>
+              The critique names the seconds to fix. <code>--from</code> and <code>--to</code> render just those seconds into their own file.
             </Feature>
           </Section>
 
@@ -368,15 +268,9 @@ export default function Features() {
           </section>
 
           <Next
-            title="Start from a move"
-            lead="Copy its snippet, then run the loop."
+            title="Write your first page"
+            lead="Run the loop on a six second sting."
             primary={{ href: REPO_URL, label: "Get started on GitHub" }}
-            secondary={{ href: "/moves", label: "See the moves" }}
-            related={[
-              { href: "/determinism", label: "Why the same page gives the same frames" },
-              { href: "/easing", label: "Easing functions as CSS" },
-              { href: "/ai-agents", label: "How an agent writes the page" },
-            ]}
           />
         </main>
       </div>

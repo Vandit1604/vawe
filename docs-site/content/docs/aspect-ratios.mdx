@@ -35,3 +35,15 @@ bin/vawe ship films/<name>/page.html --aspect all     # one file per ratio
 Without `--aspect`, the render uses the `aspect` meta of the page, else `16:9`. Draft `--aspect 9:16` once before the final.
 
 Each ratio is its own reproducible render. See [Determinism](/docs/determinism).
+
+## Sizes
+
+| Ratio | Full size |
+|---|---|
+| `16:9` | 1920 × 1080 |
+| `9:16` | 1080 × 1920 |
+| `1:1` | 1080 × 1080 |
+| `4:5` | 1080 × 1350 |
+| `4:3` | 1440 × 1080 |
+
+`bin/vawe ship <page> --aspect all` writes one file per ratio. A draft is half this size.
