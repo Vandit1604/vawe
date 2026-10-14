@@ -4,8 +4,9 @@ import { Header, DOCS_URL, REPO_URL, WaveGlyph } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { pageMetadata } from "../../components/seo";
 import { blogPostingSchema, breadcrumbSchema, jsonLdScript } from "../../../lib/schema";
-import { allPosts, neighbours, postBySlug, relatedPosts, smart } from "../../../lib/blog";
+import { allPosts, postBySlug, relatedPosts, smart } from "../../../lib/blog";
 import { Cover } from "../Cover";
+import { Card } from "../Card";
 import "../blog.css";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -40,7 +41,6 @@ export default async function PostPage({ params }: Params) {
   const post = postBySlug((await params).slug);
   if (!post) notFound();
   const path = `/blog/${post.slug}`;
-  const { older, newer } = neighbours(post.slug);
   const related = relatedPosts(post);
   const crumbs = [
     { name: "Home", url: "/" },
@@ -115,6 +115,16 @@ export default async function PostPage({ params }: Params) {
             ) : null}
           </div>
 
+          {related.length ? (
+            <section className="bp-related" aria-labelledby="bp-related">
+              <h2 id="bp-related">Read next</h2>
+              <ul className="bl-grid">
+                {related.map((p) => (
+                  <Card key={p.slug} post={p} />
+                ))}
+              </ul>
+            </section>
+          ) : null}
           <aside className="panel bp-made" aria-labelledby="bp-made">
             <WaveGlyph className="bp-made-glyph" />
             <div className="bp-made-text">
@@ -129,44 +139,6 @@ export default async function PostPage({ params }: Params) {
               <a className="btn btn-ghost" href={DOCS_URL}>Start with the docs</a>
             </div>
           </aside>
-
-          {older || newer ? (
-            <nav className="bp-pager" aria-label="Newer and older posts">
-              {newer ? (
-                <Link className="panel bp-page" href={`/blog/${newer.slug}`} prefetch={false} data-s={newer.section}>
-                  <span className="meta">&larr; Newer</span>
-                  <span className="bp-page-title">{newer.title}</span>
-                </Link>
-              ) : <span />}
-              {older ? (
-                <Link className="panel bp-page bp-page-next" href={`/blog/${older.slug}`} prefetch={false} data-s={older.section}>
-                  <span className="meta">Older &rarr;</span>
-                  <span className="bp-page-title">{older.title}</span>
-                </Link>
-              ) : null}
-            </nav>
-          ) : null}
-
-          {related.length ? (
-            <section className="bp-related" aria-labelledby="bp-related">
-              <h2 id="bp-related">Read next</h2>
-              <ul className="bl-grid bl-grid-3">
-                {related.map((p) => (
-                  <li key={p.slug} className="panel bl-card" data-s={p.section}>
-                    <Cover post={p} />
-                    <div className="bl-card-text">
-                      <p className="meta bl-card-meta">
-                        <span className="bl-sec"><span className="sw" />{p.sectionLabel}</span>
-                      </p>
-                      <h3>
-                        <Link href={`/blog/${p.slug}`} prefetch={false}>{smart(p.title)}</Link>
-                      </h3>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
         </article>
       </main>
       <Footer active="/blog" />
