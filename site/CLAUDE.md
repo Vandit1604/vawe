@@ -16,10 +16,10 @@ for a marketing site answers none of their questions. This file is how you find 
 1. **z-index is a closed set.** `--z-under · --z-base · --z-raise · --z-badge · --z-sticky · --z-nav
    · --z-skip`. Never write a number. If `--z-raise` is not enough you need your own stacking
    context, not a bigger number.
-2. **Colour has two voices, each with one meaning.** The studio blue (`--accent`) means *you can act
-   on it* or *this is live*. A lane colour (`--lane-*`) means *this layer type*, as in the studio
+2. **Colour has two voices, each with one meaning.** The accent blue (`--accent`) means *you can act
+   on it* or *this is live*, and is used rarely. A lane colour (`--lane-*`) means *this layer type*, as in the studio
    timeline, and always sits next to a label. Nothing else gets colour. Text on the blue is
-   `--lane-on` (#16151a, 5.12:1); white on it measures 3.55:1. Never tint the accent for a secondary
+   `--accent-ink` (black, 6.6:1); white on it measures 3.2:1. Never tint the accent for a secondary
    state: blue on its own tint measured 4.3:1 on the playground rail. Use `--ink` on `--raised`.
 3. **A rule reaches `globals.css` only when two routes need it.** One consumer keeps it in its own
    stylesheet. That rule is why a consolidation pass could delete 221 dead lines instead of 400.
@@ -47,5 +47,5 @@ tag `arsenal-final` and match that register.
   `globals.css` and `DESIGN.md`. The deliberate literals are listed in `DESIGN.md` "Migration to the scales".
   A new route takes tokens from the start; a `px` size, a `.15s ease` or a literal `2px solid var(--accent)`
   in a new rule is a defect.
-- **Dark only.** The site is the studio's dark ground by decision (`IDENTITY.md`), with
+- **Black only.** The site is pure black by decision (`IDENTITY.md`), with
   `color-scheme: dark`. There is no light mode to keep in sync.

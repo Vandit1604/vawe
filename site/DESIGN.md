@@ -1,25 +1,26 @@
 ---
 version: beta
 name: Vawe
-description: The site for an open source motion-graphics engine, on the vawe studio's own dark tokens. Move clips play live; colour marks an action or a layer type, nothing else.
+description: The site for an open source motion-graphics engine. Pure black, white type, neutral greys, hairlines, Geist; films in big rounded frames. Colour marks an action or a layer type, nothing else.
 colors:
-  accent: "#0a87ff"
-  accent-2: "#3a9dff"
-  accent-ink: "#16151a"
-  accent-soft: "rgba(10,135,255,.16)"
-  accent-line: "rgba(10,135,255,.42)"
+  accent: "#3291ff"
+  accent-2: "#6cb0ff"
+  accent-ink: "#000000"
+  accent-soft: "rgba(50,145,255,.16)"
+  accent-line: "rgba(50,145,255,.42)"
   ok: "#0eaf80"
   bad: "#ff7a7a"
-  bg: "#16151a"
-  surface: "#212025"
-  surface-2: "#27262c"
-  raised: "#2f2e35"
-  raised-2: "#393840"
-  line: "rgba(255,255,255,.07)"
-  line-2: "rgba(255,255,255,.13)"
+  bg: "#000000"
+  surface: "#0a0a0a"
+  surface-2: "#111111"
+  raised: "#171717"
+  raised-2: "#222222"
+  line: "#242424"
+  line-2: "#3a3a3a"
   ink: "#ffffff"
-  ink-2: "#d8d8da"
-  muted: "#97969b"
+  ink-2: "#ededed"
+  muted: "#a1a1a1"
+  dim: "#8f8f8f"
   lane-text: "#a67dff"
   lane-media: "#52525a"
   lane-shape: "#e0714f"
@@ -28,29 +29,29 @@ colors:
   lane-sound: "#0eaf80"
   lane-camera: "#4fb3d9"
   lane-fx: "#d9c34f"
-  lane-on: "#16151a"
+  lane-on: "#000000"
 typography:
   sans:
-    fontFamily: Archivo
+    fontFamily: Geist
     fontSize: 16px
     lineHeight: 1.55
     fontWeight: 400
     letterSpacing: -0.004em
   display:
-    fontFamily: Archivo
+    fontFamily: Geist
     lineHeight: 1
     fontWeight: 800
-    letterSpacing: -0.035em
+    letterSpacing: -0.05em
   heading:
-    fontFamily: Archivo
-    lineHeight: 1.05
+    fontFamily: Geist
+    lineHeight: 1.04
     fontWeight: 800
-    letterSpacing: -0.025em
+    letterSpacing: -0.04em
   title:
-    fontFamily: Unbounded
+    fontFamily: Geist
     fontWeight: 500
   mono:
-    fontFamily: JetBrains Mono
+    fontFamily: Geist Mono
 rounded:
   panel: 12px
   inner: 4px
@@ -65,19 +66,21 @@ spacing:
 
 ## Overview
 
-Vawe turns one HTML page into one film, and the site shows what it rendered: the landing hero, the
-`/moves` gallery and `/launch-video` play the move clips in `public/moves/`. The design is the vawe studio's own look (`studio/ui/page-studio.html`), because the
-site and the tool should read as one product. The brief it answers to is `IDENTITY.md`.
+Vawe turns one HTML page into one film, and the site shows what it rendered: the landing page, the
+`/moves` gallery and `/launch-video` play the move clips in `public/moves/`. The look is Vercel's
+restraint with Framer's staging (provenance row "the redesign, 2026-10-14"): a pure black ground, white
+type, neutral greys, hairlines and a faint grid, Geist and Geist Mono, huge tight headlines, and films in
+big rounded frames that scale in on scroll. The brief it answers to is `IDENTITY.md`.
 
-A dark ground, panels a step lighter, and almost no colour. The clips are the colour on the page.
+The clips are the colour on the page.
 
 ## Colors
 
 Colour has two voices and each has one meaning, plus one single-use third.
 
-- **The accent, `#0a87ff`, means you can act on it, or it is live.** Links, the focus ring, the
-  active clip. Text on the accent is the ground (`accent-ink`, 5.12:1);
-  white on it measures 3.55:1 and is never used.
+- **The accent, `#3291ff`, means you can act on it, or it is live.** Links, the focus ring, the
+  active clip. It is used rarely. Text on the accent is black (`accent-ink`, 6.6:1);
+  white on it measures 3.2:1 and is never used. As text it measures 6.6:1 on the ground.
 - **A lane colour means that layer type**, as in the studio timeline. No page uses one since the
   JSON engine left the site; the tokens stay for the next surface that shows a timeline. A lane
   colour always sits next to a label, and as TEXT it is legal only on the ground: media fails there
@@ -90,24 +93,25 @@ Nothing else gets colour. Buttons are ink on the ground (`btn-primary`) or ink o
 (`btn-ghost`); a selected row is `ink` on `raised`, never the accent on its own tint, which measured
 4.3:1.
 
-Ink is measured on the ground: `ink` 18.2:1, `ink-2` 14.0:1, `muted` 6.2:1. The studio's own
-`#7c7b81` measures 4.3:1 and is never text here.
+Ink is measured on the ground (`#000`): `ink` 21:1, `ink-2` 17.9:1, `muted` 8.1:1, `dim` 6.5:1 (code comments and
+read-outs beside a command). Surfaces are neutral: `surface` `#0a0a0a`, `surface-2` `#111`, `raised` `#171717`.
+Structure is a hairline: `line` `#242424`, and `line-2` `#3a3a3a` where it must be seen (a film frame, a hovered edge).
 
 ## Themes
 
-The site is dark only, by decision (`IDENTITY.md`), and declares `color-scheme: dark`.
+The site is black only, by decision (`IDENTITY.md`), and declares `color-scheme: dark`.
 
 ## Typography
 
-Three faces, three jobs (`app/layout.tsx`):
+Two faces, two jobs (`app/layout.tsx`, `next/font/google`):
 
-- **Archivo** carries headings and prose. Headings are 800 with tight tracking; body is 400 at
-  16px / 1.55. Its `wdth` axis is loaded and held at 100; it is never animated, because type that
-  reflows every frame competes with the live render beside it.
-- **Unbounded** is for short titles only: a film name, a card title, the wordmark, an FAQ question.
-  It was judged not serious enough for headings.
-- **JetBrains Mono** is for anything literal: a count, a clock, a file path, a JSON key, a lane name.
-  The `.meta` class is its uppercase read-out form, 11px with tabular numbers.
+- **Geist** carries headings, titles and prose. Headings are 800 with tight tracking (`--track-head` -.04em,
+  `--track-display` -.05em; the landing display lines go to -.06 and -.07em); body is 400 at 16px / 1.55. Card
+  and FAQ titles are 500. It has no width axis, so nothing reflows.
+- **Geist Mono** is for anything literal: a count, a clock, a file path, a lane name, a code block. The `.meta`
+  class is its uppercase read-out form, 11px with tabular numbers.
+
+`--font-title` is kept as an alias of `--font-sans`, so a rule that asks for a title face still resolves.
 
 Headings are fluid: a page h1 is `clamp(2.2rem, 4.6vw, 3.5rem)`, a section h2
 `clamp(1.9rem, 3.4vw, 2.75rem)`, a panel h2 `clamp(1.5rem, 2.6vw, 2rem)`. Prose is capped at a
@@ -116,7 +120,8 @@ own font size. No functional text is under 11px.
 
 ## Layout
 
-`.wrap` is the page: 1160px wide with 26px gutters. Inside it, content sits in one centred 1040px
+The landing page is full-bleed (see "Landing"). On every other route `.wrap` is the page: 1160px wide with
+26px gutters. Inside it, content sits in one centred 1040px
 column (`.ls`, and `.ipage` on the content pages). Sections are separated by space, not by grey
 bands; grouping is done with panels.
 
@@ -132,9 +137,31 @@ bands; grouping is done with panels.
 Breakpoints are 640, 760 and 900. A few older ones ship (560, 700, 860, 1000) and should fold into
 that set when their page is next touched.
 
+## Landing
+
+`app/page.tsx`, `landing.css` (every class prefixed `lp-`) and `components/LandingMotion.tsx`.
+Spike A, "full-bleed film scroll": the story is problem, page, render, result, then try it.
+
+- **Hero:** one rounded frame the height of the viewport (`100svh`) holding the tracking HUD film, the h1
+  at `clamp(3rem, 10.5vw, 11rem)`, one line of copy and two buttons. The bar floats over it
+  (`.bar-overlay`: fixed, 72% black, 12px blur, one hairline). Under 760 the film is a 16:9 frame and the copy sits below it.
+- **Four chapters** (`.lp-ch`, 240svh tall, 150svh under 760): each pins a `100svh` stage (`position: sticky`) with one large
+  film in a frame of 28px radius (16px under 640). `LandingMotion` writes `--in` (0 to 1 as the chapter enters)
+  and `--out` (0 to 1 over the last 15%) on the chapter: the frame scales `.84 + .16 * in - .05 * out` and the caption
+  fades and rises with `--in`. Plain CSS sticky and one rAF-throttled scroll handler, no animation library.
+- **A rail** of four dots on the right edge (hidden under 900) shows the chapter; `aria-current` marks it.
+- **Then:** the page contract (code and three commands on a faint grid), a 3-column grid of six move clips (2 under 900), the FAQ
+  (the same `lib/faq.ts` data the FAQPage JSON-LD reads), and the way in.
+- **Reduced motion:** the chapters do not pin, scale or fade, reveals show at once, and every clip holds its poster
+  (`Clip.tsx`). **No script:** the CSS defaults leave every block visible.
+- **No layout shift:** every film sits in a fixed-size frame with a poster; reveals move only opacity and transform.
+- The scroll reveal (600 ms) and the chapter scale break the "under 300 ms" motion rule on purpose: they run once per
+  scroll position and carry the story, they are not feedback to an action.
+- Landing-only sizes are custom properties on `.lp` (`--fs-mega`, `--fs-chapter`, `--fs-section`, `--fs-end`, `--r-frame`).
+
 ## Elevation & Depth
 
-Depth is one step: a panel is `surface` with a 1px inner ring (`--ring`), no drop shadow. Inside a
+Depth is one step: a panel is `surface` with a 1px hairline ring (`--ring`, which is `--line`), no drop shadow. Inside a
 panel, a proof is a recessed well (`bg` or `surface-2`), never a second raised card. `--shadow-2`
 and `--shadow-3` are kept small (12px and 16px blur) and appear only on a few catalogue cards.
 The one exception is the clip on a `/moves/<name>` page, the page's hero media: a six-layer neutral
@@ -158,7 +185,7 @@ Few sizes, each with one job (`globals.css`, `--fs-*`). Body is 16px, inside Pra
 | `--fs-ui` | 14px | controls, buttons, tabs, captions, nav, footer |
 | `--fs-body` | 16px | prose and card text |
 | `--fs-lead` | 18px | the hero's one paragraph |
-| `--fs-h3` | 16px | Unbounded titles: the face carries the rank, not the size |
+| `--fs-h3` | 16px | card and FAQ titles: weight carries the rank, not the size |
 | `--fs-h2`, `--fs-h1`, `--fs-display` | fluid | section, page and hero headings |
 | `--fs-panel`, `--fs-sub`, `--fs-figure` | fluid | a panel h2, a sub-heading in a panel or document, a big mono number |
 
@@ -241,11 +268,7 @@ and `--hit` (40 px, 44 px under 640), which every control's `min-height` uses.
   filled action. The current page is a `<span aria-current="page">` on `raised`, never a link.
 - **Footer:** one panel with the generated link groups (`lib/site-pages.json`) and the Apache 2.0
   line. Pages that end a journey add a closing panel above it (`<Footer bookend />`).
-- **Landing hero:** one player, two example films, switched by a row of tabs under the caption: the
-  tracking HUD and the retro desktop remix (`public/examples/`). Each is 1280 px: a VP9 WebM, an H.264 fallback and a WebP poster, looped,
-  paused on load with reduced motion. The HUD and remix keep their audio (Opus and AAC, about -16 LUFS,
-  true peak under -1.5 dBTP). Videos start muted; a round sound toggle (`aria-pressed`, 44 px on phones)
-  in the now-playing row unmutes the current film, the choice survives a tab switch, never auto-on.
+- **Landing:** see "Landing". The old split hero (one player, two example films, tabs and a sound toggle) and the section strip left with spike A.
 - **Move card** (`app/moves/`): the clip's 640 px poster at rest; its 640 px WebM plays while at
   least half on screen, six at most, and with reduced motion only on a tap. The move page shows the
   1280 px poster as an image and fades the 1280 px clip in over it once it plays. Hover rings sit
@@ -285,10 +308,9 @@ Under 900 the grid is two columns, under 640 one. Each card has one stretched ti
 **No visible dates** (owner, 2026-10-13: dates showed posts clustered on a few days). Cards, "Read next"
 and the post head show section and reading time only; the true dates stay in JSON-LD, the sitemap and RSS.
 
-**Type.** The blog routes set headings and body in Plus Jakarta Sans (OFL, `assets/fonts/PlusJakartaSans.woff2`,
-copied to `public/assets/fonts/` by `scripts/site/vendor-assets.mjs`, declared and preloaded by the blog
-pages only). The owner picked it over Archivo, Geist and Bricolage on 2026-10-13. JetBrains Mono stays for
-numbers and meta; the bar and footer keep Archivo.
+**Type.** The blog routes set headings and body in Geist like every other route. They used Plus Jakarta Sans
+(chosen 2026-10-13) until the redesign of 2026-10-14 moved the whole site to Geist. The cover images under
+`public/blog/` still carry Jakarta in their pixels. 
 
 **The cover.** A post's cover is `public/blog/<slug>/thumb.webp`, the "dithered rays" style. `lib/blog.ts`
 uses it when the file exists: on the index cards, as the post's header image (the post's hero diagram
@@ -345,10 +367,11 @@ was tried.
 
 | Surface | Register | Shaped by | Notes |
 |---|---|---|---|
+| **the redesign, 2026-10-14:** tokens, type, `/` (spike A), every route follows the tokens | brand | Spike A of the landing spikes ("full-bleed film scroll: four pinned chapters, one huge film each", `out/spikes/landing/a.html`), chosen by the owner. Direction: Vercel (pure black, white type, neutral greys, hairlines, faint grid lines, Geist and Geist Mono from `next/font/google`) and Framer (huge bold headlines with tight tracking, films in big rounded frames that scale and fade in on scroll, pinned storytelling). ui-skills `leonxlnx/minimalist-skill`, `jakubkrehel/better-typography` and `mengto/gsap-scrolltrigger-storytelling`, applied in the spike | Taken: from minimalist, restraint, one accent, hairlines, no gradients except the film scrim; from better-typography, tight tracking on display sizes, `text-wrap: balance` on headings and `pretty` on prose, tabular mono; from gsap-scrolltrigger-storytelling, the pin-and-scrub structure (pinned stage, progress 0 to 1, scale and fade). REJECTED: GSAP and ScrollTrigger (plain CSS `position: sticky` and one rAF scroll handler do the same with no dependency), minimalist's serif and warm palette, a Vercel-blue `#0070f3` accent (4.4:1 as text on black, so the accent became `#3291ff` at 6.6:1), the spike's 24px film radius token on non-landing panels (panels keep 12px), Plus Jakarta Sans on the blog (the owner chose Geist for the whole site). The old split hero, the two-film tabs and the section strip were deleted. Not done: `og.png` and the blog cover images are rasters and keep the old look until re-rendered. |
 | **studio rebuild, 2026-09-25:** tokens, type, every route | brand | `ui-ux-interview` (local), then ui-skills `jakubkrehel/better-colors`, `better-typography`, `mengto/landing-page`, `jakubkrehel/better-layout`, `better-ui`, `better-interface`, `pbakaus/distill`, `pbakaus/colorize`; `impeccable detect` on every route at 1440 and 390 | The full record is `IDENTITY.md` → Skills used and rejected. Rejected: stock gradient heroes and logo walls, pill navs on colour bands, icon badges on every card, colour as decoration, a sticky rail on content pages. Kept on purpose against `impeccable`: clipping in the editor frame and the playground field (deliberate), and a generator's glow (the engine's own artwork). Not reviewed: better-accessibility and better-writing were not loaded. |
 | `/`, split hero with a live film, timeline and scene file | brand | `mengto/landing-page`, `emilkowalski/emil-design-eng` | The hero plays a film through the in-browser engine, with its layer bars in lane colours and its scene file one tab away; all three read one scene JSON. Rejected: mp4 loops, which had drifted from their scenes. |
 | `/showcase`, `/launch-video`, `/product-tour-video` film cards | brand | `pbakaus/colorize` | Idle face is the film's own layer timeline; only a hovered card boots an engine. |
-| `site/app/components/ogCard.tsx`, `site/og/card.html` | brand | local tokens only | Studio ground and Archivo. Satori reads woff, so the font lock carries `Archivo-400/800.woff`. |
+| `site/app/components/ogCard.tsx`, `site/og/card.html` | brand | local tokens only | Black ground since 2026-10-14; the card still sets Archivo, because Satori reads woff and Geist ships as woff2. Satori reads woff, so the font lock carries `Archivo-400/800.woff`. |
 | `/moves`, `/moves/[name]` filters and fluff pass | product | ui-skills `jakubkrehel/better-accessibility`, `pbakaus/distill`, `leonxlnx/minimalist-skill` | Taken: native checkboxes and fieldsets, visible focus, a polite status count, 44 px targets on touch (accessibility); remove what carries no information, show less until asked (distill); no emoji, no gradient, no stacked shadow, plain copy (minimalist). Rejected from minimalist: its serif and warm palette, pastel pill tags, staggered scroll entry, drifting background blob, card lift on hover. Local tokens and Archivo win. |
 | `/moves` featured bento | product | ui-skills `zeke/swiss-design` (grid principles only), four local mock layouts chosen by the owner (bento) | Taken: one grid, size as the rank signal, one accent. Rejected: its IBM Plex face and stone palette, which the studio tokens replace. Picks come from a blind three-reviewer score of every clip. |
 | `/` hero film switcher (tracking HUD, retro remix) | brand | ui-skills `pbakaus/layout`, `ibelick/fixing-motion-performance` | Taken: group by meaning with proximity (tabs sit with the caption they switch, no new card), `gap` for rhythm, collapse at 640 to 44 px targets; one video element mounted at a time, no layout-affecting animation. Rejected: layout's 4-unit spacing scale and density param (no scale here), a separate gallery section (the hero already owns the film slot), motion-performance's will-change and scroll-linked advice (nothing scroll-linked). Local tokens and Archivo win. |
