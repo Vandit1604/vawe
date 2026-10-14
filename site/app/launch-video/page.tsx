@@ -5,7 +5,7 @@ import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · launch video",
+  title: "Make a product launch video with code | vawe",
   description:
     "How Vawe builds a product launch video: real captured UI, not invented mockups, one message per beat, from the site's own palette and type.",
   path: "/launch-video",

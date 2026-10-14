@@ -13,18 +13,18 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", displ
 // a shared link show. The rule the page itself now follows applies here first: name the OUTCOME, and
 // name WHO it is for. An agent or a coding session is the audience that can actually use a text file
 // as a video format, so the title says so.
-const TITLE = "vawe: make videos by vibe coding, HTML to video";
+const TITLE = "vawe: open-source HTML to video for AI agents";
 const BLURB =
-  "Motion graphics without a motion designer. Vawe renders video from a text file, so you or an AI "
-  + "agent can write a film the way you write anything else, and re-render it the day the numbers change.";
+  "Write one HTML page (CSS, SVG, canvas, three.js) and vawe renders a deterministic video. "
+  + "Motion graphics as code for you or an AI agent: a free, Apache-2.0 Remotion alternative.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://vawe.dev"),
   title: TITLE,
   description: BLURB,
   keywords: [
-    "video from code", "AI video generation", "motion graphics engine", "programmatic video",
-    "vibe coding", "AI agent video", "video as code", "deterministic rendering",
+    "HTML to video", "video from code", "AI agent video generation", "motion graphics with code",
+    "programmatic video", "Remotion alternative", "vibe coding", "deterministic rendering",
   ],
   // Google Search's favicon crawler does not support SVG (its documented formats are BMP, GIF,
   // ICO, PNG, JPEG, PPM and TIFF), so the SVG mark ships first for browsers that do, and a real
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     siteName: "vawe",
-    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "vawe: make videos by vibe coding" }],
+    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "vawe: open-source HTML to video for AI agents" }],
   },
   // summary_large_image is the only card that shows a 1200x630 at full width; the default "summary"
   // crops it to a small square and the headline is on the left, so it would crop the claim away.

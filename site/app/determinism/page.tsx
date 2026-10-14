@@ -4,7 +4,7 @@ import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · deterministic video rendering",
+  title: "Deterministic video rendering from HTML | vawe",
   description:
     "A Vawe film is a page seeked to each frame's time, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true, how it checks it, and why that lets a render split into parallel slices.",
   path: "/determinism",

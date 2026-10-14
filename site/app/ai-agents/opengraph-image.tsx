@@ -6,7 +6,7 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "for agents",
-    title: "Vawe · video rendering for AI agents",
+    title: "AI agent video generation: HTML to video with vawe",
     description:
       "An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges it.",
     path: "/ai-agents",

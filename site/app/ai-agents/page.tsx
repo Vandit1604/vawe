@@ -4,7 +4,7 @@ import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · video rendering for AI agents",
+  title: "AI agent video generation: HTML to video with vawe",
   description:
     "An agent writes a Vawe film as one HTML page, in the web platform it already knows, and one command renders, checks and ships it. A fresh session judges the result, never the one that wrote it.",
   path: "/ai-agents",

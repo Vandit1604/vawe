@@ -6,7 +6,7 @@ import { AltEvidence, type QA } from "../components/AltEvidence";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "Remotion alternatives: open source and hosted, compared",
+  title: "Remotion alternative: vawe, HyperFrames and hosted APIs",
   description:
     "Remotion alternatives sorted into self-hosted engines (vawe, HyperFrames) and hosted JSON video APIs, with Remotion's 3-employee license rule quoted.",
   path: "/remotion-alternatives",

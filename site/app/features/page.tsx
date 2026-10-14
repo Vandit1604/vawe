@@ -4,9 +4,9 @@ import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · features",
+  title: "vawe features: deterministic HTML to video rendering",
   description:
-    "The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.",
+    "What the vawe HTML-to-video engine decides for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.",
   path: "/features",
 });
 
