@@ -24,9 +24,9 @@ export const DOCS_URL = "/docs";
 // The engine repository, public since 2026-09-16.
 export const REPO_URL = "https://github.com/Vandit1604/vawe";
 
-export function Header({ active }: { active?: string }) {
+export function Header({ active, overlay = false }: { active?: string; overlay?: boolean }) {
   return (
-    <div className="wrap">
+    <div className={overlay ? "wrap bar-overlay" : "wrap"}>
       <header className="bar">
         <Link className="mark" href="/">
           <WaveGlyph />

@@ -18,11 +18,15 @@ export function Clip({
   webm,
   poster,
   className,
+  label,
+  decorative,
 }: {
   src: string;
   webm?: string;
   poster?: string;
   className?: string;
+  label?: string;
+  decorative?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
 
@@ -83,6 +87,8 @@ export function Clip({
       src={webm ? undefined : src}
       poster={poster}
       className={className}
+      aria-label={label}
+      aria-hidden={decorative || undefined}
       onClick={tap}
       onPlaying={(e) => e.currentTarget.setAttribute("data-on", "")}
       loop

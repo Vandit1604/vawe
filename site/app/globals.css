@@ -36,13 +36,14 @@
   --ink:#ffffff;            /* 21:1 */
   --ink-2:#ededed;          /* 17.9:1 */
   --muted:#a1a1a1;          /* 8.1:1 */
+  --dim:#8f8f8f;            /* 6.5:1: code comments and read-outs beside a command */
 
   /* ---- TYPE ---- */
   --font-title:var(--font-sans),system-ui,sans-serif;
 
   /* ---- TYPE SCALE (DESIGN.md "Type scale"): body 16 sits in Butterick's 15-25px web range ---- */
   --fs-label:11px;          /* mono caps read-outs only */
-  --fs-code:12px;           /* mono code and strip clips */
+  --fs-code:12px;           /* mono code and clip captions */
   --fs-ui:14px;             /* controls, captions, nav, footer */
   --fs-body:16px;
   --fs-lead:18px;
@@ -55,7 +56,7 @@
   --fs-figure:clamp(1.5rem,2.8vw,2rem);     /* a big mono number */
   --lh-body:1.55; --lh-ui:1.35; --lh-head:1.04; --lh-sub:1.2;
   --track-caps:.06em;       /* Butterick: 5-12% extra on all caps */
-  --track-head:-.025em; --track-display:-.035em;
+  --track-head:-.04em; --track-display:-.05em;
 
   /* ---- SPACE SCALE: 4 px steps, group gap at least twice the item gap ---- */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
@@ -260,9 +261,6 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 .codeblock{background:var(--bg);border-radius:var(--r);padding:var(--sp-4) var(--sp-5);margin:var(--sp-5) 0 var(--sp-1);box-shadow:var(--shadow-1);overflow-x:auto;max-width:560px}
 .codeblock .lbl{font-family:var(--font-mono),monospace;font-size:var(--fs-label);color:var(--muted);margin-bottom:var(--sp-3)}
 .codeblock pre{font-family:var(--font-mono),monospace;font-size:var(--fs-code);line-height:1.75;color:var(--ink-2);white-space:pre;margin:0}
-@media (max-width:900px){
-  .strip{grid-template-columns:1fr}
-}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   /* The clips STAY. components/Clip.tsx simply never plays them, so each one holds its poster —
