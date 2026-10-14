@@ -60,6 +60,7 @@ spacing:
   page-gutter: 26px
   column: 1040px
   page: 1160px
+  scale: [4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px, 96px]
 ---
 
 ## Overview
@@ -138,8 +139,82 @@ shadow under its ring lifts it off the ground (see the provenance row for `/move
 
 ## Shapes
 
-Four radii: a panel is `--r` (12px), a well or chip inside it is `--r-in` (4px), a control is 8px,
-a pill is 999px. Some older routes still use 6px and 10px.
+Four radii, all tokens: a panel is `--r` (12px), a control is `--r-ctl` (8px), a well or chip inside
+a panel is `--r-in` (4px), a pill is `--r-pill`. Nested corners are concentric: outer = inner + padding
+(the hero panel is 12 = 4 + 8). Some older routes still use 6px and 10px.
+
+## Type scale
+
+Few sizes, each with one job (`globals.css`, `--fs-*`). Body is 16px, inside Practical Typography's
+15 to 25px for the web.
+
+| token | size | job |
+|---|---|---|
+| `--fs-label` | 11px | mono caps read-outs only (`.meta`, `.foot-h`), tracked `--track-caps` (.06em) |
+| `--fs-code` | 12px | mono code, the section strip |
+| `--fs-ui` | 14px | controls, buttons, tabs, captions, nav, footer |
+| `--fs-body` | 16px | prose and card text |
+| `--fs-lead` | 18px | the hero's one paragraph |
+| `--fs-h3` | 16px | Unbounded titles: the face carries the rank, not the size |
+| `--fs-h2`, `--fs-h1`, `--fs-display` | fluid | section, page and hero headings |
+
+Line heights: `--lh-body` 1.55, `--lh-ui` 1.35, `--lh-head` 1.04. Body stays at 1.55, above
+Butterick's 120 to 145%, because light text on the dark ground needs the extra lead (typeset's
+light-on-dark rule). Prose is 45 to 75 characters a line; kerning is on (`font-kerning: normal`).
+Weight never changes on hover or on a selected state, so nothing reflows.
+
+## Space scale
+
+`--sp-1` to `--sp-9`: 4, 8, 12, 16, 24, 32, 48, 64, 96px. The gap between groups is at least twice
+the gap inside a group: card gap 12, section head to grid 32, section to section 96 (64 under 640).
+
+## Motion
+
+Curves are named tokens with the easing.dev values; durations stay under 300ms (Emil) and under
+200ms for an interaction (Rauno).
+
+| token | value | use |
+|---|---|---|
+| `--ease-out` | Out Quint `cubic-bezier(.23,1,.32,1)` | enters, hovers, state changes; `--ease` aliases it |
+| `--ease-press` | Quick Out `cubic-bezier(0,0,.2,1)` | the press scale |
+| `--ease-in` | In Cubic `cubic-bezier(.55,.055,.675,.19)` | exits |
+| `--ease-in-out` | In Out Cubic `cubic-bezier(.645,.045,.355,1)` | a view moving on screen |
+| `--dur-press` | 120ms | press |
+| `--dur-hover` | 150ms | hover colour |
+| `--dur-state` | 200ms | a small state change, a crossfade |
+| `--dur-exit` | 150ms | exits are shorter than entrances |
+
+Name each property in a transition, never `all`. No animation on what a visitor repeats (the FAQ
+toggle, the strip, a tab switch): only colour and the press. The hero film loops because it IS the
+product; reduced motion pauses it and sets every transition to 0.01ms.
+
+## Interaction states
+
+One rule per state, the same on every control:
+
+- **Hover:** inside `@media (hover: hover)`; `raised` goes to `raised-2`, `ink` to `ink-2`, a text
+  link gains its underline. Never a lift, never a weight change.
+- **Press:** `scale: var(--press)` (.96) over `--dur-press` on `--ease-press`, on buttons, tabs and
+  round controls; never on cards.
+- **Focus:** `:focus-visible` only, `outline: var(--focus-ring)` (2px accent) at a 2px offset, on
+  links, buttons, summaries and inputs; inset (-2px) where an outside ring would clip.
+- **Selected / current:** `ink` fill with `bg` text (tabs, the strip, the sound toggle) or `ink` on
+  `raised` (nav); `aria-pressed` or `aria-current` carries it, never colour alone.
+- **Disabled:** `opacity: .5` and `pointer-events: none`; no hover, no tooltip.
+- **Hit area:** 40px on desktop, 44px under 640; inline links in prose are exempt.
+
+## Migration to the scales
+
+Migrated (2026-10-13): the landing page (`page.tsx`, `landing.css`, `HeroSplit.tsx`, `SectionStrip`
+styles) and the shared parts in `globals.css`: `.btn` (now 14px on `--r-ctl`, 44px tall), the focus
+ring, `.ghbtn` and `.nav` timing, `.meta`, `.foot*`, `.ls`, `.ls-sub`, `.ls-grid`, body size.
+
+Still on literal values: `moves/moves.css` (`/moves`, `/moves/[name]`), `easing/easing.css`
+(`/easing`, `/easing/[slug]`), `components/intent.css` (`/determinism`, `/json-to-video`,
+`/ai-agents`, `/launch-video`, `/remotion-alternatives`, `/when-determinism-matters`,
+`/hyperframes-alternatives`), `components/study.css` (`/problems`, `/roadmap`, `/vs/[slug]`),
+`.phead` and `.row` in `globals.css`, and `blog/blog.css` plus `Header.tsx` (owned by the blog-type
+branch).
 
 ## Components
 
@@ -157,8 +232,8 @@ a pill is 999px. Some older routes still use 6px and 10px.
   1280 px poster as an image and fades the 1280 px clip in over it once it plays. Hover rings sit
   behind `(hover: hover) and (pointer: fine)`, so a tap on a phone never leaves one stuck. A code block shows syntax by tone and weight
   (`ink`, `ink-2`, `muted`, italic comments), never by hue.
-- **Focus:** `2px solid var(--accent)` on `:focus-visible`. A field that cannot carry an outside
-  ring uses a border change plus a 3px accent-tinted ring.
+- **Focus:** `var(--focus-ring)` (2px accent) on `:focus-visible` for links, buttons, summaries and
+  inputs. A field that cannot carry an outside ring uses a border change plus a 3px accent-tinted ring.
 - A control that appears on hover is visible where there is no hover (`@media (hover: none)`).
 - Reduced motion stops playback on load and removes movement, never information.
 
@@ -273,6 +348,20 @@ was tried.
 | `/blog`, `/blog/[slug]` type: Plus Jakarta Sans (2026-10-13) | brand | owner decision | The owner picked Plus Jakarta Sans over Archivo, Geist and Bricolage on 2026-10-13, for the blog routes only. Mono stays for numbers and meta; the bar and footer keep Archivo. Headline tracking loosened from -.045em to -.032em, because Jakarta is set tighter than Archivo. |
 | `/blog`, `/blog/[slug]` personality pass, blog covers (2026-10-13) | brand | ui-skills `pbakaus/bolder`, `pbakaus/typeset` (pages); `anthropics/canvas-design` (covers). Read `start`, `categories`, then `list` for visual, taste, typography and motion first | bolder: TAKEN, amplify what the system already owns (Archivo 800 at display size, mono read-outs, lane colours by meaning) instead of new effects; one decisive move per surface (the masthead h1 and the cover number) with everything around it quiet; the skeleton test (cards still read as ranked by size with the copy removed). REJECTED: its "touch only the named target" scope rule (the owner asked for the whole blog) and any new colour, font or radius. typeset: TAKEN, role contrast by size, weight and tone (title, dek, lead, body, mono meta), a 680 px measure, light-on-dark compensation (lead at 1.55, body at 1.65), tabular numbers. REJECTED: `impeccable detect` (not installed) and its live-mode `scale` param. canvas-design: TAKEN, the "systematic observation" register (registration marks, tick scales, mono labels, a dot lattice, dense repeated marks), a limited palette per cover, nothing overlaps, refine before adding. REJECTED: its philosophy .md and PDF output, thin type (Archivo 800 is the site's display face), downloading fonts, and its "masterpiece" framing. Motion: no skill loaded; the pages have no animation beyond 150 ms colour and ring hovers, off under reduced motion. Local tokens and faces win everywhere. |
 | `/easing`, `/easing/[slug]` (44 pages, 2026-10-03) | product | ui-skills `ibelick/fixing-metadata` (taken); `ibelick/baseline-ui` (fetched, rejected); layout read from the Vercel spec on getdesign.md (VoltAgent/awesome-design-md) | fixing-metadata: TAKEN, one `pageMetadata` call per page, title, description (under 155), canonical and JSON-LD agreeing, deterministic dates. baseline-ui: REJECTED, it assumes Tailwind, `cn` and `motion/react`, none of which this site uses. Vercel spec: TAKEN for the idea only, hairline panels and a spec-sheet layout of numbers then code; its Geist faces and monochrome palette rejected. Local tokens won: the curve line is the accent (it is live data), everything else is ink and muted; the `.mv-code` block and `moves.css` are reused. The charts are server-rendered SVG from `lib/easing.json`, built by `scripts/site/easing.mjs`. |
+| `/` craft pass and the scales (type, space, radius, motion, states), 2026-10-13 | brand | Practical Typography (practicaltypography.com/summary-of-key-rules.html) | TAKEN: body 15 to 25px (16 kept, card and FAQ text raised from 15), 45 to 90 characters a line (hero copy column widened from 34 to 45), caps tracked 5 to 12% (.04em to .06em), kerning on, curly apostrophes in prose. REJECTED: line spacing 120 to 145% (body stays 1.55 for light on dark); its professional-font advice (Archivo, Unbounded, JetBrains Mono are owned). |
+| same | brand | interfaces.dev/cheat-sheet | TAKEN: hit areas 40 desktop and 44 touch (play, sound, tabs, FAQ rows, "Read the page", footer links), `:focus-visible` ring on every control, hover inside `@media (hover: hover)`, named transition properties, concentric radius (hero panel 12 = 4 + 8), 1px outline at 8% white on the film, `-moz-osx-font-smoothing`, `text-underline-position: from-font` and skip-ink, group gap twice item gap. REJECTED: press scale .95 to .98 at 200ms (DESIGN.md says .96 at 120ms), "layered shadow instead of border" (hairlines own this here), light-mode rules (dark only). |
+| same | brand | emilkowal.ski/ui/you-dont-need-animations | TAKEN: no animation on frequent actions (FAQ toggle, strip, tabs: colour and press only), every duration under 300ms, the hero film kept because it explains the product. REJECTED: nothing; the page had no decorative entrances left to cut. |
+| same | brand | shedsgns.me/taste | TAKEN: restraint and "the right amount of nothing": icon badges cut from the four "What you get" cards (IDENTITY.md already rejects them), the hero kicker moved from accent to muted (colour means act-on-it), the second "Write a page. Get a film." heading renamed "How it works." so the hero line is said once. REJECTED: nothing checkable beyond that; it gives no numbers. |
+| same | product | interfaces.rauno.me | TAKEN: interactions at 200ms or less, no weight change on a selected tab (600 removed), hover only on hover devices, `muted playsinline` on autoplay video (already true). REJECTED: focus rings as box-shadow (outline is the house ring and survives forced colours), arrow-key lists and ⌘Backspace (no lists here). |
+| same | product | rauno.me/craft/interaction-design | TAKEN: frequency and novelty decide motion (same as Emil), Fitts on edges (the strip docks to the viewport bottom). REJECTED: gesture and pinch rules (no gestures on this page). |
+| same | product | tasteskill.dev (Taste Skill) | TAKEN: audit first, then fix, with a pre-flight pass (the before and after screenshots at 1440 and 390). REJECTED: its design-system mapping (Material, shadcn) and dual-mode default (dark only by decision). |
+| same | product | userinterface.wiki (rules in github.com/raphaelsalaja/userinterface-wiki/skills/SKILL.md) | TAKEN: press and hover 120 to 180ms (`--dur-press` 120, `--dur-hover` 150), small state 180 to 260ms (`--dur-state` 200), entrances ease-out and exits ease-in (`--ease-out`, `--ease-in`), similar elements share timing, a consistent spacing scale, caps letter-spacing, `text-wrap: pretty`. REJECTED: Fitts minimum 32px (stricter 40 and 44 from interfaces.dev win), springs and AnimatePresence rules (no React motion library), oldstyle numerals (mono figures stay tabular). |
+| same | product | easing.dev (Easing Graphs) | TAKEN: exact curves for the motion tokens: Out Quint `(.23,1,.32,1)`, Quick Out `(0,0,.2,1)`, In Cubic `(.55,.055,.675,.19)`, In Out Cubic `(.645,.045,.355,1)`. REJECTED: Overshoot and Anticipate (no overshoot on site controls; films own that). It gives no durations. |
+| same | product | designsystemchecklist.com (text in github.com/ardakaracizmeli/design-system-checklist) | TAKEN: what the token set must cover: units on a 4px step, type scale with readability (tracking, leading, measure), a z-index system (already closed), easing and duration values, reduced motion. REJECTED: shadow per elevation level (one elevation step here), light and dark palettes. |
+| same | brand | lawsofux.com | TAKEN: Fitts (bigger primary targets, full-width CTAs under 640), Hick (two hero actions, one per card panel), Jakob (native `details`, a plain FAQ, a standard footer), proximity and common region (panels group, gaps rank), Doherty under 400ms (all feedback under 200ms). REJECTED: none; Miller's 7 is not a layout rule. |
+| same | brand | raphaelsalaja.com/library/the-concept-of-taste | TAKEN: hierarchy, proportion and clarity as checks: one display size, one lead, one body, labels in mono. REJECTED: nothing checkable beyond that. |
+| same | product | devouringdetails.com | TAKEN: its public principle list only (inferring intent, responsive interfaces): the pressed tab and sound toggle answer at once. REJECTED: the paid chapters were not read, so nothing else is claimed from it. |
+| same | brand | benji.org/family-values | TAKEN: one family: every control on the page now shares radius `--r-ctl`, the press scale, the hover step and the timing (the hero buttons were 12px radius and 15px beside 8px tabs at 13px). Delight inverse to frequency, same as Emil. REJECTED: trays, text morphing and easter eggs (a marketing page, nothing repeated enough to earn them). |
 
 **Two rules for filling a row in.**
 
