@@ -4,7 +4,9 @@ import { pageMetadata } from "../components/seo";
 import { jsonLdScript, techArticleSchema } from "../../lib/schema";
 import { Clip } from "../components/Clip";
 import { EaseCurve } from "../components/EaseCurve";
-import { GithubCta, Icon, OpenSourceMark } from "../components/Icon";
+import { Icon } from "../components/Icon";
+import { REPO_URL } from "../components/Header";
+import { Next, PageTop, Toc } from "../components/Xp";
 import { MOVES, clip } from "../../lib/moves";
 import { OPEN, PROBLEMS, SOLVED, STATUS_LABEL, VISUALS, type Problem } from "./data";
 import "../components/intent.css";
@@ -75,7 +77,7 @@ export default function Problems() {
     <div className="shell">
       <Header />
       <div className="wrap">
-        <main id="content" className="ipage" tabIndex={-1}>
+        <main id="content" className="ipage xp" tabIndex={-1}>
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={jsonLdScript(
@@ -88,7 +90,7 @@ export default function Problems() {
             )}
           />
           <section className="phead">
-            <OpenSourceMark />
+            <PageTop group="Project" current="Hard problems" />
             <h1>The hard problems in agent-made motion graphics.</h1>
             <p>
               An agent can write a page of HTML in a minute. Turning that page into a film that looks
@@ -101,6 +103,10 @@ export default function Problems() {
               from vawe&apos;s own runs and tests. vawe runs on your machine, needs no account and has
               no per-render fee.
             </p>
+            <Toc label="Jump to" items={[
+              { href: "#solved", label: `Solved (${SOLVED.length})` },
+              { href: "#open", label: `Still solving (${OPEN.length})` },
+            ]} />
           </section>
 
           <section className="sgroup" aria-labelledby="solved">
@@ -123,27 +129,18 @@ export default function Problems() {
             </ol>
           </section>
 
-          <section className="iend iend-gap">
-            <h2 className="h2">See the engine at work.</h2>
-            <p className="lead">
-              Every move in the library uses the eases from problem 4. The determinism page shows the
-              clock from problem 1.
-            </p>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="/moves">
-                Browse the 94 moves <span className="arw">→</span>
-              </a>
-              <a className="btn btn-ghost" href="/roadmap">
-                Read the roadmap
-              </a>
-              <GithubCta />
-            </div>
-            <div className="irelated">
-              <a href="/determinism">Why the same page renders the same frames</a>
-              <a href="/ai-agents">How an agent writes and checks a film</a>
-              <a href="/vs/remotion">vawe vs Remotion</a>
-            </div>
-          </section>
+          <Next
+            title="See the engine at work."
+            lead="Every move in the library uses the eases from problem 4. The determinism page shows the clock from problem 1."
+            primary={{ href: "/moves", label: "Browse the 94 moves" }}
+            secondary={{ href: "/roadmap", label: "Read the roadmap" }}
+            related={[
+              { href: "/determinism", label: "Why the same page renders the same frames" },
+              { href: "/ai-agents", label: "How an agent writes and checks a film" },
+              { href: "/vs/remotion", label: "vawe vs Remotion" },
+              { href: REPO_URL, label: "Star vawe on GitHub" },
+            ]}
+          />
         </main>
       </div>
       <Footer active="/problems" />
