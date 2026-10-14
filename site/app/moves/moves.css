@@ -73,7 +73,10 @@
   .mv-filters{display:none;position:static;max-height:none;overflow:visible;padding:0 0 var(--sp-1)}
   .mv-filters[data-open]{display:flex}
   .mv-filters input{width:20px;height:20px}
-  .mv-grid{grid-template-columns:minmax(0,1fr)}
+  .mv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mv-grid .mv-use{display:none}
+  .mv-grid .mv-cap{padding:var(--sp-3)}
+  .mv-grid .mv-title{font-size:var(--fs-ui)}
   .mv-bento{grid-template-columns:repeat(2,minmax(0,1fr))}
   .mv-bento [data-hero]{grid-row:auto}
   .mv-bento [data-hero] .mv-media{aspect-ratio:16/9;flex:none}

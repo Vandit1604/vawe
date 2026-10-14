@@ -113,7 +113,7 @@ const Card = memo(function Card({
 function Featured({ moves, groupText, reduced }: { moves: MoveCard[]; groupText: Map<string, string>; reduced: boolean }) {
   return (
     <section className="mv-feat" aria-labelledby="mv-feat-h">
-      <h2 className="meta mv-feat-h" id="mv-feat-h">Featured</h2>
+      <h2 className="meta mv-feat-h" id="mv-feat-h">Start here</h2>
       <ul className="mv-bento">
         {moves.map((m, i) => {
           const files = clip(m);
@@ -236,7 +236,6 @@ export function MovesGallery({
 
   return (
     <>
-      {active || !featured.length ? null : <Featured moves={featured} groupText={groupText} reduced={reduced} />}
       <div className="mv-top" role="search">
         <label className="mv-find">
           <span className="sr-only">Search moves by name or when line</span>
@@ -261,6 +260,7 @@ export function MovesGallery({
         </p>
       </div>
 
+      {active || !featured.length ? null : <Featured moves={featured} groupText={groupText} reduced={reduced} />}
       <div className="mv-layout">
         <form className="mv-filters" id="mv-filters" data-open={panelOpen || undefined} onSubmit={(e) => e.preventDefault()}>
           {options.map(({ key, legend, items, fold }) => {

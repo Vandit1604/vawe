@@ -10,6 +10,7 @@ import { moveSeoDescription, moveSeoTitle, relatedMoves } from "../../../lib/mov
 import { jsonLdScript } from "../../../lib/schema";
 import { moveBreadcrumbSchema, techArticleSchema, videoObjectSchema } from "../../../lib/schema-content";
 import { CopyCode } from "./CopyCode";
+import { Next, Toc } from "../../components/Xp";
 import "../moves.css";
 
 type Params = { params: Promise<{ name: string }> };
@@ -73,7 +74,7 @@ export default async function MovePage({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(videoObjectSchema(move))} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(techArticleSchema(move))} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(moveBreadcrumbSchema(move))} />
-      <Header />
+      <Header active="moves" />
       <main className="wrap" id="content" tabIndex={-1}>
         <article className="mvd">
           <header className="phead mvd-head">
@@ -100,6 +101,17 @@ export default async function MovePage({ params }: Params) {
             <figcaption className="mvd-tap meta">Tap the clip to play it.</figcaption>
           </figure>
 
+          <Toc
+            label="On this page"
+            items={[
+              { href: "#when-to-use", label: "When to use" },
+              { href: "#the-code", label: "The code" },
+              { href: "#easing-and-timing", label: "Easing and timing" },
+              ...(move.notesHtml ? [{ href: "#notes", label: "Notes" }] : []),
+              ...(move.soundHtml ? [{ href: "#sound", label: "Sound" }] : []),
+            ]}
+          />
+
           <div className="mvd-doc" id="move-doc" dangerouslySetInnerHTML={{ __html: docHtml(move) }} />
           <CopyCode rootId="move-doc" />
 
@@ -113,12 +125,18 @@ export default async function MovePage({ params }: Params) {
                 </li>
               ))}
             </ul>
-            <p className="mvd-more">
-              See all <Link href="/moves">{MOVES.length} moves</Link>. Learn how a page becomes a film in the{" "}
-              <a href="/docs">docs</a>, copy chains of moves from the <a href="/docs/recipes">recipes</a>, or read
-              the <a href="/docs/motion">motion guide</a>.
-            </p>
           </section>
+
+          <Next
+            title="Chain it into a film."
+            lead={<>See all <Link href="/moves">{MOVES.length} moves</Link>, or copy chains of moves from the recipes.</>}
+            primary={{ href: "/docs/recipes", label: "Open the recipes" }}
+            secondary={{ href: "/moves", label: `All ${MOVES.length} moves` }}
+            related={[
+              { href: "/docs", label: "How a page becomes a film, in the docs" },
+              { href: "/docs/motion", label: "The motion guide" },
+            ]}
+          />
         </article>
       </main>
       <Footer />
