@@ -93,14 +93,6 @@ export default async function PostPage({ params }: Params) {
           ) : null}
 
           <div className="bp-grid">
-            <div className="bp-body">
-              {post.cover && post.hero && !post.heroInBody ? (
-                <figure>
-                  <img src={post.hero.src} alt={post.hero.alt} width={post.hero.width} height={post.hero.height} loading="lazy" decoding="async" />
-                </figure>
-              ) : null}
-              <div className="bp-prose" dangerouslySetInnerHTML={{ __html: post.html }} />
-            </div>
             {post.toc.length > 1 ? (
               <nav className="bp-toc" aria-label="On this page">
                 <span className="meta">On this page</span>
@@ -113,6 +105,14 @@ export default async function PostPage({ params }: Params) {
                 </ol>
               </nav>
             ) : null}
+            <div className="bp-body">
+              {post.cover && post.hero && !post.heroInBody ? (
+                <figure>
+                  <img src={post.hero.src} alt={post.hero.alt} width={post.hero.width} height={post.hero.height} loading="lazy" decoding="async" />
+                </figure>
+              ) : null}
+              <div className="bp-prose" dangerouslySetInnerHTML={{ __html: post.html }} />
+            </div>
           </div>
 
           {related.length ? (
