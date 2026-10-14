@@ -43,9 +43,9 @@ tag `arsenal-final` and match that register.
 
 ## Known gaps, so you do not rediscover them
 
-- **Scales exist; not every route uses them.** Type, space, radius, motion and state tokens are in
-  `globals.css` and `DESIGN.md`. The landing page and the shared components use them; the routes
-  still on literal values are listed in `DESIGN.md` "Migration to the scales". Migrate a route when
-  you next touch it.
+- **Scales: every route uses them (2026-10-14).** Type, space, radius, motion and state tokens are in
+  `globals.css` and `DESIGN.md`. The deliberate literals are listed in `DESIGN.md` "Migration to the scales".
+  A new route takes tokens from the start; a `px` size, a `.15s ease` or a literal `2px solid var(--accent)`
+  in a new rule is a defect.
 - **Dark only.** The site is the studio's dark ground by decision (`IDENTITY.md`), with
   `color-scheme: dark`. There is no light mode to keep in sync.

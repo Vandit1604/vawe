@@ -160,6 +160,7 @@ Few sizes, each with one job (`globals.css`, `--fs-*`). Body is 16px, inside Pra
 | `--fs-lead` | 18px | the hero's one paragraph |
 | `--fs-h3` | 16px | Unbounded titles: the face carries the rank, not the size |
 | `--fs-h2`, `--fs-h1`, `--fs-display` | fluid | section, page and hero headings |
+| `--fs-panel`, `--fs-sub`, `--fs-figure` | fluid | a panel h2, a sub-heading in a panel or document, a big mono number |
 
 Line heights: `--lh-body` 1.55, `--lh-ui` 1.35, `--lh-head` 1.04. Body stays at 1.55, above
 Butterick's 120 to 145%, because light text on the dark ground needs the extra lead (typeset's
@@ -212,12 +213,27 @@ Migrated (2026-10-13): the landing page (`page.tsx`, `landing.css`, `HeroSplit.t
 styles) and the shared parts in `globals.css`: `.btn` (now 14px on `--r-ctl`, 44px tall), the focus
 ring, `.ghbtn` and `.nav` timing, `.meta`, `.foot*`, `.ls`, `.ls-sub`, `.ls-grid`, body size.
 
-Still on literal values: `moves/moves.css` (`/moves`, `/moves/[name]`), `easing/easing.css`
-(`/easing`, `/easing/[slug]`), `components/intent.css` (`/determinism`, `/json-to-video`,
-`/ai-agents`, `/launch-video`, `/remotion-alternatives`, `/when-determinism-matters`,
-`/hyperframes-alternatives`), `components/study.css` (`/problems`, `/roadmap`, `/vs/[slug]`),
-`.phead` and `.row` in `globals.css`, and `blog/blog.css` plus `Header.tsx` (owned by the blog-type
-branch).
+Migrated (2026-10-14): every other route. `moves/moves.css`, `easing/easing.css`, `components/intent.css`,
+`components/study.css`, `blog/blog.css`, and the bar (`.bar`, `.nav`, `.ghbtn`, `.mark`) and `.phead` in
+`globals.css`. Dead rules `.row`, `.media`, `.num`, `.copy`, `.pop` and `.section` were deleted.
+
+What stays literal on purpose, so the next grep does not report it as a leftover:
+
+- The blog reading sizes (19 px body, 17 px on a phone, 20 and 24 px card titles) are custom properties on
+  `.bl, .bp` in `blog.css` (`--fs-read`, `--fs-read-sm`, `--fs-card`, `--fs-card-lg`), measured under "Blog".
+  The masthead and lead headings keep their own clamp: they are the blog's one decisive size each.
+- The star on the GitHub button keeps its 320 ms overshoot curve (the provenance row for it).
+- The SVG tick labels of the easing charts are 10 and 12 user units inside a scaled viewBox, not px.
+- Layout measures (card minimums such as 230 and 190 px, `ch` measures, aspect ratios, `.wrap` gutter 26 px,
+  the `.ls` 112 and 80 px landing offsets) are not on the space scale.
+- `.mv-clear:disabled` is hidden, not dimmed, because the button reserves its place and a dimmed "Clear" on an
+  unfiltered list reads as a control you missed.
+- The blog's `min-width:1000px` for the table of contents (720 + 48 + 240 plus gutters) is a measured breakpoint.
+- The `/easing/[slug]` demo boxes animate forever: they ARE the curve being shown. Reduced motion parks them.
+
+New tokens from this pass (`globals.css`): `--fs-panel`, `--fs-sub`, `--fs-figure`, `--lh-sub`,
+`--track-head`, `--track-display`, `--sp-panel` and `--gap-panel` (a content panel's padding and column gap),
+and `--hit` (40 px, 44 px under 640), which every control's `min-height` uses.
 
 ## Components
 
@@ -383,6 +399,8 @@ was tried.
 | same | brand | raphaelsalaja.com/library/the-concept-of-taste | TAKEN: hierarchy, proportion and clarity as checks: one display size, one lead, one body, labels in mono. REJECTED: nothing checkable beyond that. |
 | same | product | devouringdetails.com | TAKEN: its public principle list only (inferring intent, responsive interfaces): the pressed tab and sound toggle answer at once. REJECTED: the paid chapters were not read, so nothing else is claimed from it. |
 | same | brand | benji.org/family-values | TAKEN: one family: every control on the page now shares radius `--r-ctl`, the press scale, the hover step and the timing (the hero buttons were 12px radius and 15px beside 8px tabs at 13px). Delight inverse to frequency, same as Emil. REJECTED: trays, text morphing and easter eggs (a marketing page, nothing repeated enough to earn them). |
+
+| every remaining route on the scales (2026-10-14) | product | the 14 sources of the landing pass (rows above, same text) applied to `/moves`, `/easing`, the intent pages, `/problems`, `/roadmap`, `/vs/*`, `/blog`, the bar; ui-skills `pbakaus/polish` (fetched) | polish: TAKEN, classify each drift (missing token, one-off, local defect) and fix at the narrowest level: a missing token became `--fs-panel`, `--hit` and friends, one-offs became existing tokens, the local defect was the `.ez-note` class used for both SVG labels and a paragraph, so the paragraph rendered in mono. Also TAKEN from the sources: 40/44 px targets on every control, hover only inside `(hover: hover)`, the house focus ring, press scale on buttons and pill controls, tabular numbers on tables, no layout shift. REJECTED: polish's critique-storage commands (no impeccable install here), `impeccable detect`. The blog kept its Butterick sizes as local custom properties. Verified with before and after shots at 1440 and 390 of 17 routes (`out/site-scales/`). |
 
 **Two rules for filling a row in.**
 
