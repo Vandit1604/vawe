@@ -2,6 +2,7 @@ import { Header } from "../components/Header";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
+import { Next, PageTop, Toc } from "../components/Xp";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
@@ -32,8 +33,9 @@ export default function Determinism() {
       <Header />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "Determinism", url: "/determinism" }]))} />
       <div className="wrap">
-        <main id="content" className="ipage" tabIndex={-1}>
+        <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
+            <PageTop group="Learn" current="Determinism" />
             <h1>Same page in. Same frames out.</h1>
             <p>
               A Vawe film is an HTML page that the renderer seeks to each frame&apos;s time. Ask for
@@ -41,9 +43,15 @@ export default function Determinism() {
               a tuning goal: the clock is replaced before the page runs, and a test renders pages
               twice and compares every frame.
             </p>
+            <Toc items={[
+              { href: "#clock", label: "The fake clock" },
+              { href: "#test", label: "The test" },
+              { href: "#slices", label: "Parallel slices" },
+              { href: "#rates", label: "60 and 30 fps" },
+            ]} />
           </section>
 
-          <section className="isec">
+          <section className="isec" id="clock">
             <div className="isec-text">
               <h2>The clock is fake, on purpose.</h2>
               <p>
@@ -70,7 +78,7 @@ export default function Determinism() {
             </div>
           </section>
 
-          <section className="isec">
+          <section className="isec" id="test">
             <div className="isec-text">
               <h2>A test proves it, not a claim.</h2>
               <p>
@@ -91,7 +99,7 @@ export default function Determinism() {
             </div>
           </section>
 
-          <section className="isec">
+          <section className="isec" id="slices">
             <div className="isec-text">
               <h2>Parallel slices, the same pixels.</h2>
               <p>
@@ -106,7 +114,7 @@ export default function Determinism() {
             </div>
           </section>
 
-          <section className="isec">
+          <section className="isec" id="rates">
             <div className="isec-text">
               <h2>60fps final, 30fps for a fast look.</h2>
               <p>
@@ -120,21 +128,15 @@ export default function Determinism() {
             </div>
           </section>
 
-          <section className="iend">
-            <h2 className="h2">When this property decides which engine to pick.</h2>
-            <p className="lead">
-              Byte-identical output matters most where nobody looks at every frame.
-            </p>
-            <div className="hero-cta">
-              <a className="btn btn-primary" href="/when-determinism-matters">
-                When determinism matters <span className="arw">→</span>
-              </a>
-            </div>
-            <div className="irelated">
-              <a href="/ai-agents">How an agent writes the page</a>
-              <a href="/features">What else the engine decides</a>
-            </div>
-          </section>
+          <Next
+            title="When this property decides which engine to pick."
+            lead="Byte-identical output matters most where nobody looks at every frame."
+            primary={{ href: "/when-determinism-matters", label: "When determinism matters" }}
+            related={[
+              { href: "/ai-agents", label: "How an agent writes the page" },
+              { href: "/features", label: "What else the engine decides" },
+            ]}
+          />
         </main>
       </div>
       <Footer active="/determinism" />
