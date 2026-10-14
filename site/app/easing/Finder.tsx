@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ROLES } from "../../lib/easing";
+import { SpacingChart, spacingDomain } from "./Spacing";
 
-type Pick = { slug: string; name: string; ez: string };
+type Pick = { slug: string; name: string; ez: string; sp: number[] };
 
 const MAX_PICKS = 3;
 
@@ -19,7 +20,7 @@ export function Finder({ children, total }: { children: ReactNode; total: number
 
   const cards = useCallback(() => Array.from(root.current?.querySelectorAll<HTMLElement>("[data-ez-card]") ?? []), []);
 
-  const toPick = (card: HTMLElement): Pick => ({ slug: card.dataset.slug ?? "", name: card.dataset.name ?? "", ez: card.style.getPropertyValue("--ez") });
+  const toPick = (card: HTMLElement): Pick => ({ slug: card.dataset.slug ?? "", name: card.dataset.name ?? "", ez: card.style.getPropertyValue("--ez"), sp: (card.dataset.sp ?? "").split(",").map(Number) });
 
   useEffect(() => {
     const wanted = new URLSearchParams(window.location.search).get("compare")?.split(",").slice(0, MAX_PICKS) ?? [];
@@ -67,6 +68,8 @@ export function Finder({ children, total }: { children: ReactNode; total: number
     }
   };
 
+  const even = Array.from({ length: 13 }, (_, k) => k / 12);
+  const domain = spacingDomain([even, ...picks.map((p) => p.sp)]);
   const share = `/easing?compare=${picks.map((p) => p.slug).join(",")}#compare`;
 
   return (
@@ -99,14 +102,28 @@ export function Finder({ children, total }: { children: ReactNode; total: number
               <button type="button" className="ez-chip" onClick={() => setPicks([])}>Clear</button>
             </div>
           </div>
+          <span className="meta">Spacing: equal steps of time</span>
+          <div className="ez-sp-rows">
+            {picks.map((p) => (
+              <div className="ez-row" key={`sp-${p.slug}`}>
+                <span className="ez-lab-name" title={p.name}>{p.name}</span>
+                <SpacingChart values={p.sp} domain={domain} w={420} h={30} ghost={7} label={`${p.name} at 13 equal time steps`} />
+              </div>
+            ))}
+            <div className="ez-row">
+              <span className="ez-lab-name">linear</span>
+              <SpacingChart values={even} domain={domain} w={420} h={30} ghost={7} />
+            </div>
+          </div>
+          <span className="meta ez-race-h">Race</span>
           {picks.map((p) => (
             <div className="ez-row" key={`${p.slug}-${replay}`}>
-              <span className="ez-lab" title={p.name}>{p.name}</span>
+              <span className="ez-lab-name" title={p.name}>{p.name}</span>
               <div className="ez-track"><span className="ez-box ez-race" style={{ ["--ez" as string]: p.ez }} /></div>
             </div>
           ))}
           <div className="ez-row" key={`linear-${replay}`}>
-            <span className="ez-lab">linear</span>
+            <span className="ez-lab-name">linear</span>
             <div className="ez-track"><span className="ez-box ez-box-ref ez-race" /></div>
           </div>
           {picks.length < MAX_PICKS ? <p className="ez-cap">Pick up to {MAX_PICKS}. Each card has a Compare button.</p> : null}

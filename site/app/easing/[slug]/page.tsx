@@ -6,12 +6,13 @@ import { Clip } from "../../components/Clip";
 import { pageMetadata } from "../../components/seo";
 import { jsonLdScript, breadcrumbSchema } from "../../../lib/schema";
 import { CopyCode } from "../../moves/[name]/CopyCode";
-import { EASES, STATS, bezierText, camelOf, copyIsBezier, copyValue, easeBySlug, importLine, pageDescription, pageTitle, roleOf, speedText, summary, techArticleSchema, waapi, type Ease } from "../../../lib/easing";
-import { CurveChart, VelocityChart } from "../Charts";
+import { EASES, STATS, classicIn, bezierText, camelOf, copyIsBezier, copyValue, easeBySlug, importLine, pageDescription, pageTitle, roleOf, speedText, summary, techArticleSchema, waapi, type Ease } from "../../../lib/easing";
+import { MoveClips } from "../../components/MoveClips";
 import { CopyBtn } from "../CopyBtn";
-import { Demo } from "../Demo";
+import { Lab, type Variant } from "../Lab";
 import { Next, Toc } from "../../components/Xp";
 import "../../moves/moves.css";
+import "../../components/intent.css";
 import "../easing.css";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -40,6 +41,16 @@ function turns(y: number[]) {
     if (d) last = d;
   }
   return n;
+}
+
+const DIR_LABEL = { in: "In", out: "Out", inOut: "In-out" } as const;
+
+function variantsOf(e: Ease): Variant[] {
+  const set = e.kind === "classic" ? classicIn(e.family) : [e];
+  const order = ["in", "out", "inOut"];
+  return [...set]
+    .sort((a, b) => order.indexOf(a.dir ?? "") - order.indexOf(b.dir ?? ""))
+    .map((x) => ({ slug: x.slug, name: x.name, label: x.dir ? DIR_LABEL[x.dir] : x.name, y: x.y, vel: x.vel, t50: x.t50, t90: x.t90, peakSpeed: x.peakSpeed, linear: x.linear }));
 }
 
 function Code({ label, text }: { label: string; text: string }) {
@@ -186,22 +197,9 @@ export default async function EasePage({ params }: Params) {
             />
           </header>
 
-          <section className="ez-charts" aria-label="Curve and velocity">
-            <figure className="panel ez-chart">
-              <span className="meta">Progress against time</span>
-              <CurveChart e={e} />
-              <figcaption className="ez-cap">Dashed: linear. Dots: 50% and 90% of the travel.</figcaption>
-            </figure>
-            <figure className="panel ez-chart">
-              <span className="meta">Velocity, in multiples of average speed</span>
-              <VelocityChart e={e} />
-              <figcaption className="ez-cap">Dashed: 1x, the speed of linear.{e.peakSpeed > 12 ? " The chart stops at 12x." : ""}</figcaption>
-            </figure>
-          </section>
-
           <section className="ez-sec" aria-labelledby="demo">
             <h2 id="demo">Demo</h2>
-            <Demo name={e.name} ez={e.linear} />
+            <Lab current={e.slug} variants={variantsOf(e)} />
             {e.kind === "vawe" ? (
               <figure className="panel ez-clip">
                 <div className="ez-stage">
@@ -276,7 +274,8 @@ export default async function EasePage({ params }: Params) {
           {e.moves?.length ? (
             <section className="ez-sec" aria-labelledby="moves">
               <h2 id="moves">Moves that use {e.name}</h2>
-              <p>{e.moves.length} moves set <code>EASE.{camelOf(e.slug)}</code>.</p>
+              <p>{e.moves.length} moves set <code>EASE.{camelOf(e.slug)}</code>. The first four play here.</p>
+              <MoveClips names={e.moves.slice(0, 4).map((m) => m.name)} />
               <ul className="ez-moves">
                 {e.moves.slice(0, 12).map((m) => (
                   <li key={m.name}><Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link></li>

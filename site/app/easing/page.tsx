@@ -7,6 +7,7 @@ import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { CSS, EASES, FAMILIES, STATS, VAWE, classicIn, copyIsBezier, copyValue, itemListSchema, roleOf, speedText, type Ease } from "../../lib/easing";
 import { Thumb } from "./Charts";
 import { Finder } from "./Finder";
+import { SpacingChart, ghostValues } from "./Spacing";
 import { Next } from "../components/Xp";
 import "./easing.css";
 
@@ -32,7 +33,10 @@ const FAMILY_NOTE: Record<string, string> = {
 const num = (n: number) => n.toLocaleString("en-US");
 const pct = (u: number) => `${Math.round(u * 100)}%`;
 
+const CARD_GHOSTS = 13;
+
 function Card({ e }: { e: Ease }) {
+  const ghosts = ghostValues(e.y, CARD_GHOSTS);
   const bezier = copyIsBezier(e);
   const close = e.kind === "classic" && e.bezier.express === "close";
   return (
@@ -42,13 +46,14 @@ function Card({ e }: { e: Ease }) {
       data-slug={e.slug}
       data-name={e.name}
       data-role={roleOf(e)}
+      data-sp={ghosts.map((g) => g.toFixed(3)).join(",")}
       data-search={`${e.name} ${e.slug} ${e.family} ${roleOf(e)}`.toLowerCase()}
       style={{ "--ez": copyValue(e) } as CSSProperties}
     >
       <div className="ez-thumbwrap">
         <Thumb e={e} />
-        <span className="ez-mini" aria-hidden="true"><i /></span>
       </div>
+      <SpacingChart values={ghosts} label={`${e.name} at ${CARD_GHOSTS} equal time steps`} />
       <Link href={`/easing/${e.slug}`} prefetch={false}>{e.name}</Link>
       <span className="meta">50% at {pct(e.t50)} / peak {speedText(e).replace(" (it ends vertically)", "").replace("over ", ">")}</span>
       <div className="ez-card-act">
@@ -70,7 +75,7 @@ export default function EasingIndex() {
           <header className="phead ez-head">
             <h1>Easing functions as CSS</h1>
             <p className="ez-sum">
-              {EASES.length} curves. Hover a card to preview it, copy its <code>cubic-bezier()</code> or <code>linear()</code>, or compare up to three side by side. Open one for the exact <code>linear()</code>, the Web Animations line and the numbers.
+              {EASES.length} curves. Each card shows the shape at equal time steps: bunched is slow, spread is fast. Copy its <code>cubic-bezier()</code> or <code>linear()</code>, or compare up to three side by side. Open one for the exact <code>linear()</code>, the Web Animations line and the numbers.
             </p>
           </header>
 
