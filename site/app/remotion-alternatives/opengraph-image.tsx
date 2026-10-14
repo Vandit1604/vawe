@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "alternatives",
-    title: "Vawe · Remotion alternatives, categorized",
+    title: "Remotion alternatives, by category.",
     description:
-      "A hosted JSON video API or a self-hosted engine: what Remotion’s license requires, what Vawe and HyperFrames give away free. Read 2026-09-19.",
+      "\u201cRemotion alternative\u201d returns two different products under one query: a hosted API you POST a JSON file to, and a self-hosted engine you run yourself.",
     path: "/remotion-alternatives",
   });
 }

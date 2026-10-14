@@ -6,8 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "moves",
-    title: "Vawe · moves",
-    description: "Proven motion moves, each a clip and the markdown an agent copies.",
+    title: "Moves",
+    description:
+      "Each move is a clip and one markdown file: when to use it, the snippet, the notes and the sound cue.",
     path: "/moves",
   });
 }

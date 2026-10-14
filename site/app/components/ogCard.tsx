@@ -17,6 +17,29 @@ import { ImageResponse } from "next/og";
 // converted, nothing is redistributed, and the Dockerfile already runs that generator before the site
 // builds.
 
+// SATORI MEASURES TEXT ONE LETTER AT A TIME (no kerning pairs) AND DRAWS IT WITH THEM. Geist kerns "hosted" 78 units
+// tighter than the sum of its letters, so the word is drawn narrower than it was measured, the next word starts where
+// the wide measure ended, and the gap after it grows. That showed as uneven, too-wide gaps in descriptions. It is not
+// the nonbreaking space (the glyph is 250 units, same as the space). Dropping the GPOS table from the font bytes the
+// card loads makes the measure and the draw agree. Kerning is a hair at 21px; even gaps are not.
+// A woff keeps its tables at absolute offsets, so removing a directory entry leaves the others valid.
+function withoutKerning(woff: Buffer): Buffer {
+  const count = woff.readUInt16BE(12);
+  const entries: Buffer[] = [];
+  let removedSize = 0;
+  for (let i = 0; i < count; i++) {
+    const entry = woff.subarray(44 + i * 20, 64 + i * 20);
+    if (entry.toString("latin1", 0, 4) === "GPOS") removedSize = Math.ceil(entry.readUInt32BE(12) / 4) * 4;
+    else entries.push(entry);
+  }
+  const out = Buffer.from(woff);
+  out.writeUInt16BE(entries.length, 12);
+  out.writeUInt32BE(woff.readUInt32BE(16) - removedSize - (count - entries.length) * 16, 16);
+  entries.forEach((entry, i) => entry.copy(out, 44 + i * 20));
+  out.fill(0, 44 + entries.length * 20, 44 + count * 20);
+  return out;
+}
+
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
 const FONT_DIR = path.join(process.cwd(), "public/assets/fonts");
@@ -30,8 +53,8 @@ export async function loadOgFonts() {
     fs.readFile(path.join(FONT_DIR, "IBMPlexMono-400.woff")),
   ]);
   fontsCache = [
-    { name: "Geist", data: semibold, weight: 600, style: "normal" },
-    { name: "Geist", data: regular, weight: 400, style: "normal" },
+    { name: "Geist", data: withoutKerning(semibold), weight: 600, style: "normal" },
+    { name: "Geist", data: withoutKerning(regular), weight: 400, style: "normal" },
     { name: "IBM Plex Mono", data: mono, weight: 400, style: "normal" },
   ];
   return fontsCache;

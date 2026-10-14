@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "for agents",
-    title: "AI agent video generation: HTML to video with vawe",
+    title: "Let an agent write the video.",
     description:
-      "An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges it.",
+      "A vawe film is one HTML page: CSS, Web Animations, SVG, canvas or three.js. An agent already writes all of that, so it learns no private format.",
     path: "/ai-agents",
   });
 }
