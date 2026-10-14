@@ -12,3 +12,66 @@
 .dark {
   --color-fd-primary: #6ab8ff;
 }
+
+/* Typography rules (site/DESIGN.md "Typography rules"): the same values as the site's tokens. */
+:root {
+  --measure: 46ch;
+  --fw-head: 600;
+}
+
+article > p {
+  line-height: 1.45;
+}
+
+body {
+  font-kerning: normal;
+  font-feature-settings: 'kern', 'liga', 'calt';
+  hanging-punctuation: first last;
+}
+
+.prose {
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.prose :is(p, ul, ol, blockquote),
+article > p {
+  max-width: var(--measure);
+}
+
+.prose :is(p, li, dd, blockquote),
+article > p {
+  text-wrap: pretty;
+}
+
+.prose :is(h1, h2, h3, h4) {
+  font-weight: var(--fw-head);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.prose h1 {
+  letter-spacing: -0.045em;
+}
+
+.prose h2 {
+  letter-spacing: -0.03em;
+}
+
+.prose :is(h3, h4) {
+  letter-spacing: -0.02em;
+}
+
+.prose strong {
+  font-weight: var(--fw-head);
+}
+
+.prose table {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .prose {
+    font-size: 15px;
+  }
+}
