@@ -53,12 +53,12 @@ function FooterNav({ active }: { active?: string }) {
 
 /* ONE FOOTER ON EVERY PAGE: a studio panel holding the generated route groups, and a meta line.
  * `bookend` adds the closing call to action above it, on the pages that end a journey. */
-export function Footer({ note = "one page, one film", bookend = false, active }: { note?: string; bookend?: boolean; active?: string }) {
+export function Footer({ note, bookend = false, active }: { note?: string; bookend?: boolean; active?: string }) {
   return (
     <footer className="wrap foot">
       {bookend && (
         <div className="panel foot-cta-panel">
-          <p className="foot-cta">Write a page. Render it. Ship it.</p>
+          <p className="foot-cta">Write the page.</p>
           <div className="foot-act">
             <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
             <a className="btn btn-ghost" href="/moves">See the moves</a>
@@ -69,7 +69,7 @@ export function Footer({ note = "one page, one film", bookend = false, active }:
         <FooterNav active={active} />
         <div className="foot-meta">
           <span>© 2026 vawe · open source, <a href={`${REPO_URL}/blob/main/LICENSE`}>Apache 2.0</a></span>
-          <span className="mono">{note}</span>
+          {note ? <span className="mono">{note}</span> : null}
         </div>
       </div>
     </footer>

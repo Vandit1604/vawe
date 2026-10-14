@@ -31,7 +31,7 @@ const CHAPTERS = [
     id: "c2",
     tag: "02 / The page · CINDRE, one page.html",
     title: "So write a page.",
-    text: "HTML, CSS, Web Animations, SVG, canvas or three.js. You already know it. Nothing private to learn.",
+    text: "HTML, CSS, Web Animations, SVG, canvas or three.js. Nothing private to learn.",
     film: example("cindre"),
   },
   {

@@ -14,7 +14,7 @@ import "./features.css";
 export const metadata = pageMetadata({
   title: "vawe features: deterministic HTML to video rendering",
   description:
-    "Every vawe feature in one tour: a virtual clock that refuses wall time, motion blur that follows the motion, every aspect from one page, a camera lens, a moves library, and a loop that judges a film in a fresh session.",
+    "vawe features: a virtual clock that refuses wall time, motion blur that follows the motion, every aspect from one page, a camera lens, a moves library, and a loop that judges a film in a fresh session.",
   path: "/features",
 });
 
@@ -56,12 +56,12 @@ function Feature({ title, children, proof }: { title: string; children: ReactNod
   );
 }
 
-function Section({ id, title, lead, children }: { id: string; title: string; lead: string; children: ReactNode }) {
+function Section({ id, title, lead, children }: { id: string; title: string; lead?: string; children: ReactNode }) {
   return (
     <section className="isec ft-sec" id={id} aria-labelledby={`${id}-h`}>
       <div className="ft-head">
         <h2 id={`${id}-h`}>{title}</h2>
-        <p>{lead}</p>
+        {lead ? <p>{lead}</p> : null}
       </div>
       <ul className="ft-list">{children}</ul>
     </section>
@@ -155,9 +155,8 @@ export default function Features() {
             <PageTop group="Product" current="Features" />
             <h1>What the engine decides.</h1>
             <p>
-              The whole tour: what one HTML page can use, why it renders the same frames every time, how it looks and sounds,
+              What one HTML page can use, why it renders the same frames every time, how it looks and sounds,
               the {MOVES.length} moves and {EASES.length} curves you copy, and the loop that judges a film before it ships.
-              You do not pass most of this as settings.
             </p>
             <Toc items={[
               { href: "#page", label: "The page" },
@@ -169,7 +168,7 @@ export default function Features() {
             ]} />
           </section>
 
-          <Section id="page" title="The page is the film." lead="You write what you already know. If something you would naturally write fails, that is a framework bug.">
+          <Section id="page" title="The page is the film." lead="If something you would naturally write fails, that is a framework bug.">
             <Feature title="One HTML page in, one film out" proof={<Code label="page.html">{PAGE}</Code>}>
               A film is <code>films/&lt;name&gt;/page.html</code> plus its own assets folder. CSS, Web Animations, SVG, canvas and three.js
               all work. There is no private format.
@@ -202,7 +201,7 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="frames" title="Same frames, every render." lead="The clock is replaced before the page runs. Nothing depends on the wall.">
+          <Section id="frames" title="Same frames, every render." lead="The clock is replaced before the page runs.">
             <Feature
               title="The clock refuses wall time"
               proof={
@@ -229,7 +228,7 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="look" title="Light, blur and sound." lead="Decided by the renderer and the lens, not set per element.">
+          <Section id="look" title="Light, blur and sound." lead="Set by the renderer and the lens, not per element.">
             <Feature
               title="Blur follows the motion"
               proof={
@@ -268,14 +267,14 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="library" title="Moves and easing to copy." lead="Proven motion, as markdown an agent can read and a clip you can watch.">
+          <Section id="library" title="Moves and easing to copy." lead="Each move is markdown an agent reads and a clip you watch.">
             <Feature title={`${MOVES.length} moves in ${GROUPS.length} groups`} proof={<MoveClips names={["caret-typing", "bracket-callout", "iris-wipe", "camera-moves"]} />}>
               Each move is a clip and one markdown file: when to use it, the snippet, the notes and the sound cue.{" "}
               <a href="/moves">Browse the moves</a>.
             </Feature>
             <Feature title={`${EASES.length} easing curves as CSS`} proof={<Code label="/easing/land">{EASE}</Code>}>
-              Each curve has a live demo and code to copy: the exact <code>linear()</code> string, the nearest <code>cubic-bezier()</code>{" "}
-              and the Web Animations line. <a href="/easing">Browse the curves</a>.
+              Search the curves, watch one run, and copy its exact <code>linear()</code> string, nearest <code>cubic-bezier()</code>{" "}
+              or Web Animations line. <a href="/easing">Browse the curves</a>.
             </Feature>
             <Feature title="15 recipes chain the moves" proof={<Stat n="15" label="film shapes, from a 3 s spectacle to a 22 s demo" />}>
               A recipe orders moves into one film type: a brand sting, a launch, a feature tour, a proof film.{" "}
@@ -283,7 +282,7 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="loop" title="A loop, not a render button." lead="Correct is easy. Worth watching is the hard half, so a film goes through checks before it ships.">
+          <Section id="loop" title="The loop." lead="A film goes through checks before it ships.">
             <Feature title="One command per stage" proof={<Code label="start">{NEW}</Code>}>
               <code>new</code>, <code>dev</code>, <code>strip</code>, <code>critique</code>, <code>ship</code>. Each step names the next.
             </Feature>
@@ -303,7 +302,7 @@ export default function Features() {
             </Feature>
           </Section>
 
-          <Section id="agents" title="Built for coding agents." lead="The loop assumes an agent is at the keyboard.">
+          <Section id="agents" title="Built for coding agents.">
             <Feature title="Skills that carry the contract" proof={<Code label="skills/">{SKILLS}</Code>}>
               Five skills cover the brief, the page, the critique, the cuts and a reference match. An agent writes a page from them without
               reading the engine.
@@ -326,8 +325,8 @@ export default function Features() {
           </section>
 
           <Next
-            title="Write a page. Render it. Ship it."
-            lead="Start from a move, copy its snippet, and run the loop."
+            title="Start from a move"
+            lead="Copy its snippet, then run the loop."
             primary={{ href: REPO_URL, label: "Get started on GitHub" }}
             secondary={{ href: "/moves", label: "See the moves" }}
             related={[
