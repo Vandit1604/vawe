@@ -83,7 +83,7 @@ export default function Roadmap() {
             ))}
           </div>
 
-          <section className="iend" style={{ marginTop: 12 }}>
+          <section className="iend">
             <h2 className="h2">Follow the work.</h2>
             <p className="lead">
               vawe is open source under Apache-2.0, runs on your machine, needs no account and has no per-render fee. Open an issue if a problem here costs you a film.

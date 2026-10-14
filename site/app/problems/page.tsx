@@ -123,7 +123,7 @@ export default function Problems() {
             </ol>
           </section>
 
-          <section className="iend" style={{ marginTop: 48 }}>
+          <section className="iend iend-gap">
             <h2 className="h2">See the engine at work.</h2>
             <p className="lead">
               Every move in the library uses the eases from problem 4. The determinism page shows the
