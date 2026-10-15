@@ -1,7 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
-  "projectTitle": "Vawe",
-  "description": "One HTML page becomes one frame-perfect video. A deterministic motion-graphics framework for people and coding agents: write the page in HTML, CSS, Web Animations, SVG and canvas, render an mp4.",
+  "projectTitle": "Vawe: HTML to video framework",
+  "description": "Vawe is an open-source HTML to video framework for programmatic video and motion graphics as code. A film is one HTML page written in CSS, Web Animations, SVG, canvas or three.js. The renderer seeks the page frame by frame in headless Chrome, mixes the audio tags offline and encodes a deterministic mp4 with ffmpeg. It ships agent skills for Claude Code and other coding agents. An alternative to Remotion, HyperFrames and Motion Canvas.",
   "branch": "main",
   "folders": [
     "guides",
@@ -20,10 +20,12 @@
     "research"
   ],
   "rules": [
+    "To make a video from HTML or code: run bin/vawe new <name>, edit films/<name>/page.html, run bin/vawe dev films/<name>/page.html for a draft mp4.",
     "A film is films/<name>/page.html. Time is the seek, never the clock: write CSS keyframes, element.animate() or window.seek(t) as a pure function of t.",
     "A frame may never depend on wall-clock time, timers, state between frames or an unseeded random. This is the load-bearing invariant of the framework.",
     "Read AGENTS.md for the page contract before writing a page.",
     "Never write an em dash (U+2014) in on-screen text.",
-    "Run bin/vawe dev <page> for a draft, then bin/vawe critique <page> in a session that did not write the page."
+    "Run bin/vawe dev <page> for a draft, then bin/vawe critique <page> in a session that did not write the page.",
+    "Start with the skill html-to-video in skills/: it routes to vawe-brief, vawe-page, vawe-critique, vawe-reference and vawe-transitions."
   ]
 }
