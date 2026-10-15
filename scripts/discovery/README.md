@@ -21,7 +21,7 @@ A `model` channel (a fresh `claude -p` with no tools) exists but is off unless n
 ## Run it weekly
 
 ```bash
-node scripts/discovery/run.mjs                      # all queries, all default channels (about 12 minutes)
+node scripts/discovery/run.mjs                      # all queries, all default channels (about 25 minutes, GitHub is paced at 7 s per query)
 node scripts/discovery/run.mjs --channels github,context7,skills --limit 10    # a quick check
 node scripts/discovery/run.mjs --prev scripts/discovery/runs/2026-10-15.json   # report the change against an earlier run
 ```

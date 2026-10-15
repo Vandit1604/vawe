@@ -22,6 +22,7 @@ function parseArgs(argv) {
   return o;
 }
 
+const plain = (s) => s.replace(/\u2014/g, '-');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function runChannel(name, queries) {
@@ -36,7 +37,7 @@ async function runChannel(name, queries) {
     try {
       const results = await fn(q);
       blocks = 0;
-      out[q] = { results: results.map((r) => ({ ...r, ours: isOurs(r) })), error: null };
+      out[q] = { results: results.map((r) => ({ ...r, title: plain(r.title), note: plain(r.note), ours: isOurs(r) })), error: null };
     } catch (e) {
       if (e instanceof Blocked) blocks += 1;
       out[q] = { results: [], error: String(e.message || e) };
