@@ -142,7 +142,7 @@ harness/cli/       the verb table and argument parser behind it
 harness/media/     render-page.mjs · page-audio.mjs · see.mjs (the views) · ref-spec.mjs · review.mjs
 quality/gates/     page-check.mjs · anim-traps.mjs · judge.mjs · doc-refs.mjs
 prompts/           one template per film type, and prompts/moves/ (moves to copy, with clips)
-skills/            vawe-brief · vawe-page · vawe-critique · vawe-reference (loaded on demand)
+skills/            html-to-video (start here) · vawe-brief · vawe-page · vawe-critique · vawe-reference · vawe-transitions (loaded on demand)
 taste/             rules/ (one rule per file) · craft/ · build/ (generated) · README.md (the index)
 guides/            engine and process guides (ROUTING.md picks a film type) · judge.md · research/ (timing sources)
 films/             <name>/page.html per film

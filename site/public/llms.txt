@@ -1,5 +1,5 @@
 # Vawe
-> Motion graphics without a motion designer. Vawe renders video from a text file, so you or an AI agent can write a film the way you write anything else, and re-render it the day the numbers change.
+> Open-source HTML to video framework for programmatic video and motion graphics as code. Vawe renders a deterministic mp4 from one HTML page, so you or an AI coding agent can write a film the way you write anything else, and re-render it the day the numbers change. A free alternative to Remotion, HyperFrames and Motion Canvas.
 
 A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The renderer seeks it frame by frame under a virtual clock and encodes an mp4. Source and the page contract: https://github.com/Vandit1604/vawe (AGENTS.md).
 
@@ -32,6 +32,8 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [Prompting](https://vawe.dev/docs/prompting): You do not write the page alone. You answer five questions and an agent writes the brief, the stills and the page.
 - [Quality gates](https://vawe.dev/docs/quality-gates): The checks you can run by name, and the ones that advise.
 - [Quickstart](https://vawe.dev/docs/quickstart): Install, write the starter page, and render a draft.
+- [Make a video from code](https://vawe.dev/docs/video-from-code): Three ways to render a video from code, and the commands to turn one HTML page into an mp4.
+- [HTML to MP4 with Claude Code](https://vawe.dev/docs/html-to-mp4-with-claude-code): Install vawe, ask Claude Code for a film, and render one HTML page to an MP4 in four commands.
 - [Reading your own film](https://vawe.dev/docs/reading-your-film): Checks read structure. They cannot see whether a film is good. These tools put the frames in front of you.
 - [Recipes](https://vawe.dev/docs/recipes): Chains of built moves for common short films, with the beat table and the traps at each seam.
 - [The page](https://vawe.dev/docs/the-page): The page contract. One HTML file, a duration, a seek, relative assets.
