@@ -23,14 +23,14 @@ A `model` channel (a fresh `claude -p` with no tools) exists but is off unless n
 ```bash
 node scripts/discovery/run.mjs                      # all queries, all default channels (about 25 minutes, GitHub is paced at 7 s per query)
 node scripts/discovery/run.mjs --channels github,context7,skills --limit 10    # a quick check
-node scripts/discovery/run.mjs --prev scripts/discovery/runs/2026-10-15.json   # report the change against an earlier run
+node scripts/discovery/run.mjs --prev scripts/discovery/runs/baseline-2026-10-15.json   # report the change against an earlier run
 ```
 
 It writes `scripts/discovery/runs/<date>.json` (every result, with `ours: true` on a vawe hit) and `runs/<date>.md` (vawe's rank per query per channel, then the most frequent winners per channel). A channel that blocks three queries in a row is skipped and its queries show an error. Commit the pair when the run is a baseline you want to compare against.
 
 ## Read the report
 
-- `queries with vawe` is the number to move. The first run on the full set is `runs/baseline-2026-10-15`.
+- `queries with vawe` is the number to move. The first run on the full set is `runs/baseline-2026-10-15.md`.
 - A `-` means vawe is absent from the top 20 (top 10 for Bing).
 - The GitHub channel sends unquoted terms like the web UI. `gh search repos` wraps the query in quotes and matches the exact phrase, so it returns nothing for most multi-word queries: do not use it to compare.
 - `queries.json` is the query list. Keep every query generic. Add a query that a developer or an agent would type, never one that contains `vawe`.
