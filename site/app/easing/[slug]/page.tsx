@@ -163,7 +163,7 @@ export default async function EasePage({ params }: Params) {
 
   return (
     <div className="shell">
-      <Header />
+      <Header active="resources" />
       <main className="wrap" id="content" tabIndex={-1}>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(techArticleSchema(e))} />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema(crumbs))} />

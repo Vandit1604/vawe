@@ -67,7 +67,7 @@ function Card({ e }: { e: Ease }) {
 export default function EasingIndex() {
   return (
     <div className="shell">
-      <Header active="easing" />
+      <Header active="resources" />
       <main className="wrap" id="content" tabIndex={-1}>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(itemListSchema())} />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "Home", url: "/" }, { name: "Easing", url: "/easing" }]))} />

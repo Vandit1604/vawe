@@ -414,7 +414,7 @@ Shaped by ui-skills `jakubkrehel/better-typography` (first pass), then `pbakaus/
 The laws from lawsofux.com (all thirty were read), as house rules for every page. One line each; the
 selectors that carry them are in `components/xp.css`, `components/Xp.tsx` and `moves/moves.css`.
 
-- **Jakob's Law and mental model:** a page looks like the web's pages: a breadcrumb trail (`PageTop`), a header nav of four items, a footer sitemap. No new pattern for a known job.
+- **Jakob's Law and mental model:** a page looks like the web's pages: a breadcrumb trail (`PageTop`), a header nav of five items (Moves, Features, Resources, Blog, Docs; Easing sits under Resources and its pages mark Resources active), a footer sitemap. No new pattern for a known job.
 - **Hick's Law and choice overload:** one primary action per page end (`Next`: one white button, one quiet button, then a ruled list). More than seven equal choices fold or filter (the moves list has search and facets; a long chip list folds behind a `details`).
 - **Miller's Law and chunking:** a group holds seven items or fewer. A paragraph that lists three or more things becomes a numbered list (`.xp-list`); sources fold (`Sources`).
 - **Fitts's Law:** a target is 40 px on desktop and 44 px under 640 (`--hit`). Jump links, breadcrumbs, the list rows of `Next` and the card links meet it. A whole card is one target.
@@ -430,6 +430,10 @@ selectors that carry them are in `components/xp.css`, `components/Xp.tsx` and `m
 - **Aesthetic-usability:** one ground, two faces, hairlines, a big headline. A page that looks finished reads as easier to use.
 - **Postel's Law:** a filter accepts any mix of facets and a search; the URL it writes is one the page reads back.
 - **Parkinson's Law, paradox of the active user, cognitive bias, Flow:** no page asks for a manual to be read first. The action is on the page that names it.
+
+## Resources
+
+`/resources` (`app/resources/`, `resources.css`, classes `rs-`) is the index of everything the site publishes, on the `.xp` layer: breadcrumb, h1, one-line lede, jump links, then six hairline groups (Tools, For agents, Agent skills, Learn, Compare, Project). A row is one link target of 56 px (44 under 640): a thumbnail where one exists (an ease curve, a move poster), a title (mono for a file path), one line of fact, an arrow (a north-east arrow for GitHub). Counts come from `lib/easing` and `lib/moves`, the `/vs/*` rows from `vs/data.ts`. Provenance: the `.xp` layer and Laws of UX rules above; nothing fetched, nothing rejected.
 
 ## Easing visuals
 

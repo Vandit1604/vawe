@@ -29,6 +29,13 @@
       "label": "Easing"
     },
     {
+      "path": "/resources",
+      "priority": 0.8,
+      "changeFrequency": "monthly",
+      "group": "topic",
+      "label": "Resources"
+    },
+    {
       "path": "/determinism",
       "priority": 0.7,
       "changeFrequency": "monthly",
