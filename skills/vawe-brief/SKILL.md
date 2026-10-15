@@ -1,6 +1,6 @@
 ---
 name: vawe-brief
-description: "Turn a film request into films/<name>/brief.md: ask the person for the details that make a good film (subject, message, what to show, look), then write the brief in the measured anatomy and name the first draft command. Load when a person asks for a film and no brief.md exists yet."
+description: "Plan an HTML to video film (motion graphics as code). Turn a film request into films/<name>/brief.md: ask the person for the details that make a good film (subject, message, what to show, look), then write the brief in the measured anatomy and name the first draft command. Load when a person asks for a film and no brief.md exists yet."
 effort: medium
 ---
 

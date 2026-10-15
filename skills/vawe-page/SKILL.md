@@ -1,6 +1,6 @@
 ---
 name: vawe-page
-description: "Author a vawe page film: one films/<name>/page.html the renderer seeks frame by frame. Load before writing or editing any page.html: audio tags, the spring helpers, and the page-code mistakes a first draft makes. The page contract itself is in AGENTS.md."
+description: "Write an HTML page that renders to an mp4 video, programmatic video and motion graphics as code with CSS, SVG, canvas or three.js. Author a vawe page film: one films/<name>/page.html the renderer seeks frame by frame. Load before writing or editing any page.html: audio tags, the spring helpers, and the page-code mistakes a first draft makes. The page contract itself is in AGENTS.md."
 effort: medium
 ---
 

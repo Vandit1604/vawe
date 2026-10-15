@@ -1,6 +1,6 @@
 ---
 name: vawe-critique
-description: "Look at a rendered page film and say what is wrong, as a fresh session that did not write it: the phone, strip and loop views, bin/vawe critique, page-check, the default-reject judge that names shot, frame and fix, the top five, and re-rendering only the affected seconds. Load after any draft render, before any fix."
+description: "Review and fix a video made from an HTML page. Look at a rendered page film and say what is wrong, as a fresh session that did not write it: the phone, strip and loop views, bin/vawe critique, page-check, the default-reject judge that names shot, frame and fix, the top five, and re-rendering only the affected seconds. Load after any draft render, before any fix."
 effort: high
 ---
 

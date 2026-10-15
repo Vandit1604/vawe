@@ -1,6 +1,6 @@
 ---
 name: vawe-transitions
-description: "Plan the handoff at every cut of a vawe film so the transitions are continuous, varied and chosen, not defaulted: name what carries over, run the idea method (guides/IDEATE.md) with the twelve families as devices, keep a ledger, and set up the execution. Load at stage 5, when you fill the Board's handoff column."
+description: "Plan scene transitions for a motion graphics video made from HTML. Plan the handoff at every cut of a vawe film so the transitions are continuous, varied and chosen, not defaulted: name what carries over, run the idea method (guides/IDEATE.md) with the twelve families as devices, keep a ledger, and set up the execution. Load at stage 5, when you fill the Board's handoff column."
 effort: medium
 ---
 

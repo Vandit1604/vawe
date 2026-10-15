@@ -1,6 +1,6 @@
 ---
 name: vawe-reference
-description: "Match a reference film with a vawe page: bin/vawe spec writes SPEC.md frame by frame, every line is marked KEEP or CHANGE, the page is rebuilt light first, then bin/vawe critique --ref loops until the match passes. Load when a reference mp4 must be matched, not merely echoed."
+description: "Recreate a reference video as an HTML page, a video-from-code workflow. Match a reference film with a vawe page: bin/vawe spec writes SPEC.md frame by frame, every line is marked KEEP or CHANGE, the page is rebuilt light first, then bin/vawe critique --ref loops until the match passes. Load when a reference mp4 must be matched, not merely echoed."
 effort: high
 ---
 
