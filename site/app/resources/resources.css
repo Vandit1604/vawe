@@ -23,6 +23,8 @@
 .rs-card{display:block;padding:var(--sp-2);border-radius:var(--r);box-shadow:var(--ring);color:var(--ink);
   transition:background-color var(--dur-exit) var(--ease-in),box-shadow var(--dur-exit) var(--ease-in)}
 .rs-art{display:block;aspect-ratio:16/10;border-radius:var(--r-in);overflow:hidden}
+.rs-art,.rs-aside{position:relative}
+.rs-art::after,.rs-aside::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px oklch(1 0 0 / .1);pointer-events:none}
 .rs-card-body{padding:var(--sp-3) var(--sp-2) var(--sp-2)}
 
 .rs-ico{display:grid;place-items:center;width:32px;height:32px;border-radius:var(--r-ctl);background:var(--bg);box-shadow:var(--ring);color:var(--muted);
