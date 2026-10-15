@@ -1,12 +1,16 @@
-import type { ReactNode } from "react";
+import { readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { Header, REPO_URL } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { EaseCurve } from "../components/EaseCurve";
+import { GithubMark, Icon, type IconName } from "../components/Icon";
+import { MatTile, type MatDetail, type MatTone } from "../components/MatTile";
 import { pageMetadata } from "../components/seo";
 import { PageTop, Toc } from "../components/Xp";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { EASES } from "../../lib/easing";
-import { MOVES, clip, moveByName } from "../../lib/moves";
+import { MOVES } from "../../lib/moves";
+import { allPosts } from "../../lib/blog";
+import { agentGuide, llmsFull } from "../../lib/agent-guide";
 import { RIVALS } from "../vs/data";
 import "../components/study.css";
 import "../components/intent.css";
@@ -18,22 +22,32 @@ export const metadata = pageMetadata({
   path: "/resources",
 });
 
-type Item = { href: string; title: string; line: string; code?: boolean; thumb?: ReactNode; external?: boolean };
-type Group = { id: string; title: string; lead?: string; items: Item[] };
+type Tile = { word: string; tone: MatTone; detail: MatDetail; shift?: -1 | 0 | 1; flip?: boolean };
+type Item = { href: string; title: string; line: string; icon: IconName | "github"; meta?: string; code?: boolean; external?: boolean; tile?: Tile };
+type Group = { id: string; title: string; lead?: string; tile?: Tile; items: Item[] };
+
+const NBSP = "\u00a0";
+const kb = (bytes: number) => `${(bytes / 1000).toFixed(1)}${NBSP}kB`;
+const publicSize = (file: string) => kb(statSync(join(process.cwd(), "public", file)).size);
+
+function skillLines(name: string) {
+  try {
+    const text = readFileSync(join(process.cwd(), "..", "skills", name, "SKILL.md"), "utf8");
+    return `${text.trimEnd().split("\n").length}${NBSP}lines`;
+  } catch {
+    return undefined;
+  }
+}
 
 const skill = (name: string, line: string): Item => ({
   href: `${REPO_URL}/blob/main/skills/${name}/SKILL.md`,
   title: name,
   line,
+  icon: "skill",
+  meta: skillLines(name),
   code: true,
   external: true,
 });
-
-function moveThumb(name: string) {
-  const m = moveByName(name);
-  if (!m) return undefined;
-  return <img src={clip(m).poster} alt="" width={640} height={360} loading="lazy" decoding="async" />;
-}
 
 const GROUPS: Group[] = [
   {
@@ -44,13 +58,17 @@ const GROUPS: Group[] = [
         href: "/easing",
         title: "Easing curves",
         line: `${EASES.length} easing functions: preview, compare, copy a CSS cubic-bezier or linear().`,
-        thumb: <EaseCurve name="settle" label="An easing curve that settles" />,
+        icon: "curve",
+        meta: `${EASES.length}${NBSP}curves`,
+        tile: { word: "Easing", tone: "mat", detail: "easing" },
       },
       {
         href: "/moves",
         title: "The moves library",
         line: `${MOVES.length} motion moves. Each has a short clip, the CSS and one markdown file to copy.`,
-        thumb: moveThumb("scale-punch"),
+        icon: "play",
+        meta: `${MOVES.length}${NBSP}moves`,
+        tile: { word: "Moves", tone: "ochre", detail: "moves", shift: 1, flip: true },
       },
     ],
   },
@@ -58,18 +76,20 @@ const GROUPS: Group[] = [
     id: "agents",
     title: "For agents",
     lead: "Plain files an AI agent can fetch without a browser.",
+    tile: { word: "Agents", tone: "graphite", detail: "agents", shift: -1 },
     items: [
-      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and move.", code: true },
-      { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the moves in one text file.", code: true },
-      { href: "/ai-agents.md", title: "/ai-agents.md", line: "How an agent writes and renders a film, as Markdown.", code: true },
-      { href: "/moves/index.json", title: "/moves/index.json", line: "Every move with its group, look, jobs, duration and file, to filter by script.", code: true },
-      { href: "/ai-agents", title: "How an agent installs vawe", line: "Clone the repo, run bin/vawe doctor, then write one HTML page." },
+      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and move.", icon: "file", meta: publicSize("llms.txt"), code: true },
+      { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the moves in one text file.", icon: "file", meta: kb(Buffer.byteLength(llmsFull())), code: true },
+      { href: "/ai-agents.md", title: "/ai-agents.md", line: "How an agent writes and renders a film, as Markdown.", icon: "markdown", meta: kb(Buffer.byteLength(agentGuide())), code: true },
+      { href: "/moves/index.json", title: "/moves/index.json", line: "Every move with its group, look, jobs, duration and file, to filter by script.", icon: "json", meta: publicSize("moves/index.json"), code: true },
+      { href: "/ai-agents", title: "How an agent installs vawe", line: "Clone the repo, run bin/vawe doctor, then write one HTML page.", icon: "terminal", meta: "guide" },
     ],
   },
   {
     id: "skills",
     title: "Agent skills",
     lead: "Five SKILL.md files in the skills/ folder of the GitHub repo.",
+    tile: { word: "Skills", tone: "accent", detail: "skills", flip: true },
     items: [
       skill("vawe-brief", "Ask for the missing facts, then write the film’s brief."),
       skill("vawe-page", "Write page.html: audio tags, springs and the usual first-draft mistakes."),
@@ -81,34 +101,79 @@ const GROUPS: Group[] = [
   {
     id: "learn",
     title: "Learn",
+    tile: { word: "Learn", tone: "cobalt", detail: "learn", shift: 1 },
     items: [
-      { href: "/docs", title: "Docs", line: "Quickstart, the page contract, the CLI and troubleshooting." },
-      { href: "/docs/recipes", title: "Recipes", line: "Chains of moves for common short films, with the traps at each seam." },
-      { href: "/determinism", title: "Determinism", line: "Why the same page gives the same frames, and how a test proves it." },
-      { href: "/when-determinism-matters", title: "When determinism matters", line: "When byte-identical output decides the engine, and when it does not." },
-      { href: "/launch-video", title: "Launch videos", line: "A product launch film built from captured UI, one message per beat." },
-      { href: "/blog", title: "Blog", line: "Notes on what broke, what we measured and what changed." },
+      { href: "/docs", title: "Docs", line: "Quickstart, the page contract, the CLI and troubleshooting.", icon: "book", meta: "docs" },
+      { href: "/docs/recipes", title: "Recipes", line: "Chains of moves for common short films, with the traps at each seam.", icon: "list", meta: "recipes" },
+      { href: "/determinism", title: "Determinism", line: "Why the same page gives the same frames, and how a test proves it.", icon: "book", meta: "essay" },
+      { href: "/when-determinism-matters", title: "When determinism matters", line: "When byte-identical output decides the engine, and when it does not.", icon: "book", meta: "essay" },
+      { href: "/launch-video", title: "Launch videos", line: "A product launch film built from captured UI, one message per beat.", icon: "play", meta: "guide" },
+      { href: "/blog", title: "Blog", line: "Notes on what broke, what we measured and what changed.", icon: "pen", meta: `${allPosts().length}${NBSP}posts` },
     ],
   },
   {
     id: "compare",
     title: "Compare",
+    tile: { word: "Compare", tone: "oxblood", detail: "compare", shift: -1, flip: true },
     items: [
-      { href: "/remotion-alternatives", title: "Remotion alternatives", line: "A hosted JSON API or a self-hosted engine, and what each license requires." },
-      { href: "/hyperframes-alternatives", title: "HyperFrames alternatives", line: "The closest peer: both compose from HTML and make time deterministic differently." },
-      ...RIVALS.map((r) => ({ href: `/vs/${r.slug}`, title: `vawe vs ${r.name}`, line: `${r.metaTitle.split(": ")[1].replace(/^./, (c) => c.toUpperCase())}.` })),
+      { href: "/remotion-alternatives", title: "Remotion alternatives", line: "A hosted JSON API or a self-hosted engine, and what each license requires.", icon: "compare", meta: "alternatives" },
+      { href: "/hyperframes-alternatives", title: "HyperFrames alternatives", line: "The closest peer: both compose from HTML and make time deterministic differently.", icon: "compare", meta: "alternatives" },
+      ...RIVALS.map((r): Item => ({ href: `/vs/${r.slug}`, title: `vawe vs ${r.name}`, line: `${r.metaTitle.split(": ")[1].replace(/^./, (c) => c.toUpperCase())}.`, icon: "compare", meta: "comparison" })),
     ],
   },
   {
     id: "project",
     title: "Project",
+    tile: { word: "Project", tone: "mat", detail: "project", shift: 1, flip: true },
     items: [
-      { href: "/problems", title: "Hard problems", line: "Thirteen problems in agent-made video: seven solved with numbers, six open." },
-      { href: "/roadmap", title: "Roadmap", line: "What is in work now, next and later." },
-      { href: REPO_URL, title: "GitHub", line: "The source, Apache 2.0, and the issue tracker.", external: true },
+      { href: "/problems", title: "Hard problems", line: "Thirteen problems in agent-made video: seven solved with numbers, six open.", icon: "alert", meta: "problems" },
+      { href: "/roadmap", title: "Roadmap", line: "What is in work now, next and later.", icon: "map", meta: "now, next, later" },
+      { href: REPO_URL, title: "GitHub", line: "The source, Apache 2.0, and the issue tracker.", icon: "github", meta: "Apache-2.0", external: true },
     ],
   },
 ];
+
+function RowIcon({ name }: { name: Item["icon"] }) {
+  return <span className="rs-ico">{name === "github" ? <GithubMark size={16} /> : <Icon name={name} size={16} />}</span>;
+}
+
+function Row({ i }: { i: Item }) {
+  return (
+    <a className="rs-row" href={i.href}>
+      <RowIcon name={i.icon} />
+      <span className="rs-body">
+        <span className={i.code ? "rs-title is-code" : "rs-title"}>{i.title}</span>
+        <span className="rs-line">{i.line}</span>
+      </span>
+      {i.meta ? <span className="rs-meta">{i.meta}</span> : null}
+      <span className="arw" aria-hidden="true">
+        <Icon name={i.external ? "external" : "arrow"} size={16} />
+      </span>
+    </a>
+  );
+}
+
+function ToolCard({ i }: { i: Item }) {
+  const t = i.tile!;
+  return (
+    <a className="rs-card mat-trigger" href={i.href}>
+      <span className="rs-art">
+        <MatTile {...t} />
+      </span>
+      <span className="rs-card-body">
+        <RowIcon name={i.icon} />
+        <span className="rs-body">
+          <span className="rs-title">{i.title}</span>
+          <span className="rs-line">{i.line}</span>
+        </span>
+        <span className="rs-meta">{i.meta}</span>
+        <span className="arw" aria-hidden="true">
+          <Icon name="arrow" size={16} />
+        </span>
+      </span>
+    </a>
+  );
+}
 
 const COUNT = GROUPS.reduce((n, g) => n + g.items.length, 0);
 
@@ -130,23 +195,33 @@ export default function Resources() {
           </section>
 
           {GROUPS.map((g) => (
-            <section className="rs-group" id={g.id} key={g.id}>
-              <h2>{g.title}</h2>
-              {g.lead ? <p>{g.lead}</p> : null}
-              <ul className="rs-list">
-                {g.items.map((i) => (
-                  <li key={i.href}>
-                    <a className="rs-row" href={i.href}>
-                      {i.thumb ? <span className="rs-thumb">{i.thumb}</span> : null}
-                      <span className="rs-body">
-                        <span className={i.code ? "rs-title is-code" : "rs-title"}>{i.title}</span>
-                        <span className="rs-line">{i.line}</span>
-                      </span>
-                      <span className="arw" aria-hidden="true">{i.external ? "↗" : "→"}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
+            <section className={g.tile ? "rs-group has-tile" : "rs-group"} id={g.id} key={g.id}>
+              {g.tile ? (
+                <div className="rs-aside mat-trigger">
+                  <MatTile {...g.tile} />
+                </div>
+              ) : null}
+              <div className="rs-main">
+                <h2>{g.title}</h2>
+                {g.lead ? <p>{g.lead}</p> : null}
+                {g.items[0].tile ? (
+                  <ul className="rs-cards">
+                    {g.items.map((i) => (
+                      <li key={i.href}>
+                        <ToolCard i={i} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul className="rs-list">
+                    {g.items.map((i) => (
+                      <li key={i.href}>
+                        <Row i={i} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </section>
           ))}
         </main>
