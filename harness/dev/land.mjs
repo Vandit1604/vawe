@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync, spawn } from 'node:child_process';
-import { conflictedFiles, hasTrackedEdits, bigBlobs, megabytes, e2eLine, e2eLineFromReport, keepAliveSsh, BIG_FILE_BYTES } from '../lib/land.mjs';
+import { conflictedFiles, hasTrackedEdits, bigBlobs, megabytes, e2eLine, e2eLineFromReport, keepAliveSsh, rebaseDecision, pushErrorText, BIG_FILE_BYTES } from '../lib/land.mjs';
 
 const ROOT = process.cwd();
 const TEST_DIRS = ['tests/lib', 'tests/hooks'];
@@ -22,10 +22,15 @@ function git(args, { input, allowFail = false } = {}) {
 const testFiles = (dir) => fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })
   .flatMap((e) => (e.isDirectory() ? testFiles(path.join(dir, e.name)) : e.name.endsWith('.test.mjs') ? [path.join(dir, e.name)] : []));
 
+const isAncestor = (a, b) => git(['merge-base', '--is-ancestor', a, b], { allowFail: true }).status === 0;
+
 function rebase() {
+  git(['fetch', 'origin', 'main']);
+  const decision = rebaseDecision({ headInMain: isAncestor('HEAD', 'origin/main'), containsMain: isAncestor('origin/main', 'HEAD') });
+  if (decision === 'merged') throw new LandError('rebase', 'nothing to land: every commit of this branch is already in origin/main');
+  if (decision === 'skip') return console.log('land: the branch already contains origin/main, no rebase needed');
   const edits = git(['status', '--porcelain', '--untracked-files=no']).stdout;
   if (hasTrackedEdits(edits)) throw new LandError('rebase', 'the tree has uncommitted edits to tracked files: commit or stash them, then run bin/vawe land again');
-  git(['fetch', 'origin', 'main']);
   const r = git(['rebase', 'origin/main'], { allowFail: true });
   if (r.status === 0) return;
   const files = conflictedFiles(git(['status', '--porcelain']).stdout);
@@ -49,7 +54,8 @@ function runTests() {
 }
 
 function push() {
-  const env = { ...process.env, GIT_SSH_COMMAND: keepAliveSsh(process.env.GIT_SSH_COMMAND) };
+  const configured = git(['config', 'core.sshCommand'], { allowFail: true }).stdout.trim();
+  const env = { ...process.env, GIT_SSH_COMMAND: keepAliveSsh(process.env.GIT_SSH_COMMAND, configured) };
   return new Promise((resolve) => {
     const child = spawn('git', ['push', 'origin', 'HEAD:main'], { cwd: ROOT, env });
     let out = '';
@@ -73,7 +79,7 @@ async function main() {
   step('scan the range for big files', scanBigFiles);
   console.log(`land: ${step('run the tests', runTests)}`);
   const { code, out } = await step('push to main (the pre-push hook runs e2e)', push);
-  if (code !== 0) throw new LandError('push', `git push failed${e2eLine(out) ? ` after ${e2eLine(out)}` : ''}: ${out.trim().split('\n').pop()}. If main moved, run bin/vawe land again`);
+  if (code !== 0) throw new LandError('push', `git push failed${e2eLine(out) ? ` after ${e2eLine(out)}` : ''}:\n${pushErrorText(out)}\nThe CI status line the hook prints last is not the cause. If main moved, run bin/vawe land again`);
   console.log(e2eLine(out) ?? e2eLineFromReport(readReport(), head) ?? 'e2e: no result line found in the push output or quality/runs/e2e/latest.json');
   const count = git(['rev-list', '--count', `${before}..${head}`]).stdout.trim();
   console.log(`pushed ${before.slice(0, 9)}..${head.slice(0, 9)} (${count} commit${count === '1' ? '' : 's'}) to origin/main`);

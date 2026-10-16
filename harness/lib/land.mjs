@@ -36,5 +36,25 @@ export function e2eLineFromReport(report, sha) {
   return `${report.pass ? '✓' : '✗'} e2e ${report.pass ? 'passed' : 'FAILED'} in ${report.seconds}s`;
 }
 
-/** The ssh command for the push: the user's own, plus a keep-alive so the pre-push e2e does not drop an idle connection. */
-export const keepAliveSsh = (current) => `${current || 'ssh'} -o ServerAliveInterval=20 -o ServerAliveCountMax=60`;
+const KEEP_ALIVE = /ServerAliveInterval/i;
+
+/** The ssh command for the push: the user's own (GIT_SSH_COMMAND, else core.sshCommand), plus a keep-alive unless it already sets one, so the long pre-push does not drop an idle connection. */
+export function keepAliveSsh(current, configured = '') {
+  const base = current || configured || 'ssh';
+  return KEEP_ALIVE.test(base) ? base : `${base} -o ServerAliveInterval=20 -o ServerAliveCountMax=60`;
+}
+
+/** What land does with the branch: 'merged' when origin/main already has every commit, 'skip' when the branch already contains origin/main (a rebase would flatten its merges), else 'rebase'. */
+export function rebaseDecision({ headInMain, containsMain }) {
+  if (headInMain) return 'merged';
+  return containsMain ? 'skip' : 'rebase';
+}
+
+const GIT_ERROR = /^(error:|fatal:|ssh:|client_loop|packet_write|Connection |Broken pipe|kex_exchange|Permission denied|remote:|hint:| ! \[|pre-push blocked)/i;
+
+/** The last four git and ssh error lines of a failed push, else the last three output lines. The final line alone is the CI status the pre-push hook prints last. */
+export function pushErrorText(pushOutput) {
+  const lines = pushOutput.split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean);
+  const errors = lines.filter((l) => GIT_ERROR.test(l));
+  return (errors.length ? errors.slice(-4) : lines.slice(-3)).join('\n');
+}
