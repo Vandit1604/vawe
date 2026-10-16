@@ -169,6 +169,21 @@ function categoryRules() {
   return Object.entries(CATEGORY_DESTINATIONS).map(([id, to]) => permanent(`/arsenal/category/${id}`, to));
 }
 
+// Pages that lived at /moves/<name> before the move was merged or became an ease. The clip and
+// markdown files (/moves/<name>.mp4, .md, .webp) went with them.
+const MOVED_TO_EASING = ["carry", "glide", "land", "launch", "leave", "nudge", "pop", "settle", "swap"];
+const MERGED_MOVES = { "flash-cut": move("exposure-flash"), "push-in": move("camera-moves") };
+const REMOVED_MOVE_RULES = [
+  ...MOVED_TO_EASING.flatMap((name) => [
+    permanent(`/moves/${name}`, `/easing/${name}`),
+    permanent(`/moves/${name}.:ext(.+)`, `/easing/${name}`),
+  ]),
+  ...Object.entries(MERGED_MOVES).flatMap(([name, to]) => [
+    permanent(`/moves/${name}`, to),
+    permanent(`/moves/${name}.:ext(.+)`, to),
+  ]),
+];
+
 export const LEGACY_REDIRECTS = [
   ...effectRules(),
   ...blockRules(),
@@ -185,9 +200,10 @@ export const LEGACY_REDIRECTS = [
   permanent("/docs/the-scene", "/docs/the-page"),
   permanent("/docs/camera", "/docs/motion"),
   permanent("/docs/:slug(layers|blocks|themes|mcp)", "/docs"),
-  permanent("/editor/:path*", "/"),
-  permanent("/playground/:path*", "/"),
-  permanent("/deck", "/"),
-  permanent("/deck.html", "/"),
-  permanent("/vawe-rules.md", "/"),
+  permanent("/editor/:path*", "/docs/quickstart"),
+  permanent("/playground/:path*", MOVES),
+  permanent("/deck", "/docs/motion"),
+  permanent("/deck.html", "/docs/motion"),
+  permanent("/vawe-rules.md", "/docs/prompting"),
+  ...REMOVED_MOVE_RULES,
 ];

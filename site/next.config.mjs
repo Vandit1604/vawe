@@ -57,7 +57,14 @@ const nextConfig = {
   // Later entries win, so the versioned rule comes last.
   async headers() {
     const media = "/moves/:file(.+\\.(?:mp4|webm|webp|md))";
+    const canonicalLink = (path) => ({ key: "Link", value: `<https://vawe.dev${path}>; rel="canonical"` });
     return [
+      // The .md copies are alternate forms of the page; the Link header names the page as canonical.
+      { source: "/moves/:name([a-z0-9-]+).md", headers: [canonicalLink("/moves/:name")] },
+      { source: "/ai-agents.md", headers: [canonicalLink("/ai-agents")] },
+      // Data files for agents: fetchable, not for the index.
+      { source: "/:file(llms\\.txt|llms-full\\.txt)", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
+      { source: "/moves/index.json", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
       { source: media, headers: [{ key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" }] },
       {
         source: media,

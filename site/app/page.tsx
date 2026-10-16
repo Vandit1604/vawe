@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Header, REPO_URL } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -8,6 +9,8 @@ import { faqSchema } from "../lib/schema-content";
 import { FAQ } from "../lib/faq";
 import { MOVES, clip, moveByName } from "../lib/moves";
 import "./landing.css";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 /* THE LANDING PAGE (site/IDENTITY.md, DESIGN.md "Landing"). A full-bleed film, three pinned chapters with
  * one large film each (problem, page, render, result), the page contract, the moves, questions, and the

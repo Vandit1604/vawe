@@ -33,7 +33,6 @@ export const metadata: Metadata = {
       { url: "/assets/favicon-96.png", type: "image/png", sizes: "96x96" },
     ],
   },
-  alternates: { canonical: "/" },
   openGraph: {
     title: TITLE,
     description: BLURB,
