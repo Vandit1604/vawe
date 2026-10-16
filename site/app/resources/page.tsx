@@ -11,6 +11,7 @@ import { EASES } from "../../lib/easing";
 import { MOVES } from "../../lib/moves";
 import { allPosts } from "../../lib/blog";
 import { agentGuide, llmsFull } from "../../lib/agent-guide";
+import { llmsText } from "../../lib/llms";
 import { RIVALS } from "../vs/data";
 import "../components/study.css";
 import "../components/intent.css";
@@ -80,7 +81,7 @@ const GROUPS: Group[] = [
     lead: "Plain files an AI agent can fetch without a browser.",
     tile: { word: "Agents", tone: "graphite", detail: "agents", shift: -1 },
     items: [
-      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and move.", icon: "file", meta: publicSize("llms.txt"), code: true },
+      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and move.", icon: "file", meta: kb(Buffer.byteLength(llmsText())), code: true },
       { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the moves in one text file.", icon: "file", meta: kb(Buffer.byteLength(llmsFull())), code: true },
       { href: "/ai-agents.md", title: "/ai-agents.md", line: "How an agent writes and renders a film, as Markdown.", icon: "markdown", meta: kb(Buffer.byteLength(agentGuide())), code: true },
       { href: "/moves/index.json", title: "/moves/index.json", line: "Every move with its group, look, jobs, duration and file, to filter by script.", icon: "json", meta: publicSize("moves/index.json"), code: true },

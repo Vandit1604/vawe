@@ -42,8 +42,7 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [When it looks wrong](https://vawe.dev/docs/troubleshooting): Symptom to cause, for the failures that repeat. Most of them do not throw an error.
 
 ## Blog
-- [Blog](https://vawe.dev/blog): Engineering notes from building vawe: what broke, what we measured and what we changed. Grouped by architecture, agent experience, taste, measurement and speed.
-- [RSS feed](https://vawe.dev/blog/rss.xml): every post with its full text.
+{{BLOG}}
 
 ## Moves
 Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/moves.

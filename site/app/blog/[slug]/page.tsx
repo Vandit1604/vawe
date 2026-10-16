@@ -4,7 +4,7 @@ import { Header, DOCS_URL, REPO_URL, WaveGlyph } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { pageMetadata } from "../../components/seo";
 import { blogPostingSchema, breadcrumbSchema, jsonLdScript } from "../../../lib/schema";
-import { allPosts, postBySlug, relatedPosts, smart } from "../../../lib/blog";
+import { allPosts, postBySlug, relatedPosts, smart, updatedLabel } from "../../../lib/blog";
 import { Cover } from "../Cover";
 import { Card } from "../Card";
 import "../blog.css";
@@ -78,6 +78,7 @@ export default async function PostPage({ params }: Params) {
               <p className="meta bp-meta">
                 {post.no ? <span>No. {String(post.no).padStart(2, "0")}</span> : null}
                 <span>{post.minutes} min read</span>
+                {updatedLabel(post) ? <span>Updated {updatedLabel(post)}</span> : null}
               </p>
             </div>
           </header>

@@ -1,12 +1,12 @@
 {
-  "title": "44 easing pages, 9 named curves",
+  "title": "45 easing pages, 10 named curves",
   "parts": [
     {
       "kind": "number",
       "items": [
         {
-          "value": "44",
-          "label": "easing pages, 9 named curves",
+          "value": "45",
+          "label": "easing pages, 10 named curves",
           "sub": "one vocabulary for every move"
         }
       ]

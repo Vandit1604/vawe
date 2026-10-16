@@ -1,129 +1,115 @@
 ---
-title: "Deterministic rendering in headless Chrome: a checklist"
-description: "A deterministic rendering checklist for headless Chrome: six sources of pixel drift we found, from 70 of 216 frames differing to 0 of 648, and each fix."
+title: "Headless Chrome screenshots differ between runs: 6 fixes"
+description: "Two renders of one page gave 70 of 216 different frames. Six causes of pixel drift in headless Chrome, the fix for each, and a test."
 date: 2026-10-10
-updated: 2026-10-13
-section: speed
+updated: 2026-10-16
+section: rendering
 featured: true
-featuredOrder: 2
-tags: "determinism, headless chrome, svg filter, gpu compositing, rendering"
-keywords: "deterministic rendering, headless chrome rendering, repeatable screenshots, svg filter gpu compositing"
+featuredOrder: 3
+tags: "determinism, headless chrome, puppeteer, svg filter, gpu compositing"
+keywords: "deterministic rendering, headless chrome screenshots differ, puppeteer screenshot different each time, repeatable rendering, svg filter gpu"
 hero: /blog/determinism/hero.webp
 heroAlt: "Bar chart of frames that differed between two renders: 70 of 216 in a shared Chrome, 1 of 1296 with a Chrome per lane, 0 of 648 with software compositing, 117 of 154 for a downscaled WebGL page."
 ---
 
-Deterministic rendering means one page, seeked to one time, gives the same pixels on every run. In headless Chrome that does not come for free. We rendered one move twice with no change to the page or the machine, and 70 of 216 frames came out different.
+Render one web page twice and compare the frames. They should match. In headless Chrome they often do not. We rendered one page with an SVG filter twice, with no change to the page or the machine. In a shared Chrome, 70 of 216 frames came out different.
 
-Each item below is one source of drift we found while turning web pages into video with [vawe](https://github.com/Vandit1604/vawe), with the fix and the test that holds it. Work through them in order. The first two cover the page, the rest cover the browser.
+This matters for two reasons. A person who sees a wrong frame cannot tell if the page or the renderer is at fault. An AI agent cannot tell either. A renderer that gives the same frame every time removes one of the two causes.
 
-<figure>
+We built [vawe](https://github.com/Vandit1604/vawe), a renderer that turns an HTML page into an MP4. While we did, we found six sources of drift and one bug that looked like drift. Each section gives the cause, the fix and the test. The first two causes are in the page. The other four are in the browser.
 
-![Share of frames or captures that differed between two renders, by cause](/blog/determinism/hero.webp)
+![Bar chart of frames that differed between two renders, by cause.](/blog/determinism/hero.webp)
 
-<figcaption>Counts come from the commit messages and code comments named below. Each row renders one page twice.</figcaption>
-</figure>
-
-Why bother: a renderer that cannot produce the same frame twice cannot be debugged by a person or an agent. Every "it looks wrong" report then has two possible causes, the page and the renderer, and nothing tells them apart.
-
-<figure>
-
-![Table of six sources of pixel drift and the fix for each](/blog/determinism/sources.webp)
-
-</figure>
-
-## 1. Replace the page's clock before its scripts run
-
-A vawe film is a web page that the renderer seeks to a time, screenshots, and moves on, so each frame must be a pure function of its time. Pages call `Date.now()`, `setTimeout` and `Math.random()`, and all of them depend on when the page runs.
-
-We do not ban those APIs. A 75-line virtual clock, injected before any page script, makes them functions of the seek time and reseeds `Math.random` from `t`. The full table of what it fakes is in our [virtual clock reference for Math.random, Date.now and timers](/blog/page-clock).
-
-How to check: `tests/media/render-page-determinism.test.mjs` renders a page that reads `Date.now`, `performance.now` and `Math.random` twice and compares the frame hashes.
-
-## 2. Freeze the document timeline, then seek every animation
-
-The document timeline runs in real time from page load. The compositor rasterizes animated layers against that time before the first seek pauses them. A first seek 1.5 seconds after load painted different edge pixels than one at 0.05 seconds, so a frame depended on how slowly the tab started.
-
-Commit `1454df446` sets the animation playback rate to 0 through the DevTools protocol. Only a seek moves an animation after that. Seeking backward has its own traps (finished `fill: none` animations drop out of `document.getAnimations()`), and the steps are in [how to seek CSS animations frame by frame](/blog/seekable-css).
-
-How to check: seek to the end, back to the middle, and compare with a fresh page seeked once to the middle.
-
-## 3. Give each render lane its own Chrome, and composite SVG filters in software
-
-The gooey-filter move draws its tab bar through an SVG filter. In a shared draft browser, GPU compositing rasterized that filter in two different states, with no pattern we could find. Two renders of the same page differed in 70 of 216 frames.
-
-<figure>
-
-![The gooey filter move: shapes merge into one soft outline](/blog/determinism/gooey-filter.webp)
-
-<figcaption>The <a href="/moves/gooey-filter">gooey filter move</a>, the page that exposed the drift.</figcaption>
-</figure>
-
-Commit `0b1d35912` made two changes. Each draft lane now has its own Chrome, which took the difference down to 1 of 1,296 frames. A page that draws an SVG filter also composites in software, which gave 0 of 648.
-
-Software compositing costs a draft about 2.5 times as much, so only pages that need it pay. The renderer finds them by scanning the page source, and the modules it imports, for a `<filter>` element, an `fe*` primitive or a `filter: url(...)` rule. A Chrome per lane also made renders faster, which we measured in [one headless Chrome per render lane](/blog/chrome-per-lane).
-
-How to check: `render-draft-filter-determinism.test.mjs` renders a filter page twice.
-
-## 4. Emulate focus on every page
-
-The tab that holds browser focus rasterizes sub-pixel edges differently from the others (SSIM 0.9994 in our measurement). With several workers, which slice was frontmost changed the pixels. Commit `586d132c4` turns on focus emulation for every page, so all of them paint as the focused one.
-
-How to check: render with two workers and with four, and compare the hashes.
-
-## 5. Start each final slice on a fresh page, with fixed slice boundaries
-
-A page keeps raster state between seeks. The first frame on a fresh page differs from the same frame reached by seeking on: a sparse SSIM 0.99997 drift on gradient text.
-
-A final therefore uses fixed 60-frame slices, each on a fresh page. The slice boundaries come from a constant (`SLICE_FRAMES`), never from the worker count, so a render with 2 workers and a render with 4 produce the same pixels. Drafts trade this away for speed and size their slices to the work.
-
-How to check: `render-determinism-load.test.mjs` renders under different worker counts.
-
-## 6. Keep WebGL capture out of Chrome's own scaling
-
-Two fixes here. The WebGL lens films the page as a flat screen, and commit `398fd7a7c` makes it draw its SVG screen into a software canvas, so the draft pixels match from run to run.
-
-Then the downscale. A half-size draft of a WebGL page used Chrome's downscale, and 117 of 154 captures differed between runs. Commit `a916e59d6` captures at full size and lets ffmpeg shrink the frames with `flags=area`. Why a draft must lay out at full size in the first place is explained in [Puppeteer deviceScaleFactor: lay out big, capture small](/blog/drafts-lie).
-
-How to check: `render-draft-halfsize-determinism.test.mjs` renders a window of `colour-sting` twice and compares per-frame hashes.
-
-## 7. Own every tab you touch in a shared browser
-
-This one is not drift inside Chrome, but it produced wrong frames that looked like drift. Listing tabs with `browser.pages()` attached to a running render's tab and reset it to Puppeteer's default 800x600 viewport. Our judge saw the result as a shrinking box. The full timeline is in the [Puppeteer default viewport postmortem](/blog/judge-defect).
-
-How to check: render while another process opens and lists pages in the same browser.
-
-## The numbers, before and after
+## What we found
 
 | Case | Frames that differed |
 | --- | --- |
 | SVG filter, one shared draft Chrome | 70 of 216 |
-| SVG filter, a Chrome per lane | 1 of 1,296 |
+| SVG filter, one Chrome per worker | 1 of 1,296 |
 | SVG filter, software compositing | 0 of 648 |
 | WebGL draft, browser downscale | 117 of 154 captures |
 
-We have no number for how much debugging time this saved.
+Every row renders one page twice and counts the frames that differ.
 
-## The checklist on one screen
+## 1. Replace the page clock before the page scripts run
 
-Every fix landed with a test that renders twice and compares. Most checks in vawe only advise. Determinism is one of the few things that refuses a render.
+The renderer seeks the page to a time, takes a screenshot and moves on. So each frame must depend only on its time. But pages call `Date.now()`, `setTimeout` and `Math.random()`, and those depend on when the page runs.
 
-| Check | How to verify | Where in the code |
-| --- | --- | --- |
-| Page clock owns time and random | render twice, compare hashes | `core/engine/page-clock.js`, `render-page-determinism.test.mjs` |
-| Timeline frozen, all animations seeked | seek back and compare with a fresh page | `Animation.setPlaybackRate`, [1454df446](https://github.com/Vandit1604/vawe/commit/1454df446) |
-| Chrome per lane, SVG filters in software | render a filter page twice | `SVG_FILTER`, `usesSvgFilter`, [0b1d35912](https://github.com/Vandit1604/vawe/commit/0b1d35912) |
-| Focus emulated | compare 2 and 4 workers | [586d132c4](https://github.com/Vandit1604/vawe/commit/586d132c4) |
-| Fixed 60-frame final slices | `render-determinism-load.test.mjs` | `SLICE_FRAMES` in `harness/media/render-page.mjs` |
-| WebGL captured at full size, scaled in ffmpeg | `render-draft-halfsize-determinism.test.mjs` | [a916e59d6](https://github.com/Vandit1604/vawe/commit/a916e59d6), `398fd7a7c` |
-| Only your own tabs attached | render beside a compare run | `harness/media/preview-server.mjs` |
+We do not ban these calls. Agents write them without thinking, and a ban would break the pages they write. A virtual clock of 75 lines runs before any page script. It makes the calls follow the seek time, and it seeds `Math.random` from that time. The full list is in [freeze Date.now and seed Math.random](/blog/page-clock).
 
-## Deeper posts on each source of drift
+To test it, render a page that reads `Date.now`, `performance.now` and `Math.random` twice. Compare the frame hashes.
 
-- [Seed Math.random and freeze Date.now: a virtual clock](/blog/page-clock): a reference for every API the clock replaces.
-- [How to seek CSS animations frame by frame](/blog/seekable-css): forward and backward seeks, cancelled animations and fonts.
-- [Puppeteer deviceScaleFactor: lay out big, capture small](/blog/drafts-lie): why a half-size draft must not shrink the viewport.
-- [Puppeteer default viewport: the 800x600 bug in our renders](/blog/judge-defect): a shared browser, a tab we did not own, and wrong frames.
+## 2. Freeze the document timeline, then seek every animation
 
-Two lessons sit under all of them. Name the cause before you pick a fix: for the filter case the cause was the compositor, and no change to the page would have helped. And never derive anything that affects pixels from the machine, such as the worker count.
+The document timeline runs in real time from page load. Chrome paints animated layers against that time before the first seek pauses them. In our test, a first seek 1.5 seconds after load painted different edge pixels than a first seek at 0.05 seconds. A slow tab start changed the frame.
 
-For where this matters to buyers, see [when determinism matters](/when-determinism-matters) and the [determinism docs](/docs/determinism). How this compares with other tools is on [Remotion alternatives](/remotion-alternatives).
+The fix is to set the animation playback rate to 0 through the DevTools protocol. After that, only a seek moves an animation. Seeking backward has its own traps, and [how to seek CSS animations frame by frame](/blog/seekable-css) lists them.
+
+To test it, seek to the end, then back to the middle. Compare the result with a fresh page that seeks once to the middle.
+
+## 3. Give each render worker its own Chrome, and composite SVG filters in software
+
+The "gooey filter" move draws a tab bar through an SVG filter. In a shared draft browser, GPU compositing painted that filter in two different states. We found no pattern. Two renders of the same page differed in 70 of 216 frames.
+
+![The gooey filter move: shapes merge into one soft outline](/blog/determinism/gooey-filter.webp "The gooey filter move, the page that showed the drift.")
+
+We made two changes. Each draft worker now has its own Chrome, and the difference fell to 1 of 1,296 frames. A page that draws an SVG filter also composites in software, and the difference fell to 0 of 648.
+
+Software compositing makes a draft about 2.5 times slower. So only pages that need it pay the cost. The renderer scans the page source and its imported modules for a `<filter>` element, an `fe*` primitive or a `filter: url(...)` rule. A Chrome per worker also made renders faster. We measured that in [a Chrome for each parallel render](/blog/fast-drafts).
+
+To test it, render a filter page twice and compare the hashes.
+
+## 4. Emulate focus on every page
+
+The tab that holds focus paints sub-pixel edges differently from the other tabs. The difference was small (SSIM 0.9994), but with several workers the frontmost slice changed the pixels. We turn on focus emulation for every page, so all pages paint as the focused one.
+
+To test it, render with two workers and with four. Compare the hashes.
+
+## 5. Start each final slice on a fresh page, with fixed slice boundaries
+
+A page keeps raster state between seeks. The first frame on a fresh page differs from the same frame reached by seeking on. On gradient text the difference was small but real (SSIM 0.99997).
+
+A final render therefore uses fixed slices of 60 frames, and each slice starts on a fresh page. The slice size is a constant. It never depends on the number of workers. A render with 2 workers and a render with 4 give the same pixels. Drafts give up this guarantee for speed.
+
+To test it, render with different worker counts and compare the hashes.
+
+## 6. Keep WebGL capture out of the Chrome downscale
+
+A half-size draft of a WebGL page used the Chrome downscale, and 117 of 154 captures differed between runs. Now the renderer captures at full size and lets ffmpeg shrink the frames with `flags=area`. The reason is in [lay out big, capture small](/blog/drafts-lie).
+
+The WebGL lens, which films the page as a flat screen, also draws its SVG screen into a software canvas. The draft pixels now match from run to run.
+
+To test it, render a window of one film twice at half size. Compare the hash of each frame.
+
+## 7. Own every tab you touch in a shared browser
+
+This bug is not drift, but it gave wrong frames that looked like drift. A call to `browser.pages()` attached to the tab of a running render and reset it to the Puppeteer default viewport of 800 by 600 pixels. Our reviewing agent saw a shrinking box. The full story is in [the 800 by 600 viewport bug](/blog/drafts-lie).
+
+To test it, render while another process opens and lists pages in the same browser.
+
+## How to use this list
+
+Run the seven tests in order. Each one renders twice and compares. We keep all of them in the test suite.
+
+In vawe, most checks only advise. Determinism is one of the few that refuse a render. A render that cannot repeat is not a render you can debug.
+
+Two rules sit under the whole list. First, name the cause before you pick a fix. For the filter case the cause was the compositor, and no change to the page would have helped. Second, never take a value that affects pixels from the machine. The number of workers is one example.
+
+For when byte-identical output decides which tool you pick, read [when determinism matters](/when-determinism-matters). For the tool comparison, read [Remotion alternatives](/remotion-alternatives).
+
+## FAQ
+
+**Why does my Puppeteer screenshot differ between runs?**
+The usual causes are a real clock, a running animation, GPU compositing and tab focus. Pause the animations, set the time yourself and use one tab per browser.
+
+**How do I make headless Chrome deterministic?**
+Replace `Date`, timers and `Math.random` before the page loads. Set the animation playback rate to 0 and seek each animation. Composite SVG filters in software. Emulate focus on every page.
+
+**Does software compositing cost much?**
+In our drafts it made a render about 2.5 times slower. We use it only for pages that draw an SVG filter, and always for finals.
+
+**Will two machines give the same pixels?**
+Not always. A different GPU or Chrome version can change the pixels. On one machine, with the fixes above, the same page gives the same frames.
+
+**Do I need vawe to use these fixes?**
+No. The fixes are Chrome settings and a few lines of page code. vawe applies them for you.

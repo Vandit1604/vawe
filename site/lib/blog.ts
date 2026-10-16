@@ -12,11 +12,10 @@ export { smart };
 export const BLOG_URL = "https://vawe.dev/blog";
 
 export const SECTIONS = [
-  { id: "architecture", label: "Architecture", intro: "How the engine is shaped: one HTML page in, one film out, and the formats and owners we removed on the way." },
-  { id: "agent-experience", label: "Agent experience", intro: "What an agent gets wrong on its own, and the commands, defaults and checks that make a weaker model succeed." },
-  { id: "taste", label: "Taste", intro: "Motion, type and colour: how we turned judgement about a good film into rules, references and checks." },
-  { id: "measurement", label: "Measurement", intro: "Judges, benchmarks and numbers: how we know a change made films better." },
-  { id: "speed", label: "Speed", intro: "Render time, draft loops and the work we stopped doing twice." },
+  { id: "how-to", label: "How-to", intro: "Step-by-step guides that end with a file you can run: render HTML to a video, export an animation, drive vawe from an agent." },
+  { id: "rendering", label: "Rendering", intro: "Headless Chrome, Puppeteer, speed and repeatable frames: what broke when we rendered a page to video, and what fixed it." },
+  { id: "agents", label: "Agents", intro: "What an AI agent gets wrong on its own, and the commands, defaults, checks and judges that make it succeed." },
+  { id: "motion-sound", label: "Motion and sound", intro: "Easing, transitions, blur, depth and audio: how we turned a good film into measured rules." },
 ] as const;
 
 export type SectionId = (typeof SECTIONS)[number]["id"];
@@ -43,6 +42,7 @@ export type Post = {
   featuredOrder?: number;
   no: number;
   html: string;
+  body: string;
   toc: Heading[];
   minutes: number;
 };
@@ -234,6 +234,7 @@ function loadPost(file: string): Post {
     keywords: list(data.keywords),
     hero,
     html,
+    body,
     toc,
     minutes: readingMinutes(body),
   };
@@ -305,6 +306,12 @@ export function relatedPosts(post: Post, n = 3) {
 
 export function latestDate() {
   return allPosts().reduce<string | undefined>((max, p) => (!max || p.updated > max ? p.updated : max), undefined);
+}
+
+// "Updated October 2026": shown only when a real later edit exists. The one date a reader sees.
+export function updatedLabel(post: Pick<Post, "date" | "updated">) {
+  if (post.updated <= post.date) return undefined;
+  return new Date(`${post.updated}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
 }
 
 export function formatDate(iso: string) {

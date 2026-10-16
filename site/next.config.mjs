@@ -22,7 +22,7 @@ const nextConfig = {
   // Docker: emit a self-contained server so the runtime image carries no dev deps.
   output: "standalone",
   // The blog index, posts, feed and sitemap regenerate hourly at runtime (a scheduled post goes live on its date), so the server reads the posts itself.
-  outputFileTracingIncludes: { "/**": ["./content/blog/*.md"] },
+  outputFileTracingIncludes: { "/**": ["./content/blog/*.md", "./content/llms-base.txt"] },
   async redirects() {
     return [
       // www.vawe.dev and vawe.dev both served 200 with no redirect between them, so Google split
@@ -45,12 +45,6 @@ const nextConfig = {
       // Wildcarded, because the slugs were content and a new one must not 404 either. The route's
       // own social card lives under /features too, so it is excluded from the catch-all.
       { source: "/features/:slug((?!opengraph-image$).+)", destination: "/features", permanent: true },
-      { source: "/blog/taste-digest", destination: "/blog/read-load", permanent: true },
-      { source: "/blog/data-over-rules", destination: "/blog/read-load", permanent: true },
-      { source: "/blog/cheap-wait", destination: "/blog/trace-reviews", permanent: true },
-      { source: "/blog/plan-vs-reference", destination: "/blog/watch-a-film", permanent: true },
-      { source: "/blog/calibrate-spec", destination: "/blog/see-truth", permanent: true },
-      { source: "/blog/headless-blocks", destination: "/blog/ten-looks", permanent: true },
     ];
   },
   // Clip files keep their names when a move is re-rendered, so the pages link them as ?v=<hash of the
@@ -63,6 +57,7 @@ const nextConfig = {
     return [
       // The .md copies are alternate forms of the page; the Link header names the page as canonical.
       { source: "/moves/:name([a-z0-9-]+).md", headers: [canonicalLink("/moves/:name")] },
+      { source: "/blog/:slug([a-z0-9-]+).md", headers: [canonicalLink("/blog/:slug")] },
       { source: "/ai-agents.md", headers: [canonicalLink("/ai-agents")] },
       // Data files for agents: fetchable, not for the index.
       { source: "/:file(llms\\.txt|llms-full\\.txt)", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
@@ -78,6 +73,7 @@ const nextConfig = {
   async rewrites() {
     return [
       // the docs pages (fumadocs already routes these at /docs in its own app)
+      { source: "/blog/:slug([a-z0-9-]+).md", destination: "/blog-md/:slug" },
       { source: "/docs", destination: `${DOCS_ORIGIN}/docs` },
       { source: "/docs/:path*", destination: `${DOCS_ORIGIN}/docs/:path*` },
       // its assets, which docs-site emits under assetPrefix "/docs-static" precisely so they do

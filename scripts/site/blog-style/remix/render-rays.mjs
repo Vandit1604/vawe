@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import puppeteer from 'puppeteer';
 import { serveRepo, RENDER_ARGS, REPO_ROOT } from '../../../../harness/lib/render-harness.mjs';
 
-const STRIP = ['read-load', 'plan-vs-reference', 'run-logs', 'no-synth-bed', 'image-points', 'weaker-model'];
+const STRIP = ['read-load', 'run-logs', 'image-points', 'weaker-model', 'render-html-to-mp4', 'determinism'];
 const here = path.dirname(new URL(import.meta.url).pathname);
 const sandbox = { window: {} };
 vm.runInNewContext(fs.readFileSync(path.join(here, 'data.js'), 'utf8'), sandbox);

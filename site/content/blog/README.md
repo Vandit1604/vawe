@@ -8,7 +8,7 @@ Set `date` to the day the post goes live, as `YYYY-MM-DD` in UTC. Merge and depl
 
 - Until that day the post is not listed on `/blog`, in a category, in the RSS feed, in the sitemap or in "Read next", and `/blog/<slug>` returns 404.
 - From that day (UTC) it appears everywhere. The index, the posts, the feed and the sitemap regenerate every hour, so it goes live within the hour with no redeploy.
-- Do not backdate. The date is the day the post is published. `updated` is the day of a later real edit. It never shows in the page. It feeds `dateModified` and the sitemap `lastmod` only.
+- Do not backdate. The date is the day the post is published. `updated` is the day of a later real edit. The post page shows it as "Updated <Month Year>" only when it is later than `date`, and it feeds `dateModified` and the sitemap `lastmod`. No page shows the publish day.
 - `next dev` and `BLOG_DRAFTS=1` show future-dated posts, so you can preview one.
 
 ## Order
@@ -18,3 +18,11 @@ Newest `date` first. Posts that share a date sort by the time their file was fir
 ## Featured
 
 Add `featured: true` to up to three posts. `featuredOrder: 1` puts a post first. The first featured post is the large card, the next two are medium cards, and any further featured post is a normal card. The band shows while "All" is chosen.
+
+## Sections
+
+`section` is one of `how-to`, `rendering`, `agents`, `motion-sound` (`SECTIONS` in `lib/blog.ts`, `[data-s]` in `blog.css`).
+
+## Agents
+
+`/llms.txt` lists every live post and `/blog/<slug>.md` serves its Markdown. Both follow the `date` rule above, with no deploy. A removed post needs a line in `BLOG_MOVED` in `lib/redirects.mjs`.

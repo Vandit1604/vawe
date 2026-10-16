@@ -184,7 +184,24 @@ const REMOVED_MOVE_RULES = [
   ]),
 ];
 
+// Blog posts merged into another post or dropped in the 2026-10-16 rebuild. Each goes to the kept post that now holds its facts.
+const BLOG_MOVED = {
+  "chrome-per-lane": "fast-drafts", "slots-reaper": "fast-drafts", "test-suite": "fast-drafts",
+  "judge-defect": "drafts-lie", "stall-watchdog": "resumable-finals", "no-synth-bed": "audio-as-written",
+  "ten-looks": "site-after-json", "headless-blocks": "site-after-json", "big-deletion": "html-over-json",
+  "measured-brief": "loophole-audit", waivers: "advise-refuse",
+  "see-truth": "watch-a-film", "calibrate-spec": "watch-a-film", "plan-vs-reference": "watch-a-film",
+  shell: "one-binary", "stage-say": "one-binary", land: "one-binary",
+  "trace-reviews": "run-logs", "cheap-wait": "run-logs",
+  "one-owner": "weaker-model", "taste-digest": "read-load", "data-over-rules": "read-load",
+};
+const BLOG_MOVED_RULES = Object.entries(BLOG_MOVED).flatMap(([old, kept]) => [
+  permanent(`/blog/${old}`, `/blog/${kept}`),
+  permanent(`/blog/${old}.md`, `/blog/${kept}.md`),
+]);
+
 export const LEGACY_REDIRECTS = [
+  ...BLOG_MOVED_RULES,
   ...effectRules(),
   ...blockRules(),
   ...categoryRules(),

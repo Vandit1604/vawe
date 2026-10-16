@@ -11,11 +11,10 @@
 
 /* Each section borrows one studio lane colour. As on the timeline, it always sits beside the section's
    name: a swatch, the cover's unit or a timeline tick inside a labelled view. */
-[data-s="architecture"]{--sec:var(--lane-shape)}
-[data-s="agent-experience"]{--sec:var(--lane-sound)}
-[data-s="taste"]{--sec:var(--lane-text)}
-[data-s="measurement"]{--sec:var(--lane-fx)}
-[data-s="speed"]{--sec:var(--lane-camera)}
+[data-s="how-to"]{--sec:var(--lane-shape)}
+[data-s="rendering"]{--sec:var(--lane-camera)}
+[data-s="agents"]{--sec:var(--lane-sound)}
+[data-s="motion-sound"]{--sec:var(--lane-text)}
 .sw{display:inline-block;width:9px;height:9px;border-radius:var(--r-in);background:var(--sec,var(--muted));flex:none}
 .bl-sec{display:inline-flex;align-items:center;gap:var(--sp-2)}
 
@@ -55,16 +54,14 @@
 .bl-filter input:checked + label .bl-count{color:var(--bg)}
 .bl-count{font-family:var(--font-mono),monospace;font-size:var(--fs-label);font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
 .bl-intro{display:none;margin-top:var(--sp-4);max-width:var(--measure);color:var(--muted)}
-.bl:has(#f-architecture:checked) .bl-grid > li:not([data-s="architecture"]),
-.bl:has(#f-agent-experience:checked) .bl-grid > li:not([data-s="agent-experience"]),
-.bl:has(#f-taste:checked) .bl-grid > li:not([data-s="taste"]),
-.bl:has(#f-measurement:checked) .bl-grid > li:not([data-s="measurement"]),
-.bl:has(#f-speed:checked) .bl-grid > li:not([data-s="speed"]){display:none}
-.bl:has(#f-architecture:checked) .bl-intro[data-s="architecture"],
-.bl:has(#f-agent-experience:checked) .bl-intro[data-s="agent-experience"],
-.bl:has(#f-taste:checked) .bl-intro[data-s="taste"],
-.bl:has(#f-measurement:checked) .bl-intro[data-s="measurement"],
-.bl:has(#f-speed:checked) .bl-intro[data-s="speed"]{display:block}
+.bl:has(#f-how-to:checked) .bl-grid > li:not([data-s="how-to"]),
+.bl:has(#f-rendering:checked) .bl-grid > li:not([data-s="rendering"]),
+.bl:has(#f-agents:checked) .bl-grid > li:not([data-s="agents"]),
+.bl:has(#f-motion-sound:checked) .bl-grid > li:not([data-s="motion-sound"]){display:none}
+.bl:has(#f-how-to:checked) .bl-intro[data-s="how-to"],
+.bl:has(#f-rendering:checked) .bl-intro[data-s="rendering"],
+.bl:has(#f-agents:checked) .bl-intro[data-s="agents"],
+.bl:has(#f-motion-sound:checked) .bl-intro[data-s="motion-sound"]{display:block}
 
 /* ===== the cover (Cover.tsx) ===== */
 .cv{position:relative;display:block;width:100%;align-self:start;aspect-ratio:1200/630;overflow:hidden;border-radius:var(--r-in);background:var(--bg)}

@@ -8,7 +8,7 @@ if (!post) throw new Error(`no post ${location.search}`);
 document.documentElement.style.setProperty('--shade', window.Rays.TONES[post.tone][0].join(','));
 document.getElementById('num').textContent = post.line;
 document.getElementById('words').textContent = post.sub;
-document.getElementById('section').textContent = post.section.replace('-', ' ');
+document.getElementById('section').textContent = ({ 'how-to': 'how-to', 'motion-sound': 'motion and sound' })[post.section] || post.section;
 window.Rays.draw(document.getElementById('ground').getContext('2d'), 1200, 630, post);
 
 function fitWidth(el, maxWidth) {
