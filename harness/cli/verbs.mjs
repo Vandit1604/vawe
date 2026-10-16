@@ -8,6 +8,7 @@ import { compareProblem, CUTS } from '../media/compare-frames.mjs';
 import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
 import { stillProblem } from '../media/see/still-math.mjs';
+import { parseTargets, shotProblem } from '../media/shot-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { lookProblem } from '../media/see/look-math.mjs';
@@ -307,6 +308,23 @@ export const VERBS = [
     example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels',
     build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
     next: () => 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment',
+  },
+  {
+    name: 'shot', summary: 'a PNG of a site route, a url or a static html page at each width (default 1440 and 390): lazy images loaded, the site server reused or started and stopped, and page errors, failed requests and sideways overflow reported',
+    positional: [{ name: 'target', required: true, help: 'a route (/blog), a url, or a .html file; a comma list shoots each' }],
+    flags: [
+      { name: 'w', type: 'string', default: '1440,390', help: 'comma list of viewport widths' },
+      { name: 'full', type: 'bool', help: 'the whole page height, not the first screen' },
+      { name: 'base', type: 'string', default: 'http://localhost:3080', help: 'the site server for routes; a localhost one that is down is started and stopped by this verb' },
+      { name: 'out', type: 'path', default: 'out/shot', help: 'the folder for the PNGs, named <route>-<width>.png' },
+    ],
+    example: 'vawe shot /,/blog --full   |   vawe shot /moves --w 390   |   vawe shot films/design/frame.html --w 1920',
+    build: (v, [target]) => {
+      const problem = shotProblem({ targets: parseTargets(target), w: v.w, base: v.base });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/shot.mjs', args: [target, ...opt('--w', v.w), ...(v.full ? ['--full'] : []), ...opt('--base', v.base), ...opt('--out', v.out)] }];
+    },
+    next: () => 'Read each PNG at full size; the 390 one shows the phone layout; vawe links checks every link of the site',
   },
   {
     name: 'still', summary: 'one frame at the full render size as a PNG: a page renders that one frame at its final size (1920x1080 for 16:9), an mp4 gives its exact frame',
