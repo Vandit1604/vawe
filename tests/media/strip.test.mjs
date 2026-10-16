@@ -22,6 +22,8 @@ test('stripProblem: names the flag at fault', () => {
   assert.match(stripProblem({ at: 'x', cuts: false, span: 1, fps: 8 }), /not a number/);
   assert.match(stripProblem({ at: '2', cuts: false, span: 0, fps: 8 }), /--span/);
   assert.match(stripProblem({ at: '2', cuts: false, span: 1, fps: 99 }), /--fps/);
+  assert.equal(stripProblem({ at: '2', cuts: false, span: 4, fps: 0.5 }), null);
+  assert.match(stripProblem({ at: '2', cuts: false, span: 1, fps: 0 }), /--fps/);
 });
 
 test('worldCuts: the middle between a world ending and the next starting, never-shown worlds skipped', () => {
