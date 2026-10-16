@@ -14,11 +14,11 @@ import { sampleFrames, tileGrid, blendDiff, meanColorOf, ssimOf } from '../lib/t
 
 export function probe(video) {
   const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
-    'stream=width,height,avg_frame_rate', '-show_entries', 'format=duration', '-of', 'json', video], { encoding: 'utf8' });
+    'stream=width,height,avg_frame_rate,duration', '-show_entries', 'format=duration', '-of', 'json', video], { encoding: 'utf8' });
   const j = JSON.parse(r.stdout || '{}');
   const s = (j.streams || [])[0] || {};
   const [n, d] = String(s.avg_frame_rate || '30/1').split('/').map(Number);
-  return { width: s.width, height: s.height, fps: n / (d || 1) || 30, dur: Number(j.format && j.format.duration) };
+  return { width: s.width, height: s.height, fps: n / (d || 1) || 30, dur: Number(s.duration) || Number(j.format && j.format.duration) };
 }
 
 // A page is rendered as a half-size 30 fps draft with its audio mixed (the audio checks read it), and
@@ -54,9 +54,16 @@ export function phoneSheet(video, outDir) {
   return { sheet: out, frames: frames.length };
 }
 
-/** 12 consecutive frames centred on `t`, labelled with the frame number, at the film's own fps. */
-export function stripSheet(video, t, outDir) {
+/** The time `t` kept inside the film: the last frame starts one frame before `dur`. `clamped` is true when `t` moved. Pure. */
+export function clampToLastFrame(t, dur, fps) {
+  const last = +Math.max(0, dur - 1 / fps).toFixed(3);
+  return t > last ? { t: last, clamped: true } : { t, clamped: false };
+}
+
+/** 12 consecutive frames centred on `t` (moved to the last frame when it is past the end; `clamped` says so), labelled with the frame number, at the film's own fps. */
+export function stripSheet(video, requested, outDir) {
   const { width, height, fps, dur } = probe(video);
+  const { t, clamped } = clampToLastFrame(requested, dur, fps);
   const n = 12;
   const first = Math.max(0, Math.min(Math.round(t * fps) - n / 2, Math.floor(dur * fps) - n));
   const { tw, th } = frameBox(width, height, width >= height ? 480 : 270);
@@ -66,7 +73,7 @@ export function stripSheet(video, t, outDir) {
   const out = `${prefix}.png`;
   tileGrid(frames, { cols: 4, tw, th, out });
   frames.forEach((f) => fs.rmSync(f, { force: true }));
-  return { sheet: out, firstFrame: first, fps };
+  return { sheet: out, firstFrame: first, fps, clamped, at: t };
 }
 
 /**
