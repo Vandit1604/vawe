@@ -24,7 +24,7 @@ window.POSTS = [
   {"slug":"resumable-finals","section":"rendering","line":"97%","tone":"cyan","cx":0.4,"cy":0.15000000000000002,"tilt":-0.77,"squash":0,"seed":34,"sub":"where a final died"},
   {"slug":"run-logs","section":"agents","line":"18 vs 6.2 min","tone":"red","cx":0.48,"cy":0.47000000000000003,"tilt":0.01,"squash":1.4,"seed":729,"sub":"guess vs measured"},
   {"slug":"seekable-css","section":"rendering","line":"4","tone":"orange","cx":0.48,"cy":0.21000000000000002,"tilt":-0.78,"squash":-0.30000000000000004,"seed":895,"sub":"seek bugs fixed"},
-  {"slug":"site-after-json","section":"motion-sound","line":"126","tone":"pink","cx":0.6799999999999999,"cy":0.34,"tilt":-0.8,"squash":0.8,"seed":758,"sub":"moves, 70 at launch"},
+  {"slug":"site-after-json","section":"motion-sound","line":"126","tone":"pink","cx":0.6799999999999999,"cy":0.34,"tilt":-0.8,"squash":0.8,"seed":758,"sub":"copyable moves"},
   {"slug":"skill-combos","section":"agents","line":"1/6","tone":"lime","cx":0.52,"cy":0.63,"tilt":-0.01,"squash":1.6,"seed":98,"sub":"combos won both"},
   {"slug":"transitions","section":"motion-sound","line":"12","tone":"lime","cx":0.5800000000000001,"cy":0.6000000000000001,"tilt":0.08,"squash":1,"seed":231,"sub":"handoff families"},
   {"slug":"watch-a-film","section":"agents","line":"2/16","tone":"cyan","cx":0.36,"cy":0.11000000000000001,"tilt":-0.47,"squash":0.09999999999999998,"seed":357,"sub":"strips read"},
@@ -37,5 +37,8 @@ window.POSTS = [
   {"slug":"programmatic-video-javascript","section":"how-to","line":"6","tone":"orange","cx":0.56,"cy":0.5,"tilt":0.08,"squash":0.6,"seed":530,"sub":"tools compared"},
   {"slug":"product-launch-video-from-url","section":"how-to","line":"1","tone":"violet","cx":0.59,"cy":0.3,"tilt":-0.28,"squash":1.21,"seed":676,"sub":"URL in, film out"},
   {"slug":"batch-render-videos","section":"how-to","line":"100","tone":"lime","cx":0.44,"cy":0.21,"tilt":0.27,"squash":1.63,"seed":106,"sub":"videos, one template"},
-  {"slug":"html-video-aspect-ratios","section":"how-to","line":"3","tone":"teal","cx":0.51,"cy":0.27,"tilt":-0.55,"squash":0.47,"seed":571,"sub":"ratios, one page"}
+  {"slug":"html-video-aspect-ratios","section":"how-to","line":"3","tone":"teal","cx":0.51,"cy":0.27,"tilt":-0.55,"squash":0.47,"seed":571,"sub":"ratios, one page"},
+  {"slug":"video-as-code","section":"how-to","line":"1","tone":"blue","cx":0.46,"cy":0.34,"tilt":-0.28,"squash":0.78,"seed":519,"sub":"text file, one film"},
+  {"slug":"gsap-to-mp4","section":"how-to","line":"1","tone":"red","cx":0.46,"cy":0.34,"tilt":-0.28,"squash":0.78,"seed":519,"sub":"seek function"},
+  {"slug":"threejs-to-mp4","section":"how-to","line":"0","tone":"cyan","cx":0.61,"cy":0.41,"tilt":-0.46,"squash":0.29,"seed":403,"sub":"clock reads"}
 ];
