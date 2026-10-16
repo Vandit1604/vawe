@@ -298,12 +298,13 @@ export const VERBS = [
     positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html or an mp4' }],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
+      { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },
       { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page only)' },
       { name: 'cols', type: 'number', default: 4, help: 'tiles per row' },
       { name: 'out', type: 'path', default: 'out/sheet-<name>.png', help: 'the PNG path' },
     ],
     example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels',
-    build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
+    build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
     next: () => 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment',
   },
   {
