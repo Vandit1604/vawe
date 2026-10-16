@@ -20,6 +20,7 @@ import { bloomSigma, flashProfile, hueOf, summarise } from './look-math.mjs';
 import { noiseOf, readMotion } from './motion-math.mjs';
 import { burstsOfMoves, cameraWords, grainOf, layoutTilt, maskFlashes, separateFlashes, sharpnessMap, shotsWithoutFlashes } from './one-math.mjs';
 import { readVelocity } from './velocity.mjs';
+import { FIELD_FPS, FIELD_SECONDS, FIELD_W, readParticleField } from '../../lib/ref-measure/particle-field.mjs';
 import { stripWindow } from './strip-math.mjs';
 
 const round = (n, d = 3) => (n == null ? null : +n.toFixed(d));
@@ -205,6 +206,15 @@ async function soundOf(src, spec, pageRead, dir, shots, log) {
   return out;
 }
 
+/** The particle field of a shot (its first FIELD_SECONDS), or null when the shot has none or cannot be decoded. */
+function particlesOf(video, shot, probe) {
+  const w = FIELD_W, h = 2 * Math.round((FIELD_W * probe.height) / probe.width / 2);
+  const got = decodeGray(video, { w, h, t: shot.start, fps: FIELD_FPS, frames: Math.ceil(Math.min(shot.length, FIELD_SECONDS) * FIELD_FPS) });
+  if (!got.data || got.data.length < 2 * w * h) return null;
+  const frames = Array.from({ length: Math.floor(got.data.length / (w * h)) }, (_, i) => got.data.subarray(i * w * h, (i + 1) * w * h));
+  return readParticleField(frames, w, h, FIELD_FPS);
+}
+
 /**
  * The measures of one film. `src` is from resolveSource. `opts`: { ocr, noCache, from, to }. `dir` is the folder of this film's output.
  * Returns the see.json object of the film (without images).
@@ -245,6 +255,7 @@ export async function measureSide(src, opts, dir, log) {
     shot.ground = gp?.start ? { startLab: gp.start, endLab: gp.end, hex: labToHex(gp.start), L: gp.L, chroma: gp.chroma, hue: gp.hue, driftDE: gp.driftDE, lightDrift: gp.lightDrift } : null;
     const ep = spec.eye.perShot.find((p) => p.shot === s.index);
     shot.eye = ep?.start ? { start: ep.start, end: ep.end, travel: ep.travel } : null;
+    shot.particles = particlesOf(video, shot, probe);
     shot.key = keyTime(shot, spec.fps);
     return shot;
   });
