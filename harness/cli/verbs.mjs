@@ -635,7 +635,7 @@ export const VERBS = [
     next: (v, [page]) => `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${page} --waveform to check each sound on its event`,
   },
   {
-    name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',
+    name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or (the default) one PNG of the mixed waveform with world lines and cue ticks',
     positional: [PAGE],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated seconds, for example 0.8,2.75: the cues sounding there, how far into each and its level in dB' },
@@ -644,10 +644,10 @@ export const VERBS = [
     ],
     example: 'vawe audio films/my-launch/page.html --at 0.8,2.75   |   vawe audio films/my-launch/page.html --waveform',
     build: (v, [page]) => {
-      if (!v.at && !v.waveform) throw new UsageError('give --at <s,s,...> or --waveform; usage: vawe audio <page> --at 0.8,2.75');
-      return [{ script: 'harness/media/audio-view.mjs', args: [page, ...opt('--at', v.at), ...(v.waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
+      const waveform = v.waveform || !v.at;
+      return [{ script: 'harness/media/audio-view.mjs', args: [page, ...opt('--at', v.at), ...(waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
     },
-    next: (v) => `vawe audio is now vawe sound <page> ${v.waveform ? '--waveform' : '--at <s,s>'}; the output is the same`,
+    next: (v) => `vawe audio is now vawe sound <page> ${v.waveform || !v.at ? '--waveform' : '--at <s,s>'}; the output is the same`,
   },
   {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
