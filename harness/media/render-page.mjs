@@ -366,6 +366,32 @@ const LOST_PAGE = /Connection closed|Target closed|No target with given id|Sessi
 // is stuck, and the 30 min CDP protocol timeout would fire far too late.
 export const STALL_MS = 60000;
 
+// A step inside a frame is stuck when it runs this many times the median frame of the same render, between a floor (awaitFonts
+// alone may wait 10 s) and STALL_MS. Until STALL_SAMPLES frames are done, or for a page open, STALL_MS stands.
+const STALL_MEDIAN_X = 10;
+const STALL_FLOOR_MS = 15000;
+const STALL_SAMPLES = 5;
+const SLOW_FRAME_MS = 5000;
+const PAGE_STEPS = new Set(['open page', 'load page', 'close page']);
+
+const median = (xs) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+
+/** The idle time after which a step is stalled, from the durations of the frames done so far. Pure. */
+export function stallLimitMs(frameMs, step, ceilingMs, floorMs = Math.min(STALL_FLOOR_MS, ceilingMs)) {
+  if (PAGE_STEPS.has(step) || frameMs.length < STALL_SAMPLES) return ceilingMs;
+  return Math.min(ceilingMs, Math.max(floorMs, STALL_MEDIAN_X * median(frameMs)));
+}
+
+const STALL_CAUSES = {
+  seek: 'the page does heavy or endless work per seek (a window.seek or onFrame hook that loops or waits on the network)',
+  'settle (fonts, image decode, two paints)': 'a font, image or texture fetch that never finishes, or a paint that never completes',
+  screenshot: 'the browser cannot paint the frame: a GPU stall, a WebGL or canvas scene too heavy for the size, a filter on a huge layer',
+  'open page': 'the browser did not open a page: the machine is starved or another process closed Chrome',
+  'load page': 'the page does not finish loading: a request, tile or module that never answers',
+};
+
+export const stallCause = (step) => STALL_CAUSES[step] ?? 'a step that never finishes';
+
 export const SLICE_ATTEMPTS = 4;
 
 class StallError extends Error {}
@@ -376,6 +402,14 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   const slices = [];
   for (let lo = 0; lo < frames; lo += sliceFrames) slices.push([lo, Math.min(frames, lo + sliceFrames)]);
   const restarted = [];
+  const frameMs = [];
+  let slowNoted = false;
+  const noteSlow = () => {
+    if (slowNoted || frameMs.length < STALL_SAMPLES || median(frameMs) < SLOW_FRAME_MS) return;
+    slowNoted = true;
+    const each = median(frameMs);
+    console.error(`slow frames: ${(each / 1000).toFixed(1)} s each (median of ${frameMs.length}), about ${Math.round((each * frames) / workers / 60000)} min for ${frames} frames. Likely cause: ${stallCause('seek')}; or ${stallCause('screenshot')}. Draft a shorter range with --from and --to, or fix the cause.`);
+  };
   let next = 0;
   // A page opened or closed during another lane's screenshot gave that frame a corrupt 1200x818 tile (3 of 9 renders, tide-v).
   let queue = Promise.resolve();
@@ -403,7 +437,10 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
             sinceOpen = 0;
           }
           mark('frame', i);
+          const frameStart = Date.now();
           sinceOpen += await work(at.opened.page, i, local, (step) => mark(step, i), ex);
+          frameMs.push(Date.now() - frameStart);
+          noteSlow();
         }
       } finally { if (at.opened) await ex(() => at.opened.close().catch(() => {})); }
     })();
@@ -411,11 +448,13 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
     const stalled = new Promise((_, reject) => {
       timer = setInterval(() => {
         const idle = Date.now() - at.since;
-        if (idle < stallMs) return;
+        const limit = stallLimitMs(frameMs, at.step, stallMs, run.stallFloorMs);
+        if (idle < limit) return;
         at.stuck = true;
         if (at.opened) at.opened.close().catch(() => {});
         const t = (run.from + at.frame / run.fps).toFixed(2);
-        reject(new StallError(`render stalled: worker ${worker}, frame ${at.frame} (${t} s), in ${at.step} for ${(idle / 1000).toFixed(0)} s`));
+        const basis = frameMs.length >= STALL_SAMPLES && limit < stallMs ? `${(limit / 1000).toFixed(1)} s is ${STALL_MEDIAN_X} times the median frame of ${(median(frameMs) / 1000).toFixed(2)} s` : `${(limit / 1000).toFixed(0)} s is the limit`;
+        reject(new StallError(`render stalled: worker ${worker}, frame ${at.frame} (${t} s), in ${at.step} for ${(idle / 1000).toFixed(0)} s (${basis}). Likely cause: ${stallCause(at.step)}`));
       }, Math.min(1000, stallMs / 4));
     });
     loop.catch(() => {});
@@ -433,7 +472,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
         const stall = e instanceof StallError;
         if (!stall && !LOST_PAGE.test(String(e && e.message))) throw e;
         if (attempt === SLICE_ATTEMPTS) {
-          if (stall) throw new InvariantError([`${e.message}, ${SLICE_ATTEMPTS} times on slice ${range(slice)}: the page never finished that step (a window.seek or onFrame hook that never resolves, a font or image that never loads), or the browser is starved`]);
+          if (stall) throw new InvariantError([`${e.message}, ${SLICE_ATTEMPTS} times on slice ${range(slice)}`]);
           throw new InvariantError([`slice ${slice[0]}-${slice[1]} (${range(slice)}) lost its page ${SLICE_ATTEMPTS} times: another process closed the shared browser, or the page crashed (${e.message})`]);
         }
         console.error(`${stall ? e.message : `slice ${range(slice)} lost its page (${e.message})`}; retrying slice ${range(slice)} on a fresh page (attempt ${attempt + 1} of ${SLICE_ATTEMPTS})`);
@@ -469,7 +508,7 @@ const seekThenKey = async (ms) => { await window.__pageSeek(ms / 1000); return w
 
 // A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
 // A slice that finished writes slice-<lo>.done in tmpDir; a later render into the same tmpDir skips it and calls onResumed.
-async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, fault, onResumed, final }) {
+async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, stallFloorMs, fault, onResumed, final }) {
   const format = frameFormat(final);
   const marker = ([lo]) => path.join(tmpDir, `slice-${lo}.done`);
   const resume = {
@@ -501,7 +540,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
       onSubframe(i, reused);
     }
     return k;
-  }, { fps, from, stallMs, fault, resume, final, sliceFrames: sliceFramesFor(frames, workers, final) });
+  }, { fps, from, stallMs, stallFloorMs, fault, resume, final, sliceFrames: sliceFramesFor(frames, workers, final) });
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -741,7 +780,7 @@ async function muxPageAudio(read, pagePath, { video, out, duration, explicit, fa
  * or a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; each
  * frame gets what its fastest move needs, a still frame 1), from (0, seconds into the page's own timeline the
  * render starts at), durArg (seconds rendered from `from`; defaults to the page's own <meta
- * name="duration"> minus `from`), progress (false; prints a single overwriting capture-progress line), stallMs (STALL_MS; no progress this long restarts a slice).
+ * name="duration"> minus `from`), progress (false; prints a single overwriting capture-progress line), stallMs (STALL_MS, the most a step may run without progress before its slice restarts; after 5 frames the limit is 10 times their median, at least 15 s), stallFloorMs (test hook: the least that limit may be).
  */
 export async function renderPage(pagePath, outPath, opts = {}) {
   const { fps = 30, blur = 1, durArg = null, from = 0, progress = false, final = false } = opts;
@@ -802,7 +841,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const onResumed = ([lo, hi]) => { resumed++; doneSub += subframeStart[hi] - subframeStart[lo]; };
     let restarted;
     try {
-      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, fault: opts.sliceFault, onResumed, final });
+      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, stallFloorMs: opts.stallFloorMs, fault: opts.sliceFault, onResumed, final });
     } catch (e) {
       throw Object.assign(e, { progress: doneSub / totalSub, framesDir: tmpDir });
     } finally {

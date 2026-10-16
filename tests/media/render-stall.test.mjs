@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import http from 'node:http';
-import { renderPage, InvariantError, SLICE_ATTEMPTS } from '../../harness/media/render-page.mjs';
+import { renderPage, InvariantError, SLICE_ATTEMPTS, stallLimitMs, stallCause } from '../../harness/media/render-page.mjs';
 
 // Each slice opens its own browser for a page outside the repo, so the count of stalls lives in this process:
 // the page asks a local counter, and `once` stalls only on the first ask.
@@ -29,7 +29,7 @@ window.seek = (t) => {
 const STALL_PER_CAPTURE = 2;
 const STALL_FLOOR_MS = 1500;
 
-async function render(name, { stall = true, once = false, stallMs = STALL_FLOOR_MS }, dir) {
+async function render(name, { stall = true, once = false, stallMs = STALL_FLOOR_MS, stallFloorMs }, dir) {
   let asks = 0;
   const counter = http.createServer((req, res) => {
     res.writeHead(200, { 'Access-Control-Allow-Origin': '*' });
@@ -43,7 +43,7 @@ async function render(name, { stall = true, once = false, stallMs = STALL_FLOOR_
   const error = console.error;
   console.error = (line) => logged.push(String(line));
   try {
-    return { r: await renderPage(pagePath, path.join(dir, `${name}.mp4`), { fps: 30, workers: 1, stallMs }), logged };
+    return { r: await renderPage(pagePath, path.join(dir, `${name}.mp4`), { fps: 30, workers: 1, stallMs, stallFloorMs }), logged };
   } catch (e) { return { e, logged }; } finally { console.error = error; counter.close(); }
 }
 
@@ -60,7 +60,7 @@ test('a stalled seek retries its slice and the render finishes', async () => {
     assert.equal(e, undefined, e && e.message);
     assert.equal(r.frames, 15);
     assert.deepEqual(r.restarted, ['0.00-0.50s']);
-    assert.match(logged.join('\n'), new RegExp(String.raw`render stalled: worker 1, frame 6 \(0\.20 s\), in seek for \d+ s; retrying slice 0\.00-0\.50s on a fresh page \(attempt 2 of ${SLICE_ATTEMPTS}\)`));
+    assert.match(logged.join('\n'), new RegExp(String.raw`render stalled: worker 1, frame 6 \(0\.20 s\), in seek for \d+ s .*Likely cause: .*; retrying slice 0\.00-0\.50s on a fresh page \(attempt 2 of ${SLICE_ATTEMPTS}\)`));
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
@@ -69,7 +69,30 @@ test('a stall on every attempt of a slice is an error that names the step', asyn
   try {
     const { e } = await render('always', { stallMs: await stallLimit(dir) }, dir);
     assert.ok(e instanceof InvariantError, String(e));
-    assert.match(e.message, new RegExp(String.raw`render stalled: worker 1, frame 6 \(0\.20 s\), in seek .*, ${SLICE_ATTEMPTS} times on slice 0\.00-0\.50s`));
+    assert.match(e.message, new RegExp(String.raw`render stalled: worker 1, frame 6 \(0\.20 s\), in seek .*Likely cause: .*, ${SLICE_ATTEMPTS} times on slice 0\.00-0\.50s`));
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('stallLimitMs: 10 times the median frame, between the floor and the ceiling', () => {
+  const fast = [100, 120, 90, 110, 100, 95];
+  assert.equal(stallLimitMs([100, 120], 'seek', 60000), 60000);
+  assert.equal(stallLimitMs(fast, 'open page', 60000), 60000);
+  assert.equal(stallLimitMs(fast, 'screenshot', 60000), 15000);
+  assert.equal(stallLimitMs([2000, 2400, 2200, 2100, 2300], 'screenshot', 60000), 22000);
+  assert.equal(stallLimitMs([30000, 31000, 29000, 32000, 30000], 'seek', 60000), 60000);
+  assert.equal(stallLimitMs(fast, 'seek', 5000), 5000);
+  assert.match(stallCause('screenshot'), /GPU/);
+});
+
+test('a stall on a page with fast frames is caught at 10 times the median frame, not at the ceiling', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-stall-'));
+  try {
+    const started = Date.now();
+    const { r, e, logged } = await render('adaptive', { once: true, stallMs: 120000, stallFloorMs: 500 }, dir);
+    assert.equal(e, undefined, e && e.message);
+    assert.deepEqual(r.restarted, ['0.00-0.50s']);
+    assert.match(logged.join('\n'), /frame 6 \(0\.20 s\), in seek for \d+ s \(\d+\.\d s is 10 times the median frame of [\d.]+ s\)\. Likely cause: the page does heavy/);
+    assert.ok(Date.now() - started < 60000, 'the 120 s ceiling was waited for');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
