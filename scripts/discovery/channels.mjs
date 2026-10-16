@@ -3,14 +3,14 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
-const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+export const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 const MAX_RESULTS = 20;
 const run = promisify(execFile);
 
 export class Blocked extends Error {}
 
-async function get(url, { json = true } = {}) {
-  const res = await fetch(url, { headers: { 'user-agent': UA, 'accept-language': 'en-US,en;q=0.9', accept: json ? 'application/json' : 'text/html' }, signal: AbortSignal.timeout(30000) });
+export async function get(url, { json = true } = {}) {
+  const res = await fetch(url, { headers: { 'user-agent': UA, 'accept-language': 'en-US,en;q=0.9', accept: json ? 'application/json' : 'text/html' }, signal: AbortSignal.timeout(20000) });
   if (res.status === 403 || res.status === 429) throw new Blocked(`HTTP ${res.status}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return json ? res.json() : res.text();
