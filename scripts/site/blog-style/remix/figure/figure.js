@@ -12,6 +12,8 @@
 //   table    { cols: [text], rows: [[text]], num?: [col index], marks?: { rowIndex: 'hi' | 'lo' } }
 //   code     { lines: [{ code, note? }] }
 //   plot     { x: { label?, min, max, ticks?: [v | [v, text]] }, y: { label, min, max, ticks? }, series: [{ name, points? | bezier? }], marks?: [{ x, y, text }] }
+//   gantt    { max, unit?, ticks?: [v], rows: [{ label, segs: [{ from, to, text?, mark? }] }] }  (segments on one time axis)
+//   frames   { cols?, items: [{ src, label, sub? }] }  (src is a path from the repo root, e.g. /out/x.png)
 //   text     { text }
 // mark is 'hi' (the one accent, for the key value) or 'lo' (muted). Every string is shown as written.
 
@@ -165,6 +167,37 @@ const KINDS = {
     for (const l of p.lines) add(box, add(el('div', notes ? 'code-line' : 'code-line solo'), el('code', '', l.code), notes && el('div', 'sub mono', l.note || '')));
     return box;
   },
+  gantt(p) {
+    const at = (v) => `${(100 * v) / p.max}%`;
+    const box = el('div', 'glass gantt');
+    for (const r of p.rows) {
+      const track = el('div', 'gtrack');
+      for (const s of r.segs) {
+        const seg = el('div', marked('gseg', s.mark), s.text);
+        seg.style.left = at(s.from);
+        seg.style.width = `calc(${at(s.to)} - ${at(s.from)})`;
+        track.appendChild(seg);
+      }
+      add(box, add(el('div', 'grow'), el('div', 'glabel mono', r.label), track));
+    }
+    const axis = el('div', 'gaxis mono');
+    for (const t of p.ticks || [0, p.max]) {
+      const tick = el('span', '', `${t}${p.unit ? ` ${p.unit}` : ''}`);
+      tick.style.left = at(t);
+      axis.appendChild(tick);
+    }
+    return add(box, add(el('div', 'grow'), el('div', 'glabel'), axis));
+  },
+  frames(p) {
+    const box = el('div', 'frames');
+    box.style.gridTemplateColumns = `repeat(${p.cols || p.items.length}, 1fr)`;
+    for (const it of p.items) {
+      const img = el('img');
+      img.src = it.src;
+      add(box, add(el('div', 'frame'), img, el('div', 'name', it.label), it.sub && el('div', 'sub', it.sub)));
+    }
+    return box;
+  },
   text(p) {
     return el('div', p.text.length <= 60 && !p.text.includes('\n') ? 'note short' : 'note', p.text);
   },
@@ -227,6 +260,7 @@ async function render() {
     content.appendChild(KINDS[part.kind](part));
   }
   if (spec.note) content.appendChild(el('div', 'note', spec.note));
+  await Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = r; i.onerror = r; }))));
   await document.fonts.ready;
   const fig = document.getElementById('fig');
   window.__height = Math.ceil(fig.getBoundingClientRect().height);
