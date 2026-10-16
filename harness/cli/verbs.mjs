@@ -636,6 +636,18 @@ export const VERBS = [
   },
   {
     name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or (the default) one PNG of the mixed waveform with world lines and cue ticks',
+    name: 'storyboard', summary: 'one self-contained HTML storyboard to present a film: a pan-and-zoom canvas with a frame card per world (timecodes, action, move and ease curve, sound cues), the handoff arrows between cards and a rhythm strip; about 10 s',
+    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html, or a draft mp4 (frames are cut from it; the page is found by the film name)' }],
+    flags: [
+      { name: 'page', type: 'path', help: 'with an mp4: the film\'s page.html, when it is not under films/' },
+      { name: 'out', type: 'path', default: 'out/<film>-storyboard.html', help: 'the HTML path; the images go in a folder of the same name without .html' },
+    ],
+    example: 'vawe storyboard films/examples/colour-sting/page.html   |   vawe storyboard out/my-launch-draft.mp4',
+    build: (v, [input]) => [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out)] }],
+    next: () => 'open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields',
+  },
+  {
+    name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',
     positional: [PAGE],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated seconds, for example 0.8,2.75: the cues sounding there, how far into each and its level in dB' },

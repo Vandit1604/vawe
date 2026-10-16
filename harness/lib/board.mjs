@@ -40,7 +40,7 @@ export function moveRows(brief) {
   const handoffAt = header ? cellsOf(header).findIndex((h) => h.startsWith('handoff')) : -1;
   return rowsOf(section, 'cut').map((c) => {
     const nums = ((c[0] ?? '').split(',').slice(1).join(',').match(NUMBERS) ?? []).map(Number);
-    return { label: c[0] ?? '', at: nums[0] ?? null, end: nums[1] ?? null, move: c[1] ?? '', camera: c[5] ?? '', overshoots: c[7] ?? '', handoff: handoffAt < 0 ? null : (c[handoffAt] ?? '') };
+    return { label: c[0] ?? '', at: nums[0] ?? null, end: nums[1] ?? null, move: c[1] ?? '', overlap: numberOf(c[4] ?? ''), camera: c[5] ?? '', overshoots: c[7] ?? '', handoff: handoffAt < 0 ? null : (c[handoffAt] ?? '') };
   });
 }
 
