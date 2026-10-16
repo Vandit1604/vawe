@@ -32,6 +32,8 @@ const REASON = /\b(because|reason)\b/i;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dashed = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+/** The id of the handoff family a name stands for, or null (`fade` is no family of the twelve). */
+export const handoffFamily = (name) => { const id = familyOf(name); return id === 'fade' ? null : id; };
 const familyOf = (name) => FAMILIES.find(([, re]) => re.test(name.toLowerCase()))?.[0] ?? null;
 const linked = (cell) => [...cell.matchAll(/\[[^\]]*\]\(([^)]*?)([a-z0-9-]+)\.md\)/g)].map((m) => m[2]);
 

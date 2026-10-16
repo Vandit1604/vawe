@@ -72,7 +72,7 @@ the word `because`.
 `bin/vawe check ideas <page>` and the draft advice name: a world with no row (`ideas-missing`), every
 chosen device `literal` (`ideas-literal`), one device chosen for more than half the rows
 (`ideas-variety`), a pick that is the most typical idea with no reason (`ideas-typical`), a row with
-fewer than four ideas, a repeated device or a missing number (`ideas-thin`), and four ideas that are
+fewer than four ideas, a repeated device or a missing number (`ideas-thin`; a cut row may also name the twelve handoff families of `taste/craft/transitions.md`), and four ideas that are
 one idea reworded, or one picked idea copied to another row (`ideas-reworded`). Waive a code in the
 page with a reason that names a world or a second.
 

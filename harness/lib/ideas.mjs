@@ -2,6 +2,7 @@
 // Pure: brief text and the page's authoring block in, advice lines out. Advice only: a ledger is a plan, so nothing here refuses.
 import { sectionOf, rowsOf } from './board.mjs';
 import { isWaived, waiverHint } from './waivers.mjs';
+import { handoffFamily } from './handoffs.mjs';
 
 export const IDEAS_PER_ROW = 4;
 export const OVERLAP_MAX = 0.5;
@@ -22,18 +23,21 @@ const DEVICES = [
   ['collision', /collid|collision/],
 ];
 
+// A cut row ("s2 to s3") may also use the twelve handoff families as devices.
+const CUT_ROW = /\bto\b/;
+
 const STOP = new Set('the a an of to and or in on at is it its this that for with into as by from then than'.split(' '));
 const REASON = /\bbecause\b/i;
 
-/** { device (id or null), name, text, typicality (0 to 1 or null) } of an idea cell "device: the idea, 0.2". */
-export function parseIdea(cell) {
+/** { device (id or null), name, text, typicality (0 to 1 or null) } of an idea cell "device: the idea, 0.2". With `cut`, a handoff family of taste/craft/transitions.md counts as a device too. */
+export function parseIdea(cell, cut = false) {
   const raw = (cell ?? '').trim();
   const colon = raw.indexOf(':');
   const name = (colon < 0 ? '' : raw.slice(0, colon)).trim();
   const num = /[,(]\s*(0?\.\d+|[01](?:\.0+)?)\s*\)?\s*$/.exec(raw);
   const body = colon < 0 ? '' : raw.slice(colon + 1, num ? num.index : undefined).trim();
   const found = DEVICES.find(([, re]) => re.test(name.toLowerCase()));
-  return { device: found ? found[0] : null, name, text: body, typicality: num ? Number(num[1]) : null };
+  return { device: found ? found[0] : (cut ? handoffFamily(name) : null), name, text: body, typicality: num ? Number(num[1]) : null };
 }
 
 // 0-based index of the idea a `chosen` cell names (a number 1 to 4, or a device name), or null.
@@ -50,8 +54,9 @@ export function ideaRows(brief) {
   const section = brief ? sectionOf(brief, 'Ideas') : undefined;
   if (section === undefined) return [];
   return rowsOf(section, 'at').map((c) => {
-    const ideas = c.slice(2, 2 + IDEAS_PER_ROW).filter(Boolean).map(parseIdea);
-    return { at: (c[0] ?? '').trim().toLowerCase(), meaning: c[1] ?? '', ideas, chosen: chosenIndex(c[2 + IDEAS_PER_ROW], ideas), why: c[3 + IDEAS_PER_ROW] ?? '' };
+    const at = (c[0] ?? '').trim().toLowerCase();
+    const ideas = c.slice(2, 2 + IDEAS_PER_ROW).filter(Boolean).map((cell) => parseIdea(cell, CUT_ROW.test(at)));
+    return { at, meaning: c[1] ?? '', ideas, chosen: chosenIndex(c[2 + IDEAS_PER_ROW], ideas), why: c[3 + IDEAS_PER_ROW] ?? '' };
   });
 }
 
@@ -77,7 +82,7 @@ const chosenOf = (r) => (r.chosen === null ? null : r.ideas[r.chosen]);
 function thinProblem(r) {
   if (r.ideas.length < IDEAS_PER_ROW) return `has ${r.ideas.length} ideas; write ${IDEAS_PER_ROW}, each with a different device`;
   const bad = r.ideas.find((i) => !i.device);
-  if (bad) return `names the device "${bad.name}", none of the ten in guides/IDEATE.md`;
+  if (bad) return `names the device "${bad.name}", none of the ten in guides/IDEATE.md${CUT_ROW.test(r.at) ? ' or the twelve handoff families' : ''}`;
   const devices = r.ideas.map((i) => i.device);
   if (new Set(devices).size < devices.length) return 'repeats a device; use four different devices';
   if (r.ideas.some((i) => i.typicality === null)) return 'has an idea with no typicality number (0 to 1)';

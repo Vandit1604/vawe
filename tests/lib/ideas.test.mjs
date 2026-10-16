@@ -132,3 +132,11 @@ test('vawe check ideas: a literal ledger fires, a good one passes, a waiver sile
   const waived = run(fixture('literal-brief.md'), '<script type="application/json" id="authoring">{"allow":["ideas-literal"],"_why":{"ideas-literal":"the three beats at s1 s2 s3 show a real 0.4 s product"}}</script>');
   assert.doesNotMatch(waived.stdout, /\[ideas-literal\] every chosen/);
 });
+
+test('a cut row accepts the twelve handoff families as devices; a beat row with a family is still thin', () => {
+  const ideas = ['position lock: the cursor stays, 0.3', 'shared axis: both slide left, 0.4', 'metaphor: a door, 0.2', 'literal: a hard cut, 0.9'];
+  const cut = table(row('s2 to s3', ideas, 1));
+  assert.deepEqual(codes(cut).filter((c) => c === 'ideas-thin'), []);
+  assert.ok(ideaFindings(table(row('s2', ideas, 1))).some((f) => f.code === 'ideas-thin' && /none of the ten/.test(f.text)));
+  assert.ok(ideaFindings(table(row('s2 to s3', ['zigzag: x, 0.1', ...ideas.slice(1)], 2))).some((f) => /or the twelve handoff families/.test(f.text)));
+});
