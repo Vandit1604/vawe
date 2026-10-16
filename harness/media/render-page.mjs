@@ -703,14 +703,16 @@ export function briefProblems(pagePath) {
 // height are the CSS viewport, always the aspect's full size from core/layout/aspects.js, so px values lay
 // out the same in a draft and a final; scale is the device scale of the capture (0.5 draft, 1 final).
 // w/h set the output size: scale = w / full width (else h / full height), CSS size = output / scale.
-// Returns { aspect, width, height, scale }; the output is width x height times scale.
+// Returns { aspect, width, height, scale, outWidth, outHeight }: the output is outWidth x outHeight, each side
+// rounded to an even number because libx264 with yuv420p refuses an odd side (a 4:5 draft is 540x675 before rounding).
 export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
   const name = aspect || readPageMeta(pagePath, 'aspect') || '16:9';
   if (!ASPECTS[name] && !/^\d+:\d+$/.test(name)) throw new RenderError(`${pagePath}: unknown aspect "${name}" (use ${Object.keys(ASPECTS).join(' ')} or a W:H ratio)`);
   const [fw, fh] = aspectDims(name);
   const scale = w ? w / fw : h ? h / fh : final ? 1 : 0.5;
   const outW = w || Math.round(fw * scale), outH = h || Math.round(fh * scale);
-  return { aspect: name, width: Math.round(outW / scale), height: Math.round(outH / scale), scale };
+  const even = (n) => Math.max(2, 2 * Math.round(n / 2));
+  return { aspect: name, width: Math.round(outW / scale), height: Math.round(outH / scale), scale, outWidth: even(outW), outHeight: even(outH) };
 }
 
 // The page's <audio> elements are read from the loaded page before the capture (readAudio) and mixed offline, never played
@@ -812,7 +814,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const webPath = final ? webOut(outPath) : null;
     const tmpWeb = webPath && `${webPath}.tmp-${process.pid}.mp4`;
     const t1 = Date.now();
-    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, size: final ? null : [Math.round(frame.width * frame.scale), Math.round(frame.height * frame.scale)] });
+    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, size: final && frame.outWidth === Math.round(frame.width * frame.scale) && frame.outHeight === Math.round(frame.height * frame.scale) ? null : [frame.outWidth, frame.outHeight] });
     const encodeMs = Date.now() - t1;
     if (res.status !== 0 || res.error) {
       fs.rmSync(tmpOut, { force: true });
@@ -1138,7 +1140,7 @@ async function main() {
     const frame = resolveFrame(pagePath, opts);
     const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final, from, to: durArg != null ? from + durArg : null });
     fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
-    const masterLine = (r) => `✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
+    const masterLine = (r) => `✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${frame.outWidth}x${frame.outHeight} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, retried slice(s) ${r.restarted.join(' ')}` : ''}${r.resumed ? `, ${r.resumed} slice(s) resumed from an earlier run` : ''}`
       + `${final ? `, prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s` : ''}`;
     if (final) opts.onMaster = (r) => console.log(masterLine(r));
