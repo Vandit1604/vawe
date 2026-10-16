@@ -94,11 +94,11 @@ Run `node render.mjs page.html 3 30`. We ran it on the same page. It wrote 90 fr
 
 | Trap | What we saw | Fix |
 | --- | --- | --- |
-| `window.seek = (t) => tl.time(t)` | `page.evaluate` timed out. | Use braces, so the function returns nothing. |
+| `window.seek = (t) => tl.time(t)` | Puppeteer's `page.evaluate` timed out. | Use braces, so the function returns nothing. |
 | Timeline not paused | 4 of 30 frames differed between two passes. | Create it with `paused: true`. |
 | Two `from()` calls on one property | The second tween ended at `x: 200`. | Use `fromTo()`. |
 
-The seek function returns the timeline. `tl.time(t)` with an argument returns the timeline itself. An arrow function without braces returns that value, and `page.evaluate` tries to copy the whole object back to Node. Puppeteer stopped with `Runtime.callFunctionOn timed out`. In vawe the same page ran 11 minutes with no output, and we stopped it by hand. The braces in the page above are the fix.
+The seek function returns the timeline. `tl.time(t)` with an argument returns the timeline itself. An arrow function without braces returns that value, and `page.evaluate` tries to copy the whole object back to Node. Puppeteer stopped with `Runtime.callFunctionOn timed out`. vawe had a related bug. It waited on the returned timeline, and a timeline has a `then()` that never settles. The draft ran 11 minutes with no output. We fixed it. vawe now waits only for a real Promise and ignores any other return value, so that page renders in vawe. In plain Puppeteer the trap remains, and the braces in the page above avoid it.
 
 The timeline plays on its own. We removed `paused: true` and called `tl.play()`, so the GSAP ticker kept moving the timeline between our seek and the screenshot. We rendered 30 frames twice, with Puppeteer at 640 by 360 pixels, and compared the hash of each frame. With the timeline paused, 0 of 30 frames differed. With the ticker running, 4 of 30 differed.
 

@@ -59,7 +59,7 @@ Save the page as `films/blogtest-aspect/page.html`. Then render a draft with the
 bin/vawe dev films/blogtest-aspect/page.html --aspect 9:16
 ```
 
-We ran this for four ratios. Each draft is 90 frames at 30 fps. The command printed these lines:
+We ran this for the four ratios below. Each draft is 90 frames at 30 fps. The command printed these lines:
 
 | Flag | What `vawe dev` printed | Time |
 |---|---|---|
@@ -70,7 +70,7 @@ We ran this for four ratios. Each draft is 90 frames at 30 fps. The command prin
 
 A draft is half size. The label inside the page reads the full size from `window.vawe`: 1920 x 1080, 1080 x 1920 and 1080 x 1080.
 
-The fifth ratio, `4:5`, failed in our run. The half-size draft is 540 by 675 pixels, and the encoder stops with "height not divisible by 2". We report it as a bug in the draft path. We did not test a final at `4:5`.
+The fifth ratio, `4:5`, failed in our first run. Half of 1350 is 675, and the encoder stops on an odd side with "height not divisible by 2". The renderer now rounds each side of the output to an even number, so a `4:5` draft is 540 by 676 pixels. We checked this with a 1 s test page: `bin/vawe dev --aspect 4:5` printed `540x676 (4:5)` and exited with success. We did not test a final at `4:5`. The table above is from the first run, before the fix.
 
 ## Three stills
 
