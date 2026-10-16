@@ -58,6 +58,7 @@ export function runMotionCollector(page) {
 
 const LINEAR_LIMIT = LIMITS['named-eases'].linear_move_limit_s;
 const FINAL_FPS = 60;
+const MIN_GAP_S = 0.002;
 const KEYWORDS = new Set(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']);
 const onKeywords = (r) => [r.easing, ...r.kfEasings].every((e) => KEYWORDS.has(e));
 const isLinear = (r) => [r.easing, ...r.kfEasings].every((e) => e === 'linear');
@@ -90,6 +91,32 @@ export function groupLanding(records) {
   return [...frames].filter(([, labels]) => labels.length >= LIMITS.stagger.same_frame_group).map(([f, labels]) => ({
     code: 'group-landing', rule: 'stagger', at: f / FINAL_FPS,
     what: `${labels.length} elements land on one frame (${labels.slice(0, 3).join(', ')})`,
+    fix: 'stagger(els) from core/motion/presets.js: 30 to 80 ms apart',
+  }));
+}
+
+const gapsText = (gaps) => {
+  const [lo, hi] = [Math.min(...gaps), Math.max(...gaps)].map((g) => Math.round(g * 1000));
+  return lo === hi ? `${lo} ms` : `${lo} to ${hi} ms`;
+};
+
+/** Entrances that start closer than the stagger floor (rule stagger): one finding per run of siblings, from its first start. Sampled runs are not measured: their step is wider than the gap. */
+export function tightStagger(records) {
+  const floor = LIMITS.stagger.gap_min_s;
+  const starts = byTarget(records.filter((r) => !r.step))
+    .map((rs) => rs.filter((r) => entering(r) && r.duration > CUT).map((r) => r.delay))
+    .filter((ds) => ds.length).map((ds) => Math.min(...ds)).sort((a, b) => a - b);
+  const runs = [];
+  starts.slice(1).forEach((t, i) => {
+    const gap = t - starts[i];
+    if (gap < MIN_GAP_S || gap >= floor) return;
+    const run = runs.at(-1);
+    if (run && run.last === starts[i]) Object.assign(run, { last: t, n: run.n + 1, gaps: [...run.gaps, gap] });
+    else runs.push({ at: starts[i], last: t, n: 2, gaps: [gap] });
+  });
+  return runs.map((r) => ({
+    code: 'stagger-gap', rule: 'stagger', at: r.at,
+    what: `${r.n} elements start ${gapsText(r.gaps)} apart, under the ${Math.round(floor * 1000)} ms floor`,
     fix: 'stagger(els) from core/motion/presets.js: 30 to 80 ms apart',
   }));
 }
@@ -284,7 +311,7 @@ export function measureMotion(records) {
 
 /** Every lint finding, in time order. */
 export function motionLint({ records, scripted }) {
-  return [...exitLength(records), ...groupLanding(records), ...linearMove(records), ...seamRepeat(records), ...oneBand(records, { scripted }), ...durationSize(records), ...motionVariety(records)]
+  return [...exitLength(records), ...groupLanding(records), ...tightStagger(records), ...linearMove(records), ...seamRepeat(records), ...oneBand(records, { scripted }), ...durationSize(records), ...motionVariety(records)]
     .sort((a, b) => a.at - b.at);
 }
 

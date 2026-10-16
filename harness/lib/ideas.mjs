@@ -6,6 +6,7 @@ import { isWaived, waiverHint } from './waivers.mjs';
 export const IDEAS_PER_ROW = 4;
 export const OVERLAP_MAX = 0.5;
 export const MIN_ROWS_FOR_VARIETY = 3;
+export const IDEATE_ASK = 'for each beat and each cut write the meaning, 4 ideas from 4 different devices with a typicality number, and pick one that is not the most typical, with a reason; ask: what would a typical film do here, and what in this subject\'s own world does the same job?';
 
 // Order matters: the first match wins ("literalise" before "literal").
 const DEVICES = [

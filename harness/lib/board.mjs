@@ -6,6 +6,7 @@ import { metaOf } from './page-meta.mjs';
 export const CUT_SHORT_S = 0.4;
 export const CUT_LONG_S = 0.9;
 export const SPECTACLE_TOLERANCE_S = 0.25;
+export const LENGTH_TOLERANCE_S = 0.5;
 
 /** The text of the `## <title>` section of a brief, or undefined when it has none. */
 export const sectionOf = (brief, title) => brief.split(/^## /m).find((s) => s.startsWith(title));
@@ -146,6 +147,13 @@ export function movesUnused(brief) {
 }
 
 const START_TOLERANCE_S = 0.25;
+
+/** The line when the brief's "- length: N s" differs from the page's duration by more than LENGTH_TOLERANCE_S; null for no length or a match. Pure. */
+export function briefLengthLine(brief, duration) {
+  const said = Number(/^- length:\s*(\d+(?:\.\d+)?)/im.exec(brief ?? '')?.[1]);
+  if (!said || !(duration > 0) || Math.abs(said - duration) <= LENGTH_TOLERANCE_S) return null;
+  return `the brief says ${said} s and the page is ${duration} s`;
+}
 
 /** Lines where the Board's beat starts differ from the page's world starts, both in seconds (harness/lib/timeline.mjs worldRows). [] for a brief with no filled Board. Pure. */
 export function boardVsPage(brief, pageStarts) {

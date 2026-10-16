@@ -7,6 +7,8 @@ import { spawnSync } from 'node:child_process';
 import { writeApproval } from '../../harness/lib/approval.mjs';
 import { SAY, BRIEF_ASK, CRITIQUE_ASK, WAIT_WORK, nextStep,takenFromCount, movesTakenCount, boardFilled, missingRungs } from '../../harness/live/stage-say.mjs';
 
+const IDEAS = '## Ideas\n\n| at | meaning | i1 | i2 | i3 | i4 | chosen | why |\n|---|---|---|---|---|---|---|---|\n| s1 | m | a: x, 0.1 | b: y, 0.2 | c: z, 0.3 | d: w, 0.4 | 1 | because |\n\n';
+
 function film(html, brief = '## Look\n') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-stage-'));
   fs.mkdirSync(path.join(root, 'films', 'f'), { recursive: true });
@@ -22,7 +24,7 @@ function film(html, brief = '## Look\n') {
 test('a filled board that fails a check is named before the first draft, as advice', () => {
   const { root, page } = film('<meta name="spectacle" content="3"><p>x</p>');
   const filled = '## Board\n\n| beat | in s | hold s | cut out s (length) |\n|---|---|---|---|\n| s1 | 0 | 1 | 0.6 |\n| s2 | 1 | 1 | 0.6 |\n\nSpectacle: the big moment at 7 s.\n\n| cut | move |\n|---|---|\n| s1 to s2 | whip |\n\n| at s | voice | gain dB | for |\n|---|---|---|---|\n| 0 | bed, loop | -20 | all |\n';
-  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), filled);
+  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), IDEAS + filled);
   const s = nextStep(page, root);
   assert.match(s.why, /all 2 cuts last 0\.6 s/);
   assert.match(s.why, /Spectacle is at 7 s but/);
@@ -67,15 +69,15 @@ test('a brief with no Taken from section (an older film) is not nagged', () => {
 });
 
 test('a frames sheet newer than the page moves the next step on to the draft', () => {
-  const { root, page } = film('<section data-world="s1"></section>');
+  const { root, page } = film('<section data-world="s1"></section>', IDEAS);
   fs.writeFileSync(path.join(root, 'out', 'f-frames.png'), '');
   assert.equal(nextStep(page, root).next, 'bin/vawe dev films/f/page.html');
 });
 
 test('a page without worlds, or with a draft already, keeps the draft step', () => {
-  const plain = film('<p>x</p>');
+  const plain = film('<p>x</p>', IDEAS);
   assert.equal(nextStep(plain.page, plain.root).next, 'bin/vawe dev films/f/page.html');
-  const { root, page } = film('<section data-world="s1"></section>');
+  const { root, page } = film('<section data-world="s1"></section>', IDEAS);
   fs.writeFileSync(path.join(root, 'out', 'f-draft.mp4'), '');
   fs.utimesSync(path.join(root, 'out', 'f-draft.mp4'), new Date(Date.now() - 120000), new Date(Date.now() - 120000));
   assert.equal(nextStep(page, root).next, 'bin/vawe dev films/f/page.html');
@@ -104,12 +106,12 @@ test('three named moves are needed before the design files; a placeholder row do
 });
 
 test('after the frames, an unfilled Board is the next step; a filled one moves on to the draft', () => {
-  const placeholder = '## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n\n## Look\n';
+  const placeholder = `${IDEAS}## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n\n## Look\n`;
   const { root, page } = film('<section data-world="s1"></section>', placeholder);
   fs.writeFileSync(path.join(root, 'out', 'f-frames.png'), '');
   assert.equal(boardFilled(placeholder), false);
   assert.match(nextStep(page, root).next, /fill "Board"/);
-  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), '## Board\n\n| beat | in s | hold s | cut out s (length) |\n|---|---|---|---|\n| s1 | 0 | 1 | 0.3 |\n| s2 | 1 | 1 | 1.2 |\n\nSpectacle: at 7.\n\n| cut | move | handoff (family: object) |\n|---|---|---|\n| s1 to s2 | whip | invisible cut: the blur peak |\n\n| at s | voice | gain dB | for |\n|---|---|---|---|\n| 0 | bed, loop | -20 | all |\n');
+  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), IDEAS + '## Board\n\n| beat | in s | hold s | cut out s (length) |\n|---|---|---|---|\n| s1 | 0 | 1 | 0.3 |\n| s2 | 1 | 1 | 1.2 |\n\nSpectacle: at 7.\n\n| cut | move | handoff (family: object) |\n|---|---|---|\n| s1 to s2 | whip | invisible cut: the blur peak |\n\n| at s | voice | gain dB | for |\n|---|---|---|---|\n| 0 | bed, loop | -20 | all |\n');
   assert.equal(nextStep(page, root).next, 'bin/vawe dev films/f/page.html');
   assert.equal(boardFilled('## Look\n'), null);
 });
@@ -202,4 +204,19 @@ test('an empty Ideas ledger is named before the Board; a filled one moves on', (
   assert.match(s.next, /guides\/IDEATE\.md/);
   fs.writeFileSync(brief, `${head}| s1 | m | a: x, 0.1 | b: y, 0.2 | c: z, 0.3 | d: w, 0.4 | 1 | because |\n\n## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n`);
   assert.equal(nextStep(page, root).stage, 'board');
+});
+
+test('a brief with no Ideas section names guides/IDEATE.md and the storyboard before the board', () => {
+  const { root, page } = film('<meta name="spectacle" content="3"><p>x</p>', '## Look\n');
+  const s = nextStep(page, root);
+  assert.equal(s.stage, 'ideas');
+  assert.match(s.next, /guides\/IDEATE\.md.*typicality number.*bin\/vawe storyboard films\/f\/page\.html/);
+});
+
+test('a brief length that differs from the page duration is named before the ideas', () => {
+  const { root, page } = film('<meta name="duration" content="8.15"><p>x</p>', '- Length: 22.8 s\n\n## Look\n');
+  const s = nextStep(page, root);
+  assert.equal(s.stage, 'board');
+  assert.match(s.why, /brief says 22\.8 s and the page is 8\.15 s/);
+  assert.match(s.next, /bin\/vawe storyboard films\/f\/page\.html/);
 });

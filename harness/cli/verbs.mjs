@@ -636,7 +636,7 @@ export const VERBS = [
   },
   {
     name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or (the default) one PNG of the mixed waveform with world lines and cue ticks',
-    name: 'storyboard', summary: 'one self-contained HTML storyboard to present a film: a pan-and-zoom canvas with a frame card per world (timecodes, action, move and ease curve, sound cues), the handoff arrows between cards and a rhythm strip; about 10 s',
+    name: 'storyboard', summary: 'one self-contained HTML storyboard to present a film: a pan-and-zoom canvas with a frame card per world (timecodes, action, move and ease curve, sound cues), the handoff arrows between cards and a rhythm strip, and a "from the docs" list of what the taste docs and the guides say about the plan; about 10 s',
     positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html, or a draft mp4 (frames are cut from it; the page is found by the film name)' }],
     flags: [
       { name: 'page', type: 'path', help: 'with an mp4: the film\'s page.html, when it is not under films/' },
@@ -644,7 +644,7 @@ export const VERBS = [
     ],
     example: 'vawe storyboard films/examples/colour-sting/page.html   |   vawe storyboard out/my-launch-draft.mp4',
     build: (v, [input]) => [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out)] }],
-    next: () => 'open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields',
+    next: () => 'fix the lines under "from the docs" or keep them on purpose; open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields',
   },
   {
     name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',

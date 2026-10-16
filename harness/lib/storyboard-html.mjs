@@ -115,6 +115,11 @@ function strip(board, widthPx) {
 </section>`;
 }
 
+function planPanel(plan) {
+  if (!plan?.length) return '';
+  return `<section class="plan"><span class="k">from the docs</span><ul>${plan.map((l) => `<li>${esc(l)}</li>`).join('')}</ul></section>`;
+}
+
 function rowsOfCards(board, images) {
   const out = [];
   for (let i = 0; i < board.shots.length; i += PER_ROW) {
@@ -140,6 +145,9 @@ const CSS = `
 .head .meta{font:400 14px/1.5 var(--mono);color:var(--muted);display:flex;flex-direction:column;gap:2px}
 .head .meta b{color:var(--ink2);font-weight:500}
 .head .msg{font:400 20px/1.35 var(--sans);color:var(--ink2);max-width:640px;letter-spacing:-.01em}
+.plan{margin:-24px 0 56px;max-width:${CARD_W * 3}px;background:color-mix(in srgb,var(--spec) 9%,var(--panel));border:1px solid color-mix(in srgb,var(--spec) 35%,transparent);border-radius:10px;padding:14px 16px}
+.plan .k{display:block;margin-bottom:8px;font:500 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--spec)}
+.plan ul{margin:0;padding-left:18px;font:400 13px/1.5 var(--sans);color:var(--ink2)}
 .cards{display:flex;align-items:flex-start;margin-bottom:96px}
 .tag{display:flex;align-items:center;gap:10px;font:500 13px/1 var(--mono);color:var(--muted);padding:0 2px 10px;white-space:nowrap}
 .tag .no{color:var(--ink);font-weight:500}.tag .id{color:var(--ink2);text-transform:none}
@@ -229,6 +237,7 @@ export function storyboardHtml(board, { images, fontCss = '' }) {
 <body>
 <div id="viewport"><div id="world" data-film="${esc(board.film)}">
   <div class="head"><h1>${esc(board.film)}</h1><div class="meta">${meta}</div>${board.message ? `<p class="msg">${esc(board.message)}</p>` : ''}</div>
+  ${planPanel(board.plan)}
   ${rowsOfCards(board, images)}
   ${strip(board, rowW)}
   ${board.motionPass ? `<div class="pass"><span class="k">motion pass</span>${esc(board.motionPass)}</div>` : ''}

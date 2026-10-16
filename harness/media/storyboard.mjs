@@ -17,6 +17,8 @@ import { lockedSpectacle, spectacleOf } from '../lib/board.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
 import { filmKeyOf } from '../lib/runlog.mjs';
 import { storyboardOf } from '../lib/storyboard.mjs';
+import { readPlanFindings } from './plan-read.mjs';
+import { planLines } from '../lib/plan-findings.mjs';
 import { storyboardHtml } from '../lib/storyboard-html.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -109,10 +111,12 @@ async function main(argv) {
       film, brief,
       read: { ...read, spectacle: lockedSpectacle(brief, spectacleOf(text)), signature: metaOf(text, 'signature'), message: readPageMeta(abs, 'message') },
     });
+    board.plan = planLines(await readPlanFindings(opened.page, abs, duration), ROOT);
     const images = source.endsWith('.html') ? await shootShots(opened.page, board.shots, dir) : mp4Frames(source, board.shots, dir);
     for (const shot of board.shots) shot.ground = groundOfImage(path.join(dir, images[shot.id])) ?? shot.ground;
     const relative = Object.fromEntries(Object.entries(images).map(([id, f]) => [id, `${path.basename(dir)}/${f}`]));
     fs.writeFileSync(html, storyboardHtml(board, { images: relative, fontCss: fontFaceCss() }));
+    console.log(board.plan.length ? [`from the docs (${board.plan.length}; advice, the page keeps what it does on purpose):`, ...board.plan.map((l) => `  ${l}`)].join('\n') : 'from the docs: no finding');
     console.log(`✓ ${html}: ${board.shots.length} shots, ${board.cues.length} cues${board.hasBrief ? '' : ', no brief.md'}; images in ${dir}`);
   } catch (e) {
     die(e.stack || String(e));
