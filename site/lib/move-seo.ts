@@ -44,3 +44,12 @@ export function relatedMoves(m: Move): Move[] {
   const sameJob = MOVES.filter((o) => o !== m && o.jobs.some((j) => m.jobs.includes(j)));
   return [...new Set([...sameGroup.slice(0, 4), ...sameJob, ...sameGroup])].slice(0, RELATED_MAX);
 }
+
+// The rest of the move's group, nearest first, for a plain link list under the related cards.
+export function moreInGroup(m: Move): Move[] {
+  const shown = new Set(relatedMoves(m));
+  const index = MOVES.indexOf(m);
+  return MOVES.filter((o) => o !== m && o.group === m.group && !shown.has(o)).sort(
+    (a, b) => Math.abs(MOVES.indexOf(a) - index) - Math.abs(MOVES.indexOf(b) - index),
+  );
+}

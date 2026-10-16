@@ -7,7 +7,7 @@ import { Clip } from "../../components/Clip";
 import { pageMetadata } from "../../components/seo";
 import { MOVES, clip, groupLabel, moveByName, type Ease, type Move } from "../../../lib/moves";
 import { moveAlt } from "../../../lib/move-words";
-import { moveSeoDescription, moveSeoTitle, relatedMoves } from "../../../lib/move-seo";
+import { moreInGroup, moveSeoDescription, moveSeoTitle, relatedMoves } from "../../../lib/move-seo";
 import { jsonLdScript } from "../../../lib/schema";
 import { moveBreadcrumbSchema, techArticleSchema, videoObjectSchema } from "../../../lib/schema-content";
 import { CopyCode } from "./CopyCode";
@@ -69,6 +69,7 @@ export default async function MovePage({ params }: Params) {
   if (!move) notFound();
   const files = clip(move);
   const related = relatedMoves(move);
+  const more = moreInGroup(move);
 
   return (
     <div className="shell">
@@ -85,6 +86,7 @@ export default async function MovePage({ params }: Params) {
               <Link href={`/moves?group=${move.group}`}>{groupLabel(move.group)}</Link>
             </p>
             <h1>{move.title}</h1>
+            <p className="mvd-lede">{moveSeoDescription(move)}</p>
             <p className="meta mvd-meta">
               <span>look: {move.look}</span>
               {move.duration ? <span>{move.duration} s</span> : null}
@@ -126,6 +128,16 @@ export default async function MovePage({ params }: Params) {
                 </li>
               ))}
             </ul>
+            {more.length ? (
+              <>
+                <h3 className="mvd-more-h">More in {groupLabel(move.group)}</h3>
+                <ul className="mvd-more">
+                  {more.map((m) => (
+                    <li key={m.name}><Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link></li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
           </section>
 
           <Next
