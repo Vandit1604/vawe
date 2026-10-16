@@ -35,6 +35,22 @@ export const trackPoints = (times, track) => track
   .map((b, i) => (b ? { t: times[i], x: b[0] + b[2] / 2, y: b[1] + b[3] / 2, s: Math.sqrt(Math.max(0, b[2] * b[3])), alpha: b[4] ?? 1 } : null))
   .filter(Boolean);
 
+/**
+ * The points of the longest stretch in which the box is drawn (a size above zero and an alpha above zero): an element that toggles display sits at 0, 0 with no size while hidden,
+ * and reading that jump as a move gave speeds of 100 frame heights a second. { points, from, to } with the times of the stretch; no points when it is never drawn. Pure.
+ */
+export function visiblePoints(times, track) {
+  let best = { start: 0, end: 0 }, start = null;
+  const drawn = (b) => b && b[2] * b[3] > 0 && (b[4] ?? 1) > 0;
+  for (let i = 0; i <= track.length; i++) {
+    if (i < track.length && drawn(track[i])) { start ??= i; continue; }
+    if (start !== null && i - start > best.end - best.start) best = { start, end: i };
+    start = null;
+  }
+  const points = trackPoints(times.slice(best.start, best.end), track.slice(best.start, best.end));
+  return { points, from: points.length ? points[0].t : null, to: points.length ? points.at(-1).t : null };
+}
+
 /** The central difference of `value(point)` per second at each point, one-sided at the two ends. Pure. */
 function slope(pts, value) {
   return pts.map((_, i) => {

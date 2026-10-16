@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ONION_FRAMES, ONION_SPAN, blendWeights, frameTint, isLightGround, onionGraph, onionProblem, onionTimes, tintMixer } from '../../harness/media/see/onion-math.mjs';
-import { analyseMove, analyseTrack, easeShape, moveScore, pathProgress, sampleTimes, scaleSeries, speedSeries, topMovers, trackPoints, velocityProblem } from '../../harness/media/see/velocity-math.mjs';
+import { analyseMove, analyseTrack, easeShape, moveScore, pathProgress, sampleTimes, scaleSeries, speedSeries, topMovers, trackPoints, velocityProblem, visiblePoints } from '../../harness/media/see/velocity-math.mjs';
 import { velocitySvg } from '../../harness/media/see/velocity-graph.mjs';
 
 const H = 1000;
@@ -143,4 +143,21 @@ test('velocitySvg: one polyline per element and a circle at each peak', () => {
   assert.equal((svg.match(/<polyline/g) || []).length, 3);
   assert.equal((svg.match(/<circle/g) || []).length, 2);
   assert.ok(svg.includes('b &lt;x&gt;'));
+});
+
+test('visiblePoints: an element that toggles display is read over its drawn stretch, not across the jump from 0, 0', () => {
+  const times = sampleTimes(0, 1);
+  const track = times.map((t) => (t < 0.3 ? [0, 0, 0, 0, 0] : [100 + 400 * (t - 0.3), 200, 100, 100, 1]));
+  const run = visiblePoints(times, track);
+  assert.equal(run.from, 0.3);
+  assert.equal(run.to, 1);
+  assert.ok(Math.max(...analyseTrack(run.points, H).speed.map((p) => p.v)) < 1);
+  assert.ok(Math.max(...analyseTrack(trackPoints(times, track), H).speed.map((p) => p.v)) > 5);
+});
+
+test('visiblePoints: a box never drawn has no points, and the longer of two stretches wins', () => {
+  const times = sampleTimes(0, 1);
+  assert.equal(visiblePoints(times, times.map(() => [0, 0, 0, 0, 1])).points.length, 0);
+  const two = times.map((t) => (t < 0.2 || (t > 0.4 && t < 0.5) ? [10, 10, 50, 50, 1] : [0, 0, 0, 0, 0]));
+  assert.ok(visiblePoints(times, two).to <= 0.2);
 });

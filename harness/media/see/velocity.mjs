@@ -7,7 +7,7 @@ import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
 import { die } from './core.mjs';
 import { stripWindow } from './strip-math.mjs';
 import { GRAPH_H, GRAPH_W, LINE_COLOURS, velocitySvg } from './velocity-graph.mjs';
-import { analyseTrack, moveScore, sampleTimes, summaryLines, topMovers, trackPoints, VELOCITY_SPAN, velocityProblem } from './velocity-math.mjs';
+import { analyseTrack, moveScore, sampleTimes, summaryLines, topMovers, VELOCITY_SPAN, velocityProblem, visiblePoints } from './velocity-math.mjs';
 
 const TAG = 'data-velocity-pick';
 
@@ -25,8 +25,12 @@ export async function readVelocity(page, opts, from, to) {
   const scope = await scopeOf(page, opts);
   const times = sampleTimes(from, to);
   const sampled = await sampleBoxTracks(page, times, scope);
-  const picked = scope === 'visible' ? topMovers(sampled.tracks.map((t) => moveScore(trackPoints(times, t), sampled.height))) : sampled.tracks.map((_, i) => i).filter((i) => sampled.tracks[i].length).slice(0, LINE_COLOURS.length);
-  const rows = picked.map((i, k) => ({ label: `${k + 1}. ${sampled.labels[i]}`, colour: LINE_COLOURS[k], analysis: analyseTrack(trackPoints(times, sampled.tracks[i]), sampled.height) }));
+  const picked = scope === 'visible' ? topMovers(sampled.tracks.map((t) => moveScore(visiblePoints(times, t).points, sampled.height))) : sampled.tracks.map((_, i) => i).filter((i) => sampled.tracks[i].length).slice(0, LINE_COLOURS.length);
+  const rows = picked.map((i, k) => {
+    const run = visiblePoints(times, sampled.tracks[i]);
+    const shown = run.points.length && (run.from > times[0] + 1e-6 || run.to < times.at(-1) - 1e-6) ? ` (drawn ${run.from.toFixed(2)} to ${run.to.toFixed(2)} s)` : '';
+    return { label: `${k + 1}. ${sampled.labels[i]}${shown}`, colour: LINE_COLOURS[k], analysis: run.points.length >= 3 ? analyseTrack(run.points, sampled.height) : null };
+  }).filter((r) => r.analysis);
   return { times, height: sampled.height, rows };
 }
 

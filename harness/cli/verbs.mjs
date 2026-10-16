@@ -397,7 +397,7 @@ export const VERBS = [
     next: (v) => (v.vs ? 'act on the advice lines, then vawe zoom <film> --vs <ref> --auto --at <s> to see the pixels behind a number' : 'vawe look <film> --vs <ref id> to put the numbers beside a reference'),
   },
   {
-    name: 'velocity', summary: 'the speed and scale of page elements over time as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page)',
+    name: 'velocity', summary: 'the speed and scale of page elements over time as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page; an element is read over the stretch where it is drawn, so display toggles are not moves; a canvas painted in window.seek has no element: pass --sel)',
     positional: [PAGE],
     flags: [
       { name: 'at', type: 'string', help: 'the second to centre the window on' },
