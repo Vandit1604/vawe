@@ -5,12 +5,14 @@
 
 // Seek film time `t` (seconds): set the virtual clock, call window.seek(t) when the page paints as a
 // function of time, seek every CSS/WAAPI/SMIL animation, then call every vawe.onFrame hook (awaited, so a
-// hook that decodes a texture or builds three.js geometry settles before a screenshot).
+// hook that decodes a texture or builds three.js geometry settles before a screenshot, when it returns a Promise).
 export async function seekTo(t, win = window) {
+  // A GSAP timeline has a then() that never settles, so only a native Promise is awaited; any other return value is ignored.
+  const settle = async (result) => { if (Object.prototype.toString.call(result) === '[object Promise]') await result; };
   if (win.__pageReady) await win.__pageReady();
   if (win.__pageFonts) await win.__pageFonts();
   if (win.__pageClock) win.__pageClock.set(t);
-  if (typeof win.seek === 'function') await win.seek(t);
+  if (typeof win.seek === 'function') await settle(win.seek(t));
   if (win.__pageFonts) await win.__pageFonts();
   const seen = win.__seekAnimations || (win.__seekAnimations = new Set());
   // getAnimations() drops a finished fill:none animation, so a later seek back would miss it.
@@ -22,7 +24,7 @@ export async function seekTo(t, win = window) {
   win.document.querySelectorAll('svg').forEach((svg) => {
     if (typeof svg.pauseAnimations === 'function') { try { svg.pauseAnimations(); svg.setCurrentTime(t); } catch { /* best-effort */ } }
   });
-  for (const fn of win.__vaweFrameHooks || []) await fn(t);
+  for (const fn of win.__vaweFrameHooks || []) await settle(fn(t));
 }
 
 // Resolve when every FontFace in document.fonts has finished loading, including faces whose load starts

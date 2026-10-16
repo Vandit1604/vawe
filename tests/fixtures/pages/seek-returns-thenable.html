@@ -1,0 +1,9 @@
+<!doctype html>
+<meta name="duration" content="1">
+<div id="box" data-world="a" style="width:100px;height:100px;background:#fff"></div>
+<script>
+  // Like a GSAP timeline: tl.time(t) returns the timeline, which has a then() that never settles.
+  const timeline = { then() {} };
+  window.seek = (t) => { document.getElementById('box').style.opacity = String(1 - t); return timeline; };
+  vawe.onFrame((t) => { document.getElementById('box').dataset.hook = String(t); return timeline; });
+</script>
