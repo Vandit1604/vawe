@@ -297,8 +297,8 @@ export const VERBS = [
     next: () => 'Read the PNG at full size: evenly spaced ghosts mean a linear move, ghosts bunched at one end mean an ease, a ghost past the final position means an overshoot; vawe velocity gives the numbers for a page',
   },
   {
-    name: 'sheet', summary: 'a storyboard sheet of a page or mp4: one tile per second with the second on it, and with --labels the world id; default seconds are the middle of each world change',
-    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html or an mp4' }],
+    name: 'sheet', summary: 'a storyboard sheet of a page or mp4: one tile per second with the second on it, and with --labels the world id; default seconds are the middle of each world change; a folder of images gives one tile per image with its file name',
+    positional: [{ name: 'page|mp4|folder', required: true, kind: 'file', help: 'films/<name>/page.html, an mp4, or a folder of png, jpg or webp images (up to 48 tiles, named by file)' }],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
       { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// `vawe sheet <page|mp4> [--at s,s,...] [--from s] [--labels] [--cols n] [--out file.png]`: a storyboard sheet, one tile per second,
+// `vawe sheet <page|mp4|folder> [--at s,s,...] [--from s] [--labels] [--cols n] [--out file.png]`: a storyboard sheet, one tile per second,
 // the second printed on each tile and, with --labels, the data-world id of the world on top (a page only).
 //   node harness/media/sheet.mjs films/my-launch/page.html --at 0.5,1.2,3 --labels
-// Default seconds: the middle of each world of a page, else 12 evenly spaced.
+// Default seconds: the middle of each world of a page, else 12 evenly spaced. A folder of images gives one tile per image, named by its file.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -15,6 +15,8 @@ import { parseAt } from './compare-frames.mjs';
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const EVEN_TILES = 12;
 const TILE_W = 480;
+const IMAGE_TILES_MAX = 48;
+const IMAGE = /\.(png|jpe?g|webp)$/i;
 
 export const tileLabel = (t, world) => `${t}s${world ? ` ${world}` : ''}`;
 
@@ -76,26 +78,35 @@ function videoTiles(mp4, at, from) {
   return { shots: times.map((t, i) => ({ t, at: local[i], png: mp4, world: null })), size: videoSize(mp4) };
 }
 
+/** One tile per image of a folder, sorted by name, each labelled with its file name (at most IMAGE_TILES_MAX). */
+function imageTiles(dir) {
+  const files = fs.readdirSync(dir).filter((f) => IMAGE.test(f)).sort().slice(0, IMAGE_TILES_MAX);
+  if (!files.length) throw new Error(`no png, jpg or webp image in ${dir}`);
+  const shots = files.map((f) => ({ t: 0, at: 0, png: path.join(dir, f), world: null, label: f }));
+  return { shots, size: videoSize(shots[0].png) };
+}
+
 async function main(argv) {
   const flag = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
   const valued = new Set(['--at', '--cols', '--out', '--from']);
   const source = argv.find((a, i) => !a.startsWith('--') && !valued.has(argv[i - 1]));
-  if (!source) die('missing <page|mp4>; usage: bin/vawe sheet <page|mp4> [--at s,s,...] [--from s] [--labels] [--cols n] [--out file.png]');
+  if (!source) die('missing <page|mp4|folder>; usage: bin/vawe sheet <page|mp4|folder> [--at s,s,...] [--from s] [--labels] [--cols n] [--out file.png]');
   if (!fs.existsSync(source)) die(`no such file: ${source}`);
   const labels = argv.includes('--labels');
   const isPage = source.endsWith('.html');
+  const isFolder = fs.statSync(source).isDirectory();
   if (labels && !isPage) die('--labels names the world on each tile, which only a page has; give the page');
   const out = path.resolve(flag('--out') || path.join('out', `sheet-${path.basename(source, path.extname(source)) === 'page' ? path.basename(path.dirname(path.resolve(source))) : path.basename(source, path.extname(source))}.png`));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-sheet-'));
   try {
     let read;
-    try { read = isPage ? await pageTiles(source, flag('--at'), labels, dir) : videoTiles(source, flag('--at'), Number(flag('--from') ?? 0)); } catch (e) { die(e.message); }
+    try { read = isFolder ? imageTiles(source) : isPage ? await pageTiles(source, flag('--at'), labels, dir) : videoTiles(source, flag('--at'), Number(flag('--from') ?? 0)); } catch (e) { die(e.message); }
     const th = Math.round((TILE_W * read.size.h) / read.size.w);
-    const tiles = read.shots.map((s, i) => frameTile(s.png, s.at ?? s.t, path.join(dir, `t${i}.png`), { tw: TILE_W, th, label: tileLabel(s.t, s.world) }));
+    const tiles = read.shots.map((s, i) => frameTile(s.png, s.at ?? s.t, path.join(dir, `t${i}.png`), { tw: TILE_W, th, label: s.label ?? tileLabel(s.t, s.world) }));
     const cols = Number(flag('--cols')) || Math.min(tiles.length, 4);
     tileGrid(tiles, { cols, tw: TILE_W, th, out });
-    console.log(`✓ ${out}: ${tiles.length} tile(s), ${cols} per row, left to right: ${read.shots.map((s) => tileLabel(s.t, s.world)).join(', ')}`);
+    console.log(`✓ ${out}: ${tiles.length} tile(s), ${cols} per row, left to right: ${read.shots.map((s) => s.label ?? tileLabel(s.t, s.world)).join(', ')}`);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
