@@ -3,7 +3,7 @@
 vawe is the framework for agent-native motion graphics: one HTML page in, one film out. Write the
 page in what you already know (HTML, CSS, Web Animations, SVG, canvas, three.js): you never learn a
 private format, and if something you would naturally write fails, that is a framework bug to report.
-This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`.
+This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`. Its first run turns on the git hooks in `.githooks`.
 `films/examples/colour-sting/` is a judged-PASS 5 s sting: study how it moves, then make your own direction.
 
 ## The page contract  `[live: harness/media/render-page.mjs]`
@@ -73,7 +73,7 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 - macOS has no `timeout`, and `sed -i` needs `''`: `sed -i '' 's/a/b/' f`, or use the Edit tool.
 
 Over 60 seconds or more than one session: one chapter file per agent
-(`prompts/directors-brief-long-form.md`). Skills: `vawe-brief` (no `brief.md` yet), `vawe-page` (write),
+(`prompts/directors-brief-long-form.md`). Skills (read `skills/<name>/SKILL.md` before the stage; any agent can, nothing to install): `vawe-brief` (no `brief.md` yet), `vawe-page` (write),
 `vawe-critique` (look), `vawe-transitions` (the cuts), `vawe-reference` (match). A PASS is never self-recorded: score with `bin/vawe judge` in a fresh session.
 
 ## Waivers  `[live: harness/media/render-page.mjs]`

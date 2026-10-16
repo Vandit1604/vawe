@@ -15,6 +15,7 @@ import { nextStep } from '../harness/live/stage-say.mjs';
 import { recentFailedShipLines } from '../harness/lib/ship-status.mjs';
 import { newEvent } from '../harness/lib/run-events.mjs';
 import { doctorHintFromFile } from '../harness/lib/doctor-hint.mjs';
+import { ensureHooks, gitAt } from '../harness/lib/git-hooks.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MAX_SCAN = 4_000_000;
@@ -120,6 +121,8 @@ const quietFooter = (rest) => rest.includes('--json') || rest.includes('--questi
 
 async function main(argv) {
   const [name, ...rest] = argv;
+  const hooksLine = ensureHooks(gitAt(ROOT));
+  if (hooksLine) console.error(hooksLine);
   if (!name || name === '--help' || name === '-h' || name === 'help') return console.log(topHelp(VERBS));
   const verb = VERBS.find((v) => v.name === name);
   if (!verb) {
