@@ -33,6 +33,16 @@ export function stillText(r, limit = STILL_SEC) {
   return `static window ${r.a}-${r.b} s (${r.len} s, limit ${limit} s): ${why}; give the hold an element motion (typing, a counter, a glint), not a camera drift; ${waiverHint(`static-window@${r.a}-${r.b}`)}`;
 }
 
+const round2 = (x) => +x.toFixed(2);
+
+/** The still runs without the `typing` seconds (harness/lib/typing-spans.mjs): text that changes is element motion the pixels cannot see. Pure. */
+export function withoutTypingStills(runs, typing = []) {
+  return runs.flatMap((r) => {
+    const parts = typing.reduce((acc, [c, d]) => acc.flatMap(([p, q]) => (d <= p || c >= q ? [[p, q]] : [[p, Math.min(q, c)], [Math.max(p, d), q]].filter(([x, y]) => y > x))), [[r.a, r.b]]);
+    return parts.map(([a, b]) => ({ ...r, a: round2(a), b: round2(b), len: round2(b - a) }));
+  });
+}
+
 /** A predicate for { a, b } second ranges that lie inside one hold declared for check `code`. */
 export function insideHold(authoring = {}, code = 'static-window') {
   const holds = declaredHolds(authoring, code);

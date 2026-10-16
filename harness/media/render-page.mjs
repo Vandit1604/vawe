@@ -83,6 +83,7 @@ import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs'
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { cameraOnlySpans, cameraSpans } from '../lib/camera-moves.mjs';
+import { typingSpans } from '../lib/typing-spans.mjs';
 import { boardVerify } from '../lib/board-verify.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, sightedRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
@@ -991,11 +992,12 @@ export function pageAdvice(pagePath, { probe, motion }) {
 
 /** { problems, measures } of the draft video from one read (stills, held worlds, blank runs, tail tiles, smoothness), or null when ffmpeg fails. */
 export async function videoChecks(mp4, pagePath, checks, probe = {}, cameraOnly = []) {
+  const typing = typingSpans(probe.motionText ?? []);
   const authoring = pageAuthoring(pagePath);
   const shots = dropGuesses(parseBriefTables(readBrief(pagePath))).set.shots;
-  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail), canvasFilm: Boolean(probe.canvasFilm), cameraOnly };
+  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail), canvasFilm: Boolean(probe.canvasFilm), cameraOnly, typing };
   try {
-    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds, cameraOnly) }; }, { authoring, shots, page });
+    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds, cameraOnly, typing) }; }, { authoring, shots, page });
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 
@@ -1021,7 +1023,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
     cues: (level?.cues ?? []).filter((c) => c.role === 'sfx'), dur: Number(readPageMeta(pagePath, 'duration')),
   });
   const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...bedAdvice, ...planAdvice, ...page.lines];
-  const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly })) : null;
+  const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly, typing: typingSpans(probe.motionText ?? []) })) : null;
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples, probe.motionText), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
   const hard = [...problems, sound, peak].filter(Boolean);
