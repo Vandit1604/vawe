@@ -69,6 +69,7 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 - A Bash call over 120 s moves to the background and keeps its render slot: run `dev` alone and strips in a second call.
 - Never `sleep`: wait with `bin/vawe wait <page>` (any draft or final; a call returns within about 3.5 minutes; if its last line says STILL RUNNING, call it again; a progress line each minute; run it alone, not in parallel), or `bin/vawe ship --status <page> --wait` for the verdict of a final.
 - Run `git` plainly from the worktree: no `git -C`, no `$(...)`, no `for` loop around it.
+- In a worktree a call with a heredoc, a `for` loop, a variable or `$(...)` is refused as "too complex to verify" (410 calls of 12k in one day): one verb per call with literal arguments, and the Write tool for any file.
 - macOS has no `timeout`, and `sed -i` needs `''`: `sed -i '' 's/a/b/' f`, or use the Edit tool.
 
 Over 60 seconds or more than one session: one chapter file per agent
