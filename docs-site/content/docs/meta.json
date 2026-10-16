@@ -4,6 +4,7 @@
   "pages": [
     "index",
     "quickstart",
+    "video-from-code",
     "html-to-mp4-with-claude-code",
     "prompting",
     "---Concepts---",

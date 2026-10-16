@@ -1,0 +1,32 @@
+---
+title: Make a video from code
+description: Three ways to render a video from code, and the commands to turn one HTML page into an mp4 with vawe.
+icon: Film
+---
+
+You want a video from code: HTML to video, programmatic video, or motion graphics that an AI coding agent writes. There are three common ways to get it.
+
+| way | how the frames are made | what to watch for |
+|---|---|---|
+| Record a headless browser in real time | the browser plays the page and a recorder films it | frames drop when the machine is busy, so two renders differ |
+| Write React components for a video renderer | the renderer sets a frame number and draws the component | you write React and use its animation helpers |
+| Write one HTML page and seek it | the renderer sets the time, takes a picture, moves to the next time | the page must not read the clock |
+
+Vawe is the third way. The page is plain HTML, CSS, Web Animations, SVG, canvas or three.js. There is no private format. A virtual clock owns `Date`, `requestAnimationFrame`, timers and `Math.random`, so the same page gives the same frames in any order.
+
+## Render your first video
+
+```bash
+git clone https://github.com/Vandit1604/vawe.git
+cd vawe
+npm install
+bin/vawe doctor
+bin/vawe new hello --request "a 6 second title sting for a note-taking app"
+bin/vawe dev films/hello/page.html
+```
+
+The last command writes a draft mp4 to `out/`. Edit `films/hello/page.html` and run it again. `bin/vawe ship films/hello/page.html` renders the final file.
+
+## Use it with a coding agent
+
+The repository ships agent skills in `skills/`. Start with `html-to-video`: it routes to `vawe-brief`, `vawe-page`, `vawe-critique`, `vawe-reference` and `vawe-transitions`. See [HTML to MP4 with Claude Code](/docs/html-to-mp4-with-claude-code) for a full run, and [the page](/docs/the-page) for the contract.

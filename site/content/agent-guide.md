@@ -58,7 +58,7 @@ A whole film:
 ## The loop an agent follows
 
 1. Read `AGENTS.md` in the repo root. It holds only what you would get wrong on your own.
-2. If your tool loads skills, load `skills/vawe-page` before you write any page.
+2. If your tool loads skills, start with `skills/html-to-video`, then load `skills/vawe-page` before you write any page.
 3. `bin/vawe new <name> --request "<the ask>"`. It asks for missing facts first. Use `--defaults` when unattended.
 4. Study references, fill `brief.md`, then build one key frame per beat: `bin/vawe frames <page>`.
 5. Draft with `bin/vawe dev <page> [--from s --to s]`. Draft the hardest 2 to 4 seconds first.

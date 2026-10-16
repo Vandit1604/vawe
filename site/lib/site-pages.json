@@ -207,10 +207,15 @@
       "path": "/docs/html-to-mp4-with-claude-code",
       "priority": 0.8,
       "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/video-from-code",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
     }
   ],
   "counts": {
     "routes": 10,
-    "docs": 15
+    "docs": 16
   }
 }
