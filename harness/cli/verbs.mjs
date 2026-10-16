@@ -9,6 +9,7 @@ import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs
 
 import { stillProblem } from '../media/see/still-math.mjs';
 import { parseTargets, shotProblem } from '../media/shot-math.mjs';
+import { linksProblem } from '../media/links-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { lookProblem } from '../media/see/look-math.mjs';
@@ -325,6 +326,23 @@ export const VERBS = [
       return [{ script: 'harness/media/shot.mjs', args: [target, ...opt('--w', v.w), ...(v.full ? ['--full'] : []), ...opt('--base', v.base), ...opt('--out', v.out)] }];
     },
     next: () => 'Read each PNG at full size; the 390 one shows the phone layout; vawe links checks every link of the site',
+  },
+  {
+    name: 'links', summary: 'crawl the site from its start routes and check every link, image and stylesheet: broken ones with the pages that link there, redirecting ones, and #anchors with no element; exit 1 when any is broken',
+    positional: [],
+    flags: [
+      { name: 'base', type: 'string', default: 'http://localhost:3080', help: 'the site: a localhost server that is down is started and stopped by this verb; https://vawe.dev checks the live site' },
+      { name: 'from', type: 'string', default: '/', help: 'comma list of start routes' },
+      { name: 'max', type: 'number', default: 400, help: 'the most distinct urls to check' },
+      { name: 'external', type: 'bool', help: 'also check links to other sites (slower; some sites refuse a bot)' },
+    ],
+    example: 'vawe links   |   vawe links --base https://vawe.dev --from /,/blog',
+    build: (v) => {
+      const problem = linksProblem({ base: v.base, max: v.max });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/links.mjs', args: [...opt('--base', v.base), ...opt('--from', v.from), ...opt('--max', v.max), ...(v.external ? ['--external'] : [])] }];
+    },
+    next: () => 'fix each broken link at the page named after the arrow, or the redirect rule in site/lib/redirects.mjs; vawe shot <route> shows the page',
   },
   {
     name: 'still', summary: 'one frame at the full render size as a PNG: a page renders that one frame at its final size (1920x1080 for 16:9), an mp4 gives its exact frame',

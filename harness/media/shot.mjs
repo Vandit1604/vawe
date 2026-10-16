@@ -5,35 +5,12 @@
 // Lazy images are loaded before the shot. Each line also reports page errors, failed requests and sideways overflow, the three things a screenshot hides.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawn } from 'node:child_process';
 import { launchPage, serveRepo, REPO_ROOT } from '../lib/render-harness.mjs';
-import { scratch } from '../lib/scratch.mjs';
+import { withSite } from '../lib/site-server.mjs';
 import { DEFAULT_BASE, DEFAULT_WIDTHS, parseTargets, parseWidths, resolveTarget, shotName, shotProblem, viewportHeight } from './shot-math.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const NAV_TIMEOUT_MS = 120000;
-const SERVER_START_MS = 180000;
-
-async function reachable(url) {
-  try { await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(3000) }); return true; } catch { return false; }
-}
-
-/** Starts `npm run dev` of site/ on the base's port and waits for it; returns a stop function. The caller owns the child. */
-async function startSite(base) {
-  const port = new URL(base).port || '80';
-  const log = fs.openSync(scratch('shot', `site-dev-${port}.log`), 'w');
-  const child = spawn('npm', ['--prefix', 'site', 'run', 'dev', '--', '-p', port], { cwd: REPO_ROOT, detached: true, stdio: ['ignore', log, log] });
-  const stop = () => { try { process.kill(-child.pid, 'SIGTERM'); } catch { /* already gone */ } };
-  process.on('exit', stop);
-  const t0 = Date.now();
-  while (Date.now() - t0 < SERVER_START_MS) {
-    if (await reachable(base)) return stop;
-    if (child.exitCode !== null) break;
-    await new Promise((r) => setTimeout(r, 1000));
-  }
-  stop();
-  throw new Error(`the site server did not answer on ${base} in ${SERVER_START_MS / 1000} s; its log: ${scratch('shot', `site-dev-${port}.log`)}`);
-}
 
 async function loadLazy(page) {
   await page.evaluate(async () => {
@@ -87,22 +64,18 @@ async function main(argv) {
   const full = argv.includes('--full');
 
   const resolved = targets.map((t) => ({ t, ...resolveTarget(t, base) }));
-  let stopSite = null;
-  let files = null;
-  try {
-    if (resolved.some((r) => r.kind === 'url' && r.url.startsWith(base)) && !(await reachable(base))) {
-      if (!/^https?:\/\/(localhost|127\.0\.0\.1)\b/.test(base)) die(`${base} does not answer`);
-      console.log(`starting the site server on ${base} (it is stopped when the shots are done)`);
-      stopSite = await startSite(base);
-    }
-    if (resolved.some((r) => r.kind === 'file')) files = await serveRepo({ root: REPO_ROOT });
+  const needsSite = resolved.some((r) => r.kind === 'url' && r.url.startsWith(base));
+  const files = resolved.some((r) => r.kind === 'file') ? await serveRepo({ root: REPO_ROOT }) : null;
+  const shootAll = async () => {
     for (const r of resolved) {
       const url = r.kind === 'file' ? `http://127.0.0.1:${files.port}/${path.relative(REPO_ROOT, path.resolve(r.file))}` : r.url;
       for (const width of widths) await shoot({ url, name: shotName(r.t, width), width, full, outDir });
     }
+  };
+  try {
+    await (needsSite ? withSite(base, shootAll) : shootAll());
   } finally {
     files?.close();
-    stopSite?.();
   }
 }
 
