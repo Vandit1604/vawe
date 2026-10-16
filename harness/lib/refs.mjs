@@ -173,7 +173,7 @@ export function downscaleFilter(w, h) {
 
 export const refVideo =(dir, id) => ['mp4', 'webm'].map((e) => path.join(dir, `${id}.${e}`)).find(fs.existsSync);
 
-/** The video to look at for film `id`: the 1080p copy in hd/ when there is one, else the 360p video; undefined when neither exists. */
+/** The video to look at for film `id`: the 1080p copy in hd/ when there is one, else the downloaded video; undefined when neither exists. */
 export const refSharpVideo = (dir, id) => [path.join(dir, 'hd', `${id}.mp4`)].find(fs.existsSync) ?? refVideo(dir, id);
 
 const readSpec = (dir, id) => {
