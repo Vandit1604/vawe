@@ -1,5 +1,5 @@
 // One line per free font face and per synth voice, so an agent never lists a directory.
-const titleCase = (slug) => slug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ').replace('Jetbrains', 'JetBrains');
+const titleCase = (slug) => slug.split('-').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ').replace('Jetbrains', 'JetBrains').replace('Ibm', 'IBM');
 
 /** Free faces as [file, family, weight] from fonts.lock.json `faces`; OG-only .woff instances are left out. */
 export function freeFaces(faces) {

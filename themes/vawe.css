@@ -1,24 +1,37 @@
 /* The vawe brand as CSS custom properties, taken from the real site (site/app/globals.css, layout.tsx).
-   Dark ground, white ink, one blue accent used sparingly. Import it in a page and use var(--vawe-*).
-   Archivo, Unbounded and JetBrains Mono are declared in core/tokens.css. */
+   Pure black ground, white ink, one blue accent used rarely (black ink on it). Import it in a page and use var(--vawe-*).
+   Geist and IBM Plex Mono are declared in core/tokens.css; `bin/vawe fonts` lists the files. */
 :root {
-  --vawe-bg: #16151a;
-  --vawe-surface: #212025;
-  --vawe-surface2: #27262c;
-  --vawe-raised: #2f2e35;
-  --vawe-line: rgba(255, 255, 255, 0.07);
-  --vawe-line-strong: rgba(255, 255, 255, 0.13);
+  --vawe-bg: #000000;
+  --vawe-surface: #0a0a0a;
+  --vawe-surface2: #111111;
+  --vawe-raised: #171717;
+  --vawe-line: #242424;
+  --vawe-line-strong: #3a3a3a;
   --vawe-ink: #ffffff;
-  --vawe-ink2: #d8d8da;
-  --vawe-muted: #97969b;
-  --vawe-accent: #0a87ff;
-  --vawe-accent-hover: #3a9dff;
-  --vawe-accent-ink: #16151a;
-  --vawe-accent-soft: rgba(10, 135, 255, 0.16);
+  --vawe-ink2: #ededed;
+  --vawe-muted: #a1a1a1;
+  --vawe-accent: #3291ff;
+  --vawe-accent-hover: #6cb0ff;
+  --vawe-accent-ink: #000000;
+  --vawe-accent-soft: rgba(50, 145, 255, 0.16);
 
-  --vawe-font-sans: "Archivo", system-ui, sans-serif;
-  --vawe-font-title: "Unbounded", "Archivo", system-ui, sans-serif;
-  --vawe-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --vawe-lane-text: #a67dff;
+  --vawe-lane-sound: #0eaf80;
+  --vawe-lane-cap: #3ea3ff;
+  --vawe-lane-media: #52525a;
+  --vawe-lane-shape: #e0714f;
+  --vawe-lane-comp: #cf5b98;
+  --vawe-lane-camera: #4fb3d9;
+  --vawe-lane-fx: #d9c34f;
+
+  --vawe-font-sans: "Geist", system-ui, sans-serif;
+  --vawe-font-title: "Geist", system-ui, sans-serif;
+  --vawe-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --vawe-head-weight: 600;
+  --vawe-track-display: -0.045em;
+  --vawe-track-head: -0.03em;
+  --vawe-frame-radius: 28px;
 
   --vawe-ease: cubic-bezier(0.23, 1, 0.32, 1);
   --vawe-exit-ratio: 0.4;

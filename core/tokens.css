@@ -49,6 +49,8 @@ html, body {
 @font-face { font-family: 'Geist Mono'; font-weight: 400; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-weight: 600; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Geist'; font-weight: 400 800; font-display: block; src: url('/assets/fonts/Geist.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; font-display: block; src: url('/assets/fonts/IBMPlexMono-400.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; font-display: block; src: url('/assets/fonts/IBMPlexMono-500.woff2') format('woff2'); }
 @font-face { font-family: 'Plus Jakarta Sans'; font-weight: 400 800; font-display: block; src: url('/assets/fonts/PlusJakartaSans.woff2') format('woff2'); }
 @font-face { font-family: 'JetBrains Mono'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/JetBrainsMono.woff2') format('woff2'); }
 @font-face { font-family: 'Caveat'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/Caveat.woff2') format('woff2'); }

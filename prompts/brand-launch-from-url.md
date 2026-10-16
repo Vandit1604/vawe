@@ -88,7 +88,7 @@ A claim that needs a source (a number, a customer name) gets its source before t
 
 URL `site/app/` (local), promise "Write a scene. Get a film.", moments: the editor diff, the same
 scene on five canvases, frame 412 rendered twice, `bin/vawe ship`. Kit: `themes/vawe.css`. The vawe
-brand is a dark ground `#16151a`, white, the accent `#0a87ff` sparingly, Archivo / Unbounded / JetBrains Mono.
+brand is a black ground `#000`, white, the accent `#3291ff` sparingly, Geist and IBM Plex Mono.
 
 ## Launch bars to study
 
