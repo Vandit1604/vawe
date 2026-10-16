@@ -31,7 +31,7 @@ async function pageStill(pagePath, at, out) {
   return { ...last, size: `${frame.width}x${frame.height}` };
 }
 
-function videoStill(mp4, at, out) {
+export function videoStill(mp4, at, out) {
   const { width, height, fps, dur } = probe(mp4);
   const last = clampToLastFrame(at, dur, fps);
   const n = Math.round(last.t * fps);

@@ -47,7 +47,7 @@ next command for the film you edited last.
 
 Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe see <mp4 | page | ref-id> [--vs <ref>]`, the one command that reads a film completely (shots, motion, light, type, sound, every image with its numbers; `--vs` adds deltas and advice naming the page literal), or with its parts: `vawe refs frames` (reference stills),
 `vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft), `vawe spec` (a film measured),
-`vawe compare` (side by side), `vawe sheet` (a labelled storyboard of seconds and worlds), `vawe still` (one full-size PNG of a page or mp4 at a second). If a verb is missing what you need, say so in your report; do not hand-roll it.
+`vawe compare` (side by side), `vawe sheet` (a labelled storyboard of seconds and worlds), `vawe storyboard` (one HTML board to present: frame cards, moves, eases, handoffs, sound, rhythm), `vawe still` (one full-size PNG of a page or mp4 at a second). A site route, url or static html page: `vawe shot <route> --w 1440,390 [--full]` (never a puppeteer script); the site's links: `vawe links`. A field of many small moving parts (rain, dust, sparks): `vawe see` prints one "Particle field" line with count, direction and speed. If a verb is missing what you need, say so in your report; do not hand-roll it.
 
 `bin/vawe` names the next stage after each step; `ship` warns, never refuses, while the Board or Motion pass is unfilled. A page over about 25k tokens cannot be Read in one call: Read it with offset and limit.
 
@@ -69,6 +69,7 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 - A Bash call over 120 s moves to the background and keeps its render slot: run `dev` alone and strips in a second call.
 - Never `sleep`: wait with `bin/vawe wait <page>` (any draft or final; a call returns within about 3.5 minutes; if its last line says STILL RUNNING, call it again; a progress line each minute; run it alone, not in parallel), or `bin/vawe ship --status <page> --wait` for the verdict of a final.
 - Run `git` plainly from the worktree: no `git -C`, no `$(...)`, no `for` loop around it.
+- In a worktree a call with a heredoc, a `for` loop, a variable or `$(...)` is refused as "too complex to verify" (410 calls of 12k in one day): one verb per call with literal arguments, and the Write tool for any file.
 - macOS has no `timeout`, and `sed -i` needs `''`: `sed -i '' 's/a/b/' f`, or use the Edit tool.
 
 Over 60 seconds or more than one session: one chapter file per agent

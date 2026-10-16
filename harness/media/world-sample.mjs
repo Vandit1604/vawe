@@ -94,7 +94,8 @@ export const readWorldAnimations = (page) => page.evaluate(() => document.getAni
   const world = el && el.closest && el.closest('[data-world]');
   const t = a.effect && a.effect.getComputedTiming();
   if (!world || el.closest('[aria-hidden="true"]') || !Number.isFinite(t.endTime)) return [];
-  return [{ world: world.dataset.world, id: a.id || a.animationName || '', start: t.delay / 1000, end: t.endTime / 1000 }];
+  const eased = [t.easing, ...a.effect.getKeyframes().map((k) => k.easing)].find((e) => e && e !== 'linear');
+  return [{ world: world.dataset.world, id: a.id || a.animationName || '', start: t.delay / 1000, end: t.endTime / 1000, ease: eased || 'linear' }];
 }));
 
 /** The second the world's own entrances have all ended, a frame later, or null: animations that end inside the span and not at its end. Pure. */

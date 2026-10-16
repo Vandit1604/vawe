@@ -8,6 +8,8 @@ import { compareProblem, CUTS } from '../media/compare-frames.mjs';
 import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
 import { stillProblem } from '../media/see/still-math.mjs';
+import { parseTargets, shotProblem } from '../media/shot-math.mjs';
+import { linksProblem } from '../media/links-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { lookProblem } from '../media/see/look-math.mjs';
@@ -295,8 +297,8 @@ export const VERBS = [
     next: () => 'Read the PNG at full size: evenly spaced ghosts mean a linear move, ghosts bunched at one end mean an ease, a ghost past the final position means an overshoot; vawe velocity gives the numbers for a page',
   },
   {
-    name: 'sheet', summary: 'a storyboard sheet of a page or mp4: one tile per second with the second on it, and with --labels the world id; default seconds are the middle of each world change',
-    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html or an mp4' }],
+    name: 'sheet', summary: 'a storyboard sheet of a page or mp4: one tile per second with the second on it, and with --labels the world id; default seconds are the middle of each world change; a folder of images gives one tile per image with its file name',
+    positional: [{ name: 'page|mp4|folder', required: true, kind: 'file', help: 'films/<name>/page.html, an mp4, or a folder of png, jpg or webp images (up to 48 tiles, named by file)' }],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
       { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },
@@ -307,6 +309,40 @@ export const VERBS = [
     example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels',
     build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
     next: () => 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment',
+  },
+  {
+    name: 'shot', summary: 'a PNG of a site route, a url or a static html page at each width (default 1440 and 390): lazy images loaded, the site server reused or started and stopped, and page errors, failed requests and sideways overflow reported',
+    positional: [{ name: 'target', required: true, help: 'a route (/blog), a url, or a .html file; a comma list shoots each' }],
+    flags: [
+      { name: 'w', type: 'string', default: '1440,390', help: 'comma list of viewport widths' },
+      { name: 'full', type: 'bool', help: 'the whole page height, not the first screen' },
+      { name: 'base', type: 'string', default: 'http://localhost:3080', help: 'the site server for routes; a localhost one that is down is started and stopped by this verb' },
+      { name: 'out', type: 'path', default: 'out/shot', help: 'the folder for the PNGs, named <route>-<width>.png' },
+    ],
+    example: 'vawe shot /,/blog --full   |   vawe shot /moves --w 390   |   vawe shot films/design/frame.html --w 1920',
+    build: (v, [target]) => {
+      const problem = shotProblem({ targets: parseTargets(target), w: v.w, base: v.base });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/shot.mjs', args: [target, ...opt('--w', v.w), ...(v.full ? ['--full'] : []), ...opt('--base', v.base), ...opt('--out', v.out)] }];
+    },
+    next: () => 'Read each PNG at full size; the 390 one shows the phone layout; vawe links checks every link of the site',
+  },
+  {
+    name: 'links', summary: 'crawl the site from its start routes and check every link, image and stylesheet: broken ones with the pages that link there, redirecting ones, and #anchors with no element; exit 1 when any is broken',
+    positional: [],
+    flags: [
+      { name: 'base', type: 'string', default: 'http://localhost:3080', help: 'the site: a localhost server that is down is started and stopped by this verb; https://vawe.dev checks the live site' },
+      { name: 'from', type: 'string', default: '/', help: 'comma list of start routes' },
+      { name: 'max', type: 'number', default: 400, help: 'the most distinct urls to check' },
+      { name: 'external', type: 'bool', help: 'also check links to other sites (slower; some sites refuse a bot)' },
+    ],
+    example: 'vawe links   |   vawe links --base https://vawe.dev --from /,/blog',
+    build: (v) => {
+      const problem = linksProblem({ base: v.base, max: v.max });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/links.mjs', args: [...opt('--base', v.base), ...opt('--from', v.from), ...opt('--max', v.max), ...(v.external ? ['--external'] : [])] }];
+    },
+    next: () => 'fix each broken link at the page named after the arrow, or the redirect rule in site/lib/redirects.mjs; vawe shot <route> shows the page',
   },
   {
     name: 'still', summary: 'one frame at the full render size as a PNG: a page renders that one frame at its final size (1920x1080 for 16:9), an mp4 gives its exact frame',
@@ -361,7 +397,7 @@ export const VERBS = [
     next: (v) => (v.vs ? 'act on the advice lines, then vawe zoom <film> --vs <ref> --auto --at <s> to see the pixels behind a number' : 'vawe look <film> --vs <ref id> to put the numbers beside a reference'),
   },
   {
-    name: 'velocity', summary: 'the speed and scale of page elements over time as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page)',
+    name: 'velocity', summary: 'the speed and scale of page elements over time as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page; an element is read over the stretch where it is drawn, so display toggles are not moves; a canvas painted in window.seek has no element: pass --sel)',
     positional: [PAGE],
     flags: [
       { name: 'at', type: 'string', help: 'the second to centre the window on' },
@@ -599,6 +635,18 @@ export const VERBS = [
     next: (v, [page]) => `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${page} --waveform to check each sound on its event`,
   },
   {
+    name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or (the default) one PNG of the mixed waveform with world lines and cue ticks',
+    name: 'storyboard', summary: 'one self-contained HTML storyboard to present a film: a pan-and-zoom canvas with a frame card per world (timecodes, action, move and ease curve, sound cues), the handoff arrows between cards and a rhythm strip; about 10 s',
+    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html, or a draft mp4 (frames are cut from it; the page is found by the film name)' }],
+    flags: [
+      { name: 'page', type: 'path', help: 'with an mp4: the film\'s page.html, when it is not under films/' },
+      { name: 'out', type: 'path', default: 'out/<film>-storyboard.html', help: 'the HTML path; the images go in a folder of the same name without .html' },
+    ],
+    example: 'vawe storyboard films/examples/colour-sting/page.html   |   vawe storyboard out/my-launch-draft.mp4',
+    build: (v, [input]) => [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out)] }],
+    next: () => 'open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields',
+  },
+  {
     name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',
     positional: [PAGE],
     flags: [
@@ -608,10 +656,10 @@ export const VERBS = [
     ],
     example: 'vawe audio films/my-launch/page.html --at 0.8,2.75   |   vawe audio films/my-launch/page.html --waveform',
     build: (v, [page]) => {
-      if (!v.at && !v.waveform) throw new UsageError('give --at <s,s,...> or --waveform; usage: vawe audio <page> --at 0.8,2.75');
-      return [{ script: 'harness/media/audio-view.mjs', args: [page, ...opt('--at', v.at), ...(v.waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
+      const waveform = v.waveform || !v.at;
+      return [{ script: 'harness/media/audio-view.mjs', args: [page, ...opt('--at', v.at), ...(waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
     },
-    next: (v) => `vawe audio is now vawe sound <page> ${v.waveform ? '--waveform' : '--at <s,s>'}; the output is the same`,
+    next: (v) => `vawe audio is now vawe sound <page> ${v.waveform || !v.at ? '--waveform' : '--at <s,s>'}; the output is the same`,
   },
   {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',

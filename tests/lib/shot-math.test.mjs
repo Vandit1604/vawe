@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { parseWidths, parseTargets, shotProblem, resolveTarget, shotName, viewportHeight } from '../../harness/media/shot-math.mjs';
+
+test('parseWidths reads a comma list and refuses the rest', () => {
+  assert.deepEqual(parseWidths('1440,390'), [1440, 390]);
+  assert.equal(parseWidths('1440,wide'), null);
+  assert.equal(parseWidths('100'), null);
+});
+
+test('shotProblem names the first fault', () => {
+  assert.match(shotProblem({ targets: [] }), /missing <route/);
+  assert.match(shotProblem({ targets: ['/'], w: 'x' }), /--w/);
+  assert.match(shotProblem({ targets: ['/'], base: 'localhost' }), /--base/);
+  assert.match(shotProblem({ targets: ['blog'] }), /not a route/);
+  assert.equal(shotProblem({ targets: ['/', 'https://vawe.dev/blog', 'films/a/page.html'] }), null);
+});
+
+test('resolveTarget joins a route onto the base and keeps urls and files', () => {
+  assert.deepEqual(resolveTarget('/blog', 'http://localhost:3080'), { kind: 'url', url: 'http://localhost:3080/blog' });
+  assert.deepEqual(resolveTarget('https://vawe.dev/x', 'http://b'), { kind: 'url', url: 'https://vawe.dev/x' });
+  assert.deepEqual(resolveTarget('films/a/page.html', 'http://b'), { kind: 'file', file: 'films/a/page.html' });
+});
+
+test('shotName is one slug per route and width', () => {
+  assert.equal(shotName('/', 390), 'home-390.png');
+  assert.equal(shotName('/blog/determinism/', 1440), 'blog-determinism-1440.png');
+  assert.equal(shotName('https://vawe.dev/vs/remotion?x=1', 390), 'vs-remotion-390.png');
+  assert.equal(shotName('films/my-film/page.html', 1920), 'my-film-page-1920.png');
+});
+
+test('a phone width gets a phone height', () => {
+  assert.equal(viewportHeight(390), 844);
+  assert.equal(viewportHeight(1440), 900);
+});
+
+test('parseTargets splits a comma list', () => {
+  assert.deepEqual(parseTargets('/,/blog'), ['/', '/blog']);
+  assert.deepEqual(parseTargets(undefined), []);
+});

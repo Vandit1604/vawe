@@ -46,6 +46,12 @@ const energyLine = (e) => {
   return `Frame energy: ${e.bursts.length} burst${e.bursts.length === 1 ? '' : 's'} (${e.bursts.map((b) => `${b.t0.toFixed(2)}-${b.t1.toFixed(2)} s peak ${b.peak}`).join(', ')}), settles ${s2(e.settle)}.`;
 };
 
+const particleLine = (p) => {
+  if (!p) return null;
+  const way = p.direction ? `moving ${p.direction} at ${p.speed} frame heights/s, ${Math.round(p.coherence * 100)}% of them with the field` : 'with no common direction';
+  return `Particle field: about ${p.count.median} small parts a frame (${p.count.min} to ${p.count.max}), ${way}, ${Math.round(p.still * 100)}% sitting still, spread over ${Math.round(p.spread.x * 100)}% of the width and ${Math.round(p.spread.y * 100)}% of the height. The moving parts above are the larger shapes: the field is not one of them.`;
+};
+
 const eyeLine = (e) => (e ? `Eye: from ${Math.round(e.start.x * 100)},${Math.round(e.start.y * 100)}% to ${Math.round(e.end.x * 100)},${Math.round(e.end.y * 100)}% (${e.start.src}), travel ${e.travel ?? '-'} frame heights.` : null);
 
 const textLine = (text) => (text.length ? `Text: ${text.map((t) => `"${t.text}" frames ${t.f0}-${t.f1}, ${t.boxHeightPx} px high (font about ${t.fontPxApprox} px)`).join('; ')}.` : null);
@@ -61,7 +67,7 @@ export function shotAccount(s) {
   const moves = s.moves.length ? [`Moving parts (${s.moves.length}):`, ...s.moves.map(moveLine)] : ['No part is tracked as moving.'];
   const hits = s.hits.length ? `Sound hits inside: ${s.hits.map((h) => `f${h.frame} (${h.strength})`).join(', ')}.` : null;
   return [openingLine(s), groundLine(s.ground), `Palette ${s.palette.map((p) => `${p.hex} ${Math.round(p.share * 100)}%`).join(', ')}.`, layoutLine(s.layout), ...moves,
-    energyLine(s.energy), ...eventLines(s.events), `Camera: ${s.camera.words}.${tiltWords(s.camera.tilt)}`, eyeLine(s.eye), textLine(s.text), hits].filter(Boolean);
+    particleLine(s.particles), energyLine(s.energy), ...eventLines(s.events), `Camera: ${s.camera.words}.${tiltWords(s.camera.tilt)}`, eyeLine(s.eye), textLine(s.text), hits].filter(Boolean);
 }
 
 function structureSection(m) {
