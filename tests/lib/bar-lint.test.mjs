@@ -122,6 +122,14 @@ test('boxMotion: an arrival is a move that starts faded out and ends faded in; i
   assert.deepEqual(found.map((a) => a.over), [true, false]);
 });
 
+test('boxMotion: a pop that grows in place overshoots by its size, though its centre never moves', () => {
+  const fade = (k) => Math.min(1, 0.2 + k * 0.3);
+  const grow = (sizes) => sizes.map((w, k) => [900 - w / 2, 500 - w / 2, w, w, fade(k), 1]);
+  const pop = grow([60, 120, 190, 240, 262, 252, 244, 240, 240, 240, 240, 240]);
+  const land = grow([60, 120, 190, 225, 238, 240, 240, 240, 240, 240, 240, 240]);
+  assert.deepEqual(boxMotion(frame([pop, land])).arrivals.map((a) => a.over), [true, false]);
+});
+
 const at5 = (t, ...texts) => ({ t, lines: texts.map((text, block) => ({ text, box: [0, 0, 400, 60], block })) });
 const CTX = { step: 0.5, frameH: 600 };
 const times = (n) => Array.from({ length: n }, (_, k) => 0.25 + k * 0.5);

@@ -1,0 +1,16 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="5">
+<meta name="aspect" content="16:9">
+<style>
+*{margin:0}
+html,body{height:100%;background:#f4f1ea;overflow:hidden}
+h1{position:absolute;left:8%;top:18%;font:700 90px sans-serif;color:#17313b}
+.box{position:absolute;left:8%;top:52%;width:60%;padding:24px;border:3px solid #17313b;border-radius:16px;font:500 44px sans-serif;color:#17313b}
+</style></head><body>
+<h1>Ask anything</h1>
+<div class="box"><span>Write a launch film for a coffee grinder</span><span id="caret">|</span></div>
+<script>
+vawe.onFrame((t) => {
+  document.getElementById('caret').textContent = Math.floor(t * 3) % 2 ? '' : '|';
+});
+</script></body></html>

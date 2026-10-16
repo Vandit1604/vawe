@@ -20,6 +20,6 @@ craft: motion-craft
 
 Of nine card arrivals, three use EASE.pop and six use EASE.land. A "Send" button presses with EASE.pop; the headline lands on EASE.land; 0 to 1,822 runs over 1.1 s on an expo-out.
 
-Draft check, overshoot-share: The draft check reads the easing of each element's entering moves from its animations (a fade alone cannot overshoot, and a curve it cannot read is not counted). A page that paints in window.seek has no animations to read: its arrivals are read from element boxes (a move that starts faded out and ends faded in, past its end by 3 percent of its length or 1 px). It needs 6 arrivals. Under the range or over 61 percent (1.5 times the reference p90) it gives advice.
+Draft check, overshoot-share: The draft check reads the easing of each element's entering moves from its animations (a fade alone cannot overshoot, and a curve it cannot read is not counted). A page that paints in window.seek has no animations to read: its arrivals are read from element boxes (a move or a size change that starts faded out and ends faded in, a corner of the box past its end by 3 percent of its travel or 1 px; a pop that grows in place counts). It needs 6 arrivals. Under the range or over 61 percent (1.5 times the reference p90) it gives advice.
 
 Why and sources: [motion-craft](../craft/motion-craft.md).

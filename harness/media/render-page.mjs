@@ -47,7 +47,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { scratch } from '../lib/scratch.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
-import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
+import { seekTo, awaitFonts, awaitReady, installPageReady, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun, filmKeyOf, readRuns } from '../lib/runlog.mjs';
 import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
@@ -83,6 +83,7 @@ import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs'
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { cameraOnlySpans, cameraSpans } from '../lib/camera-moves.mjs';
+import { typingSpans } from '../lib/typing-spans.mjs';
 import { boardVerify } from '../lib/board-verify.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, sightedRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
@@ -191,7 +192,7 @@ export async function openPage(pagePath, frame, { warm = false, final = true, la
   await cdp.send('Animation.enable');
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
   opened.cdp = cdp;
-  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
+  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});(${installPageReady})();window.__pageFonts = ${awaitFonts};window.__pageReady = ${awaitReady};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
 }
 
@@ -243,6 +244,7 @@ export async function settle(page) {
       const guard = real.setTimeout(resolve, 250);
       real.raf(() => { real.clearTimeout(guard); resolve(); });
     });
+    if (window.__pageReady) await window.__pageReady();
     await window.__pageFonts();
     await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
     await paint();
@@ -755,7 +757,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     await gotoLoaded(page, url, pagePath);
     try { await settle(page); } catch (e) {
       const msg = String(e.message).replace(/^.*?Error: /, '');
-      if (/^font (still loading|failed)/.test(msg)) throw new InvariantError([msg]);
+      if (/^(font (still loading|failed)|page not ready)/.test(msg)) throw new InvariantError([msg]);
       throw e;
     }
     const audioRead = await readAudio(page, pagePath);
@@ -991,11 +993,12 @@ export function pageAdvice(pagePath, { probe, motion }) {
 
 /** { problems, measures } of the draft video from one read (stills, held worlds, blank runs, tail tiles, smoothness), or null when ffmpeg fails. */
 export async function videoChecks(mp4, pagePath, checks, probe = {}, cameraOnly = []) {
+  const typing = typingSpans(probe.motionText ?? []);
   const authoring = pageAuthoring(pagePath);
   const shots = dropGuesses(parseBriefTables(readBrief(pagePath))).set.shots;
-  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail), canvasFilm: Boolean(probe.canvasFilm), cameraOnly };
+  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail), canvasFilm: Boolean(probe.canvasFilm), cameraOnly, typing };
   try {
-    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds, cameraOnly) }; }, { authoring, shots, page });
+    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds, cameraOnly, typing) }; }, { authoring, shots, page });
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 
@@ -1021,7 +1024,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
     cues: (level?.cues ?? []).filter((c) => c.role === 'sfx'), dur: Number(readPageMeta(pagePath, 'duration')),
   });
   const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...bedAdvice, ...planAdvice, ...page.lines];
-  const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly })) : null;
+  const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly, typing: typingSpans(probe.motionText ?? []) })) : null;
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples, probe.motionText), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
   const hard = [...problems, sound, peak].filter(Boolean);

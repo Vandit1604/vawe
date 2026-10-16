@@ -13,7 +13,7 @@ import { spawn } from 'node:child_process';
 import { openFile } from '../harness/lib/open-file.mjs';
 import { serveRepo, REPO_ROOT } from '../harness/lib/render-harness.mjs';
 import { installPageClock } from '../core/engine/page-clock.js';
-import { installPageFrame } from '../core/engine/page-seek.js';
+import { installPageFrame, installPageReady, awaitReady } from '../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../core/layout/aspects.js';
 import { parsePage, applyEdits } from './page-source.mjs';
 import { chatRoutes } from './chat.mjs';
@@ -45,7 +45,7 @@ const pageModel = () => {
 // The page itself, with the clock and frame facts installed before its first script, as render-page.mjs does.
 function framedPage(aspect) {
   const [width, height] = aspectDims(aspect);
-  const boot = `<script>(${installPageClock})();(${installPageFrame})(${JSON.stringify({ aspect, width, height })});</script>`;
+  const boot = `<script>(${installPageClock})();(${installPageFrame})(${JSON.stringify({ aspect, width, height })});(${installPageReady})();window.__pageReady = ${awaitReady};</script>`;
   const html = fs.readFileSync(pageFile, 'utf8');
   const at = html.match(/<head[^>]*>/i) || html.match(/<html[^>]*>/i) || html.match(/<!doctype[^>]*>/i);
   if (!at) return boot + html;

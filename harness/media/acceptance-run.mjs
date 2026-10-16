@@ -29,8 +29,8 @@ function readJson(file) {
 }
 
 /** What the video alone tells: smoothness, still windows, tail tiles and the hard jumps' times, from one read of the video. */
-export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots, tailMoving = false, worlds = null, cameraOnly = []) {
-  const stats = statsWithCamera(summarize(feats), cameraOnly);
+export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots, tailMoving = false, worlds = null, cameraOnly = [], typing = []) {
+  const stats = statsWithCamera(summarize(feats), cameraOnly, typing);
   const cuts = shots.slice(1).map((s) => s.start).filter((t) => typeof t === 'number');
   const worldCuts = (worlds ?? []).flatMap((w) => [w.start, w.end]).filter((t) => t > 0);
   return {
@@ -66,8 +66,8 @@ function judgeMeasure(name) {
   return { yes: anchor.length - no.length, total: anchor.length, fixes: no.map((a) => `${a.frame}${a.at != null ? ` at ${a.at} s` : ''}: ${a.fix}`) };
 }
 
-function record(name, rows, stage, caps = null, spec = null, worlds = null, tailMoving = null, cameraOnly = null, canvasFilm = false) {
-  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, worlds, tailMoving, cameraOnly, canvasFilm, at: new Date().toISOString() });
+function record(name, rows, stage, caps = null, spec = null, worlds = null, tailMoving = null, cameraOnly = null, canvasFilm = false, typing = null) {
+  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, worlds, tailMoving, cameraOnly, typing, canvasFilm, at: new Date().toISOString() });
   fs.mkdirSync(path.dirname(outFile(name, 'acceptance')), { recursive: true });
   fs.writeFileSync(outFile(name, 'acceptance'), JSON.stringify(file, null, 1));
   return was;
@@ -78,14 +78,14 @@ function record(name, rows, stage, caps = null, spec = null, worlds = null, tail
  * `video` the draft video's measures (videoMeasures, null when it could not be read), `mode` the draft's tier mode.
  * Table rows that `vawe new` wrote as template guesses are left out of the spec checks and show "not set".
  */
-export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, mode, cameraOnly = [] }) {
+export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, mode, cameraOnly = [], typing = [] }) {
   const { set, guessed } = dropGuesses(parseBriefTables(readBrief(pagePath)));
   const authoring = pageAuthoring(pagePath);
   const name = nameOf(mp4);
   const page = pageMeasures({ probe, findings, authoring }, set);
   const m = { ...(video ?? {}), ...page, decls: readDecls(pagePath), guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, cues: level?.cues, judge: judgeMeasure(name) };
   const rows = buildRows(set.acceptance, m, { mode, stage: 'draft' });
-  const was = record(name, rows, 'draft', page.caps, page.measuredSpec, probe.worlds, tailMoving(probe.tail), cameraOnly, Boolean(probe.canvasFilm));
+  const was = record(name, rows, 'draft', page.caps, page.measuredSpec, probe.worlds, tailMoving(probe.tail), cameraOnly, Boolean(probe.canvasFilm), typing);
   return { rows, was, sync: writeBriefFromPage(pagePath, page.measuredSpec, probe.samples) };
 }
 
@@ -122,7 +122,7 @@ export async function finalAcceptance({ page, outputs }) {
   const history = readJson(outFile(name, 'acceptance'))?.history ?? [];
   const level = await finalLevel(mp4);
   const facts = lastPageFacts(name);
-  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots, facts.tailMoving, facts.worlds, facts.cameraOnly), decls: readDecls(page), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
+  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots, facts.tailMoving, facts.worlds, facts.cameraOnly, facts.typing), decls: readDecls(page), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(tables.acceptance, m, { carry: history.at(-1)?.rows ?? [] });
   return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows), counts: acceptanceCounts(rows) };
 }
@@ -139,11 +139,11 @@ export function lastSpec(name) {
 
 /**
  * What the live page said at the last full draft, for checks that run on a final video alone:
- * { worlds (lastWorlds), tailMoving (an animation ran on a visible element through the last second), canvasFilm (a canvas covered the frame), cameraOnly (the seconds where only a whole-frame move ran) }.
+ * { worlds (lastWorlds), tailMoving (an animation ran on a visible element through the last second), canvasFilm (a canvas covered the frame), cameraOnly (the seconds where only a whole-frame move ran), typing (the seconds where the text kept changing) }.
  */
 export function lastPageFacts(name) {
   const last = (readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.worlds || e.tailMoving != null || e.canvasFilm);
-  return { worlds: last?.worlds ?? null, tailMoving: Boolean(last?.tailMoving), cameraOnly: last?.cameraOnly ?? [], canvasFilm: Boolean(last?.canvasFilm) };
+  return { worlds: last?.worlds ?? null, tailMoving: Boolean(last?.tailMoving), cameraOnly: last?.cameraOnly ?? [], typing: last?.typing ?? [], canvasFilm: Boolean(last?.canvasFilm) };
 }
 
 /** The worlds of the last full draft, [{ id, start, end, ground }] (harness/lib/worlds.mjs), or null before any draft. */

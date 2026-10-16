@@ -11,19 +11,20 @@ import { sampleBoxTracks } from '../lib/box-track.mjs';
 import { frameMotion } from './motion-curve.mjs';
 import { decodeGray } from './see/frame.mjs';
 import { withCameraStills } from '../lib/camera-moves.mjs';
+import { withoutTypingStills } from '../lib/still-limit.mjs';
 
 /** What one pass over a draft video reads: its scene features, the judge sheet's tile differences and its frame motion. Throws when ffmpeg fails. */
 export function readVideo(mp4) {
   return { feats: readFeatures(mp4), tiles: sheetTileDiffs(mp4), motion: frameMotion(mp4) };
 }
 
-/** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. `page` is what the live page says: { worlds (the measured data-world spans, or null), tailMoving, canvasFilm, cameraOnly (the [a, b] seconds where only a whole-frame move runs) }. */
+/** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. `page` is what the live page says: { worlds (the measured data-world spans, or null), tailMoving, canvasFilm, cameraOnly (the [a, b] seconds where only a whole-frame move runs), typing (the [a, b] seconds where the text keeps changing) }. */
 export function videoProblems({ feats, tiles }, authoring = {}, page = {}) {
-  return [...problemsOf(statsWithCamera(summarize(feats), page.cameraOnly), blankRuns(feats, isFlat), undefined, authoring, page.worlds, page.canvasFilm), ...tileProblems(tiles.diffs, tiles.fps, authoring, page.tailMoving)];
+  return [...problemsOf(statsWithCamera(summarize(feats), page.cameraOnly, page.typing), blankRuns(feats, isFlat), undefined, authoring, page.worlds, page.canvasFilm), ...tileProblems(tiles.diffs, tiles.fps, authoring, page.tailMoving)];
 }
 
 /** scene-stats with the seconds where only the camera moves counted as still (harness/lib/camera-moves.mjs). */
-export const statsWithCamera = (stats, cameraOnly = []) => ({ ...stats, static: withCameraStills(stats.static, cameraOnly) });
+export const statsWithCamera = (stats, cameraOnly = [], typing = []) => ({ ...stats, static: withoutTypingStills(withCameraStills(stats.static, cameraOnly), typing) });
 
 /** The judge's sheet tiles (harness/media/judge-fresh.mjs contactSheet, without labels): adjacent mean grey differences. */
 export function sheetTileDiffs(mp4) {

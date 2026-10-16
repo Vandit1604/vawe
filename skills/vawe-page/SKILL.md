@@ -118,6 +118,9 @@ asks for overshoot. Full reference: `core/motion/README.md`.
    use `forwards` unless it should sit there before it starts.
 10. `--vw` and `--vh` hold a unit (`1920px`): write `calc(var(--vh) * 0.11)`, never `* 0.11px`. A capture
     scaled below 0.6 loses its type: crop instead.
+11. A module-level `await` of something else than an image decode, a `fetch` or `document.fonts.ready`
+    (a promise you made, a dynamic `import()`): the renderer waits only for those three, so frame 0 is
+    painted before your `vawe.onFrame` exists. Await the three, or register the hook first and await inside it.
 
 ## Commands
 

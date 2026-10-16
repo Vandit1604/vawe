@@ -7,6 +7,7 @@
 // function of time, seek every CSS/WAAPI/SMIL animation, then call every vawe.onFrame hook (awaited, so a
 // hook that decodes a texture or builds three.js geometry settles before a screenshot).
 export async function seekTo(t, win = window) {
+  if (win.__pageReady) await win.__pageReady();
   if (win.__pageFonts) await win.__pageFonts();
   if (win.__pageClock) win.__pageClock.set(t);
   if (typeof win.seek === 'function') await win.seek(t);
@@ -50,6 +51,59 @@ export async function awaitFonts(timeoutMs = 10000) {
     try { done = await Promise.race([loaded, timeout]); } finally { clearReal(timer); }
     if (done) return;
   }
+}
+
+// Runs in the page before any page script: lists the async work a page starts that a module-level `await` can wait on (an image
+// decode or load, a fetch and the reading of its body), so awaitReady can tell a page that is still starting from a finished one.
+// Injected via toString(), so it references nothing outside its body.
+export function installPageReady() {
+  if (window.__pagePending) return;
+  const open = new Map();
+  let ids = 0;
+  const track = (what, promise) => {
+    const id = ++ids;
+    open.set(id, what);
+    const done = () => open.delete(id);
+    promise.then(done, done);
+    return promise;
+  };
+  const decode = HTMLImageElement.prototype.decode;
+  HTMLImageElement.prototype.decode = function trackedDecode() { return track(`image ${this.src}`, decode.call(this)); };
+  const src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+  Object.defineProperty(HTMLImageElement.prototype, 'src', {
+    ...src,
+    set(value) {
+      src.set.call(this, value);
+      if (!value || this.complete) return;
+      track(`image ${this.src}`, new Promise((resolve) => { this.addEventListener('load', resolve, { once: true }); this.addEventListener('error', resolve, { once: true }); }));
+    },
+  });
+  const fetchNow = window.fetch;
+  window.fetch = (input, init) => track(`fetch ${input?.url ?? input}`, fetchNow(input, init));
+  for (const read of ['arrayBuffer', 'blob', 'json', 'text']) {
+    const original = Response.prototype[read];
+    Response.prototype[read] = function trackedRead() { return track(`${read} of ${this.url}`, original.call(this)); };
+  }
+  window.__pagePending = () => [...open.values()];
+}
+
+// Resolve when the page has started nothing that is still running: no tracked decode, load or fetch, and a real timer tick later
+// still none (a module that awaited one continues in a microtask and may start the next). The first resolve is kept, so a seek
+// pays for it once. Rejects naming what is pending after `timeoutMs`. Injected via toString(), so it references nothing outside its body.
+export async function awaitReady(timeoutMs = 10000) {
+  if (window.__pageReadyDone) return;
+  const pending = window.__pagePending || (() => []);
+  const setReal = window.__pageClock ? window.__pageClock.real.setTimeout : setTimeout.bind(window);
+  const tick = (ms) => new Promise((resolve) => setReal(resolve, ms));
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    if (pending().length === 0) {
+      await tick(0);
+      if (pending().length === 0) break;
+    } else await tick(10);
+    if (Date.now() > deadline) throw new Error(`page not ready after ${timeoutMs} ms: still waiting on ${[...new Set(pending())].join(', ')}; a module-level await must finish, or move it into the hook`);
+  }
+  window.__pageReadyDone = true;
 }
 
 // Runs in the page before any page script: the frame facts a page lays out against. documentElement does not exist yet at this point, so its attributes wait for the parser.
