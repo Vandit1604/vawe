@@ -35,9 +35,9 @@ The prompt in `quality/gates/rubric.mjs` tells the judge to default to reject. A
 
 ## Three ways our first scoring agent failed
 
-- **It flipped.** It asked for one value in one round and a different value in the next. One target went back and forth over three rounds.
-- **It punished choices.** A film whose brief declared silence got 0 on sound. A film with no text lost points on type. Neither could pass, however good the rest was. One flower film "scored 0 and could never pass", and on type "three of four films lost it by construction".
-- **It had no outside bar.** It compared a film only with our own earlier films, so a habit that all of them shared looked normal. We built an outside bar from 167 measured cuts, described in [a motion graphics quality benchmark](/blog/quality-bar).
+- It flipped. It asked for one value in one round and a different value in the next. One target went back and forth over three rounds.
+- It punished choices. A film whose brief declared silence got 0 on sound. A film with no text lost points on type. Neither could pass, however good the rest was. One flower film "scored 0 and could never pass", and on type "three of four films lost it by construction".
+- It had no outside bar. It compared a film only with our own earlier films, so a habit that all of them shared looked normal. We built an outside bar from 167 measured cuts, described in [a motion graphics quality benchmark](/blog/quality-bar).
 
 ## Compare with two reference films, then cap
 

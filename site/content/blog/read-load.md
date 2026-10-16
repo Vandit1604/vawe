@@ -57,8 +57,8 @@ The last step was a merge of lists. On 2026-10-01 we moved the pitfalls in `AGEN
 
 Two other changes moved reading out of the always-read set:
 
-- **Advice at the step.** From 30 September, `dev` and `ship --status` print 5 to 8 "do X, not Y" lines for their own step. Each line quotes its row in the taste card, and a test fails when a quote leaves the card. A draft render of a 4 s starter took 4.3 s with the lines printed, the same as without.
-- **One file per rule.** On 5 October the rules got one owner: `taste/rules/` holds one file per rule (98 at that time). A generator, `harness/dev/taste-build.mjs`, writes the card, the digest, `steps.json` and `limits.json`. We resolved ten conflicts between the old files.
+- Advice at the step. From 30 September, `dev` and `ship --status` print 5 to 8 "do X, not Y" lines for their own step. Each line quotes its row in the taste card, and a test fails when a quote leaves the card. A draft render of a 4 s starter took 4.3 s with the lines printed, the same as without.
+- One file per rule. On 5 October the rules got one owner: `taste/rules/` holds one file per rule (98 at that time). A generator, `harness/dev/taste-build.mjs`, writes the card, the digest, `steps.json` and `limits.json`. We resolved ten conflicts between the old files.
 
 This is one rule, shortened:
 

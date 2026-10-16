@@ -38,11 +38,11 @@ The agent runs `bin/vawe new <name> --request "<your sentence>"`. We ran that co
 
 ## The five questions
 
-1. **Subject.** What is the product, and who is it for?
-2. **Message.** What is the one thing to remember, and what is the one big moment?
-3. **Show.** What must the viewer see working: the product screen, a number or a process?
-4. **Assets (optional).** Which real captures, logo or photos exist?
-5. **Ending (optional).** How does the film end: the brand, a call to action, a URL?
+1. Subject. What is the product, and who is it for?
+2. Message. What is the one thing to remember, and what is the one big moment?
+3. Show. What must the viewer see working: the product screen, a number or a process?
+4. Assets (optional). Which real captures, logo or photos exist?
+5. Ending (optional). How does the film end: the brand, a call to action, a URL?
 
 Each question prints a reason and an example. The agent writes the answers to a file and runs the command again with `--answers <file>`. For an unattended run, add `--defaults` and the tool guesses. We explain why we built this gate in [make an AI agent ask questions before it acts](/blog/new-asks).
 

@@ -31,11 +31,11 @@ A better prompt would not fix any of these. The list named the traps and nothing
 
 Each change answers a failure at the point of action, with the fix printed in the line.
 
-- **Attractor check.** `taste/attractors.json` holds the stock names and hero shapes. A test checks that the taste card quotes them. The `dev` and `new` verbs flag a match in the brand name and in each direction, and print the fix.
-- **Advice prefix.** Every advice line from `dev`, `new` and the stills range check starts with `advice:`. Its block ends with `(advice only: ...)`. An error that stops the run starts with `error:`. `harness/lib/advice.mjs` owns the wording.
-- **Stills judge in `dev`.** `bin/vawe dev` runs the stills judge itself when `brief.md` has three filled directions. It runs once per change of the directions or the slots, and prints its pick in three lines. `--no-judge` skips it.
-- **Judge ledger.** The judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones. It must say why a new fix reverses an old one. After three rounds on one target, the ledger prints a stop line.
-- **Motion lint for `window.seek` pages.** The five motion rules also run on element boxes sampled over time (`harness/lib/box-track.mjs`). Canvas contents are out of scope, and the output says so.
+- Attractor check. `taste/attractors.json` holds the stock names and hero shapes. A test checks that the taste card quotes them. The `dev` and `new` verbs flag a match in the brand name and in each direction, and print the fix.
+- Advice prefix. Every advice line from `dev`, `new` and the stills range check starts with `advice:`. Its block ends with `(advice only: ...)`. An error that stops the run starts with `error:`. `harness/lib/advice.mjs` owns the wording.
+- Stills judge in `dev`. `bin/vawe dev` runs the stills judge itself when `brief.md` has three filled directions. It runs once per change of the directions or the slots, and prints its pick in three lines. `--no-judge` skips it.
+- Judge ledger. The judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones. It must say why a new fix reverses an old one. After three rounds on one target, the ledger prints a stop line.
+- Motion lint for `window.seek` pages. The five motion rules also run on element boxes sampled over time (`harness/lib/box-track.mjs`). Canvas contents are out of scope, and the output says so.
 
 Later, repeated judge findings became defaults in the starter page, the moves and the taste digest. The first 5 s sting that passed a fresh judge became the gold example, [`films/examples/colour-sting`](https://github.com/Vandit1604/vawe/tree/main/films/examples/colour-sting).
 

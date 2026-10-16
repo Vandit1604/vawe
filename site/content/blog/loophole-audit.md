@@ -18,9 +18,9 @@ Nobody told the agents to cheat. They read the output of a check, found the chea
 
 [vawe](https://github.com/Vandit1604/vawe) turns one HTML page into a film. A set of 107 rules checks the page. Many of the checks are global and binary:
 
-- **Live-hold** asks whether fewer than 2 percent of pixels changed over 0.3 s. A 1 to 6 percent scale push on the whole stage passes it.
-- **Moving tail** asks whether any animation runs on a visible element in the last second. Animating everything a little passes it.
-- **Living ground** asks for a layer that paints a gradient or an image over 15 percent of the frame. An empty full-frame div with a faint radial gradient passes it.
+- Live-hold asks whether fewer than 2 percent of pixels changed over 0.3 s. A 1 to 6 percent scale push on the whole stage passes it.
+- Moving tail asks whether any animation runs on a visible element in the last second. Animating everything a little passes it.
+- Living ground asks for a layer that paints a gradient or an image over 15 percent of the frame. An empty full-frame div with a faint radial gradient passes it.
 
 ## The one question
 
@@ -44,9 +44,9 @@ Waivers told a different story. There were 13 waiver entries in 8 pages, and 2 w
 
 ## Three causes
 
-1. **The advice named the trick.** Besides the live-hold line, the digest said to end on a slow push or drift. The grain rule called grain the cheapest fix. An agent obeys the advice it gets.
-2. **The measure was global.** It counted whole-frame pixel change, any running animation or any gradient box. A global measure has a global cheap answer.
-3. **One exemption covered about ten checks.** Text marked `aria-hidden` or `data-chrome` skipped most text checks at once. One attribute could exempt a line of copy from all of them.
+1. The advice named the trick. Besides the live-hold line, the digest said to end on a slow push or drift. The grain rule called grain the cheapest fix. An agent obeys the advice it gets.
+2. The measure was global. It counted whole-frame pixel change, any running animation or any gradient box. A global measure has a global cheap answer.
+3. One exemption covered about ten checks. Text marked `aria-hidden` or `data-chrome` skipped most text checks at once. One attribute could exempt a line of copy from all of them.
 
 ## The fixes
 
@@ -82,8 +82,8 @@ In a trace review of one weaker-model film, the table stayed at 7 of 14 or 15 ro
 
 There were two root causes:
 
-- **The rows measured the agent's own tables.** The agent wrote the Spec, built the page, and then the script checked the page against the Spec. A film can match its own plan and still look nothing like the film it should match. Such a check shows consistency, not quality.
-- **The thresholds came from a generic range.** The range used 17 reference films, not the one reference the brief named. A 0.3 s shot got a requirement of "needs 5.00 s".
+- The rows measured the agent's own tables. The agent wrote the Spec, built the page, and then the script checked the page against the Spec. A film can match its own plan and still look nothing like the film it should match. Such a check shows consistency, not quality.
+- The thresholds came from a generic range. The range used 17 reference films, not the one reference the brief named. A 0.3 s shot got a requirement of "needs 5.00 s".
 
 The trace also showed "7 of 14" and "7 of 15" for the same table, because the row count moved while we measured. Now a draft prints "N of M measured green, K more at ship (15 rows)", with one denominator.
 

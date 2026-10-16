@@ -33,11 +33,11 @@ Remotion, Revideo and Motion Canvas ask you to learn their model. HyperFrames, v
 
 Determinism means the same input gives the same frames. The tools differ in how they treat `Date.now()`, timers and `Math.random()`.
 
-- **Remotion:** a component reads the frame number, so the frame is a function of that number. This is how its docs define a frame.
-- **HyperFrames:** its docs forbid `Date.now()`, `requestAnimationFrame`, system timers and unseeded `Math.random()` in a composition. It states that the same input gives the same output.
-- **vawe:** a page may call them. A virtual clock replaces `Date`, timers, `requestAnimationFrame` and `Math.random` before any page script runs, and each follows the seek time. [The six drift sources we fixed](/blog/determinism) show how we tested it.
-- **Puppeteer and ffmpeg:** the script moves only CSS animations and Web Animations. A `setTimeout` or `requestAnimationFrame` loop still follows the real clock, so a page that uses one can give a different video on each run.
-- **Revideo and Motion Canvas:** the pages we read do not state a determinism rule, so we make no claim.
+- Remotion: a component reads the frame number, so the frame is a function of that number. This is how its docs define a frame.
+- HyperFrames: its docs forbid `Date.now()`, `requestAnimationFrame`, system timers and unseeded `Math.random()` in a composition. It states that the same input gives the same output.
+- vawe: a page may call them. A virtual clock replaces `Date`, timers, `requestAnimationFrame` and `Math.random` before any page script runs, and each follows the seek time. [The six drift sources we fixed](/blog/determinism) show how we tested it.
+- Puppeteer and ffmpeg: the script moves only CSS animations and Web Animations. A `setTimeout` or `requestAnimationFrame` loop still follows the real clock, so a page that uses one can give a different video on each run.
+- Revideo and Motion Canvas: the pages we read do not state a determinism rule, so we make no claim.
 
 ## Agent use, license and hosting
 
@@ -54,12 +54,12 @@ Read 2026-10-16 for Remotion, Revideo, Motion Canvas and HyperFrames. Sources: t
 
 ## When each tool is the better pick
 
-- **Remotion:** pick it if your team writes React and wants video in the same model. It also fits you if you need to render many videos in parallel on AWS Lambda. Check the license first if your company has more than 3 employees. More in [Remotion alternatives](/remotion-alternatives).
-- **Revideo:** pick it if you want TypeScript scenes and a render API you can host yourself, under MIT.
-- **Motion Canvas:** pick it for vector animation and diagrams with a live editor. Its docs describe it as a tool to make informative vector animations and sync them with voice-overs. Its default output is an image sequence, and an FFmpeg exporter makes a video. The docs call the exporter relatively new.
-- **HyperFrames:** pick it if you want a block catalog, a Studio editor, or cloud rendering. More in [HyperFrames alternatives](/hyperframes-alternatives).
-- **vawe:** pick it if you want ordinary web code to keep working. It has no new model to learn and no company-size limit in its license. Pick another tool if you need cloud rendering or a timeline editor.
-- **Puppeteer and ffmpeg:** pick it for a short, simple page that uses only CSS animation. It has no dependency beyond Chrome and ffmpeg.
+- Remotion: pick it if your team writes React and wants video in the same model. It also fits you if you need to render many videos in parallel on AWS Lambda. Check the license first if your company has more than 3 employees. More in [Remotion alternatives](/remotion-alternatives).
+- Revideo: pick it if you want TypeScript scenes and a render API you can host yourself, under MIT.
+- Motion Canvas: pick it for vector animation and diagrams with a live editor. Its docs describe it as a tool to make informative vector animations and sync them with voice-overs. Its default output is an image sequence, and an FFmpeg exporter makes a video. The docs call the exporter relatively new.
+- HyperFrames: pick it if you want a block catalog, a Studio editor, or cloud rendering. More in [HyperFrames alternatives](/hyperframes-alternatives).
+- vawe: pick it if you want ordinary web code to keep working. It has no new model to learn and no company-size limit in its license. Pick another tool if you need cloud rendering or a timeline editor.
+- Puppeteer and ffmpeg: pick it for a short, simple page that uses only CSS animation. It has no dependency beyond Chrome and ffmpeg.
 
 ## A small example you can run
 
