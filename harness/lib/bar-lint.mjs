@@ -108,13 +108,18 @@ function moveRuns(travels) {
   return runs;
 }
 
-/** Does the run's path go past its end along the way it came, by more than the tolerance of its length? Null when the run has no length to measure. */
-function runOvershoots(points) {
-  const [from, to] = [points[0], points.at(-1)];
-  const length = Math.hypot(to[0] - from[0], to[1] - from[1]);
-  if (length < SHOOT.min_travel_px) return null;
-  const past = Math.max(...points.map((p) => ((p[0] - to[0]) * (to[0] - from[0]) + (p[1] - to[1]) * (to[1] - from[1])) / length));
-  return past > Math.max(SHOOT.past_px_min, SHOOT.past_share * length);
+/** Does any corner of the box go past its end along the way it came, by more than the tolerance of its travel? A move and a size change both carry the corners. Null when no corner travels far enough to measure. */
+function runOvershoots(boxes) {
+  const corners = ([x, y, w, h]) => [[x, y], [x + w, y], [x, y + h], [x + w, y + h]];
+  const [from, to] = [corners(boxes[0]), corners(boxes.at(-1))];
+  const paths = boxes.map(corners);
+  const verdicts = to.map((end, c) => {
+    const length = Math.hypot(end[0] - from[c][0], end[1] - from[c][1]);
+    if (length < SHOOT.min_travel_px) return null;
+    const past = Math.max(...paths.map((p) => ((p[c][0] - end[0]) * (end[0] - from[c][0]) + (p[c][1] - end[1]) * (end[1] - from[c][1])) / length));
+    return past > Math.max(SHOOT.past_px_min, SHOOT.past_share * length);
+  }).filter((v) => v !== null);
+  return verdicts.length ? verdicts.some(Boolean) : null;
 }
 
 /** The arrivals of one element read from its boxes: a run of motion that starts while the element is faded out and ends faded in. */
@@ -124,7 +129,7 @@ function boxArrivals(boxes, i) {
   const travels = stepTravels(boxes, i);
   return moveRuns(travels).filter(([a, b]) => track[a][4] < ALPHA_IN && track[b + 1][4] >= ALPHA_IN).map(([a, b]) => ({
     at: boxes.times[a],
-    over: runOvershoots(own.slice(a, b + 2).map(centre)),
+    over: runOvershoots(own.slice(a, b + 2)),
   })).filter((r) => r.over !== null);
 }
 
