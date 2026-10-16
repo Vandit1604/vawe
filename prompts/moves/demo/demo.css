@@ -9,6 +9,8 @@
 @font-face { font-family: 'Instrument Serif'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InstrumentSerif-Regular.woff2') format('woff2'); }
 @font-face { font-family: 'Bricolage Grotesque'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/BricolageGrotesque.woff2') format('woff2'); }
 @font-face { font-family: 'Geist'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Geist.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; font-display: block; src: url('/assets/fonts/IBMPlexMono-400.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; font-display: block; src: url('/assets/fonts/IBMPlexMono-500.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Plus Jakarta Sans'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/PlusJakartaSans.woff2') format('woff2'); }
 @font-face { font-family: 'Manrope'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/Manrope.woff2') format('woff2'); }
@@ -22,27 +24,27 @@
   --u: calc(var(--vh) / 100);
 
   /* colour roles. A look sets all of them. */
-  --ground: #16151a;
-  --surface: #212025;
-  --raised: #2b2a31;
-  --hover: #37363e;
+  --ground: #000;
+  --surface: #0a0a0a;
+  --raised: #111;
+  --hover: #171717;
   --ink: #fff;
-  --muted: #9b9aa1;
-  --faint: #5f5e65;
-  --accent: #0a87ff;
-  --on-accent: #06101f;
-  --line: rgba(255, 255, 255, 0.08);
-  --edge: rgba(255, 255, 255, 0.07);
-  --dot: #3a3941;
+  --muted: #a1a1a1;
+  --faint: #6b6b6b;
+  --accent: #3291ff;
+  --on-accent: #000;
+  --line: #242424;
+  --edge: #242424;
+  --dot: #3a3a3a;
   --bar: rgba(255, 255, 255, 0.28);
-  --dim: rgba(10, 9, 13, 0.8);
+  --dim: rgba(0, 0, 0, 0.8);
   --cursor: #fff;
-  --cursor-edge: #16151a;
+  --cursor-edge: #000;
   --paper: #ecebf1;
   --paper-ink: #16151a;
   --paper-muted: #6b6a72;
   --star: #c9d8ff;
-  --up-ink: #6cb6ff;
+  --up-ink: #6cb0ff;
   --tile-alt: var(--raised);
 
   /* faces: --sans is text, --head is hero, title and head, --label is eyebrows, --display is wordmarks, --em-face is one emphasis word */
@@ -169,11 +171,13 @@ body {
 
 /* ---- looks: ten token sets on the one foundation above. Sizes, spacing and every class stay the same. ---- */
 
-/* vawe, the default: cool near-black, a surface ladder, one cobalt. Dark ink on the accent, since white on #0a87ff is 3.6:1. */
+/* vawe, the default: pure black, a grey surface ladder, hairlines, one blue used rarely. Black ink on the accent, as on the site. */
 html[data-look="vawe"] {
-  --ground: #16151a; --surface: #212025; --raised: #2b2a31; --hover: #37363e;
-  --ink: #fff; --muted: #9b9aa1; --faint: #5f5e65; --accent: #0a87ff; --on-accent: #06101f; --up-ink: #6cb6ff;
-  --display: 'Unbounded', 'Archivo', sans-serif;
+  --ground: #000; --surface: #0a0a0a; --raised: #111; --hover: #171717;
+  --ink: #fff; --muted: #a1a1a1; --faint: #6b6b6b; --accent: #3291ff; --on-accent: #000; --up-ink: #6cb0ff;
+  --line: #242424; --edge: #242424; --dot: #3a3a3a; --dim: rgba(0, 0, 0, 0.8); --cursor-edge: #000;
+  --sans: 'Geist', system-ui, sans-serif; --display: 'Geist', system-ui, sans-serif; --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --head-weight: 600; --head-track: -0.05em;
 }
 
 /* paper: warm editorial. A serif for headlines only, a humanist sans for text, one brick orange, a warm soft shadow. */

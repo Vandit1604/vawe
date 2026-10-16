@@ -175,6 +175,20 @@
       "file": "ibm-plex-mono-latin-400-normal.woff",
       "bytes": 13144,
       "sha256": "328d50b6ece9ca25c46eea3e885ba497f6237f2fb84ef7b92f88e14a1a25e381"
+    },
+    "IBMPlexMono-400.woff2": {
+      "pkg": "@fontsource/ibm-plex-mono",
+      "version": "5.3.0",
+      "file": "ibm-plex-mono-latin-400-normal.woff2",
+      "bytes": 14708,
+      "sha256": "08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7"
+    },
+    "IBMPlexMono-500.woff2": {
+      "pkg": "@fontsource/ibm-plex-mono",
+      "version": "5.3.0",
+      "file": "ibm-plex-mono-latin-500-normal.woff2",
+      "bytes": 14888,
+      "sha256": "01d285447409c8a588692162439a038b8cbd7871309ee20267b0d2d91c6e8e22"
     }
   }
 }
