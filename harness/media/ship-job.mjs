@@ -2,7 +2,7 @@
 //
 //   node harness/media/ship-job.mjs start <page.html> [render-page args]   detach a final render, print its job id
 //   node harness/media/ship-job.mjs status [job] [--wait]                  progress, or the result (default: newest job);
-//                                                                          --wait blocks until the job ends or 9 minutes pass,
+//                                                                          --wait blocks until the job ends or 3.5 minutes pass,
 //                                                                          one progress line per minute
 //   node harness/media/ship-job.mjs wait <page|film>                       the same wait for any render of the film: a running ship job,
 //                                                                          else a draft or clip holding a render slot; prints its result line
@@ -24,12 +24,12 @@ import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { WAIT_WORK } from '../live/stage-say.mjs';
 import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs, waitCallsLeft } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
-import { waitForFilm } from '../lib/render-wait.mjs';
+import { waitForFilm, WAIT_CAP_DEFAULT_MS, stillRunningLine, waitExitCode } from '../lib/render-wait.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
 import { finalAcceptance, lastPageFacts } from './acceptance-run.mjs';
 
-// The Bash tool stops a call at 10 minutes: 9 leaves room to print the result.
-const WAIT_CAP_MS = Number(process.env.VAWE_SHIP_WAIT_MS) || 540_000;
+// An agent tool call stalls at its 10 minute watchdog; 3.5 minutes leaves a wide margin.
+const WAIT_CAP_MS = Number(process.env.VAWE_SHIP_WAIT_MS) || WAIT_CAP_DEFAULT_MS;
 const PROGRESS_MS = Number(process.env.VAWE_SHIP_PROGRESS_MS) || 60_000;
 
 const SELF = fileURLToPath(import.meta.url);
@@ -228,7 +228,9 @@ async function waitThenStatus(id) {
     await new Promise((r) => setTimeout(r, 2000));
   }
   console.log(statusOf(target).join('\n'));
-  if (target && fs.existsSync(stateFile(target)) && !isOver(target)) console.log(`this call stopped after ${clock(WAIT_CAP_MS)} because a call may not run longer than the 10 minute limit of the Bash tool. The render is still running; nothing is lost. Run the next: command to keep waiting.`);
+  const running = Boolean(target && fs.existsSync(stateFile(target)) && !isOver(target));
+  if (running) console.log(stillRunningLine(`bin/vawe ship --status ${readJob(target).page} --wait`, WAIT_CAP_MS));
+  else if (target && fs.existsSync(stateFile(target)) && readJob(target).status === 'failed') process.exitCode = 1;
 }
 
 const activeJobFor = (film) => allJobs().filter((j) => filmKeyOf(j.page) === filmKeyOf(film) && !isOver(j.id) && j.status !== 'cancelled').sort((a, b) => b.startedAt - a.startedAt)[0];
@@ -237,8 +239,9 @@ async function waitForRender(film) {
   const job = activeJobFor(film);
   if (job) return waitThenStatus(job.id);
   const { running, result } = await waitForFilm(film, { capMs: WAIT_CAP_MS, progressMs: PROGRESS_MS });
-  if (running) console.log(`this call stopped after ${clock(WAIT_CAP_MS)} because a call may not run longer than the 10 minute limit of the Bash tool. The render is still running; nothing is lost. Run bin/vawe wait ${filmKeyOf(film)} again.`);
+  if (running) console.log(stillRunningLine(`bin/vawe wait ${filmKeyOf(film)}`, WAIT_CAP_MS));
   else console.log(result ?? `vawe wait: no render of ${filmKeyOf(film)} is running and no result is logged yet`);
+  process.exitCode = waitExitCode({ running, result });
 }
 
 const [mode, ...rest] = process.argv.slice(2);

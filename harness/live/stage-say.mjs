@@ -78,7 +78,7 @@ export const SAY = {
   critique: (name, rel) => `bin/vawe critique ${rel}`,
   judge: (name, rel, ref) => `VAWE_AGENT=judge-${name} bin/vawe judge ${rel} --struct --runs A,B${ref ? ` --ref ${ref}` : ''} in a fresh session, then fix the named seconds with bin/vawe dev ${rel} --from s --to s`,
   approve: (name, rel) => `${SHOW_OWNER} (${rel}); never run bin/vawe approve yourself`,
-  ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`,
+  ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait (one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel); ${WAIT_WORK}`,
 };
 
 /** The records of out/<name>.runs.jsonl under `root`, oldest first; [] when the log is missing. */

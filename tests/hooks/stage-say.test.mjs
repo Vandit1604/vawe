@@ -155,7 +155,7 @@ test('the motion step names the doc and each principle to check; every stage lin
 
 test('the ship step names the work for the wait', () => {
   assert.match(WAIT_WORK, /Board and Motion pass rows.*strip <page> --cuts.*critique notes/);
-  assert.match(SAY.ship('f', 'films/f/page.html'), /--wait \(one call blocks up to 9 minutes; run it once, not in parallel\); while it renders, fill/);
+  assert.match(SAY.ship('f', 'films/f/page.html'), /--wait \(one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel\); while it renders, fill/);
 });
 
 test('dev advises, never blocks, while the Board is the template', () => {
