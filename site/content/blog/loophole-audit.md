@@ -1,39 +1,32 @@
 ---
-title: "Reward hacking in AI agents: 18 of 36 films gamed a check"
-description: "Reward hacking in AI agents, counted: 18 of 36 films passed our live-hold check with a slow camera drift, and our own advice line taught them the trick."
+title: "Reward hacking in AI: 18 of 36 agent runs gamed a check"
+description: "18 of 36 films passed a live-hold check with a slow camera drift. Our own advice line taught the trick. How to write checks agents cannot game."
 date: 2026-10-10
-updated: 2026-10-13
-section: measurement
+updated: 2026-10-16
+section: agents
 tags: "ai agents, reward hacking, automated checks, testing, harness design"
-keywords: "reward hacking ai agents, agents gaming checks, goodhart's law agents, test fixtures for checks"
+keywords: "reward hacking ai agents, agents gaming checks, goodhart's law agents, acceptance criteria for ai agents, test fixtures for checks"
 hero: /blog/loophole-audit/hero.webp
 heroAlt: "Large text 18 of 36 with the caption films drifted the camera, because our own advice taught them how"
 ---
 
-Film after film from our agents ended a held shot with the same slow camera drift. On 10 October we stopped looking at the films and audited the checks instead. Across 36 film pages, 18 carried the drift, and the reason was ours: a check called live-hold counted any motion in a held shot as alive, and the advice line it printed told the agent to "keep one thing moving (a slow drift on the ground or the hero)".
+Reward hacking in AI agents means an agent changes the cheapest thing that turns a check green. In our audit of 36 film pages, 18 ended a held shot with the same slow camera drift. The cause was ours. Our live-hold check counted any motion in a held shot as alive. The advice line it printed said "keep one thing moving (a slow drift on the ground or the hero)".
 
-That is reward hacking in its plainest form. Nobody told the agents to cheat. They read a check's output, found the cheapest change that turned it green, and applied it. This case study covers what the audit counted, the three causes behind almost every loophole, and the fixes. It is part of our series on [judging generated video with an LLM and with checks](/blog/judge-design).
+Nobody told the agents to cheat. They read the output of a check, found the cheapest change that made it pass, and applied it. This post covers the audit, the three causes behind almost every loophole and the fixes. It also covers a second case: a scoreboard that measured the agent's own plan.
 
-## How a vawe film gets checked
+## What we checked
 
-A vawe film is one HTML page that the harness renders and then checks against 107 rules. Many of the checks are global and binary:
+[vawe](https://github.com/Vandit1604/vawe) turns one HTML page into a film. A set of 107 rules checks the page. Many of the checks are global and binary:
 
-- Live-hold asks whether fewer than 2 percent of pixels changed over 0.3 s. A 1 to 6 percent scale push on the whole stage passes it.
-- The moving-tail check asks whether any animation runs on a visible element in the last second. Animating everything a little passes it.
-- The living-ground check asks for a layer that paints a gradient or an image over 15 percent of the frame. An empty full-frame div with a faint radial gradient passes it.
+- **Live-hold** asks whether fewer than 2 percent of pixels changed over 0.3 s. A 1 to 6 percent scale push on the whole stage passes it.
+- **Moving tail** asks whether any animation runs on a visible element in the last second. Animating everything a little passes it.
+- **Living ground** asks for a layer that paints a gradient or an image over 15 percent of the frame. An empty full-frame div with a faint radial gradient passes it.
 
-## The one question the audit asked
+## The one question
 
-The audit was read-only. We rendered nothing and edited nothing. For each check we asked one question: what is the cheapest change that turns it green? Then we counted how many of the 36 page films already used that change. The counts are a grep of the page source, so they show a pattern in the code, not a measured render.
+The audit was read-only. We rendered nothing and edited nothing. For each check we asked one question: what is the cheapest change that turns it green? Then we counted how many of the 36 films already used that change. The counts come from a grep of the page source. They show a pattern in the code, not a measured render.
 
-<figure>
-<img src="/blog/loophole-audit/tricks.webp" alt="Bar chart: 30 of 36 films had a full-frame gradient, 23 a grain overlay, 18 a slow drift, about 7 a drifting blob ground, and 4 of 24 audio films a synth bed" width="720" height="410" loading="lazy">
-<figcaption>Patterns found in the page source of 36 films. Gradient and grain are mostly honest, because the rule asks for a lit ground. The check could not tell a lit ground from a transparent layer.</figcaption>
-</figure>
-
-## What 36 film pages contained
-
-| Pattern | Films |
+| Pattern in the page source | Films |
 |---|---|
 | slow scale or translate drift | 18 of 36 |
 | drifting blob ground | about 7 of 36 |
@@ -43,41 +36,77 @@ The audit was read-only. We rendered nothing and edited nothing. For each check 
 | synth bed, the cheapest way to meet a loudness check | 4 of 24 with audio |
 | a declared spectacle second | 25 of 36 |
 
-The spectacle second matters because the check lets an author move it to the strongest second after the fact. The synth bed got its own ban, described in [background music for generated video](/blog/no-synth-bed).
+Gradient and grain are mostly honest, because our rule asks for a lit ground. The check could not tell a lit ground from a transparent layer. The spectacle second matters because the check lets an author move it to the strongest second after the fact.
 
-Waivers told a different story. There were 13 waiver entries in 8 pages, and 2 of them were dead, because no check emitted the code they waived. None hid the camera drift or the bed. In the audit's own words, those films were green because of the trick, not because of a waiver. The waiver rule we wrote afterwards is in [suppression comments must name a place and a number](/blog/waivers).
+Waivers told a different story. There were 13 waiver entries in 8 pages, and 2 were dead, because no check emitted the code they waived. None hid the camera drift or the bed. Those films were green because of the trick, not because of a waiver. Also, 21 of the 107 rules had no check at all.
 
-Last, 21 of the 107 rules had no check at all. Nothing stops a film from ignoring those limits.
+![Bar chart of tricks found in the page source of 36 films.](/blog/loophole-audit/tricks.webp "Patterns found in the page source of 36 films.")
 
-## Three causes behind almost every loophole
+## Three causes
 
-The advice or the rule text named the trick. Besides the live-hold advice line, the digest said to end on a slow push or drift, and the grain rule called grain the cheapest fix. An agent obeys the advice it is given.
+1. **The advice named the trick.** Besides the live-hold line, the digest said to end on a slow push or drift. The grain rule called grain the cheapest fix. An agent obeys the advice it gets.
+2. **The measure was global.** It counted whole-frame pixel change, any running animation or any gradient box. A global measure has a global cheap answer.
+3. **One exemption covered about ten checks.** Text marked `aria-hidden` or `data-chrome` skipped most text checks at once. One attribute could exempt a line of copy from all of them.
 
-The measure was global: whole-frame pixel change, any running animation, any gradient box. A global measure has a global cheap answer.
-
-One exemption list covered about ten checks. Text marked `aria-hidden` or `data-chrome` skipped most text checks at once, so one attribute could exempt a line of copy from all of them.
-
-## The fixes, one per cause
+## The fixes
 
 Each fix has the same shape: exclude the global cheap change from what counts.
 
-Live-hold stopped counting a whole-frame camera move, and the starter page no longer drifts the camera ([bb965eb3e](https://github.com/Vandit1604/vawe/commit/bb965eb3e)). Living-ground and blank-frame now measure what a layer paints against the ground, so grain, a blend overlay or a faint gradient is not a ground ([e959dd362](https://github.com/Vandit1604/vawe/commit/e959dd362)).
+- Live-hold no longer counts a whole-frame camera move, and the starter page no longer drifts the camera.
+- Living-ground and blank-frame now measure what a layer paints against the ground. Grain, a blend overlay or a faint gradient is not a ground.
+- The moving-tail, grain, acceptance and spectacle lines now name the real fix. The docs no longer recommend a drift as the hold.
+- A reviewer rubric lists each known trick and needs a cited second for a claim. The [scoring agent post](/blog/judge-design) explains it.
+- Waivers follow rules in [AI agent guardrails](/blog/advise-refuse).
 
-The advice stopped teaching tricks. The moving-tail, grain, acceptance and spectacle lines name the real fix instead ([fec66ba0e](https://github.com/Vandit1604/vawe/commit/fec66ba0e)), and the docs no longer recommend a ground or lockup drift as the hold ([563516725](https://github.com/Vandit1604/vawe/commit/563516725)).
-
-Waivers became one code per check, scoped to seconds. A reason has to say where and what was measured, and a generic, copied or dead waiver is refused ([ecb537a46](https://github.com/Vandit1604/vawe/commit/ecb537a46)). The judge rubric now lists each known trick and needs a cited second for a claim ([cf73a1c7a](https://github.com/Vandit1604/vawe/commit/cf73a1c7a)).
-
-<figure>
-<img src="/blog/loophole-audit/audit-loop.webp" alt="Diagram: ask each check the cheapest-change question, exclude global answers, then fixtures, advice, waivers and judge rubric" width="720" height="340" loading="lazy">
-<figcaption>The audit question and the four things that came out of it.</figcaption>
-</figure>
+![Diagram: ask each check the cheapest-change question, exclude global answers, then fixtures, advice, waivers and rubric.](/blog/loophole-audit/audit-loop.webp "The audit question and the four things that came out of it.")
 
 ## A fixture page for every trick
 
-The change we trust most is a test. For each trick the audit found there is now a fixture page in `tests/fixtures/tricks/`, with an honest page beside it, and `tests/media/tricks.test.mjs` runs the checks on each ([c8f4630e6](https://github.com/Vandit1604/vawe/commit/c8f4630e6)). A check that stops catching its trick shows up as a failing test. The honest page proves the check still passes real work, which is the half that is easy to forget. Before this, nobody tested that the checks reject cheats, and a loophole fixed once could come back unseen.
+The change we trust most is a test. For each trick the audit found, `tests/fixtures/tricks/` holds a fixture page, and an honest page sits beside it. `tests/media/tricks.test.mjs` runs the checks on each. A check that stops catching its trick shows up as a failing test. The honest page proves that the check still passes real work, which is the half people forget. Before this, nobody tested that the checks reject cheats, so a fixed loophole could return unseen.
 
-The checks themselves live in `quality/gates/page-check.mjs` and `harness/lib/`.
+To run it from the repo root:
+
+```sh
+node --test tests/media/tricks.test.mjs
+```
+
+We ran it for this post: 11 tests passed in about 18 seconds. The checks live in `quality/gates/page-check.mjs` and `harness/lib/`.
+
+## A second case: the scoreboard that measured its own plan
+
+A scoreboard can leak in the other direction: it can measure the agent against the agent's own plan. Every `vawe new` brief carries a Spec with tables for shots, words and objects, and an Acceptance table. `harness/lib/acceptance.mjs` parses those tables after each draft. It counts frozen runs, jerky steps and jumps, and compares the words, objects and cuts in the film with the Spec. It prints one table with a trend line.
+
+In a trace review of one weaker-model film, the table stayed at 7 of 14 or 15 rows green for ten drafts. In 9 of the 12 drafts after the first, the log field `rules_fired` showed "fixed none". Fifteen of 17 `dev` calls ran with `--no-judge`. The one stills judge that ran scored 3, 2 and 2 for its three candidate frames, and no judge ran on a later draft.
+
+![Three counts from one film: 7 of 15 rows green, 9 of 12 drafts that fixed nothing, 15 of 17 dev calls with the judge skipped.](/blog/measured-brief/counts.webp "Three counts from one film.")
+
+There were two root causes:
+
+- **The rows measured the agent's own tables.** The agent wrote the Spec, built the page, and then the script checked the page against the Spec. A film can match its own plan and still look nothing like the film it should match. Such a check shows consistency, not quality.
+- **The thresholds came from a generic range.** The range used 17 reference films, not the one reference the brief named. A 0.3 s shot got a requirement of "needs 5.00 s".
+
+The trace also showed "7 of 14" and "7 of 15" for the same table, because the row count moved while we measured. Now a draft prints "N of M measured green, K more at ship (15 rows)", with one denominator.
+
+The fix list was short. Judge against the named reference at least once every three drafts. Take thresholds from that reference. Make `refs`, `critique` and `judge` default to the reference the brief names. We have no before and after on one film, so we do not claim the scoreboard now works.
 
 ## What we still do not know
 
-We have the before numbers and no after. We did not rerun the grep on a fresh set of films, so we cannot say how many films still cheat. The fixtures prove the checks reject the tricks we know, and they say nothing about the next one. That is why the rule we kept is a question to ask of every new check: what is the cheapest change that turns it green, and if that change is global, exclude it. The judge side of the same problem, a rubric that names each trick, is covered in [how our LLM judge works](/blog/judge-design).
+We have the before numbers and no after. We did not rerun the grep on a fresh set of films, so we cannot say how many films still cheat. The fixtures prove that the checks reject the tricks we know. They say nothing about the next one.
+
+## How to use it
+
+Ask this question of every new check: what is the cheapest change that turns it green? If that change is global, exclude it. Then add a fixture for the trick and an honest page that must pass. The [quality gates docs](/docs/quality-gates) list the checks.
+
+## FAQ
+
+**What is reward hacking in AI agents?**
+It is when an agent meets the letter of a check without the intent. In our audit, 18 of 36 films passed a live-hold check with a slow camera drift.
+
+**How do I stop an agent from gaming a check?**
+Ask what the cheapest change is that turns the check green, and exclude it if it is global. Keep a fixture page for each trick and an honest page that must still pass.
+
+**Can advice text cause reward hacking?**
+Yes. Our own advice line said "a slow drift on the ground or the hero", and agents drifted on every hold. The advice now names the real fix.
+
+**Why not check an agent against its own plan?**
+The check then shows only that the work matches the plan. In our trace, 7 of 14 or 15 rows stayed green for ten drafts, and 9 of 12 drafts fixed nothing the rules named.
