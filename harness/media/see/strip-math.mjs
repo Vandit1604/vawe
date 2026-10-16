@@ -15,8 +15,14 @@ export function stripProblem({ at, cuts, span, fps }) {
   if (!cuts && at === undefined) return 'missing --at <s> (the moment to look at) or --cuts (one strip per world change or shot cut)';
   if (!cuts && !(Number.isFinite(Number(at)) && Number(at) >= 0)) return `--at is not a number of seconds: "${at}"`;
   if (!(span > 0)) return '--span must be more than 0 seconds';
-  if (!(fps > 0 && fps <= 30)) return '--fps must be more than 0 and at most 30 (0.5 is one frame every 2 s)';
+  if (!(fps > 0)) return '--fps must be more than 0 (0.5 is one frame every 2 s)';
   return null;
+}
+
+/** The problem with asking for `fps` frames per second from a source that has `sourceFps`, or null. Pure. */
+export function stripFpsProblem(fps, sourceFps) {
+  if (fps <= sourceFps * 1.005) return null;
+  return `--fps ${fps} is more than the ${+sourceFps.toFixed(2)} fps this video has: ask for at most ${+sourceFps.toFixed(2)} (a draft is 30 fps, a final 60: strip the final mp4 to measure 60)`;
 }
 
 /** The window { from, to } of `span` seconds centred on `at`, moved to stay inside [0, dur] (shorter than `span` only when the film is). Pure. */

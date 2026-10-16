@@ -3,7 +3,7 @@
 import path from 'node:path';
 import { computeEnergy, die, HOLD_FLOOR, probeVideo } from './core.mjs';
 import { runShot } from './compare.mjs';
-import { energyLines, motionLines, motionRead, stripWindow } from './strip-math.mjs';
+import { energyLines, motionLines, motionRead, stripFpsProblem, stripWindow } from './strip-math.mjs';
 import { resolveInput } from './input.mjs';
 
 /** The seconds of the cuts of a page or mp4, for `vawe compare --at cuts`. */
@@ -31,7 +31,9 @@ export async function runStrip(input, opts) {
   const found = await resolveInput(input);
   if (found.draftMissing) die(`no draft of ${input} yet: run bin/vawe dev ${found.page} first (it writes ${found.video}), then repeat`);
   if (found.draftOld) console.log(`note: ${found.video} is older than ${found.page}; run bin/vawe dev ${found.page} for the current page`);
-  const { dur } = probeVideo(found.video);
+  const { dur, fps: sourceFps } = probeVideo(found.video);
+  const fpsProblem = stripFpsProblem(opts.fps, sourceFps);
+  if (fpsProblem) die(fpsProblem);
   const energy = computeEnergy(found.video);
   const outRoot = path.resolve(opts.out ?? path.join('out', 'strip', found.name));
   const common = { span: opts.span, fps: opts.fps };

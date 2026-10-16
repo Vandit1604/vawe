@@ -264,7 +264,7 @@ export const VERBS = [
       { name: 'at', type: 'string', help: 'the second to centre the strip on' },
       { name: 'cuts', type: 'bool', help: 'one strip per world change (a page or mp4: the data-world spans of the last full draft) or per shot cut (a reference: spec.json); the strip is centred on the cut' },
       { name: 'span', type: 'number', default: STRIP_SPAN, help: 'seconds of film in the strip' },
-      { name: 'fps', type: 'number', default: STRIP_FPS, help: 'frames per second of film in the strip; a grid holds 9 frames, more make a second grid' },
+      { name: 'fps', type: 'number', default: STRIP_FPS, help: 'frames per second of film in the strip, at most the fps of the video read (a draft 30, a final 60); a grid holds 9 frames, more make a second grid' },
       { name: 'out', type: 'path', default: 'out/strip/<film>', help: 'folder for the grids' },
     ],
     example: 'vawe strip out/my-launch.mp4 --at 8.4   |   vawe strip films/my-launch/page.html --cuts   |   vawe strip u6iro1jHujs --cuts',
