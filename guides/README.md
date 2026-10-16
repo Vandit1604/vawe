@@ -21,4 +21,4 @@ about how to run a film or change the engine, not about how a film should look.
 - `guides/` = how to choose a film type, run the loop and change the engine (you are here).
 - `research/` = the outside timing and loudness sources behind the thresholds (`TIMING-SOURCES.md`).
 - `prompts/moves/README.md` = what techniques exist; `core/motion/README.md` = the motion numbers.
-- `skills/taste-skill` and `vendor/impeccable` = enforcement for web UI work, not for films.
+- `skills/taste-skill` = enforcement for web UI work, not for films.
