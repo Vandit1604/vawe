@@ -552,3 +552,7 @@ re-importing the default and calling it the house style.
 Used: `pbakaus/layout` (group by proximity before adding containers; one spacing scale) and `danilaa1/compact-landing`
 (real product content, no fake metrics; one product-native artifact per section). Rejected: compact-landing's random design
 fingerprint, its 440px column and its button-size question; the local tokens win.
+
+### About page (2026-10-16)
+
+`/about` (`app/about/`, `about.css`, classes `ab-`) is on the `.xp` layer: breadcrumb, h1, one-line lede, jump links, six `.isec` panels (what, why, how built, five rules, who, get involved), one `showcase` clip in the first panel, then `Next` pointing to /roadmap. No skill shaped it beyond the `.xp` layer and the Laws of UX above; nothing fetched, nothing rejected. Not in the header nav (five items); footer group Project.

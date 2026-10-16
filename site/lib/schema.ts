@@ -149,7 +149,24 @@ export function blogSchema(posts: { headline: string; path: string; datePublishe
   };
 }
 
-export type BreadcrumbItem = { name: string; url: string };
+export function aboutPageSchema(opts: { description: string; owner: { name: string; url: string } }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: "About vawe",
+    description: opts.description,
+    url: `${SITE_URL}/about`,
+    mainEntity: {
+      "@type": "Organization",
+      name: "vawe",
+      url: SITE_URL,
+      sameAs: [REPO_URL],
+      founder: { "@type": "Person", name: opts.owner.name, url: opts.owner.url },
+    },
+  };
+}
+
+export type BreadcrumbItem ={ name: string; url: string };
 
 export function breadcrumbSchema(items: BreadcrumbItem[]) {
   return {
