@@ -1,8 +1,8 @@
 ---
 title: "CSS text animation: 5 kinetic typography effects"
 description: "Five kinetic text effects in plain CSS, each with code and a 2 s clip: stagger, wave, scale punch, mask reveal and tracking."
-date: 2026-10-22
-updated: 2026-10-22
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "kinetic typography, css animation, text animation, motion graphics"
 keywords: "kinetic typography css, kinetic typography javascript, text animation css, css letter animation, text animation video"
