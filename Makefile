@@ -14,6 +14,6 @@ test:     ; @bin/vawe test
 
 install-hooks:
 	git config core.hooksPath .githooks
-	@echo "hooks active: pre-commit (fast checks), pre-push (fast checks + e2e), commit-msg, post-checkout"
+	@echo "hooks active: pre-commit (fast checks), pre-push (guards, plus the site gate, unit tests and e2e the changed paths need), commit-msg, post-checkout"
 
 help:     ; @bin/vawe --help

@@ -126,7 +126,7 @@ asks for overshoot. Full reference: `core/motion/README.md`.
 
 `bin/vawe dev <page> [--aspect --from --to --audio]`: half size, 30 fps, silent.
 `bin/vawe ship <page> [--aspect all]` needs the owner's approval of the full draft: show the draft (`bin/vawe sheet <draft>`), stop, and let the owner run `bin/vawe approve <page>`; never approve it yourself. It runs in the background; wait with `bin/vawe ship --status <page> --wait`
-(one call blocks up to 9 minutes with a progress line each minute; run it once); before it do the work it names (fill the Board and
+(one call returns within 3.5 minutes with a progress line each minute; if it says STILL RUNNING, call it again); before it do the work it names (fill the Board and
 Motion pass rows, Read the `bin/vawe strip <page> --cuts` grids, prepare the critique notes). Fix the verdict worst first on drafts (`bin/vawe dev`, then
 `bin/vawe judge <draft mp4> --fresh`) until PASS, then ship once more.
 `bin/vawe critique <page> [--ref mp4]`: the fresh look (`vawe-critique`; with `--ref`, `vawe-reference`).

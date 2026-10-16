@@ -155,7 +155,7 @@ export const VERBS = [
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
       { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
-      { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait up to 9 minutes for the background job, one progress line per minute' },
+      { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait up to 3.5 minutes for the background job, one progress line per minute' },
       { name: 'status', type: 'bool', help: 'print the progress or the result of a background render' },
       { name: 'profile', type: 'bool', help: 'print a cost table: frames, subframes, screenshots, capture and encode seconds, the 5 costliest seconds' },
     ],
@@ -171,11 +171,11 @@ export const VERBS = [
     next: (v, [page]) => {
       if (v.status) return null;
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
-      return `rendering in the background: bin/vawe ship --status ${page} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`;
+      return `rendering in the background: bin/vawe ship --status ${page} --wait (one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel); ${WAIT_WORK}`;
     },
   },
   {
-    name: 'wait', summary: 'block until any render of a film ends (a dev draft, a clip or a ship final), one progress line a minute, then print its result line; a call stops after about 9 minutes',
+    name: 'wait', summary: 'wait for any render of a film (a dev draft, a clip or a ship final), one progress line a minute, then print its result line; a call returns after about 3.5 minutes with a STILL RUNNING line, call it again; exit 1 when the render failed, else 0',
     positional: [{ name: 'page|film', required: true, help: 'films/<name>/page.html, or the film name' }],
     flags: [],
     example: 'vawe wait films/my-launch/page.html   |   vawe wait my-launch',
