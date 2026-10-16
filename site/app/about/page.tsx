@@ -156,7 +156,7 @@ export default function About() {
             <div className="isec-text">
               <h2>Who makes it</h2>
               <p>
-                {OWNER.name} owns the repository and made the first commit. His GitHub profile:{" "}
+                {OWNER.name} owns the repository and made the first commit. GitHub profile:{" "}
                 <a href={OWNER.url}>github.com/Vandit1604</a>.
               </p>
             </div>
