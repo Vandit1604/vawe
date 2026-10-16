@@ -40,7 +40,7 @@ async function readSide(src, opts, dir, log) {
   }
   fs.rmSync(path.join(dir, 'images'), { recursive: true, force: true });
   const m = await measureSide(src, opts, dir, log);
-  const images = makeImages(src, m, dir, log);
+  const images = await makeImages(src, m, dir, log);
   const moment = opts.at == null ? null : momentImages(src, m, opts.at, dir, log);
   const side = { key, measures: m, images, moment };
   fs.mkdirSync(dir, { recursive: true });

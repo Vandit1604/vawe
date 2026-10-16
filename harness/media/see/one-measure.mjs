@@ -3,6 +3,7 @@
 // (bursts of energy), the page (timeline, velocity). This file joins them per shot; it adds only what no owner has: flashes as events, grain, focus.
 import fs from 'node:fs';
 import path from 'node:path';
+import { workerMap } from '../../lib/worker-map.mjs';
 import { cutAdvice } from '../../lib/board.mjs';
 import { timelineOf } from '../../lib/timeline.mjs';
 import { motionDeltaSeries } from '../shot-detect.mjs';
@@ -133,6 +134,11 @@ function shotLook(video, shot, series, fps, dur) {
   const got = edgesAt(video, times.map((t) => Math.min(t, dur - 0.05)), dur);
   const s = summarise({ means: means.length > 1 ? means : [lum, lum], fps, clips: clips.length > 1 ? clips : [0, 0], ...got });
   return { ...look, bloom: s.bloom ? { ...s.bloom, sigma: bloomSigma(s.bloom.px) } : null, chroma: s.chroma, glow: s.glow, texture: s.texture };
+}
+
+/** The light, texture and focus of one shot: a job of `measureSide`, run on a worker thread. */
+export function shotLookJob(shot, { video, light, fps, dur }) {
+  return { index: shot.index, ...shotLook(video, shot, light, fps, dur), ...shotFocus(video, shot) };
 }
 
 function shotFocus(video, shot) {
@@ -269,7 +275,7 @@ export async function measureSide(src, opts, dir, log) {
     flashes: flashes.flashes.map((f) => ({ ...f, shot: shots.find((s) => f.at >= s.start - 0.001 && f.at < s.end + 0.001)?.index ?? null })),
     perShot: [],
   };
-  for (const s of shots.slice(0, MAX_LOOK_SHOTS)) look.perShot.push({ index: s.index, ...shotLook(video, s, light, fps, probe.dur), ...shotFocus(video, s) });
+  look.perShot.push(...await workerMap(import.meta.url, 'shotLookJob', shots.slice(0, MAX_LOOK_SHOTS), { video, light, fps, dur: probe.dur }, { minPerWorker: 2 }));
   for (const l of look.perShot) { const s = shots.find((x) => x.index === l.index); s.look = l; s.camera = { ...s.camera, tilt: l.tilt }; }
 
   const structure = structureOf(spec, shots, flashes.cuts, flashes, world ? { worlds: world.timeline.worlds, spectacle: world.timeline.spectacle } : null, fps);

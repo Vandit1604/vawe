@@ -22,18 +22,18 @@ import { findTransitions, shotSpans } from '../lib/ref-measure/transition.mjs';
 import { measureLayout } from '../lib/ref-measure/layout.mjs';
 import { transitionRow, easingLines, layoutLines, audioRow, errorLines, colourLines, motionRegionLines } from '../lib/ref-measure/spec-lines.mjs';
 import { measureColour } from '../lib/ref-measure/colour.mjs';
-import { DEG, estimateCamera, halfRes, slowCamera, warp } from '../lib/ref-measure/camera.mjs';
+import { DEG, estimateCamera, halfRes, slowCamera } from '../lib/ref-measure/camera.mjs';
 import { worldTurns } from '../lib/ref-measure/world-turns.mjs';
 import { measureMotionRegions } from '../lib/ref-measure/motion-regions.mjs';
 import { measureEye } from '../lib/ref-measure/eye-path.mjs';
 import { measureGround } from '../lib/ref-measure/ground.mjs';
+import { detectMoves } from '../lib/ref-measure/blob-pool.mjs';
 import { decode as decodeFrames } from '../lib/ref-measure/decode.mjs';
 import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
 import { trackWords, refineWordTimes, buildLines, restBox, fontPxOf, inkColor } from '../lib/ref-measure/words.mjs';
 import { loadErrors } from '../lib/ref-measure/error-table.mjs';
 
 const GRID_W = 320;
-const DIFF_THR = 6;
 const MAX_FRAMES = 2400;
 const MAX_TRACK_GAP = 4;
 const die = (m) => { console.error(`✗ ${m}`); process.exit(2); };
@@ -65,91 +65,6 @@ function findCuts(V, fps) {
 
 // ── moving elements: connected components of the camera-compensated difference ───────────────────
 
-// A flat-coloured object that moves changes only at its leading and trailing edges; the interior
-// is identical in both frames. A gap of flat, non-background colour between two changed pixels on
-// one line is that interior, so it joins the mask and the two edges become one element.
-const MAX_GAP = 90;
-function fillFlatGaps(raw, B, w, h) {
-  const hist = new Uint32Array(32);
-  for (let i = 0; i < B.length; i++) hist[B[i] >> 3]++;
-  const bg = hist.indexOf(Math.max(...hist)) * 8 + 4;
-  const fill = (start, len, step) => {
-    let last = -1;
-    for (let k = 0; k < len; k++) {
-      const i = start + k * step;
-      if (!raw[i]) continue;
-      if (last >= 0 && k - last > 1 && k - last <= MAX_GAP) {
-        const ref = B[start + (last + 1) * step];
-        let flat = Math.abs(ref - bg) > 12;
-        for (let g = last + 1; g < k && flat; g++) if (Math.abs(B[start + g * step] - ref) > 8) flat = false;
-        if (flat) for (let g = last + 1; g < k; g++) raw[start + g * step] = 1;
-      }
-      last = k;
-    }
-  };
-  for (let y = 0; y < h; y++) fill(y * w, w, 1);
-  for (let x = 0; x < w; x++) fill(x, h, w);
-}
-function findBlobs(A, B, w, h) {
-  const raw = new Uint8Array(w * h);
-  for (let y = 3; y < h - 3; y++) for (let x = 3; x < w - 3; x++) {
-    const i = y * w + x;
-    if (Math.abs(A[i] - B[i]) > DIFF_THR) raw[i] = 1;
-  }
-  fillFlatGaps(raw, B, w, h);
-  const R = 2, tmp = new Uint8Array(w * h), dil = new Uint8Array(w * h);
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (raw[y * w + x])
-    for (let k = -R; k <= R; k++) if (x + k >= 0 && x + k < w) tmp[y * w + x + k] = 1;
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (tmp[y * w + x])
-    for (let k = -R; k <= R; k++) if (y + k >= 0 && y + k < h) dil[(y + k) * w + x] = 1;
-  const seen = new Uint8Array(w * h), out = [];
-  for (let s = 0; s < w * h; s++) {
-    if (!dil[s] || seen[s]) continue;
-    const stack = [s], px = [];
-    let x0 = w, y0 = h, x1 = -1, y1 = -1;
-    seen[s] = 1;
-    while (stack.length) {
-      const i = stack.pop(), x = i % w, y = (i / w) | 0;
-      if (raw[i]) { px.push(i); if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-      for (const j of [i - 1, i + 1, i - w, i + w]) if (j >= 0 && j < w * h && dil[j] && !seen[j]) { seen[j] = 1; stack.push(j); }
-    }
-    if (px.length < 12 || px.length > 0.4 * w * h) continue;
-    out.push({ px, x0, y0, x1, y1, area: px.length });
-  }
-  return out.sort((a, b) => b.area - a.area).slice(0, 12);
-}
-
-// Shift v that best maps A onto B over the blob's own changed pixels: B(p) = A(p - v). Coarse then fine, parabola sub-pixel.
-function blobShift(A, B, w, h, blob) {
-  const step = Math.max(1, Math.floor(blob.px.length / 600));
-  const pts = blob.px.filter((_, i) => i % step === 0);
-  const sad = (vx, vy, sub) => {
-    let s = 0, n = 0;
-    for (let k = 0; k < pts.length; k += sub) {
-      const i = pts[k], x = (i % w) - vx, y = ((i / w) | 0) - vy;
-      if (x < 0 || y < 0 || x >= w || y >= h) continue;
-      s += Math.abs(B[i] - A[y * w + x]); n++;
-    }
-    return n > 4 ? s / n + 0.02 * (Math.abs(vx) + Math.abs(vy)) : Infinity;
-  };
-  let best = { vx: 0, vy: 0, c: sad(0, 0, 1) };
-  const R = Math.min(72, Math.max(24, 1.6 * (blob.x1 - blob.x0), 1.6 * (blob.y1 - blob.y0)));
-  for (let vy = -R; vy <= R; vy += 2) for (let vx = -R; vx <= R; vx += 2) {
-    const c = sad(vx, vy, 2);
-    if (c < best.c) best = { vx, vy, c };
-  }
-  const c0 = best;
-  for (let vy = c0.vy - 1; vy <= c0.vy + 1; vy++) for (let vx = c0.vx - 1; vx <= c0.vx + 1; vx++) {
-    const c = sad(vx, vy, 1);
-    if (c < best.c) best = { vx, vy, c };
-  }
-  const para = (m, c, p) => (Number.isFinite(m) && Number.isFinite(p) && m + p - 2 * c > 1e-6 ? (m - p) / (2 * (m + p - 2 * c)) : 0);
-  const sub = { x: para(sad(best.vx - 1, best.vy, 1), best.c, sad(best.vx + 1, best.vy, 1)),
-    y: para(sad(best.vx, best.vy - 1, 1), best.c, sad(best.vx, best.vy + 1, 1)) };
-  const vx = best.vx + Math.max(-0.5, Math.min(0.5, sub.x)), vy = best.vy + Math.max(-0.5, Math.min(0.5, sub.y));
-  return Math.hypot(vx, vy) < 0.3 ? { vx: 0, vy: 0 } : { vx, vy };
-}
-
 function edgeEnergy(g, w, h, cx, cy, bw, bh) {
   const x0 = Math.max(1, Math.round(cx - bw / 2 - 2)), x1 = Math.min(w - 2, Math.round(cx + bw / 2 + 2));
   const y0 = Math.max(1, Math.round(cy - bh / 2 - 2)), y1 = Math.min(h - 2, Math.round(cy + bh / 2 + 2));
@@ -162,17 +77,12 @@ function edgeEnergy(g, w, h, cx, cy, bw, bh) {
   return n ? { ex: ex / n, ey: ey / n } : { ex: 0, ey: 0 };
 }
 
-function trackShot(V, f0, f1, cams, maxTracks) {
-  const { w, h } = V;
+function trackShot(V, f0, f1, cams, maxTracks, moves) {
   const tracks = [];
   for (let f = f0 + 1; f < f1; f++) {
-    const cam = cams[f];
-    const still = cam.s === 1 && cam.dx === 0 && cam.dy === 0 && !cam.r;
-    const B = V.frame(f);
-    const A = still ? V.frame(f - 1) : warp(V.frame(f - 1), B, w, h, cam);
     const pairs = [], cands = [];
-    for (const b of findBlobs(A, B, w, h)) {
-      const { vx, vy } = blobShift(A, B, w, h, b);
+    for (const b of moves.get(f)) {
+      const { vx, vy } = b;
       const bw = b.x1 - b.x0 + 1, bh = b.y1 - b.y0 + 1;
       const mx = (b.x0 + b.x1) / 2, my = (b.y0 + b.y1) / 2;
       // Overlapping old and new boxes make one blob (union of both); a jump longer than the box makes two blobs, the new one at its own centre.
@@ -536,12 +446,13 @@ async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibra
   const read = ocr ? await analyseText(video, dir, V, W, H, fps, fast ? FAST_TEXT_FPS : TEXT_FPS) : { runs: null, lines: [], words: [] };
   const text = read.words, textRuns = read.runs;
 
+  const moves = await detectMoves(V, spans.flatMap(({ f0, f1 }) => Array.from({ length: Math.max(0, f1 - f0 - 1) }, (_, k) => ({ f: f0 + 1 + k, cam: cams[f0 + 1 + k] }))));
   const shots = [];
   for (let i = 0; i < spans.length; i++) {
     const { f0, f1 } = spans[i];
     if (f1 - f0 < 1) continue;
     console.error(`  shot ${i + 1}: frames ${f0}-${f1 - 1}`);
-    const tracks = trackShot(V, f0, f1, cams, maxElements);
+    const tracks = trackShot(V, f0, f1, cams, maxElements, moves);
     const elements = tracks.map((t, j) => {
       const e = analyseTrack(t, V, fps, sc, { f0, f1, still: cams.slice(f0 + 1, f1).every((c) => c.s === 1 && c.dx === 0 && c.dy === 0 && !c.r) });
       const travel = Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]);

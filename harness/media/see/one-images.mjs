@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ffmpegOrDie } from '../../lib/scratch.mjs';
+import { MAX_WORKERS as MAX_LANES, workerMap } from '../../lib/worker-map.mjs';
 import { downsample } from './core.mjs';
 import { motionDeltaSeries } from '../shot-detect.mjs';
 import { runShot } from './compare.mjs';
@@ -133,17 +134,21 @@ function flashImage(f, i, ctx, folder) {
   return { ...strip, zoom, lines: [`flash ${i + 1}: ${f.at.toFixed(2)} s, ${f.frames} f (${f.seconds} s), mean luma ${f.baseLuma} to ${f.peakLuma}, rise ${f.rise} f, decay ${f.decay} f, clipped ${f.clippedAtPeak ?? '?'}% at the peak, tint ${f.tint ?? '?'}, ${joined}`] };
 }
 
-/** All images of one film into `dir`. `m` is the output of measureSide. Returns { shots: [{ index, id, frame, cut, onion, zooms, flashes }] }. */
-export function makeImages(src, m, dir, log) {
-  const ctx = { src, m, video: src.video, dur: m.media.duration, energy: downsample(motionDeltaSeries(src.video), 10), clip: { video: src.video, dur: m.media.duration, label: 'a', name: src.name }, tmp: path.join(dir, '.tmp') };
-  const shots = m.shots.map((shot) => {
-    const folder = path.join(imagesRoot(dir, src), `shot-${pad(shot.index)}`);
-    log(`images of shot ${shot.index} of ${m.shots.length}`);
-    return { index: shot.index, id: shot.id, frame: frameImage(shot, ctx, folder), cut: cutImage(shot, ctx, folder), onion: onionImage(shot, ctx, folder),
-      zooms: [edgeZoom(shot, ctx, folder), textureZoom(shot, ctx, folder)].filter(Boolean),
-      flashes: m.look.flashes.filter((x) => x.shot === shot.index).map((f, i) => flashImage(f, i, ctx, folder)) };
-  });
-  fs.rmSync(ctx.tmp, { recursive: true, force: true });
+/** The images of one shot: a job of `makeImages`, run on a worker thread with its own scratch folder `lane`. */
+export function shotImagesJob(shot, { src, m, dir, energy }, lane) {
+  const ctx = { src, m, video: src.video, dur: m.media.duration, energy, clip: { video: src.video, dur: m.media.duration, label: 'a', name: src.name }, tmp: path.join(dir, `.tmp-${lane}`) };
+  const folder = path.join(imagesRoot(dir, src), `shot-${pad(shot.index)}`);
+  return { index: shot.index, id: shot.id, frame: frameImage(shot, ctx, folder), cut: cutImage(shot, ctx, folder), onion: onionImage(shot, ctx, folder),
+    zooms: [edgeZoom(shot, ctx, folder), textureZoom(shot, ctx, folder)].filter(Boolean),
+    flashes: m.look.flashes.filter((x) => x.shot === shot.index).map((f, i) => flashImage(f, i, ctx, folder)) };
+}
+
+/** All images of one film into `dir`, shot by shot on worker threads. `m` is the output of measureSide. Returns { shots: [{ index, id, frame, cut, onion, zooms, flashes }] }. */
+export async function makeImages(src, m, dir, log) {
+  log(`images of ${m.shots.length} shot${m.shots.length === 1 ? '' : 's'}`);
+  const energy = downsample(motionDeltaSeries(src.video), 10);
+  const shots = await workerMap(import.meta.url, 'shotImagesJob', m.shots, { src, m, dir, energy });
+  for (let lane = 0; lane < MAX_LANES; lane++) fs.rmSync(path.join(dir, `.tmp-${lane}`), { recursive: true, force: true });
   return { shots };
 }
 
