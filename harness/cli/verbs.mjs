@@ -507,6 +507,17 @@ export const VERBS = [
     build: (v) => [{ script: 'harness/dev/list-assets.mjs', args: ['fonts', ...(v.system ? ['--system'] : [])] }],
   },
   {
+    name: 'palette', summary: 'one OKLCH brand seed with its mood, and how to compose a full palette around it; the same key always gives the same seed',
+    positional: [],
+    flags: [
+      { name: 'from', type: 'string', help: 'hash this key (a film name, a brand) to a seed: deterministic; with neither flag the seed is random' },
+      { name: 'id', type: 'string', help: 'a specific seed, for example seed-021' },
+    ],
+    example: 'vawe palette --from my-launch',
+    build: (v) => [{ script: 'harness/dev/palette.mjs', args: [...opt('--id', v.id), ...opt('--from', v.from)] }],
+    next: () => 'write the palette into films/<name>/DESIGN.md as OKLCH roles',
+  },
+  {
     name: 'sound', summary: 'the sound of a track, a film or a page read completely, for cutting to the music: loudness, tempo, beat grid with frames, bars, every hit, sections, a PNG, and with --cuts each cut against the beat; with --at or --waveform the cues of a page; with no argument the synth voices',
     positional: [{ name: 'input', required: false, help: 'an audio file (m4a, mp3, wav), an mp4 with audio, a reference id from vawe refs list, or a page (reads its <audio loop> bed, the synth cues as separate rows, and the page\'s own cuts); none: list the synth voices for <audio data-synth>' }],
     flags: [
