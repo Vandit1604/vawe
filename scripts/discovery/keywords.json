@@ -1,0 +1,44 @@
+{
+ "1 html and css to video": [
+  "render html to mp4", "render html page to mp4", "html to video", "css animation to video", "export css animation as video",
+  "css animation to mp4", "svg animation to video", "canvas animation export mp4", "record web page animation to video",
+  "web animations api render video", "convert html to video node", "html to mp4", "convert html to mp4", "html to mp4 converter",
+  "html5 animation to video", "html to webm", "css animation to gif", "gsap to mp4", "gsap timeline export to video",
+  "three.js to mp4", "three.js animation render to video", "html video aspect ratios", "responsive video layout",
+  "vertical video from html", "motion blur css animation", "x264 preset fast vs medium", "lufs for video"
+ ],
+ "2 headless chrome and puppeteer": [
+  "puppeteer record animation to mp4", "puppeteer screenshots to video", "headless chrome render video frames",
+  "frame by frame rendering web animation", "puppeteer screenshot different each time", "headless chrome screenshot flicker",
+  "deterministic video rendering", "mock date.now math.random puppeteer", "puppeteer devicescalefactor screenshot",
+  "puppeteer hangs", "resume failed render", "puppeteer to mp4", "puppeteer to video", "puppeteer screenshots to mp4 ffmpeg",
+  "ffmpeg images to video", "puppeteer screen recording", "puppeteer screenshot slow", "headless chrome screenshot",
+  "puppeteer devicescalefactor", "freeze date.now javascript", "seed math.random javascript", "seek css animation"
+ ],
+ "3 ai agents": [
+  "make a video with claude code", "claude code generate video", "coding agent video skill", "ai agent that makes videos",
+  "cursor make a video from code", "claude code skill for video creation", "agent skills motion design", "mcp server video generation",
+  "how long should agents.md be", "agents.md best practices", "reward hacking in ai agents", "llm as a judge video",
+  "ai agent guardrails", "ai agent observability jsonl", "cli design for ai agents", "make ai agent ask clarifying questions",
+  "harness engineering weaker model", "can ai agents watch videos", "claude code video", "agents.md", "llm as a judge",
+  "reward hacking", "ai agent observability", "agent skills ui design", "verbalized sampling", "claude code make video"
+ ],
+ "4 alternatives and programmatic video": [
+  "remotion alternative", "remotion alternative open source", "hyperframes alternative", "motion canvas alternative",
+  "revideo alternative", "programmatic video javascript", "programmatic video generation with code", "video as code",
+  "video editing as code", "after effects alternative for developers", "manim alternative for web", "create video in node.js",
+  "batch render videos from template", "declarative video", "automate social media video generation", "programmatic video",
+  "json video format", "html vs json video"
+ ],
+ "5 kinetic type and launch video": [
+  "kinetic typography css", "kinetic typography javascript", "kinetic typography with code", "text animation video generator code",
+  "product launch video generator", "generate product launch video from website url", "saas promo video generator",
+  "create launch video for github project", "app demo video generator", "css motion blur", "depth of field css",
+  "image to particles three.js", "cut video to the beat", "motion graphics transitions", "product launch video from website",
+  "css text animation", "motion graphics benchmark", "css animation library", "depth of field webgl", "motion graphics in code"
+ ],
+ "6 css easing": [
+  "css easing functions", "css easing cheat sheet", "cubic-bezier generator", "spring animation css", "easing curves for motion design",
+  "css easing", "ease out cubic css", "css animation easing", "easing functions"
+ ]
+}

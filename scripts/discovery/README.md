@@ -34,3 +34,16 @@ It writes `scripts/discovery/runs/<date>.json` (every result, with `ours: true` 
 - A `-` means vawe is absent from the top 20 (top 10 for Bing).
 - The GitHub channel sends unquoted terms like the web UI. `gh search repos` wraps the query in quotes and matches the exact phrase, so it returns nothing for most multi-word queries: do not use it to compare.
 - `queries.json` is the query list. Keep every query generic. Add a query that a developer or an agent would type, never one that contains `vawe`.
+
+## Demand index
+
+`demand.mjs` scores how much people and agents ask for a phrase. It reads `queries.json` and `keywords.json` (the blog plan's keyword clusters) and calls free public endpoints: Google and YouTube autocomplete, GitHub repository search, Stack Overflow, Hacker News Algolia, skills.sh, Context7, and npm downloads as context. Google Trends is probed once; it answers 429, so it feeds no score.
+
+```bash
+node scripts/discovery/demand.mjs                  # all phrases, about 25 minutes, run it in the background
+node scripts/discovery/demand.mjs --limit 5 --sources google,hn   # a quick check
+node scripts/discovery/demand.mjs --sources skills               # re-run one source and merge it into today's file
+node --test tests/dev/demand-index.test.mjs        # the index math
+```
+
+It writes `runs/demand-<date>.json` (raw counts, suggestions and expansions) and `runs/demand-<date>.md` (a table sorted by index, then one table per cluster). The index is 0.6 x people demand (autocomplete, YouTube, Stack Overflow, HN) + 0.4 x agent demand (skills installs, GitHub, Context7). The weights and scales are in `demand-index.mjs` and printed in the report. A source that blocks three phrases in a row is skipped and its weight is shared by the others. Stack Overflow allows 300 anonymous calls a day, so the run stops at 290 and the last phrases have no SO score.
