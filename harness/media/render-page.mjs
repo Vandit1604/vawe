@@ -47,7 +47,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { scratch } from '../lib/scratch.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
-import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
+import { seekTo, awaitFonts, awaitReady, installPageReady, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun, filmKeyOf, readRuns } from '../lib/runlog.mjs';
 import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
@@ -192,7 +192,7 @@ export async function openPage(pagePath, frame, { warm = false, final = true, la
   await cdp.send('Animation.enable');
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
   opened.cdp = cdp;
-  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
+  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});(${installPageReady})();window.__pageFonts = ${awaitFonts};window.__pageReady = ${awaitReady};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
 }
 
@@ -244,6 +244,7 @@ export async function settle(page) {
       const guard = real.setTimeout(resolve, 250);
       real.raf(() => { real.clearTimeout(guard); resolve(); });
     });
+    if (window.__pageReady) await window.__pageReady();
     await window.__pageFonts();
     await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
     await paint();
@@ -756,7 +757,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     await gotoLoaded(page, url, pagePath);
     try { await settle(page); } catch (e) {
       const msg = String(e.message).replace(/^.*?Error: /, '');
-      if (/^font (still loading|failed)/.test(msg)) throw new InvariantError([msg]);
+      if (/^(font (still loading|failed)|page not ready)/.test(msg)) throw new InvariantError([msg]);
       throw e;
     }
     const audioRead = await readAudio(page, pagePath);
