@@ -21,6 +21,8 @@ const nextConfig = {
   outputFileTracingRoot: import.meta.dirname,
   // Docker: emit a self-contained server so the runtime image carries no dev deps.
   output: "standalone",
+  // The blog index, posts, feed and sitemap regenerate hourly at runtime (a scheduled post goes live on its date), so the server reads the posts itself.
+  outputFileTracingIncludes: { "/**": ["./content/blog/*.md"] },
   async redirects() {
     return [
       // www.vawe.dev and vawe.dev both served 200 with no redirect between them, so Google split

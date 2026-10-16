@@ -4,6 +4,8 @@ description: "A custom JSON video format lost a blind A/B test to one HTML page:
 date: 2026-10-07
 updated: 2026-10-13
 section: architecture
+featured: true
+featuredOrder: 1
 tags: "json video format, html to video, agents, web animations, architecture"
 keywords: "json video format, html vs json for video, agent-native motion graphics, web animations api"
 hero: /blog/html-over-json/hero.webp

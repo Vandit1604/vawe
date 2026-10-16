@@ -16,6 +16,8 @@ import "../components/study.css";
 import "../components/intent.css";
 import "./resources.css";
 
+export const revalidate = 3600;
+
 export const metadata = pageMetadata({
   title: "Motion graphics resources: CSS easing, moves and AI agent video | vawe",
   description: `${EASES.length} CSS easing functions, ${MOVES.length} motion moves with clips, the files an AI agent reads to make a video, guides, and comparisons with Remotion, HyperFrames, Motion Canvas and Lottie.`,

@@ -30,7 +30,21 @@
 @media (hover:hover){ .bl-rss a:hover{color:var(--ink)} }
 
 /* ===== INDEX: filters (native radios; :has() hides what the chosen one excludes) ===== */
-.bl-filter{border:0;display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-top:var(--sp-7);padding:0}
+.bl-bar{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:var(--sp-3) var(--sp-5);margin-top:var(--sp-7)}
+.bl-filter{border:0;display:flex;flex-wrap:wrap;gap:var(--sp-2);padding:0;min-width:0}
+
+/* Grid and list: a two-option segmented control. data-view on .bl is set before first paint (page.tsx),
+   so the pressed look follows that attribute and never lags behind the script. */
+.bl-view{display:inline-flex;flex:none;padding:2px;border-radius:var(--r-pill);background:var(--surface);box-shadow:var(--ring)}
+.bl-view button{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:calc(var(--hit) - 4px);padding:0 var(--sp-4);border:0;border-radius:var(--r-pill);cursor:pointer;
+  background:none;color:var(--ink-2);font:inherit;font-size:var(--fs-ui);font-weight:600;
+  transition:background-color var(--dur-hover) var(--ease-out),color var(--dur-hover) var(--ease-out),scale var(--dur-press) var(--ease-press)}
+.bl-view button:active{scale:var(--press)}
+.bl-view svg{fill:currentColor}
+@media (hover:hover){ .bl-view button:hover{color:var(--ink)} }
+.bl-view button:focus-visible{outline:var(--focus-ring);outline-offset:2px}
+.bl:not([data-view="list"]) .bl-view [data-v="grid"],
+.bl[data-view="list"] .bl-view [data-v="list"]{background:var(--ink);color:var(--bg)}
 .bl-filter label{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:var(--hit);padding:0 var(--sp-4);border-radius:var(--r-pill);cursor:pointer;
   background:var(--surface);box-shadow:var(--ring);color:var(--ink-2);font-size:var(--fs-ui);font-weight:600;
   transition:background-color var(--dur-hover) var(--ease-out),color var(--dur-hover) var(--ease-out),box-shadow var(--dur-hover) var(--ease-out),scale var(--dur-press) var(--ease-press)}
@@ -56,10 +70,13 @@
 .cv{position:relative;display:block;width:100%;align-self:start;aspect-ratio:1200/630;overflow:hidden;border-radius:var(--r-in);background:var(--bg)}
 .cv img{display:block;width:100%;height:100%;object-fit:cover}
 
-/* ===== INDEX: the grid. Every card is one size: 3 columns, 2 under 900, 1 under 640. ===== */
-.bl-grid{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-5);margin-top:var(--sp-6)}
-.bl-card{position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);
+/* ===== INDEX: the grid. Six tracks: a card spans 2 (3 across), 3 under 900 (2 across), 1 track under 640. ===== */
+.bl-grid{list-style:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--sp-5);margin-top:var(--sp-6)}
+.bl-card{grid-column:span 2;position:relative;display:flex;flex-direction:column;overflow:hidden;background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);
   transition:box-shadow var(--dur-hover) var(--ease-out),background-color var(--dur-hover) var(--ease-out)}
+.bl-min{display:none;color:var(--muted)}
+.bl-min::before{content:"·";margin-right:var(--sp-2)}
+.bl-card .bl-sec{flex-wrap:wrap;column-gap:var(--sp-2)}
 .bl-card .cv{border-radius:0}
 .bl-card-text{display:flex;flex-direction:column;gap:var(--sp-2);flex:1;padding:var(--sp-4)}
 .bl-card h2{font-size:var(--fs-card);line-height:var(--lh-sub);font-weight:var(--fw-head);letter-spacing:var(--track-sub);
@@ -73,10 +90,54 @@
 @media (hover:hover) and (pointer:fine){
   .bl-card:hover{background:var(--surface-2);box-shadow:0 0 0 1px var(--line-2)}
 }
-@media (max-width:900px){ .bl-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:900px){ .bl-card{grid-column:span 3} }
 @media (max-width:640px){
   .bl-mast{padding-top:var(--sp-7)}
   .bl-grid{grid-template-columns:minmax(0,1fr);gap:var(--sp-4)}
+  .bl-card{grid-column:auto}
+  .bl-bar .bl-view{margin-left:auto}
+}
+
+/* ===== INDEX: the list view. One row per post: a small cover, the section and reading time, the title, one line. =====
+   A row is any card that is not in the featured band. With a section filter on, the band is off and every card is a row. */
+.bl[data-view="list"] .bl-grid{row-gap:var(--sp-3)}
+.bl[data-view="list"] .bl-card:not([data-feat]),
+.bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card{grid-column:1 / -1;flex-direction:row;align-items:center}
+.bl[data-view="list"] .bl-card:not([data-feat]) .cv,
+.bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card .cv{flex:none;width:11rem;margin:var(--sp-3) 0 var(--sp-3) var(--sp-3);border-radius:var(--r-in)}
+.bl[data-view="list"] .bl-card:not([data-feat]) .bl-card-text,
+.bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card .bl-card-text{min-width:0;justify-content:center;gap:var(--sp-1);padding:var(--sp-3) var(--sp-4)}
+.bl[data-view="list"] .bl-card:not([data-feat]) h2,
+.bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card h2{-webkit-line-clamp:2;min-height:0}
+.bl[data-view="list"] .bl-card:not([data-feat]) .bl-card-desc,
+.bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card .bl-card-desc{-webkit-line-clamp:1}
+.bl[data-view="list"] .bl-card:not([data-feat]) .bl-min,
+.bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card .bl-min{display:inline}
+@media (max-width:640px){
+  .bl[data-view="list"] .bl-card:not([data-feat]) .cv,
+  .bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card .cv{width:6rem;margin:var(--sp-2) 0 var(--sp-2) var(--sp-2);align-self:flex-start}
+  .bl[data-view="list"] .bl-card:not([data-feat]) h2,
+  .bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card h2{font-size:var(--fs-body)}
+  .bl[data-view="list"] .bl-card:not([data-feat]) .bl-card-desc,
+  .bl[data-view="list"]:not(:has(#f-all:checked)) .bl-card .bl-card-desc{-webkit-line-clamp:2}
+}
+
+/* ===== INDEX: the featured band (Von Restorff: the one standout). Posts with `featured: true` come first:
+   one wide lead card, then up to two medium cards. Same in both views; off while a section filter is on. ===== */
+.bl:has(#f-all:checked) .bl-card[data-feat] h2{min-height:0}
+.bl[data-view="list"]:has(#f-all:checked) .bl-card[data-feat]{margin-bottom:calc(var(--sp-5) - var(--sp-3))}
+.bl:has(#f-all:checked) .bl-card[data-feat="lead"] h2{font-size:var(--fs-panel);line-height:var(--lh-sub);-webkit-line-clamp:4}
+.bl:has(#f-all:checked) .bl-card[data-feat="lead"] .bl-card-desc{font-size:var(--fs-body);-webkit-line-clamp:4}
+@media (min-width:641px){
+  .bl:has(#f-all:checked) .bl-card[data-feat="lead"]{grid-column:1 / -1;flex-direction:row}
+  .bl:has(#f-all:checked) .bl-card[data-feat="lead"] .cv{flex:none;width:60%}
+  .bl:has(#f-all:checked) .bl-card[data-feat="lead"] .bl-card-text{justify-content:center;gap:var(--sp-3);padding:var(--sp-6)}
+  .bl:has(#f-all:checked) .bl-card[data-feat="mid"]{grid-column:span 3}
+}
+@media (min-width:641px) and (max-width:900px){
+  .bl:has(#f-all:checked) .bl-card[data-feat="lead"]{flex-direction:column}
+  .bl:has(#f-all:checked) .bl-card[data-feat="lead"] .cv{width:100%}
+  .bl:has(#f-all:checked) .bl-card[data-feat="lead"] .bl-card-text{padding:var(--sp-5)}
 }
 
 /* ===== POST: head ===== */
@@ -183,5 +244,5 @@
   .bp-body figure{padding:var(--sp-2);margin-inline:calc(var(--sp-1) * -1)}
 }
 @media (prefers-reduced-motion:reduce){
-  .bl-filter label,.bl-card,.bp-toc a,.bp-prose a{transition:none}
+  .bl-filter label,.bl-view button,.bl-card,.bp-toc a,.bp-prose a{transition:none}
 }
