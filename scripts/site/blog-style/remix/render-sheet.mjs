@@ -8,7 +8,7 @@ import { RENDER_ARGS } from '../../../../harness/lib/render-harness.mjs';
 
 const [out, columns, ...images] = process.argv.slice(2);
 if (!out || !columns || !images.length) throw new Error('usage: render-sheet.mjs <out.png> <columns> <image ...>');
-const tile = (file, width) => `<figure><img src="file://${path.resolve(file)}" width="${width}"><figcaption>${path.basename(file, '.webp').replace('dither-rays-', '')}</figcaption></figure>`;
+const tile = (file, width) => `<figure><img src="file://${path.resolve(file)}" width="${width}"><figcaption>${path.basename(path.dirname(path.dirname(path.resolve(file))))}: ${path.basename(file, '.webp').replace('dither-rays-', '')}</figcaption></figure>`;
 const width = 2400;
 const bigWidth = Math.floor((width - 36 - 14 * (Number(columns) - 1)) / Number(columns));
 const html = `<!doctype html><meta charset="utf-8"><style>

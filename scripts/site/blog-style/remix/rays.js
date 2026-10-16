@@ -40,16 +40,17 @@ window.Rays = (() => {
     };
   }
 
-  // gain 1 is the cover; a figure passes less so its panels stay the brightest thing on the ground.
-  function draw(ctx, w, h, p, { cell = 8, gain = 1 } = {}) {
+  // keep(x, y) in 0..1 thins the dots where it is below 1 (a knock-out). gain 1 is the cover; a figure passes less so its panels stay the brightest thing on the ground.
+  function draw(ctx, w, h, p, { cell = 8, gain = 1, keep = null } = {}) {
     const levels = TONES[p.tone] || TONES.blue;
     const field = rayField(p, w, h);
     for (let j = 0; j * cell < h; j++) for (let i = 0; i * cell < w; i++) {
       const { s, r } = field(i * cell + cell / 2, j * cell + cell / 2);
-      const v = clamp01(0.06 + gain * (0.58 * s * smooth(0.02, 0.5, r) + 0.95 * Math.exp(-r * 6)));
+      const k = keep ? keep(i * cell + cell / 2, j * cell + cell / 2) : 1;
+      const v = k * clamp01(0.06 + gain * (0.58 * s * smooth(0.02, 0.5, r) + 0.95 * Math.exp(-r * 6)));
       const scaled = v * (levels.length - 1), lo = Math.floor(scaled);
       const pick = Math.min(levels.length - 1, lo + (scaled - lo > bayer(i, j) ? 1 : 0));
-      ctx.fillStyle = `rgb(${levels[pick].join(',')})`;
+      ctx.fillStyle = `rgb(${levels[pick].map((c) => (pick === 0 ? Math.round(c * k) : c)).join(',')})`;
       ctx.fillRect(i * cell, j * cell, cell, cell);
     }
   }
