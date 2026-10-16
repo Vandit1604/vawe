@@ -4,6 +4,8 @@ description: "Rendering video in headless Chrome, our four workers shared one br
 date: 2026-10-08
 updated: 2026-10-13
 section: speed
+featured: true
+featuredOrder: 3
 tags: "headless chrome, puppeteer, rendering, parallelism, performance"
 keywords: "headless chrome render video, puppeteer parallel screenshots, chrome per worker, html to video render speed"
 hero: /blog/chrome-per-lane/hero.webp

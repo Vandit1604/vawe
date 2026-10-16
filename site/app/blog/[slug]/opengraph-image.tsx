@@ -7,6 +7,7 @@ import { allPosts, postBySlug } from "../../../lib/blog";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return allPosts().map((p) => ({ slug: p.slug }));

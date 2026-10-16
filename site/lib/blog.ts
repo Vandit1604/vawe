@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Marked, type Tokens } from "marked";
 import { smart, smartHtml } from "./typo.mjs";
+import added from "./blog-added.json";
 
 export { smart };
 
@@ -38,6 +39,8 @@ export type Post = {
   hero?: { src: string; alt: string; width?: number; height?: number };
   heroInBody: boolean;
   cover?: Cover;
+  featured: boolean;
+  featuredOrder?: number;
   no: number;
   html: string;
   toc: Heading[];
@@ -50,6 +53,9 @@ const WORDS_PER_MINUTE = 230;
 // Raw HTML a post may carry (SPEC): figure, figcaption, video, details, table. These stay out.
 const BANNED_HTML = /<\s*(script|iframe|svg|object|embed|style)\b/i;
 const showDrafts = process.env.NODE_ENV !== "production" || process.env.BLOG_DRAFTS === "1";
+const FEATURED_MAX = 3;
+// The first commit time of each post (scripts/site/blog-added.mjs). It orders posts that share a date and is never shown.
+const addedAt = added as Record<string, string>;
 
 function fail(file: string, msg: string): never {
   throw new Error(`content/blog/${file}: ${msg}`);
@@ -200,6 +206,9 @@ function loadPost(file: string): Post {
   for (const key of ["title", "description", "date", "section"]) if (!data[key]) fail(file, `front matter needs "${key}"`);
   if (!isDate(data.date)) fail(file, `date must be YYYY-MM-DD, got "${data.date}"`);
   if (data.updated && !isDate(data.updated)) fail(file, `updated must be YYYY-MM-DD, got "${data.updated}"`);
+  if (data.updated && data.updated < data.date) fail(file, `updated ${data.updated} is before date ${data.date}`);
+  if (data.featured && data.featured !== "true" && data.featured !== "false") fail(file, `featured must be true or false, got "${data.featured}"`);
+  if (data.featuredOrder && !/^\d+$/.test(data.featuredOrder)) fail(file, `featuredOrder must be a whole number, got "${data.featuredOrder}"`);
   const section = SECTIONS.find((s) => s.id === data.section);
   if (!section) fail(file, `section must be one of ${SECTIONS.map((s) => s.id).join(", ")}, got "${data.section}"`);
   let hero: Post["hero"];
@@ -210,7 +219,10 @@ function loadPost(file: string): Post {
   const { html, toc } = render(file, body);
   return {
     heroInBody: Boolean(data.hero && body.includes(data.hero)),
+    featured: data.featured === "true",
+    featuredOrder: data.featuredOrder ? Number(data.featuredOrder) : undefined,
     no: 0,
+    cover: coverFor(slug),
     slug,
     title: data.title,
     description: data.description,
@@ -227,9 +239,9 @@ function loadPost(file: string): Post {
   };
 }
 
-const newestFirst = (a: Post, b: Post) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title);
-
-let cache: Post[] | null = null;
+// Same date: the post written later comes first. A post with no recorded commit is still being written, so it is the newest.
+const writtenAt = (p: Post) => (addedAt[p.slug] ? Date.parse(addedAt[p.slug]) : Infinity);
+const newestFirst = (a: Post, b: Post) => b.date.localeCompare(a.date) || writtenAt(b) - writtenAt(a) || a.title.localeCompare(b.title);
 
 function coverFor(slug: string): Cover | undefined {
   const src = `/blog/${slug}/thumb.webp`;
@@ -237,16 +249,35 @@ function coverFor(slug: string): Cover | undefined {
   return size ? { src, ...size } : undefined;
 }
 
+let parsed: Post[] | null = null;
+
+function parsedPosts() {
+  if (parsed) return parsed;
+  const files = fs.existsSync(CONTENT) ? fs.readdirSync(CONTENT).filter((f) => f.endsWith(".md") && f !== "README.md") : [];
+  parsed = files.filter((f) => showDrafts || !f.startsWith("_")).map(loadPost);
+  return parsed;
+}
+
+// A post dated after today (UTC) does not exist yet. The clock is read on every call: the server
+// regenerates its pages hourly (revalidate), so a post goes live on its date without a redeploy.
 export function allPosts(): Post[] {
-  if (cache) return cache;
-  const files = fs.existsSync(CONTENT) ? fs.readdirSync(CONTENT).filter((f) => f.endsWith(".md")) : [];
-  cache = files
-    .filter((f) => showDrafts || !f.startsWith("_"))
-    .map(loadPost)
-    .sort(newestFirst)
-    // The issue number counts from the oldest post.
-    .map((p, i, all) => ({ ...p, no: all.length - i, cover: coverFor(p.slug) }));
-  return cache;
+  const today = new Date(Date.now()).toISOString().slice(0, 10);
+  const live = parsedPosts().filter((p) => showDrafts || p.date <= today).sort(newestFirst);
+  // The issue number counts from the oldest post.
+  return live.map((p, i) => ({ ...p, no: live.length - i }));
+}
+
+export type IndexPost = { post: Post; feat?: "lead" | "mid" };
+
+// The index order: the featured posts first (featuredOrder, then newest), then every other post newest first.
+export function indexPosts(): IndexPost[] {
+  const posts = allPosts();
+  const byOrder = (a: Post, b: Post) => (a.featuredOrder ?? Infinity) - (b.featuredOrder ?? Infinity);
+  const featured = posts.filter((p) => p.featured).sort(byOrder).slice(0, FEATURED_MAX);
+  return [
+    ...featured.map((post, i) => ({ post, feat: i === 0 ? ("lead" as const) : ("mid" as const) })),
+    ...posts.filter((p) => !featured.includes(p)).map((post) => ({ post })),
+  ];
 }
 
 export function postBySlug(slug: string) {

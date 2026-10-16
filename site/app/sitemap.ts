@@ -10,7 +10,7 @@ import { allPosts, latestDate } from "../lib/blog";
  * add a route, add one entry to the list in `entries()` or to site-pages.json.
  *
  * lastmod is the date of the last commit that touched the page's source (scripts/site/lastmod.mjs for
- * routes, scripts/site/moves.mjs for moves). A post's is its front matter date, and /blog's is the
+ * routes, scripts/site/moves.mjs for moves). A post's is its `updated` date (else its date), and /blog's is the
  * newest post's. A route with no known date gets none: Google ignores a lastmod that is always "now",
  * so a missing one is better than a made-up one. Google ignores changefreq and priority, so they are
  * not emitted.
@@ -21,6 +21,9 @@ const BASE = "https://vawe.dev";
 type Entry = { path: string; lastmod?: string };
 
 const dates = lastmod as Record<string, string>;
+
+// A scheduled post enters the sitemap on its date: regenerate hourly.
+export const revalidate = 3600;
 
 function entries(): Entry[] {
   return [

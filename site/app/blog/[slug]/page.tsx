@@ -11,7 +11,7 @@ import "../blog.css";
 
 type Params = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false;
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return allPosts().map((p) => ({ slug: p.slug }));

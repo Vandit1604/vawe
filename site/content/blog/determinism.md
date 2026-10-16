@@ -4,6 +4,8 @@ description: "A deterministic rendering checklist for headless Chrome: six sourc
 date: 2026-10-10
 updated: 2026-10-13
 section: speed
+featured: true
+featuredOrder: 2
 tags: "determinism, headless chrome, svg filter, gpu compositing, rendering"
 keywords: "deterministic rendering, headless chrome rendering, repeatable screenshots, svg filter gpu compositing"
 hero: /blog/determinism/hero.webp
