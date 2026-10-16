@@ -64,10 +64,10 @@ export function defaultOutDir(video) {
 
 export function probeVideo(video) {
   const probe = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
-    'stream=width,height,r_frame_rate,avg_frame_rate', '-show_entries', 'format=duration',
+    'stream=width,height,r_frame_rate,avg_frame_rate,duration', '-show_entries', 'format=duration',
     '-of', 'default=noprint_wrappers=1', video], { encoding: 'utf8' });
   const fields = Object.fromEntries(String(probe.stdout).trim().split('\n').filter(Boolean)
-    .map((l) => l.split('=')).map(([k, v]) => [k, v]));
+    .map((l) => l.split('=')).map(([k, v]) => [k, v]).reverse().filter(([k, v]) => v !== 'N/A'));
   const width = +fields.width, height = +fields.height, dur = +fields.duration;
   const rate = (v) => { const m = /^(\d+)(?:\/(\d+))?$/.exec(String(v || '')); return m ? +m[1] / (m[2] ? +m[2] : 1) : 0; };
   const fps = rate(fields.avg_frame_rate) || rate(fields.r_frame_rate) || 30;

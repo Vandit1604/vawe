@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ytDlpArgs, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
+import { ytDlpArgs, downscaleFilter, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
 
 test('the frame manifest numbers each frame and holds its absolute path; frameLines prints it', () => {
   const m = frameManifest('a', [{ t: 0.14, file: '/r/frames/a/key-1-0.1s.png' }, { t: 3.62, file: '/r/frames/a/key-2-3.6s.png' }]);
@@ -110,6 +110,20 @@ test('the yt-dlp argv ends with the url, for a YouTube and an X url', () => {
     assert.equal(args.filter((a) => a === url).length, 1);
     assert.equal(args[args.indexOf('-o') + 1], '/r/%(id)s.%(ext)s');
   }
+});
+
+test('the yt-dlp format sorts on the short side up to 1080, so a vertical video has a format', () => {
+  const args = ytDlpArgs('https://x.test/v', '/r');
+  assert.equal(args[args.indexOf('-S') + 1], 'res:1080');
+  assert.equal(args[args.indexOf('-f') + 1], 'bv*/b');
+  assert.ok(!args.join(' ').includes('height<='));
+});
+
+test('downscaleFilter keeps the short side at 1080 for both orientations', () => {
+  assert.equal(downscaleFilter(1920, 1080), null);
+  assert.equal(downscaleFilter(720, 1280), null);
+  assert.equal(downscaleFilter(3840, 2160), 'scale=-2:1080');
+  assert.equal(downscaleFilter(2160, 3840), 'scale=1080:-2');
 });
 
 const NAMING_BRIEF = `- Reference: private style reference \`ref-a\` (\`~/.vawe/refs/ref-a.mp4\`)

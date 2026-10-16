@@ -7,6 +7,7 @@ import { UsageError } from './parse.mjs';
 import { compareProblem, CUTS } from '../media/compare-frames.mjs';
 import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
+import { stillProblem } from '../media/see/still-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { lookProblem } from '../media/see/look-math.mjs';
@@ -298,13 +299,29 @@ export const VERBS = [
     positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html or an mp4' }],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
+      { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },
       { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page only)' },
       { name: 'cols', type: 'number', default: 4, help: 'tiles per row' },
       { name: 'out', type: 'path', default: 'out/sheet-<name>.png', help: 'the PNG path' },
     ],
     example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels',
-    build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
+    build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
     next: () => 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment',
+  },
+  {
+    name: 'still', summary: 'one frame at the full render size as a PNG: a page renders that one frame at its final size (1920x1080 for 16:9), an mp4 gives its exact frame',
+    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html or an mp4' }],
+    flags: [
+      { name: 'at', type: 'string', help: 'the film second to write; past the last frame it is moved to the last frame and the output says so' },
+      { name: 'out', type: 'path', default: 'out/still/<name>-<s>s.png', help: 'the PNG path' },
+    ],
+    example: 'vawe still films/my-launch/page.html --at 4.2   |   vawe still out/my-launch.mp4 --at 4.2 --out /tmp/f.png',
+    build: (v, [input]) => {
+      const problem = stillProblem({ source: input, at: v.at });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/still.mjs', args: [input, '--at', v.at, ...opt('--out', v.out)] }];
+    },
+    next: () => 'Read the PNG at full size; vawe zoom <page|mp4> --at <s> --box x,y,w,h enlarges one region',
   },
   {
     name: 'zoom', summary: 'one region of a frame enlarged with no smoothing (every pixel a square), beside the same region of a second film: fringes, masks and glow',

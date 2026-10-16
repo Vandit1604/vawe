@@ -150,7 +150,8 @@ export async function dispatchViews(input, positional, flag, argv) {
   if (stripAt === 'auto') stripAt = views.autoStripTime(input, video);
   if (stripAt != null) {
     const r = views.stripSheet(video, Number(stripAt), outDir);
-    console.log(`✓ strip, 12 frames from f${r.firstFrame} at ${r.fps} fps around ${stripAt}s: LOOK at ${rel(r.sheet)}`);
+    console.log(`✓ strip, 12 frames from f${r.firstFrame} at ${r.fps} fps around ${r.at}s: LOOK at ${rel(r.sheet)}`);
+    if (r.clamped) console.log(`  note: ${stripAt}s is past the last frame; the strip is centred on the last frame (${r.at}s)`);
   }
   if (argv.includes('--loop')) {
     const r = views.loopSeam(video, outDir);

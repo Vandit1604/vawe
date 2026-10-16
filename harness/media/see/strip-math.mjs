@@ -15,7 +15,7 @@ export function stripProblem({ at, cuts, span, fps }) {
   if (!cuts && at === undefined) return 'missing --at <s> (the moment to look at) or --cuts (one strip per world change or shot cut)';
   if (!cuts && !(Number.isFinite(Number(at)) && Number(at) >= 0)) return `--at is not a number of seconds: "${at}"`;
   if (!(span > 0)) return '--span must be more than 0 seconds';
-  if (!(fps >= 1 && fps <= 30)) return '--fps must be from 1 to 30';
+  if (!(fps > 0 && fps <= 30)) return '--fps must be more than 0 and at most 30 (0.5 is one frame every 2 s)';
   return null;
 }
 
