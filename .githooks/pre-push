@@ -1,7 +1,8 @@
 #!/bin/sh
-# pre-push: the pre-commit checks over the whole tree, then e2e (about 4 s). Ratchets and doc references
-# warn, they do not block. Bypass with `git push --no-verify` when you know better.
-# Installed by `make install-hooks`.
+# pre-push: push-guard and the site build check on the pushed range, then harness/dev/pre-push.mjs: the guards that always run
+# (em dash scan, doc references, bench) and only the checks the changed paths can affect (site gate, unit tests, e2e). It prints
+# what it chose and why; a path it does not know runs everything. Ratchets and doc references warn, they do not block.
+# Bypass with `git push --no-verify` when you know better. Installed by `make install-hooks`.
 
 hooks_path="$(git config core.hooksPath 2>/dev/null || true)"
 case "$hooks_path" in
@@ -11,6 +12,7 @@ esac
 # push-guard reads the refs git hands this hook on stdin and scans the whole pushed range for an
 # assistant attribution or a force-added ignored file. The site build check runs only when the range
 # touches something the site build reads.
+ranges=""
 while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
@@ -18,13 +20,12 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   else
     range="$remote_sha..$local_sha"
   fi
+  ranges="$ranges --range $range"
   node harness/dev/push-guard.mjs "$range" || { echo "pre-push blocked by push-guard." >&2; exit 1; }
   node quality/gates/site-build-check.mjs "$range" || { echo "pre-push blocked: the site would not have built." >&2; exit 1; }
 done
 
-node harness/dev/no-emdash.mjs || exit 1
-node quality/gates/doc-refs.mjs | grep -E '^⚠' >&2
-node harness/dev/bench.mjs fast 2>&1 | grep -E 'grew' >&2
-node harness/dev/e2e.mjs || { echo "pre-push blocked: e2e failed." >&2; exit 1; }
+# shellcheck disable=SC2086
+node harness/dev/pre-push.mjs $ranges || exit 1
 node harness/dev/ci-status.mjs || true
 exit 0

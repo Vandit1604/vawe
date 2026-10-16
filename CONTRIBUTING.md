@@ -41,7 +41,8 @@ bin/vawe check code-quality            # nothing got more tangled
 ```
 
 `make install-hooks` turns on the pre-commit hook (no em dash, `node --check`, doc references) and the
-pre-push hook (the same, plus e2e).
+pre-push hook (the same, plus the site gate, unit tests and e2e that the changed paths can affect; it
+prints which it chose and why, and a path it does not know runs everything).
 
 The last check is a **ratchet, not a threshold**. The repo has known complexity debt recorded in
 `quality/baselines/code-quality-baseline.json`; the gate fails only if your change makes a file worse than that
