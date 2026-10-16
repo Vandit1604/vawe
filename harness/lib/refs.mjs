@@ -157,10 +157,18 @@ export function frameManifest(id, got) {
   return { id, frames: got.map((k, i) => ({ n: i + 1, t: +k.t.toFixed(1), file: path.resolve(k.file) })) };
 }
 
-/** The 360p video of film `id` in `dir`, or undefined. */
+export const REF_SHORT_SIDE = 1080;
+
+/** The yt-dlp argv: the best video whose short side is at most 1080 (`res` sorts on the short side, so a vertical and a wide video both work); a source with only larger formats gets its smallest one. */
 export function ytDlpArgs(url, dir) {
-  return ['-f', 'bv*[height<=360]/b[height<=360]/worst', '--merge-output-format', 'mp4', '--no-playlist', '-o', path.join(dir, '%(id)s.%(ext)s'),
+  return ['-f', 'bv*/b', '-S', `res:${REF_SHORT_SIDE}`, '--merge-output-format', 'mp4', '--no-playlist', '-o', path.join(dir, '%(id)s.%(ext)s'),
     '--print', 'after_move:%(filepath)s\t%(id)s\t%(title)s\t%(channel)s', url];
+}
+
+/** The ffmpeg scale filter that brings a w x h video to a short side of 1080 (even sides), or null when it is small enough. */
+export function downscaleFilter(w, h) {
+  if (Math.min(w, h) <= REF_SHORT_SIDE) return null;
+  return w < h ? `scale=${REF_SHORT_SIDE}:-2` : `scale=-2:${REF_SHORT_SIDE}`;
 }
 
 export const refVideo =(dir, id) => ['mp4', 'webm'].map((e) => path.join(dir, `${id}.${e}`)).find(fs.existsSync);

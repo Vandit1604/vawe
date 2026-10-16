@@ -5,7 +5,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { refCard } from '../lib/ref-card.mjs';
-import { refsDir, ytDlpArgs, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { refsDir, ytDlpArgs, downscaleFilter, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { probeSize } from '../lib/frame-forensics.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -55,7 +56,18 @@ function download(url) {
   if (r.error?.code === 'ENOENT') die('yt-dlp is not installed: brew install yt-dlp');
   if (r.status !== 0) die(`yt-dlp failed: ${String(r.stderr).split('\n').filter(Boolean).slice(-2).join(' ')}\n  argv: yt-dlp ${args.join(' ')}`);
   const [file, id, title, studio] = r.stdout.trim().split('\n').at(-1).split('\t');
+  downscale(file);
   return { file, id, title, studio };
+}
+
+function downscale(file) {
+  const { width, height } = probeSize(file);
+  const filter = downscaleFilter(width, height);
+  if (!filter) return;
+  const small = file.replace(/\.mp4$/, '.small.mp4');
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', file, '-vf', filter, '-c:a', 'copy', small], { encoding: 'utf8' });
+  if (r.status !== 0) die(`ffmpeg could not scale ${file} from ${width}x${height} to a short side of 1080: ${String(r.stderr).trim()}`);
+  fs.renameSync(small, file);
 }
 
 function fromFile(file) {
