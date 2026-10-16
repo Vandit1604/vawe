@@ -15,6 +15,8 @@ html, body { width: 1200px; height: 630px; overflow: hidden; background: #0b1020
   box-shadow: 0 20px 60px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .45);
   font-weight: 600; white-space: nowrap;
 }
+/* ?panel=solid: a flat dark block with a hairline in place of the glass pane. */
+.chip.solid { background: rgb(var(--shade)); backdrop-filter: none; border: 1px solid rgba(255, 255, 255, .4); border-radius: 4px; box-shadow: none; }
 .num { font-size: 172px; line-height: .9; letter-spacing: -0.045em; font-variant-numeric: lining-nums; }
 .words { font-size: 74px; line-height: 1; letter-spacing: -0.02em; margin-top: 14px; }
 

@@ -1,5 +1,6 @@
 // Renders every post's cover to WebP (beside the review page and as site/public/blog/<slug>/thumb.webp), then the review page:
-// node scripts/site/blog-style/remix/render-rays.mjs <page.html> [slug ...]
+// node scripts/site/blog-style/remix/render-rays.mjs <page.html> [slug ...] [--panel solid]
+// --panel solid renders the flat panel (thumb.css .solid) and writes only beside the page, never into site/public.
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -13,7 +14,10 @@ const sandbox = { window: {} };
 vm.runInNewContext(fs.readFileSync(path.join(here, 'data.js'), 'utf8'), sandbox);
 const { POSTS } = sandbox.window;
 
-const [pageFile, ...picked] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const panelIdx = argv.indexOf('--panel');
+const panel = panelIdx >= 0 ? argv.splice(panelIdx, 2)[1] : '';
+const [pageFile, ...picked] = argv;
 if (!pageFile) throw new Error('usage: render-rays.mjs <page.html> [slug ...]');
 const imgDirName = path.basename(pageFile, '.html');
 const imgDir = path.join(path.dirname(pageFile), imgDirName);
@@ -33,12 +37,13 @@ try {
     const page = await browser.newPage();
     page.on('pageerror', (e) => { throw new Error(`${p.slug}: ${e.message}`); });
     await page.setViewport({ width: 1200, height: 630, deviceScaleFactor: 1 });
-    await page.goto(`http://127.0.0.1:${port}/scripts/site/blog-style/remix/thumb.html?post=${p.slug}`, { waitUntil: 'load' });
+    await page.goto(`http://127.0.0.1:${port}/scripts/site/blog-style/remix/thumb.html?post=${p.slug}${panel ? `&panel=${panel}` : ''}`, { waitUntil: 'load' });
     await page.waitForFunction('window.__ready === true', { timeout: 30000 });
     const png = path.join(imgDir, `dither-rays-${p.slug}.png`);
     await page.screenshot({ path: png });
     await page.close();
     const webp = toWebp(png);
+    if (panel) { console.log(webp); continue; }
     const blogThumb = path.join(REPO_ROOT, 'site/public/blog', p.slug, 'thumb.webp');
     fs.mkdirSync(path.dirname(blogThumb), { recursive: true });
     fs.copyFileSync(webp, blogThumb);

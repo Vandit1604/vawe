@@ -9,6 +9,7 @@ document.documentElement.style.setProperty('--shade', window.Rays.TONES[post.ton
 document.getElementById('num').textContent = post.line;
 document.getElementById('words').textContent = post.sub;
 document.getElementById('section').textContent = ({ 'how-to': 'how-to', 'motion-sound': 'motion and sound' })[post.section] || post.section;
+if (new URLSearchParams(location.search).get('panel') === 'solid') document.querySelector('.chip').classList.add('solid');
 window.Rays.draw(document.getElementById('ground').getContext('2d'), 1200, 630, post);
 
 function fitWidth(el, maxWidth) {
