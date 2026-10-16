@@ -1,93 +1,148 @@
 ---
-title: "CSS easing functions cheat sheet: nine named curves"
-description: "A CSS easing functions cheat sheet for motion graphics: nine named curves with their jobs and peak speeds, a speed ramp for cuts, and 44 generated pages."
+title: "CSS easing functions cheat sheet: 10 curves"
+description: "CSS easing functions: ten named curves with peak speeds, a spring as a linear() easing, a speed ramp for cuts, and a page for each curve."
 date: 2026-10-07
-updated: 2026-10-13
-section: taste
+updated: 2026-10-16
+section: motion-sound
 tags: "easing, css, motion, cubic-bezier, after effects"
 keywords: "css easing functions, cubic-bezier easing, css linear() easing, easing curves cheat sheet, after effects easing in css"
 hero: /blog/easing/hero.webp
 heroAlt: "Large number 44 with the caption easing pages, 9 named curves, one vocabulary for every move"
 ---
 
-Every vawe move uses one of nine named CSS easing functions. Below is what each one is for, how fast it peaks, and which two needed fixing on real clips. Every curve here also has its own page on the site, generated from the same source, at [/easing](/easing).
+This is a CSS easing functions cheat sheet for motion graphics. Every vawe move uses one of ten named easing curves. Below is what each one is for, how fast it peaks, and which two needed a fix on real clips. Each curve has its own page at [/easing](/easing), generated from the same source file.
 
-| Name | Job | Peak speed (vs linear) |
-|---|---|---|
-| `land` | entrance: fast start, long soft stop | 4.8x |
-| `landSoft` | entrance under 0.4 s | 2.81x |
-| `leave` | exit that settles | 1.95x |
-| `launch` | exit that accelerates, capped at the cut | 3x |
-| `pop` | arrival that overshoots its mark by 15.3% | 4.79x |
+## What we found
 
-The other four names are `settle` and `swap` (two-sided eases), `glide` (a drift) and `carry`. Their numbers are on their [easing pages](/easing).
+Peak speed is the top speed of the curve compared with a straight line (linear) over the same time. We read all values from the generated data in `site/lib/easing.json`.
 
-These curves are one part of our [motion design system](/blog/ten-looks): the looks decide how a clip is dressed, and these names decide how it moves.
+| Name | Job | Peak speed | Overshoot |
+| --- | --- | --- | --- |
+| `land` | entrance: fast start, long soft stop | 4.8x | none |
+| `landSoft` | entrance under 0.4 s | 2.81x | none |
+| `settle` | heavy object that starts and ends at rest | 2.5x | none |
+| `swap` | replace one thing with another | 4x | none |
+| `glide` | slow drift, such as a camera push | 1.47x | none |
+| `carry` | a move that runs into a cut | 4.79x | none |
+| `leave` | exit that settles | 1.95x | none |
+| `launch` | exit that accelerates, capped at the cut | 3x | none |
+| `pop` | arrival that overshoots its mark | 4.79x | 15.3% |
+| `nudge` | the same shape as `pop`, less of it | 4.79x | 6.34% |
 
-## Why name a curve at all
+![Progress curves for land, landSoft, launch, leave and pop plotted on one chart.](/blog/easing/curves.webp "The five curves that matter most. Peak speed is relative to a straight line.")
 
-Our moves, and the agents that wrote them, typed `cubic-bezier` numbers by hand. Across the library those numbers had no shared meaning. Short pops landed too hard, exits ran as long as their entrances, and two moves that should have felt related used unrelated curves.
+## Why name a curve
 
-A table of names is the common fix, and every motion system has one. We had an extra reason. Agents write these pages, and an agent that sees `EASE.launch` makes a better choice than one that sees four floats, because the name carries the purpose.
+Our moves, and the agents that wrote them, typed `cubic-bezier` numbers by hand. Across the library those numbers had no shared meaning. Short pops landed too hard. Exits ran as long as their entrances. Two moves that should feel alike used unrelated curves.
 
-## How each curve is defined
+A table of names is the usual fix. We had one more reason. Agents write these pages. An agent that sees `EASE.launch` chooses better than one that sees four floats, because the name carries the purpose.
 
-Each name is two After Effects keyframe handles: an influence (how far along the time axis the handle reaches) and a speed (how steep the curve is at the key). The vocabulary lives in one file, `core/motion/presets.js`. Each curve converts to a CSS `linear()` string, and every page also shows the nearest `cubic-bezier` with its fit error.
+## How a curve is defined
 
-<figure>
-<img src="/blog/easing/curves.webp" alt="Progress curves for land, land-soft, launch, leave and pop plotted on one chart" width="720" height="400" loading="lazy">
-<figcaption>The five curves that matter most, plotted from the sampled data on the easing pages. Peak speed is relative to a straight line.</figcaption>
-</figure>
+Each name is two After Effects keyframe handles. A handle has an influence (how far along the time axis it reaches) and a speed (how steep the curve is at the key). The whole vocabulary lives in one file, `core/motion/presets.js`. Each curve converts to a CSS `linear()` string, and every page also shows the nearest `cubic-bezier` with its fit error.
 
-## land and landSoft: entrances
+## Entrances: land and landSoft
 
-`land` is a fast start with a long soft stop. It peaks at 4.8 times average speed, and on a move shorter than 0.4 s that reads as a jump (the README note in the fix commit says so). `landSoft` keeps the long stop and drops the peak to 2.81 times average ([`a5fd39d88`](https://github.com/Vandit1604/vawe/commit/a5fd39d88)). A later commit lengthened the short pops and exits that the energy measure had flagged (`766c2a809`).
+`land` is a fast start with a long soft stop. At 0.1 of the time it has already covered 0.395 of the distance. It peaks at 4.8 times average speed, and on a move shorter than 0.4 s that reads as a jump. So `landSoft` keeps the long stop and drops the peak to 2.81 times average speed.
 
 <figure>
 <video src="/blog/easing/land.mp4" poster="/blog/easing/land.webp" muted loop playsinline autoplay width="640" height="360"></video>
 <figcaption><a href="/easing/land">land</a>: a fast start and a long soft stop, against linear.</figcaption>
 </figure>
 
-## leave and launch: exits
+## Exits: leave and launch
 
-Exits are shorter than entrances and accelerate. The house range is 0.35 to 0.6 of the entrance duration, and `leave()` in the presets uses 0.6. The rule is written once, in `taste/rules/exits-shorter.md`, and a check flags an exit as long as its entrance.
+Exits are shorter than entrances and they accelerate. The range is 0.35 to 0.6 of the entrance time, and `leave()` in the presets uses 0.6. The rule lives once, in `taste/rules/exits-shorter.md`, and a check flags an exit as long as its entrance.
 
-`launch` is the exit that speeds up into a cut. The first version ended at 4.8 times average speed at the cut, and the README note says it read as a vanish. We capped it at 3x at the cut in the same commit as `landSoft`.
+`launch` is the exit that speeds up into a cut. The first version ended at 4.8 times average speed at the cut, and it read as a vanish. We capped it at 3x at the cut, the same change that added `landSoft`.
 
 <figure>
 <video src="/blog/easing/launch.mp4" poster="/blog/easing/launch.webp" muted loop playsinline autoplay width="640" height="360"></video>
-<figcaption><a href="/easing/launch">launch</a>: an exit that starts gently and speeds up, capped at 3x at the cut.</figcaption>
+<figcaption><a href="/easing/launch">launch</a>: a gentle start, then a fast exit, capped at 3x.</figcaption>
 </figure>
 
-## pop: the one that overshoots
+## Overshoot: pop and nudge
 
-`pop` passes its mark by 15.3 percent and settles back, the shape a button press or a notification wants. Across 22 reference films, the median share of arrivals that overshoot is 30.5 percent (p10 21.1, p90 40.9), and our overshoot-share check is built on that range. How that range was measured is in [average shot length in motion graphics](/blog/quality-bar).
+`pop` passes its mark by 15.3 percent and settles back. A button press or a notification wants that shape. `nudge` has the same shape with 6.34 percent overshoot. Use it for the items next to a `pop` hero.
 
-## settle, swap, glide and carry
+How much overshoot is normal? Across 22 reference films, the median share of arrivals that overshoot is 30.5 percent (p10 21.1, p90 40.9). Our overshoot-share check uses that range. The method is in [motion graphics benchmark: 167 cuts measured](/blog/quality-bar).
 
-The first set had six names: `land`, `leave`, `launch`, `settle`, `swap` and `glide`. `settle` and `swap` are two-sided eases and `glide` is a drift. The vocabulary now has nine: those six plus `landSoft`, `carry` and `pop`.
+## Match speed across a cut with ramp()
 
-## ramp(): matching speed across a cut
-
-`ramp()` is a speed ramp across a cut. The outgoing element accelerates into the cut, and the incoming one leaves it at the same speed and slows down, so velocity matches on both sides ([`8f117991b`](https://github.com/Vandit1604/vawe/commit/8f117991b)). Matching velocity across a cut is the part people get wrong by eye. See [the speed-ramp move](/moves/speed-ramp), and for other ways to carry motion over a seam, [motion graphics transitions](/blog/transitions).
+`ramp()` is a speed ramp across a cut. The outgoing element accelerates into the cut. The incoming element leaves the cut at the same speed and slows down. So the velocity matches on both sides, which is the part people get wrong by eye. See [the speed-ramp move](/moves/speed-ramp), and read [motion graphics transitions](/blog/transitions) for other ways to carry motion over a seam.
 
 ## Where the handle values came from
 
-We did not pick the handles by taste. We measured 1,339 animation segments from open-source Lottie projects (the lottie-android, lottie-ios and lottie-web repositories) and 27 segments from HyperFrames carousels. In that sample 65.05 percent of segments used the default handles, 468 were tuned, 616 were entrances and 57 were exits. No exit in the sample ran faster than 1.5 times at its end. Our rule that exits accelerate is a deliberate step away from that, which is why `launch` is capped at 3x.
+We did not pick the handles by taste. We measured 1,339 animation segments from open-source Lottie projects (the lottie-android, lottie-ios and lottie-web repositories) and 27 segments from HyperFrames carousels. In that sample, 65.05 percent of segments used the default handles and 468 had tuned handles. There were 616 entrances and 57 exits. No exit ran faster than 1.5 times at its end. Our rule that exits accelerate departs from that sample, so we cap `launch` at 3x.
 
-## The 44 easing pages
+## Use a curve in your page
 
-A script reads the motion library and writes one JSON file per ease with the curve, its velocity, the `linear()` string, a cubic-bezier fit and the After Effects handle values. The site renders 44 pages from it: the nine vawe curves, 30 classic ones (ten families, each in, out and in-out) and the 5 CSS keywords including `linear` ([`88f2f435a`](https://github.com/Vandit1604/vawe/commit/88f2f435a)). Only the words are typed by hand. Each vawe page carries a 2 s clip of the curve moving a square next to a linear one.
+Import `EASE` from `core/motion/presets.js` and pass a name as the `easing` of a Web Animation:
 
-## What this list cannot tell you
+```js
+import { EASE, easeFn } from "./core/motion/presets.js";
 
-We have no before-and-after score. We did not render one film with ad hoc curves and again with named ones and compare. The clips were re-rendered with the names, and the short-move fixes came from a measurement, but there is no number for how much better films got. Because the names live in one file and everything else is generated from it, the duplicates that came before are gone; [single source of truth in code](/blog/one-owner) covers that cleanup. The rest of the motion craft posts are listed in our [motion design system](/blog/ten-looks) overview.
+el.animate(
+  [{ translate: "0 40px", opacity: 0 }, { translate: "0 0", opacity: 1 }],
+  { duration: 600, easing: EASE.land, fill: "both" },
+);
 
-## Source files
+console.log(easeFn("land")(0.1).toFixed(3)); // 0.395
+```
+
+We ran the last line in Node and it printed 0.395. `easeFn(name)` gives the same curve as a function of 0 to 1. Use it in pages that paint with `window.seek(t)`, where a `linear()` string cannot run.
+
+## Spring animation in CSS
+
+CSS has no spring keyword. It has `linear()`, an easing function that takes a list of points. Sample a spring at 40 points, and CSS draws the spring. The result is a plain CSS value, so a Web Animation or a CSS `transition` can use it.
+
+```js
+function spring(t, k, d) {
+  if (t <= 0) return 0;
+  const w = Math.sqrt(k), z = d / (2 * w);
+  if (z >= 1) return 1 - Math.exp(-w * t) * (1 + w * t);
+  const wd = w * Math.sqrt(1 - z * z);
+  return 1 - Math.exp(-z * w * t) * (Math.cos(wd * t) + ((z * w) / wd) * Math.sin(wd * t));
+}
+
+function springEasing(k, d, seconds, samples = 40) {
+  const pts = Array.from({ length: samples + 1 }, (_, i) =>
+    i === 0 ? 0 : i === samples ? 1 : Math.round(spring((i / samples) * seconds, k, d) * 1e4) / 1e4);
+  return `linear(${pts.join(", ")})`;
+}
+
+el.animate([{ transform: "scale(0)" }, { transform: "scale(1)" }],
+  { duration: 1040, easing: springEasing(220, 12, 1.04), fill: "both" });
+```
+
+Here `k` is the stiffness and `d` is the damping. A higher `d` removes the bounce. We ran this in headless Chrome with `k` 220 and `d` 12. The easing string is 319 characters, and the scale peaks at 1.248 before it settles at 1. The four springs in `core/motion/springs.js` settle in 0.43 s (snappy), 0.71 s (default), 1.34 s (heavy) and 1.04 s (playful). Only snappy (1.015) and playful (1.249) overshoot by more than 0.1 percent.
+
+## The 45 easing pages
+
+A script reads the motion library and writes one JSON file per curve. Each holds the curve, its velocity, the `linear()` string, a cubic-bezier fit and the After Effects handle values. The site renders 45 pages from it. They cover the ten vawe curves, 30 classic ones (ten families, each in, out and in-out) and the 5 CSS keywords including `linear`. A person types only the words. Each vawe page carries a 2 s clip of the curve moving a square next to a linear one.
+
+We have no before-and-after score. We did not render one film with ad hoc curves and again with named ones. The short-move fixes came from a measurement, but no number says how much better the films got. The names live in one file and the rest is generated, so the duplicate curves are gone. The looks that dress a clip are in [CSS animation library: 125 copyable motion moves](/blog/site-after-json).
 
 | File | What it holds |
-|---|---|
+| --- | --- |
 | `core/motion/presets.js` | the `EASE` vocabulary, `leave()` and `ramp()` |
 | `scripts/site/easing.mjs` | builds the easing page data from the motion library |
-| `site/app/easing/` | the 44 pages and [the index](/easing) |
-| `taste/rules/exits-shorter.md` | the exit duration rule |
+| `site/app/easing/` | the 45 pages and [the index](/easing) |
+| `taste/rules/exits-shorter.md` | the exit time rule |
+
+## FAQ
+
+**How do I make a spring animation in CSS?**
+Sample a spring formula at about 40 points and put the numbers in a `linear()` easing. The code above does this, and it works in a Web Animation and in a CSS `transition`.
+
+**What is the best easing for UI animation?**
+Use a fast start and a long soft stop for things that arrive, such as `land` here. Make exits shorter than entrances and let them accelerate.
+
+**What is the difference between cubic-bezier and linear() in CSS?**
+`cubic-bezier()` describes one smooth curve with four numbers. `linear()` lists many points. So it can draw an overshoot or a bounce that one bezier cannot.
+
+**How long should an exit take compared with an entrance?**
+We use 0.35 to 0.6 of the entrance time. A card that takes 0.4 s to appear leaves in about 0.25 s.
+
+**How do I use After Effects easing in CSS?**
+Treat each keyframe handle as an influence and a speed, then convert the curve to a `linear()` string. The pages at [/easing](/easing) show the handle values and the matching `linear()` and `cubic-bezier` for each curve.

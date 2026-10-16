@@ -1,67 +1,91 @@
 ---
-title: "Cut video to the beat in code with a beat grid"
-description: "Cut video to the beat without listening: read a track as a beat grid, check each cut within one frame of a hit, and move it. 8 of 19 calls failed first."
+title: "Cut video to beat: sync cuts to music with code"
+description: "Read a music track as a beat grid, check that each cut lands within one frame of a hit, and move it. 8 of 19 calls failed first."
 date: 2026-10-11
-updated: 2026-10-13
-section: agent-experience
-tags: "cut to the beat, beat detection, audio onsets, agents, error messages"
-keywords: "cut video to the beat, beat grid, audio onset detection, beat sync editing"
+updated: 2026-10-16
+section: motion-sound
+tags: "cut to the beat, beat detection, audio onsets, beat grid, agents"
+keywords: "cut video to the beat, beat sync video editing, beat detection python, audio onset detection, edit video to music"
 hero: /blog/beat/hero.webp
 heroAlt: "Before the fix, vawe sound failed 8 of 19 calls on short cues with the message no output. The cause was a one-second minimum. After the fix, one agent used the verb 21 times."
 ---
 
-You can cut a video to the beat in code, with no ear involved: read the music as a beat grid and a list of hits, compare every cut with them, and move each cut that is more than three frames off. At the end you have a cut table where each cut is marked on beat, near or off, and each off cut names the second to move it to. Our agents work this way because an agent can read a music file as bytes but cannot hear it.
+You can cut a video to the beat in code, with no ear involved. Read the music as a beat grid and a list of hits. Compare every cut with them. Move each cut that is more than three frames off. The result is a cut table: each cut is on beat, near or off, and each off cut names the second to move it to. Our agents work this way because an agent can read a music file as bytes but cannot hear it.
 
-We built this into `vawe sound` after reading traces. In one, the agent wrote its own Python with numpy to find onsets, after `vawe see` refused the track with "no readable video stream" (`see` expects a film). In another film, the hits were found by hand and 10 cuts fell in the first 2.2 seconds, where the bed has no onset at all. Sound for agents has its own rules; the [LUFS for video guide](/blog/audio-as-written) covers how loud the mix should be.
+## What we did
 
-## What you need for beat-synced cuts
+We built the check into `vawe sound`, after we read agent traces. In one trace, the agent wrote its own Python with numpy to find onsets. The reason: `vawe see` refused the track with "no readable video stream" (`see` expects a film). In another film, a person found the hits by hand. Ten cuts fell in the first 2.2 seconds, where the music has no onset at all.
 
-- A music file the user gave. Without one there is no beat grid, and the verb says so instead of checking cuts against nothing.
-- A film page whose beats are `data-world` elements, so the cut times are known.
-- `bin/vawe` from the repo (the [CLI docs](/docs/cli) list the verbs).
+The verb now reads a track, a film, a page or a reference id. It prints the tempo, a beat grid, every hit with a kind (click, pop, swish, impact or sustained), and a cut table. The code is in `harness/lib/sound-read.mjs` (hits, tempo, grid, cut table) and `harness/media/sound.mjs` (the verb).
 
-## Step 1: read the track as a beat grid
+## How to cut to the beat
 
-Run the verb on the track alone. It prints the tempo, a beat grid and the hits:
+You need a music file from a person, and a vawe page with one `data-world` element for each beat. The elements give the cut times. Without a music file the verb says there is no beat grid. It does not check cuts against nothing. The [CLI docs](/docs/cli) list the verbs.
 
-```
-bin/vawe sound <track.mp3>
-```
+Make a test track first. This command writes a 6 second click track at 120 BPM with ffmpeg:
 
-The input can be a track, a film or a page, or a reference id from `vawe refs list` ([f1453e1d4](https://github.com/Vandit1604/vawe/commit/f1453e1d4)). The verb came from [a600cae64](https://github.com/Vandit1604/vawe/commit/a600cae64), which made `vawe sound` the one reader of sound and folded in the older `audio`, `sounds` and `beatmap` verbs: 30 files, 695 lines added and 112 removed.
-
-## Step 2: name each hit
-
-A beat grid tells you where the pulse is. A hit tells you what happens. Since [b71bae255](https://github.com/Vandit1604/vawe/commit/b71bae255) each hit has a kind (click, pop, swish, impact or sustained) and the verb says what moves in the frame at that moment. An impact is a stronger place to cut than a sustained note, so read the kinds before you choose.
-
-## Step 3: check the film's cuts against the grid
-
-Pass the page with `--cuts`:
-
-```
-bin/vawe sound <track.mp3> --cuts <page.html>
+```bash
+ffmpeg -y -f lavfi -i "aevalsrc='sin(2*PI*1000*t)*exp(-40*mod(t,0.5))':d=6:s=44100" click.wav
 ```
 
-The cut table gives each cut a verdict. Within 1 frame of a hit or a beat line, it is on beat. Within 3 frames it is near. Beyond that it is off, and the row gives the second to move it to.
+Step 1: read the track alone.
 
-![Schematic cut table. Cuts within one frame of a hit are on beat, within three frames are near, beyond that are off, and an off cut shows the second to move to.](/blog/beat/grid.webp)
+```bash
+bin/vawe sound click.wav
+```
 
-## Step 4: move the off cuts in the page
+We ran it. It printed `Tempo 120 BPM`, the first beat at 0.50 s, and 11 hits. Each hit is a "pop", at 0.50 s, 1.00 s, 1.50 s and so on. One beat is 15 frames at 30 fps.
 
-Each beat's start is a literal in the page, so moving a cut means editing that number (a keyframe stop or a `:root` custom property) to the second the table names. Then render a draft and run Step 3 again.
+Step 2: check the cuts of a film against the track.
 
-## Check it worked: the draft advice
+```bash
+bin/vawe sound click.wav --cuts films/examples/colour-sting/page.html
+```
 
-You do not have to remember Step 3. The draft loop reads the same table through the `cut-off-beat` check: it reports how many cuts sit within a frame of a hit or beat line, lists the off ones, and names the command that gives the fix. It never stops a draft. If the music cannot be read, it prints that and moves on, and a page can waive the check with a reason.
+The table gives each cut a verdict. Within 1 frame of a hit or a beat line, the cut is on beat. Within 3 frames it is near. Beyond that it is off. Half-beat lines count as targets too.
 
-## Failures we hit on short cues and wrong inputs
+![Schematic cut table. Cuts within one frame of a hit are on beat, within three frames are near, beyond that are off, and an off cut shows the second to move to.](/blog/beat/grid.webp "The cut table.")
 
-"no output" on a tick or a pop. Agents also called `vawe sound` on the film's own cues to check them, and those files are often well under a second. The decoder rejected any file with less than a second of samples and printed the first line of ffmpeg's stderr, or "no output" when ffmpeg had said nothing, which it had not, because nothing was wrong with the file. In one session's log, 8 of 19 `sound` calls exited with code 2 on a tick, a word pop, a leave swish, an ETA tick and similar. We reproduced it on a valid mp3 tick. [6ec0d5adc](https://github.com/Vandit1604/vawe/commit/6ec0d5adc) fixed it: `decodeMono` in `harness/lib/audio-onsets.mjs` takes a `minSeconds` option with a default of 1, the sound reader passes 0.02, and a file that is too short now fails with `under N s of audio`. A test asserts that the default error names the length.
+On the five cuts of `colour-sting` against this click track, 2 of 5 were on beat. The advice named the fix for each off cut:
 
-A reference id where a path was expected, and a page with no music. In one remix session, 3 of the 13 errors came from `vawe sound`: one passed a reference id where a path was expected, and two ran on a page that had no music bed. Both now get a clear answer: reference ids are accepted, and a page with no music file gets "no beat grid".
+```
+cut 1 at 0.03 s is 14 f before the hit at 0.50 s (off): move it to 0.50 s (frame 15 at 30 fps).
+cut 5 at 4.37 s is 3.5 f after the half beat at 4.25 s (off): move it to 4.25 s (frame 127 at 30 fps).
+```
 
-## How much it helped
+The film has no music of its own, so this shows the table and does not show a good cut. Real tracks give real hits.
 
-Before the fix, `vawe sound` failed 8 of 19 calls on ticks and pops. After the verb existed, the remix agent used it 21 times. The first number comes from one session's log and the second from another session's trace review, so they do not form a rate. We have not measured whether films now cut closer to the beat; the on-beat share before and after is still to collect.
+Step 3: move the off cuts. Each beat start is a literal in the page, a keyframe stop or a `:root` custom property. Edit that number to the second the table names. Render a draft, then run Step 2 again.
 
-The code is in `harness/lib/sound-read.mjs` (hits, tempo, grid, cut table) and `harness/media/sound.mjs` (the verb). A cut on the beat can still feel flat if nothing carries the eye across it, which [motion graphics transitions: 12 handoffs](/blog/transitions) covers. For what plays under the cuts, read why we [ban the synth bed in background music for generated video](/blog/no-synth-bed), and the [audio docs](/docs/audio) for the tags. The level of the finished mix is checked as described in [LUFS for video](/blog/audio-as-written).
+You do not have to remember Step 2. The draft loop reads the same table through the `cut-off-beat` check. It reports how many cuts sit within a frame of a hit or beat line. It lists the off ones and names the command that gives the fix. It never stops a draft, and a page can waive the check with a reason.
+
+## Failures we hit
+
+Short cues failed first. Agents ran `vawe sound` on the cues of their own film, and those files are often under one second. The decoder rejected any file with less than one second of samples. It printed "no output" when ffmpeg had said nothing, because nothing was wrong with the file.
+
+In one session log, 8 of 19 `sound` calls exited with code 2 on a tick, a word pop, a leave swish and similar cues. We reproduced it on a valid mp3 tick. The fix is in `decodeMono` in `harness/lib/audio-onsets.mjs`. It takes a `minSeconds` option with a default of 1. The sound reader passes 0.02, and a file that is too short now fails with `under N s of audio`. We checked a 0.15 s tick after the fix and `vawe sound` read it.
+
+Two more errors came from wrong inputs. In one remix session, 3 of the 13 errors came from `vawe sound`. One call passed a reference id where a path was expected. Two calls ran on a page with no music. Both now get a clear answer.
+
+| Test | Result |
+| --- | --- |
+| One session log, `vawe sound` on short cues | 8 of 19 calls failed |
+| A remix session trace, after the fix | the agent used the verb 21 times |
+
+The two numbers come from two sessions, so they do not form a rate. We have not measured whether films cut closer to the beat. The on-beat share before and after is still to collect.
+
+A cut on the beat can still feel flat if nothing carries the eye across it. [Motion graphics transitions](/blog/transitions) covers that. For the level of the finished mix and what plays under the cuts, read [LUFS for video](/blog/audio-as-written), and see the [audio docs](/docs/audio) for the tags.
+
+## FAQ
+
+**How do I cut a video to the beat?**
+Find the beat times of the music, then move each cut to the nearest beat or hit. In vawe, `vawe sound <track> --cuts <page>` prints the beat grid and names the second to move each cut to.
+
+**How close to the beat must a cut be?**
+We call a cut on beat when it is within 1 frame of a hit or beat line, and near within 3 frames. At 30 fps, 1 frame is about 33 ms.
+
+**Can an AI agent hear music?**
+No. It can read a music file as numbers. Onset detection turns those numbers into hits and a beat grid that the agent can compare with its cuts.
+
+**Why did vawe sound say "no output"?**
+Older versions rejected audio files shorter than one second, such as a tick. The reader now accepts files down to 0.02 s.
