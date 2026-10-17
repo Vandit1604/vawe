@@ -167,7 +167,7 @@ const progressLine = (job, text) => progress(job, text).line;
 function waitNextLine(job, text) {
   const { etaMs, elapsed } = progress(job, text);
   const { calls, basis } = waitCallsLeft({ etaMs, elapsedMs: elapsed, capMs: WAIT_CAP_MS });
-  return `next: bin/vawe ship --status ${job.page} --wait (about ${calls} more ${calls === 1 ? 'call' : 'calls'} ${basis}; one call waits up to ${clock(WAIT_CAP_MS)}; run it alone, not in parallel); ${WAIT_WORK}`;
+  return `next: bin/vawe wait ${job.page} (about ${calls} more ${calls === 1 ? 'call' : 'calls'} ${basis}; one call waits up to ${clock(WAIT_CAP_MS)}; run it alone, not in parallel); ${WAIT_WORK}`;
 }
 
 const LINE_CAP = 240;
@@ -211,7 +211,7 @@ function statusOf(id) {
 const renderedLines = (job) => [
   `job ${job.id}: RENDERED in ${clock(job.renderMs)}, the mp4 is ready; NOT JUDGED yet (a fresh judge and the acceptance rows run now, about 70 s)`,
   ...job.outputs.map((o) => `output: ${o}`),
-  `next: bin/vawe ship --status ${job.page} --wait (1 more call: the judge and the acceptance rows end within about 70 s)`,
+  `next: bin/vawe wait ${job.page} (1 more call: the judge and the acceptance rows end within about 70 s)`,
 ];
 
 const isOver = (id) => ['done', 'failed', 'cancelled'].includes(readJob(id).status) || (readJob(id).status === 'running' && !pidAlive(readJob(id).pid));
@@ -229,7 +229,7 @@ async function waitThenStatus(id) {
   }
   console.log(statusOf(target).join('\n'));
   const running = Boolean(target && fs.existsSync(stateFile(target)) && !isOver(target));
-  if (running) console.log(stillRunningLine(`bin/vawe ship --status ${readJob(target).page} --wait`, WAIT_CAP_MS));
+  if (running) console.log(stillRunningLine(`bin/vawe wait ${readJob(target).page}`, WAIT_CAP_MS));
   else if (target && fs.existsSync(stateFile(target)) && readJob(target).status === 'failed') process.exitCode = 1;
 }
 

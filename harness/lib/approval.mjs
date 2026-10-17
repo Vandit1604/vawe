@@ -7,7 +7,7 @@ import { filmKeyOf, agentId, namedAgent } from './runlog.mjs';
 const TEXT_FILE = /\.(html|css|m?js|svg)$/i;
 const FILE_TOKEN = /[\w@./-]+\.[a-z0-9]{2,5}\b/gi;
 
-export const SHOW_OWNER = 'show the draft to the owner (storyboard: bin/vawe sheet <draft>) and stop; the owner approves with bin/vawe approve';
+export const SHOW_OWNER = 'show the draft to the owner (storyboard: bin/vawe sheet <draft>) and stop';
 
 export const approvalPath = (film, root = '.') => path.join(root, 'out', `${filmKeyOf(film)}.approved`);
 export const fullDraftPath = (film, root = '.') => path.join(root, 'out', `${filmKeyOf(film)}-draft.mp4`);
@@ -45,8 +45,8 @@ export function readApproval(film, root = '.') {
 export function shipProblem(pagePath, { root = '.', env = process.env } = {}) {
   if (env.VAWE_UNATTENDED === '1') return null;
   const approval = readApproval(pagePath, root);
-  if (!approval) return `no approval for ${filmKeyOf(pagePath)}: ${SHOW_OWNER}`;
-  if (approval.page !== pageDigest(pagePath)) return `the page changed after the approval (${approval.at}): ${SHOW_OWNER}`;
+  if (!approval) return `no approval for ${filmKeyOf(pagePath)}: ${SHOW_OWNER}; the owner then runs bin/vawe approve ${pagePath}`;
+  if (approval.page !== pageDigest(pagePath)) return `the page changed after the approval (${approval.at}): ${SHOW_OWNER}; the owner then runs bin/vawe approve ${pagePath}`;
   return null;
 }
 

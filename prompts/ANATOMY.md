@@ -129,7 +129,7 @@ disagreement between draft check and judge on tail tiles and tagline size; a num
 1. Stills and the stills judge: `bin/vawe judge films/<name>/directions.html --fresh --stage stills`.
 2. Component labs: the 4 to 6 hardest pieces, each alone on its own page at 3 sizes, fixed before they join.
 3. Draft loop: `bin/vawe dev`, then a fresh `bin/vawe critique`, until every Acceptance row is green.
-4. Final: `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait`.
+4. Final: `bin/vawe ship <page>`, then `bin/vawe wait <page>`.
 
 Answers: a ship takes 3 to 19 minutes and one failed final cost 40 (trace study 1, speed); gates 1 to 3 find the failure in a draft.
 

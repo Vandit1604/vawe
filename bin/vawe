@@ -9,6 +9,7 @@ import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cl
 import { VERBS, stripChromeNoise, commitsBehind, staleNote } from '../harness/cli/verbs.mjs';
 import { newFilm, newFilmLines, readDetails, questionsJson } from '../harness/cli/new.mjs';
 import { appendRun, readAllRuns, filmKeyOf } from '../harness/lib/runlog.mjs';
+import { pageDigest } from '../harness/lib/approval.mjs';
 import { verbEvent, footerLine, filmOfCall, imagesIn, reasonOf, readNotes } from '../harness/lib/verb-log.mjs';
 import { namedRef, refsDir } from '../harness/lib/refs.mjs';
 import { nextStep } from '../harness/live/stage-say.mjs';
@@ -108,8 +109,13 @@ function briefOf(input) {
   return page ? orNone(() => fs.readFileSync(path.resolve(ROOT, path.dirname(page), 'brief.md'), 'utf8'), '') : '';
 }
 
+function pageHashOf(verb, call, code) {
+  const page = call.positional.find((p) => p.endsWith('.html'));
+  return verb.name === 'critique' && code === 0 && page ? orNone(() => pageDigest(path.resolve(ROOT, page)), null) : null;
+}
+
 function record(verb, rest, call, code, reason, endMs) {
-  const event = verbEvent({ verb: verb.name, args: rest, stage: call.stage, startMs: call.startMs, endMs, exitCode: code, reason, slotWaitS: readNotes(call.notes).slotWaitS ?? null, images: imagesIn(call.stdout) });
+  const event = verbEvent({ verb: verb.name, args: rest, stage: call.stage, startMs: call.startMs, endMs, exitCode: code, reason, slotWaitS: readNotes(call.notes).slotWaitS ?? null, images: imagesIn(call.stdout), pageHash: pageHashOf(verb, call, code) });
   try {
     appendRun(filmOfCall(verb.name, call.positional), event, { root: ROOT });
   } catch (e) {
@@ -142,6 +148,8 @@ async function main(argv) {
   try {
     code = await execute(verb, rest, call);
     if (code !== 0) reason = reasonOf({ code, signal: call.signal, stderr: call.stderr });
+    const fix = code !== 0 && verb.fix ? verb.fix(reason, call.positional) : null;
+    if (fix) console.error(`fix: ${fix}`);
   } catch (e) {
     code = e instanceof UsageError ? 2 : 1;
     reason = e instanceof UsageError ? e.message : `exit 1: ${e.message}`;

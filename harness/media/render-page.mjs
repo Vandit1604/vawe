@@ -65,7 +65,7 @@ import { MODES } from '../lib/draft-tiers.mjs';
 import { redLine, summaryLine, fullTable } from '../lib/acceptance.mjs';
 import { draftAcceptance, videoMeasures } from './acceptance-run.mjs';
 import { readDecls, rulesWith } from '../lib/design-decls.mjs';
-import { RULES, textProblems, frameUnitLines, hiddenTextLines, soundLine, soundSummary, briefLine, mergeProblems, draftAdvice, draftCheckLines, layoutTimes } from '../lib/draft-check.mjs';
+import { RULES, textProblems, frameUnitLines, hiddenTextLines, soundLine, soundSummary, briefLine, mergeProblems, draftAdvice, draftCheckLines, layoutTimes, NOTE_LINES } from '../lib/draft-check.mjs';
 import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
@@ -1043,7 +1043,7 @@ export async function videoChecks(mp4, pagePath, checks, probe = {}, cameraOnly 
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 
-export const NOTE_LINES = /^(waive: |motion lint read element boxes|checks skipped: )/;
+export { NOTE_LINES };
 
 /**
  * What a draft says about itself: { red, notes, rows, was, sync }. `red` is what the terminal shows (the red acceptance

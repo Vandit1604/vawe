@@ -32,8 +32,8 @@ test('a running job prints a progress line each interval, then names the next ca
     const out = await runWait(cwd, { VAWE_SHIP_WAIT_MS: '5500', VAWE_SHIP_PROGRESS_MS: '2000' });
     const progress = out.split('\n').filter((l) => l.startsWith('job demo-1: running'));
     assert.ok(progress.length >= 4, out);
-    assert.match(out, /vawe wait: STILL RUNNING after 6s.*Call again: bin\/vawe ship --status films\/demo\/page\.html --wait/);
-    assert.match(out, /next: bin\/vawe ship --status films\/demo\/page\.html --wait \(about \d+ more calls? /);
+    assert.match(out, /vawe wait: STILL RUNNING after 6s.*Call again: bin\/vawe wait films\/demo\/page\.html/);
+    assert.match(out, /next: bin\/vawe wait films\/demo\/page\.html \(about \d+ more calls? /);
   } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
 });
 

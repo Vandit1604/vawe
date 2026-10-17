@@ -5,7 +5,7 @@ import { filmKeyOf, namedAgent, agentId } from './runlog.mjs';
 export const UNFILED = '_unfiled';
 const IMAGE = /(?:^|[\s(`"'=])((?:~\/|\/|\.\/|[\w.-]+\/)[^\s`"')|]*\.(?:png|jpe?g|webp))(?=$|[\s)`"'|,;:])/gi;
 const MAX_IMAGES = 20;
-const MAX_REASON = 140;
+const MAX_REASON = 260;
 
 /** The film a call is about: the page or mp4 it names (`new` names the film itself); UNFILED when it names none. */
 export function filmOfCall(verb, positional) {
@@ -46,13 +46,14 @@ export function causeOf(reason) {
 
 const tenths = (s) => Math.round(s * 10) / 10;
 
-/** The runs.jsonl fields of one call. `stage` is stage-say's stage for the film when the call started; `tagged` is false for a run no VAWE_AGENT names. */
-export function verbEvent({ verb, args, stage = null, startMs, endMs, exitCode, reason = null, slotWaitS = null, images = [], env = process.env }) {
+/** The runs.jsonl fields of one call. `pageHash` is the digest of the page a critique looked at (the ship gate reads it). `stage` is stage-say's stage for the film when the call started; `tagged` is false for a run no VAWE_AGENT names. */
+export function verbEvent({ verb, args, stage = null, startMs, endMs, exitCode, reason = null, slotWaitS = null, images = [], pageHash = null, env = process.env }) {
   return {
     cmd: 'verb', verb, args, stage,
     start: new Date(startMs).toISOString(), durationS: tenths((endMs - startMs) / 1000),
     exitCode, error: exitCode === 0 ? null : reason, slotWaitS: slotWaitS == null ? null : tenths(slotWaitS),
     images, tagged: namedAgent(agentId()) !== null,
+    ...(pageHash ? { pageHash } : {}),
     ...(verb === 'ship' && env.VAWE_UNATTENDED === '1' ? { unattended: true } : {}),
   };
 }

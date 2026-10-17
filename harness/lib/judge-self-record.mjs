@@ -2,7 +2,7 @@
 // rendered the cut it is judging? Pulled out of quality/gates/judge.mjs so it can be asserted directly
 // (that script exits the process on a dozen other conditions the moment it is run, which makes it unsafe
 // to import for a unit test) and so nothing else that ever needs "who authored this run" forks a second
-// copy of the answer.
+// copy of the answer (the ship gate asks the same question of a critique: harness/lib/critique-gate.mjs).
 //
 // Session alone cannot answer "which agent": a subagent launched via the Agent tool (the fresh judge
 // this guard exists to allow, guides/judge.md, "the PASS is not the author's to self-record")
@@ -16,13 +16,19 @@ import { readRuns, agentId, namedAgent } from './runlog.mjs';
 
 const AUTHORING = new Set(['dev', 'ship']);
 
+/** True when two run records ({ session, agent }) come from the same session and the same named agent (an unnamed side matches any). */
+export function sameIdentity(a, b) {
+  const sameSession = !!(a.session && b.session && a.session === b.session);
+  const [x, y] = [namedAgent(a.agent), namedAgent(b.agent)];
+  return sameSession && (!x || !y || x === y);
+}
+
+/** The newest run that rendered the film (a dev or ship record), or undefined. */
+export const lastAuthorRun = (runs) => runs.slice().reverse().find((r) => AUTHORING.has(r.cmd) || r.render);
+
 export function selfRecordCheck(inp) {
   const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
-  const thisAgent = namedAgent(agentId());
-  const authorRun = readRuns(inp).slice().reverse().find((r) => AUTHORING.has(r.cmd) || r.render);
+  const authorRun = lastAuthorRun(readRuns(inp));
   const authorSession = authorRun && authorRun.session;
-  const authorAgent = namedAgent(authorRun?.agent);
-  const sameSession = !!(thisSession && authorSession && thisSession === authorSession);
-  const sameAgent = !thisAgent || !authorAgent || thisAgent === authorAgent;
-  return { selfRecorded: sameSession && sameAgent, thisSession, authorSession };
+  return { selfRecorded: sameIdentity({ session: thisSession, agent: agentId() }, { session: authorSession, agent: authorRun?.agent }), thisSession, authorSession };
 }

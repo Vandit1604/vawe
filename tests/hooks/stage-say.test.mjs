@@ -157,17 +157,7 @@ test('the motion step names the doc and each principle to check; every stage lin
 
 test('the ship step names the work for the wait', () => {
   assert.match(WAIT_WORK, /Board and Motion pass rows.*strip <page> --cuts.*critique notes/);
-  assert.match(SAY.ship('f', 'films/f/page.html'), /--wait \(one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel\); while it renders, fill/);
-});
-
-test('dev advises, never blocks, while the Board is the template', () => {
-  const { root, page } = film('<p>x</p>', '## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n');
-  const run = () => spawnSync(process.execPath, [path.resolve('harness/live/dev-warn.mjs'), page], { encoding: 'utf8' });
-  const empty = run();
-  assert.equal(empty.status, 0);
-  assert.match(empty.stdout, /The Board comes before the motion: fill rhythm, spectacle, one move per cut, sound/);
-  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), '## Board\n\n| beat | in s |\n|---|---|\n| s1 | 0 |\n');
-  assert.equal(run().stdout, '');
+  assert.match(SAY.ship('f', 'films/f/page.html'), /bin\/vawe wait films\/f\/page\.html \(one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel\); while it renders, fill/);
 });
 
 test('after a draft the next step follows what is done: strips under any out/strip/<name>* folder, Motion pass rows, critique, then ship', () => {

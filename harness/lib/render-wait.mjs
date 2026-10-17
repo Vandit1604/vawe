@@ -16,6 +16,9 @@ export const waitingLine = (film, held, now) => {
   return `vawe wait: ${filmKeyOf(film)} has a ${held.map((s) => s.kind).join(' and ')} render running, ${age}s in`;
 };
 
+/** The one command that waits for a render of `page`: named while a render of its film holds a slot, else null. */
+export const waitCommand = (page, slots) => (slotsOfFilm(page, slots).length ? `bin/vawe wait ${page}` : null);
+
 const isResult = (r) => r.cmd === 'verb' && r.verb !== 'wait';
 
 /** The footer line of the newest verb run recorded after `sinceAt`, or null. */

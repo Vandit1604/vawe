@@ -182,7 +182,7 @@ const gatesText = (name) => `Do the gates in order. A failed gate sends you back
 3. Draft loop: \`bin/vawe dev films/${name}/page.html\`, fix, repeat until every Acceptance row is green.
    Then Read \`bin/vawe strip films/${name}/page.html --cuts\` for every cut and fix what reads flat.
    Then \`bin/vawe critique films/${name}/page.html\` in a session that did not write the page.
-4. Final: \`bin/vawe ship films/${name}/page.html\`, then \`bin/vawe ship --status films/${name}/page.html --wait\`.`;
+4. Final: \`bin/vawe ship films/${name}/page.html\`, then \`bin/vawe wait films/${name}/page.html\`.`;
 
 const PITFALLS = `Taste pitfalls: taste/build/DIGEST.md (\`bin/vawe dev\` prints them).`;
 

@@ -18,6 +18,7 @@ import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs'
 import { readFindings } from '../lib/findings.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
+import { critiqueProblem, critiqueCommand } from '../lib/critique-gate.mjs';
 export { commitsBehind } from '../lib/stale-checkout.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -45,6 +46,7 @@ const pageName = (page) => {
 };
 const devNext = (v, [page]) => {
   if (v.from != null || v.to != null) return `bin/vawe strip ${page} --at <the second you fixed> and Read it; when every named second is fixed: ${SAY.critique(pageName(page), page)}`;
+  if (critiqueProblem(page, { root: ROOT })) return `before anything else, in a session that did not write the page: ${critiqueCommand(page)}`;
   const state = nextStep(path.resolve(page), ROOT);
   if (state.stage === 'draft') return SAY.motion(pageName(page), page);
   return state.stage === 'motion' && !/Motion pass/.test(state.why) ? state.next : `${state.next} (${state.why})`;
@@ -175,12 +177,14 @@ export const VERBS = [
       { script: 'harness/live/dev-warn.mjs', args: [page] },
       { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : [])] },
       ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
+      { script: 'harness/live/dev-end.mjs', args: [page] },
     ],
     next: devNext,
+    fix: (reason, [page]) => (/render slot|Navigation timeout/i.test(reason) ? `bin/vawe wait ${page}` : `bin/vawe frames ${page}`),
   },
   {
     tier: 'core',
-    name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background; refused until the owner approves the draft (vawe approve)',
+    name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background; refused until another session has run vawe critique on the page and the owner has approved the draft (vawe approve)',
     positional: [{ name: 'page|job', help: 'films/<name>/page.html; with --status, that page or a job id (default: the newest job)' }],
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
@@ -198,10 +202,11 @@ export const VERBS = [
       if (v.wait) return [...before, { script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
       return [...before, { script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
+    fix: (reason, [page]) => (page?.endsWith('.html') && !/ship refused/.test(reason) ? `bin/vawe dev ${page}` : null),
     next: (v, [page]) => {
       if (v.status) return null;
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
-      return `rendering in the background: bin/vawe ship --status ${page} --wait (one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel); ${WAIT_WORK}`;
+      return `rendering in the background: bin/vawe wait ${page} (one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel); ${WAIT_WORK}`;
     },
   },
   {

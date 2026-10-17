@@ -32,12 +32,21 @@ Test a change by one question: what would an agent write unprompted, and does th
 | Audio | `harness/media/page-audio.mjs`, `core/audio/kit.mjs` | reads `<audio>` tags, mixes offline as written (`<meta name="loudness">` opts in to a target), synth voices by `data-synth`; nothing plays live |
 | Reference measure | `harness/media/ref-spec.mjs` (pixels), `harness/media/render-spec.mjs` (DOM), `harness/lib/spec-deltas.mjs` (the diff) | SPEC.md, spec.json, deltas.md; `bin/vawe see --spec` and `critique --ref` call them |
 | Views | `harness/media/see.mjs` and `harness/media/see/*.mjs`, `harness/media/see-views.mjs` | grids, probe, look, layout, word events, phone sheet, strip, loop seam |
-| Checks | `quality/gates/page-check.mjs`, `anim-traps.mjs`, `judge.mjs` | advise; only determinism and a missing waiver reason refuse |
+| Checks | `quality/gates/page-check.mjs`, `anim-traps.mjs`, `judge.mjs` | advise; only determinism, a missing waiver reason, a banned item and `ship` without approval or a fresh critique refuse |
 | Studio | `studio/page-server.mjs`, `studio/page-source.mjs`, `studio/ui/` | live preview; edits the literals in the page source in place; its buttons run `bin/vawe` |
 | CLI | `bin/vawe`, `harness/cli/` | one verb table (`verbs.mjs`), one parser (`parse.mjs`); a new verb needs the same hand-roll in 5 or more agents in trace-review (`node harness/dev/trace-review.mjs`). Otherwise add a flag to the owner verb or make its output better; `vawe --help` shows the core verbs, tiers are set on each entry |
 
 If a change needs a second owner for one concern (a second clock, a second mixer, a second measure),
 stop: extend the owner above. Two ways to say one thing is a fork, and the fork is the bug.
+
+## Where a refusal is allowed
+
+Checks advise; only determinism, approval and banned items refuse. The owner approved one more gate, `ship` without a critique of
+the current page from another session (`harness/lib/critique-gate.mjs`), because traces of 44 film agents showed 21 of 23 shipped
+past the warning and 2 of 23 ran a critique first. Every refusal ends with the command to run.
+
+Pre-registered trigger, not built: if the routing eval shows `storyboard` before `dev` under 50 percent, the first draft refuses too.
+Until then an empty Board is a warning in the `dev` plan status (`harness/live/plan-status.mjs`).
 
 ## The five rules
 

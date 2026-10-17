@@ -189,6 +189,9 @@ export function isTemplateBrief(text) {
   return inputs.every((l) => l.includes('[unanswered'));
 }
 
+/** The draft-check lines that are notes about the check itself, not advice on the film. */
+export const NOTE_LINES = /^(waive: |motion lint read element boxes|checks skipped: )/;
+
 /** The advice a draft check gives: its problems, then the sound and brief lines when present. */
 export function draftAdvice(problems, sound = null, brief = null) {
   return [...problems, sound, brief].filter(Boolean);
