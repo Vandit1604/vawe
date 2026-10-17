@@ -1,0 +1,47 @@
+import { RULES } from '../../live/verb-hint.mjs';
+import { brief } from './redact.mjs';
+
+const HINT_WINDOW_CALLS = 5;
+
+/** Every vawe verb the agent ran, in order: { verb, args, call, sec, ok, reason, secs }; ok is null when no footer line was printed. Pure. */
+export function verbEvents(calls, startMs) {
+  const events = [];
+  for (const call of calls) {
+    const footers = [...(call.footers ?? [])];
+    for (const { verb, args, help } of call.verbs) {
+      const at = footers.findIndex((f) => f.verb === verb);
+      const footer = at >= 0 ? footers.splice(at, 1)[0] : null;
+      events.push({ verb, help, refused: call.flags?.noApproval === true, args: brief(args, 80), call: call.index, sec: Math.round((call.ms - startMs) / 1000), ok: footer ? footer.ok : null, reason: footer?.reason ?? null, secs: footer?.secs ?? null, callSecs: Math.max(0, Math.round((call.resultMs - call.ms) / 1000) || 0) });
+    }
+  }
+  return events;
+}
+
+/** How the agent treated each `next:` line a verb printed: followed (its next verb call is a named one), ignored (another verb) or none (no verb call after). Pure. */
+export function nextLineOutcomes(calls, allEvents) {
+  const events = allEvents.filter((e) => !e.help);
+  const out = [];
+  for (const call of calls) {
+    const mine = events.filter((e) => e.call === call.index);
+    if (!mine.length) continue;
+    const printer = mine.at(-1);
+    const after = events[events.indexOf(printer) + 1];
+    for (const named of call.next ?? []) {
+      if (!named.length) continue;
+      out.push({ verb: printer.verb, named, then: after?.verb ?? null, outcome: !after ? 'none' : named.includes(after.verb) ? 'followed' : 'ignored' });
+    }
+  }
+  return out;
+}
+
+const hintId = (text) => RULES.find((r) => text.includes(r.say))?.id ?? null;
+
+/** Each hook-injected hint that names a verb, and whether a verb call it names came within the next calls. Pure. */
+export function hintOutcomes(hints, allEvents) {
+  const events = allEvents.filter((e) => !e.help);
+  return hints.filter((h) => h.named.length).map((h) => {
+    const near = events.filter((e) => e.call > h.afterCall && e.call <= h.afterCall + HINT_WINDOW_CALLS);
+    const text = h.text;
+    return { source: h.source, id: hintId(text), named: h.named, outcome: near.some((e) => h.named.includes(e.verb)) ? 'followed' : 'ignored', text: brief(text, 120) };
+  });
+}

@@ -1,0 +1,60 @@
+const cell = (r) => (r.of ? `${r.count}/${r.of} (${r.pct}%)` : '-');
+const table = (head, rows) => [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.join(' | ')} |`)].join('\n');
+const list = (items) => items.join(', ') || 'none';
+const entries = (o) => Object.entries(o).map(([k, v]) => `${k} ${v}`).join(', ') || 'none';
+
+function routingLine(r) {
+  const pct = (n, of) => (of ? `${Math.round((100 * n) / of)}%` : '-');
+  return [`next lines followed ${r.nextFollowed}/${r.nextLines} (${pct(r.nextFollowed, r.nextLines)}), ignored ${r.nextIgnored}`,
+    `hook hints followed ${r.hintsFollowed}/${r.hints} (${pct(r.hintsFollowed, r.hints)}), ignored ${r.hintsIgnored}`].join('; ');
+}
+
+function verbUseLines(use) {
+  const ran = Object.entries(use).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]);
+  return [`Verbs by agents that ran them: ${ran.map(([v, n]) => `${v} ${n}`).join(', ') || 'none'}.`, `No agent ran: ${Object.keys(use).filter((v) => !use[v]).join(', ') || 'none'}.`].join('\n');
+}
+
+/** The aggregate table as markdown. Pure. */
+export function aggregateMarkdown(agg, title = 'Aggregate') {
+  return [`## ${title} (${agg.n} agents)`, '',
+    table(['what', 'agents'], agg.rows.map((r) => [r.label, cell(r)])), '',
+    table(['number', 'mean', 'median'], agg.numbers.map((n) => [n.label, n.mean, n.median])), '',
+    `Routing: ${routingLine(agg.routing)}.`, '', verbUseLines(agg.verbUse)].join('\n');
+}
+
+/** Before and after a cutoff, side by side. Pure. */
+export function compareMarkdown({ before, after }, cutoffText) {
+  const rows = before.rows.map((b, i) => {
+    const a = after.rows[i];
+    const delta = b.pct === null || a.pct === null ? '-' : `${a.pct - b.pct > 0 ? '+' : ''}${a.pct - b.pct} pts`;
+    return [b.label, cell(b), cell(a), delta];
+  });
+  const nums = before.numbers.map((b, i) => [b.label, b.mean, after.numbers[i].mean, `${(after.numbers[i].mean - b.mean).toFixed(1)}`]);
+  return [`## Before and after ${cutoffText} (${before.n} agents before, ${after.n} after)`, '',
+    table(['what', 'before', 'after', 'change'], rows), '',
+    table(['number (mean)', 'before', 'after', 'change'], nums), '',
+    `Routing before: ${routingLine(before.routing)}.`, `Routing after: ${routingLine(after.routing)}.`].join('\n');
+}
+
+const sequence = (verbs) => verbs.map((v) => `${v.verb}${v.help ? '?' : ''}${v.ok === false ? '!' : ''}@${v.sec}s`).join(' ') || 'none';
+
+/** One agent's report as markdown. Pure. */
+export function agentMarkdown(a) {
+  const { first, skipped, inversions } = a.stages;
+  const lines = [
+    `### ${a.label ?? a.agent ?? a.file}`,
+    `${a.file}`,
+    `${a.model ?? '?'} · ${a.branch ?? '?'} · ${a.start?.slice(0, 16) ?? '?'} · ${a.minutes} min (${a.activeMinutes} active) · tokens in ${((a.tokens.input + a.tokens.cacheWrite) / 1e6).toFixed(1)}M, cache read ${(a.tokens.cacheRead / 1e6).toFixed(1)}M, out ${(a.tokens.output / 1e3).toFixed(0)}k · films ${list(a.films)}`,
+    `verbs: ${sequence(a.verbs)}`,
+    `stages (first second): ${Object.entries(first).map(([s, t]) => `${s} ${t}`).join(', ') || 'none'}; skipped ${list(skipped)}; out of order ${list(inversions)}`,
+    `routing: next ${entries(a.routing.nextCounts)}; hints ${entries(a.routing.hintCounts)}`,
+    `raw tools: ${entries(a.raw)}`,
+    `docs read: ${list(a.docs.map((d) => `${d.doc}@${d.sec}s${d.beforePage ? '' : ' (after page)'}`))}; ban lines seen ${entries(Object.fromEntries(Object.entries(a.banSeen).map(([k, v]) => [k, v.join('/')])))}`,
+    `failures ${a.failures.total}: ${entries(a.failures.byClass)}; hook errors ${a.failures.hookErrors}`,
+    `cost: ${a.cost.calls} calls, ${a.cost.repeats} repeats, ${a.cost.bigResults} big results (${a.cost.bigChars} chars), wait ${a.cost.waitSecs}s, render ${a.cost.renderSecs}s`,
+    `rule breaks: ${list(Object.entries(a.breaks).filter(([, v]) => v).map(([k]) => k))}`,
+  ];
+  for (const f of a.failures.list.slice(0, 5)) lines.push(`  - ${f.cls}: ${f.call} :: ${f.why}`);
+  for (const r of a.cost.topRepeats.slice(0, 3)) lines.push(`  - ${r.times}x ${r.call}`);
+  return lines.join('\n');
+}

@@ -19,7 +19,7 @@ Test a change by one question: what would an agent write unprompted, and does th
 - Change the environment, never forbid the habit: if an agent's natural command fails, make it work
   (tools via `bin/vawe doctor`, how agents are launched), do not add a rule or hook against it.
 - Give the tool the agent reaches for: agents built their own frame compare until `vawe compare` existed.
-- Measure with traces (`node harness/dev/trace-review.mjs`), not impressions: minutes, failed calls,
+- Measure with traces (`node harness/dev/trace-review.mjs --project <dir> --films --compare <sha|date>` prints the film agents before and after the change), not impressions: minutes, failed calls,
   input tokens. Keep tasks small; one six-step agent used 106 M input tokens, a one-step agent 3 M.
 - Numbers come from code (`vawe spec`), taste from the eye (`vawe compare`, a fresh judge).
 

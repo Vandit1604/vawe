@@ -1,71 +1,59 @@
-// harness/dev/trace-review.mjs: summarise one agent transcript (Claude Code JSONL) into what went
-// wrong and what cost the most, so each finished agent run can feed an improvement back.
-//   node harness/dev/trace-review.mjs <transcript.jsonl> [more.jsonl ...]
+// harness/dev/trace-review.mjs: the one tool that reads agent transcripts (Claude Code JSONL) and says what each agent did,
+// what failed, what cost most and which rules the trace shows broken, so a framework change can be measured.
+//   node harness/dev/trace-review.mjs <transcript.jsonl | dir> ...        one report per agent, then the aggregate table
+//   node harness/dev/trace-review.mjs --project <dir> [--since <date|sha>] [--films] [--agent <id|label>] [--main]
+//   flags: --films        only film agents: wrote films/<name>/page.html or ran bin/vawe new for a real film (not zz-*, probes, trials) and ran dev
+//          --since X      only agents that started on or after X (an ISO date or a commit sha)
+//          --agent X      only agents whose id or VAWE_AGENT label contains X
+//          --main         with --project, read the main sessions too (default: sub-agent transcripts only)
+//          --compare X    the aggregate table before and after X (date or commit sha), to measure a change
+//          --aggregate-only   skip the per-agent reports
+//          --json         every field as JSON, for other scripts
+// Verb footers (ok, FAILED, seconds) exist in transcripts from 2026-10-09; earlier verb calls have no exit status.
+// Transcripts are streamed line by line. Commands and results are redacted (keys, tokens, long opaque strings).
 import fs from 'node:fs';
+import { parseArgs } from 'node:util';
+import { rowsOf, cutoffMs, transcriptFiles } from '../lib/trace/read.mjs';
+import { foldRows } from '../lib/trace/fold.mjs';
+import { analyze } from '../lib/trace/analyze.mjs';
+import { selectAgents } from '../lib/trace/select.mjs';
+import { aggregate, compareAt } from '../lib/trace/aggregate.mjs';
+import { agentMarkdown, aggregateMarkdown, compareMarkdown } from '../lib/trace/report.mjs';
 
-const BIG_RESULT = 8000;
-const BLOCK_RE = /^[✗!]? ?pre-(commit|push) blocked|hook (error|blocked)|blocked by (a |the )?hook|^make: \*\*\* \[[a-z-]+\] Error/im;
+const OPTIONS = {
+  project: { type: 'string' }, since: { type: 'string' }, agent: { type: 'string' }, compare: { type: 'string' },
+  films: { type: 'boolean' }, main: { type: 'boolean' }, json: { type: 'boolean' }, 'aggregate-only': { type: 'boolean' },
+};
 
-const toolText = (content) => (typeof content === 'string' ? content
-  : Array.isArray(content) ? content.map((c) => c.text ?? '').join('\n') : '');
-
-const briefOf = (input = {}) => String(input.command ?? input.file_path ?? input.pattern ?? input.description ?? '')
-  .replace(/\s+/g, ' ').slice(0, 140);
-
-function readRows(file) {
-  return fs.readFileSync(file, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l));
+async function review(file) {
+  return analyze(await foldRows(rowsOf(file)), file);
 }
 
-function collectCalls(rows) {
-  const calls = new Map();
-  for (const r of rows) {
-    for (const c of r.message?.content ?? []) {
-      if (c.type === 'tool_use') calls.set(c.id, { name: c.name, brief: briefOf(c.input) });
-    }
+// The verb table imports harness/lib/findings.mjs, which sends process.stdout to stderr under --json: write to fd 1 directly.
+const print = (text) => fs.createWriteStream(null, { fd: 1 }).end(`${text}\n`);
+
+async function main() {
+  const { values, positionals } = parseArgs({ options: OPTIONS, allowPositionals: true });
+  if (!positionals.length && !values.project) {
+    console.error('usage: node harness/dev/trace-review.mjs <transcript.jsonl | dir> ... | --project <dir> [--since X] [--films] [--agent X] [--compare X] [--json]');
+    process.exit(2);
   }
-  return calls;
-}
-
-function classifyResult(text, isError, call, found) {
-  if (BLOCK_RE.test(text)) found.blocked.push(`${call.brief} :: ${text.split('\n').find((l) => BLOCK_RE.test(l) || /error/i.test(l))?.slice(0, 160)}`);
-  else if (isError || /Exit code [1-9]/.test(text)) found.failed.push(`${call.name} ${call.brief} :: ${text.split('\n').filter(Boolean).at(-1)?.slice(0, 160)}`);
-  if (text.length > BIG_RESULT) found.big.push(`${text.length} chars  ${call.name} ${call.brief}`);
-}
-
-function collectResults(rows, calls) {
-  const found = { failed: [], blocked: [], big: [] };
-  for (const r of rows) {
-    for (const c of r.message?.content ?? []) {
-      if (c.type === 'tool_result') classifyResult(toolText(c.content), c.is_error, calls.get(c.tool_use_id) ?? { name: '?', brief: '' }, found);
-    }
+  const sinceMs = cutoffMs(values.since);
+  const files = transcriptFiles({ inputs: positionals, project: values.project, sinceMs, main: values.main });
+  const all = [];
+  for (const file of files) all.push(await review(file));
+  const agents = selectAgents(all, { films: values.films, agent: values.agent, sinceMs });
+  const agg = aggregate(agents);
+  const compared = values.compare ? compareAt(agents, cutoffMs(values.compare)) : null;
+  if (values.json) {
+    print(JSON.stringify({ files: files.length, agents, aggregate: agg, compare: compared }, null, 1));
+    return;
   }
-  return found;
+  const parts = [`${files.length} transcripts read, ${agents.length} agents kept`];
+  if (!values['aggregate-only']) parts.push(...agents.map(agentMarkdown));
+  parts.push(aggregateMarkdown(agg));
+  if (compared) parts.push(compareMarkdown(compared, values.compare));
+  print(parts.join('\n\n'));
 }
 
-function repeatsOf(calls) {
-  const seen = new Map();
-  for (const { name, brief } of calls.values()) seen.set(`${name}:${brief}`, (seen.get(`${name}:${brief}`) ?? 0) + 1);
-  return [...seen].filter(([, n]) => n > 1).map(([k, n]) => `${n}x ${k}`);
-}
-
-function minutesOf(rows) {
-  const stamps = rows.map((r) => r.timestamp).filter(Boolean);
-  return stamps.length ? ((Date.parse(stamps.at(-1)) - Date.parse(stamps[0])) / 60000).toFixed(1) : '?';
-}
-
-function review(file) {
-  const rows = readRows(file);
-  const calls = collectCalls(rows);
-  const counts = {};
-  for (const { name } of calls.values()) counts[name] = (counts[name] ?? 0) + 1;
-  const { failed, blocked, big } = collectResults(rows, calls);
-  const out = [`## ${file}`, `minutes ${minutesOf(rows)} · calls ${Object.entries(counts).map(([k, v]) => `${k} ${v}`).join(', ')}`];
-  for (const [title, list] of [['failed', failed], ['hook blocks', blocked], ['repeated calls', repeatsOf(calls)], ['large results', big]]) {
-    if (list.length) out.push(`${title} (${list.length})`, ...list.slice(0, 12).map((l) => `  - ${l}`));
-  }
-  return out.join('\n');
-}
-
-const files = process.argv.slice(2);
-if (!files.length) { console.error('usage: node harness/dev/trace-review.mjs <transcript.jsonl> ...'); process.exit(2); }
-console.log(files.map(review).join('\n\n'));
+main().catch((e) => { console.error(`trace-review: ${e.message}`); process.exit(1); });

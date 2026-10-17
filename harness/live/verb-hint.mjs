@@ -7,7 +7,7 @@ import { scratch } from '../lib/scratch.mjs';
 
 const HINT_EVERY_MS = 30 * 60 * 1000;
 
-const RULES = [
+export const RULES = [
   { id: 'shot', test: /puppeteer|--screenshot=|playwright/, say: 'bin/vawe shot <route|url|page.html> --w 1440,390 [--full] takes site and page screenshots at several widths (lazy images loaded, the dev server started and stopped for you, page errors and sideways overflow reported); do not write a screenshot script' },
   { id: 'links', test: /curl\b[^\n]*(%\{http_code\}|-w\b|-I\b)/, say: 'bin/vawe links [--base https://vawe.dev] crawls the site and lists broken links, redirects and dead #anchors with the page that links to each; for one page, bin/vawe shot <route>' },
   { id: 'wait', test: /(until|while)\b[^\n]*(render-page|\.mp4|-draft|\.runs\.jsonl|vawe: (dev|ship))|ps (aux|-ax)[^\n]*render-page|sleep\s+\d+[^\n]*(draft|render|\.mp4)/, say: 'bin/vawe wait <page> waits for any draft, clip or final and prints one progress line a minute; do not poll with sleep or ps' },
