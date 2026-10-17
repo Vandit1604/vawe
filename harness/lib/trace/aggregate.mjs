@@ -69,7 +69,7 @@ const round = (x) => Number(x.toFixed(1));
 /** For each vawe verb, how many agents ran it (help calls left out); a verb no agent ran has 0. Pure. */
 function verbUse(agents) {
   const use = Object.fromEntries(VERBS.map((v) => [v.name, 0]));
-  for (const a of agents) for (const verb of new Set(a.verbs.filter((v) => !v.help).map((v) => v.verb))) use[verb] += 1;
+  for (const a of agents) for (const verb of new Set(a.verbs.filter((v) => !v.help).map((v) => v.verb))) use[verb] = (use[verb] ?? 0) + 1;
   return use;
 }
 

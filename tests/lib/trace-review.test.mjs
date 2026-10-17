@@ -147,7 +147,7 @@ test('aggregate counts and percentages, and compareAt splits at the cutoff', asy
   assert.deepEqual([row1('critique').count, row1('critique').of], [1, 2]);
   assert.deepEqual([row1('shipRefused').count, row1('shipRefused').of], [1, 1]);
   assert.equal(agg.verbUse.dev, 1);
-  assert.equal(agg.verbUse.looks, 0);
+  assert.equal(agg.verbUse.palette, 0);
   const { before, after } = compareAt(all, Date.parse('2026-10-11'));
   assert.deepEqual([before.n, after.n], [1, 1]);
   assert.equal(before.rows.find((r) => r.id === 'critique').pct, 100);
