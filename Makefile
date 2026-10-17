@@ -7,7 +7,7 @@
 dev:      ; @bin/vawe dev $(PAGE) $(ARGS)
 ship:     ; @bin/vawe ship $(PAGE) $(ARGS)
 critique: ; @bin/vawe critique $(PAGE) $(ARGS)
-spec:     ; @bin/vawe spec $(REF) $(ARGS)
+spec:     ; @bin/vawe see $(REF) --spec $(ARGS)
 studio:   ; @bin/vawe studio $(PAGE) $(ARGS)
 e2e:      ; @bin/vawe e2e
 test:     ; @bin/vawe test

@@ -18,7 +18,7 @@ const FLASH_EDGE_FRAMES = 1;
 export const secs = (frames, fps) => round(frames / fps);
 
 /**
- * Splits the spec's cuts by the flash candidates of `vawe look` (each { frame, frames, neutral }). A candidate is a flash when the picture before and
+ * Splits the spec's cuts by the flash candidates of `vawe see` (each { frame, frames, neutral }). A candidate is a flash when the picture before and
  * after it is the same shot (the dominant Lab colours of the two neighbouring shots differ by under 15) or its own colour is neutral white (a white-out);
  * a short coloured shot between two different shots is a shot. The cuts within one frame of a flash's first frame or of the frame after its last are its
  * edges; a white-out that hides a cut keeps its last edge as that cut. `shotLab(frame)` is the dominant Lab colour of the spec shot that holds `frame`,

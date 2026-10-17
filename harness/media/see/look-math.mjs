@@ -1,4 +1,4 @@
-// Pure parts of `vawe look`: flashes, clipped pixels, bloom spread, chromatic offset and glow colour, the table and the advice. No I/O.
+// Pure parts of `vawe see`: flashes, clipped pixels, bloom spread, chromatic offset and glow colour, the table and the advice. No I/O.
 
 const FLASH_JUMP = 25;
 export const FLASH_HALF_WINDOW = 15;

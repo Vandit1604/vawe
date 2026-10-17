@@ -1,4 +1,4 @@
-// `vawe look`: measures of light and texture of a film (flashes, clipped pixels, bloom, chromatic offset, screen texture, glow colour), one table, optionally a against b.
+// `vawe see`: measures of light and texture of a film (flashes, clipped pixels, bloom, chromatic offset, screen texture, glow colour), one table, optionally a against b.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -100,7 +100,7 @@ async function source(input, label) {
   return { ...found, label, isRef, note: found.page ? `last draft of ${found.page}` : isRef ? 'reference film' : 'film' };
 }
 
-/** Runs `vawe look`: prints the table of `input` (and `opts.vs`) and the advice lines. */
+/** Runs `vawe see`: prints the table of `input` (and `opts.vs`) and the advice lines. */
 export async function runLook(input, opts) {
   const problem = lookProblem(opts);
   if (problem) die(problem);

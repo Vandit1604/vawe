@@ -13,15 +13,15 @@
           "note": "frames through a moment or every cut, with motion start and settle"
         },
         {
-          "name": "vawe onion",
+          "name": "vawe strip --onion",
           "note": "frames of one move blended into one image, older ones fainter"
         },
         {
-          "name": "vawe velocity",
+          "name": "vawe strip --velocity",
           "note": "speed and scale of page elements at 120 samples a second"
         },
         {
-          "name": "vawe spec",
+          "name": "vawe see --spec",
           "note": "where the eye goes, and what the ground does, per shot"
         },
         {

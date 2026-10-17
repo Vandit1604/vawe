@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-// `vawe spec-sync <page>`: writes the times the last draft measured into the brief's Words and Objects tables
+// `vawe see <page> --sync-brief`: writes the times the last draft measured into the brief's Words and Objects tables
 // (harness/lib/spec-sync.mjs). Run it after you retimed on purpose; it changes no target (cap, x, y).
 import fs from 'node:fs';
 import path from 'node:path';
 import { lastSpec } from './acceptance-run.mjs';
 import { syncSpec } from '../lib/spec-sync.mjs';
 
-const die = (m) => { console.error(`vawe spec-sync: ${m}`); process.exit(1); };
+const die = (m) => { console.error(`vawe see --sync-brief: ${m}`); process.exit(1); };
 
 const page = process.argv[2];
-if (!page) die('usage: vawe spec-sync <page.html>');
+if (!page) die('usage: vawe see <page.html> --sync-brief');
 const dir = path.dirname(path.resolve(page));
 const name = path.basename(page, '.html') === 'page' ? path.basename(dir) : path.basename(page, '.html');
 const briefFile = path.join(dir, 'brief.md');

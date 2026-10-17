@@ -89,7 +89,7 @@ height, the same words 3 or more times, or a `data-texture="why"` of 12 characte
 `data-chrome` (a real product's UI labels) follows the same test and is then held to a 2.5% cap floor with no read hold.
 The page owns the times: after each full draft `bin/vawe dev` writes the measured times into the Words,
 Objects and Shots cells (a changed cell ends in `*`), and never a target (cap, x, y). It also writes the page's
-`:root` colours and typeface into each Look line still marked as a guess. `bin/vawe spec-sync <page>` does the
+`:root` colours and typeface into each Look line still marked as a guess. `bin/vawe see <page> --sync-brief` does the
 times by hand.
 Answers: the gold film's gains came from numbers (ring width equals the "o", push 12%, a window onto the
 real next world), and a static tail after 4 s appeared in 5 of 11 films.

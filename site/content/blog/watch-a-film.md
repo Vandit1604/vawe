@@ -50,12 +50,12 @@ We set two rules. If you cannot measure it, you cannot improve it. A reference g
 
 - The `vawe refs frames` verb writes the settled full-size frame of each shot.
 - The `vawe strip` verb shows the frames through a moment or through every cut, with the motion start and the settle.
-- The `vawe onion` verb blends the frames of one move into one image. The `vawe velocity` verb samples a page 120 times a second and reports start, peak, settle, overshoot and ease shape per element.
-- The `vawe spec` verb measures where the eye goes and what the ground does in each shot.
-- The `vawe look` verb reports flashes, clipped share, bloom, chromatic offset, screen texture and glow colour. The `vawe zoom` verb shows a sharp crop of one region beside the same region of a second film.
+- The `vawe strip --onion` mode blends the frames of one move into one image. The `vawe strip --velocity` mode samples a page 120 times a second and reports start, peak, settle, overshoot and ease shape per element.
+- The `vawe see --spec` mode measures where the eye goes and what the ground does in each shot.
+- The `vawe see` verb reports flashes, clipped share, bloom, chromatic offset, screen texture and glow colour. The `vawe zoom` verb shows a sharp crop of one region beside the same region of a second film.
 - The `vawe see` verb reads a film completely: structure, motion, look, type, sound and images.
 
-The `look`, `zoom` and `see` verbs take `--vs <ref>` and print deltas. The code is in `harness/media/see/`, and the verb table is in `harness/cli/verbs.mjs`. The reference is now the default: `critique`, `compare` and `judge` use the reference the brief names (`harness/lib/refs.mjs`). We had a `--ref` flag before, and agents skipped it.
+The `zoom` and `see` verbs take `--vs <ref>` and print deltas. The code is in `harness/media/see/`, and the verb table is in `harness/cli/verbs.mjs`. The reference is now the default: `critique`, `compare` and `judge` use the reference the brief names (`harness/lib/refs.mjs`). We had a `--ref` flag before, and agents skipped it.
 
 <figure>
 <video src="/blog/watch-a-film/exposure-flash.mp4" poster="/blog/watch-a-film/exposure-flash.hd.webp" muted loop playsinline controls></video>
@@ -79,14 +79,14 @@ Run it on one family:
 
 ```sh
 node harness/dev/see-truth.mjs --only flash
-bin/vawe look out/see-truth/flash.mp4
+bin/vawe see out/see-truth/flash.mp4
 ```
 
-We ran both today. The suite scored 13 pass, 0 fail and 1 "no tool" in 14 s. It found flash 1 at 0.8 s for 2 frames and flash 2 at 1.8 s for 3 frames, as built. The `vawe look` verb printed the same two flashes, with luma 48 to 200 and 48 to 240. On the `cuts` family the same script scored 22 pass and 4 fail in 49 s. All 4 failures are `vawe timeline` rows that returned no value. We did not record a pass count for the whole suite, so we give none.
+We ran both today. The suite scored 13 pass, 0 fail and 1 "no tool" in 14 s. It found flash 1 at 0.8 s for 2 frames and flash 2 at 1.8 s for 3 frames, as built. The `vawe see` verb printed the same two flashes, with luma 48 to 200 and 48 to 240. On the `cuts` family the same script scored 22 pass and 4 fail in 49 s. All 4 failures are `vawe storyboard --text` rows that returned no value. We did not record a pass count for the whole suite, so we give none.
 
 ## Error bars on every number
 
-A pass row says a tool is good enough. The agent also needs to know how wrong each number can be. The script `harness/media/ref-calibrate.mjs` renders twelve fixtures at 960 by 540 pixels and 60 fps. They cover an audio click, a layout grid, moves on four curves, motion blur, a card moving in and out, staggered text and transitions. It subtracts the known truth of each page from what `vawe spec` reports. Then it writes the p50, p90 and bias of the error per measure to `quality/baselines/ref-spec-error.json`.
+A pass row says a tool is good enough. The agent also needs to know how wrong each number can be. The script `harness/media/ref-calibrate.mjs` renders twelve fixtures at 960 by 540 pixels and 60 fps. They cover an audio click, a layout grid, moves on four curves, motion blur, a card moving in and out, staggered text and transitions. It subtracts the known truth of each page from what `vawe see --spec` reports. Then it writes the p50, p90 and bias of the error per measure to `quality/baselines/ref-spec-error.json`.
 
 Each limit comes from the decision the number feeds. It is 33.3 ms for most timings, 0.02 for overshoot, 3% of the frame for position and 10% for size. Thirteen of 14 measures sit inside their limit.
 
@@ -112,7 +112,7 @@ We have no score after the change. We did not rerun that film, and we will not i
 An agent reads frames, not motion. Give it numbers for cut times, flash lengths and brightness, and it can compare two films. Without them it describes a film in words and misses details such as a 0.07 s flash.
 
 **How do I compare two videos frame by frame?**
-Render both at the same exact seconds, put them side by side, and print measured deltas for light, motion and cuts. In vawe, `vawe compare` does the first and `vawe see <film> --vs <ref>` does the second.
+Render both at the same exact seconds, put them side by side, and print measured deltas for light, motion and cuts. In vawe, `vawe sheet --ref` does the first and `vawe see <film> --vs <ref>` does the second.
 
 **How do I check that a video analysis tool is accurate?**
 Render a page whose answer you set, such as a cut at 0.85 s, and score the tool within one frame. Report the p90 error beside every number the tool prints.

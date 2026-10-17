@@ -83,7 +83,7 @@ px or more (reference 20 to 28). At 1080p a frame costs about 17 ms on the GPU (
 A look is a named set of lens options, data in `LOOKS` (`core/surfaces/lens.js`, next to `PALETTES`).
 `lens(source, { look: 'film-halation', ...own })` starts from a flat lens, switches on the look, then puts the
 page's own options over it: a page option always wins. A page with no `look` keeps the filmed-screen defaults.
-Choose by sight: `bin/vawe looks <page> --at 4.5,9 [--only a,b] [--out dir]` films the page frame at each second
+Choose by sight: `bin/vawe frames <page> --looks --at 4.5,9 [--only a,b] [--out dir]` films the page frame at each second
 under every look and as-is, and writes one labelled grid per second (draft size, so a fine `grid` cell shows only in a final).
 The verb sets `window.__vaweLensOverride` before the page runs. `lens()` merges it over the page options, and it
 holds a full look: every effect the look does not name is off, while `aim`, `zoom`, tilt and `dof` stay the page's. Only the verb sets it.

@@ -1,4 +1,4 @@
-// `vawe looks` on the lens fixture page: one grid per second, a tile per look plus as-is; a page without the lens stops.
+// `vawe frames --looks` on the lens fixture page: one grid per second, a tile per look plus as-is; a page without the lens stops.
 //   node --test tests/media/looks-verb.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';

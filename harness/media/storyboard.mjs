@@ -2,7 +2,7 @@
 // `vawe storyboard <page|draft mp4> [--page page.html] [--out file.html]`: one self-contained HTML storyboard, a pan-and-zoom canvas of frame
 // cards, handoff arrows and a rhythm strip.
 //   node harness/media/storyboard.mjs films/my-launch/page.html
-// Worlds, cues and eases come from the page (the data `vawe timeline` and `vawe frames` read); the plan comes from brief.md. With an mp4
+// Worlds, cues and eases come from the page (the data `vawe storyboard --text` and `vawe frames` read); the plan comes from brief.md. With an mp4
 // the frames are cut from it and the page is found by the film's name.
 import fs from 'node:fs';
 import path from 'node:path';

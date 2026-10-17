@@ -43,6 +43,6 @@ async function pageSpans(page) {
 
 function refCuts(id) {
   const cuts = shotCuts(refShots(refsDir(), id));
-  if (!cuts.length) die(`no measured shots for ${id}: run bin/vawe spec on the film, or pass --at <s>`);
+  if (!cuts.length) die(`no measured shots for ${id}: run bin/vawe see <mp4> --spec on the film, or pass --at <s>`);
   return cuts;
 }

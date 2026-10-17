@@ -1,0 +1,111 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { VERBS } from '../../harness/cli/verbs.mjs';
+import { TIERS, topHelp, verbHelp, UsageError } from '../../harness/cli/parse.mjs';
+import { GATES } from '../../harness/lib/check-gate.mjs';
+
+const verb = (name) => VERBS.find((v) => v.name === name);
+const argsOf = (name, values, positional) => verb(name).build(values, positional)[0].args;
+
+const STOP = new Set(['use', 'when', 'you', 'the', 'a', 'an', 'of', 'to', 'and', 'or', 'in', 'on', 'for', 'is', 'it', 'its', 'one', 'with', 'then', 'at', 'as', 'by', 'each', 'every']);
+const tokens = (text) => new Set(String(text).toLowerCase().match(/[a-z][a-z0-9-]+/g).filter((t) => !STOP.has(t)));
+const overlap = (a, b) => [...a].filter((t) => b.has(t)).length / Math.min(a.size, b.size);
+
+test('every verb has a tier, a unique name and a one-line summary', () => {
+  const tiers = TIERS.map(([tier]) => tier);
+  assert.equal(new Set(VERBS.map((v) => v.name)).size, VERBS.length);
+  for (const v of VERBS) {
+    assert.ok(tiers.includes(v.tier), `${v.name} has no tier (core, more or maintainer)`);
+    assert.equal(typeof v.summary, 'string', `${v.name} summary is not a string`);
+    assert.ok(!v.summary.includes('\n'), `${v.name} summary spans lines`);
+  }
+});
+
+test('the verb set stays small', () => {
+  assert.ok(VERBS.length <= 30, `${VERBS.length} verbs: merge into a flag of the owner verb before you add one`);
+  assert.ok(VERBS.filter((v) => v.tier === 'core').length <= 15);
+});
+
+test('no two core verbs share their purpose line', () => {
+  const core = VERBS.filter((v) => v.tier === 'core');
+  for (const a of core) {
+    for (const b of core) {
+      if (a.name < b.name) assert.ok(overlap(tokens(a.summary), tokens(b.summary)) < 0.5, `${a.name} and ${b.name} read alike: ${overlap(tokens(a.summary), tokens(b.summary)).toFixed(2)}`);
+    }
+  }
+});
+
+test('every core verb but dev and ship opens with when to use it', () => {
+  for (const v of VERBS.filter((x) => x.tier === 'core' && !/^(dev|ship)$/.test(x.name))) assert.match(v.summary, /^use when /, v.name);
+});
+
+test('the verbs that became flags are gone, with no alias', () => {
+  const gone = ['look', 'looks', 'onion', 'velocity', 'spec', 'spec-sync', 'compare', 'sounds', 'sfx', 'audio', 'sound-lab', 'timeline', 'review', 'coverage', 'links', 'match', 'track', 'ref-cutlist', 'ref-calibrate'];
+  for (const name of gone) assert.equal(verb(name), undefined, name);
+});
+
+test('review, coverage and links run as gates of check', () => {
+  for (const name of ['review', 'coverage', 'links']) assert.ok(GATES[name], name);
+});
+
+test('--help lists the core verbs, and --help --all lists every verb under its tier', () => {
+  const short = topHelp(VERBS);
+  const all = topHelp(VERBS, { all: true });
+  for (const v of VERBS) {
+    assert.equal(new RegExp(`^  ${v.name}\\s`, 'm').test(short), v.tier === 'core', `${v.name} in the short help`);
+    assert.match(all, new RegExp(`^  ${v.name}\\s`, 'm'), `${v.name} in the full help`);
+  }
+  assert.match(short, /\d+ more verbs: vawe --help --all/);
+  assert.ok(all.indexOf('the loop:') < all.indexOf('more:') && all.indexOf('more:') < all.indexOf('maintainers'));
+});
+
+test('verb --help starts with the summary', () => {
+  for (const v of VERBS) assert.equal(verbHelp(v).split('\n')[0], v.summary);
+});
+
+test('strip --onion and --velocity build the old onion and velocity steps and refuse stray flags', () => {
+  assert.deepEqual(argsOf('strip', { onion: true, at: '8.4', span: 0.6, n: 6 }, ['a.mp4']), ['a.mp4', '--onion', '8.4', '--span', '0.6', '--n', '6']);
+  assert.deepEqual(argsOf('strip', { onion: true, at: '8.4' }, ['a.mp4']).slice(0, 6), ['a.mp4', '--onion', '8.4', '--span', '0.3', '--n']);
+  assert.deepEqual(argsOf('strip', { velocity: true, at: '2.75', sel: '.card' }, ['p.html']), ['p.html', '--velocity', '2.75', '--span', '1', '--sel', '.card']);
+  assert.deepEqual(argsOf('strip', { at: '2' }, ['a.mp4']).slice(0, 3), ['a.mp4', '--moment', '2']);
+  assert.throws(() => argsOf('strip', { onion: true, velocity: true, at: '1' }, ['p.html']), /not both/);
+  assert.throws(() => argsOf('strip', { n: 4, at: '1' }, ['p.html']), /--n needs --onion/);
+  assert.throws(() => argsOf('strip', { sel: '.a', at: '1' }, ['p.html']), /--sel needs --velocity/);
+  assert.throws(() => argsOf('strip', { onion: true, cuts: true }, ['p.html']), UsageError);
+  assert.throws(() => argsOf('strip', { onion: true }, ['p.html']), /missing --at/);
+});
+
+test('frames --looks builds the looks step and refuses its flags without it', () => {
+  assert.deepEqual(argsOf('frames', { looks: true, at: '4.5,9', only: 'crt' }, ['p.html']), ['p.html', '--at', '4.5,9', '--only', 'crt']);
+  assert.throws(() => argsOf('frames', { at: '4.5' }, ['p.html']), /--at needs --looks/);
+  assert.throws(() => argsOf('frames', { looks: true, full: true, at: '1' }, ['p.html']), UsageError);
+  assert.throws(() => argsOf('frames', { looks: true, at: '1', only: 'nope' }, ['p.html']), /no look "nope"/);
+  assert.deepEqual(argsOf('frames', { full: true }, ['p.html']), ['p.html', '--full']);
+});
+
+test('storyboard --text reads the page as text, --json needs --text', () => {
+  const [step] = verb('storyboard').build({ text: true, json: true }, ['p.html']);
+  assert.equal(step.script, 'harness/media/timeline.mjs');
+  assert.deepEqual(step.args, ['p.html', '--json']);
+  assert.throws(() => verb('storyboard').build({ text: true }, ['a.mp4']), /reads a page/);
+  assert.throws(() => verb('storyboard').build({ json: true }, ['p.html']), /--json needs --text/);
+});
+
+test('sound --sfx and --lab take the place of sfx and sound-lab', () => {
+  assert.deepEqual(argsOf('sound', { sfx: true, film: 'f.html', trim: '0.1,0.5', peak: -6 }, ['click.wav']), ['click.wav', '--film', 'f.html', '--trim', '0.1,0.5', '--peak', '-6']);
+  assert.throws(() => argsOf('sound', { sfx: true }, ['click.wav']), /missing --film/);
+  assert.throws(() => argsOf('sound', { trim: '0,1' }, ['click.wav']), /--trim needs --sfx/);
+  assert.equal(verb('sound').build({ lab: true }, [])[0].script, 'harness/dev/sound-lab.mjs');
+  assert.equal(verb('sound').build({}, [])[0].script, 'harness/dev/list-assets.mjs');
+});
+
+test('see --spec and --sync-brief take the place of spec and spec-sync', () => {
+  const [spec] = verb('see').build({ spec: true, fast: true, 'no-ocr': true }, ['ref.mp4']);
+  assert.equal(spec.script, 'harness/media/ref-spec.mjs');
+  assert.deepEqual(spec.args, ['ref.mp4', '--fast']);
+  assert.throws(() => verb('see').build({ spec: true }, ['p.html']), /measures a reference mp4/);
+  assert.throws(() => verb('see').build({ fast: true }, ['ref.mp4']), /--fast needs --spec/);
+  const [sync] = verb('see').build({ 'sync-brief': true }, ['p.html']);
+  assert.deepEqual([sync.script, sync.args], ['harness/media/spec-sync.mjs', ['p.html']]);
+  assert.throws(() => verb('see').build({ 'sync-brief': true }, ['a.mp4']), /reads a page/);
+});

@@ -1,5 +1,5 @@
 // The one reader of a track's sound for cutting to it: hits, tempo and beat grid, bars, sections, loudness, and the cuts of a film against them.
-// `vawe sound`, `vawe see`, `vawe spec` and the draft check all read sound through here; core/beats/detect.js and ref-measure/audio-attack.mjs do the estimating.
+// `vawe sound`, `vawe see` and the draft check all read sound through here; core/beats/detect.js and ref-measure/audio-attack.mjs do the estimating.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';

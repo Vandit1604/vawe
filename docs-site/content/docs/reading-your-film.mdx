@@ -14,14 +14,14 @@ Producing an image is not looking at one. Open the sheet and look at it.
 
 | Command | Shows |
 |---|---|
-| `bin/vawe compare --page <page> --at 2.5,3.1,4` | your frames at exact seconds, about 4 s for 4 frames, no render needed. Add `--ref <mp4>` for the reference beside it |
+| `bin/vawe sheet <page> --at 2.5,3.1,4` | your frames at exact seconds, about 4 s for 4 frames, no render needed. Add `--ref <mp4>` for the reference beside it |
 | `bin/vawe dev <page>` | a half-size draft, plus a key-frame sheet PNG next to it |
 | `bin/vawe critique <page>` | a phone sheet, a strip, the loop seam, measured deltas and the `page-check` findings |
-| `bin/vawe review <page>` | one report and one sheet: clipped glyphs, text timing, motion, coverage, worst first |
+| `bin/vawe check review <page>` | one report and one sheet: clipped glyphs, text timing, motion, coverage, worst first |
 | `bin/vawe studio <page>` | a live scrubber. It is the only tool that moves |
 | `bin/vawe judge <page or mp4>` | key frames and a rubric for a fresh session to score |
 
-Never render a whole range to look at a few frames. Use `compare --page` for frames and `dev --from --to` for motion.
+Never render a whole range to look at a few frames. Use `sheet` for frames and `dev --from --to` for motion.
 
 ## Critique in a fresh session
 
@@ -32,12 +32,12 @@ Give the draft to a session that did not write the page (`vawe-critique`). It re
 ## Match a reference
 
 ```bash
-bin/vawe spec refs/ad.mp4                              # SPEC.md and spec.json
+bin/vawe see refs/ad.mp4 --spec                              # SPEC.md and spec.json
 bin/vawe critique <page> --ref refs/ad.mp4
-bin/vawe coverage out/film.mp4 --ref refs/ad.mp4       # SSIM at every step
+bin/vawe check coverage out/film.mp4 --ref refs/ad.mp4       # SSIM at every step
 ```
 
-`coverage` exits 1 when any second falls below `--min` (default 0.5). `bin/vawe ship` refuses a recreation until the `critique --ref` loop passes.
+`check coverage` exits 1 when any second falls below `--min` (default 0.5). `bin/vawe ship` refuses a recreation until the `critique --ref` loop passes.
 
 ## What to look for
 

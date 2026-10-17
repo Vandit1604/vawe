@@ -62,7 +62,7 @@ function usageLine(verb) {
 }
 
 export function verbHelp(verb) {
-  const lines = [`${usageLine(verb)}`, `  ${verb.summary}`];
+  const lines = [verb.summary, '', usageLine(verb)];
   for (const p of verb.positional || []) lines.push(`  ${`<${p.name}>`.padEnd(14)} ${p.help}`);
   if ((verb.flags || []).length) {
     lines.push('', 'flags:');
@@ -75,8 +75,18 @@ export function verbHelp(verb) {
   return lines.join('\n');
 }
 
-export function topHelp(verbs) {
+export const TIERS = [
+  ['core', 'the loop'],
+  ['more', 'more'],
+  ['maintainer', 'maintainers (the framework, not a film)'],
+];
+
+/** The text of `vawe --help`: the core verbs, or with `all` every verb in its tier. Pure. */
+export function topHelp(verbs, { all = false } = {}) {
   const width = Math.max(...verbs.map((v) => v.name.length)) + 2;
-  return ['vawe: one HTML page in, one film out.', '', 'usage: vawe <verb> [args]   (vawe <verb> --help for flags)', '',
-    ...verbs.map((v) => `  ${v.name.padEnd(width)}${v.summary}`)].join('\n');
+  const row = (v) => `  ${v.name.padEnd(width)}${v.summary}`;
+  const shown = all ? TIERS : TIERS.slice(0, 1);
+  const groups = shown.flatMap(([tier, title]) => ['', `${title}:`, ...verbs.filter((v) => v.tier === tier).map(row)]);
+  const hidden = all ? [] : ['', `${verbs.filter((v) => v.tier !== 'core').length} more verbs: vawe --help --all`];
+  return ['vawe: one HTML page in, one film out.', '', 'usage: vawe <verb> [args]   (vawe <verb> --help for flags)', ...groups, ...hidden].join('\n');
 }

@@ -38,7 +38,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 // missing render via `gradeable` before this ever runs.
 const renderHashOf = (file) => { try { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); } catch { return null; } };
 
-// out/<film>.judge.json: the latest verdict, one small file `vawe review` reads back into its header.
+// out/<film>.judge.json: the latest verdict, one small file `vawe check review` reads back into its header.
 function writeJudgeResult(mp4, result) {
   const file = path.resolve('out', `${baseOf(mp4).replace(/-draft$/, '')}.judge.json`);
   fs.mkdirSync(path.dirname(file), { recursive: true });

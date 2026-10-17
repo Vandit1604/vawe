@@ -121,8 +121,8 @@ test('cutsRows pass on exact results and fail on a lost short world', () => {
   assert.ok(cutsRows(t, { spec, timeline }).every((x) => x.status === 'pass'));
   const lost = { worlds: timeline.worlds.filter((w) => w.id !== 'w2') };
   const rows = cutsRows(t, { spec, timeline: lost });
-  assert.equal(rows.find((x) => x.measure === 'world count' && x.tool === 'vawe timeline').status, 'fail');
-  assert.equal(rows.find((x) => x.measure === 'world w2 duration' && x.tool === 'vawe timeline').status, 'fail');
+  assert.equal(rows.find((x) => x.measure === 'world count' && x.tool === 'vawe storyboard --text').status, 'fail');
+  assert.equal(rows.find((x) => x.measure === 'world w2 duration' && x.tool === 'vawe storyboard --text').status, 'fail');
 });
 
 test('cutsRows with no tool result fail instead of throwing', () => {
@@ -154,7 +154,7 @@ test('motionRows score the velocity, spec and strip results against the truth', 
   const by = (m, tool) => rows.find((x) => x.measure === m && x.tool.includes(tool));
   assert.equal(by('A settle second', 'velocity').status, 'pass');
   assert.equal(by('A overshoot (points of travel)', 'spec').status, 'pass');
-  assert.equal(by('A settle second', 'strip').status, 'fail');
+  assert.equal(by('A settle second', 'strip (mp4)').status, 'fail');
   assert.equal(by('B ease shape', 'spec').status, 'pass');
   assert.equal(rows.at(-1).status, 'no tool');
 });

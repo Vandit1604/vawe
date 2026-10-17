@@ -336,7 +336,7 @@ Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lis
 
 const motionText = () => `## Motion pass
 
-Phase 7, after the first draft. Done when \`bin/vawe dev\` shows overshoot-share, live-hold, constant-camera and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut. For the spectacle second also run \`bin/vawe onion\` and \`bin/vawe velocity\`. Check each cut against taste/craft/motion-craft.md and the principles in core/motion/README.md; one row per cut, ok, fix or n/a per principle. \`bin/vawe ship\` warns while this table holds a placeholder.
+Phase 7, after the first draft. Done when \`bin/vawe dev\` shows overshoot-share, live-hold, constant-camera and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut. For the spectacle second also run \`bin/vawe strip <page> --onion --at <s>\` and \`--velocity\`. Check each cut against taste/craft/motion-craft.md and the principles in core/motion/README.md; one row per cut, ok, fix or n/a per principle. \`bin/vawe ship\` warns while this table holds a placeholder.
 
 | cut | anticipation (hero) | follow-through, overlap | spacing eased | arcs | secondary action | exits faster | hold alive | camera still | what read flat | what I fixed (or why it stays) |
 |---|---|---|---|---|---|---|---|---|---|---|

@@ -71,7 +71,7 @@ Every KEEP line is a number in the page: a @keyframes stop, an element.animate k
 measured. Then:
   bin/vawe critique films/<name>/page.html --ref quality/refs/<ref>/source.mp4
 It compares the draft to the reference at the same timestamps and prints a match score. Loop until
-combined >= 0.70 and every Acceptance row is green. Then run bin/vawe coverage out/<name>.mp4 --ref
+combined >= 0.70 and every Acceptance row is green. Then run bin/vawe check coverage out/<name>.mp4 --ref
 <ref.mp4> and fix the seconds it lists below its floor. Then run the critique pass
 (the `vawe-critique` skill, frame-locked) as a fresh agent.
 Three passes without progress: report what blocks you and go on with the next row.

@@ -6,7 +6,7 @@ import { runShot } from './compare.mjs';
 import { energyLines, motionLines, motionRead, stripFpsProblem, stripWindow } from './strip-math.mjs';
 import { resolveInput } from './input.mjs';
 
-/** The seconds of the cuts of a page or mp4, for `vawe compare --at cuts`. */
+/** The seconds of the cuts of a page or mp4, for `vawe sheet --ref --at cuts`. */
 export async function cutSeconds(input) {
   const { cuts } = await resolveInput(input);
   return (await cuts()).map((c) => +c.at.toFixed(2));

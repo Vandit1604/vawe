@@ -19,7 +19,7 @@ const videoOf = (id) => refVideo(dir, id);
 
 function cardLines(id) {
   const spec = path.join(dir, 'spec', id, 'spec.json');
-  if (!fs.existsSync(spec)) return [`card ${id}: not measured yet; bin/vawe spec ${path.join(dir, `${id}.mp4`)}`];
+  if (!fs.existsSync(spec)) return [`card ${id}: not measured yet; bin/vawe see ${path.join(dir, `${id}.mp4`)} --spec`];
   return refCard(JSON.parse(fs.readFileSync(spec, 'utf8')), id, path.dirname(spec));
 }
 const specOf = (id) => (fs.existsSync(path.join(dir, 'spec', id, 'spec.json')) ? path.join('spec', id, 'spec.json') : null);

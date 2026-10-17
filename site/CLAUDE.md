@@ -46,7 +46,7 @@ tag `arsenal-final` and match that register.
 Do not write a screenshot or link-check script: the verbs do it from the repo root.
 `bin/vawe shot /,/blog --full` writes each route at 1440 and 390 (lazy images loaded, the dev server
 started and stopped for you) and says which route has page errors, failed requests or sideways overflow.
-`bin/vawe links` crawls the site and lists broken links, redirects and dead anchors; `--base https://vawe.dev`
+`bin/vawe check links` crawls the site and lists broken links, redirects and dead anchors; `--base https://vawe.dev`
 checks the live site. `node scripts/site/typography-audit.mjs` measures the type rules.
 
 ## Known gaps, so you do not rediscover them

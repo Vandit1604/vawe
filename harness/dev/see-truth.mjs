@@ -66,7 +66,7 @@ export function formatSummary(rows) {
   return lines.join('\n');
 }
 
-/** `vawe velocity` summary: one entry per element with its position move. */
+/** `vawe strip --velocity` summary: one entry per element with its position move. */
 export function parseVelocity(text) {
   const out = [];
   let cur = null;
@@ -133,17 +133,17 @@ export function cutsRows(t, { spec, timeline }) {
   const F = 'cuts', tol = t.tolerance;
   const rows = [];
   const cuts = spec?.cuts ?? null;
-  t.truth.cuts.forEach((c, i) => rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} second`, tool: 'vawe spec (cuts)', truth: c, measured: cuts?.[i]?.t, tolerance: tol.cutSeconds })));
-  rows.push(scoreRow({ fixture: F, measure: 'world count', tool: 'vawe spec (shots)', truth: t.truth.worlds.length, measured: spec?.shots?.length, tolerance: tol.worldCount }));
-  rows.push(scoreRow({ fixture: F, measure: 'world count', tool: 'vawe timeline', truth: t.truth.worlds.length, measured: timeline?.worlds?.length, tolerance: tol.worldCount }));
+  t.truth.cuts.forEach((c, i) => rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} second`, tool: 'vawe see --spec (cuts)', truth: c, measured: cuts?.[i]?.t, tolerance: tol.cutSeconds })));
+  rows.push(scoreRow({ fixture: F, measure: 'world count', tool: 'vawe see --spec (shots)', truth: t.truth.worlds.length, measured: spec?.shots?.length, tolerance: tol.worldCount }));
+  rows.push(scoreRow({ fixture: F, measure: 'world count', tool: 'vawe storyboard --text', truth: t.truth.worlds.length, measured: timeline?.worlds?.length, tolerance: tol.worldCount }));
   for (const id of t.truth.durationWorlds) {
     const i = t.truth.worlds.findIndex((w) => w.id === id);
     const w = t.truth.worlds[i];
     const dur = w.end - w.start;
     const shot = spec?.shots?.find((s) => Math.abs(s.t0 - w.start) <= tol.worldSeconds);
     const tl = timeline?.worlds?.find((x) => x.id === id);
-    rows.push(scoreRow({ fixture: F, measure: `world ${id} duration`, tool: 'vawe spec (shots)', truth: r(dur), measured: shot ? shot.t1 - shot.t0 : null, tolerance: tol.worldSeconds }));
-    rows.push(scoreRow({ fixture: F, measure: `world ${id} duration`, tool: 'vawe timeline', truth: r(dur), measured: tl ? tl.end - tl.start : null, tolerance: tol.worldSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `world ${id} duration`, tool: 'vawe see --spec (shots)', truth: r(dur), measured: shot ? shot.t1 - shot.t0 : null, tolerance: tol.worldSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `world ${id} duration`, tool: 'vawe storyboard --text', truth: r(dur), measured: tl ? tl.end - tl.start : null, tolerance: tol.worldSeconds }));
   }
   return rows;
 }
@@ -158,9 +158,9 @@ export function flashRows(t, { spec }) {
     const next = startOk ? spec.cuts.find((c) => c.frame > startOk.frame) : undefined;
     const shot = startOk ? spec.shots.find((s) => s.f0 === startOk.frame) : undefined;
     const L = shot ? spec.colour?.perShot?.find((p) => p.shot === shot.index)?.dominant?.[0] : undefined;
-    rows.push(scoreRow({ fixture: F, measure: `${tag} start second`, tool: 'vawe spec (cuts, derived)', truth: fl.start, measured: startOk?.t, tolerance: tol.startSeconds }));
-    rows.push(scoreRow({ fixture: F, measure: `${tag} length in frames`, tool: 'vawe spec (cut pair, derived)', truth: fl.frames, measured: startOk && next ? next.frame - startOk.frame : null, tolerance: tol.lengthFrames }));
-    rows.push(scoreRow({ fixture: F, measure: `${tag} peak mean luma`, tool: 'vawe spec (shot colour, derived)', truth: fl.peakLuma, measured: L == null ? null : lumaOfL(L), tolerance: tol.peakLuma }));
+    rows.push(scoreRow({ fixture: F, measure: `${tag} start second`, tool: 'vawe see --spec (cuts, derived)', truth: fl.start, measured: startOk?.t, tolerance: tol.startSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${tag} length in frames`, tool: 'vawe see --spec (cut pair, derived)', truth: fl.frames, measured: startOk && next ? next.frame - startOk.frame : null, tolerance: tol.lengthFrames }));
+    rows.push(scoreRow({ fixture: F, measure: `${tag} peak mean luma`, tool: 'vawe see --spec (shot colour, derived)', truth: fl.peakLuma, measured: L == null ? null : lumaOfL(L), tolerance: tol.peakLuma }));
   });
   rows.push(noTool(F, 'flash event (one exposure flash, not two cuts)', 2));
   return rows;
@@ -172,26 +172,26 @@ export function motionRows(t, { velocity, spec, stripA, stripB }) {
   const el = (axisStart) => spec?.shots?.flatMap((s) => s.elements).find((e) => e.axis === 'x' && Math.abs(e.start.t - axisStart) <= 0.1);
   const eA = el(a.start), eB = el(b.start);
   const rows = [
-    scoreRow({ fixture: F, measure: 'A start second', tool: 'vawe velocity (page)', truth: a.start, measured: vel('a')?.start, tolerance: tol.startSeconds }),
-    scoreRow({ fixture: F, measure: 'A settle second', tool: 'vawe velocity (page)', truth: a.settle, measured: vel('a')?.settle, tolerance: tol.settleSeconds }),
-    scoreRow({ fixture: F, measure: 'A overshoot (points of travel)', tool: 'vawe velocity (page)', truth: a.overshootPct, measured: vel('a')?.overshootPct, tolerance: tol.overshootPoints }),
-    scoreRow({ fixture: F, measure: 'B start second', tool: 'vawe velocity (page)', truth: b.start, measured: vel('b')?.start, tolerance: tol.startSeconds }),
-    scoreRow({ fixture: F, measure: 'B settle second (end of move)', tool: 'vawe velocity (page)', truth: b.settle, measured: vel('b')?.settle, tolerance: tol.settleSeconds }),
-    scoreRow({ fixture: F, measure: 'B peak speed (css px/s)', tool: 'vawe velocity (page)', truth: b.peakCssPxPerS, measured: vel('b')?.peakPxPerS, tolerance: b.peakCssPxPerS * tol.speedRatio }),
-    scoreRow({ fixture: F, measure: 'B ease shape', tool: 'vawe velocity (page)', truth: b.shape, measured: vel('b')?.shape }),
-    scoreRow({ fixture: F, measure: 'A start second', tool: 'vawe spec (elements)', truth: a.start, measured: eA?.start?.t, tolerance: tol.startSeconds }),
-    scoreRow({ fixture: F, measure: 'A settle second', tool: 'vawe spec (elements)', truth: a.settle, measured: eA?.land?.t, tolerance: tol.settleSeconds }),
-    scoreRow({ fixture: F, measure: 'A overshoot (points of travel)', tool: 'vawe spec (elements)', truth: a.overshootPct, measured: eA?.overshoot == null ? null : (eA.overshoot - 1) * 100, tolerance: tol.overshootPoints }),
-    scoreRow({ fixture: F, measure: 'A rest x (video px)', tool: 'vawe spec (elements)', truth: a.restVideoX, measured: eA?.to?.[0], tolerance: tol.restPx }),
-    scoreRow({ fixture: F, measure: 'B start second', tool: 'vawe spec (elements)', truth: b.start, measured: eB?.start?.t, tolerance: tol.startSeconds }),
-    scoreRow({ fixture: F, measure: 'B settle second (end of move)', tool: 'vawe spec (elements)', truth: b.settle, measured: eB?.land?.t, tolerance: tol.settleSeconds }),
-    scoreRow({ fixture: F, measure: 'B ease shape', tool: 'vawe spec (elements)', truth: b.shape, measured: eB?.easing?.class }),
+    scoreRow({ fixture: F, measure: 'A start second', tool: 'vawe strip --velocity (page)', truth: a.start, measured: vel('a')?.start, tolerance: tol.startSeconds }),
+    scoreRow({ fixture: F, measure: 'A settle second', tool: 'vawe strip --velocity (page)', truth: a.settle, measured: vel('a')?.settle, tolerance: tol.settleSeconds }),
+    scoreRow({ fixture: F, measure: 'A overshoot (points of travel)', tool: 'vawe strip --velocity (page)', truth: a.overshootPct, measured: vel('a')?.overshootPct, tolerance: tol.overshootPoints }),
+    scoreRow({ fixture: F, measure: 'B start second', tool: 'vawe strip --velocity (page)', truth: b.start, measured: vel('b')?.start, tolerance: tol.startSeconds }),
+    scoreRow({ fixture: F, measure: 'B settle second (end of move)', tool: 'vawe strip --velocity (page)', truth: b.settle, measured: vel('b')?.settle, tolerance: tol.settleSeconds }),
+    scoreRow({ fixture: F, measure: 'B peak speed (css px/s)', tool: 'vawe strip --velocity (page)', truth: b.peakCssPxPerS, measured: vel('b')?.peakPxPerS, tolerance: b.peakCssPxPerS * tol.speedRatio }),
+    scoreRow({ fixture: F, measure: 'B ease shape', tool: 'vawe strip --velocity (page)', truth: b.shape, measured: vel('b')?.shape }),
+    scoreRow({ fixture: F, measure: 'A start second', tool: 'vawe see --spec (elements)', truth: a.start, measured: eA?.start?.t, tolerance: tol.startSeconds }),
+    scoreRow({ fixture: F, measure: 'A settle second', tool: 'vawe see --spec (elements)', truth: a.settle, measured: eA?.land?.t, tolerance: tol.settleSeconds }),
+    scoreRow({ fixture: F, measure: 'A overshoot (points of travel)', tool: 'vawe see --spec (elements)', truth: a.overshootPct, measured: eA?.overshoot == null ? null : (eA.overshoot - 1) * 100, tolerance: tol.overshootPoints }),
+    scoreRow({ fixture: F, measure: 'A rest x (video px)', tool: 'vawe see --spec (elements)', truth: a.restVideoX, measured: eA?.to?.[0], tolerance: tol.restPx }),
+    scoreRow({ fixture: F, measure: 'B start second', tool: 'vawe see --spec (elements)', truth: b.start, measured: eB?.start?.t, tolerance: tol.startSeconds }),
+    scoreRow({ fixture: F, measure: 'B settle second (end of move)', tool: 'vawe see --spec (elements)', truth: b.settle, measured: eB?.land?.t, tolerance: tol.settleSeconds }),
+    scoreRow({ fixture: F, measure: 'B ease shape', tool: 'vawe see --spec (elements)', truth: b.shape, measured: eB?.easing?.class }),
     scoreRow({ fixture: F, measure: 'A start second', tool: 'vawe strip (mp4)', truth: a.start, measured: stripA?.start, tolerance: tol.startSeconds }),
     scoreRow({ fixture: F, measure: 'A settle second', tool: 'vawe strip (mp4)', truth: a.settle, measured: stripA?.settle, tolerance: tol.settleSeconds }),
     scoreRow({ fixture: F, measure: 'A bursts', tool: 'vawe strip (mp4)', truth: a.bursts, measured: stripA?.bursts, tolerance: tol.bursts }),
     scoreRow({ fixture: F, measure: 'B start second', tool: 'vawe strip (mp4)', truth: b.start, measured: stripB?.start, tolerance: tol.startSeconds }),
     scoreRow({ fixture: F, measure: 'B settle second (end of move)', tool: 'vawe strip (mp4)', truth: b.settle, measured: stripB?.settle, tolerance: tol.settleSeconds }),
-    noTool(F, 'A overshoot from vawe onion (image only, prints no number)', a.overshootPct, tol.overshootPoints),
+    noTool(F, 'A overshoot from vawe strip --onion (image only, prints no number)', a.overshootPct, tol.overshootPoints),
   ];
   return rows;
 }
@@ -205,16 +205,16 @@ export function eyeRows(t, { spec }) {
     const m = shot(s.t0);
     for (const end of ['start', 'end']) {
       const got = m?.[end];
-      rows.push(scoreRow({ fixture: F, measure: `shot ${i + 1} eye ${end} (frame heights from truth)`, tool: 'vawe spec (eye)', truth: 0, measured: got ? heights(got, s[end], asp) : null, tolerance: tol.eyeHeights }));
+      rows.push(scoreRow({ fixture: F, measure: `shot ${i + 1} eye ${end} (frame heights from truth)`, tool: 'vawe see --spec (eye)', truth: 0, measured: got ? heights(got, s[end], asp) : null, tolerance: tol.eyeHeights }));
     }
   });
   t.truth.shots.forEach((s, i) => {
-    rows.push(scoreRow({ fixture: F, measure: `shot ${i + 1} eye travel inside the shot (frame heights)`, tool: 'vawe spec (eye)', truth: r(heights(s.start, s.end, asp)), measured: shot(s.t0)?.travel, tolerance: tol.travelHeights }));
+    rows.push(scoreRow({ fixture: F, measure: `shot ${i + 1} eye travel inside the shot (frame heights)`, tool: 'vawe see --spec (eye)', truth: r(heights(s.start, s.end, asp)), measured: shot(s.t0)?.travel, tolerance: tol.travelHeights }));
   });
   for (let i = 0; i + 1 < t.truth.shots.length; i++) {
     const b = t.truth.shots[i + 1];
     const jump = spec?.eye?.cuts?.find((c) => Math.abs(c.at - b.t0) <= 0.05);
-    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} eye jump (frame heights)`, tool: 'vawe spec (eye)', truth: r(heights(t.truth.shots[i].end, b.start, asp)), measured: jump?.jump, tolerance: tol.travelHeights }));
+    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} eye jump (frame heights)`, tool: 'vawe see --spec (eye)', truth: r(heights(t.truth.shots[i].end, b.start, asp)), measured: jump?.jump, tolerance: tol.travelHeights }));
   }
   return rows;
 }
@@ -226,16 +226,16 @@ export function groundRows(t, { spec }) {
   const shot = (t0) => per.find((p) => Math.abs(p.t0 - t0) <= 0.05);
   t.truth.shots.forEach((s, i) => {
     const m = shot(s.t0);
-    rows.push(scoreRow({ fixture: F, measure: `world ${i + 1} ground colour (deltaE from truth)`, tool: 'vawe spec (ground)', truth: 0, measured: m?.start ? deltaE76(m.start, s.lab) : null, tolerance: tol.deltaE }));
+    rows.push(scoreRow({ fixture: F, measure: `world ${i + 1} ground colour (deltaE from truth)`, tool: 'vawe see --spec (ground)', truth: 0, measured: m?.start ? deltaE76(m.start, s.lab) : null, tolerance: tol.deltaE }));
   });
   t.truth.cutDeltaE.forEach((de, i) => {
     const cut = spec?.ground?.cuts?.find((c) => Math.abs(c.at - t.truth.shots[i + 1].t0) <= 0.05);
-    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} deltaE`, tool: 'vawe spec (ground)', truth: de, measured: cut?.dE, tolerance: tol.deltaE }));
+    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} deltaE`, tool: 'vawe see --spec (ground)', truth: de, measured: cut?.dE, tolerance: tol.deltaE }));
   });
   const drift = t.truth.shots.at(-1);
   const d = shot(drift.t0);
-  rows.push(scoreRow({ fixture: F, measure: 'light drift of world 4 (L change)', tool: 'vawe spec (ground)', truth: drift.driftL, measured: d?.lightDrift == null ? null : Math.abs(d.lightDrift), tolerance: tol.driftL }));
-  rows.push(scoreRow({ fixture: F, measure: 'still worlds report no drift (worlds 1 to 3)', tool: 'vawe spec (ground)', truth: 0, measured: [0, 1, 2].every((i) => shot(t.truth.shots[i].t0)) ? Math.max(...[0, 1, 2].map((i) => Math.abs(shot(t.truth.shots[i].t0).lightDrift ?? 0))) : null, tolerance: tol.driftL }));
+  rows.push(scoreRow({ fixture: F, measure: 'light drift of world 4 (L change)', tool: 'vawe see --spec (ground)', truth: drift.driftL, measured: d?.lightDrift == null ? null : Math.abs(d.lightDrift), tolerance: tol.driftL }));
+  rows.push(scoreRow({ fixture: F, measure: 'still worlds report no drift (worlds 1 to 3)', tool: 'vawe see --spec (ground)', truth: 0, measured: [0, 1, 2].every((i) => shot(t.truth.shots[i].t0)) ? Math.max(...[0, 1, 2].map((i) => Math.abs(shot(t.truth.shots[i].t0).lightDrift ?? 0))) : null, tolerance: tol.driftL }));
   return rows;
 }
 
@@ -245,12 +245,12 @@ export function typeRows(t, { spec }) {
   const fps = spec?.fps ?? t.fps;
   const words = spec ? spec.shots.flatMap((s) => s.text ?? []) : null;
   const find = (text) => words?.find((w) => String(w.text).toUpperCase().replace(/[^A-Z]/g, '') === text);
-  rows.push(scoreRow({ fixture: F, measure: 'word count', tool: 'vawe spec (words, OCR)', truth: t.truth.words.length, measured: words?.length, tolerance: tol.wordCount }));
+  rows.push(scoreRow({ fixture: F, measure: 'word count', tool: 'vawe see --spec (words, OCR)', truth: t.truth.words.length, measured: words?.length, tolerance: tol.wordCount }));
   for (const w of t.truth.words) {
     const m = find(w.text);
-    rows.push(scoreRow({ fixture: F, measure: `${w.text} in second`, tool: 'vawe spec (words, OCR)', truth: w.in, measured: m ? m.f0 / fps : null, tolerance: tol.wordSeconds }));
-    rows.push(scoreRow({ fixture: F, measure: `${w.text} out second`, tool: 'vawe spec (words, OCR)', truth: w.out, measured: m ? m.f1 / fps : null, tolerance: tol.wordSeconds }));
-    rows.push(scoreRow({ fixture: F, measure: `${w.text} cap height (fraction of frame)`, tool: 'vawe spec (words, OCR)', truth: t.truth.capHeightFraction, measured: m && spec?.media?.height ? m.boxHeightPx / spec.media.height : null, tolerance: tol.capHeightFraction }));
+    rows.push(scoreRow({ fixture: F, measure: `${w.text} in second`, tool: 'vawe see --spec (words, OCR)', truth: w.in, measured: m ? m.f0 / fps : null, tolerance: tol.wordSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${w.text} out second`, tool: 'vawe see --spec (words, OCR)', truth: w.out, measured: m ? m.f1 / fps : null, tolerance: tol.wordSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${w.text} cap height (fraction of frame)`, tool: 'vawe see --spec (words, OCR)', truth: t.truth.capHeightFraction, measured: m && spec?.media?.height ? m.boxHeightPx / spec.media.height : null, tolerance: tol.capHeightFraction }));
   }
   return rows;
 }
@@ -262,9 +262,9 @@ export function soundRows(t, { audioAt, lufs, timeline, spec }) {
     const probe = audioAt?.find((p) => Math.abs(p.at - (c.at + PROBE_OFFSET)) < 1e-6);
     const cue = probe?.cues.find((x) => x.voice === c.voice);
     rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe sound --at (page)', truth: c.at, measured: cue ? probe.at - cue.into : null, tolerance: tol.cueSeconds }));
-    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe timeline (page)', truth: c.at, measured: timeline?.cues?.[i]?.voice === c.voice ? timeline.cues[i].at : null, tolerance: tol.cueSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe storyboard --text (page)', truth: c.at, measured: timeline?.cues?.[i]?.voice === c.voice ? timeline.cues[i].at : null, tolerance: tol.cueSeconds }));
     const hit = spec?.audio?.hits ? nearest(spec.audio.hits, c.at, (h) => h.t ?? h.frame / spec.fps) : undefined;
-    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe spec (audio hits of the mp4)', truth: c.at, measured: hit ? hit.t ?? hit.frame / spec.fps : null, tolerance: tol.cueSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe see --spec (audio hits of the mp4)', truth: c.at, measured: hit ? hit.t ?? hit.frame / spec.fps : null, tolerance: tol.cueSeconds }));
   });
   rows.push(scoreRow({ fixture: F, measure: 'integrated loudness (LUFS)', tool: 'vawe sound --waveform (page)', truth: t.truth.lufs, measured: lufs, tolerance: tol.lufs }));
   return rows;
@@ -273,7 +273,7 @@ export function soundRows(t, { audioAt, lufs, timeline, spec }) {
 /** Seconds after a cue start at which `vawe sound --at` probes it. */
 export const PROBE_OFFSET = 0.1;
 
-/** `vawe look` table: the glow sigma, the signed channel offsets and the stripe period of the screen texture. */
+/** `vawe see` look table (harness/media/see/look.mjs): the glow sigma, the signed channel offsets and the stripe period of the screen texture. */
 export function parseLook(text) {
   const t = String(text);
   const num1 = (re) => { const m = re.exec(t); return m ? Number(m[1]) : null; };
@@ -282,7 +282,7 @@ export function parseLook(text) {
 }
 
 export function lookRows(t, { look }) {
-  const F = 'look', tol = t.tolerance, v = t.truth, tool = 'vawe look';
+  const F = 'look', tol = t.tolerance, v = t.truth, tool = 'vawe see (look)';
   return [
     scoreRow({ fixture: F, measure: 'bloom radius (css px, gaussian sigma)', tool, truth: v.bloomSigmaPx, measured: look?.bloomSigma, tolerance: tol.bloomPx }),
     scoreRow({ fixture: F, measure: 'red vs blue channel offset (css px)', tool, truth: v.channelOffsetPx, measured: look?.offset, tolerance: tol.channelOffsetPx }),
@@ -361,7 +361,7 @@ function cameraGrade(t, shots, tool) {
 
 export function cameraRows(t, { spec }) {
   const shots = spec?.shots.map((s) => ({ pan: s.camera.panTotalPx[0], zoom: s.camera.zoomTotal, turn: s.camera.rotation?.total ?? 0 }));
-  return [...cameraGrade(t, shots, 'vawe spec (camera)'), noTool('camera', 'world 4 tilt of a still picture (degrees clockwise)', t.truth.shots[3].tiltDeg, t.tolerance.tiltDeg)];
+  return [...cameraGrade(t, shots, 'vawe see --spec (camera)'), noTool('camera', 'world 4 tilt of a still picture (degrees clockwise)', t.truth.shots[3].tiltDeg, t.tolerance.tiltDeg)];
 }
 
 function cameraSeeRows(t, { a }) {
@@ -504,12 +504,12 @@ function render(name, { reuse, audio, final }) {
 function specOf(name, mp4, ocr) {
   const dir = path.join('out/see-truth', `${name}-spec`);
   if (!mp4) return null;
-  const res = vawe('spec', mp4, '--out', dir, '--no-cache', ...(ocr ? [] : ['--no-ocr']));
-  if (!res.ok) console.error(`vawe spec on ${name} failed:\n${res.text.split('\n').slice(-6).join('\n')}`);
+  const res = vawe('see', mp4, '--spec', '--out', dir, '--no-cache', ...(ocr ? [] : ['--no-ocr']));
+  if (!res.ok) console.error(`vawe see --spec on ${name} failed:\n${res.text.split('\n').slice(-6).join('\n')}`);
   return readJson(path.join(ROOT, dir, 'spec.json'));
 }
 
-const timelineOf = (name) => { const res = vawe('timeline', pageOf(name), '--json'); try { return JSON.parse(res.text.slice(0, res.text.lastIndexOf('}') + 1)); } catch { return null; } };
+const timelineOf = (name) => { const res = vawe('storyboard', pageOf(name), '--text', '--json'); try { return JSON.parse(res.text.slice(0, res.text.lastIndexOf('}') + 1)); } catch { return null; } };
 
 /** The see.json of `vawe see` on the mp4 (or, with `page`, on the page read with that mp4 as its draft); null when it failed. */
 function seeOf(name, mp4, { page = false, ocr = false } = {}) {
@@ -526,7 +526,7 @@ const FIXTURE_RUN = {
   motion: (t, o) => {
     const mp4 = render('motion', o);
     const { a, b } = t.truth;
-    const vel = vawe('velocity', pageOf('motion'), '--at', '1.5', '--span', '3', '--out', 'out/see-truth/velocity');
+    const vel = vawe('strip', pageOf('motion'), '--velocity', '--at', '1.5', '--span', '3', '--out', 'out/see-truth/velocity');
     const strip = (s) => (mp4 ? parseStrip(vawe('strip', mp4, '--at', String(s.at), '--span', String(s.span), '--out', 'out/see-truth/strip').text) : null);
     return [...motionRows(t, { velocity: parseVelocity(vel.text), spec: specOf('motion', mp4), stripA: strip(a.strip), stripB: strip(b.strip) }), ...motionSeeRows(t, { a: seeOf('motion', mp4) })];
   },
@@ -550,7 +550,7 @@ const FIXTURE_RUN = {
   },
   look: (t, o) => {
     const mp4 = render('look', { ...o, final: true });
-    return [...lookRows(t, { look: mp4 ? parseLook(vawe('look', mp4).text) : null }), ...lookSeeRows(t, { a: seeOf('look', mp4) })];
+    return [...lookRows(t, { look: mp4 ? parseLook(sh('node', ['harness/media/see/look.mjs', mp4]).text) : null }), ...lookSeeRows(t, { a: seeOf('look', mp4) })];
   },
 };
 

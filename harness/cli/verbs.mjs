@@ -9,10 +9,8 @@ import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs
 
 import { stillProblem } from '../media/see/still-math.mjs';
 import { parseTargets, shotProblem } from '../media/shot-math.mjs';
-import { linksProblem } from '../media/links-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
-import { lookProblem } from '../media/see/look-math.mjs';
 import { looksProblem } from '../lib/looks.mjs';
 import { seeProblem } from '../media/see/one-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
@@ -55,12 +53,23 @@ const readFresh = (file, sinceMs) => (fs.existsSync(file) && fs.statSync(file).m
 const critiqueFindingsFile = (page) => path.join(scratch('critique', filmKey(page)), 'findings.json');
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
 
+/** The compare-frames step of `vawe sheet --ref`: a page is seeked, an mp4 is read; the reference is always beside it. */
+function versus(v, input) {
+  if (v.labels || v.cols !== undefined) throw new UsageError('--labels and --cols do not go with --ref');
+  const page = input.endsWith('.html');
+  const at = v.at ?? CUTS;
+  const problem = compareProblem({ ours: page ? undefined : input, page: page ? input : undefined, ref: v.ref, at });
+  if (problem) throw new UsageError(problem);
+  return [{ script: 'harness/media/compare-frames.mjs', args: [...(page ? ['--page', input] : [input]), '--ref', v.ref, '--at', at, ...opt('--from', v.from), ...opt('--out', v.out)] }];
+}
+
 const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
 const ASPECT = 'one of 16:9 9:16 1:1 4:5 4:3';
 
 export const VERBS = [
   {
-    name: 'new', summary: 'start a film: films/<name>/page.html and brief.md',
+    tier: 'core',
+    name: 'new', summary: 'use when you start a film or recreate a reference mp4: writes page.html and brief.md, asks for missing facts first',
     positional: [{ name: 'name', required: true, help: 'film name, lowercase with dashes' }],
     flags: [
       { name: 'from', type: 'path', default: 'the guides/ROUTING.md row that --request, the name and --length point at; a sting when none does', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
@@ -79,7 +88,8 @@ export const VERBS = [
     build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref, ...(v.score ? { SCORE: '1' } : {}) } }] : null),
   },
   {
-    name: 'see', summary: 'ONE command that reads a film completely: shots and cuts, motion, light and texture, type, sound, and every image with its numbers (the full read of a bed for cutting to it: vawe sound); --vs puts a reference beside yours with advice',
+    tier: 'core',
+    name: 'see', summary: 'use when you read a film, page or reference completely (shots, motion, light, type, sound, numbers, images); --vs puts a reference beside it; --spec writes SPEC.md for a recreation',
     positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (its draft is rendered first when missing or older than the page), or a reference id from vawe refs list' }],
     flags: [
       { name: 'vs', type: 'string', help: 'a second film (same kinds as <film>), usually the reference: both are read, with a delta per measure, one advice line per delta and paired images of the same moment' },
@@ -91,45 +101,62 @@ export const VERBS = [
       { name: 'out', type: 'path', default: 'out/see/<name>', help: 'folder for see.md, see.json and the images' },
       { name: 'no-ocr', type: 'bool', help: 'skip reading the words (OCR runs by default when tesseract is installed)' },
       { name: 'no-cache', type: 'bool', help: 'measure again even if this film and the code were measured before (the result is cached by content hash)' },
+      { name: 'spec', type: 'bool', help: 'a reference mp4 only, nothing else is read: measure it into SPEC.md and spec.json (with --out, --no-ocr, --no-cache, --fps, --elements, --fast)' },
+      { name: 'fps', type: 'number', default: 'the video rate', help: 'with --spec: frame rate for the tables' },
+      { name: 'elements', type: 'number', default: 6, help: 'with --spec: moving elements to track' },
+      { name: 'fast', type: 'bool', help: 'with --spec: half the analysis width and OCR samples, for iteration' },
+      { name: 'sync-brief', type: 'bool', help: 'a page only, nothing else is read: write the times the last draft measured into the brief\'s Words and Objects tables (after you retimed on purpose)' },
     ],
-    example: 'vawe see out/my-launch.mp4   |   vawe see films/my-launch/page.html --vs <ref-id>   |   vawe see <ref-id> --at 2.4',
+    example: 'vawe see out/my-launch.mp4   |   vawe see films/my-launch/page.html --vs <ref-id>   |   vawe see <ref-id> --at 2.4   |   vawe see refs/ad.mp4 --spec',
     build: (v, [film]) => {
+      const specOnly = ['fps', 'elements', 'fast'].find((f) => v[f] !== undefined);
+      if (specOnly && !v.spec) throw new UsageError(`--${specOnly} needs --spec`);
+      if (v.spec) {
+        if (!film.endsWith('.mp4')) throw new UsageError('--spec measures a reference mp4: usage: vawe see <ref.mp4> --spec');
+        return [{ script: 'harness/media/ref-spec.mjs', args: [film, ...opt('--out', v.out), ...opt('--fps', v.fps), ...opt('--elements', v.elements), ...(v['no-ocr'] ? [] : ['--ocr']), ...(v.fast ? ['--fast'] : []), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
+      }
+      if (v['sync-brief']) {
+        if (!film.endsWith('.html')) throw new UsageError('--sync-brief reads a page: usage: vawe see <page> --sync-brief');
+        return [{ script: 'harness/media/spec-sync.mjs', args: [film] }];
+      }
       const problem = seeProblem({ at: v.at, atB: v['at-b'], from: v.from, to: v.to, vs: v.vs });
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/see/one.mjs', args: [film, ...opt('--vs', v.vs), ...opt('--at', v.at), ...opt('--at-b', v['at-b']), ...opt('--from', v.from), ...opt('--to', v.to), ...opt('--draft', v.draft), ...opt('--out', v.out), ...(v['no-ocr'] ? ['--no-ocr'] : []), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
     },
-    next: (v) => (v.vs ? 'Read see.md, then every image path in it at full size, each with the numbers under it; act on the advice lines (each names the page literal), then vawe see again' : 'Read see.md, then every image path in it at full size, each with the numbers under it; vawe see <film> --vs <ref id> puts a reference beside it'),
+    next: (v, [film]) => (v.spec ? 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild' : v['sync-brief'] ? `bin/vawe dev ${film}; the changed cells end in *` : v.vs ? 'Read see.md, then every image path in it at full size, each with the numbers under it; act on the advice lines (each names the page literal), then vawe see again' : 'Read see.md, then every image path in it at full size, each with the numbers under it; vawe see <film> --vs <ref id> puts a reference beside it'),
   },
   {
-    name: 'frames', summary: 'one still per data-world element (the others hidden), a contact sheet and the still-frame layout rules; about 2 s',
+    tier: 'core',
+    name: 'frames', summary: 'use when you check the key state of each world: one still per data-world element and a contact sheet; --looks tries every lens look',
     positional: [PAGE],
     flags: [
       { name: 'full', type: 'bool', help: 'full-size stills (the page\'s own size, 1920x1080 for 16:9) as out/<name>-frames/<id>-full.png; no sheet, no frames.html' },
       { name: 'world', type: 'string', repeat: true, help: 'only this world id (comma list or repeat the flag); no sheet, no frames.html. Each still is at its own world\'s time' },
+      { name: 'looks', type: 'bool', help: 'instead of the world stills: a page frame under every named camera look of the lens (and as-is), one labelled grid per second; the page is not edited' },
+      { name: 'at', type: 'string', help: 'with --looks: comma-separated film seconds, for example 4.5,9' },
+      { name: 'only', type: 'string', help: 'with --looks: comma-separated look names, for example anamorphic,crt; all when left out' },
+      { name: 'out', type: 'path', default: 'out/looks-<film>', help: 'with --looks: folder for the grids' },
     ],
-    example: 'vawe frames films/my-launch/page.html   |   vawe frames films/my-launch/page.html --full --world s3,s5',
-    build: (v, [page]) => [{ script: 'harness/media/frames.mjs', args: [page, ...(v.full ? ['--full'] : []), ...(v.world ?? []).flatMap((w) => ['--world', w])] }],
-    next: (v, [page]) => (v.full || v.world?.length
-      ? `Read the stills at full size and fix the states; then bin/vawe frames ${page} for the sheet`
-      : nextStep(path.resolve(page), ROOT).next),
-  },
-  {
-    name: 'looks', summary: 'a page frame under every named camera look of the lens (and as-is), one labelled grid per second; the look is set from outside, the page is not edited',
-    positional: [PAGE],
-    flags: [
-      { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 4.5,9' },
-      { name: 'only', type: 'string', help: 'comma-separated look names, for example anamorphic,crt; all when left out' },
-      { name: 'out', type: 'path', default: 'out/looks-<film>', help: 'folder for the grids' },
-    ],
-    example: 'vawe looks films/my-launch/page.html --at 4.5,9   |   vawe looks films/my-launch/page.html --at 3 --only anamorphic,pro-mist',
+    example: 'vawe frames films/my-launch/page.html   |   vawe frames films/my-launch/page.html --full --world s3,s5   |   vawe frames films/my-launch/page.html --looks --at 4.5,9 --only anamorphic,crt',
     build: (v, [page]) => {
+      if (!v.looks) {
+        const stray = ['at', 'only', 'out'].find((f) => v[f] !== undefined);
+        if (stray) throw new UsageError(`--${stray} needs --looks`);
+        return [{ script: 'harness/media/frames.mjs', args: [page, ...(v.full ? ['--full'] : []), ...(v.world ?? []).flatMap((w) => ['--world', w])] }];
+      }
+      if (v.full || v.world?.length) throw new UsageError('--looks does not take --full or --world');
       const problem = looksProblem({ at: v.at, only: v.only });
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/looks.mjs', args: [page, ...opt('--at', v.at), ...opt('--only', v.only), ...opt('--out', v.out)] }];
     },
-    next: () => 'Read each grid at full size, pick a look by sight, then put `look: \'<name>\'` in the lens options of the page (prompts/moves/lens.md lists the numbers); the page options still win over the look',
+    next: (v, [page]) => (v.looks
+      ? 'Read each grid at full size, pick a look by sight, then put `look: \'<name>\'` in the lens options of the page (prompts/moves/lens.md lists the numbers); the page options still win over the look'
+      : v.full || v.world?.length
+      ? `Read the stills at full size and fix the states; then bin/vawe frames ${page} for the sheet`
+      : nextStep(path.resolve(page), ROOT).next),
   },
   {
+    tier: 'core',
     name: 'dev', summary: 'draft render: half size, 30 fps, silent; also writes a key-frame sheet PNG next to it',
     positional: [PAGE],
     flags: [
@@ -152,6 +179,7 @@ export const VERBS = [
     next: devNext,
   },
   {
+    tier: 'core',
     name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background; refused until the owner approves the draft (vawe approve)',
     positional: [{ name: 'page|job', help: 'films/<name>/page.html; with --status, that page or a job id (default: the newest job)' }],
     flags: [
@@ -177,14 +205,16 @@ export const VERBS = [
     },
   },
   {
-    name: 'wait', summary: 'wait for any render of a film (a dev draft, a clip or a ship final), one progress line a minute, then print its result line; a call returns after about 3.5 minutes with a STILL RUNNING line, call it again; exit 1 when the render failed, else 0',
-    positional: [{ name: 'page|film', required: true, help: 'films/<name>/page.html, or the film name' }],
+    tier: 'core',
+    name: 'wait', summary: 'use when a draft, clip or final render is running: waits for it and prints its result line; exit 1 when it failed',
+    positional: [{ name: 'page|film', required: true, help: 'films/<name>/page.html, or the film name; a call returns after about 3.5 minutes with a STILL RUNNING line and a progress line a minute: call it again' }],
     flags: [],
     example: 'vawe wait films/my-launch/page.html   |   vawe wait my-launch',
     build: (v, [film]) => [{ script: 'harness/media/ship-job.mjs', args: ['wait', film] }],
     next: (v, [film]) => `bin/vawe ship --status ${film} for a final, or ${WAIT_WORK}`,
   },
   {
+    tier: 'maintainer',
     name: 'land', summary: 'put the current branch on main: fetch, rebase onto origin/main (stops on a conflict), scan for files over 5 MB, run tests/lib and tests/hooks, push with ssh keep-alive, print the e2e line and the pushed range',
     positional: [],
     flags: [],
@@ -193,7 +223,8 @@ export const VERBS = [
     next: () => 'delete the merged branch and its worktree (git branch -d <topic>)',
   },
   {
-    name: 'approve', summary: 'the owner approves the full draft of the current page; vawe ship needs it. A film session never runs this',
+    tier: 'core',
+    name: 'approve', summary: 'use when the owner signs off the full draft of a page: vawe ship needs it; a film session never runs this',
     positional: [PAGE],
     flags: [],
     example: 'vawe approve films/my-launch/page.html   (after vawe dev without --from and --to)',
@@ -201,15 +232,8 @@ export const VERBS = [
     next: (v, [page]) => `bin/vawe ship ${page}`,
   },
   {
-    name: 'spec-sync', summary: 'write the times the last draft measured into the brief\'s Words and Objects tables (after you retimed on purpose)',
-    positional: [PAGE],
-    flags: [],
-    example: 'vawe spec-sync films/my-launch/page.html',
-    build: (v, [page]) => [{ script: 'harness/media/spec-sync.mjs', args: [page] }],
-    next: (v, [page]) => `bin/vawe dev ${page}; the changed cells end in *`,
-  },
-  {
-    name: 'critique', summary: 'phone sheet, strip, loop seam, measured deltas and page-check to look at',
+    tier: 'core',
+    name: 'critique', summary: 'use when a draft is ready for fresh eyes: phone sheet, strip, loop seam, measured deltas and page-check to look at',
     positional: [PAGE],
     flags: [
       { name: 'ref', type: 'path', help: 'reference mp4 to measure against (default: the reference the brief names)', kind: 'file' },
@@ -228,89 +252,79 @@ export const VERBS = [
         : { label: 'measured deltas', script: 'harness/media/see.mjs', args: [page, '--measure'] },
       { label: 'page-check: text, cues, spectacle, cuts (1 to 3 min)', script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)], env: { VAWE_FINDINGS_OUT: critiqueFindingsFile(page) } },
     ],
-    summary: (v, [page], sinceMs) => summaryLines(
+    report: (v, [page], sinceMs) => summaryLines(
       readFresh(critiqueFindingsFile(page), sinceMs),
       freshImages(scratch('see', filmKey(page)), sinceMs),
     ),
     next: (v, [page]) => `look at the sheets above, then ${SAY.judge(pageName(page), page, v.ref)}`,
   },
   {
-    name: 'compare', summary: 'reference and your film at the same exact seconds, side by side, one PNG',
-    positional: [{ name: 'ours.mp4', help: 'your render (a draft is fine); or use --page. Without --ref: a labelled sheet of your frames at the --at seconds' }],
-    flags: [
-      { name: 'page', type: 'path', help: 'seek this page and screenshot it at half size: no render needed; without --ref, only your frames, labelled with time', kind: 'file' },
-      { name: 'ref', type: 'path', help: 'reference mp4 (default: the reference the brief names)', kind: 'file' },
-      { name: 'alone', type: 'bool', help: 'only your frames, labelled with time, even when the brief names a reference' },
-      { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 2.5,3.1,4; or `cuts` for the middle of each world change (the last full draft\'s data-world spans: run vawe dev first)' },
-      { name: 'from', type: 'number', default: 0, help: 'the film second where ours starts (a --from/--to draft)' },
-      { name: 'out', type: 'path', default: 'out/compare-<ours>.png', help: 'output PNG' },
-    ],
-    defaultRef: (v, [ours]) => v.page ?? ours,
-    example: 'vawe compare --page films/my-launch/page.html --at 2.5,3.1,4   |   vawe compare out/my-launch.mp4 --at cuts --ref refs/ad.mp4   (without --ref: only your frames, 3 per row)',
-    build: (v, [ours]) => {
-      const problem = compareProblem({ ours, page: v.page, ref: v.ref, at: v.at });
-      if (problem) throw new UsageError(problem);
-      return [{ script: 'harness/media/compare-frames.mjs', args: [...(ours ? [ours] : []), ...opt('--page', v.page), ...opt('--ref', v.ref), ...opt('--at', v.at), ...opt('--from', v.from), ...opt('--out', v.out)] }];
-    },
-    next: (v) => {
-      const rows = v.at === CUTS ? 'one frame per world change, at its middle' : 'one frame per --at second';
-      return v.ref ? `look at the PNG: ${rows}, reference left, yours right; fix the worst row first` : `look at the PNG: ${rows}, each labelled with its second, 3 per row, left to right`;
-    },
-  },
-  {
-    name: 'strip', summary: 'the frames through one moment as ONE grid plus the motion numbers of that window: when it starts, peaks and settles; or one strip per cut',
-    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list (uses the 1080p copy)' }],
+    tier: 'core',
+    name: 'strip', summary: 'use when you check how a moment or a cut moves: the frames through it as one grid with motion numbers; --onion and --velocity show the path and speed of a move',
+    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list (uses the 1080p copy); --velocity reads a page only' }],
     flags: [
       { name: 'at', type: 'string', help: 'the second to centre the strip on' },
       { name: 'cuts', type: 'bool', help: 'one strip per world change (a page or mp4: the data-world spans of the last full draft) or per shot cut (a reference: spec.json); the strip is centred on the cut' },
-      { name: 'span', type: 'number', default: STRIP_SPAN, help: 'seconds of film in the strip' },
+      { name: 'span', type: 'number', default: `${STRIP_SPAN} (--onion ${ONION_SPAN}, --velocity ${VELOCITY_SPAN})`, help: 'seconds of film in the strip, the onion or the velocity window' },
       { name: 'fps', type: 'number', default: STRIP_FPS, help: 'frames per second of film in the strip, at most the fps of the video read (a draft 30, a final 60); a grid holds 9 frames, more make a second grid' },
-      { name: 'out', type: 'path', default: 'out/strip/<film>', help: 'folder for the grids' },
+      { name: 'onion', type: 'bool', help: 'instead of a grid: several frames of the move at --at blended into ONE image, newest strongest, older ones fainter and tinted cool to warm: the spacing, path and overshoot of the move' },
+      { name: 'n', type: 'number', default: ONION_FRAMES, help: 'with --onion: frames blended, from 2 to 12' },
+      { name: 'velocity', type: 'bool', help: 'instead of a grid: the speed and scale of page elements around --at as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page; a canvas painted in window.seek has no element: pass --sel)' },
+      { name: 'sel', type: 'string', help: 'with --velocity: a CSS selector, graph every element it matches (default: the 4 elements that move most)' },
+      { name: 'ids', type: 'string', help: 'with --velocity: element ids, comma separated, instead of --sel' },
+      { name: 'out', type: 'path', default: 'out/strip/<film> (--onion out/onion/<film>, --velocity out/velocity)', help: 'folder for the grids or the PNG' },
     ],
-    example: 'vawe strip out/my-launch.mp4 --at 8.4   |   vawe strip films/my-launch/page.html --cuts   |   vawe strip u6iro1jHujs --cuts',
+    example: 'vawe strip out/my-launch.mp4 --at 8.4   |   vawe strip films/my-launch/page.html --cuts   |   vawe strip u6iro1jHujs --cuts   |   vawe strip out/my-launch.mp4 --at 8.4 --onion --span 0.6 --n 6   |   vawe strip films/my-launch/page.html --at 2.75 --velocity',
     build: (v, [film]) => {
+      const modes = ['onion', 'velocity'].filter((m) => v[m]);
+      if (modes.length > 1) throw new UsageError('give --onion or --velocity, not both');
+      if (v.n !== undefined && !v.onion) throw new UsageError('--n needs --onion');
+      const velocityOnly = ['sel', 'ids'].find((f) => v[f] !== undefined);
+      if (velocityOnly && !v.velocity) throw new UsageError(`--${velocityOnly} needs --velocity`);
+      if (v.cuts && modes.length) throw new UsageError(`--cuts does not take --${modes[0]}`);
+      if (v.onion) {
+        const span = v.span ?? ONION_SPAN;
+        const n = v.n ?? ONION_FRAMES;
+        const problem = onionProblem({ at: v.at, span, n });
+        if (problem) throw new UsageError(problem);
+        return [{ script: 'harness/media/see.mjs', args: [film, '--onion', v.at, '--span', String(span), '--n', String(n), ...opt('--out', v.out)] }];
+      }
+      if (v.velocity) {
+        const span = v.span ?? VELOCITY_SPAN;
+        const problem = velocityProblem({ at: v.at, span, sel: v.sel, ids: v.ids });
+        if (problem) throw new UsageError(problem);
+        return [{ script: 'harness/media/see.mjs', args: [film, '--velocity', v.at, '--span', String(span), ...opt('--sel', v.sel), ...opt('--ids', v.ids), ...opt('--out', v.out)] }];
+      }
       const span = v.span ?? STRIP_SPAN;
       const fps = v.fps ?? STRIP_FPS;
       const problem = stripProblem({ at: v.at, cuts: v.cuts, span, fps });
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/see.mjs', args: [film, ...(v.cuts ? ['--cuts'] : ['--moment', v.at]), '--span', String(span), '--fps', String(fps), ...opt('--out', v.out)] }];
     },
-    next: (v, [film]) => `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe compare --at <s> to put the reference beside yours'}${v.cuts ? (film.endsWith('.html') ? `; ${SAY.motionRows(pageName(film))}, then ${SAY.critique(pageName(film), film)}` : '; then name 3 moves in "Taken from" (ref id, cut second) and the pattern of taste/craft/film-structure.md (The motion grammar) the ref uses') : ''}`,
-  },
-  {
-    name: 'onion', summary: 'several frames of one move blended into ONE image, newest strongest, older ones fainter and tinted cool to warm: the spacing, path and overshoot of the move',
-    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list (uses the 1080p copy)' }],
-    flags: [
-      { name: 'at', type: 'string', help: 'the second to centre the onion on' },
-      { name: 'span', type: 'number', default: ONION_SPAN, help: 'seconds of film the frames cover' },
-      { name: 'n', type: 'number', default: ONION_FRAMES, help: 'frames blended, from 2 to 12' },
-      { name: 'out', type: 'path', default: 'out/onion/<film>', help: 'folder for the PNG' },
-    ],
-    example: 'vawe onion out/my-launch.mp4 --at 8.4 --span 0.6 --n 6   |   vawe onion u6iro1jHujs --at 12.3',
-    build: (v, [film]) => {
-      const span = v.span ?? ONION_SPAN;
-      const n = v.n ?? ONION_FRAMES;
-      const problem = onionProblem({ at: v.at, span, n });
-      if (problem) throw new UsageError(problem);
-      return [{ script: 'harness/media/see.mjs', args: [film, '--onion', v.at, '--span', String(span), '--n', String(n), ...opt('--out', v.out)] }];
+    next: (v, [film]) => {
+      if (v.onion) return 'Read the PNG at full size: evenly spaced ghosts mean a linear move, ghosts bunched at one end mean an ease, a ghost past the final position means an overshoot; vawe strip <page> --velocity gives the numbers for a page';
+      if (v.velocity) return 'Read the PNG, then fix the move the summary names: the page literal that sets its ease, its duration or its overshoot';
+      return `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe sheet <page|mp4> --ref <ref.mp4> --at <s> to put the reference beside yours'}${v.cuts ? (film.endsWith('.html') ? `; ${SAY.motionRows(pageName(film))}, then ${SAY.critique(pageName(film), film)}` : '; then name 3 moves in "Taken from" (ref id, cut second) and the pattern of taste/craft/film-structure.md (The motion grammar) the ref uses') : ''}`;
     },
-    next: () => 'Read the PNG at full size: evenly spaced ghosts mean a linear move, ghosts bunched at one end mean an ease, a ghost past the final position means an overshoot; vawe velocity gives the numbers for a page',
   },
   {
-    name: 'sheet', summary: 'a storyboard sheet of a page or mp4: one tile per second with the second on it, and with --labels the world id; default seconds are the middle of each world change; a folder of images gives one tile per image with its file name',
+    tier: 'core',
+    name: 'sheet', summary: 'use when you want a labelled contact sheet of seconds of a page or mp4, or of a folder of images; --ref puts a reference beside each frame',
     positional: [{ name: 'page|mp4|folder', required: true, kind: 'file', help: 'films/<name>/page.html, an mp4, or a folder of png, jpg or webp images (up to 48 tiles, named by file)' }],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
       { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },
       { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page only)' },
       { name: 'cols', type: 'number', default: 4, help: 'tiles per row' },
-      { name: 'out', type: 'path', default: 'out/sheet-<name>.png', help: 'the PNG path' },
+      { name: 'ref', type: 'path', help: 'a reference mp4 (a page or an mp4, never a folder): each row is the reference left, yours right, at the same second; --at may be \`cuts\` for the middle of each world change of the last full draft', kind: 'file' },
+      { name: 'out', type: 'path', default: 'out/sheet-<name>.png (--ref: out/compare-<name>.png)', help: 'the PNG path' },
     ],
-    example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels',
-    build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
-    next: () => 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment',
+    example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels   |   vawe sheet films/my-launch/page.html --ref refs/ad.mp4 --at 2.5,3.1,4   |   vawe sheet out/my-launch.mp4 --ref refs/ad.mp4 --at cuts',
+    build: (v, [input]) => v.ref ? versus(v, input) : [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
+    next: (v) => (v.ref ? `look at the PNG: ${v.at === CUTS ? 'one frame per world change, at its middle' : 'one frame per --at second'}, reference left, yours right; fix the worst row first` : 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment'),
   },
   {
+    tier: 'more',
     name: 'shot', summary: 'a PNG of a site route, a url or a static html page at each width (default 1440 and 390): lazy images loaded, the site server reused or started and stopped, and page errors, failed requests and sideways overflow reported',
     positional: [{ name: 'target', required: true, help: 'a route (/blog), a url, or a .html file; a comma list shoots each' }],
     flags: [
@@ -325,27 +339,11 @@ export const VERBS = [
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/shot.mjs', args: [target, ...opt('--w', v.w), ...(v.full ? ['--full'] : []), ...opt('--base', v.base), ...opt('--out', v.out)] }];
     },
-    next: () => 'Read each PNG at full size; the 390 one shows the phone layout; vawe links checks every link of the site',
+    next: () => 'Read each PNG at full size; the 390 one shows the phone layout; vawe check links crawls every link of the site',
   },
   {
-    name: 'links', summary: 'crawl the site from its start routes and check every link, image and stylesheet: broken ones with the pages that link there, redirecting ones, and #anchors with no element; exit 1 when any is broken',
-    positional: [],
-    flags: [
-      { name: 'base', type: 'string', default: 'http://localhost:3080', help: 'the site: a localhost server that is down is started and stopped by this verb; https://vawe.dev checks the live site' },
-      { name: 'from', type: 'string', default: '/', help: 'comma list of start routes' },
-      { name: 'max', type: 'number', default: 400, help: 'the most distinct urls to check' },
-      { name: 'external', type: 'bool', help: 'also check links to other sites (slower; some sites refuse a bot)' },
-    ],
-    example: 'vawe links   |   vawe links --base https://vawe.dev --from /,/blog',
-    build: (v) => {
-      const problem = linksProblem({ base: v.base, max: v.max });
-      if (problem) throw new UsageError(problem);
-      return [{ script: 'harness/media/links.mjs', args: [...opt('--base', v.base), ...opt('--from', v.from), ...opt('--max', v.max), ...(v.external ? ['--external'] : [])] }];
-    },
-    next: () => 'fix each broken link at the page named after the arrow, or the redirect rule in site/lib/redirects.mjs; vawe shot <route> shows the page',
-  },
-  {
-    name: 'still', summary: 'one frame at the full render size as a PNG: a page renders that one frame at its final size (1920x1080 for 16:9), an mp4 gives its exact frame',
+    tier: 'core',
+    name: 'still', summary: 'use when you need one exact full-size frame of a page or mp4 as a PNG',
     positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html or an mp4' }],
     flags: [
       { name: 'at', type: 'string', help: 'the film second to write; past the last frame it is moved to the last frame and the output says so' },
@@ -360,7 +358,8 @@ export const VERBS = [
     next: () => 'Read the PNG at full size; vawe zoom <page|mp4> --at <s> --box x,y,w,h enlarges one region',
   },
   {
-    name: 'zoom', summary: 'one region of a frame enlarged with no smoothing (every pixel a square), beside the same region of a second film: fringes, masks and glow',
+    tier: 'more',
+    name: 'zoom', summary: 'use when a pixel pattern needs a closer look: one region of a frame enlarged with no smoothing (every pixel a square), beside the same region of a second film: fringes, masks and glow',
     positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list' }],
     flags: [
       { name: 'at', type: 'string', help: 'the second to crop' },
@@ -378,89 +377,11 @@ export const VERBS = [
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/see/zoom.mjs', args: [film, '--at', v.at, ...(v.auto ? ['--auto'] : ['--box', v.box]), '--scale', String(scale), ...opt('--vs', v.vs), ...opt('--at-b', v['at-b']), ...opt('--out', v.out)] }];
     },
-    next: () => 'Read the PNG at full size: left is a, right is b; name the pixel pattern you see (colour fringes, a stripe mask, halo width) and then vawe look for the numbers',
+    next: () => 'Read the PNG at full size: left is a, right is b; name the pixel pattern you see (colour fringes, a stripe mask, halo width) and then vawe see <film> for the numbers',
   },
   {
-    name: 'look', summary: 'numbers for light and texture, a against b: flashes, clipped pixels, bloom width, colour fringe, screen pattern, glow colour, with advice',
-    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list' }],
-    flags: [
-      { name: 'vs', type: 'string', help: 'a second film, usually the reference: adds its column and advice lines' },
-      { name: 'from', type: 'string', help: 'start second of the window (default: 0)' },
-      { name: 'to', type: 'string', help: 'end second of the window (default: the end)' },
-    ],
-    example: 'vawe look out/my-launch.mp4 --vs <ref-id>   |   vawe look films/my-launch/page.html --from 2 --to 6',
-    build: (v, [film]) => {
-      const problem = lookProblem({ from: v.from, to: v.to });
-      if (problem) throw new UsageError(problem);
-      return [{ script: 'harness/media/see/look.mjs', args: [film, ...opt('--vs', v.vs), ...opt('--from', v.from), ...opt('--to', v.to)] }];
-    },
-    next: (v) => (v.vs ? 'act on the advice lines, then vawe zoom <film> --vs <ref> --auto --at <s> to see the pixels behind a number' : 'vawe look <film> --vs <ref id> to put the numbers beside a reference'),
-  },
-  {
-    name: 'velocity', summary: 'the speed and scale of page elements over time as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page; an element is read over the stretch where it is drawn, so display toggles are not moves; a canvas painted in window.seek has no element: pass --sel)',
-    positional: [PAGE],
-    flags: [
-      { name: 'at', type: 'string', help: 'the second to centre the window on' },
-      { name: 'span', type: 'number', default: VELOCITY_SPAN, help: 'seconds of film in the window, sampled 120 a second' },
-      { name: 'sel', type: 'string', help: 'a CSS selector: graph every element it matches (default: the 4 elements that move most)' },
-      { name: 'ids', type: 'string', help: 'element ids, comma separated, instead of --sel' },
-      { name: 'out', type: 'path', default: 'out/velocity', help: 'folder for the PNG' },
-    ],
-    example: 'vawe velocity films/my-launch/page.html --at 2.75   |   vawe velocity films/my-launch/page.html --at 4 --span 0.5 --sel .card',
-    build: (v, [page]) => {
-      const span = v.span ?? VELOCITY_SPAN;
-      const problem = velocityProblem({ at: v.at, span, sel: v.sel, ids: v.ids });
-      if (problem) throw new UsageError(problem);
-      return [{ script: 'harness/media/see.mjs', args: [page, '--velocity', v.at, '--span', String(span), ...opt('--sel', v.sel), ...opt('--ids', v.ids), ...opt('--out', v.out)] }];
-    },
-    next: () => 'Read the PNG, then fix the move the summary names: the page literal that sets its ease, its duration or its overshoot',
-  },
-  {
-    name: 'coverage', summary: 'SSIM of your render against the reference at every step; the done check for a recreation',
-    positional: [{ name: 'ours.mp4', required: true, kind: 'file', help: 'your render' }],
-    flags: [
-      { name: 'ref', type: 'path', help: 'reference mp4', kind: 'file' },
-      { name: 'step', type: 'number', default: 0.1, help: 'seconds between samples' },
-      { name: 'min', type: 'number', default: 0.5, help: 'exit 1 when any second falls below this SSIM' },
-      { name: 'out', type: 'path', default: 'out/coverage-<ours>.png', help: 'sheet of the 6 worst moments' },
-      { name: 'text', type: 'bool', help: 'check the on-screen words instead of SSIM: every reference row present in yours within 0.25 s; exit 1 when a row is missing' },
-    ],
-    example: 'vawe coverage out/my-launch.mp4 --ref refs/ad.mp4 --min 0.6',
-    build: (v, [ours]) => [{ script: 'harness/media/coverage.mjs', args: [ours, ...opt('--ref', v.ref), ...opt('--step', v.step), ...opt('--min', v.min), ...opt('--out', v.out), ...(v.text ? ['--text'] : [])] }],
-    next: () => 'look at the sheet, then vawe compare --page at the worst seconds',
-  },
-  {
-    name: 'review', summary: 'one report, one sheet: clipped glyphs, text timing, motion, coverage, worst first',
-    positional: [PAGE],
-    flags: [
-      { name: 'ref', type: 'path', help: 'reference mp4: compare motion and run coverage', kind: 'file' },
-      { name: 'final', type: 'bool', help: 'review the full-size 60 fps render instead of the half-size draft' },
-      { name: 'text', type: 'bool', help: 'with --ref: also check the on-screen words against the reference (slow)' },
-      { name: 'table', type: 'bool', help: 'print the text timing table (it is always written to out/<name>-review.json)' },
-      { name: 'judge', type: 'bool', help: 'prepare the default-reject judge and print the command for a fresh session' },
-      { name: 'out', type: 'path', default: 'out/review-<name>.png', help: 'the picture sheet of the 6 worst findings' },
-    ],
-    example: 'vawe review films/my-launch/page.html --ref refs/ad.mp4',
-    build: (v, [page]) => [{ script: 'harness/media/review.mjs', args: [page, ...opt('--ref', v.ref), ...(v.final ? ['--final'] : []), ...(v.text ? ['--text'] : []), ...(v.table ? ['--table'] : []), ...(v.judge ? ['--judge'] : []), ...opt('--out', v.out)] }],
-    next: (v, [page]) => `fix the line marked "Fix first", then vawe review ${page} again`,
-  },
-  {
-    name: 'spec', summary: 'measure a reference mp4 into SPEC.md and spec.json',
-    positional: [{ name: 'ref.mp4', required: true, kind: 'file', help: 'the reference film' }],
-    flags: [
-      { name: 'out', type: 'path', default: 'next to the reference', help: 'output directory' },
-      { name: 'no-ocr', type: 'bool', help: 'skip the text timeline (OCR runs by default when tesseract is installed)' },
-      { name: 'fps', type: 'number', default: 'the video rate', help: 'frame rate for the tables' },
-      { name: 'elements', type: 'number', default: 6, help: 'moving elements to track' },
-      { name: 'fast', type: 'bool', help: 'half the analysis width and OCR samples, for iteration' },
-      { name: 'no-cache', type: 'bool', help: 'measure again even if this reference and code were measured before' },
-    ],
-    example: 'vawe spec refs/ad.mp4',
-    build: (v, [ref]) => [{ script: 'harness/media/ref-spec.mjs', args: [ref, ...opt('--out', v.out), ...opt('--fps', v.fps), ...opt('--elements', v.elements), ...(v['no-ocr'] ? [] : ['--ocr']), ...(v.fast ? ['--fast'] : []), ...(v['no-cache'] ? ['--no-cache'] : [])] }],
-    next: () => 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild',
-  },
-  {
-    name: 'refs', summary: 'the top reference films to study before you design, and that the fresh judge compares your film with (kept outside the repo in ~/.vawe/refs, or $VAWE_REFS_DIR)',
+    tier: 'core',
+    name: 'refs', summary: 'use when you study references before you design: list them, print the settled frame of every shot, add a film',
     positional: [{ name: 'action', required: true, help: 'list, index (build refs.json from the folder), add, or frames (the settled full-size frame of each shot, into frames/<id>/ with a frames.json manifest; prints every absolute path)' }, { name: 'source', help: 'with add: an mp4 file or a URL (yt-dlp, 360p); with frames: one film id (default: every film in scope); with list: one film id, whose frame paths it prints' }],
     flags: [
       { name: 'type', type: 'string', help: 'with add: product (product and UI launch films) or brand (idents, brand and studio films)' },
@@ -471,6 +392,7 @@ export const VERBS = [
     next: (v, [action]) => (action === 'list' ? 'bin/vawe refs frames, then Read the absolute paths it prints (one per frame) at full size before you design; bin/vawe strip <id> --cuts shows how the film moves through each cut' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
   },
   {
+    tier: 'more',
     name: 'studio', summary: 'live scrubbable preview; edits the page literals in place',
     positional: [PAGE],
     flags: [{ name: 'port', type: 'number', default: 8799, help: 'http port' }],
@@ -478,53 +400,15 @@ export const VERBS = [
     build: (v, [page]) => [{ script: 'studio/page-server.mjs', args: [page], env: v.port ? { PORT: String(v.port) } : {} }],
   },
   {
-    name: 'check', summary: 'run one gate by name; bare lists the gates',
+    tier: 'core',
+    name: 'check', summary: 'use when you run one named gate or report (anim-traps, page-check, review, coverage, links, doc-refs, ...); bare lists the gates',
     positional: [{ name: 'name', help: 'gate name, then that gate\'s own args' }],
     flags: [], raw: true,
     example: 'vawe check anim-traps films/my-launch/page.html',
     build: (v, args) => [{ script: 'harness/lib/check-gate.mjs', args }],
   },
   {
-    name: 'track', summary: 'track one element in a reference video over a time range and print motion keyframes',
-    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
-    flags: [], raw: true,
-    example: 'vawe track ref.mp4 --box 800,400,300,120 --from 1 --to 2.5 [--fps 10] [--thresh 128] [--dark]',
-    build: (v, args) => [{ script: 'harness/media/track.mjs', args }],
-    next: () => "read the keyframes into the page's animation, then vawe compare --page to check the move against the reference",
-  },
-  {
-    name: 'match', summary: 'score a render against its reference beat by beat: strips, difference overlay, SSIM, worst first',
-    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
-    flags: [], raw: true,
-    example: 'vawe match ref.mp4 out/my-launch.mp4 [--step s] [--light]',
-    build: (v, args) => [{ script: 'harness/media/match.mjs', args }],
-    next: () => 'open match.md, fix the worst beat, then vawe match again',
-  },
-  {
-    name: 'ref-cutlist', summary: "measure a reference clip's cuts and write quality/refs/<name>/beats.md from them",
-    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
-    flags: [], raw: true,
-    example: 'vawe ref-cutlist REF=kinetic-promo [THRESHOLD=0.3]',
-    build: (v, args) => [{ script: 'harness/dev/ref-cutlist.mjs', args }],
-    next: () => "look at the stills it wrote and fill each beat's label and technique",
-  },
-  {
-    name: 'ref-calibrate', summary: 'render the measure fixtures and write how wrong each ref-spec measure is to quality/baselines/ref-spec-error.json',
-    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
-    flags: [], raw: true,
-    example: 'vawe ref-calibrate [--only move-linear,text-stagger] [--dry]',
-    build: (v, args) => [{ script: 'harness/media/ref-calibrate.mjs', args }],
-    next: () => 'vawe spec now marks the measures it cannot trust',
-  },
-  {
-    name: 'sound-lab', summary: 'render every synth cue to out/sound-lab/*.wav and open the lab to listen and mark verdicts',
-    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
-    flags: [], raw: true,
-    example: 'vawe sound-lab',
-    build: (v, args) => [{ script: 'harness/dev/sound-lab.mjs', args }],
-    next: () => 'verdicts are kept in quality/baselines/sound-verdicts.json',
-  },
-  {
+    tier: 'maintainer',
     name: 'claim', summary: 'declare or release the scope a worktree works in: add <name> [branch] [scope ...] | rm <name>',
     positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
     flags: [], raw: true,
@@ -533,6 +417,7 @@ export const VERBS = [
     next: () => 'vawe claim rm <name> when the work lands',
   },
   {
+    tier: 'maintainer',
     name: 'doctor', summary: 'check node, ffmpeg, Chrome and the other tools; print the install line for each missing one',
     positional: [],
     flags: [
@@ -543,6 +428,7 @@ export const VERBS = [
     build: (v) => [{ script: 'harness/dev/doctor.mjs', args: [...(v.quiet ? ['--quiet'] : []), ...(v.json ? ['--json'] : [])] }],
   },
   {
+    tier: 'maintainer',
     name: 'moves', summary: 'render the stale prompts/moves/demo/<move>.html clips to prompts/moves/<move>.mp4 (640 px, 60 fps) in parallel; a clip is stale when its demo, demo.css or a core/ import changed',
     positional: [],
     flags: [
@@ -554,12 +440,14 @@ export const VERBS = [
     next: () => 'look at a clip in prompts/moves/ before you commit it',
   },
   {
+    tier: 'more',
     name: 'fonts', summary: 'the free font faces, one line each, with the file to copy into films/<name>/assets/; with --system the faces installed on this machine, usable through local() in a film you render yourself',
     positional: [], flags: [{ name: 'system', type: 'bool', help: 'list the installed system faces (Tahoma, Verdana, ...) with their local() name; never copy or commit the font file' }],
     example: 'vawe fonts --system',
     build: (v) => [{ script: 'harness/dev/list-assets.mjs', args: ['fonts', ...(v.system ? ['--system'] : [])] }],
   },
   {
+    tier: 'more',
     name: 'palette', summary: 'one OKLCH brand seed with its mood, and how to compose a full palette around it; the same key always gives the same seed',
     positional: [],
     flags: [
@@ -571,7 +459,8 @@ export const VERBS = [
     next: () => 'write the palette into films/<name>/DESIGN.md as OKLCH roles',
   },
   {
-    name: 'sound', summary: 'the sound of a track, a film or a page read completely, for cutting to the music: loudness, tempo, beat grid with frames, bars, every hit, sections, a PNG, and with --cuts each cut against the beat; with --at or --waveform the cues of a page; with no argument the synth voices',
+    tier: 'core',
+    name: 'sound', summary: 'use when you choose, check or cut to sound: voices, the beat grid and hits of a track, the cues of a page (--at, --waveform), --sfx to import an effect, --lab to listen',
     positional: [{ name: 'input', required: false, help: 'an audio file (m4a, mp3, wav), an mp4 with audio, a reference id from vawe refs list, or a page (reads its <audio loop> bed, the synth cues as separate rows, and the page\'s own cuts); none: list the synth voices for <audio data-synth>' }],
     flags: [
       { name: 'cuts', type: 'string', help: 'a page (exact worlds from the DOM), an mp4 or a reference id (shot cuts): a table per cut with the nearest hit and beat line, offset in ms and frames, verdict, and the second to move each off cut to' },
@@ -581,9 +470,27 @@ export const VERBS = [
       { name: 'waveform', type: 'bool', help: 'a page: one PNG of the mixed waveform, loudness curve, world starts and a tick per cue; prints LUFS and true peak' },
       { name: 'out', type: 'path', default: 'out/see/<name>, or out/<film>-waveform.png with --waveform', help: 'folder for sound.md, sound.json and sound.png, or the PNG path with --waveform' },
       { name: 'no-cache', type: 'bool', help: 'read the track again even if this file and the code were read before' },
+      { name: 'sfx', type: 'bool', help: 'instead of reading: trim, pitch, fade and level the <input> effect file into the film\'s assets/sfx/ as mp3 and print the <audio> line to paste; needs --film' },
+      { name: 'film', type: 'string', help: 'with --sfx: the page or film name that gets the file in its assets/sfx/' },
+      { name: 'trim', type: 'string', help: 'with --sfx: a,b in seconds of the source, for example 0.1,0.6' },
+      { name: 'fade-in', type: 'number', help: 'with --sfx: seconds of fade in' },
+      { name: 'fade-out', type: 'number', help: 'with --sfx: seconds of fade out' },
+      { name: 'pitch', type: 'number', help: 'with --sfx: semitones, 12 is an octave up; the speed moves with the pitch' },
+      { name: 'gain', type: 'number', help: 'with --sfx: dB added to the level' },
+      { name: 'peak', type: 'number', help: 'with --sfx: set the loudest sample to this dBFS, for example -6 (not with --gain)' },
+      { name: 'name', type: 'string', help: 'with --sfx: the output name (default: the input name)' },
+      { name: 'lab', type: 'bool', help: 'instead of reading: render every synth cue to out/sound-lab/*.wav and open the lab to listen and mark verdicts' },
     ],
-    example: 'vawe sound assets/bed.m4a --cuts films/my-launch/page.html   |   vawe sound films/my-launch/page.html   |   vawe sound films/my-launch/page.html --at 0.8,2.75   |   vawe sound',
+    example: 'vawe sound assets/bed.m4a --cuts films/my-launch/page.html   |   vawe sound films/my-launch/page.html   |   vawe sound films/my-launch/page.html --at 0.8,2.75   |   vawe sound ~/Downloads/click.wav --sfx --film films/my-launch/page.html --trim 0.05,0.4 --fade-out 0.08 --pitch 3 --peak -6 --name click-high   |   vawe sound   |   vawe sound --lab',
     build: (v, [input]) => {
+      if (v.lab) return [{ script: 'harness/dev/sound-lab.mjs', args: [] }];
+      const sfxFlag = ['film', 'trim', 'fade-in', 'fade-out', 'pitch', 'gain', 'peak', 'name'].find((f) => v[f] !== undefined);
+      if (v.sfx) {
+        if (!input) throw new UsageError('missing <input>; usage: vawe sound <file> --sfx --film films/my-launch/page.html [--trim a,b] [--fade-in s] [--fade-out s] [--pitch st] [--gain dB | --peak dB]');
+        if (!v.film) throw new UsageError('missing --film <page|name>; usage: vawe sound <file> --sfx --film films/my-launch/page.html [--trim a,b] [--fade-in s] [--fade-out s] [--pitch st] [--gain dB | --peak dB]');
+        return [{ script: 'harness/media/sfx.mjs', args: [input, '--film', v.film, ...opt('--trim', v.trim), ...opt('--fade-in', v['fade-in']), ...opt('--fade-out', v['fade-out']), ...opt('--pitch', v.pitch), ...opt('--gain', v.gain), ...opt('--peak', v.peak), ...opt('--name', v.name)] }];
+      }
+      if (sfxFlag) throw new UsageError(`--${sfxFlag} needs --sfx`);
       const view = Boolean(v.at || v.waveform);
       if (!input) {
         if (view || v.cuts) throw new UsageError('give a page: usage: vawe sound <page> --at 0.8,2.75 | --waveform');
@@ -595,85 +502,47 @@ export const VERBS = [
       }
       return [{ script: 'harness/media/sound.mjs', args: [input, ...opt('--cuts', v.cuts), ...opt('--from', v.from), ...opt('--to', v.to), ...opt('--out', v.out), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
     },
-    next: (v, [input]) => (!input ? 'a voice goes in <audio data-synth="name" data-at="s">; vawe sound <track> gives the beat grid and hits of a music file the user gave'
+    next: (v, [input]) => (v.lab ? 'verdicts are kept in quality/baselines/sound-verdicts.json' : v.sfx ? 'set data-at on the <audio> line, then bin/vawe sound <page> --at <s> to check the cue sounds on its event' : !input ? 'a voice goes in <audio data-synth="name" data-at="s">; vawe sound <track> gives the beat grid and hits of a music file the user gave'
       : v.at || v.waveform ? (v.waveform ? 'Read the PNG: each orange tick must sit on the dashed world line of its visual event; move a cue with data-at or data-on' : 'a cue 0 s into itself starts at that second; move one that is off its event with data-at')
         : 'Read sound.md and sound.png; put each cut on a hit or a beat line at the frame the cut table names, then vawe sound <track> --cuts <page> again'),
   },
   {
-    name: 'sfx', summary: 'trim, pitch, fade and level one sound effect into the film\'s assets/sfx/ as mp3, and print the <audio> line to paste',
-    positional: [{ name: 'file', required: true, kind: 'file', help: 'the sound effect to start from (mp3, wav, m4a)' }],
-    flags: [
-      { name: 'film', type: 'string', help: 'the page or film name that gets the file in its assets/sfx/' },
-      { name: 'trim', type: 'string', help: 'a,b in seconds of the source, for example 0.1,0.6' },
-      { name: 'fade-in', type: 'number', help: 'seconds of fade in' },
-      { name: 'fade-out', type: 'number', help: 'seconds of fade out' },
-      { name: 'pitch', type: 'number', help: 'semitones, 12 is an octave up; the speed moves with the pitch' },
-      { name: 'gain', type: 'number', help: 'dB added to the level' },
-      { name: 'peak', type: 'number', help: 'set the loudest sample to this dBFS, for example -6 (not with --gain)' },
-      { name: 'name', type: 'string', help: 'the output name (default: the input name)' },
-    ],
-    example: 'vawe sfx ~/Downloads/click.wav --film films/my-launch/page.html --trim 0.05,0.4 --fade-out 0.08 --pitch 3 --peak -6 --name click-high',
-    build: (v, [file]) => {
-      if (!v.film) throw new UsageError('missing --film <page|name>; usage: vawe sfx <file> --film films/my-launch/page.html [--trim a,b] [--fade-in s] [--fade-out s] [--pitch st] [--gain dB | --peak dB]');
-      return [{ script: 'harness/media/sfx.mjs', args: [file, '--film', v.film, ...opt('--trim', v.trim), ...opt('--fade-in', v['fade-in']), ...opt('--fade-out', v['fade-out']), ...opt('--pitch', v.pitch), ...opt('--gain', v.gain), ...opt('--peak', v.peak), ...opt('--name', v.name)] }];
-    },
-    next: () => 'set data-at on the <audio> line, then bin/vawe sound <page> --at <s> to check the cue sounds on its event',
-  },
-  {
-    name: 'sounds', summary: 'alias of vawe sound with no argument: the synth voices for <audio data-synth>, one line each, with default gain and length',
-    positional: [], flags: [],
-    example: 'vawe sounds',
-    next: () => 'vawe sounds is now vawe sound with no argument; both print the same list',
-    build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['sounds'] }],
-  },
-  {
-    name: 'timeline', summary: 'the worlds, cut rhythm, spectacle and every audio cue as text, before any pixel; about 3 s',
-    positional: [PAGE],
-    flags: [{ name: 'json', type: 'bool', help: 'print the same data as JSON' }],
-    example: 'vawe timeline films/my-launch/page.html',
-    build: (v, [page]) => [{ script: 'harness/media/timeline.mjs', args: [page, ...(v.json ? ['--json'] : [])] }],
-    next: (v, [page]) => `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${page} --waveform to check each sound on its event`,
-  },
-  {
-    name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or (the default) one PNG of the mixed waveform with world lines and cue ticks',
-    name: 'storyboard', summary: 'one self-contained HTML storyboard to present a film: a pan-and-zoom canvas with a frame card per world (timecodes, action, move and ease curve, sound cues), the handoff arrows between cards and a rhythm strip, and a "from the docs" list of what the taste docs and the guides say about the plan; about 10 s',
-    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html, or a draft mp4 (frames are cut from it; the page is found by the film name)' }],
+    tier: 'core',
+    name: 'storyboard', summary: 'use when you plan or present a film: an HTML board with a card per world (moves, eases, handoffs, sound, rhythm); --text prints worlds, rhythm and cues in 3 s',
+    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html, or a draft mp4 (frames are cut from it; the page is found by the film name); --text reads a page only' }],
     flags: [
       { name: 'page', type: 'path', help: 'with an mp4: the film\'s page.html, when it is not under films/' },
       { name: 'out', type: 'path', default: 'out/<film>-storyboard.html', help: 'the HTML path; the images go in a folder of the same name without .html' },
+      { name: 'text', type: 'bool', help: 'no HTML and no render: the worlds, the cut rhythm, the spectacle and every audio cue as text' },
+      { name: 'json', type: 'bool', help: 'with --text: print the same data as JSON' },
     ],
-    example: 'vawe storyboard films/examples/colour-sting/page.html   |   vawe storyboard out/my-launch-draft.mp4',
-    build: (v, [input]) => [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out)] }],
-    next: () => 'fix the lines under "from the docs" or keep them on purpose; open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields',
-  },
-  {
-    name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',
-    positional: [PAGE],
-    flags: [
-      { name: 'at', type: 'string', help: 'comma-separated seconds, for example 0.8,2.75: the cues sounding there, how far into each and its level in dB' },
-      { name: 'waveform', type: 'bool', help: 'one PNG: mixed waveform, loudness curve, world starts as dashed lines, a tick per cue start; prints LUFS and true peak' },
-      { name: 'out', type: 'path', default: 'out/<film>-waveform.png', help: 'with --waveform: the PNG path' },
-    ],
-    example: 'vawe audio films/my-launch/page.html --at 0.8,2.75   |   vawe audio films/my-launch/page.html --waveform',
-    build: (v, [page]) => {
-      const waveform = v.waveform || !v.at;
-      return [{ script: 'harness/media/audio-view.mjs', args: [page, ...opt('--at', v.at), ...(waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
+    example: 'vawe storyboard films/examples/colour-sting/page.html   |   vawe storyboard out/my-launch-draft.mp4   |   vawe storyboard films/my-launch/page.html --text',
+    build: (v, [input]) => {
+      if (v.text) {
+        if (!input.endsWith('.html')) throw new UsageError('--text reads a page: usage: vawe storyboard <page> --text [--json]');
+        return [{ script: 'harness/media/timeline.mjs', args: [input, ...(v.json ? ['--json'] : [])] }];
+      }
+      if (v.json) throw new UsageError('--json needs --text');
+      return [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out)] }];
     },
-    next: (v) => `vawe audio is now vawe sound <page> ${v.waveform || !v.at ? '--waveform' : '--at <s,s>'}; the output is the same`,
+    next: (v, [input]) => (v.text ? `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${input} --waveform to check each sound on its event` : 'fix the lines under "from the docs" or keep them on purpose; open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields'),
   },
   {
+    tier: 'maintainer',
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
     positional: [], flags: [],
     example: 'vawe e2e',
     build: () => [{ script: 'harness/dev/e2e.mjs', args: [] }],
   },
   {
+    tier: 'maintainer',
     name: 'test', summary: 'run every tests/**/*.test.mjs with node --test; the timing test runs alone at the end',
     positional: [], flags: [],
     example: 'vawe test',
     build: () => testSteps(),
   },
   {
+    tier: 'maintainer',
     name: 'runs', summary: 'where a film\'s time went (per stage and verb, slot wait), what failed (by cause) and the draft series; or, with --all, one row per film of the last 30 days',
     positional: [{ name: 'film', help: 'film name or films/<name>/page.html' }],
     flags: [
@@ -689,6 +558,7 @@ export const VERBS = [
     },
   },
   {
+    tier: 'more',
     name: 'judge', summary: 'prepare key frames and the rubric for a fresh session to score',
     positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'a page or a rendered mp4' }],
     flags: [

@@ -1,5 +1,5 @@
 {
- "_source": "node harness/dev/bar-from-refs.mjs --range, 2026-10-07: eye and ground from 17 in-scope reference films (167 cuts, bin/vawe spec); overshoot share from 22 films (measures.json); one value per film, then p10, median and p90",
+ "_source": "node harness/dev/bar-from-refs.mjs --range, 2026-10-07: eye and ground from 17 in-scope reference films (167 cuts, bin/vawe see --spec); overshoot share from 22 films (measures.json); one value per film, then p10, median and p90",
  "films": 17,
  "cuts": 167,
  "metrics": {

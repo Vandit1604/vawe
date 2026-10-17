@@ -35,10 +35,10 @@ the spectacle second (also `<meta name="spectacle">`; recipe 15 in `prompts/move
 (overlap, camera, what carries the eye, which arrivals overshoot: `EASE.nudge` for ordinary ones, `EASE.pop` for the hero),
 and sound: small effects on actions, no bed (`taste/craft/sound.md`; `bin/vawe sound`). (6) Then the Shots rows, the
 motion and `bin/vawe dev`. The camera holds still by default and moves only with a reason (the spectacle, a reveal): a hold stays alive through an element motion (typing, a counter, a glint), not a camera drift. The motion is done when overshoot-share, live-hold, constant-camera and seam-variety are clean or waived with a
-reason, and you have Read `bin/vawe strip <page> --cuts` for every cut (and `bin/vawe onion` and `bin/vawe velocity` on the
+reason, and you have Read `bin/vawe strip <page> --cuts` for every cut (and `bin/vawe strip <page> --onion` and `--velocity` on the
 spectacle second), fixed what reads flat and written a row per cut in the brief's "Motion pass". `bin/vawe` names the next
 stage after each step; `bin/vawe ship` warns while the Board or the Motion pass is unfilled.
-A film that uses the lens (`core/surfaces/lens.js`, `prompts/moves/lens.md`) picks its look by sight: `bin/vawe looks <page> --at <s>` shows the page under every look, then set `look: '<name>'` in the lens options.
+A film that uses the lens (`core/surfaces/lens.js`, `prompts/moves/lens.md`) picks its look by sight: `bin/vawe frames <page> --looks --at <s>` shows the page under every look, then set `look: '<name>'` in the lens options.
 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->
@@ -53,7 +53,7 @@ A film that uses the lens (`core/surfaces/lens.js`, `prompts/moves/lens.md`) pic
 
 ## Sound is felt, not noticed
 
-A recorded effect first, a few soft synth ticks and at most one swell after it, never a bed (`taste/craft/sound.md`). `data-gain` is absolute dB and replaces the voice default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`; a `src` file defaults to 0 dB): write it only to move one cue on purpose. Cue the first and the last key word, not every word. Name each beat once in CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat. What you write is what you hear: no normalising, and `<meta name="loudness" content="-14">` opts in to a delivery target. The mix warns when one cue peaks more than 6 dB above the median, and `bin/vawe review <page> --final` warns outside -30 to -12 LUFS.
+A recorded effect first, a few soft synth ticks and at most one swell after it, never a bed (`taste/craft/sound.md`). `data-gain` is absolute dB and replaces the voice default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`; a `src` file defaults to 0 dB): write it only to move one cue on purpose. Cue the first and the last key word, not every word. Name each beat once in CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat. What you write is what you hear: no normalising, and `<meta name="loudness" content="-14">` opts in to a delivery target. The mix warns when one cue peaks more than 6 dB above the median, and `bin/vawe check review <page> --final` warns outside -30 to -12 LUFS.
 
 ## Moves to copy
 
@@ -95,9 +95,9 @@ asks for overshoot. Full reference: `core/motion/README.md`.
 1. Pick the film type in `guides/ROUTING.md`; `bin/vawe new <name> --from prompts/<t>.md`.
 2. Write the beat table (`prompts/beat-sheet.md`): time, message, the one thing that moves, the cue.
 3. Make the five stills that define the look. Fix cramped, overlapping or unreadable before motion.
-4. Check frames with `bin/vawe compare --page <page> --ref <ref.mp4> --at s,s,s` (about 4 s for 4 frames).
+4. Check frames with `bin/vawe sheet <page> --ref <ref.mp4> --at s,s,s` (about 4 s for 4 frames).
    Never render a whole range to look at a few frames. `bin/vawe dev <page> --from s --to s` is for motion.
-   A recreation is done when `bin/vawe coverage <film.mp4> --ref <ref.mp4>` exits 0.
+   A recreation is done when `bin/vawe check coverage <film.mp4> --ref <ref.mp4>` exits 0.
 5. Hand the draft to a fresh session: `vawe-critique`.
 
 ## Page-code mistakes a first draft makes

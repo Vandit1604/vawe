@@ -1,6 +1,6 @@
 ---
 name: vawe-reference
-description: "Recreate a reference video as an HTML page, a video-from-code workflow. Match a reference film with a vawe page: bin/vawe spec writes SPEC.md frame by frame, every line is marked KEEP or CHANGE, the page is rebuilt light first, then bin/vawe critique --ref loops until the match passes. Load when a reference mp4 must be matched, not merely echoed."
+description: "Recreate a reference video as an HTML page, a video-from-code workflow. Match a reference film with a vawe page: bin/vawe see --spec writes SPEC.md frame by frame, every line is marked KEEP or CHANGE, the page is rebuilt light first, then bin/vawe critique --ref loops until the match passes. Load when a reference mp4 must be matched, not merely echoed."
 effort: high
 ---
 
@@ -14,21 +14,21 @@ References are in-house and never published. Length is the reference's length, n
 
 ```bash
 bin/vawe new <name> --ref quality/refs/<ref>/source.mp4   # page starter plus SPEC.md
-bin/vawe spec quality/refs/<ref>/source.mp4               # SPEC.md alone, to re-measure
-bin/vawe compare --page films/<name>/page.html --ref quality/refs/<ref>/source.mp4 --at 2.5,3.1,4
+bin/vawe see quality/refs/<ref>/source.mp4 --spec               # SPEC.md alone, to re-measure
+bin/vawe sheet films/<name>/page.html --ref quality/refs/<ref>/source.mp4 --at 2.5,3.1,4
                                                           # reference | yours at the same exact seconds
-bin/vawe coverage out/<name>.mp4 --ref quality/refs/<ref>/source.mp4 --min 0.5
+bin/vawe check coverage out/<name>.mp4 --ref quality/refs/<ref>/source.mp4 --min 0.5
                                                           # SSIM per second, the 6 worst moments as a sheet
 ```
 
 `compare --page` is the check loop: it seeks the page and screenshots 3 or 4 frames in about 4 s. Never
 render a whole range to look at a few frames. `compare <draft.mp4> --from` still works for an existing render.
-`coverage` is the done check for a recreation: render once, run it, and fix the seconds it lists below `--min`.
+`check coverage` is the done check for a recreation: render once, run it, and fix the seconds it lists below `--min`.
 
 SPEC.md's "On-screen text" table lists every line on screen every 0.25 s for the whole film. Walk it row
 by row before you call a rebuild done: a word the table has and your page lacks is a missed section.
 
-`bin/vawe spec` writes `quality/refs/<ref>/SPEC.md` with the measured cut list and, at every cut and hold:
+`bin/vawe see <ref.mp4> --spec` writes `quality/refs/<ref>/SPEC.md` with the measured cut list and, at every cut and hold:
 
 - t in seconds and the frame's job in five words;
 - the light map: background colour, key direction, contrast band;

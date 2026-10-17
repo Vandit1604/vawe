@@ -1,4 +1,4 @@
-// Pure parts of `vawe look`, screen texture: the dominant repeating pattern of a dark block, from its 2D FFT, and whether its colour channels are in phase.
+// Pure parts of `vawe see`, screen texture: the dominant repeating pattern of a dark block, from its 2D FFT, and whether its colour channels are in phase.
 // No I/O.
 
 export const BLOCK = 256;

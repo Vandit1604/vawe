@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// `vawe sfx <file> --film <page|name> [--trim a,b] [--fade-in s] [--fade-out s] [--pitch semitones] [--gain dB | --peak dB] [--name x]`:
+// `vawe sound <file> --sfx --film <page|name> [--trim a,b] [--fade-in s] [--fade-out s] [--pitch semitones] [--gain dB | --peak dB] [--name x]`:
 // trim, pitch, fade and level one sound effect into the film's assets/sfx/ as mp3, then print the <audio> line to paste.
 // Pitch moves the speed with it (a rise is shorter), as a sampler does. --peak sets the loudest sample to that dBFS.
 import fs from 'node:fs';
@@ -29,7 +29,7 @@ function main(argv) {
   const valued = ['--film', '--trim', '--fade-in', '--fade-out', '--pitch', '--gain', '--peak', '--name'];
   const flag = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
   const input = argv.find((a, i) => !a.startsWith('--') && !valued.includes(argv[i - 1]));
-  const usage = 'usage: bin/vawe sfx <file> --film <page|name> [--trim a,b] [--fade-in s] [--fade-out s] [--pitch semitones] [--gain dB | --peak dB] [--name x]';
+  const usage = 'usage: bin/vawe sound <file> --sfx --film <page|name> [--trim a,b] [--fade-in s] [--fade-out s] [--pitch semitones] [--gain dB | --peak dB] [--name x]';
   if (!input || !flag('--film')) die(`missing <file> or --film; ${usage}`);
   if (!fs.existsSync(input)) die(`no such file: ${input}`);
   if (flag('--gain') !== undefined && flag('--peak') !== undefined) die('give --gain or --peak, not both');

@@ -30,7 +30,7 @@ function cameraLine(shots) {
 /** The card as lines (about 14 for a 17-shot film). `spec` is the parsed spec.json; `id` names the film; `specFolder` holds its SPEC.md. */
 export function refCard(spec, id, specFolder) {
   const shots = spec.shots ?? [];
-  if (!shots.length) return [`${id}: spec.json has no shots; run bin/vawe spec first`];
+  if (!shots.length) return [`${id}: spec.json has no shots; run bin/vawe see <mp4> --spec first`];
   const lengths = shots.map((s) => s.t1 - s.t0);
   const shown = lengths.slice(0, MAX_LENGTHS).map(secs).join(' ');
   const flashes = flashShots(shots);

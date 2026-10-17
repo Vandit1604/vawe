@@ -18,10 +18,10 @@ Test a change by one question: what would an agent write unprompted, and does th
 
 - Change the environment, never forbid the habit: if an agent's natural command fails, make it work
   (tools via `bin/vawe doctor`, how agents are launched), do not add a rule or hook against it.
-- Give the tool the agent reaches for: agents built their own frame compare until `vawe compare` existed.
+- Give the tool the agent reaches for: agents built their own frame compare until `vawe sheet --ref` existed.
 - Measure with traces (`node harness/dev/trace-review.mjs --project <dir> --films --compare <sha|date>` prints the film agents before and after the change), not impressions: minutes, failed calls,
   input tokens. Keep tasks small; one six-step agent used 106 M input tokens, a one-step agent 3 M.
-- Numbers come from code (`vawe spec`), taste from the eye (`vawe compare`, a fresh judge).
+- Numbers come from code (`vawe see --spec`), taste from the eye (`vawe sheet --ref`, a fresh judge).
 
 ## Who owns what
 
@@ -30,11 +30,11 @@ Test a change by one question: what would an agent write unprompted, and does th
 | Time | `harness/media/render-page.mjs`, `core/engine/page-clock.js`, `core/engine/page-seek.js` | render-page walks the frames and sets the seek; page-clock replaces `Date`, `performance.now`, `requestAnimationFrame`, timers and `Math.random` before any page script runs; page-seek pauses every animation, sets `currentTime`, calls `window.seek(t)` and sets aspect, `--vw`, `--vh` |
 | Page API | `core/engine/page-api.js` | `window.vawe`, the three.js helpers a page imports |
 | Audio | `harness/media/page-audio.mjs`, `core/audio/kit.mjs` | reads `<audio>` tags, mixes offline as written (`<meta name="loudness">` opts in to a target), synth voices by `data-synth`; nothing plays live |
-| Reference measure | `harness/media/ref-spec.mjs` (pixels), `harness/media/render-spec.mjs` (DOM), `harness/lib/spec-deltas.mjs` (the diff) | SPEC.md, spec.json, deltas.md; `bin/vawe spec` and `critique --ref` call them |
+| Reference measure | `harness/media/ref-spec.mjs` (pixels), `harness/media/render-spec.mjs` (DOM), `harness/lib/spec-deltas.mjs` (the diff) | SPEC.md, spec.json, deltas.md; `bin/vawe see --spec` and `critique --ref` call them |
 | Views | `harness/media/see.mjs` and `harness/media/see/*.mjs`, `harness/media/see-views.mjs` | grids, probe, look, layout, word events, phone sheet, strip, loop seam |
 | Checks | `quality/gates/page-check.mjs`, `anim-traps.mjs`, `judge.mjs` | advise; only determinism and a missing waiver reason refuse |
 | Studio | `studio/page-server.mjs`, `studio/page-source.mjs`, `studio/ui/` | live preview; edits the literals in the page source in place; its buttons run `bin/vawe` |
-| CLI | `bin/vawe`, `harness/cli/` | one verb table (`verbs.mjs`), one parser (`parse.mjs`); a script gets a verb only when a film needs it |
+| CLI | `bin/vawe`, `harness/cli/` | one verb table (`verbs.mjs`), one parser (`parse.mjs`); a new verb needs the same hand-roll in 5 or more agents in trace-review (`node harness/dev/trace-review.mjs`). Otherwise add a flag to the owner verb or make its output better; `vawe --help` shows the core verbs, tiers are set on each entry |
 
 If a change needs a second owner for one concern (a second clock, a second mixer, a second measure),
 stop: extend the owner above. Two ways to say one thing is a fork, and the fork is the bug.
@@ -181,7 +181,7 @@ cut a polish pass from 14.6 to 2.3 minutes and from 24.6 M to 3.1 M input tokens
 Keep rules 1, 3 and 5 above. You own ONLY films/<name>/<your chapter or beat file>; never git add
 a private film (films/recreations/). Read GUIDE.md first; the font, palette and shared assets are
 fixed there before you start.
-LOOP: `bin/vawe compare --page films/<name>/page.html --ref <ref.mp4> --at <3-5 s> --out
+LOOP: `bin/vawe sheet films/<name>/page.html --ref <ref.mp4> --at <3-5 s> --out
 /tmp/claude-501/<topic>/c.png`, Read that ONE sheet, list every difference, fix them all in the
 fewest edits, repeat. Never render a range to look at frames. At most 6 loops.
 DONE: every row of the guide's text list for your seconds is on screen at its time.

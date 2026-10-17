@@ -37,7 +37,7 @@ Until 7 October our scoring agent compared a new film with our own earlier films
 
 `vawe refs` indexes the reference films and picks them by film type and length. The films live in a folder outside the repo and stay private. We publish the measurement and keep the films.
 
-`vawe spec` measures any film deterministically: its cuts and flashes, and two more groups.
+`vawe see --spec` measures any film deterministically: its cuts and flashes, and two more groups.
 
 - The eye group: where the focus sits in each shot, how far it jumps at a cut and how far it travels. It also counts how often the focus sits near the centre.
 - The ground group: the edge tone, whether the ground changes at a cut, and how much the light drifts. A cut compares the border cells of the two scenes.
@@ -76,7 +76,7 @@ You also cannot reproduce the ranges from the films, because the films stay on o
 The method runs on any folder of films you choose:
 
 1. Index the films with `vawe refs`.
-2. Measure each one with `bin/vawe spec <film.mp4>` (the code is `harness/media/ref-spec.mjs`).
+2. Measure each one with `bin/vawe see <film.mp4> --spec` (the code is `harness/media/ref-spec.mjs`).
 3. Summarise with `harness/dev/bar-from-refs.mjs`, which writes the p10, median and p90 for each metric.
 
 We ran step 2 on a short clip with `--fast --no-ocr`, and it finished in 2.4 s and wrote `SPEC.md`. The clip has one shot, so it has no cuts to measure. The four rules live in `taste/rules/overshoot.md`, `speed-bands.md`, `text-breathing.md` and `readable-hold.md`. The agent workflow that uses these numbers is on [/ai-agents](/ai-agents).

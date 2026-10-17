@@ -1,4 +1,4 @@
-// `vawe onion`: several frames of one move blended into ONE image, the newest strongest, so the spacing, path and overshoot of the move show.
+// `vawe strip --onion`: several frames of one move blended into ONE image, the newest strongest, so the spacing, path and overshoot of the move show.
 // The input resolves as `vawe strip` resolves it (a page's last draft, an mp4, a reference id).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,7 +29,7 @@ export function makeOnion(found, opts) {
   return { out, times };
 }
 
-/** Runs `vawe onion`: writes one PNG of `opts.n` frames across `opts.span` seconds around `opts.at`, prints its absolute path. */
+/** Runs `vawe strip --onion`: writes one PNG of `opts.n` frames across `opts.span` seconds around `opts.at`, prints its absolute path. */
 function runOnion(found, opts) {
   if (found.draftMissing) die(`no draft of ${found.page} yet: run bin/vawe dev ${found.page} first (it writes ${found.video}), then repeat`);
   if (found.draftOld) console.log(`note: ${found.video} is older than ${found.page}; run bin/vawe dev ${found.page} for the current page`);

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // The measured quality bar of the reference films: p10, median and p90 of the metrics the bar-check rules use.
 //   node harness/dev/bar-from-refs.mjs <measures.json> [--json]
-// Reads the file `bin/vawe spec` measurements are collected in (one entry per film with a `spec` block). Our own
+// Reads the file `bin/vawe see --spec` measurements are collected in (one entry per film with a `spec` block). Our own
 // films (group "ours") and films marked `out_of_scope` are left out. The numbers go into the rules' `numbers` by hand;
 // no check reads the measures file.
 import fs from 'node:fs';
@@ -88,7 +88,7 @@ export const RANGE_KEYS = ['eye_jump_median_fh', 'eye_carried_pct', 'eye_moved_p
 export function rangeOf(shapeBar, filmBar, date) {
   const metrics = Object.fromEntries([...RANGE_KEYS.map((k) => [k, shapeBar[k]]), ['overshoot_pct', filmBar.overshoot_pct]]);
   return {
-    _source: `node harness/dev/bar-from-refs.mjs --range, ${date}: eye and ground from ${shapeBar.films} in-scope reference films (${shapeBar.cuts} cuts, bin/vawe spec); overshoot share from ${filmBar.overshoot_pct.n} films (measures.json); one value per film, then p10, median and p90`,
+    _source: `node harness/dev/bar-from-refs.mjs --range, ${date}: eye and ground from ${shapeBar.films} in-scope reference films (${shapeBar.cuts} cuts, bin/vawe see --spec); overshoot share from ${filmBar.overshoot_pct.n} films (measures.json); one value per film, then p10, median and p90`,
     films: shapeBar.films, cuts: shapeBar.cuts, metrics,
   };
 }

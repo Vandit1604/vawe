@@ -1,4 +1,4 @@
-// `vawe velocity`: the speed and scale of page elements over a window, read from the page itself (its own seek, no video), as one graph and a summary per element.
+// `vawe strip --velocity`: the speed and scale of page elements over a window, read from the page itself (its own seek, no video), as one graph and a summary per element.
 // The boxes come from harness/lib/box-track.mjs sampleBoxTracks, the one box sampler of the page checks.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,7 +34,7 @@ export async function readVelocity(page, opts, from, to) {
   return { times, height: sampled.height, rows };
 }
 
-/** Runs `vawe velocity`: samples the page at 120 a second across `opts.span` seconds around `opts.at`, writes the graph, prints its path and the summary. */
+/** Runs `vawe strip --velocity`: samples the page at 120 a second across `opts.span` seconds around `opts.at`, writes the graph, prints its path and the summary. */
 export async function runVelocity(pagePath, opts) {
   if (!fs.existsSync(pagePath)) die(`no such page: ${pagePath}`);
   const dur = Number(readPageMeta(pagePath, 'duration')) || Infinity;

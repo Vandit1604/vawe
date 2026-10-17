@@ -259,5 +259,5 @@ version as `dead-stop` ([live-hold](../rules/live-hold.md)).
 ## What code guarantees, and what is taste
 
 Code guarantees determinism (seek purity), text contrast, clipped glyphs, readable holds and dead
-stops, through `bin/vawe check page-check` and `bin/vawe review`. Everything else in this file is taste,
+stops, through `bin/vawe check page-check` and `bin/vawe check review`. Everything else in this file is taste,
 which is why it is written down.

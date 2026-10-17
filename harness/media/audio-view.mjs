@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// `vawe audio <page.html> --at <s,s,...>` and `--waveform`: what sounds at a second, and the mix as one picture.
+// `vawe sound <page.html> --at <s,s,...>` and `--waveform`: what sounds at a second, and the mix as one picture.
 //   node harness/media/audio-view.mjs <page.html> --at 0.8,2.75     the tracks sounding at each second, how far into the cue, level in dB
 //   node harness/media/audio-view.mjs <page.html> --waveform [--out file.png]   mixed waveform, loudness curve, world lines, a tick per cue
 // The mix is rendered once into out/<film>-audio/ and reused while the page, its sound files and the synth kit are unchanged.

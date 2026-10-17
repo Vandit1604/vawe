@@ -88,7 +88,7 @@ A fresh critic matters because the thread that wrote the page has anchored on it
 | beat | the phone sheet and strip of `bin/vawe critique` | `{beat, reads, flaw, fix}` |
 | bg-motion | a strip of 4 or more frames, reference and render at matched times (a still says nothing about speed) | `{axis, ours, reference, delta, fix}` |
 | reveal | a dense strip of the entrance and exit windows | `{beat, enter, exit, paired, flaw, fix}` |
-| fidelity (recreations) | `bin/vawe compare` frames | `{beat, score 0-10, gaps}` (gaps, not agreement) |
+| fidelity (recreations) | `bin/vawe sheet --ref` frames | `{beat, score 0-10, gaps}` (gaps, not agreement) |
 | seam | the seam frames and the loop seam | `{seam, flash, evidence, fix}` |
 
 Launch the panel in one message so the critics run at once. Critics report, the main thread fixes. A critic is evidence, not a ruling: if you look and the flaw is not there, it is wrong. A panel suits a full authoring pass, a recreation and any render you ship; a colour swap is not worth it. The fan-out cost and the brief lines for any subagent: `guides/SUBAGENTS.md`. Judge dimensions: `guides/judge.md`.

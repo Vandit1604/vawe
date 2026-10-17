@@ -255,10 +255,10 @@ test('the brief carries the strip study, the Board (rhythm, spectacle, cuts, sou
   assert.match(text, /strip films\/zz\/page\.html --cuts/);
 });
 
-test('the Look section names bin/vawe looks and every look of the lens, read from the module', () => {
+test('the Look section names bin/vawe frames and --looks every look of the lens, read from the module', () => {
   const { text } = briefFor('beat-sheet.md', { request: 'a five second sting', length: 5 });
   const line = text.split('## Look')[1].split('## ')[0].split('\n').find((l) => l.startsWith('- look:'));
-  assert.match(line, /bin\/vawe looks <page> --at <s>/);
+  assert.match(line, /bin\/vawe frames <page> --looks --at <s>/);
   for (const name of Object.keys(LOOKS)) assert.ok(line.includes(name), name);
   assert.doesNotMatch(line, /\(guess: change me\)/);
 });

@@ -181,10 +181,10 @@ const readSpec = (dir, id) => {
   return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
 };
 
-/** The measured shots of film `id` as [{ start, end }] from spec/<id>/spec.json; empty before `vawe spec` ran. */
+/** The measured shots of film `id` as [{ start, end }] from spec/<id>/spec.json; empty before `vawe see --spec` ran. */
 export const refShots = (dir, id) => (readSpec(dir, id).shots ?? []).map((s) => ({ start: s.t0, end: s.t1 }));
 
-/** The ground block (per shot and per cut) of film `id` from spec/<id>/spec.json, or null before `vawe spec` ran. */
+/** The ground block (per shot and per cut) of film `id` from spec/<id>/spec.json, or null before `vawe see --spec` ran. */
 export const refGround = (dir, id) => readSpec(dir, id).ground ?? null;
 
 /** The manifest of film `id` under `dir`, or null when `vawe refs frames` has not written it. */

@@ -80,7 +80,7 @@ async function execute(verb, rest, call) {
     const code = stepCode(await runStep(step, call), call);
     if (code !== 0) return code;
   }
-  if (typeof verb.summary === 'function') console.log(verb.summary(values, positional, startedMs).join('\n'));
+  if (typeof verb.report === 'function') console.log(verb.report(values, positional, startedMs).join('\n'));
   const next = verb.next && !verb.nextInline ? verb.next(values, positional) : null;
   if (next) console.log(`\nnext: ${next}`);
   return 0;
@@ -123,7 +123,7 @@ async function main(argv) {
   const [name, ...rest] = argv;
   const hooksLine = ensureHooks(gitAt(ROOT));
   if (hooksLine) console.error(hooksLine);
-  if (!name || name === '--help' || name === '-h' || name === 'help') return console.log(topHelp(VERBS));
+  if (!name || name === '--help' || name === '-h' || name === 'help') return console.log(topHelp(VERBS, { all: rest.includes('--all') }));
   const verb = VERBS.find((v) => v.name === name);
   if (!verb) {
     const guess = closest(name, VERBS.map((v) => v.name));

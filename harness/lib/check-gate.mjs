@@ -16,6 +16,9 @@ const NOT_GATES = new Set(['compare', 'judge', 'rubric']);
 const ALIASES = {
   'no-emdash': 'harness/dev/no-emdash.mjs',
   'provenance': `${GATE_DIR}/threshold-provenance.mjs`,
+  'review': 'harness/media/review.mjs',
+  'coverage': 'harness/media/coverage.mjs',
+  'links': 'harness/media/links.mjs',
 };
 
 const discovered = fs.readdirSync(path.join(ROOT, GATE_DIR))

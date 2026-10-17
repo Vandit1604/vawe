@@ -4,25 +4,40 @@ description: Every bin/vawe verb and its flags.
 icon: Terminal
 ---
 
-One command runs everything: `bin/vawe`. `bin/vawe --help` lists the verbs. `bin/vawe <verb> --help` lists the flags. A wrong flag exits 2 and prints the valid ones.
+One command runs everything: `bin/vawe`. `bin/vawe --help` lists the core verbs and `bin/vawe --help --all` lists every verb. `bin/vawe <verb> --help` lists the flags. A wrong flag exits 2 and prints the valid ones.
+
+The core verbs, the loop:
 
 | Verb | What it does |
 |---|---|
 | `new` | start a film: `films/<name>/page.html` and `brief.md` |
+| `refs` | list the reference films, print the settled frame of every shot, add a film |
+| `see` | read a film, page or reference completely: shots, motion, light, type, sound. `--vs <ref>` adds deltas and advice. `--spec` measures a reference into `SPEC.md` and `spec.json` |
+| `frames` | one still per world and a contact sheet. `--looks` shows every lens look |
+| `storyboard` | one HTML board with a card per world. `--text` prints worlds, rhythm and cues as text |
 | `dev` | draft render: half size, 30 fps, silent, plus a key-frame sheet PNG |
-| `ship` | final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge. Runs in the background |
+| `strip` | the frames through one moment or every cut, with motion numbers. `--onion` and `--velocity` show one move |
+| `sheet` | a labelled contact sheet of seconds. `--ref <mp4>` puts the reference beside your frames |
+| `still` | one exact full-size frame as a PNG |
+| `wait` | wait for a running render and print its result |
+| `sound` | synth voices, the beat grid and hits of a track, the cues of a page. `--sfx` imports an effect, `--lab` listens |
 | `critique` | phone sheet, strip, loop seam, measured deltas and `page-check` |
-| `compare` | reference and your film at the same exact seconds, side by side, one PNG |
-| `coverage` | SSIM of your render against the reference at every step |
-| `review` | one report, one sheet: clipped glyphs, text timing, motion, coverage |
-| `spec` | measure a reference mp4 into `SPEC.md` and `spec.json` |
-| `studio` | live scrubbable preview. It edits the page literals in place |
-| `check` | run one gate by name. Bare `check` lists the gates |
-| `doctor` | check Node, ffmpeg, Chrome and the other tools, and print the install line for each missing one |
-| `moves` | render the stale clips in `prompts/moves/` |
-| `e2e` | page tests plus a parallel half-size draft of every film |
-| `test` | run every `tests/**/*.test.mjs` with `node --test` |
+| `approve` | the owner signs off the draft. `ship` needs it |
+| `ship` | final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge. Runs in the background |
+| `check` | run one gate or report by name (`review`, `coverage` and `links` among them). Bare `check` lists them |
+
+More verbs, shown by `--help --all`:
+
+| Verb | What it does |
+|---|---|
+| `zoom` | one region of a frame enlarged with no smoothing, beside a second film |
+| `shot` | screenshots of a site route, a url or an html page at several widths |
 | `judge` | prepare key frames and the rubric for a fresh session to score |
+| `fonts` | the free font faces |
+| `palette` | one OKLCH brand seed |
+| `studio` | live scrubbable preview. It edits the page literals in place |
+
+Maintainer verbs: `e2e`, `test`, `land`, `claim`, `doctor`, `runs`, `moves`.
 
 ## The flags you use most
 
@@ -31,7 +46,7 @@ bin/vawe new my-film --from prompts/story-explainer.md --length 30 --aspect 16:9
 bin/vawe dev films/my-film/page.html --from 2 --to 6 --aspect 9:16 --audio
 bin/vawe ship films/my-film/page.html --aspect all
 bin/vawe ship --status --wait
-bin/vawe compare --page films/my-film/page.html --at 2.5,3.1,4
+bin/vawe sheet films/my-film/page.html --at 2.5,3.1,4
 bin/vawe studio films/my-film/page.html --port 8800
 ```
 

@@ -18,4 +18,4 @@ craft: motion-craft
 
 ## Example
 
-A film that wants bloom and chromatic fringe sets them on the lens surface and measures them with `vawe look`, not with a text-shadow and an offset copy.
+A film that wants bloom and chromatic fringe sets them on the lens surface and measures them with `vawe see`, not with a text-shadow and an offset copy.
