@@ -16,6 +16,9 @@ import { readRuns, agentId, namedAgent } from './runlog.mjs';
 
 const AUTHORING = new Set(['dev', 'ship']);
 
+/** True when both run records name a session and it is the same one. A VAWE_AGENT label cannot tell two agents of one session apart: any process can set it. */
+export const sameSession = (a, b) => Boolean(a.session && b.session && a.session === b.session);
+
 /** True when two run records ({ session, agent }) come from the same session and the same named agent (an unnamed side matches any). */
 export function sameIdentity(a, b) {
   const sameSession = !!(a.session && b.session && a.session === b.session);

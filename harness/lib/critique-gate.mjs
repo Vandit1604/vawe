@@ -1,9 +1,9 @@
-// The ship gate on a critique: a final render needs a `vawe critique` of the page as it is now, run by a session or VAWE_AGENT other
+// The ship gate on a critique: a final render needs a `vawe critique` of the page as it is now, run by a session other
 // than the one that rendered the draft. The critique verb logs the page digest (verbEvent pageHash); this reads it back.
 // Why a gate: traces of 44 film agents showed 21 of 23 shipped past the warnings and 2 of 23 ran a critique first.
 import { readRuns } from './runlog.mjs';
 import { pageDigest } from './approval.mjs';
-import { sameIdentity, lastAuthorRun } from './judge-self-record.mjs';
+import { sameSession, lastAuthorRun } from './judge-self-record.mjs';
 
 const ranCritique = (r, digest) => r.cmd === 'verb' && r.verb === 'critique' && r.exitCode === 0 && r.pageHash === digest;
 
@@ -15,8 +15,8 @@ export function critiqueProblem(pagePath, { root = '.', env = process.env, runs 
   if (env.VAWE_UNATTENDED === '1') return null;
   const critiques = runs.filter((r) => ranCritique(r, digest));
   const run = critiqueCommand(pagePath);
-  if (!critiques.length) return `no critique of the current page (it never ran, or the page changed after it): in a session that did not write the page, run ${run}`;
+  if (!critiques.length) return `no critique of the current page (it never ran, or the page changed after it): in a separate session (a new agent or terminal), run ${run}`;
   const author = lastAuthorRun(runs);
-  if (author && critiques.every((c) => sameIdentity(c, author))) return `the critique of the current page ran in the session that rendered the draft: in another session, run ${run}`;
+  if (author && critiques.every((c) => sameSession(c, author))) return `the critique of the current page ran in the session that rendered the draft (a VAWE_AGENT label does not make a new session): in a separate session (a new agent or terminal), run ${run}`;
   return null;
 }

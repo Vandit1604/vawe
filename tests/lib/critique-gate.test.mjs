@@ -42,13 +42,14 @@ test('no critique, or one of an older page, refuses and names the command', () =
   assert.match(gate(f, [dev, critique({ pageHash: f.digest, exitCode: 1 })]), /no critique of the current page/);
 });
 
-test('a critique from the session and agent that rendered the draft refuses', () => {
+test('a critique from the session that rendered the draft refuses, whatever its VAWE_AGENT label', () => {
   const f = film();
   const same = critique({ pageHash: f.digest, session: 's1', agent: 'author' });
   const problem = gate(f, [dev, same]);
   assert.match(problem, /ran in the session that rendered the draft/);
   assert.ok(problem.endsWith(`bin/vawe critique ${f.page}`));
-  assert.equal(gate(f, [dev, critique({ pageHash: f.digest, session: 's1', agent: 'critic' })]), null);
+  assert.match(gate(f, [dev, critique({ pageHash: f.digest, session: 's1', agent: 'critic' })]), /separate session \(a new agent or terminal\)/);
+  assert.equal(gate(f, [dev, critique({ pageHash: f.digest, session: null, agent: 'critic#ab' })]), null);
 });
 
 test('an unattended run passes with no critique', () => {
