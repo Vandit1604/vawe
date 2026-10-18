@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { addPlan, ytDlpArgs, downscaleFilter, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest, refsEmpty, noRefsLines } from '../../harness/lib/refs.mjs';
+import { addPlan, positionals, ytDlpArgs, downscaleFilter, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest, refsEmpty, noRefsLines } from '../../harness/lib/refs.mjs';
 
 test('the frame manifest numbers each frame and holds its absolute path; frameLines prints it', () => {
   const m = frameManifest('a', [{ t: 0.14, file: '/r/frames/a/key-1-0.1s.png' }, { t: 3.62, file: '/r/frames/a/key-2-3.6s.png' }]);
@@ -182,4 +182,10 @@ test('the empty refs folder names what to study instead, and every path it names
 test("addPlan skips the measure step only for --no-measure", () => {
   assert.deepEqual(addPlan({ noMeasure: false }), ["fetch", "measure", "record"]);
   assert.deepEqual(addPlan({ noMeasure: true }), ["fetch", "record"]);
+});
+
+test("positionals keeps the source after a bool flag and drops the value of a valued flag", () => {
+  assert.deepEqual(positionals(["add", "--no-measure", "https://x/a.mp4"]), ["add", "https://x/a.mp4"]);
+  assert.deepEqual(positionals(["add", "https://x/a.mp4", "--no-measure"]), ["add", "https://x/a.mp4"]);
+  assert.deepEqual(positionals(["add", "--type", "brand", "a.mp4", "--title", "T"]), ["add", "a.mp4"]);
 });

@@ -12,6 +12,9 @@ export const SHEETS = 'judge-sheets';
 export const TYPES = ['product', 'brand'];
 export const REFS_PER_FILM = 2;
 
+/** The words of argv that are neither a flag nor the value of --type or --title. Pure. */
+export const positionals = (argv) => argv.filter((a, i) => !a.startsWith('--') && !['--type', '--title'].includes(argv[i - 1]));
+
 /** The steps of `refs add`: fetch, then measure unless the flag asks for fetch only. Pure. */
 export function addPlan({ noMeasure }) {
   return noMeasure ? ['fetch', 'record'] : ['fetch', 'measure', 'record'];

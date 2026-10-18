@@ -5,13 +5,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { refCard } from '../lib/ref-card.mjs';
-import { addPlan, refsDir, ytDlpArgs, downscaleFilter, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, refsEmpty, noRefsLines, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { addPlan, positionals, refsDir, ytDlpArgs, downscaleFilter, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, refsEmpty, noRefsLines, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
 import { probeSize } from '../lib/frame-forensics.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const dir = refsDir();
-const [action, source] = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !all[i - 1]?.startsWith('--'));
+const [action, source] = positionals(process.argv.slice(2));
 const flag = (k) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : null; };
 const die = (m) => { console.error(`vawe refs: ${m}`); process.exit(1); };
 
