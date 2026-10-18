@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { stillPath, stillProblem } from '../../harness/media/see/still-math.mjs';
+import { stillArgs, stillPath, stillProblem } from '../../harness/media/see/still-math.mjs';
 
 const still = path.join(import.meta.dirname, '../../harness/media/still.mjs');
 const run = (...args) => spawnSync(process.execPath, [still, ...args], { encoding: 'utf8' });
@@ -53,4 +53,16 @@ test('still of a page writes one PNG at the final render size', () => {
   assert.equal(head.readUInt32BE(16), 1920);
   assert.equal(head.readUInt32BE(20), 1080);
   fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("stillArgs puts -ss before -i for a URL and after it for a local file", () => {
+  const url = stillArgs("https://x.test/a.mp4", 1.5, "o.png");
+  assert.ok(url.indexOf("-ss") < url.indexOf("-i"));
+  const local = stillArgs("a.mp4", 1.5, "o.png");
+  assert.ok(local.indexOf("-i") < local.indexOf("-ss"));
+  assert.equal(local.at(-1), "o.png");
+});
+
+test("stillPath names a URL by its file, without the query", () => {
+  assert.match(stillPath("https://x.test/d/clip.mp4?sig=1", "2"), /out\/still\/clip-2s\.png$/);
 });

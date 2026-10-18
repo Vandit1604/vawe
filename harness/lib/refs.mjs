@@ -12,6 +12,11 @@ export const SHEETS = 'judge-sheets';
 export const TYPES = ['product', 'brand'];
 export const REFS_PER_FILM = 2;
 
+/** The steps of `refs add`: fetch, then measure unless the flag asks for fetch only. Pure. */
+export function addPlan({ noMeasure }) {
+  return noMeasure ? ['fetch', 'record'] : ['fetch', 'measure', 'record'];
+}
+
 // Films in the verified list that no page film can match: live action, 3D CG, or a reel of many works.
 const OUT_OF_SCOPE = {
   vO9YGI5Gf4s: 'live action',

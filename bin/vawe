@@ -5,6 +5,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { execFileSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { isUrl } from '../harness/lib/url.mjs';
 import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cli/parse.mjs';
 import { VERBS, stripChromeNoise, commitsBehind, staleNote } from '../harness/cli/verbs.mjs';
 import { newFilm, newFilmLines, readDetails, questionsJson } from '../harness/cli/new.mjs';
@@ -23,7 +24,7 @@ const MAX_SCAN = 4_000_000;
 
 function requireFiles(verb, values, positional) {
   (verb.positional || []).forEach((p, i) => {
-    if (p.kind === 'file' && positional[i] && !fs.existsSync(positional[i])) throw new UsageError(`no such ${p.name}: ${positional[i]}`);
+    if (p.kind === 'file' && !(p.remote && isUrl(positional[i])) && positional[i] && !fs.existsSync(positional[i])) throw new UsageError(`no such ${p.name}: ${positional[i]}`);
   });
   for (const f of verb.flags || []) {
     if (f.kind === 'file' && values[f.name] && !fs.existsSync(values[f.name])) throw new UsageError(`no such file for --${f.name}: ${values[f.name]}`);

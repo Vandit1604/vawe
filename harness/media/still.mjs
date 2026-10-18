@@ -7,7 +7,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { openPage, seekAll, resolveFrame, settle, readPageMeta } from './render-page.mjs';
 import { clampToLastFrame, probe } from './see-views.mjs';
-import { stillPath, stillProblem } from './see/still-math.mjs';
+import { isUrl } from '../lib/url.mjs';
+import { stillArgs, stillPath, stillProblem } from './see/still-math.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 
@@ -37,7 +38,7 @@ export function videoStill(mp4, at, out) {
   const n = Math.round(last.t * fps);
   // The first frame with a time at or after -ss: a quarter frame early lands on frame n and not on n + 1.
   const seek = Math.max(0, (n - 0.25) / fps);
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', mp4, '-ss', seek.toFixed(4), '-frames:v', '1', out], { encoding: 'utf8' });
+  const r = spawnSync('ffmpeg', stillArgs(mp4, seek, out), { encoding: 'utf8' });
   if (r.status !== 0 || !fs.existsSync(out)) die(`ffmpeg could not write frame ${n} of ${mp4}: ${String(r.stderr).trim().split('\n').slice(-2).join(' ')}`);
   return { ...last, t: +(n / fps).toFixed(3), size: `${width}x${height}` };
 }
@@ -49,7 +50,7 @@ async function main(argv) {
   const at = flag('--at');
   const problem = stillProblem({ source, at });
   if (problem) die(problem);
-  if (!fs.existsSync(source)) die(`no such file: ${source}`);
+  if (!isUrl(source) && !fs.existsSync(source)) die(`no such file: ${source}`);
   const out = path.resolve(flag('--out') || stillPath(source, at));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   let got;

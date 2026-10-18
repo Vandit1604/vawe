@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ytDlpArgs, downscaleFilter, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest, refsEmpty, noRefsLines } from '../../harness/lib/refs.mjs';
+import { addPlan, ytDlpArgs, downscaleFilter, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest, refsEmpty, noRefsLines } from '../../harness/lib/refs.mjs';
 
 test('the frame manifest numbers each frame and holds its absolute path; frameLines prints it', () => {
   const m = frameManifest('a', [{ t: 0.14, file: '/r/frames/a/key-1-0.1s.png' }, { t: 3.62, file: '/r/frames/a/key-2-3.6s.png' }]);
@@ -177,4 +177,9 @@ test('the empty refs folder names what to study instead, and every path it names
     assert.ok(fs.existsSync(path.resolve(import.meta.dirname, '../..', p)), p);
   }
   assert.match(text, /bin\/vawe refs add <url>/);
+});
+
+test("addPlan skips the measure step only for --no-measure", () => {
+  assert.deepEqual(addPlan({ noMeasure: false }), ["fetch", "measure", "record"]);
+  assert.deepEqual(addPlan({ noMeasure: true }), ["fetch", "record"]);
 });

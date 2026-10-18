@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { refCard } from '../lib/ref-card.mjs';
-import { refsDir, ytDlpArgs, downscaleFilter, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, refsEmpty, noRefsLines, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { addPlan, refsDir, ytDlpArgs, downscaleFilter, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, refsEmpty, noRefsLines, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
 import { probeSize } from '../lib/frame-forensics.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
@@ -77,17 +77,22 @@ function fromFile(file) {
 }
 
 function add() {
-  const type = flag('--type');
-  if (!TYPES.includes(type)) die(`--type is ${TYPES.join(' or ')}`);
-  if (!source) die('usage: vawe refs add <mp4-or-url> --type product|brand [--title t]');
+  const noMeasure = process.argv.includes('--no-measure');
+  const plan = addPlan({ noMeasure });
+  const type = flag('--type') ?? (noMeasure ? null : undefined);
+  if (type !== null && !TYPES.includes(type)) die(`--type is ${TYPES.join(' or ')}; only --no-measure may leave it out`);
+  if (!source) die('usage: vawe refs add <mp4-or-url> --type product|brand [--title t] [--no-measure]');
   fs.mkdirSync(dir, { recursive: true });
   const got = /^https?:\/\//.test(source) ? download(source) : fromFile(source);
-  const spec = spawnSync(process.execPath, [path.join(root, 'harness/media/ref-spec.mjs'), got.file, '--out', path.join(dir, 'spec', got.id), '--ocr'], { stdio: 'inherit' });
-  if (spec.status !== 0) console.error('vawe refs: the measure failed; the film is registered without a spec');
+  if (plan.includes('measure')) {
+    const spec = spawnSync(process.execPath, [path.join(root, 'harness/media/ref-spec.mjs'), got.file, '--out', path.join(dir, 'spec', got.id), '--ocr'], { stdio: 'inherit' });
+    if (spec.status !== 0) console.error('vawe refs: the measure failed; the film is registered without a spec');
+  }
   const meta = { id: got.id, title: flag('--title') ?? got.title ?? got.id, studio: got.studio, type, inScope: true, why: null };
   const registry = (readRegistry(dir) ?? []).filter((r) => r.id !== got.id);
   writeRegistry(dir, [...registry, recorded(meta, got.file)].sort((a, b) => a.id.localeCompare(b.id)));
-  console.log(`added ${got.id} (${type}) to ${path.join(dir, 'refs.json')}`);
+  console.log(`added ${got.id} (${type ?? 'no type'}) to ${path.join(dir, 'refs.json')}`);
+  if (!plan.includes('measure')) console.log(`not measured; measure it later: bin/vawe see ${got.id}`);
 }
 
 const FRAMES_PER_FILM = 8;
