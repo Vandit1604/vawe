@@ -18,11 +18,11 @@ type FacetKey = keyof Facets;
 const EMPTY: Filters = { q: "", group: [], look: [], job: [] };
 const FACETS: FacetKey[] = ["group", "look", "job"];
 
-const list = (v: string | null) => (v ? v.split(",").filter(Boolean) : []);
+const list = (v: string | null, known: string[]) => [...new Set(v ? v.split(",") : [])].filter((x) => known.includes(x));
 
-function readUrl(): Filters {
+function readUrl(known: Facets): Filters {
   const p = new URLSearchParams(window.location.search);
-  return { q: p.get("q") ?? "", group: list(p.get("group")), look: list(p.get("look")), job: list(p.get("job")) };
+  return { q: p.get("q") ?? "", group: list(p.get("group"), known.group), look: list(p.get("look"), known.look), job: list(p.get("job"), known.job) };
 }
 
 function writeUrl(f: Filters) {
@@ -66,16 +66,20 @@ const Card = memo(function Card({
   return (
     <li className="mv-card panel" data-name={move.name}>
       <div className="mv-media">
-        <img
-          src={files.poster}
-          alt={moveAlt(move)}
-          width={640}
-          height={360}
-          loading={first ? "eager" : "lazy"}
-          fetchPriority={first ? "high" : "auto"}
-          decoding="async"
-        />
-        {live ? (
+        {move.clipHash ? (
+          <img
+            src={files.poster}
+            alt={moveAlt(move)}
+            width={640}
+            height={360}
+            loading={first ? "eager" : "lazy"}
+            fetchPriority={first ? "high" : "auto"}
+            decoding="async"
+          />
+        ) : (
+          <p className="meta mv-soon">Clip coming</p>
+        )}
+        {live && move.clipHash ? (
           <video
             muted
             loop
@@ -88,7 +92,7 @@ const Card = memo(function Card({
             <source src={files.mp4} type="video/mp4" />
           </video>
         ) : null}
-        {reduced ? (
+        {reduced && move.clipHash ? (
           <button type="button" className="mv-play" aria-pressed={live} onClick={() => onToggle(move.name)}>
             {live ? "Stop" : "Play"}
             <span className="sr-only"> {move.title}</span>
@@ -174,7 +178,10 @@ export function MovesGallery({
     return out;
   }, [moves, filters]);
 
-  useEffect(() => setFilters(readUrl()), []);
+  useEffect(
+    () => setFilters(readUrl({ group: groups.map((g) => g.id), look: looks, job: jobs.map((j) => j.id) })),
+    [groups, looks, jobs],
+  );
 
   const update = (next: Filters) => {
     setFilters(next);

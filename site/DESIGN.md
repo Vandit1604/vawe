@@ -234,14 +234,16 @@ a panel is `--r-in` (4px), a pill is `--r-pill`. Nested corners are concentric: 
 Few sizes, each with one job (`globals.css`, `--fs-*`). Body is 16px, inside Practical Typography's
 15 to 25px for the web.
 
+The size tokens are rem, so text follows the browser font size (a 200% setting doubles it). A new size is rem, never px.
+
 | token | size | job |
 |---|---|---|
-| `--fs-label` | 11px | mono caps read-outs only (`.meta`, `.foot-h`), tracked `--track-caps` (.06em) |
-| `--fs-code` | 12px | mono code, the section strip |
-| `--fs-ui` | 14px | controls, buttons, tabs, captions, nav, footer |
-| `--fs-body` | 16px | prose and card text |
-| `--fs-lead` | 18px | the hero's one paragraph |
-| `--fs-h3` | 16px | card and FAQ titles: weight carries the rank, not the size |
+| `--fs-label` | .75rem (12px) | mono caps read-outs only (`.meta`, `.foot-h`), tracked `--track-caps` (.06em) |
+| `--fs-code` | .75rem (12px) | mono code, the section strip |
+| `--fs-ui` | .875rem (14px) | controls, buttons, tabs, captions, nav, footer |
+| `--fs-body` | 1rem (16px) | prose and card text |
+| `--fs-lead` | 1.125rem (18px) | the hero's one paragraph |
+| `--fs-h3` | 1rem (16px) | card and FAQ titles: weight carries the rank, not the size |
 | `--fs-h2`, `--fs-h1`, `--fs-display` | fluid | section, page and hero headings |
 | `--fs-panel`, `--fs-sub`, `--fs-figure` | fluid | a panel h2, a sub-heading in a panel or document, a big mono number |
 

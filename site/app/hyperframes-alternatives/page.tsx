@@ -64,7 +64,7 @@ const FAQ: QA[] = [
       <>
         Neither project publishes a side-by-side number, so we do not claim one. vawe’s own figure:
         capture of a 20&nbsp;s film fell from 140&nbsp;s to 47&nbsp;s with one Chrome per lane, in{" "}
-        <a href="/blog/chrome-per-lane">faster headless Chrome rendering</a>.
+        <a href="/blog/fast-drafts">faster headless Chrome rendering</a>.
       </>
     ),
   },

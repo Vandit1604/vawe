@@ -4,6 +4,7 @@ import { pageMetadata } from "../components/seo";
 import { blogSchema, breadcrumbSchema, jsonLdScript } from "../../lib/schema";
 import { allPosts, indexPosts, postsBySection } from "../../lib/blog";
 import { Card } from "./Card";
+import { HashFilter } from "./HashFilter";
 import { ViewToggle } from "./ViewToggle";
 import "./blog.css";
 
@@ -69,6 +70,7 @@ export default function BlogIndex() {
               <ViewToggle />
               </div>
               <script dangerouslySetInnerHTML={{ __html: HASH_FILTER }} />
+              <HashFilter />
               {sections.map((s) => (
                 <p key={s.id} className="bl-intro" data-s={s.id}>{s.intro}</p>
               ))}

@@ -10,15 +10,23 @@ const OPTIONS: { id: View; label: string }[] = [
   { id: "list", label: "List" },
 ];
 
-// The pre-paint script in page.tsx has already set data-view on .bl from ?view= or storage; the
-// buttons only change it. Their pressed look comes from that attribute in blog.css, so it never lags.
+// The pre-paint script in page.tsx sets data-view on a full load; a client navigation runs no inline
+// script, so this effect reads ?view= and storage again. Their pressed look comes from that attribute in blog.css, so it never lags.
 export function ViewToggle() {
   const group = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<View>("grid");
   const root = () => group.current?.closest<HTMLElement>(".bl");
 
   useEffect(() => {
-    setView(root()?.dataset.view === "list" ? "list" : "grid");
+    let saved: string | null = null;
+    try {
+      saved = new URLSearchParams(location.search).get("view");
+      if (saved !== "list" && saved !== "grid") saved = localStorage.getItem(KEY);
+    } catch {}
+    const next: View = saved === "list" ? "list" : "grid";
+    const el = root();
+    if (el) el.dataset.view = next;
+    setView(next);
   }, []);
 
   function choose(next: View) {

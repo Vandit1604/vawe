@@ -73,7 +73,7 @@ export default async function MovePage({ params }: Params) {
 
   return (
     <div className="shell">
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(videoObjectSchema(move))} />
+      {move.clipHash ? <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(videoObjectSchema(move))} /> : null}
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(techArticleSchema(move))} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(moveBreadcrumbSchema(move))} />
       <Header active="moves" />
@@ -98,10 +98,16 @@ export default async function MovePage({ params }: Params) {
 
           <figure className="mvd-clip panel">
             <div className="mvd-stage">
-              <img src={files.posterHd} alt={moveAlt(move)} width={1280} height={720} fetchPriority="high" decoding="async" />
-              <Clip src={files.mp4} />
+              {move.clipHash ? (
+                <>
+                  <img src={files.posterHd} alt={moveAlt(move)} width={1280} height={720} fetchPriority="high" decoding="async" />
+                  <Clip src={files.mp4} />
+                </>
+              ) : (
+                <p className="meta mv-soon">Clip coming</p>
+              )}
             </div>
-            <figcaption className="mvd-tap meta">Tap the clip to play it.</figcaption>
+            {move.clipHash ? <figcaption className="mvd-tap meta">Tap the clip to play it.</figcaption> : null}
           </figure>
 
           <Toc
@@ -123,7 +129,11 @@ export default async function MovePage({ params }: Params) {
             <ul className="mvd-rel">
               {related.map((m) => (
                 <li key={m.name} className="panel">
-                  <img src={clip(m).poster} alt={moveAlt(m)} width={640} height={360} loading="lazy" decoding="async" />
+                  {m.clipHash ? (
+                    <img src={clip(m).poster} alt={moveAlt(m)} width={640} height={360} loading="lazy" decoding="async" />
+                  ) : (
+                    <p className="meta mv-soon-rel">Clip coming</p>
+                  )}
                   <Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link>
                 </li>
               ))}

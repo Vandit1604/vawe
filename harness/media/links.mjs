@@ -73,7 +73,9 @@ async function crawl({ base, starts, max, external }) {
   });
   for (const a of anchors) {
     const ids = pageIds.get(a.url);
-    if (ids && !ids.has(decodeURIComponent(a.hash))) record(`${a.url}#${a.hash}`, { kind: 'broken', why: 'no element with this id on the page' }, a.from);
+    const id = decodeURIComponent(a.hash);
+    // /blog#<section> selects the radio filter with id f-<section>; it is a client-side filter, not an anchor.
+    if (ids && !ids.has(id) && !ids.has(`f-${id}`)) record(`${a.url}#${a.hash}`, { kind: 'broken', why: 'no element with this id on the page' }, a.from);
   }
   return { rows: [...rows.values()], pages, checked: seen.size };
 }

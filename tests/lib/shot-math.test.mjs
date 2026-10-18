@@ -25,7 +25,8 @@ test('resolveTarget joins a route onto the base and keeps urls and files', () =>
 test('shotName is one slug per route and width', () => {
   assert.equal(shotName('/', 390), 'home-390.png');
   assert.equal(shotName('/blog/determinism/', 1440), 'blog-determinism-1440.png');
-  assert.equal(shotName('https://vawe.dev/vs/remotion?x=1', 390), 'vs-remotion-390.png');
+  assert.equal(shotName('https://vawe.dev/vs/remotion?x=1', 390), 'vs-remotion-x-1-390.png');
+  assert.equal(shotName('/blog?view=list', 390), 'blog-view-list-390.png');
   assert.equal(shotName('films/my-film/page.html', 1920), 'my-film-page-1920.png');
 });
 

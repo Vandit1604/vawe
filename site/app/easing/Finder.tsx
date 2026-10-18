@@ -7,6 +7,7 @@ import { SpacingChart, spacingDomain } from "./Spacing";
 type Pick = { slug: string; name: string; ez: string; sp: number[] };
 
 const MAX_PICKS = 3;
+const MAX_ECHO = 40;
 
 // The cards are server-rendered so every ease stays a plain link. This wrapper filters them by
 // toggling `hidden`, copies a card's value, and runs the comparison tray.
@@ -23,9 +24,10 @@ export function Finder({ children, total }: { children: ReactNode; total: number
   const toPick = (card: HTMLElement): Pick => ({ slug: card.dataset.slug ?? "", name: card.dataset.name ?? "", ez: card.style.getPropertyValue("--ez"), sp: (card.dataset.sp ?? "").split(",").map(Number) });
 
   useEffect(() => {
-    const wanted = new URLSearchParams(window.location.search).get("compare")?.split(",").slice(0, MAX_PICKS) ?? [];
-    if (!wanted.length) return;
-    setPicks(cards().filter((c) => wanted.includes(c.dataset.slug ?? "")).map(toPick));
+    const wanted = new URLSearchParams(window.location.search).get("compare")?.split(",") ?? [];
+    const known = cards().filter((c, i, all) => wanted.includes(c.dataset.slug ?? "") && all.findIndex((d) => d.dataset.slug === c.dataset.slug) === i);
+    if (!known.length) return;
+    setPicks(known.slice(0, MAX_PICKS).map(toPick));
   }, [cards]);
 
   useEffect(() => {
@@ -88,7 +90,7 @@ export function Finder({ children, total }: { children: ReactNode; total: number
       </div>
       {shown === 0 ? (
         <p className="ez-empty">
-          No ease matches &ldquo;{query}&rdquo;. <button type="button" className="ez-link" onClick={() => { setQuery(""); setRole("All"); }}>Clear the filters</button>
+          {query.trim() ? <>No ease matches &ldquo;{query.trim().slice(0, MAX_ECHO)}{query.trim().length > MAX_ECHO ? "\u2026" : ""}&rdquo;.</> : "No ease matches these filters."} <button type="button" className="ez-link" onClick={() => { setQuery(""); setRole("All"); }}>Clear the filters</button>
         </p>
       ) : null}
       {children}

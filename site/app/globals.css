@@ -42,12 +42,12 @@
   --font-title:var(--font-sans),system-ui,sans-serif;
 
   /* ---- TYPE SCALE (DESIGN.md "Type scale"): body 16 sits in Butterick's 15-25px web range ---- */
-  --fs-label:12px;          /* mono caps read-outs only; 12 is the floor for any text (Calvez) */
-  --fs-code:12px;           /* mono code and clip captions */
-  --fs-ui:14px;             /* controls, captions, nav, footer */
-  --fs-body:16px;
-  --fs-lead:18px;
-  --fs-h3:16px;             /* card and FAQ titles: weight carries the rank, not the size */
+  --fs-label:.75rem;          /* mono caps read-outs only; 12 is the floor for any text (Calvez) */
+  --fs-code:.75rem;           /* mono code and clip captions */
+  --fs-ui:.875rem;             /* controls, captions, nav, footer */
+  --fs-body:1rem;
+  --fs-lead:1.125rem;
+  --fs-h3:1rem;             /* card and FAQ titles: weight carries the rank, not the size */
   --fs-h2:clamp(1.9rem,3.4vw,2.75rem);
   --fs-h1:clamp(2.2rem,4.6vw,3.5rem);
   --fs-display:clamp(2.2rem,4.2vw,3.6rem);
@@ -283,7 +283,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
 /* Below 700 the nav takes its own full-width row under the mark and the GitHub action, and wraps
    rather than scrolls, so no link hides past an edge with no cue. 44px thumb targets. */
 @media (max-width:640px){
-  :root{--hit:44px;--fs-body:15px;--fs-lead:17px;--sp-panel:var(--sp-4)}
+  :root{--hit:44px;--fs-body:.9375rem;--fs-lead:1.0625rem;--sp-panel:var(--sp-4)}
   .wrap{padding:0 var(--sp-4)}
   .bar{flex-wrap:wrap;height:auto;gap:var(--sp-1) var(--sp-3);padding:var(--sp-3) 0}
   .mark{order:1}

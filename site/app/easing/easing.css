@@ -133,7 +133,7 @@
 .ez-chip:focus-visible{outline:var(--focus-ring);outline-offset:2px}
 .ez-chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
 .ez-count{margin-left:auto}
-.ez-empty{margin-top:var(--sp-6);color:var(--ink-2);font-size:var(--fs-body)}
+.ez-empty{overflow-wrap:anywhere;margin-top:var(--sp-6);color:var(--ink-2);font-size:var(--fs-body)}
 .ez-link{background:none;border:0;padding:0;font:inherit;color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 [data-ez-card][hidden],[data-ez-group][hidden]{display:none}
 
@@ -178,6 +178,7 @@
 .ez-lab-body .ez-demo{margin-top:0;display:grid;align-content:center}
 .ez-lab .ez-lab-name{white-space:normal;overflow-wrap:anywhere}
 .ez-ui{grid-column:1 / -1;padding:var(--sp-4)}
+.ez-ui>.meta{white-space:normal}
 .ez-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-3);margin-top:var(--sp-3)}
 .ez-tile .meta{display:block;margin-top:var(--sp-2);white-space:normal}
 .ez-ph{animation:ez-ph-x var(--d,3s) var(--loop,infinite) linear both}

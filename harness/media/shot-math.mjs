@@ -31,10 +31,10 @@ export function resolveTarget(target, base) {
   return { kind: 'url', url: new URL(target, base).href };
 }
 
-/** The PNG name for one target at one width: /blog/x at 390 is blog-x-390.png, / is home-390.png. Pure. */
+/** The PNG name for one target at one width: /blog/x at 390 is blog-x-390.png, / is home-390.png, /blog?view=list is blog-view-list-390.png. Pure. */
 export function shotName(target, width) {
   const t = resolveTarget(target, 'http://x');
-  const raw = t.kind === 'file' ? path.basename(path.dirname(path.resolve(t.file))) + '-' + path.basename(t.file, '.html') : new URL(t.url).pathname;
+  const raw = t.kind === 'file' ? path.basename(path.dirname(path.resolve(t.file))) + '-' + path.basename(t.file, '.html') : (({ pathname, search }) => pathname + search)(new URL(t.url));
   const slug = raw.replace(/^\/+|\/+$/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'home';
   return `${slug}-${width}.png`;
 }

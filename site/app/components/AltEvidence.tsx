@@ -14,7 +14,7 @@ const EVIDENCE = [
   },
   {
     fact: "One headless Chrome per render lane cut frame capture for a 20\u00a0s film from 140\u00a0s to 47\u00a0s.",
-    href: "/blog/chrome-per-lane",
+    href: "/blog/fast-drafts",
     label: "Faster headless Chrome rendering",
   },
   {
