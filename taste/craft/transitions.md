@@ -121,7 +121,7 @@ A film that reads as slides has one of these. `bin/vawe check slideshow <page>` 
 | every scene enters and exits the same way (`same-in-out`) | change the way in or out per scene; exits shorter than entrances |
 | a fade or crossfade between every scene (`crossfade-every-cut`) | carry one handoff object across the cut, from a family above |
 | hard cut plus a fade in on every scene (`cut-and-fade-in`) | open each scene on the carried object landing, not on a fade |
-| a full-frame background swap at every cut with no carried element (`swap-no-carry`) | name a handoff object that leaves A and starts B |
+| a full-frame background swap at every cut with no carried element (`swap-no-carry`; an element counts only if it is visible on both sides and moves within 0.3 s of the cut, one animation over 80 percent of the film is a drift) | name a handoff object that leaves A and starts B |
 | scene B starts only after scene A fully left, a dead gap (`dead-gap`) | overlap 0.2 to 0.4 s |
 | all elements of a scene enter at once with one move (`all-at-once`) | stagger 30 to 80 ms, a different move for hero and support |
 | one centred line of text per scene on a still ground (`one-thing-scenes`) | give each scene a part that moves while the line is read |

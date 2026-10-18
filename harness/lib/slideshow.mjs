@@ -3,7 +3,7 @@
 // (scene-stats staticRuns, or null) in; { score, of, tells } out, each tell { code, at: [seconds], what, fix }. Advice only.
 // Thresholds are conservative on purpose: a tell needs a repeated pattern (3 or more cuts, 5 or more elements, a 75 percent share), so
 // films/examples/colour-sting and tracking-hud stay clean (tests/lib/slideshow.test.mjs reads their pages' shape through the same rules).
-import { CUT, entering, exiting, moveParts } from './motion-records.mjs';
+import { CUT, entering, exiting, moveParts, movesBetween } from './motion-records.mjs';
 import { scenesOf } from './motion-variety.mjs';
 
 export const MIN_REPEATS = 3;
@@ -13,6 +13,8 @@ export const SAME_KIND_MIN = 5;
 export const EQUAL_SPREAD = 0.15;
 export const STATIC_SHARE = 0.25;
 export const CARRY_MARGIN_S = 0.1;
+export const CARRY_WINDOW_S = 0.3;
+export const DRIFT_SHARE = 0.8;
 export const AT_ONCE_S = 0.04;
 export const SPARSE_MAX = 2;
 
@@ -81,10 +83,13 @@ function cutAndFadeIn(worlds, records, transitions, fps) {
     fix: 'open the scene on the carried object landing, not on a fade' };
 }
 
+// A handoff is visible on both sides of the cut and moves in the window around it. One animation over most of the film is a drift, never a handoff.
 function swapNoCarry(worlds, records) {
-  const rs = own(records).filter((r) => !r.fullFrame);
+  const film = worlds.at(-1).end - worlds[0].start;
+  const rs = own(records).filter((r) => !r.fullFrame && !(r.duration >= DRIFT_SHARE * film && (r.stops ?? []).length <= 2));
   const bs = boundaries(worlds);
-  const carried = bs.map((b) => rs.some((r) => r.delay < b.at - CARRY_MARGIN_S && r.delay + r.duration > b.at + CARRY_MARGIN_S));
+  const carried = bs.map((b) => rs.some((r) => r.delay < b.at - CARRY_MARGIN_S && r.delay + r.duration > b.at + CARRY_MARGIN_S
+    && movesBetween(r, b.at - CARRY_WINDOW_S, b.at + CARRY_WINDOW_S).length > 0));
   if (!mostly(carried.map((c) => !c))) return null;
   return { code: 'swap-no-carry', at: bs.filter((b, i) => !carried[i]).map((b) => r2(b.at)), what: `${carried.filter((c) => !c).length} of ${bs.length} cuts swap the whole frame with no element carried across`,
     fix: 'name a handoff object that leaves A and starts B (taste/craft/transitions.md families)' };

@@ -20,10 +20,12 @@ export function motionRecord(a, k, area) {
   const box = el.getBoundingClientRect();
   const text = (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 18);
   const kf = {};
-  for (const p of ['scale', 'translate', 'rotate', 'transform', 'filter', 'clipPath', 'maskImage', 'maskPosition']) {
+  const props = ['scale', 'translate', 'rotate', 'transform', 'filter', 'clipPath', 'maskImage', 'maskPosition'];
+  for (const p of props) {
     const vs = kfs.map((f) => f[p]).filter((v) => v != null && v !== '');
     if (vs.length) kf[p] = [String(vs[0]), String(vs[vs.length - 1])];
   }
+  const stops = kfs.map((f) => Object.fromEntries([['offset', f.computedOffset], ...props.filter((p) => f[p] != null && f[p] !== '').map((p) => [p, String(f[p])])]));
   const cls = typeof el.className === 'string' && el.className ? `.${el.className.trim().split(/\s+/)[0]}` : '';
   return {
     target: k, label: `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : cls}${text ? ` "${text}"` : ''}`,
@@ -31,7 +33,7 @@ export function motionRecord(a, k, area) {
     delay: (t.delay || 0) / 1000, duration: (t.duration || 0) / 1000,
     easing: t.easing || 'linear', kfEasings: kfs.map((f) => f.easing || 'linear'),
     opacity: withOpacity.length ? [Number(withOpacity[0].opacity), Number(withOpacity[withOpacity.length - 1].opacity)] : null,
-    from: String((kfs[0] && (kfs[0].translate || kfs[0].transform || kfs[0].clipPath)) || ''), kf,
+    from: String((kfs[0] && (kfs[0].translate || kfs[0].transform || kfs[0].clipPath)) || ''), kf, stops,
     fullFrame: box.width * box.height >= 0.6 * area, area: Math.round(box.width * box.height),
     decorative: Boolean(el.closest(DECORATIVE)),
   };

@@ -104,3 +104,23 @@ test('sightedRecords is null for a seek(t) page without sampled boxes', async ()
   assert.equal(sightedRecords({ scripted: true, records: [] }), null);
   assert.deepEqual(sightedRecords({ scripted: false, records: [1] }), [1]);
 });
+
+const carryBase = { worlds: classic.worlds, records: classic.records.map((r) => ({ ...r, duration: 0.5 })) };
+const thread = (translates) => rec('thread', 0, {
+  id: '', duration: 7.6, opacity: null, props: ['translate'], kf: { translate: ['0px 0px', '0px 0px'] },
+  stops: [0, 1.8, 2.3, 3.8, 4.3, 5.8, 6.3, 7.6].map((s, i) => ({ offset: s / 7.6, translate: translates(i) })),
+});
+const withThread = (r) => codes(slideshowTells({ ...carryBase, records: [...carryBase.records, r] }));
+
+test('one drift across the whole film is no handoff: swap-no-carry still fires', () => {
+  const drift = rec('drift', 0.1, { id: '', duration: 7.5, opacity: null, props: ['translate'], kf: { translate: ['0px 0px', '120px 0px'] } });
+  assert.ok(withThread(drift).includes('swap-no-carry'));
+});
+
+test('an element that hops across every cut is a handoff: no swap-no-carry', () => {
+  assert.ok(!withThread(thread((i) => `${(i >> 1) % 2 ? 300 : 0}px 0px`)).includes('swap-no-carry'));
+});
+
+test('an element visible on both sides that holds still at the cut is no handoff', () => {
+  assert.ok(withThread(thread(() => '0px 0px')).includes('swap-no-carry'));
+});

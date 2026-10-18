@@ -1,5 +1,5 @@
 // What the motion lint (motion-lint.mjs, motion-variety.mjs) asks of one motion record: does it move, enter, leave, which
-// ease and which way. Pure. A record is { target, id, props, delay, duration, easing, kfEasings, opacity, from, step? }.
+// ease and which way. Pure. A record is { target, id, props, delay, duration, easing, kfEasings, opacity, from, stops?, step? }.
 import { EASE } from '../../core/motion/presets.js';
 
 export const CUT = 0.05;
@@ -46,7 +46,7 @@ const lengthNumber = (s) => {
   const factor = /\*\s*(-?[\d.]+)\s*\)$/.exec(s);
   return factor ? Number(factor[1]) * 100 : (parseFloat(s) || 0) * (/r?em$/.test(s) ? EM_PX : 1);
 };
-const translateXY = (s) => { const [x, y] = lengths(s); return [lengthNumber(x ?? '0'), lengthNumber(y ?? '0')]; };
+export const translateXY = (s) => { const [x, y] = lengths(s); return [lengthNumber(x ?? '0'), lengthNumber(y ?? '0')]; };
 
 function fromTransform(tf) {
   const out = {};
@@ -98,4 +98,28 @@ export function moveParts(r) {
     parts.push({ key: fade, text: fade });
   }
   return parts;
+}
+
+const NUMERIC = { translate: { read: translateXY, write: ([x, y]) => `${x}px ${y}px` }, scale: { read: (v) => [parseFloat(v)], write: ([v]) => String(v) } };
+
+// One prop's value at offset u in 0..1 over the record's stops: translate and scale blend linearly between stops, the others hold the last stop passed.
+function valueAt(stops, prop, u) {
+  const have = stops.filter((s) => s[prop] != null);
+  const after = have.findIndex((s) => s.offset >= u);
+  const [lo, hi] = after < 0 ? [have.at(-1), have.at(-1)] : after === 0 ? [have[0], have[0]] : [have[after - 1], have[after]];
+  const num = NUMERIC[prop];
+  if (!num || hi.offset === lo.offset) return (after < 0 || hi.offset > u ? lo : hi)[prop];
+  const k = (u - lo.offset) / (hi.offset - lo.offset);
+  const [a, b] = [num.read(lo[prop]), num.read(hi[prop])];
+  return num.write(a.map((x, i) => x + (b[i] - x) * k));
+}
+
+/** The moves (moveParts) a record makes between seconds t0 and t1: through the stops it was animated with, or its first and last values. */
+export function movesBetween(r, t0, t1) {
+  const ends = (i) => ({ offset: i, ...Object.fromEntries(Object.entries(r.kf ?? {}).map(([p, v]) => [p, v[i]])) });
+  const stops = r.stops ?? [ends(0), ends(1)];
+  const u = (t) => Math.min(1, Math.max(0, (t - r.delay) / r.duration));
+  const kf = {};
+  for (const p of new Set(stops.flatMap((s) => Object.keys(s).filter((k) => k !== 'offset')))) kf[p] = [valueAt(stops, p, u(t0)), valueAt(stops, p, u(t1))];
+  return moveParts({ kf });
 }
