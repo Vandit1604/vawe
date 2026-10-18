@@ -21,7 +21,7 @@ bin/vawe doctor     # checks Node, ffmpeg and Chrome and prints the install line
 
 ```bash
 bin/vawe new hello --request "a 6 second title sting for a note-taking app"
-bin/vawe dev films/hello/page.html       # draft mp4 in out/: half size, 30 fps, silent
+bin/vawe dev films/hello/page.html       # draft mp4 in out/: half size, 30 fps, with sound
 ```
 
 Edit `films/hello/page.html`, then run `dev` again. Time is the seek, never the clock: use CSS keyframes, `element.animate()` or `window.seek(t)` as a pure function of t. No timers, no state between frames, no unseeded random.

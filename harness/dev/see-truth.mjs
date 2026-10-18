@@ -496,7 +496,7 @@ function render(name, { reuse, audio, final }) {
   const mp4 = path.join('out/see-truth', `${name}.mp4`);
   const fresh = fs.existsSync(path.join(ROOT, mp4)) && fs.statSync(path.join(ROOT, mp4)).mtimeMs > fs.statSync(path.join(ROOT, pageOf(name))).mtimeMs;
   if (reuse && fresh) return mp4;
-  const res = sh('node', ['harness/media/render-page.mjs', pageOf(name), mp4, ...(audio ? ['--audio'] : []), ...(final ? ['--final'] : [])]);
+  const res = sh('node', ['harness/media/render-page.mjs', pageOf(name), mp4, ...(audio ? ['--audio'] : ['--silent']), ...(final ? ['--final'] : [])]);
   if (!res.ok) { console.error(`render of ${name} failed:\n${res.text.split('\n').slice(-8).join('\n')}`); return null; }
   return mp4;
 }

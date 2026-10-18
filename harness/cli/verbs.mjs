@@ -159,13 +159,13 @@ export const VERBS = [
   },
   {
     tier: 'core',
-    name: 'dev', summary: 'draft render: half size, 30 fps, silent; also writes a key-frame sheet PNG next to it',
+    name: 'dev', summary: 'draft render: half size, 30 fps, with sound (the audio tags of the page mixed; a --from/--to window stays silent); also writes a key-frame sheet PNG next to it',
     positional: [PAGE],
     flags: [
       { name: 'from', type: 'number', help: 'start second' },
       { name: 'to', type: 'number', help: 'end second' },
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT },
-      { name: 'audio', type: 'bool', help: 'mix the audio tags into the draft' },
+      { name: 'silent', type: 'bool', help: 'picture-only draft: leave the audio tags out of the mix (faster)' },
       { name: 'out', type: 'path', default: 'out/<name>-draft.mp4, or out/<name>-draft-<from>-<to>.mp4 for a range', help: 'output file' },
       { name: 'fast', type: 'bool', help: 'run only the fast checks (page errors, text size and collisions, still windows, tail tiles, smoothness, motion lint on declared animations)' },
       { name: 'full', type: 'bool', help: 'also run the ship-tier checks: per-frame box motion lint, object tracks, loudness and peak' },
@@ -175,7 +175,7 @@ export const VERBS = [
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [
       { script: 'harness/live/dev-warn.mjs', args: [page] },
-      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : [])] },
+      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.silent ? ['--silent'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : [])] },
       ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
       { script: 'harness/live/dev-end.mjs', args: [page] },
     ],

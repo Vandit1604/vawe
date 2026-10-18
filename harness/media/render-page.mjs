@@ -2,10 +2,10 @@
 // mp4, with an optional N-subframe motion blur blended into each output frame.
 //
 //   node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N]
-//     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--audio] [--profile]
+//     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--silent] [--profile]
 //
-// Default is a DRAFT: half size, 30 fps, no blur, silent, and --from/--to windows the render to one
-// slice instead of the whole page. --final renders the way `vawe ship` does: full size, 60 fps, the
+// Default is a DRAFT: half size, 30 fps, no blur, the page's <audio> mixed in (--silent for a picture-only draft), and --from/--to windows the render to one
+// slice instead of the whole page; a window is silent, because the mix has no offset. --final renders the way `vawe ship` does: full size, 60 fps, the
 // whole page from 0, up to 32 subframes of motion blur a frame, and the page's <audio> elements mixed in (harness/media/page-audio.mjs);
 // it writes the master and, beside it, a small web copy (<name>.web.mp4). --profile prints the cost table.
 // A final logs a `ship` event in out/<film>.runs.jsonl; --job (the ship job, harness/media/ship-job.mjs) leaves that to the job.
@@ -776,8 +776,7 @@ async function muxPageAudio(read, pagePath, { video, out, duration, explicit, fa
 /**
  * renderPage(pagePath, outPath, opts) -> { frames, subframes, captureMs, encodeMs, dur }.
  * opts: aspect (the page's <meta name="aspect">, else 16:9), w/h (the output pixel size; see resolveFrame),
- * muxFault (test hook: called before the audio mux), final (false: half-size capture of the same layout, ultrafast x264), audio (final: mix the page's <audio> elements in; a draft
- * or a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; each
+ * muxFault (test hook: called before the audio mux), final (false: half-size capture of the same layout, ultrafast x264), audio (mix the page's <audio> elements in; a whole render does by default, a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; each
  * frame gets what its fastest move needs, a still frame 1), from (0, seconds into the page's own timeline the
  * render starts at), durArg (seconds rendered from `from`; defaults to the page's own <meta
  * name="duration"> minus `from`), progress (false; prints a single overwriting capture-progress line), stallMs (STALL_MS, the most a step may run without progress before its slice restarts; after 5 frames the limit is 10 times their median, at least 15 s), stallFloorMs (test hook: the least that limit may be).
@@ -786,7 +785,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   const { fps = 30, blur = 1, durArg = null, from = 0, progress = false, final = false } = opts;
   if (!fs.existsSync(pagePath)) throw new RenderError(`no such file: ${pagePath}`);
   const frame = resolveFrame(pagePath, opts);
-  const wantAudio = opts.audio ?? (final && from === 0 && durArg == null);
+  const wantAudio = opts.audio ?? (from === 0 && durArg == null);
   if (opts.audio && from > 0) throw new RenderError('--audio needs a render from 0: the mix has no offset');
   const slotAskedAt = Date.now();
   const slot = await takeRenderSlot({ kind: process.env.VAWE_RENDER_KIND || (final ? 'final' : 'draft'), who: filmKeyOf(pagePath) });
@@ -1145,7 +1144,7 @@ async function main() {
   const [pagePath, outArg] = positional;
   if (!pagePath) {
     die('usage: node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N] '
-      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--audio] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
+      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--silent] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
   const drift = briefProblems(pagePath);
@@ -1171,7 +1170,7 @@ async function main() {
       w: flag('--w', null) && Number(flag('--w', null)), h: flag('--h', null) && Number(flag('--h', null)),
       blur: Number(flag('--blur', final ? 32 : 1)), from, durArg, progress: argv.includes('--progress') || (final && Boolean(process.stdout.isTTY)),
       workers: flag('--workers', null) && Number(flag('--workers', null)),
-      audio: argv.includes('--audio') ? true : undefined,
+      audio: argv.includes('--silent') ? false : argv.includes('--audio') ? true : undefined,
       sliceFault: faultFromEnv(process.env.VAWE_TEST_SLICE_FAULT),
       muxFault: process.env.VAWE_TEST_MUX_FAULT ? () => { throw new Error('mux failed (VAWE_TEST_MUX_FAULT)'); } : undefined,
       checks: final ? undefined : createChecks({ pagePath, mode: argv.includes('--full') ? 'full' : argv.includes('--fast') ? 'fast' : 'draft' }),
