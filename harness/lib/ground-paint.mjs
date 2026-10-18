@@ -4,7 +4,8 @@
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 
 const L = LIMITS['living-ground'];
-const COLOUR = /rgba?\(\s*([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)|#([0-9a-f]{6})\b/gi;
+// A color-mix() computes to color(srgb r g b / a) with channels from 0 to 1.
+const COLOUR = /rgba?\(\s*([\d.]+)[ ,]+([\d.]+)[ ,]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)|#([0-9a-f]{6})\b|color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)/gi;
 const GRAIN = /feTurbulence|noise|grain/i;
 const TILE_MAX_PX = 300;
 const MID = [128, 128, 128];
@@ -13,7 +14,11 @@ const alphaOf = (a) => (a === undefined ? 1 : a.endsWith('%') ? parseFloat(a) / 
 
 /** The [r, g, b, a] colour stops written in a computed background-image. */
 export function stopsOf(paint) {
-  return [...String(paint ?? '').matchAll(COLOUR)].map((m) => (m[5] ? [0, 2, 4].map((i) => parseInt(m[5].slice(i, i + 2), 16)).concat(1) : [Number(m[1]), Number(m[2]), Number(m[3]), alphaOf(m[4])]));
+  return [...String(paint ?? '').matchAll(COLOUR)].map((m) => {
+    if (m[5]) return [0, 2, 4].map((i) => parseInt(m[5].slice(i, i + 2), 16)).concat(1);
+    if (m[6]) return [m[6], m[7], m[8]].map((v) => Number(v) * 255).concat(alphaOf(m[9]));
+    return [Number(m[1]), Number(m[2]), Number(m[3]), alphaOf(m[4])];
+  });
 }
 
 const over = (stop, ground) => [0, 1, 2].map((i) => stop[3] * stop[i] + (1 - stop[3]) * ground[i]);

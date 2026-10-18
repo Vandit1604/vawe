@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { openPage, seekAll, settle, resolveFrame, readPageMeta } from './render-page.mjs';
+import { openPage, seekAll, resolveFrame, readPageMeta } from './render-page.mjs';
 import { sampleWorlds, readWorldAnimations } from './world-sample.mjs';
 import { readPageAudio } from './page-audio.mjs';
 import { videoStill } from './still.mjs';
@@ -17,7 +17,7 @@ import { lockedSpectacle, spectacleOf } from '../lib/board.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
 import { filmKeyOf } from '../lib/runlog.mjs';
 import { storyboardOf } from '../lib/storyboard.mjs';
-import { readPlanFindings } from './plan-read.mjs';
+import { readPlanFindings, loadOpened } from './plan-read.mjs';
 import { planLines } from '../lib/plan-findings.mjs';
 import { storyboardHtml } from '../lib/storyboard-html.mjs';
 
@@ -42,11 +42,7 @@ export function pageOfFilm(key, root = ROOT) {
 }
 
 async function readPage(opened, abs, duration) {
-  if (!opened.reused) {
-    await opened.page.goto(opened.url, { waitUntil: 'load' });
-    await settle(opened.page);
-    await opened.markWarm?.();
-  }
+  await loadOpened(opened);
   const anims = await readWorldAnimations(opened.page);
   const seek = (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms);
   const spans = await sampleWorlds(opened.page, duration, seek);
@@ -111,12 +107,13 @@ async function main(argv) {
       film, brief,
       read: { ...read, spectacle: lockedSpectacle(brief, spectacleOf(text)), signature: metaOf(text, 'signature'), message: readPageMeta(abs, 'message') },
     });
-    board.plan = planLines(await readPlanFindings(opened.page, abs, duration), ROOT);
+    const plan = await readPlanFindings(opened.page, abs, duration);
+    board.plan = [...planLines(plan.findings, ROOT), ...plan.advice];
     const images = source.endsWith('.html') ? await shootShots(opened.page, board.shots, dir) : mp4Frames(source, board.shots, dir);
     for (const shot of board.shots) shot.ground = groundOfImage(path.join(dir, images[shot.id])) ?? shot.ground;
     const relative = Object.fromEntries(Object.entries(images).map(([id, f]) => [id, `${path.basename(dir)}/${f}`]));
     fs.writeFileSync(html, storyboardHtml(board, { images: relative, fontCss: fontFaceCss() }));
-    console.log(board.plan.length ? [`from the docs (${board.plan.length}; advice, the page keeps what it does on purpose):`, ...board.plan.map((l) => `  ${l}`)].join('\n') : 'from the docs: no finding');
+    console.log(board.plan.length ? [`from the docs and the page, before any render (${board.plan.length}; advice, the page keeps what it does on purpose):`, ...board.plan.map((l) => `  ${l}`)].join('\n') : 'from the docs: no finding');
     console.log(`✓ ${html}: ${board.shots.length} shots, ${board.cues.length} cues${board.hasBrief ? '' : ', no brief.md'}; images in ${dir}`);
   } catch (e) {
     die(e.stack || String(e));

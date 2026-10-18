@@ -84,6 +84,26 @@ test('an attractor finding comes before the plan findings', () => {
   assert.match(lines.find((l) => l.startsWith('  plan: ')), /attractor: ring/);
 });
 
+test('the bans the page shows come first: the slideshow score in the head, two lines with their doc, the rest counted for the storyboard', () => {
+  const page = [
+    'rule stagger @5.12s stagger-gap: 2 elements start 20 ms apart, under the 30 ms floor; fix: stagger(els) from core/motion/presets.js: 30 to 80 ms apart',
+    'slideshow: score 2/10',
+    'slideshow: same-entrance at 0.7 s: 17 of 17 elements enter with one move (blur + moves up + scale in). Fix: vary the moves of the hero, the support and the detail; stagger them',
+    'slideshow: swap-no-carry at 2.3, 5 s: 2 of 2 cuts swap the whole frame with no element carried across. Fix: name a handoff object that leaves A and starts B (taste/craft/transitions.md families)',
+    'world held s2 2-5.5 s (3.5 s, limit 2 s)',
+  ];
+  const lines = planStatusLines({ name: 'f', rel: 'films/f/page.html', brief: BOARD_EMPTY, design: '', early: false, frames: 'ok', storyboardRan: true, findings: [], page, digest: DIGEST, next: 'x' });
+  assert.ok(lines.length <= STATUS_MAX_LINES);
+  assert.equal(lines[0], 'plan of f: 5 open, slideshow 2/10, the draft renders anyway');
+  assert.equal(lines[1], '  page: same-entrance at 0.7 s: 17 of 17 elements enter with one move (blur + moves up + scale in). Fix: vary the moves of the hero, the support and the detail; stagger them (taste/craft/transitions.md)');
+  assert.equal(lines[2], '  page: swap-no-carry at 2.3, 5 s: 2 of 2 cuts swap the whole frame with no element carried across. Fix: name a handoff object that leaves A and starts B (taste/craft/transitions.md)');
+  assert.equal(lines[3], '  page: +2 more before the render: bin/vawe storyboard films/f/page.html');
+  assert.match(lines[4], /the brief Board is empty/);
+  const clean = { name: 'f', rel: 'p', brief: TAKEN + IDEAS + BOARD, design: RUNGS, early: false, frames: 'ok', storyboardRan: true, digest: DIGEST, next: 'x' };
+  assert.deepEqual(planStatusLines({ ...clean, page: [] }), []);
+  assert.match(planStatusLines({ ...clean, page: [page[0]] })[1], /^ {2}page: rule stagger .* \(taste\/rules\/stagger\.md\)$/);
+});
+
 test('the ban lines come from the digest, not from a copy', () => {
   assert.deepEqual(banLines(''), []);
   assert.match(banLines(DIGEST)[0], /^ban: No tells unless the brief asks/);

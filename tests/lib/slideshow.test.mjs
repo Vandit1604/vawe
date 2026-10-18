@@ -67,6 +67,18 @@ test('a film that holds still for a quarter of its length fires static-holds', (
   assert.deepEqual(codes(held), ['static-holds']);
 });
 
+test('an enter() pair (its move and its fade start together) is one entrance of the move kind, and an em offset is a move', () => {
+  const entrance = (target, at, from) => [
+    rec(target, at, { props: ['translate', 'scale', 'filter'], opacity: null, kf: { translate: [from, '0px'], scale: ['0.96', '1'], filter: ['blur(10px)', 'blur(0px)'] } }),
+    rec(target, at, { id: 'enter-fade', duration: 0.16 }),
+  ];
+  const rising = [0, 1, 2, 3, 4, 5].flatMap((i) => entrance(`e${i}`, i * 0.3, '0px 0.4em'));
+  const tell = slideshowTells({ worlds: classic.worlds, records: rising }).tells.find((t) => t.code === 'same-entrance');
+  assert.equal(tell.what, '6 of 6 elements enter with one move (blur + moves up + scale in)');
+  const mixed = [0, 1, 2, 3, 4, 5].flatMap((i) => entrance(`e${i}`, i * 0.3, i % 2 ? '0.6em 0px' : '0px 0.4em'));
+  assert.ok(!codes(slideshowTells({ worlds: classic.worlds, records: mixed })).includes('same-entrance'));
+});
+
 test('film shape alone never fires on fewer than the repeat counts', () => {
   assert.deepEqual(slideshowTells({ worlds: [world('a', 0, 2), world('b', 2, 4)], records: [rec('x', 0), rec('y', 2)] }).tells, []);
 });

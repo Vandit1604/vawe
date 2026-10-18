@@ -40,10 +40,11 @@ export function moveDirection(from) {
 }
 
 const lengths = (s) => String(s).match(/calc\((?:[^()]|\([^()]*\))*\)|\S+/g) || [];
-// A length is read as a bare number, a calc(var(--vw) * 0.24) as its factor in percent: only the sign and the larger axis are used.
+// A length is read as a bare number, an em as 16 px, a calc(var(--vw) * 0.24) as its factor in percent: only the sign and the larger axis are used.
+const EM_PX = 16;
 const lengthNumber = (s) => {
   const factor = /\*\s*(-?[\d.]+)\s*\)$/.exec(s);
-  return factor ? Number(factor[1]) * 100 : parseFloat(s) || 0;
+  return factor ? Number(factor[1]) * 100 : (parseFloat(s) || 0) * (/r?em$/.test(s) ? EM_PX : 1);
 };
 const translateXY = (s) => { const [x, y] = lengths(s); return [lengthNumber(x ?? '0'), lengthNumber(y ?? '0')]; };
 

@@ -1,9 +1,9 @@
 // What the planning docs say about a page, before any render: each finding names its rule, the doc line it comes from, the
-// measured value and a fix. It reuses the checks that already own each rule (motion-lint, read-hold, tail-motion, ideas, board)
-// and holds no threshold of its own. Advice only. Pure: the page's probes in, findings out; planLines reads the rule files.
+// measured value and a fix. It reuses the checks that already own each rule (read-hold, tail-motion, ideas, board) and holds no
+// threshold of its own; the motion lint and the slideshow tells come from the draft check's page advice (render-page.mjs probeAdvice).
+// Advice only. Pure: the page's probes in, findings out; planLines reads the rule files.
 import fs from 'node:fs';
 import path from 'node:path';
-import { groupLanding, tightStagger, unwaived } from './motion-lint.mjs';
 import { readHoldProblems, probeTracks } from './read-hold.mjs';
 import { tailMoving } from './tail-motion.mjs';
 import { ideaFindings, IDEATE_ASK } from './ideas.mjs';
@@ -29,11 +29,6 @@ function tailFindings(probe) {
     fix: 'give one part of the last lockup its own last key (a caret, a value that ticks, a highlight that moves on)' }];
 }
 
-// The rule file line that holds the number a finding measures against, when it is not the limit line.
-const DOC_KEY = { 'stagger-gap': 'range' };
-
-const fromLint = (f) => ({ code: f.code, rule: f.rule, docKey: DOC_KEY[f.code], at: f.at, value: f.what, fix: f.fix });
-
 function briefFindings(brief, duration, worlds) {
   if (!brief) return [];
   const stale = briefLengthLine(brief, duration);
@@ -52,12 +47,11 @@ function briefFindings(brief, duration, worlds) {
 
 /**
  * The plan findings of a page: [{ code, rule (taste rule id or null), doc (path or null: planLines fills it from the rule), at (s or row id or null), value, fix }].
- * `records` are the motion records (null when the page paints in seek and no boxes were sampled), `probe` the text and tail probe, `words` the brief's Words rows,
+ * `probe` is the text and tail probe (null before the page is opened), `words` the brief's Words rows,
  * `worlds` the data-world ids, `authoring` the page's waivers. The brief's findings come first, then the page's in time order. Pure.
  */
-export function planFindings({ brief, duration, records, probe, words = [], worlds = null, authoring = {} }) {
-  const motion = records ? unwaived([...groupLanding(records), ...tightStagger(records)], authoring).map(fromLint) : [];
-  const page = [...motion, ...holdFindings(probe, words), ...tailFindings(probe)].filter((f) => !isWaived(authoring, f.code, typeof f.at === 'number' ? f.at.toFixed(2) : null));
+export function planFindings({ brief, duration, probe, words = [], worlds = null, authoring = {} }) {
+  const page = [...holdFindings(probe, words), ...tailFindings(probe)].filter((f) => !isWaived(authoring, f.code, typeof f.at === 'number' ? f.at.toFixed(2) : null));
   const timed = page.sort((a, b) => (a.at ?? Infinity) - (b.at ?? Infinity));
   return [...briefFindings(brief, duration, worlds).filter((f) => !isWaived(authoring, f.code, f.at)), ...timed];
 }
@@ -75,7 +69,7 @@ export function ruleDoc(id, root, key = 'limit') {
 export function planLines(findings, root) {
   return findings.map((f) => {
     const at = typeof f.at === 'number' ? `@${f.at.toFixed(2)}s ` : '';
-    const doc = f.doc ?? (f.rule ? ruleDoc(f.rule, root, f.docKey) : null);
+    const doc = f.doc ?? (f.rule ? ruleDoc(f.rule, root) : null);
     return `${at}${f.value} (${f.rule ? `rule ${f.rule}, ` : ''}${doc}); fix: ${f.fix}`;
   });
 }

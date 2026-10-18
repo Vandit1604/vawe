@@ -9,6 +9,7 @@ export const STATUS_MAX_LINES = 8;
 export const ITEMS_SHOWN = 2;
 export const LINE_MAX = 200;
 export const ADVICE_SHOWN = 3;
+export const PAGE_SHOWN = 2;
 
 export const SKILLS = {
   brief: 'skills/vawe-brief/SKILL.md',
@@ -19,7 +20,9 @@ export const SKILLS = {
 };
 
 const BAN_IDS = { tells: 'no-tells', slideshow: 'thread' };
-const ADVICE_RANK = [/^slideshow: score/, /^attractor:/, /^slideshow:/, /^transitions:/];
+const ADVICE_RANK = [/^slideshow: score/, /^attractor:/, /^slideshow:/, /^world held/, /^transitions:/];
+const SCORE = /^slideshow: score (\d+\/\d+)$/;
+const PAGE_PREFIX = '  page: ';
 
 /** `line` cut to LINE_MAX characters. */
 export const short = (line, max = LINE_MAX) => (line.length > max ? `${line.slice(0, max - 3)}...` : line);
@@ -68,21 +71,51 @@ function findingLine(findings, rel) {
   return [`  plan: ${short(ranked[0])}${more}`];
 }
 
+const rankOf = (line) => { const at = ADVICE_RANK.findIndex((re) => re.test(line)); return at < 0 ? ADVICE_RANK.length : at; };
+
+/** Advice lines most costly first (ADVICE_RANK), the rest in their own order. */
+const ranked = (lines) => lines.map((line, i) => ({ line, i })).sort((a, b) => rankOf(a.line) - rankOf(b.line) || a.i - b.i).map((x) => x.line);
+
+/** The doc a page advice line comes from: the slideshow tells, the rule file of a lint line, world-turns for a held world; null when none fits. */
+export function adviceDoc(line) {
+  if (line.startsWith('slideshow:')) return 'taste/craft/transitions.md';
+  if (line.startsWith('world held')) return 'taste/rules/world-turns.md';
+  const rule = /^rule ([\w-]+) /.exec(line)?.[1];
+  return rule ? `taste/rules/${rule}.md` : null;
+}
+
+/** A page line cut to LINE_MAX, then its doc added at the end, so the fix and the doc both survive; the doc replaces the "slideshow:" prefix and any mention of itself. */
+const withDoc = (line) => {
+  const doc = adviceDoc(line);
+  const body = short(doc ? line.replace(/^slideshow: /, '').split(` (${doc}`).map((part, i) => (i ? part.replace(/^[^)]*\)/, '') : part)).join('') : line, LINE_MAX - PAGE_PREFIX.length);
+  return doc ? `${body} (${doc})` : body;
+};
+
+/** The bans the page itself shows, before any render: PAGE_SHOWN lines ranked like the draft advice, each with its doc, then the count of the rest. */
+function pageLines(page, rel) {
+  const lines = ranked(page);
+  const shown = lines.slice(0, PAGE_SHOWN).map((l) => `${PAGE_PREFIX}${withDoc(l)}`);
+  const rest = lines.length - shown.length;
+  return [...shown, ...(rest > 0 ? [`${PAGE_PREFIX}+${rest} more before the render: bin/vawe storyboard ${rel}`] : [])];
+}
+
 /**
  * The block printed before a draft renders, at most STATUS_MAX_LINES lines, ending in one `next:` line; [] when nothing is open and
- * no finding exists. `findings` are plan finding lines (planLines) and attractor lines; `digest` is taste/build/DIGEST.md; `next` is nextStep's command.
+ * no finding exists. `findings` are plan finding lines (planLines) and attractor lines; `page` the draft advice the opened page shows
+ * (plan-read.mjs), ranked first; `digest` is taste/build/DIGEST.md; `next` is nextStep's command.
  */
-export function planStatusLines({ name, rel, brief, design, early, frames, storyboardRan, findings = [], digest = '', next }) {
+export function planStatusLines({ name, rel, brief, design, early, frames, storyboardRan, findings = [], page = [], digest = '', next }) {
   const items = openItems({ rel, brief, design, early, frames, storyboardRan });
-  if (!items.length && !findings.length) return [];
+  const score = page.map((l) => SCORE.exec(l)?.[1]).find(Boolean);
+  const tells = page.filter((l) => !SCORE.test(l));
+  if (!items.length && !findings.length && !tells.length) return [];
   const shown = items.slice(0, ITEMS_SHOWN).map(itemLine);
   const rest = items.slice(ITEMS_SHOWN);
   const more = rest.length ? [`  - +${rest.length} more: ${rest.map((i) => i.what).join('; ')}`] : [];
-  const body = [`plan of ${name}: ${items.length + findings.length} open, the draft renders anyway`, ...shown, ...more.map((l) => short(l)), ...findingLine(findings, rel), ...banLines(digest)];
+  const head = `plan of ${name}: ${items.length + findings.length + tells.length} open${score ? `, slideshow ${score}` : ''}, the draft renders anyway`;
+  const body = [head, ...pageLines(tells, rel), ...shown, ...more.map((l) => short(l)), ...findingLine(findings, rel), ...banLines(digest)];
   return [...body.slice(0, STATUS_MAX_LINES - 1), `next: ${next}`];
 }
-
-const rankOf = (line) => { const at = ADVICE_RANK.findIndex((re) => re.test(line)); return at < 0 ? ADVICE_RANK.length : at; };
 
 /** The advice lines of out/<film>.dev.md ("advice: ..." under Draft check), without the prefix. */
 export function adviceOfDevNotes(text) {
@@ -92,8 +125,8 @@ export function adviceOfDevNotes(text) {
 
 /** The top ADVICE_SHOWN advice lines of a draft, slideshow score and attractors first, then the count of the rest and where they are. */
 export function topAdviceLines(advice, film) {
-  const ranked = advice.map((line, i) => ({ line, i })).sort((a, b) => rankOf(a.line) - rankOf(b.line) || a.i - b.i).map((x) => x.line);
-  const shown = ranked.slice(0, ADVICE_SHOWN).map((l) => `  advice: ${short(l)}`);
-  const rest = ranked.length - shown.length;
-  return ranked.length ? [`top advice of ${film}:`, ...shown, ...(rest > 0 ? [`  +${rest} more in out/${film}.dev.md`] : [])] : [];
+  const lines = ranked(advice);
+  const shown = lines.slice(0, ADVICE_SHOWN).map((l) => `  advice: ${short(l)}`);
+  const rest = lines.length - shown.length;
+  return lines.length ? [`top advice of ${film}:`, ...shown, ...(rest > 0 ? [`  +${rest} more in out/${film}.dev.md`] : [])] : [];
 }

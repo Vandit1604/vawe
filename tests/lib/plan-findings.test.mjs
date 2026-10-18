@@ -7,8 +7,9 @@ import { briefLengthLine } from '../../harness/lib/board.mjs';
 const ROOT = new URL('../../', import.meta.url).pathname;
 
 const rec = (target, delay, o = {}) => ({ target, label: `win${target}`, id: '', props: ['opacity'], delay, duration: 0.4, easing: 'linear', kfEasings: ['ease', 'ease'], opacity: [0, 1], from: '', fullFrame: false, ...o });
+const stillTail = { samples: [], step: 0.5, frameH: 1080, whole: true, tail: [[], [], []] };
 const IDEAS = '## Ideas\n\n| at | meaning | i1 | i2 | i3 | i4 | chosen | why |\n|---|---|---|---|---|---|---|---|\n| s1 | m | metaphor: a, 0.3 | transformation: b, 0.2 | collision: c, 0.1 | literal: d, 0.9 | 2 | because it fits |\n';
-const quiet = { brief: IDEAS, duration: 8, records: [], probe: null, worlds: ['s1'] };
+const quiet = { brief: IDEAS, duration: 8, probe: null, worlds: ['s1'] };
 
 test('entrances 22 to 27 ms apart are one stagger-gap finding at the first start; 30 ms and wider are not', () => {
   const tight = [rec(0, 1), rec(1, 1.022), rec(2, 1.049)];
@@ -32,8 +33,8 @@ test('a quiet page with a good brief has no finding', () => {
 });
 
 test('a brief with no Ideas section gets the exact IDEATE ask and the brief findings come first', () => {
-  const found = planFindings({ ...quiet, brief: '- Length: 22.8 s\n\n## Look\n', records: [rec(0, 1), rec(1, 1.02)] });
-  assert.deepEqual(found.map((f) => f.code), ['brief-stale', 'ideas-missing', 'stagger-gap']);
+  const found = planFindings({ ...quiet, brief: '- Length: 22.8 s\n\n## Look\n', probe: stillTail });
+  assert.deepEqual(found.map((f) => f.code), ['brief-stale', 'ideas-missing', 'tail-static']);
   assert.equal(found[1].doc, 'guides/IDEATE.md');
   assert.match(found[1].fix, /4 ideas from 4 different devices with a typicality number/);
 });
@@ -55,14 +56,14 @@ test('a static last second is a moving-tail finding; a running part animation cl
 });
 
 test('a waiver with a reason silences its finding', () => {
-  const authoring = { _worlds: ['s1'], allow: ['stagger-gap@1.00'], _why: { 'stagger-gap@1.00': 'world s1, 3 windows: the lockup must land on one beat at 1.0 s' } };
-  assert.deepEqual(planFindings({ ...quiet, records: [rec(0, 1), rec(1, 1.02)], authoring }), []);
+  const authoring = { _worlds: ['s1'], allow: ['tail-static'], _why: { 'tail-static': 'world s1, the last 1.0 s: the wordmark holds still as the end card' } };
+  assert.deepEqual(planFindings({ ...quiet, probe: stillTail, authoring }), []);
 });
 
 test('a line names its second, value, rule, doc line and fix; the doc line is the rule file limit line', () => {
   assert.equal(ruleDoc('stagger', ROOT), 'taste/rules/stagger.md:5');
   assert.equal(ruleDoc('stagger', ROOT, 'range'), 'taste/rules/stagger.md:6');
   assert.equal(ruleDoc('no-such-rule', ROOT), 'taste/rules/no-such-rule.md');
-  const [line] = planLines(planFindings({ ...quiet, records: [rec(0, 1), rec(1, 1.02)] }), ROOT);
-  assert.match(line, /^@1\.00s 2 elements start 20 ms apart, under the 30 ms floor \(rule stagger, taste\/rules\/stagger\.md:6\); fix: stagger\(els\)/);
+  const [line] = planLines(planFindings({ ...quiet, probe: stillTail }), ROOT);
+  assert.equal(line, `no part of the held lockup moves in the last second (rule moving-tail, ${ruleDoc('moving-tail', ROOT)}); fix: give one part of the last lockup its own last key (a caret, a value that ticks, a highlight that moves on)`);
 });

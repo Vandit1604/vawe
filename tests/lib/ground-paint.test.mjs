@@ -11,6 +11,11 @@ test('stopsOf reads rgb, rgba with a fraction or a percent alpha, and hex stops'
   assert.deepEqual(stopsOf(null), []);
 });
 
+test('a color-mix() stop, computed as color(srgb r g b / a), is read and paints the ground', () => {
+  assert.deepEqual(stopsOf('radial-gradient(closest-side, color(srgb 1 0 0.5), color(srgb 0 0 0 / 0.5))'), [[255, 0, 127.5, 1], [0, 0, 0, 0.5]]);
+  assert.equal(paintsGround(layer({ image: true, paint: 'radial-gradient(closest-side, color(srgb 0.75 0.75 0.75), rgba(0, 0, 0, 0))' }), [140, 140, 140]), true);
+});
+
 test('groundOf is the largest opaque background, else mid grey', () => {
   const boxes = [
     { bg: [200, 0, 0, 1], op: 1, box: [0, 0, 10, 10] },

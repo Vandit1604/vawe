@@ -59,10 +59,12 @@ const STARTER_TEMPLATE = `<!doctype html>
   .facts { margin: 0; padding: 0; list-style: none; font-size: calc(var(--vh) * 0.09); font-weight: 600; line-height: 1.15; }
   h1, .line, .facts { letter-spacing: -0.03em; }
   [data-aspect="9:16"] h1 { font-size: calc(var(--vw) * 0.13); }
+  .thread { position: absolute; left: 0; top: 0; width: calc(var(--vh) * 0.07); height: calc(var(--vh) * 0.07); border-radius: 18%;
+            background: color-mix(in srgb, var(--ground), white 60%); }
 </style>
 <script type="module">
 // core/motion/README.md: enter, leave, stagger and layer carry the house motion; change the options, keep the calls
-import { layer, leave, stagger, EASE } from '../../core/motion/presets.js';
+import { enter, keys, layer, leave, stagger, EASE } from '../../core/motion/presets.js';
 const root = document.documentElement;
 const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
 const end = parseFloat(document.querySelector('meta[name="duration"]').content);
@@ -92,13 +94,20 @@ worlds.forEach((world, i) => {
   drift(world, cut, stop);
   const facts = world.querySelector('.facts');
   if (!facts) return bloom(world, cut, stop);
-  stagger(facts.querySelectorAll('li'), { at: cut, from: '0.6em 0', blur: 10, ...(i % 2 ? {} : { ease: 'pop' }) });
+  stagger(facts.querySelectorAll('li'), { at: cut, blur: 10, ...(i % 2 ? { from: '0.6em 0' } : { from: '0 0.6em', ease: 'pop' }) });
   facts.animate([{ translate: '0 0' }, { translate: '0 -0.4em' }], { delay: cut * 1000, duration: (stop - cut) * 1000, easing: EASE.glide, fill: 'both' });
 });
+// the thread (rule thread): one object carried across every cut, from its place in one world to its place in the next; make it the film's own
+const PLACE = [[0.78, 0.2], [0.62, 0.32], [0.86, 0.48], [0.7, 0.14]];
+const place = (k) => 'calc(var(--vw) * ' + PLACE[k % PLACE.length][0] + ') calc(var(--vh) * ' + PLACE[k % PLACE.length][1] + ')';
+const carry = worlds.slice(1).flatMap((world, k) => [[beat(k + 2) - 0.23, place(k), 'fling'], [beat(k + 2) + 0.27, place(k + 1), 'hang']]);
+enter($('.thread'), { at: 0.3, from: '0 0', scale: 0.4, ease: 'pop' });
+keys($('.thread'), 'translate', [[0, place(0)], ...carry, [end, place(worlds.length - 1)]]);
 </script>
 </head>
 <body>
 {{worlds}}
+<div class="thread"></div>
 </body>
 </html>
 `;
@@ -204,7 +213,7 @@ const GROUND = '<div class="ground" aria-hidden="true"><i></i><i></i><i></i></di
 
 function worldsHtml(beats, title) {
   const rest = beats.slice(1).map((b, k) => `<section class="world" data-world="s${k + 2}">
-  ${GROUND}${b.wordless ? '' : `\n  <ul class="facts"><li>fact ${k + 2}</li></ul>`}
+  ${GROUND}${b.wordless ? '' : `\n  <ul class="facts"><li>fact ${k + 2}</li><li>its proof</li></ul>`}
 </section>`);
   return [`<main class="world" data-world="s1">
   ${GROUND}

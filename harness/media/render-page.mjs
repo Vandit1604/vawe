@@ -1014,17 +1014,23 @@ function slideshowAdvice(pagePath, motion, probe, authoring) {
   return [...(skipped ? [NO_RECORDS_NOTE] : []), ...(live.length ? [...slideshowLines({ score: live.length, of: 10, tells: live }), waiverHint('slideshow')] : [])];
 }
 
+/** The advice lines read from the probed page alone (text, motion, slideshow, bar and layout lint), waivers applied; no brief line and no video. */
+export function probeAdvice(pagePath, { probe, motion }) {
+  const authoring = pageAuthoring(pagePath);
+  const contrast = contrastLines(unwaivedContrast(probe.contrast, authoring));
+  return [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe))];
+}
+
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
 export function pageAdvice(pagePath, { probe, motion }) {
   const authoring = pageAuthoring(pagePath);
   const brief = readBrief(pagePath);
   const dir = path.relative(process.cwd(), path.dirname(path.resolve(pagePath)));
-  const contrast = contrastLines(unwaivedContrast(probe.contrast, authoring));
   const directions = directionsLines(brief, dir).filter((l) => !(l.startsWith('attractor:') && isWaived(authoring, 'attractor', /^attractor: direction (\w+)/.exec(l)?.[1] ?? null)));
   return {
     text: textProblems(probe.samples, { ...probe, rules: rulesWith(readDecls(pagePath), RULES) }),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
+    lines: [...probeAdvice(pagePath, { probe, motion }), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...(isWaived(authoring, 'transitions') || boardFilled(brief ?? '') !== true ? [] : handoffAdvice(moveRows(brief)).flatMap((l) => [l, waiverHint('transitions')])), ...ideasAdvice(brief, authoring), ...moveDocLines(brief),
       ...beatLines(pagePath, probe.worlds, authoring),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],

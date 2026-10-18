@@ -18,13 +18,27 @@ export const SPARSE_MAX = 2;
 
 const r2 = (x) => Math.round(x * 100) / 100;
 const own = (records) => records.filter((r) => !r.decorative && r.duration > CUT);
-const kindOf = (r) => moveParts(r).map((p) => p.key).sort().join(' + ') || 'none';
+// An entrance is every entering record of one element that starts with its first: enter() runs the move and its fade as two animations,
+// so the fade alone is the kind only when nothing moves with it.
+const kindOf = (r) => {
+  const keys = [...new Set((r.together ?? [r]).flatMap((x) => moveParts(x).map((p) => p.key)))];
+  const moved = keys.filter((k) => !k.startsWith('fade '));
+  return (moved.length ? moved : keys).sort().join(' + ') || 'none';
+};
 const mostCommon = (xs) => {
   const n = new Map();
   for (const x of xs) n.set(x, (n.get(x) ?? 0) + 1);
   return [...n].sort((a, b) => b[1] - a[1])[0] ?? [null, 0];
 };
-const firstPerTarget = (rs) => [...new Map(rs.sort((a, b) => a.delay - b.delay).map((r) => [r.target, r])).values()];
+function firstPerTarget(rs) {
+  const first = new Map();
+  for (const r of [...rs].sort((a, b) => a.delay - b.delay)) {
+    const had = first.get(r.target);
+    if (!had) first.set(r.target, { ...r, together: [r] });
+    else if (r.delay - had.delay <= AT_ONCE_S) had.together.push(r);
+  }
+  return [...first.values()];
+}
 const worldIndex = (worlds, t) => worlds.reduce((k, w, i) => (w.start <= t + 1e-9 ? i : k), 0);
 const boundaries = (worlds) => worlds.slice(1).map((w, i) => ({ at: w.start, a: worlds[i], b: w }));
 const mostly = (flags) => flags.length >= MIN_REPEATS && flags.filter(Boolean).length / flags.length >= SHARE;
@@ -33,8 +47,8 @@ function sameEntrance(records) {
   const enters = firstPerTarget(own(records).filter(entering));
   const [kind, n] = mostCommon(enters.map(kindOf));
   if (enters.length < SAME_KIND_MIN || n / enters.length < SAME_KIND_SHARE) return null;
-  return { code: 'same-entrance', at: [r2(enters[0].delay)], what: `${n} of ${enters.length} elements enter with the same move (${kind})`,
-    fix: 'give the hero, the support and the detail different moves; stagger them' };
+  return { code: 'same-entrance', at: [r2(enters[0].delay)], what: `${n} of ${enters.length} elements enter with one move (${kind})`,
+    fix: 'vary the moves of the hero, the support and the detail; stagger them' };
 }
 
 function sameInOut(worlds, records) {

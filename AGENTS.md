@@ -45,7 +45,7 @@ Read `taste/build/DIGEST.md` first: the one list of taste pitfalls. Read `skills
 ## The proof before you say done
 
 Report each path. Without all four the film is not done.
-`dev` prints the plan status first: what is empty, the plan findings, the bans, one `next:`.
+`dev` prints the plan status first: the bans the page already shows (read before the render), what is empty, the plan findings, one `next:`.
 
 1. The draft: `out/<name>-draft.mp4`, newer than `page.html`.
 2. The storyboard: `out/<name>-storyboard.html`.
