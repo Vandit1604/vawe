@@ -10,6 +10,7 @@ import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolveFrame } from './render-page.mjs';
+import { ensureFonts, fontFilesIn } from '../lib/ensure-fonts.mjs';
 import { chooseCrf, RENDER_CRF, CLIP_BUDGET_BYTES } from '../lib/clip-budget.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -44,13 +45,40 @@ export function sourceHash(name) {
 }
 
 const hashOf = (entry) => (typeof entry === 'string' ? entry : entry?.hash);
-const readLock = () => (fs.existsSync(LOCK) ? JSON.parse(fs.readFileSync(LOCK, 'utf8')) : {});
-const writeLock = (lock) => fs.writeFileSync(LOCK, `${JSON.stringify(Object.fromEntries(Object.entries(lock).sort()), null, 2)}\n`);
+const readLock = (file = LOCK) => (fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {});
+const LOCK_WAIT_MS = 15_000;
+
+/** Merges `entries` into the lock file. Two renders at once each hold the mkdir lock for the read, merge and rename, so neither loses the other's clips. */
+export async function recordClips(entries, lockFile = LOCK) {
+  const guard = `${lockFile}.d`;
+  const giveUp = Date.now() + LOCK_WAIT_MS;
+  for (;;) {
+    try { fs.mkdirSync(guard); break; } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      if (Date.now() > giveUp) throw new Error(`${guard} has been held for ${LOCK_WAIT_MS / 1000} s; remove it if no render is running`);
+      await new Promise((r) => setTimeout(r, 50));
+    }
+  }
+  try {
+    const merged = { ...readLock(lockFile), ...entries };
+    const tmp = `${lockFile}.${process.pid}.tmp`;
+    fs.writeFileSync(tmp, `${JSON.stringify(Object.fromEntries(Object.entries(merged).sort()), null, 2)}\n`);
+    fs.renameSync(tmp, lockFile);
+  } finally {
+    fs.rmdirSync(guard);
+  }
+}
 
 /** Why the clip must be rendered again, or '' when its sources match the recorded hash. */
 export function staleReason(name, lock) {
   if (!fs.existsSync(path.join(MOVES, `${name}.mp4`))) return 'no clip yet';
   return hashOf(lock[name]) === sourceHash(name) ? '' : 'the clip size, demo, demo.css or a core/ import changed';
+}
+
+function fetchMissingFonts(names) {
+  const read = (f) => fs.readFileSync(f, 'utf8');
+  const files = fontFilesIn(read(path.join(MOVES, 'demo', 'demo.css')), ...names.map((n) => read(path.join(MOVES, 'demo', `${n}.html`))));
+  if (ensureFonts(ROOT, files)) console.log('  fonts    a face was missing from assets/fonts; fetched with generators/media/fonts.mjs');
 }
 
 function renderArgs(name) {
@@ -119,10 +147,11 @@ async function main() {
     console.log(`all ${all.length} clips are current; --all re-renders them`);
     return;
   }
+  fetchMissingFonts(names);
   const results = await renderAll(names);
   const failed = results.filter((r) => r.code !== 0);
-  for (const r of results) if (r.code === 0) lock[r.name] = { hash: sourceHash(r.name), crf: r.crf };
-  if (results.length) writeLock(lock);
+  const done = results.filter((r) => r.code === 0);
+  if (done.length) await recordClips(Object.fromEntries(done.map((r) => [r.name, { hash: sourceHash(r.name), crf: r.crf }])));
   console.log(`${results.length - failed.length} of ${results.length} clips rendered to prompts/moves/`);
   process.exit(failed.length ? 1 : 0);
 }

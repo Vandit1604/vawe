@@ -7,8 +7,8 @@
 // puts its text above that one's fields (so a table ends its section), the others follow as headings.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { UsageError } from './parse.mjs';
+import { ensureFonts } from '../lib/ensure-fonts.mjs';
 import { pickTemplate, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
@@ -435,7 +435,7 @@ function chooseTemplate(root, { from, request, name, title, length }) {
 // The starter's face goes into the film's own assets folder: a film carries its files.
 function copyFace(root, dir, face) {
   const src = path.join(root, 'assets', 'fonts', face.font);
-  if (!fs.existsSync(src)) spawnSync(process.execPath, [path.join(root, 'generators', 'media', 'fonts.mjs')], { cwd: root, stdio: 'inherit' });
+  ensureFonts(root, [face.font]);
   if (!fs.existsSync(src)) throw new UsageError(`${path.relative(root, src)} is missing and the fetch failed; run: node generators/media/fonts.mjs`);
   fs.mkdirSync(path.join(dir, 'assets'), { recursive: true });
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));

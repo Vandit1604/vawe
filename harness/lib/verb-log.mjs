@@ -8,8 +8,9 @@ const MAX_IMAGES = 20;
 const MAX_REASON = 260;
 
 /** The film a call is about: the page or mp4 it names (`new` names the film itself); UNFILED when it names none. */
-export function filmOfCall(verb, positional) {
+export function filmOfCall(verb, positional, args = []) {
   if (verb === 'new' && positional[0]) return filmKeyOf(positional[0]);
+  if (verb === 'moves' && args.includes('--only')) return args[args.indexOf('--only') + 1];
   const file = positional.find((p) => /\.(html|mp4|webm)$/i.test(p));
   return file ? filmKeyOf(file) : UNFILED;
 }
