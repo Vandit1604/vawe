@@ -154,6 +154,29 @@ function CopyButton({
   );
 }
 
+// The creator's X picture in a circle; the initial stands in when it is missing or fails, before or after hydration.
+function Avatar({ post, className, decorative = false }: { post: InspirationCard; className: string; decorative?: boolean }) {
+  const name = post.creator.name || post.creator.handle;
+  const label = decorative ? "" : name;
+  const [failed, setFailed] = useState(!post.avatar);
+  const img = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const el = img.current;
+    if (el?.complete && el.naturalWidth === 0) setFailed(true);
+  }, []);
+  return (
+    <span className={className}>
+      {failed ? (
+        <span className="in-ava-initial" role={label ? "img" : undefined} aria-label={label || undefined} aria-hidden={label ? undefined : true}>
+          {[...name][0]?.toUpperCase()}
+        </span>
+      ) : (
+        <img ref={img} src={post.avatar} alt={label} width={28} height={28} loading="lazy" decoding="async" onError={() => setFailed(true)} />
+      )}
+    </span>
+  );
+}
+
 function Fail({ url, onRetry }: { url: string; onRetry?: () => void }) {
   return (
     <div className="in-fail">
@@ -297,6 +320,7 @@ function Tile({
         />
       ) : null}
       <span className="in-buf" aria-hidden="true" />
+      <Avatar post={post} className="in-ava" />
       <div className="in-layer" aria-hidden="true">
         <span className="in-txt">
           <b className={post.title ? undefined : "is-none"} lang={langOf(title)}>
@@ -505,6 +529,7 @@ function Viewer({
                 </h2>
                 <p className="in-who">
                   <a href={`https://x.com/${post.creator.handle}`} rel="noopener">
+                    <Avatar post={post} className="in-ava in-ava-inline" decorative />
                     {post.creator.name ? `${post.creator.name} ` : null}
                     <span className="in-handle">@{post.creator.handle}</span>
                   </a>

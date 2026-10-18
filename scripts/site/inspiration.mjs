@@ -8,6 +8,7 @@
 //   1. video   the playback mp4 on video.twimg.com: a hinted URL checked with a HEAD request, else yt-dlp
 //   2. post    the text, creator and name from X oEmbed
 //   3. poster  one frame, `bin/vawe still <mp4 url>` (a range read, nothing downloaded), as a small webp
+//   3b. avatar the creator's profile picture URL on pbs.twimg.com, from the embed data X serves
 //   4. data    the entries, written once
 // "Made with" and the prompt come only from the post text. Type tags come from rules on the post text
 // and from a look at the posters; a tag set by hand is kept on every run. --normalize re-derives
@@ -34,7 +35,7 @@ const argv = process.argv.slice(2);
 const arg = (name) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : undefined);
 const HINTS = arg('--hints') ? JSON.parse(fs.readFileSync(arg('--hints'), 'utf8')) : {};
 // Parallel requests per stage: the CDN takes many HEAD requests, X's oEmbed and yt-dlp fewer.
-const JOBS = { head: 16, ytdlp: 4, oembed: 8, poster: 4 };
+const JOBS = { head: 16, ytdlp: 4, oembed: 8, poster: 4, avatar: 8 };
 const POSTER_W = 640;
 const POSTER_MAX = 60_000;
 const TITLE_MAX = 90;
@@ -245,6 +246,30 @@ async function postStage(todo, st, failed) {
   return `${need.length} posts`;
 }
 
+// The embed data X serves for a post names the author's picture; _bigger is 73 px, enough for a 28 px circle at 2x.
+async function avatarOf(id) {
+  return retry('avatar', async () => {
+    const res = await fetch(`https://cdn.syndication.twimg.com/tweet-result?id=${id}&token=a`).catch(() => null);
+    if (!res) return { ok: false, why: 'avatar: no response' };
+    if (res.status === 429) return { ok: false, limited: true, why: 'avatar: 429' };
+    if (!res.ok) return { ok: false, why: `avatar: HTTP ${res.status}` };
+    const url = (await res.json().catch(() => ({}))).user?.profile_image_url_https;
+    return url ? { ok: true, url: url.replace(/_normal(\.\w+)$/, '_bigger$1') } : { ok: false, why: 'avatar: none in the embed data' };
+  });
+}
+
+async function avatarStage(posts, st) {
+  st.avatar ??= {};
+  const need = posts.filter((p) => !p.avatar && !st.avatar[p.id]);
+  let missing = 0;
+  await pool(need, JOBS.avatar, async (p) => {
+    const r = await avatarOf(p.id);
+    if (r.ok) st.avatar[p.id] = r.url;
+    else missing++;
+  });
+  return `${need.length - missing} of ${need.length} avatars`;
+}
+
 async function posterStage(todo, st, failed) {
   const need = todo.filter(({ id }) => st.video[id] && st.post[id] && !fs.existsSync(path.join(POSTERS, `${id}.webp`)));
   await pool(need, JOBS.poster, async ({ id }) => {
@@ -279,6 +304,7 @@ function entryOf(id, video, post, old = {}) {
     duration: video.duration ?? null,
     ...(saves ? { saves } : {}),
     ...(likes ? { likes } : {}),
+    ...(old.avatar ? { avatar: old.avatar } : {}),
   };
 }
 
@@ -317,6 +343,9 @@ async function main() {
     built++;
   }
   const order = new Map(urls.map((u, i) => [idOf(u), i]));
+  await timed('avatar', () => avatarStage([...known.values()], st));
+  save();
+  for (const p of known.values()) if (!p.avatar && st.avatar[p.id]) p.avatar = st.avatar[p.id];
   data.posts = [...known.values()].map((p) => (argv.includes('--normalize') || !p.maker ? normalize(p) : p)).sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
   fs.writeFileSync(DATA, `${JSON.stringify(data, null, 2)}\n`);
   fs.rmSync(TMP, { recursive: true, force: true });

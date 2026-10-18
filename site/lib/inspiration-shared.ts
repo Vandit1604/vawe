@@ -17,6 +17,8 @@ export type InspirationPost = {
   playback: string;
   duration: number;
   saves?: number;
+  likes?: number;
+  avatar?: string;
 };
 // What the wall needs per post. The prompt text stays out of the page and loads on demand (PROMPTS_PATH).
 export type InspirationCard = Omit<InspirationPost, "prompt"> & { posted: string; typeLabel: string; madeWith: string; promptSource?: string };

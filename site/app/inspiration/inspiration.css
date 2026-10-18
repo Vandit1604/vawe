@@ -73,6 +73,14 @@
 .in-layer{position:absolute;inset:0;z-index:var(--z-base);display:flex;flex-direction:column;justify-content:flex-end;padding:var(--sp-3);pointer-events:none;
   background:linear-gradient(to top,rgb(0 0 0 / .88) 0,rgb(0 0 0 / .85) 34%,rgb(0 0 0 / .35) 70%,rgb(0 0 0 / 0) 100%);
   opacity:0;transition:opacity var(--dur-press) var(--ease-in)}
+/* The creator's picture: the tile's one resting detail. The hover text sits above it, never under it. */
+.in-tile{--ava:28px}
+.in-ava{position:absolute;left:var(--sp-2);bottom:var(--sp-2);z-index:var(--z-raise);display:grid;place-items:center;width:var(--ava);height:var(--ava);
+  border-radius:50%;overflow:hidden;background:rgb(0 0 0 / .6);box-shadow:0 0 0 1px oklch(1 0 0 / .2),0 0 0 3px rgb(0 0 0 / .35);pointer-events:none}
+.in-ava img{width:100%;height:100%;object-fit:cover;display:block}
+.in-ava-initial{font-size:var(--fs-label);font-weight:var(--fw-head);line-height:1;color:var(--ink)}
+.in-ava-inline{--ava:28px;position:static;display:inline-grid;vertical-align:middle;margin-right:var(--sp-2);box-shadow:0 0 0 1px var(--line-2)}
+.in-layer{padding-bottom:calc(var(--sp-2) + var(--ava) + var(--sp-2))}
 .in-txt{display:flex;flex-direction:column;min-width:0}
 .in-txt b{font-size:var(--fs-ui);font-weight:var(--fw-head);line-height:var(--lh-ui);letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .in-txt b.is-none,.in-lb-info h2.is-none{color:var(--muted);font-weight:500}
@@ -188,6 +196,7 @@
   .in-rail{margin-inline:calc(var(--sp-4) * -1);padding-inline:var(--sp-4)}
   .in-wall{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2)}
   .in-chip span,.in-icon,.in-sort button,.in-made select{min-height:var(--hit)}
+  .in-tile{--ava:24px}
   .in-icon{width:var(--hit);height:var(--hit)}
   .in-fail p{font-size:var(--fs-label)}
   .btn.in-sm{min-height:36px}
