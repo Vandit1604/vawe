@@ -11,6 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { scratch } from '../lib/scratch.mjs';
 import { appendRun, readRuns } from '../lib/runlog.mjs';
 import { judgeEvent } from '../lib/run-events.mjs';
+import { pageDigest } from '../lib/approval.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
 import { TILE_W } from '../lib/sheet-tiles.mjs';
@@ -276,6 +277,7 @@ function readJson(file) {
 }
 
 const t0 = Date.now();
+const pageHash = ext === '.html' ? pageDigest(input) : null;
 const ev = await prepare(input, stage, brief);
 const file = path.resolve('out', `${ev.name}.${stage === 'stills' ? 'stills' : 'judge'}.json`);
 const prevItems = stage === 'stills' ? [] : previousItems(readJson(file));
@@ -283,7 +285,7 @@ const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(
 const result = finish(ev, raw, Date.now() - t0);
 const led = stage === 'stills' ? null : mergeLedger(prevItems, raw, result.fixes, result.notes);
 if (led) Object.assign(result, { fixes: led.fixes, items: led.items, ledger: ledgerLines(led) });
-appendRun(ev.name, judgeEvent({ stage, verdict: result.verdict, scores: result.scores, anchor: result.anchor, bar: result.bar ? barEvent(result.bar) : null, ledger: led?.counts, seconds: result.ms / 1000, findings: stage === 'stills' ? null : findingsEvent(result) }));
+appendRun(ev.name, judgeEvent({ pageHash, stage, verdict: result.verdict, scores: result.scores, anchor: result.anchor, bar: result.bar ? barEvent(result.bar) : null, ledger: led?.counts, seconds: result.ms / 1000, findings: stage === 'stills' ? null : findingsEvent(result) }));
 fs.mkdirSync(path.dirname(file), { recursive: true });
 fs.writeFileSync(file, JSON.stringify(result, null, 1));
 console.log(reportLines(result, path.relative(process.cwd(), file)).join('\n'));

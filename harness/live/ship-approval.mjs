@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runs before `vawe ship`: refuses a final render without a critique of the current page by another session and without the owner's
+// Runs before `vawe ship`: refuses a final render without a fresh review of the current page (a judge verdict, or a critique from another session) and without the owner's
 // approval of it. Each refusal line ends with the command to run. VAWE_UNATTENDED=1 skips both and says so.
 //   node harness/live/ship-approval.mjs <page.html>
 import path from 'node:path';
@@ -14,4 +14,4 @@ if (problems.length) {
   for (const problem of problems) console.error(`vawe: ship refused: ${problem}`);
   process.exit(1);
 }
-if (process.env.VAWE_UNATTENDED === '1') console.log('vawe: ship runs unattended (VAWE_UNATTENDED=1): no fresh critique and no owner approval checked');
+if (process.env.VAWE_UNATTENDED === '1') console.log('vawe: ship runs unattended (VAWE_UNATTENDED=1): no fresh review and no owner approval checked');

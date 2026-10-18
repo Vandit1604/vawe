@@ -18,7 +18,7 @@ import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs'
 import { readFindings } from '../lib/findings.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
-import { critiqueProblem, critiqueCommand } from '../lib/critique-gate.mjs';
+import { critiqueProblem, critiqueCommand, judgeCommand } from '../lib/critique-gate.mjs';
 export { commitsBehind } from '../lib/stale-checkout.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -46,7 +46,7 @@ const pageName = (page) => {
 };
 const devNext = (v, [page]) => {
   if (v.from != null || v.to != null) return `bin/vawe strip ${page} --at <the second you fixed> and Read it; when every named second is fixed: ${SAY.critique(pageName(page), page)}`;
-  if (critiqueProblem(page, { root: ROOT })) return `before anything else, in a session that did not write the page: ${critiqueCommand(page)}`;
+  if (critiqueProblem(page, { root: ROOT })) return `before anything else: ${judgeCommand(page)} (its own session), or in a separate terminal ${critiqueCommand(page)}`;
   const state = nextStep(path.resolve(page), ROOT);
   if (state.stage === 'draft') return SAY.motion(pageName(page), page);
   return state.stage === 'motion' && !/Motion pass/.test(state.why) ? state.next : `${state.next} (${state.why})`;
@@ -184,7 +184,7 @@ export const VERBS = [
   },
   {
     tier: 'core',
-    name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background; refused until another session has run vawe critique on the page and the owner has approved the draft (vawe approve)',
+    name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background; refused until a fresh review of the page (vawe judge --fresh, or vawe critique from another session) and the owner approval (vawe approve)',
     positional: [{ name: 'page|job', help: 'films/<name>/page.html; with --status, that page or a job id (default: the newest job)' }],
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
