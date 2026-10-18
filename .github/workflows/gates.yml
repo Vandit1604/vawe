@@ -35,7 +35,7 @@ jobs:
         with:
           path: ~/.cache/puppeteer
           key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - run: sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - run: npm ci
       - name: static gates
         run: |
@@ -48,7 +48,7 @@ jobs:
       - run: node --test --test-concurrency=1 'tests/lib/*.test.mjs' 'tests/motion/*.test.mjs' 'tests/hooks/*.test.mjs'
 
   e2e:
-    name: e2e (manual: page tests and draft renders of every page film)
+    name: "e2e (manual: page tests and draft renders of every page film)"
     if: github.event_name == 'workflow_dispatch' && inputs.e2e
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -62,7 +62,7 @@ jobs:
         with:
           path: ~/.cache/puppeteer
           key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - run: sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - run: npm ci
       - name: fetch the locked faces
         run: node generators/media/fonts.mjs
