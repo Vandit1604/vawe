@@ -1,37 +1,43 @@
----
-when: you have never run this repo
-answers: what vawe is, how to install it, the one command that turns a page into an mp4, and the hard rules for day one
-group: project
----
+# vawe: HTML to video for coding agents
 
-# vawe: one page in, one film out
+vawe is an open-source HTML to video framework for agent-native motion graphics: one HTML page in, one
+film out. It is programmatic video and motion graphics as code, a free alternative to Remotion,
+HyperFrames and Motion Canvas, built so that coding agents (Claude Code, Codex, Cursor) write the films.
+The page is plain HTML, CSS, Web Animations, SVG, canvas or three.js. The renderer seeks it frame by
+frame in Chrome, mixes its `<audio>` tags offline and encodes one deterministic mp4.
+
+Site and docs: [vawe.dev](https://vawe.dev). For an AI agent: [vawe.dev/ai-agents](https://vawe.dev/ai-agents)
+or [llms.txt](https://vawe.dev/llms.txt).
+
+![A vawe page rendering to a film](assets/vawe-demo.gif)
+
+## Quickstart
 
 ```bash
 git clone https://github.com/Vandit1604/vawe.git && cd vawe
-npm install                                # Node 22+; also needs ffmpeg
-npx puppeteer browsers install chrome      # bin/vawe doctor prints this and every other missing tool
-bin/vawe new coffee-sting --request "a 10 s sting for a coffee brand"
-# then run the next: line each command prints (AGENTS.md is the map)
+npm install                                  # Node 22+; ffmpeg must be on PATH
+npx puppeteer browsers install chrome        # bin/vawe doctor prints this and every other missing tool
+bin/vawe new hello --request "a 10 s sting for a coffee brand"
+# then run the next: line that each command prints (AGENTS.md is the map)
 ```
 
-vawe is an open-source (Apache-2.0) HTML to video framework for agent-native motion graphics: a free,
-self-hosted, programmatic-video alternative to Remotion, HyperFrames and Motion Canvas. Site and docs:
-[vawe.dev](https://vawe.dev). For an AI agent: [vawe.dev/ai-agents](https://vawe.dev/ai-agents) or
-[llms.txt](https://vawe.dev/llms.txt). A film is one HTML page that an agent (or
-you) writes in HTML, CSS, Web Animations, SVG, canvas or three.js. The renderer seeks the page frame
-by frame, screenshots every frame, mixes the page's `<audio>` tags offline and encodes one mp4. No
-timeline, no editor, no private format: the page is the film, and the same page renders the same
-bytes in any frame order.
+## Films made with vawe
 
-```bash
-bin/vawe new hello                         # films/hello/page.html, a valid starter
-bin/vawe dev  films/hello/page.html        # half size, 30 fps, silent: the draft
-bin/vawe ship films/hello/page.html        # full size, 60 fps, subframe blur, audio: the final
-```
+Each film is one `page.html`. Click a still to play the mp4.
 
-![vawe demo](assets/vawe-demo.gif)
+| | |
+|---|---|
+| [![showcase: a nautilus shell drawn in glowing gold particles on black](site/public/examples/showcase.webp)](https://vawe.dev/examples/showcase.mp4) | [![CINDRE: a red lotus of soft light opens on black, a perfume film](site/public/examples/cindre.webp)](https://vawe.dev/examples/cindre.mp4) |
+| **showcase**, 14 s: one page rendered to 16:9, 9:16, 1:1, 4:5 and 4:3 | **CINDRE**, 10 s: a perfume film, one page |
+| [![tracking HUD: the words "every frame" with tracking boxes, colour fringes and scan lines over a field of coordinates](site/public/examples/tracking-hud.webp)](https://vawe.dev/examples/tracking-hud.mp4) | [![retro remix: desktop windows on a green hill read learn After Effects, buy a template, hire a studio, keyframe for 3 days](site/public/examples/retro-remix.webp)](https://vawe.dev/examples/retro-remix.mp4) |
+| **tracking HUD**: a screen filmed through the lens shader (`films/examples/tracking-hud/`) | **retro remix**: a desktop-window style remix |
 
-## A film, in one page
+More: over 120 moves to copy, each with a clip, at [vawe.dev/moves](https://vawe.dev/moves) and in
+`prompts/moves/README.md`.
+
+## How it works
+
+### A film is one HTML page
 
 ```html
 <!doctype html>
@@ -47,43 +53,65 @@ bin/vawe ship films/hello/page.html        # full size, 60 fps, subframe blur, a
 ```
 
 - `<meta name="duration">` is the length in seconds. Everything else is what you already know.
-- Time is the seek. CSS `@keyframes` and `element.animate()` are paused and driven by
-  `currentTime`; or define `window.seek(t)` and paint frame t as a pure function of t.
-- Before any page script runs the renderer installs a virtual clock (`Date`, `performance.now`,
-  `requestAnimationFrame`, timers and a seeded `Math.random` all follow the seek) and sets
-  `<html data-aspect>`, `--vw`/`--vh` and `window.vawe` so one page lays out for
-  `16:9 9:16 1:1 4:5 4:3` (`bin/vawe ship <page> --aspect all` renders every one).
-- Audio is `<audio>` tags with `data-at`, `data-gain`, `data-fade-out`; `loop` marks a music file the user gives;
-  `data-synth` picks a fallback effect voice from `core/audio/kit.mjs` (a recorded effect comes first). Mixed offline as written; `<meta name="loudness">`
-  opts in to a target.
+- Time is the seek. CSS `@keyframes` and `element.animate()` are paused and driven by `currentTime`,
+  or define `window.seek(t)` and paint frame t as a pure function of t.
+- Before any page script runs, the renderer installs a virtual clock (`Date`, `performance.now`,
+  `requestAnimationFrame`, timers and a seeded `Math.random` all follow the seek). It also sets
+  `<html data-aspect>`, `--vw`/`--vh` and `window.vawe`, so one page lays out for `16:9 9:16 1:1 4:5 4:3`
+  (`bin/vawe ship <page> --aspect all` renders every one).
+- Audio is `<audio>` tags with `data-at`, `data-gain` and `data-fade-out`. `loop` marks a music file the
+  user gives. `data-synth` picks a fallback effect voice from `core/audio/kit.mjs` (a recorded effect
+  comes first). The mix is offline and as written; `<meta name="loudness">` opts in to a target.
 - Springs, keyframe tables and seeded noise: `core/motion/springs.js` (`core/motion/README.md`).
 
-The whole contract, and the mistakes a first draft makes, is `skills/vawe-page/SKILL.md`. The house
-rules an agent reads are `AGENTS.md`. Note the shape the rules ask for in the example: the entrance is a
-move, not only a fade; the exit is shorter than the entrance; the text holds still long enough to read;
-the cue lands with the move.
+The whole contract, and the mistakes a first draft makes, is `skills/vawe-page/SKILL.md`. In the
+example the line rises 40 px as it fades in, holds long enough to read, and the chime lands with the move.
 
-## Before you write a page
+### The loop
 
-Read `AGENTS.md` first: the contract, the loop, and the motion rules that are not your defaults. Pick the
-film type in `guides/ROUTING.md` and start it with
-`bin/vawe new <name> --from prompts/<template>.md`. Every template stops before code at least once (a
-beat table, a facts list or a SPEC); honour the stop. If your tool loads skills, load `vawe-page` before
-the first line. `bin/vawe new hello` writes `films/hello/page.html`, `directions.html` and `brief.md`.
+```
+brief -> reference study -> design and kit -> key frames -> board -> draft -> motion pass
+      -> critique in a FRESH session -> fix the named seconds -> owner approval -> final
+```
 
-Hard rules for day one:
+`bin/vawe` is the one command. The core verbs (`bin/vawe --help`; `--help --all` lists every verb):
 
-- No live clock, no state between frames, no unseeded random. Frame 400 never needs frame 399.
-- Lay out with `--vw`/`--vh` and `[data-aspect]`, never fixed pixels for one aspect.
-- Bundle fonts in `assets/`; never load one from the network.
-- No em dash on screen. The first-frame hook is 12 words or fewer.
-- Exits faster than entrances. Arrive fast, land soft. One entrance per beat, not a fade on all.
-- Text holds for its read time (rule `readable-hold`). Add a hold; never slow the move.
-- A rule broken on purpose is declared in the page with a `_why` (`AGENTS.md`, Waivers).
+| verb | does |
+|---|---|
+| `new` | starts a film: writes `page.html` and `brief.md`, and asks for missing facts first |
+| `refs`, `see`, `strip`, `sheet`, `still` | study references and look at a film: shots, motion, light, type, sound |
+| `frames` | one still per world, the key state of each beat |
+| `storyboard` | an HTML board with a card per world: moves, eases, handoffs, sound, rhythm |
+| `dev` | the draft: half size, 30 fps |
+| `critique` | phone sheet, strip, loop seam and page checks for a session that did not write the page |
+| `approve`, `ship`, `wait` | the owner signs off the draft; the final renders at 60 fps with motion blur and mixed audio |
+| `sound`, `check` | voices, beat grid and cues; one named gate (`anim-traps`, `page-check`, `doc-refs`, ...) |
+
+Each verb prints a `next:` line with the next command. The critique rejects by default and names every
+finding as shot, frame and fix (`skills/vawe-critique/SKILL.md`). A reference is matched through `SPEC.md`
+and a KEEP or CHANGE list (`skills/vawe-reference/SKILL.md`). One prompt template per film type:
+`guides/ROUTING.md`.
+
+### Determinism
+
+Every frame is a pure function of its seek time: no wall clock, no state carried between frames, no
+unseeded random. That lets the renderer capture frames on several browser pages at once, blur from
+fractional subframes, and re-render only the seconds a critique named. `bin/vawe check anim-traps <page>`
+finds the seven ways a seeked CSS animation breaks without an error. More: [vawe.dev/determinism](https://vawe.dev/determinism).
+
+## Use it from your agent
+
+- Codex, Cursor and other agents read `AGENTS.md`: setup, the hard rules, the loop and an index of the
+  docs. Claude Code reads `CLAUDE.md`, which points to `AGENTS.md`.
+- `skills/` holds the skills an agent loads per stage: `html-to-video` (start here), `vawe-brief`,
+  `vawe-page`, `vawe-critique`, `vawe-transitions`, `vawe-reference`. Any agent can read a
+  `SKILL.md`; nothing to install.
+- Ask your agent for a film in plain words. It runs `bin/vawe new <name> --request "<the ask>"` and
+  follows the `next:` lines.
 
 ## Install
 
-**From source**: Node 22+, git, ffmpeg (with libx264 and drawtext) and tesseract (optional, for OCR).
+From source: Node 22+, git, ffmpeg (with libx264 and drawtext), and tesseract (optional, for OCR).
 
 ```bash
 npm install
@@ -91,36 +119,10 @@ bin/vawe doctor
 bin/vawe dev films/<name>/page.html
 ```
 
-`bin/vawe doctor` checks each tool and prints the install line for your system (macOS, Linux or
-Windows) for any that is missing. It exits 1 only when a required tool is missing.
-
-Output can differ between hosts that rasterise on a different GPU or Chrome version.
-
-## The loop
-
-```
-brief or reference -> stills -> draft -> critique in a FRESH session -> fix the named seconds -> final
-```
-
-```bash
-bin/vawe dev      films/<name>/page.html [--from s --to s]   # draft; the hardest 2 to 4 s first
-bin/vawe critique films/<name>/page.html [--ref <mp4>]       # sheet, strip, phone, loop + page checks; a ref is matched
-bin/vawe ship     films/<name>/page.html [--aspect all]      # final
-```
-
-A hook (`harness/live/stage-say.mjs`) names the next command for the film you edited last.
-
-The critique is run by a session that did not write the page, rejects by default, and names every
-finding as shot + frame + fix (`skills/vawe-critique/SKILL.md`). A reference is matched through
-`SPEC.md` and a KEEP/CHANGE list (`bin/vawe see <mp4> --spec`, then `bin/vawe check coverage <film.mp4> --ref <mp4>` lists the seconds that still differ; `skills/vawe-reference/SKILL.md`). One prompt template per film
-type: the router `guides/ROUTING.md`.
-
-## Determinism
-
-Every frame is a pure function of its seek time: no wall clock, no state carried between frames, no
-unseeded random. That is what lets the renderer capture frames on several browser pages at once,
-blur from fractional subframes, and re-render only the seconds a critique named.
-`bin/vawe check anim-traps <page>` finds the seven ways a seeked CSS animation silently breaks.
+`bin/vawe doctor` checks each tool and prints the install line for your system (macOS, Linux or Windows)
+for each missing one. It exits 1 only when a required tool is missing. A verb that fails because
+Chrome is missing prints the same install command. Output can differ between hosts that rasterise on a
+different GPU or Chrome version.
 
 ## Architecture
 
@@ -144,27 +146,51 @@ blur from fractional subframes, and re-render only the seconds a critique named.
 core/motion/       springs.js (spring, track, approach, kf, springLinear, rng, noise1), curves.js
 core/engine/       page-clock.js (the virtual clock), page-api.js (vawe.onFrame, three.js helpers)
 core/audio/        kit.mjs: the synth voices
-bin/vawe:          the one command (`bin/vawe --help`): new dev ship critique compare coverage review spec
-                   studio check doctor moves e2e test judge
+bin/               vawe: the one command; --help lists the verbs
 harness/cli/       the verb table and argument parser behind it
 harness/media/     render-page.mjs · page-audio.mjs · see.mjs (the views) · ref-spec.mjs · review.mjs
 quality/gates/     page-check.mjs · anim-traps.mjs · judge.mjs · doc-refs.mjs
 prompts/           one template per film type, and prompts/moves/ (moves to copy, with clips)
-skills/            html-to-video (start here) · vawe-brief · vawe-page · vawe-critique · vawe-reference · vawe-transitions (loaded on demand)
+skills/            html-to-video (start here) · vawe-brief · vawe-page · vawe-critique · vawe-reference · vawe-transitions
 taste/             rules/ (one rule per file) · craft/ · build/ (generated) · README.md (the index)
-guides/            engine and process guides (ROUTING.md picks a film type) · judge.md · research/ (timing sources)
-films/             <name>/page.html per film
+guides/            engine and process guides (ROUTING.md picks a film type) · judge.md
+films/             <name>/page.html per film; films/examples/ holds the reference films
 out/               rendered mp4s (gitignored)
 ```
 
 ## Docs
 
-New here and want to author? This page, then `AGENTS.md` (the house rules). Then `guides/ROUTING.md`,
-`prompts/moves/README.md`, `core/motion/README.md`, `taste/README.md` (every taste rule; `taste/build/DIGEST.md` is the first read), and `guides/judge.md` (how a film is scored). `bin/vawe --help` prints every command.
+- [vawe.dev](https://vawe.dev): the site, [features](https://vawe.dev/features), [moves](https://vawe.dev/moves),
+  [blog](https://vawe.dev/blog), [Remotion alternatives](https://vawe.dev/remotion-alternatives) and
+  [HyperFrames alternatives](https://vawe.dev/hyperframes-alternatives).
+- In the repo: `AGENTS.md` (the map), `guides/ROUTING.md` (film types), `prompts/moves/README.md`,
+  `core/motion/README.md`, `taste/README.md` (every taste rule; `taste/build/DIGEST.md` is the first
+  read) and `guides/judge.md` (how a film is scored).
+
+## FAQ
+
+**What is vawe?** An HTML to video renderer and workflow for motion graphics as code. You, or your
+agent, write one HTML page; `bin/vawe ship` turns it into an mp4.
+
+**How is it different from Remotion?** There is no React component tree and no timeline API to learn.
+The page uses CSS animations, Web Animations or a `window.seek(t)` function, and the renderer drives
+them by seek time. Comparisons: [vawe.dev/remotion-alternatives](https://vawe.dev/remotion-alternatives).
+
+**Which agents does it work with?** Any agent that reads files and runs shell commands. Claude Code
+reads `CLAUDE.md`; Codex, Cursor and others read `AGENTS.md`.
+
+**Is the output deterministic?** Yes. The same page renders the same frames in any frame order,
+because a virtual clock replaces `Date`, timers, `requestAnimationFrame` and `Math.random`.
+
+**Which formats and aspect ratios?** H.264 mp4, at 16:9, 9:16, 1:1, 4:5 and 4:3 from one page.
+
+**Can I use GSAP, three.js or canvas?** Yes: anything that paints from the seek time. See
+`core/engine/page-api.js` for `vawe.onFrame` and the three.js helpers.
+
+**Is it free for commercial use?** Yes, under the Apache License 2.0.
 
 ## Status and license
 
-vawe is under active development and released under the **[Apache License 2.0](LICENSE)**: free to
-use, modify and distribute, for any purpose, including production and commercial use. See
-**[LICENSE](LICENSE)** for the full text and the patent grant, and **[NOTICE](NOTICE)** for
-third-party attribution. Contributions and issues welcome.
+vawe is under active development and released under the [Apache License 2.0](LICENSE): free to use,
+change and distribute for any purpose, including production and commercial use. [LICENSE](LICENSE) has
+the full text and the patent grant; [NOTICE](NOTICE) has the third-party attribution. Contributions and issues are welcome (`CONTRIBUTING.md`).
