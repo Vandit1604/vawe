@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { refCard } from '../lib/ref-card.mjs';
-import { refsDir, ytDlpArgs, downscaleFilter, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { refsDir, ytDlpArgs, downscaleFilter, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, refsEmpty, noRefsLines, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
 import { probeSize } from '../lib/frame-forensics.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
@@ -109,6 +109,7 @@ function frames() {
 }
 
 function list() {
+  if (refsEmpty(dir)) return console.log(noRefsLines(dir).join('\n'));
   const registry = readRegistry(dir);
   if (!registry) die(`no registry in ${dir}; run: bin/vawe refs index`);
   const shown = registry.filter((r) => !source || r.id === source);

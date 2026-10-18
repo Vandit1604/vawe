@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ytDlpArgs, downscaleFilter, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
+import { ytDlpArgs, downscaleFilter, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest, refsEmpty, noRefsLines } from '../../harness/lib/refs.mjs';
 
 test('the frame manifest numbers each frame and holds its absolute path; frameLines prints it', () => {
   const m = frameManifest('a', [{ t: 0.14, file: '/r/frames/a/key-1-0.1s.png' }, { t: 3.62, file: '/r/frames/a/key-2-3.6s.png' }]);
@@ -158,4 +158,23 @@ test('namedRef finds the first named id that has a video; chooseRefs puts it fir
   assert.equal(got.skipped, null);
   assert.equal(got.named, 'ref-a');
   assert.deepEqual(got.refs.map((r) => r.id), ['ref-a']);
+});
+
+test('an empty or missing refs folder is empty; a video or a registry entry is not', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'refs-empty-'));
+  assert.equal(refsEmpty(path.join(dir, 'missing')), true);
+  assert.equal(refsEmpty(dir), true);
+  writeRegistry(dir, []);
+  assert.equal(refsEmpty(dir), true);
+  fs.writeFileSync(path.join(dir, 'a.mp4'), '');
+  assert.equal(refsEmpty(dir), false);
+});
+
+test('the empty refs folder names what to study instead, and every path it names exists', () => {
+  const text = noRefsLines('/r').join('\n');
+  for (const p of ['films/examples/colour-sting/page.html', 'prompts/moves/README.md']) {
+    assert.ok(text.includes(p), p);
+    assert.ok(fs.existsSync(path.resolve(import.meta.dirname, '../..', p)), p);
+  }
+  assert.match(text, /bin\/vawe refs add <url>/);
 });

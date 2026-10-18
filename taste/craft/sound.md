@@ -36,7 +36,7 @@ music-led structure are aural.
 ## The mechanism
 
 Audio is `<audio>` tags in the page, never played live, mixed offline by `harness/media/page-audio.mjs`
-(the contract is in `AGENTS.md`).
+(`AGENTS.md` keeps the essentials).
 
 ```html
 <audio src="assets/click.wav" data-at="1.2"></audio>                                        <!-- a recorded effect -->
@@ -47,6 +47,10 @@ Audio is `<audio>` tags in the page, never played live, mixed offline by `harnes
 
 - Attributes: `data-at` (s), `data-gain` (dB), `data-fade-in`, `data-fade-out`, `data-trim`
   and `data-trim-end` (play seconds trim to trim-end of the file; an 8 ms fade at each cut),  `data-duck` (dB), `data-role`. An unknown voice or a missing file fails the render with the list.
+- `data-gain` is absolute dB and replaces the voice default: leave it off unless you move one cue on purpose.
+  `data-synth="<voice>"` picks a short effect voice; `loop` marks the music track; `data-role="vo"` ducks it.
+- `bin/vawe sound` lists the voices and `bin/vawe fonts` the fonts. `bin/vawe sound <page> --at s` or
+  `--waveform` checks the cues.
 - The mix is as written: the sum of the cues at their gains. Nothing is raised or lowered. A
   -1 dBTP limiter never raises a level. `<meta name="loudness" content="-14">` opts in to normalising.
 - A cue that peaks more than 6 dB above the median cue draws a warning, never a refusal.

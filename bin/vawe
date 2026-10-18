@@ -154,6 +154,8 @@ async function main(argv) {
     code = e instanceof UsageError ? 2 : 1;
     reason = e instanceof UsageError ? e.message : `exit 1: ${e.message}`;
     console.error(e instanceof UsageError ? `vawe: ${e.message}` : e.stack);
+    const hint = e instanceof UsageError ? null : doctorHintFromFile(ROOT, String(e.stack));
+    if (hint) console.error(hint);
   }
   const endMs = Date.now();
   record(verb, rest, call, code, reason, endMs);

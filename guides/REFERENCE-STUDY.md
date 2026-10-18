@@ -64,7 +64,16 @@ Evidence: the Brew launch v1 had static holds, hard cuts, a small centred headli
 Fixing exactly those (a push per beat, zoom seams, hero size up and left, scale-settle entrances, a
 darker accent ink for text at 2.4:1) moved it from "inspired by" to "reads like the same film".
 
+## A style from a reference
+
+A style taken from a reference is not a recreation. The brief names the ref, and `critique` and `judge` default to
+it (the line `ref: <id>` shows which). Read the card that `bin/vawe refs frames <id>` prints (cuts, flashes, luma,
+camera, palette), not only the top of SPEC.md. Judge the film against the ref, not against the generic range.
+
 ## Recreating a reference end to end
+
+`bin/vawe new <name> --ref <ref.mp4>` writes SPEC.md, and `ship` refuses until the `bin/vawe critique <page> --ref <ref.mp4>`
+loop passes (`skills/vawe-reference/SKILL.md`).
 
 A reference is pixels, not a page. The loop turns those pixels into a page that reads as the same film.
 

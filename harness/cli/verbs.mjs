@@ -17,6 +17,7 @@ import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
 import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs';
 import { readFindings } from '../lib/findings.mjs';
 import { scratch } from '../lib/scratch.mjs';
+import { refsDir, refsEmpty } from '../lib/refs.mjs';
 import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
 import { critiqueProblem, critiqueCommand, judgeCommand } from '../lib/critique-gate.mjs';
 export { commitsBehind } from '../lib/stale-checkout.mjs';
@@ -394,7 +395,7 @@ export const VERBS = [
     ],
     example: 'vawe refs list [id]   |   vawe refs frames u6iro1jHujs   |   vawe refs add https://youtu.be/xxxx --type product --title "Linear Agent"',
     build: (v, [action, source]) => [{ script: 'harness/dev/refs.mjs', args: [action, ...(source ? [source] : []), ...opt('--type', v.type), ...opt('--title', v.title)] }],
-    next: (v, [action]) => (action === 'list' ? 'bin/vawe refs frames, then Read the absolute paths it prints (one per frame) at full size before you design; bin/vawe strip <id> --cuts shows how the film moves through each cut' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
+    next: (v, [action]) => (action === 'list' && refsEmpty(refsDir()) ? 'bin/vawe frames films/examples/colour-sting/page.html --full, then Read the stills at full size before you design' : action === 'list' ? 'bin/vawe refs frames, then Read the absolute paths it prints (one per frame) at full size before you design; bin/vawe strip <id> --cuts shows how the film moves through each cut' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
   },
   {
     tier: 'more',

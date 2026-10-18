@@ -441,6 +441,12 @@ function copyFace(root, dir, face) {
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));
 }
 
+const LATER_DOCS = [
+  'for the later stages: cuts, the twelve handoff families: taste/craft/transitions.md; moves to copy, with clips: prompts/moves/README.md',
+  'sound effects, recorded first: taste/craft/sound.md; lens (depth of field, bloom, LED grid): prompts/moves/lens.md',
+  'skill combos for DESIGN.md: prompts/skill-combos.md; ideas before the board: guides/IDEATE.md',
+];
+
 export function newFilmLines(name, { page, route, title, guesses = [], asked, request, from, defaulted = [], variety = { lines: [] } }) {
   if (asked) return askLines(name, request, from, asked);
   const lines = [`wrote ${page}, films/${name}/brief.md and films/${name}/directions.html`];
@@ -457,7 +463,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
   ];
   const spread = variety.lines.length ? ['', ...variety.lines] : [];
   return [...lines, ...spread, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('explore'), '',
-    ...adviceBlock(advice, '(advice only)'), '', `next: ${SAY.study(name)}; then ${SAY.moves()}. The stages after it are in AGENTS.md, The loop; bin/vawe names the next one after each step.`];
+    ...adviceBlock(advice, '(advice only)'), '', ...LATER_DOCS, '', `next: ${SAY.study(name)}; then ${SAY.moves()}. The stages after it are in AGENTS.md, The loop; bin/vawe names the next one after each step.`];
 }
 
 /**

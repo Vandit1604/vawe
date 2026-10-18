@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { CHROME_FIX } from '../lib/doctor-hint.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const quiet = process.argv.includes('--quiet');
@@ -65,7 +66,7 @@ const TOOLS = [
   { id: 'ffmpeg', name: 'ffmpeg (libx264, drawtext)', required: true, probe: probeFfmpeg, pkg: { brew: 'ffmpeg', apt: 'ffmpeg', dnf: 'ffmpeg (needs the RPM Fusion repo)', pacman: 'ffmpeg', apk: 'ffmpeg', zypper: 'ffmpeg', winget: 'Gyan.FFmpeg', choco: 'ffmpeg' } },
   { id: 'ffprobe', name: 'ffprobe', required: true, probe: () => probeBinary('ffprobe'), pkg: { brew: 'ffmpeg', apt: 'ffmpeg', dnf: 'ffmpeg', pacman: 'ffmpeg', apk: 'ffmpeg', zypper: 'ffmpeg', winget: 'Gyan.FFmpeg', choco: 'ffmpeg' } },
   { id: 'tesseract', name: 'tesseract (optional, OCR for spec and coverage --text)', required: false, probe: () => probeBinary('tesseract', '--version'), pkg: { brew: 'tesseract', apt: 'tesseract-ocr', dnf: 'tesseract', pacman: 'tesseract tesseract-data-eng', apk: 'tesseract-ocr', zypper: 'tesseract-ocr', winget: 'UB-Mannheim.TesseractOCR', choco: 'tesseract' } },
-  { id: 'chrome', name: 'puppeteer Chrome', required: true, probe: probeChrome, fix: 'npm install, then npx puppeteer browsers install chrome' },
+  { id: 'chrome', name: 'puppeteer Chrome', required: true, probe: probeChrome, fix: CHROME_FIX },
   { id: 'fonts', name: 'assets/fonts', required: true, probe: probeFile('assets/fonts', true), fix: 'git checkout -- assets/fonts, or node generators/media/fonts.mjs' },
 ];
 

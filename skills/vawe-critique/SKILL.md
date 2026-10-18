@@ -34,6 +34,18 @@ With a reference: frame-locked. Pull the same five timestamps from both. For eac
 type scale, and the curve of the one thing that moves: same or not. Anything the draft added without
 a KEEP/CHANGE line is a rejection (`vawe-reference`).
 
+## The look verbs
+
+`vawe see <mp4 | page | ref-id> [--vs <ref>]` reads a film completely: shots, motion, light, type, sound, every image
+with its numbers; `--vs` adds deltas and advice that names the page literal. Its parts: `vawe refs frames` (reference
+stills), `vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft;
+`--onion` and `--velocity` for one move), `vawe see <ref.mp4> --spec` (a reference measured into SPEC.md), `vawe sheet`
+(a labelled sheet of seconds and worlds; `--ref <mp4>` puts the reference beside your frames), `vawe storyboard` (one
+HTML board: frame cards, moves, eases, handoffs, sound, rhythm), `vawe still` (one full-size PNG of a page or mp4 at a
+second). A site route, url or static html page: `vawe shot <route> --w 1440,390 [--full]`, never a puppeteer script;
+the site's links: `vawe check links`. A field of many small moving parts (rain, dust, sparks): `vawe see` prints one
+"Particle field" line with count, direction and speed.
+
 ## The judge
 
 Score the seven dimensions of `guides/judge.md` (readability, hierarchy, composition, brand

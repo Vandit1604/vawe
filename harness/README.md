@@ -26,6 +26,11 @@ Register it in your own settings with matcher `Read` and command `node harness/l
 from the repo root).
 `verb-hint.mjs` is a PreToolUse hook (matcher `Bash`, command `node harness/live/verb-hint.mjs`): when a command does by hand what a verb does (a puppeteer or headless Chrome screenshot, a curl status loop, a sleep loop on a render, an ffmpeg contact sheet or frame grab) it adds one line naming the verb. It never blocks and names each verb once per 30 minutes.
 
+## Run log
+
+Every verb appends one line to `out/<film>.runs.jsonl`: verb, stage, seconds, exit code and render slot wait, tagged
+with `VAWE_AGENT` and `VAWE_MODEL` from the shell. `bin/vawe runs <film>` (or `--all`) reads it.
+
 ## Tools with no verb
 
 Run with `node <path>`; the file header holds the usage. A film rarely needs them.

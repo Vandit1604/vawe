@@ -6,6 +6,14 @@ group: project
 
 # vawe: one page in, one film out
 
+```bash
+git clone https://github.com/Vandit1604/vawe.git && cd vawe
+npm install                                # Node 22+; also needs ffmpeg
+npx puppeteer browsers install chrome      # bin/vawe doctor prints this and every other missing tool
+bin/vawe new coffee-sting --request "a 10 s sting for a coffee brand"
+# then run the next: line each command prints (AGENTS.md is the map)
+```
+
 vawe is an open-source (Apache-2.0) HTML to video framework for agent-native motion graphics: a free,
 self-hosted, programmatic-video alternative to Remotion, HyperFrames and Motion Canvas. Site and docs:
 [vawe.dev](https://vawe.dev). For an AI agent: [vawe.dev/ai-agents](https://vawe.dev/ai-agents) or

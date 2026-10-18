@@ -186,6 +186,17 @@ test('--defaults keeps the guesses and names the details it guessed', () => {
   fs.rmSync(root, { recursive: true, force: true });
 });
 
+test('a written film names the docs of the later stages, each with its path, in at most 3 lines', () => {
+  const root = sandbox();
+  const lines = newFilmLines('zz', runNew(root, { request: FULL, defaults: true }));
+  const docs = ['taste/craft/transitions.md', 'prompts/moves/README.md', 'taste/craft/sound.md', 'prompts/moves/lens.md', 'prompts/skill-combos.md'];
+  const naming = lines.filter((l) => docs.some((d) => l.includes(d)));
+  assert.ok(naming.length <= 3, naming.join('\n'));
+  for (const d of docs) assert.ok(naming.some((l) => l.includes(d)), d);
+  for (const d of docs) assert.ok(fs.existsSync(path.resolve(import.meta.dirname, '../..', d)), d);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
 test('a length in the request is the length of the brief and of the page', () => {
   const root = sandbox();
   runNew(root, { request: 'a 6 s sting for Argus', defaults: true });
