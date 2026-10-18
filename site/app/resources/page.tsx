@@ -9,6 +9,7 @@ import { PageTop, Toc } from "../components/Xp";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { EASES } from "../../lib/easing";
 import { MOVES } from "../../lib/moves";
+import { INSPIRATION, INSPIRATION_PATH } from "../../lib/inspiration";
 import { allPosts } from "../../lib/blog";
 import { agentGuide, llmsFull } from "../../lib/agent-guide";
 import { llmsText } from "../../lib/llms";
@@ -72,6 +73,14 @@ const GROUPS: Group[] = [
         icon: "play",
         meta: `${MOVES.length}${NBSP}moves`,
         tile: { word: "Moves", tone: "ochre", detail: "moves", shift: 1, flip: true },
+      },
+      {
+        href: INSPIRATION_PATH,
+        title: "Motion video inspiration",
+        line: "Motion videos made with AI, from posts on X, each with the command to use it as a reference.",
+        icon: "play",
+        meta: `${INSPIRATION.length}${NBSP}videos`,
+        tile: { word: "Films", tone: "cobalt", detail: "films", shift: -1 },
       },
     ],
   },

@@ -2,7 +2,7 @@ import { useId, type ReactNode } from "react";
 import "./mat-tile.css";
 
 export type MatTone = "mat" | "cobalt" | "oxblood" | "ochre" | "graphite" | "accent";
-export type MatDetail = "easing" | "moves" | "agents" | "skills" | "learn" | "compare" | "project";
+export type MatDetail = "easing" | "moves" | "agents" | "skills" | "learn" | "compare" | "project" | "films";
 
 const W = 200;
 const H = 125;
@@ -112,6 +112,14 @@ const DETAILS: Record<MatDetail, ReactNode> = {
           </g>
         );
       })}
+    </>
+  ),
+  films: (
+    <>
+      {[0, 1, 2, 3, 4, 5].map((i) => (
+        <rect key={i} x={16 + i * 28.8} y="100" width="24" height="13.5" rx="1.5" className={i === 2 ? "mat-fill" : "mat-solid"} />
+      ))}
+      <path d="M83.4 103.5v6.5l5.5-3.25z" className="mat-solid" />
     </>
   ),
   project: (

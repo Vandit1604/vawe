@@ -1,0 +1,697 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { Icon } from "../components/Icon";
+import { refCommand, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration";
+
+// The --ease-out and --ease-in tokens: the Web Animations API cannot read a custom property.
+const EASE_OUT = "cubic-bezier(.23,1,.32,1)";
+const EASE_IN = "cubic-bezier(.55,.055,.675,.19)";
+const COPIED_MS = 1600;
+// The first row's posters are the largest paint on load, so they skip lazy loading.
+const FIRST_ROW = 6;
+
+type Filters = { q: string; types: string[]; prompt: boolean };
+const EMPTY: Filters = { q: "", types: [], prompt: false };
+
+const langOf = (s: string) => (/[一-鿿]/.test(s) ? "zh" : "en");
+const factsOf = (p: InspirationCard) => [p.typeLabel, p.tool].filter(Boolean).join(" · ");
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+
+function matches(p: InspirationCard, f: Filters) {
+  if (f.prompt && !p.prompt) return false;
+  if (f.types.length && !f.types.some((t) => p.types.includes(t))) return false;
+  if (!f.q) return true;
+  const hay = [p.title, p.creator.name, p.creator.handle, p.tool, p.prompt?.text ?? "", p.typeLabel, ...p.tags].join(" ").toLowerCase();
+  return f.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
+}
+
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduced(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return reduced;
+}
+
+async function copyText(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.append(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {}
+    ta.remove();
+    return ok;
+  }
+}
+
+function CopyButton({ text, className, onCopied, children }: { text: string; className: string; onCopied: (ok: boolean, text: string) => void; children?: ReactNode }) {
+  const [done, setDone] = useState(false);
+  const timer = useRef<number>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  return (
+    <button
+      type="button"
+      className={className}
+      data-state={done ? "done" : undefined}
+      aria-label={children ? undefined : "Copy the reference command"}
+      title={`Copy: ${text}`}
+      onClick={async (e) => {
+        e.stopPropagation();
+        const ok = await copyText(text);
+        setDone(ok);
+        onCopied(ok, text);
+        window.clearTimeout(timer.current);
+        timer.current = window.setTimeout(() => setDone(false), COPIED_MS);
+      }}
+    >
+      <span className="in-idle">
+        <Icon name="copy" size={14} />
+        {children}
+      </span>
+      <span className="in-done" aria-hidden="true">
+        <Icon name="check" size={14} />
+        {children ? "Copied" : null}
+      </span>
+    </button>
+  );
+}
+
+function Fail({ url, onRetry }: { url: string; onRetry?: () => void }) {
+  return (
+    <div className="in-fail">
+      {onRetry ? <p>Video did not load</p> : null}
+      <div className="in-fail-row">
+        {onRetry ? (
+          <button className="btn btn-ghost in-sm" type="button" onClick={onRetry}>
+            Retry
+          </button>
+        ) : null}
+        <a className="btn btn-ghost in-sm" href={url} rel="noopener">
+          Open on X
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function Tile({
+  post,
+  hidden,
+  first,
+  allowPlay,
+  revealed,
+  onOpen,
+  onCopied,
+}: {
+  post: InspirationCard;
+  hidden: boolean;
+  first: boolean;
+  allowPlay: boolean;
+  revealed: boolean;
+  onOpen: (id: string, e: MouseEvent<HTMLButtonElement>) => void;
+  onCopied: (ok: boolean, text: string) => void;
+}) {
+  const [hover, setHover] = useState(false);
+  const [focus, setFocus] = useState(false);
+  const [skel, setSkel] = useState(false);
+  const [armed, setArmed] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [buffering, setBuffering] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const img = useRef<HTMLImageElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const want = Boolean(post.playback) && allowPlay && !hidden && !failed && !skel && (hover || focus || revealed);
+  const wantRef = useRef(want);
+  wantRef.current = want;
+
+  useEffect(() => {
+    if (img.current && !img.current.complete) setSkel(true);
+  }, []);
+
+  useEffect(() => {
+    if (want && !armed) setArmed(true);
+  }, [want, armed]);
+
+  useEffect(() => {
+    const v = video.current;
+    if (!v || !armed) return;
+    if (want) {
+      setBuffering(true);
+      v.currentTime = 0;
+      v.play().catch(() => {});
+    } else {
+      setPlaying(false);
+      setBuffering(false);
+      v.pause();
+      try {
+        v.currentTime = 0;
+      } catch {}
+    }
+  }, [want, armed, attempt]);
+
+  const title = titleOf(post);
+  const facts = factsOf(post);
+  const cls = ["in-tile", skel && "is-skel", revealed && "is-revealed", playing && "is-playing", buffering && "is-buffering", failed && "is-failed"]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <li
+      className={cls}
+      data-id={post.id}
+      hidden={hidden}
+      onPointerEnter={(e) => e.pointerType === "mouse" && setHover(true)}
+      onPointerLeave={(e) => e.pointerType === "mouse" && setHover(false)}
+      onFocus={() => setFocus(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus(false);
+      }}
+    >
+      <img
+        ref={img}
+        src={post.poster}
+        alt=""
+        width={800}
+        height={450}
+        loading={first ? "eager" : "lazy"}
+        fetchPriority={first ? "high" : "auto"}
+        decoding="async"
+        onLoad={() => setSkel(false)}
+        onError={() => setSkel(false)}
+      />
+      {post.playback ? (
+        <video
+          key={attempt}
+          ref={video}
+          src={armed ? post.playback : undefined}
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-hidden="true"
+          tabIndex={-1}
+          onPlaying={() => {
+            setBuffering(false);
+            if (wantRef.current) setPlaying(true);
+          }}
+          onWaiting={() => wantRef.current && setBuffering(true)}
+          onError={() => {
+            if (!armed) return;
+            setPlaying(false);
+            setBuffering(false);
+            setFailed(true);
+          }}
+        />
+      ) : null}
+      <span className="in-buf" aria-hidden="true" />
+      <div className="in-layer" aria-hidden="true">
+        <span className="in-txt">
+          <b className={post.title ? undefined : "is-none"} lang={langOf(title)}>
+            {title}
+          </b>
+          <span>@{post.creator.handle}</span>
+          {facts ? <span>{facts}</span> : null}
+        </span>
+      </div>
+      <button
+        className="in-open"
+        type="button"
+        aria-label={`Open ${title}, by @${post.creator.handle}${facts ? `, ${facts}` : ""}`}
+        onClick={(e) => onOpen(post.id, e)}
+      />
+      {post.prompt ? <span className="in-badge">Prompt</span> : null}
+      {post.playback ? <CopyButton className="in-ref" text={refCommand(post)} onCopied={onCopied} /> : null}
+      {failed ? (
+        <Fail
+          url={post.url}
+          onRetry={() => {
+            setFailed(false);
+            setArmed(false);
+            setAttempt((n) => n + 1);
+          }}
+        />
+      ) : null}
+    </li>
+  );
+}
+
+function ViewerMedia({ post, reduced }: { post: InspirationCard; reduced: boolean }) {
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const video = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = video.current;
+    if (!v || reduced) return;
+    v.play().catch(() => {
+      v.muted = true;
+      v.play().catch(() => {});
+    });
+  }, [reduced, attempt]);
+
+  if (!post.playback) {
+    return (
+      <div className="in-lb-media is-failed">
+        <img src={post.poster} alt="" />
+        <Fail url={post.url} />
+      </div>
+    );
+  }
+  return (
+    <div className={failed ? "in-lb-media is-failed" : "in-lb-media"}>
+      <video key={attempt} ref={video} src={post.playback} poster={post.poster} controls playsInline preload="metadata" onError={() => setFailed(true)} />
+      {failed ? (
+        <Fail
+          url={post.url}
+          onRetry={() => {
+            setFailed(false);
+            setAttempt((n) => n + 1);
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function Viewer({
+  post,
+  position,
+  reduced,
+  onStep,
+  onClosed,
+  onCopied,
+  toast,
+}: {
+  post: InspirationCard | null;
+  position: string;
+  reduced: boolean;
+  onStep: (dir: number) => void;
+  onClosed: () => void;
+  onCopied: (ok: boolean, text: string) => void;
+  toast: ReactNode;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const info = useRef<HTMLDivElement>(null);
+  const isOpen = Boolean(post);
+
+  useEffect(() => {
+    const d = dialog.current;
+    if (!d || !isOpen || d.open) return;
+    d.showModal();
+    d.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: EASE_OUT, pseudoElement: "::backdrop" });
+    d.animate(reduced ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "scale(.97) translateY(8px)" }, { opacity: 1, transform: "none" }], {
+      duration: 240,
+      easing: EASE_OUT,
+    });
+  }, [isOpen, reduced]);
+
+  const close = useCallback(() => {
+    const d = dialog.current;
+    if (!d?.open) return;
+    d.querySelector("video")?.pause();
+    d.animate([{ opacity: 1 }, { opacity: 0, transform: reduced ? "none" : "scale(.98)" }], { duration: 140, easing: EASE_IN, fill: "forwards" }).finished.then(() => {
+      d.close();
+      d.getAnimations().forEach((a) => a.cancel());
+      onClosed();
+    });
+  }, [reduced, onClosed]);
+
+  const step = (dir: number) => {
+    onStep(dir);
+    if (!reduced) info.current?.animate([{ opacity: 0, transform: `translateX(${12 * dir}px)` }, { opacity: 1, transform: "none" }], { duration: 180, easing: EASE_OUT });
+  };
+
+  const title = post ? titleOf(post) : "";
+  const facts = post ? [post.typeLabel, post.tool, fmtDate(post.posted)].filter(Boolean).join(" · ") : "";
+
+  return (
+    <dialog
+      ref={dialog}
+      className="in-lb"
+      aria-labelledby="in-lb-title"
+      onCancel={(e) => {
+        e.preventDefault();
+        close();
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) close();
+      }}
+      onKeyDown={(e) => {
+        if ((e.target as HTMLElement).closest("video")) return;
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          step(1);
+        }
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          step(-1);
+        }
+      }}
+    >
+      {post ? (
+        <>
+          <div className="in-lb-top">
+            <span className="meta">{position}</span>
+            <button className="in-icon" type="button" aria-label="Previous" onClick={() => step(-1)}>
+              <Icon name="back" />
+            </button>
+            <button className="in-icon" type="button" aria-label="Next" onClick={() => step(1)}>
+              <Icon name="arrow" />
+            </button>
+            <button className="in-icon" type="button" aria-label="Close" onClick={close}>
+              <Icon name="x" />
+            </button>
+          </div>
+          <div className="in-lb-body">
+            <ViewerMedia key={post.id} post={post} reduced={reduced} />
+            <div className="in-lb-info" ref={info}>
+              <div>
+                <h2 id="in-lb-title" className={post.title ? undefined : "is-none"} lang={langOf(title)}>
+                  {title}
+                </h2>
+                <p className="in-who">
+                  <a href={`https://x.com/${post.creator.handle}`} rel="noopener">
+                    {post.creator.name ? `${post.creator.name} ` : null}
+                    <span className="in-handle">@{post.creator.handle}</span>
+                  </a>
+                </p>
+                <p className="meta in-facts">{facts}</p>
+              </div>
+              {post.prompt ? (
+                <div className="in-blk">
+                  <h3>
+                    Prompt{" "}
+                    <a className="in-src" href={post.prompt.source} rel="noopener">
+                      source
+                    </a>
+                  </h3>
+                  <div className="in-well">
+                    <pre lang={langOf(post.prompt.text)}>
+                      {post.prompt.text}
+                      {post.prompt.cut ? <span className="in-cut">…</span> : null}
+                    </pre>
+                  </div>
+                </div>
+              ) : null}
+              {post.playback ? (
+                <div className="in-blk">
+                  <h3>Use as a reference</h3>
+                  <div className="in-well in-cmd">
+                    <code>{refCommand(post)}</code>
+                    <CopyButton className="in-copy" text={refCommand(post)} onCopied={onCopied}>
+                      Copy
+                    </CopyButton>
+                  </div>
+                </div>
+              ) : null}
+              <div className="in-lb-acts">
+                <a className="btn btn-ghost" href={post.url} rel="noopener">
+                  Open on X <Icon name="external" size={14} />
+                </a>
+              </div>
+            </div>
+          </div>
+          {toast}
+        </>
+      ) : null}
+    </dialog>
+  );
+}
+
+export function InspirationWall({
+  posts,
+  types,
+  suggestHref,
+  children,
+}: {
+  posts: InspirationCard[];
+  types: InspirationType[];
+  suggestHref: string;
+  children: ReactNode;
+}) {
+  const [filters, setFilters] = useState<Filters>(EMPTY);
+  const [previewsOff, setPreviewsOff] = useState(false);
+  const [revealed, setRevealed] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [live, setLive] = useState<{ text: string; on: boolean }>({ text: "", on: false });
+  const reduced = useReducedMotion();
+  const wall = useRef<HTMLUListElement>(null);
+  const search = useRef<HTMLInputElement>(null);
+  const liveTimer = useRef<number>(undefined);
+  const firstFilter = useRef(true);
+
+  const shownIds = useMemo(() => posts.filter((p) => matches(p, filters)).map((p) => p.id), [posts, filters]);
+  const shown = new Set(shownIds);
+  const counts = useMemo(() => new Map(types.map((t) => [t.id, posts.filter((p) => p.types.includes(t.id)).length])), [posts, types]);
+  const byId = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
+  const visibleTiles = () => [...(wall.current?.children ?? [])].filter((t) => !(t as HTMLElement).hidden) as HTMLElement[];
+
+  // First paint: the tiles arrive in a diagonal wave, one step per row and column.
+  useEffect(() => {
+    const tiles = visibleTiles();
+    const rects = tiles.map((t) => t.getBoundingClientRect());
+    const xs = [...new Set(rects.map((r) => Math.round(r.left)))].sort((a, b) => a - b);
+    const ys = [...new Set(rects.map((r) => Math.round(r.top)))].sort((a, b) => a - b);
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    tiles.forEach((t, i) =>
+      t.animate(still ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "scale(.97)" }, { opacity: 1, transform: "none" }], {
+        duration: 360,
+        delay: still ? 0 : (xs.indexOf(Math.round(rects[i].left)) + ys.indexOf(Math.round(rects[i].top))) * 40,
+        easing: EASE_OUT,
+        fill: "backwards",
+      }),
+    );
+  }, []);
+
+  useEffect(() => {
+    if (firstFilter.current) {
+      firstFilter.current = false;
+      return;
+    }
+    visibleTiles().forEach((t, i) => {
+      t.getAnimations().forEach((a) => a.cancel());
+      t.animate(reduced ? [{ opacity: 0.4 }, { opacity: 1 }] : [{ opacity: 0, transform: "scale(.98)" }, { opacity: 1, transform: "none" }], {
+        duration: 180,
+        delay: reduced ? 0 : i * 14,
+        easing: EASE_OUT,
+        fill: "backwards",
+      });
+    });
+  }, [filters, reduced]);
+
+  // Touch has no hover: the first tap reveals a tile and plays it, a tap anywhere else hides it.
+  useEffect(() => {
+    const hide = (e: Event) => {
+      if (!(e.target as HTMLElement).closest?.(".in-tile")) setRevealed(null);
+    };
+    document.addEventListener("click", hide);
+    return () => document.removeEventListener("click", hide);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "/" || (e.target as HTMLElement).closest("input, textarea") || document.querySelector("dialog[open]")) return;
+      e.preventDefault();
+      search.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(liveTimer.current), []);
+
+  const onCopied = useCallback((ok: boolean, text: string) => {
+    setLive({ text: ok ? `Copied: ${text}` : "Copy failed. Select the command and copy it.", on: true });
+    window.clearTimeout(liveTimer.current);
+    liveTimer.current = window.setTimeout(() => setLive((l) => ({ ...l, on: false })), COPIED_MS);
+  }, []);
+
+  const onOpen = (id: string, e: MouseEvent<HTMLButtonElement>) => {
+    const touch = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (touch && e.detail !== 0 && revealed !== id) {
+      setRevealed(id);
+      return;
+    }
+    setOpenId(id);
+  };
+
+  const openRef = useRef(openId);
+  openRef.current = openId;
+  const onClosed = useCallback(() => {
+    const id = openRef.current;
+    setOpenId(null);
+    setRevealed(null);
+    if (id) wall.current?.querySelector<HTMLButtonElement>(`[data-id="${id}"]:not([hidden]) .in-open`)?.focus({ preventScroll: true });
+  }, []);
+
+  const step = (dir: number) => {
+    const list = shownIds.length ? shownIds : posts.map((p) => p.id);
+    if (list.length < 2 || !openId) return;
+    const i = list.indexOf(openId);
+    setOpenId(list[(i + dir + list.length) % list.length]);
+  };
+
+  const surprise = () => {
+    const list = shownIds.length ? shownIds : posts.map((p) => p.id);
+    setOpenId(list[Math.floor(Math.random() * list.length)]);
+  };
+
+  const onWallKey = (e: KeyboardEvent<HTMLUListElement>) => {
+    const d = ({ ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] } as Record<string, number[]>)[e.key];
+    const from = (e.target as HTMLElement).closest<HTMLElement>(".in-open");
+    if (!d || !from) return;
+    e.preventDefault();
+    const r0 = from.getBoundingClientRect();
+    const c0 = [r0.left + r0.width / 2, r0.top + r0.height / 2];
+    let best: HTMLElement | null = null;
+    let bestScore = Infinity;
+    for (const t of visibleTiles()) {
+      const h = t.querySelector<HTMLElement>(".in-open");
+      if (!h || h === from || !h.offsetParent) continue;
+      const r = h.getBoundingClientRect();
+      const c = [r.left + r.width / 2, r.top + r.height / 2];
+      const along = (c[0] - c0[0]) * d[0] + (c[1] - c0[1]) * d[1];
+      if (along <= 1) continue;
+      const score = along + 2 * (Math.abs((c[0] - c0[0]) * d[1]) + Math.abs((c[1] - c0[1]) * d[0]));
+      if (score < bestScore) {
+        bestScore = score;
+        best = h;
+      }
+    }
+    if (best) {
+      best.focus();
+      best.scrollIntoView({ block: "nearest" });
+    }
+  };
+
+  const toggleType = (id: string) =>
+    setFilters((f) => ({ ...f, types: f.types.includes(id) ? f.types.filter((t) => t !== id) : [...f.types, id] }));
+
+  const open = openId ? byId.get(openId) ?? null : null;
+  const position = open ? `${Math.max(shownIds.indexOf(open.id), 0) + 1} / ${shownIds.length || posts.length}` : "";
+  const toast = (
+    <div className={live.on ? "in-live is-on" : "in-live"} role="status" aria-live="polite">
+      {live.text}
+    </div>
+  );
+
+  return (
+    <>
+      <div className="in-head">
+        <div>{children}</div>
+        <div className="in-acts">
+          <button className="btn btn-ghost" type="button" onClick={surprise}>
+            <Icon name="shuffle" size={16} />
+            Surprise me
+          </button>
+          <a className="btn btn-primary" href={suggestHref} rel="noopener">
+            Suggest a post
+          </a>
+        </div>
+      </div>
+
+      <div className="in-rail" role="search">
+        <label className="in-search">
+          <span className="sr-only">Search by title, creator, tool or prompt</span>
+          <Icon name="search" size={16} />
+          <input
+            ref={search}
+            type="search"
+            placeholder="Search"
+            autoComplete="off"
+            value={filters.q}
+            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && filters.q) {
+                e.stopPropagation();
+                setFilters((f) => ({ ...f, q: "" }));
+              }
+            }}
+          />
+          <kbd aria-hidden="true">/</kbd>
+        </label>
+        <div className="in-chips">
+          <fieldset>
+            <legend className="sr-only">Type</legend>
+            {types.map((t) => (
+              <label className="in-chip" key={t.id}>
+                <input type="checkbox" checked={filters.types.includes(t.id)} onChange={() => toggleType(t.id)} />
+                <span>
+                  {t.chip} <i>{counts.get(t.id)}</i>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+          <span className="in-sep" aria-hidden="true" />
+          <label className="in-chip">
+            <input type="checkbox" checked={filters.prompt} onChange={(e) => setFilters((f) => ({ ...f, prompt: e.target.checked }))} />
+            <span>Prompt</span>
+          </label>
+        </div>
+        <span className="meta in-status" role="status" aria-live="polite">
+          {shownIds.length}
+          <span className="sr-only"> posts</span>
+        </span>
+        <button
+          className="in-icon"
+          type="button"
+          aria-pressed={previewsOff}
+          aria-label="Pause previews"
+          title="Pause previews"
+          onClick={() => setPreviewsOff((v) => !v)}
+        >
+          <Icon name="pause" size={16} />
+        </button>
+      </div>
+
+      <ul className="in-wall" ref={wall} aria-label="Posts" onKeyDown={onWallKey}>
+        {posts.map((p, i) => (
+          <Tile
+            key={p.id}
+            post={p}
+            hidden={!shown.has(p.id)}
+            first={i < FIRST_ROW}
+            allowPlay={!previewsOff && !reduced && !openId}
+            revealed={revealed === p.id}
+            onOpen={onOpen}
+            onCopied={onCopied}
+          />
+        ))}
+      </ul>
+      {shownIds.length ? null : (
+        <div className="in-empty">
+          <p>No match.</p>
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => {
+              setFilters(EMPTY);
+              search.current?.focus();
+            }}
+          >
+            Clear search
+          </button>
+        </div>
+      )}
+
+      <Viewer post={open} position={position} reduced={reduced} onStep={step} onClosed={onClosed} onCopied={onCopied} toast={toast} />
+      {open ? null : toast}
+    </>
+  );
+}

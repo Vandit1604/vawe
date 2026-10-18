@@ -5,6 +5,7 @@ import { MOVES, groupLabel, type Move } from "./moves";
 import { moveSeoDescription } from "./move-seo";
 import { FAQ, faqText } from "./faq";
 import { breadcrumbSchema } from "./schema";
+import { INSPIRATION, INSPIRATION_PATH } from "./inspiration";
 
 const SITE_URL = "https://vawe.dev";
 
@@ -85,6 +86,43 @@ export function movesItemListSchema() {
         position: i + 1,
         url: `${SITE_URL}/moves/${m.name}`,
         name: m.title,
+      })),
+    },
+  };
+}
+
+// Each post is credited to its creator and its url is the X post. contentUrl is X's CDN file, only where
+// the post has one; the CDN serves it to a request that sends no Referer.
+export function inspirationSchema(opts: { name: string; description: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: opts.name,
+    description: opts.description,
+    url: `${SITE_URL}${INSPIRATION_PATH}`,
+    publisher,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: INSPIRATION.length,
+      itemListElement: INSPIRATION.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "VideoObject",
+          name: p.title || `Video post by @${p.creator.handle}`,
+          description: [p.typeLabel, p.tool && `made with ${p.tool}`, `posted on X by @${p.creator.handle}`].filter(Boolean).join(", "),
+          url: p.url,
+          thumbnailUrl: [absolute(p.poster)],
+          ...(p.playback ? { contentUrl: p.playback } : {}),
+          uploadDate: p.posted,
+          duration: isoDuration(p.duration),
+          author: {
+            "@type": "Person",
+            name: p.creator.name || `@${p.creator.handle}`,
+            alternateName: `@${p.creator.handle}`,
+            url: `https://x.com/${p.creator.handle}`,
+          },
+        },
       })),
     },
   };

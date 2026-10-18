@@ -13,6 +13,7 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [Home](https://vawe.dev/): Write a web page, get a film. Move clips rendered by vawe, how a page becomes a film, and questions.
 - [features](https://vawe.dev/features): The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.
 - [moves](https://vawe.dev/moves): Proven motion moves, each a 1 to 2 s clip and one markdown file an agent copies. Every move file is listed under Moves below.
+- [inspiration](https://vawe.dev/inspiration): Motion videos made with Claude and other AI, from posts on X. Each one is listed under Inspiration below.
 - [resources](https://vawe.dev/resources): Every vawe resource in one list: easing curves, the moves library, the plain files for agents, the five agent skills, guides, comparisons and the project pages.
 - [about](https://vawe.dev/about): What vawe is, why a film is one HTML page, how it is built (Apache-2.0, public since 2026-09-16), its five rules, who makes it and how to help.
 - [determinism](https://vawe.dev/determinism): A page seeked, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true and how it checks it.
@@ -43,6 +44,9 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 
 ## Blog
 {{BLOG}}
+
+## Inspiration
+{{INSPIRATION}}
 
 ## Moves
 Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/moves.

@@ -1,0 +1,138 @@
+{
+  "types": [
+    { "id": "explainer", "chip": "Explainer", "label": "Explainer" },
+    { "id": "product-ui", "chip": "UI", "label": "Product UI" },
+    { "id": "3d", "chip": "3D", "label": "3D" },
+    { "id": "interactive", "chip": "Interactive", "label": "Interactive" },
+    { "id": "pixel-art", "chip": "Pixel", "label": "Pixel art" }
+  ],
+  "posts": [
+    {
+      "id": "2103683057689522564",
+      "title": "什么是 Transformer",
+      "creator": { "name": "宝玉", "handle": "dotey" },
+      "url": "https://x.com/dotey/status/2103683057689522564",
+      "types": ["explainer"],
+      "tags": ["maths"],
+      "tool": "Claude Code, Opus 5.5",
+      "prompt": {
+        "text": "帮我用js制作一个视频，主题是：什么是 Transformer\n要深入浅出，让高中生也能看得懂，不仅high level说的清楚，也要有细节，包括注意力机制，甚至一些数学概念\n\n你可以用任何工具或者安装工具，可以联网检索\n\n请给我惊喜",
+        "source": "https://x.com/dotey/status/2103683057689522564"
+      },
+      "poster": "/inspiration/2103683057689522564.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103682805754388480/vid/avc1/1920x1080/5fJLDg7Xn6ENKQyo.mp4?tag=29",
+      "duration": 732.3
+    },
+    {
+      "id": "2104094723887501736",
+      "title": "An interactive Raptor 3 you can take apart",
+      "creator": { "name": "Konstantin Saifoulline", "handle": "konstantinsaifo" },
+      "url": "https://x.com/konstantinsaifo/status/2104094723887501736",
+      "types": ["3d", "explainer", "interactive"],
+      "tags": ["cutaway"],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2104094723887501736.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104094523999563776/vid/avc1/1920x1080/wnZVe49yC4Jqo1eX.mp4?tag=29",
+      "duration": 34.7
+    },
+    {
+      "id": "2102476258948927543",
+      "title": "Animated pixel art wizard, pure code",
+      "creator": { "name": "Majid Manzarpour", "handle": "majidmanzarpour" },
+      "url": "https://x.com/majidmanzarpour/status/2102476258948927543",
+      "types": ["pixel-art"],
+      "tags": ["character"],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102476258948927543.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102476231740399616/vid/avc1/1080x890/8wOPIn__IAkbl9ho.mp4?tag=29",
+      "duration": 11.2
+    },
+    {
+      "id": "2102853258582880547",
+      "title": "A recipe motion graphic, rendered in HTML from one image",
+      "creator": { "name": "Rory Flynn", "handle": "Ror_Fly" },
+      "url": "https://x.com/Ror_Fly/status/2102853258582880547",
+      "types": ["explainer"],
+      "tags": ["image to motion"],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "We're going to try a little test. Do you think you could render a recipe motion graphic animation using javascript or html (w/e you think will produce the best) to show the full recipe from start",
+        "cut": true,
+        "source": "https://x.com/Ror_Fly/status/2102853258582880547"
+      },
+      "poster": "/inspiration/2102853258582880547.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102853041246347264/vid/avc1/1080x1080/gHD5YPPHdPJDh8GO.mp4?tag=29",
+      "duration": 30
+    },
+    {
+      "id": "2102591147927654847",
+      "title": "An interactive lens lab that explains camera focus",
+      "creator": { "name": "Ryan Sael", "handle": "RyanSael" },
+      "url": "https://x.com/RyanSael/status/2102591147927654847",
+      "types": ["interactive", "explainer"],
+      "tags": ["optics"],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102591147927654847.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102589341197619200/vid/avc1/1920x1080/0zt2fNiA4QMgvhkM.mp4?tag=29",
+      "duration": 32
+    },
+    {
+      "id": "2102554209166000267",
+      "title": "A product video in code, synced to the beat",
+      "creator": { "name": "zero", "handle": "twoclipping" },
+      "url": "https://x.com/twoclipping/status/2102554209166000267",
+      "types": ["product-ui"],
+      "tags": ["beat-synced", "music and sfx"],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "<inputs>\nAsk me for: the product name and a one-line promise, 3 to 5 UI moments",
+        "cut": true,
+        "source": "https://x.com/twoclipping/status/2102554209166000267"
+      },
+      "poster": "/inspiration/2102554209166000267.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102553635750125568/vid/avc1/1920x1080/-V5gRZlCHC4-qd2P.mp4?tag=29",
+      "duration": 20
+    },
+    {
+      "id": "2103273003555402193",
+      "title": "One shape that becomes 8 to 12 UI states",
+      "creator": { "name": "zero", "handle": "twoclipping" },
+      "url": "https://x.com/twoclipping/status/2103273003555402193",
+      "types": ["product-ui"],
+      "tags": ["shape morph"],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "<inputs>\nAsk me for: 8 to 12 UI states I want the shape to become (e.g. button, loader, player,",
+        "cut": true,
+        "source": "https://x.com/twoclipping/status/2103273003555402193"
+      },
+      "poster": "/inspiration/2103273003555402193.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103272964967804928/vid/avc1/1440x1440/DMnmDsC9z0gcgSUX.mp4?tag=29",
+      "duration": 14
+    },
+    {
+      "id": "2103116235009347650",
+      "title": "Napoleon's sharpest battle as a 5 minute film",
+      "creator": { "name": "Winter", "handle": "WinterArc2125" },
+      "url": "https://x.com/WinterArc2125/status/2103116235009347650",
+      "types": ["3d"],
+      "tags": ["satellite terrain", "score and voice"],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2103116235009347650.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103113452726140928/vid/avc1/1920x1080/7kwgLDfFWkBBQ35Z.mp4?tag=29",
+      "duration": 301.3
+    },
+    {
+      "id": "2110911582209241088",
+      "title": "",
+      "creator": { "name": "", "handle": "poetengineer__" },
+      "url": "https://x.com/poetengineer__/status/2110911582209241088",
+      "types": [],
+      "tags": [],
+      "tool": "",
+      "poster": "/inspiration/2110911582209241088.webp",
+      "playback": "",
+      "duration": 12.8
+    }
+  ]
+}

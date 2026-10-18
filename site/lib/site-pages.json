@@ -36,6 +36,13 @@
       "label": "Resources"
     },
     {
+      "path": "/inspiration",
+      "priority": 0.7,
+      "changeFrequency": "weekly",
+      "group": "topic",
+      "label": "Inspiration"
+    },
+    {
       "path": "/determinism",
       "priority": 0.7,
       "changeFrequency": "monthly",
