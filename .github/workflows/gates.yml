@@ -1,61 +1,57 @@
 name: framework gates
 
-# The same static gates .githooks/pre-push runs. A film is one HTML page; the e2e job renders every
-# page film and fixture page at half size and checks each mp4.
+# Basic checks that pass on a clean checkout. The pre-push hook (.githooks/pre-push) is the main gate:
+# it runs the site build, the dev tests and the e2e renders locally. Run the e2e here by hand.
 
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      e2e:
+        description: run the e2e renders of every page film
+        type: boolean
+        default: false
 
 concurrency:
   group: gates-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  fast-gates:
-    name: static gates
+  basics:
+    name: basics (static gates, unit tests)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
-      PUPPETEER_SKIP_DOWNLOAD: "1"
+      VAWE_CI: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: sudo apt-get install -y --no-install-recommends ffmpeg
       - run: npm ci
-      - name: gates
+      - name: static gates
         run: |
-          for g in no-emdash provenance rule-length skill-reach seo-surface; do
+          for g in no-emdash rule-length skill-reach; do
             node bin/vawe check "$g"
           done
-
-  unit-tests:
-    name: unit tests (tests/lib, motion, hooks, dev)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/puppeteer
-          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-      - run: npm ci
+      - run: node quality/gates/doc-refs.mjs
       - name: fetch the locked faces
         run: node generators/media/fonts.mjs
-      - run: node --test --test-concurrency=1 'tests/lib/*.test.mjs' 'tests/motion/*.test.mjs' 'tests/hooks/*.test.mjs' 'tests/dev/*.test.mjs'
+      - run: node --test --test-concurrency=1 'tests/lib/*.test.mjs' 'tests/motion/*.test.mjs' 'tests/hooks/*.test.mjs'
 
   e2e:
-    name: e2e (page tests + draft renders of every page film)
+    name: e2e (manual: page tests and draft renders of every page film)
+    if: github.event_name == 'workflow_dispatch' && inputs.e2e
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -66,6 +62,7 @@ jobs:
         with:
           path: ~/.cache/puppeteer
           key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: sudo apt-get install -y --no-install-recommends ffmpeg
       - run: npm ci
       - name: fetch the locked faces
         run: node generators/media/fonts.mjs

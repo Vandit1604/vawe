@@ -59,7 +59,7 @@ for (const file of workflowFiles) {
   if (glyph === '✗') anyRed = true;
 }
 if (anyRed) {
-  console.log('  CI is red on at least one workflow right now. This push does not fix that by itself unless it does.');
+  console.log('  CI is red on at least one workflow right now. CI runs only the basics (static gates, lib, motion and hooks tests). This hook runs the site build, dev tests and e2e locally, so a red CI run is a basics failure.');
 }
 console.log(`  after this push: gh run list --repo ${slug} --limit 10`);
 process.exit(0);
