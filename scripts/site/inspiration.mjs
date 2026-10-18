@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 // Builds site/content/inspiration.json from site/content/inspiration-posts.txt (one X post URL per line).
 //
-//   nice -n 15 node scripts/site/inspiration.mjs [--jobs 2] [--limit n] [--hints file.json] [--refresh | --ids a,b]
+//   nice -n 15 node scripts/site/inspiration.mjs [--hints file.json] [--ids a,b | --refresh] [--normalize]
 //
-// Per new post: the text and creator from X oEmbed; the duration, the full post text and the playback mp4
-// from yt-dlp; a poster from one frame (`bin/vawe still`) of a small copy yt-dlp fetches to a temp dir and
-// deletes after. "made with" and the prompt come only from the post text. Type tags, a hand title and a
-// hand tool are kept on every run. The run resumes: a post already in the JSON is skipped unless
-// --refresh (every post) or --ids (these posts), which re-read text, playback and duration. A post
-// that fails is skipped and listed.
+// Four stages, each in parallel and each saved to out/inspiration-stages.json when it ends, so a run
+// resumes where the last one stopped:
+//   1. video   the playback mp4 on video.twimg.com: a hinted URL checked with a HEAD request, else yt-dlp
+//   2. post    the text, creator and name from X oEmbed
+//   3. poster  one frame, `bin/vawe still <mp4 url>` (a range read, nothing downloaded), as a small webp
+//   4. data    the entries, written once
+// "Made with" and the prompt come only from the post text. Type tags come from rules on the post text
+// and from a look at the posters; a tag set by hand is kept on every run. --normalize re-derives
+// maker, model and the rule tags of every entry without a request. A post that fails is listed.
 //
-// --hints: an optional JSON map of post id to { toolQuote, promptPublished, saves }. A tool quote is used
-// only when the post text contains it; promptPublished only says where to look; saves is a public count.
+// --hints: an optional JSON map of post id to { playback, duration, toolQuote, promptPublished, saves, likes }.
+// A playback URL is used only if the CDN answers it; a tool quote only if the post text contains it.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -23,32 +26,89 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const LIST = path.join(ROOT, 'site/content/inspiration-posts.txt');
 const DATA = path.join(ROOT, 'site/content/inspiration.json');
 const POSTERS = path.join(ROOT, 'site/public/inspiration');
+const STAGES = path.join(ROOT, 'out/inspiration-stages.json');
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'inspiration-'));
 const sharp = createRequire(path.join(ROOT, 'site/package.json'))('sharp');
 
 const argv = process.argv.slice(2);
 const arg = (name) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : undefined);
-const REFRESH = argv.includes('--refresh');
-const JOBS = Number(arg('--jobs')) || 2;
-const LIMIT = Number(arg('--limit')) || Infinity;
 const HINTS = arg('--hints') ? JSON.parse(fs.readFileSync(arg('--hints'), 'utf8')) : {};
+// Parallel requests per stage: the CDN takes many HEAD requests, X's oEmbed and yt-dlp fewer.
+const JOBS = { head: 16, ytdlp: 4, oembed: 8, poster: 4 };
 const POSTER_W = 640;
 const POSTER_MAX = 60_000;
 const TITLE_MAX = 90;
 // X answers 429 when requests come too fast: wait this long, times the attempt, then try again.
 const BACKOFF_MS = 30_000;
 const ATTEMPTS = 4;
-// A pause between two posts of one worker, so X sees a few requests a minute per worker.
-const SPACING_MS = 1500;
 
-// Names as a post writes them, longest first so "Claude Code" wins over "Claude".
-const TOOLS = [
-  /Claude Code/i, /Claude (?:Opus|Sonnet|Haiku) \d(?:\.\d)?/i, /(?:Opus|Sonnet|Haiku) \d(?:\.\d)?/i, /Claude Design/i, /Claude/i,
-  /GPT-?\d(?:\.\d)?(?:[- ]?(?:Codex|Pro|mini))?/i, /ChatGPT/i, /Codex/i, /Gemini(?: \d(?:\.\d)?(?: (?:Pro|Flash))?)?/i, /Grok(?: \d)?/i,
-  /Cursor/i, /Remotion/i, /HyperFrames/i, /Kimi(?: K\d(?:\.\d)?)?/i, /DeepSeek/i, /Qwen/i, /GLM-?\d(?:\.\d)?/i, /MiniMax/i,
-  /three\.js/i, /Lovable/i, /Replit/i, /\bv0\b/, /Windsurf/i, /Manus/i, /Veo ?\d/i, /Seedance/i, /Kling/i,
+// ---------- made with: the names a post writes, folded to one maker and a clean model list ----------
+const MODELS = [
+  { re: /claude code/i, name: 'Claude Code', maker: 'Claude' },
+  { re: /claude design/i, name: 'Claude Design', maker: 'Claude' },
+  { re: /\b(opus|sonnet|haiku|fable)[ -]?(\d(?:\.\d)?)/i, name: (m) => `${cap(m[1])} ${m[2]}`, maker: 'Claude' },
+  { re: /\bclaude\b/i, name: 'Claude', maker: 'Claude', weak: true },
+  { re: /\bgpt-?(\d(?:\.\d)?)(?:[- ]?(codex|pro|mini|sol|astra))?/i, name: (m) => `GPT-${m[1]}${m[2] ? ` ${cap(m[2])}` : ''}`, maker: 'OpenAI' },
+  { re: /\bcodex\b/i, name: 'Codex', maker: 'OpenAI' },
+  { re: /\bchatgpt\b/i, name: 'ChatGPT', maker: 'OpenAI', weak: true },
+  { re: /\bsora\b/i, name: 'Sora', maker: 'OpenAI' },
+  { re: /\bgemini(?: (\d(?:\.\d)?))?(?: (pro|flash))?/i, name: (m) => ['Gemini', m[1], m[2] && cap(m[2])].filter(Boolean).join(' '), maker: 'Google' },
+  { re: /\bveo ?(\d)/i, name: (m) => `Veo ${m[1]}`, maker: 'Google' },
+  { re: /nano banana/i, name: 'Nano Banana', maker: 'Google' },
+  { re: /\bgrok(?: (\d))?/i, name: (m) => (m[1] ? `Grok ${m[1]}` : 'Grok'), maker: 'Other' },
+  { re: /\bkimi(?: (k\d(?:\.\d)?))?/i, name: (m) => (m[1] ? `Kimi ${m[1].toUpperCase()}` : 'Kimi'), maker: 'Other' },
+  { re: /\bdeepseek/i, name: 'DeepSeek', maker: 'Other' },
+  { re: /\bqwen/i, name: 'Qwen', maker: 'Other' },
+  { re: /\bglm-?(\d(?:\.\d)?)/i, name: (m) => `GLM-${m[1]}`, maker: 'Other' },
+  { re: /\bminimax/i, name: 'MiniMax', maker: 'Other' },
+  { re: /\bseedance/i, name: 'Seedance', maker: 'Other' },
+  { re: /\bkling/i, name: 'Kling', maker: 'Other' },
+  { re: /\bcursor\b/i, name: 'Cursor', tool: true },
+  { re: /\bremotion\b/i, name: 'Remotion', tool: true },
+  { re: /\bhyperframes\b/i, name: 'HyperFrames', tool: true },
+  { re: /three\.?js/i, name: 'Three.js', tool: true },
+  { re: /\bblender\b/i, name: 'Blender', tool: true },
+  { re: /\bafter effects\b/i, name: 'After Effects', tool: true },
+  { re: /\bhiggsfield\b/i, name: 'Higgsfield', tool: true },
 ];
+const cap = (s) => s[0].toUpperCase() + s.slice(1).toLowerCase();
+const MAKER_ORDER = ['Claude', 'OpenAI', 'Google', 'Other'];
 
+export function madeWith(text) {
+  const model = [];
+  const makers = [];
+  for (const m of MODELS) {
+    const hit = m.re.exec(text ?? '');
+    if (!hit) continue;
+    const name = typeof m.name === 'function' ? m.name(hit) : m.name;
+    if (m.weak && makers.includes(m.maker)) continue;
+    if (!model.includes(name)) model.push(name);
+    if (m.maker && !makers.includes(m.maker)) makers.push(m.maker);
+  }
+  const maker = MAKER_ORDER.find((k) => makers.includes(k)) ?? (model.length ? 'Other' : 'Unknown');
+  return { maker, model };
+}
+
+// ---------- type tags from the post text; the poster pass corrects and completes them ----------
+const TYPE_RULES = [
+  ['3d', /\b3d\b|three\.?js|blender|webgl|unreal engine|\bunity\b|voxel/i],
+  ['pixel-art', /pixel/i],
+  ['explainer', /explain|explainer|how (?:a |an |the )?\w+ works|tutorial|lesson|教学|讲解|解説|科普/i],
+  ['interactive', /interactive|playable|you can (?:drag|play|click|take)|\bgame\b/i],
+  ['product-ui', /\b(?:ui|ux|saas|product (?:video|demo|launch)|launch video|landing page|dashboard|onboarding|app demo)\b/i],
+  ['typography', /typograph|kinetic type|lettering/i],
+  ['data-viz', /data ?vi[sz]|\bchart|visuali[sz]ation/i],
+  ['illustration', /illustrat|hand-?drawn|\banime\b|cartoon|watercolou?r/i],
+  ['abstract', /generative|abstract|shader|particles/i],
+];
+const MAX_TYPES = 3;
+
+export function typesFrom(text, kept = []) {
+  const ruled = TYPE_RULES.filter(([, re]) => re.test(text ?? '')).map(([id]) => id);
+  return [...new Set([...kept, ...ruled])].slice(0, MAX_TYPES);
+}
+
+// ---------- requests ----------
 const run = (cmd, args) =>
   new Promise((resolve) => {
     execFile(cmd, args, { cwd: ROOT, maxBuffer: 1 << 26 }, (error, stdout, stderr) => resolve({ ok: !error, stdout: String(stdout), stderr: String(stderr) }));
@@ -63,6 +123,32 @@ async function retry(what, fn) {
     console.error(`  ${what}: rate limited, waiting ${(BACKOFF_MS * i) / 1000}s`);
     await wait(BACKOFF_MS * i);
   }
+}
+
+async function pool(items, jobs, fn) {
+  const queue = [...items];
+  const worker = async () => {
+    for (let item = queue.shift(); item; item = queue.shift()) await fn(item);
+  };
+  await Promise.all(Array.from({ length: jobs }, worker));
+}
+
+// The CDN serves the file to a request with no Referer (Node's fetch sends none): 200 or 206 and a
+// video type means it plays.
+async function headOk(url) {
+  const res = await fetch(url, { method: 'HEAD' }).catch(() => null);
+  return Boolean(res && (res.status === 200 || res.status === 206) && /^video\//.test(res.headers.get('content-type') ?? ''));
+}
+
+async function ytdlp(url) {
+  return retry('yt-dlp', async () => {
+    const r = await run('yt-dlp', ['--no-warnings', '--playlist-items', '1', '-f', 'best[protocol=https][ext=mp4]', '--print', '%(duration)s', '--print', '%(url)s', '--print', '%(description)s', url]);
+    if (!r.ok) return { ok: false, limited: /429|rate.?limit/i.test(r.stderr), why: `yt-dlp: ${lastLine(r.stderr)}` };
+    const [duration, playback, ...rest] = r.stdout.trimEnd().split('\n');
+    if (!/^https:\/\/video\.twimg\.com\//.test(playback)) return { ok: false, why: 'yt-dlp: no mp4 on video.twimg.com (a GIF, an image or an embed)' };
+    const seconds = Number(duration);
+    return { ok: true, playback, duration: Number.isFinite(seconds) ? Math.round(seconds * 10) / 10 : null, description: rest.join('\n') };
+  });
 }
 
 const decode = (s) =>
@@ -81,16 +167,22 @@ async function oembed(url) {
   });
 }
 
-async function video(url) {
-  return retry('yt-dlp', async () => {
-    const r = await run('yt-dlp', ['--no-warnings', '--playlist-items', '1', '-f', 'best[protocol=https][ext=mp4]', '--print', '%(duration)s', '--print', '%(url)s', '--print', '%(description)s', url]);
-    if (!r.ok) return { ok: false, limited: /429|rate.?limit/i.test(r.stderr), why: `yt-dlp: ${lastLine(r.stderr)}` };
-    const [duration, playback, ...rest] = r.stdout.trimEnd().split('\n');
-    if (!/^https:\/\/video\.twimg\.com\//.test(playback)) return { ok: false, why: 'yt-dlp: no mp4 on video.twimg.com (a GIF, an image or an embed)' };
-    return { ok: true, duration: Math.round(Number(duration) * 10) / 10, playback, description: rest.join('\n') };
-  });
+async function poster(id, playback, duration) {
+  const out = path.join(POSTERS, `${id}.webp`);
+  if (fs.existsSync(out)) return { ok: true };
+  const png = path.join(TMP, `${id}.png`);
+  const at = (duration ? Math.min(Math.max(duration * 0.3, 1), 8) : 1).toFixed(1);
+  const still = await run(path.join(ROOT, 'bin/vawe'), ['still', playback, '--at', at, '--out', png]);
+  if (!fs.existsSync(png)) return { ok: false, why: `still: ${lastLine(still.stderr || still.stdout)}` };
+  for (let q = 80; q >= 40; q -= 10) {
+    await sharp(png).resize({ width: POSTER_W, withoutEnlargement: true }).webp({ quality: q, effort: 6 }).toFile(out);
+    if (fs.statSync(out).size < POSTER_MAX) break;
+  }
+  fs.rmSync(png, { force: true });
+  return { ok: true };
 }
 
+// ---------- the post text: title, prompt ----------
 const clean = (s) => s.replace(/\u2014/g, ' - ').replace(/https?:\/\/\S+|pic\.(?:twitter|x)\.com\/\S+/g, '').replace(/[ \t]+/g, ' ').trim();
 
 function titleFrom(text) {
@@ -98,15 +190,6 @@ function titleFrom(text) {
   if (line.length <= TITLE_MAX) return line;
   const cut = line.slice(0, TITLE_MAX);
   return `${cut.slice(0, Math.max(cut.lastIndexOf(' '), 40)).replace(/[\s,.;:!-]+$/, '')}…`;
-}
-
-function toolFrom(text) {
-  const found = [];
-  for (const re of TOOLS) {
-    const m = re.exec(text);
-    if (m && !found.some((f) => f.toLowerCase().includes(m[0].toLowerCase()))) found.push(m[0]);
-  }
-  return found.join(', ');
 }
 
 // A prompt counts only when the post publishes it: the text after a "prompt:" marker, or a long quoted ask.
@@ -120,102 +203,127 @@ function promptFrom(text, published) {
   return published && body.length >= 80 ? body : null;
 }
 
-function quotedTool(text, quote) {
-  if (!quote) return '';
+function quoted(text, quote) {
   const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ').trim();
-  return norm(text).includes(norm(quote)) ? toolFrom(quote) : '';
+  return quote && norm(text).includes(norm(quote)) ? quote : '';
 }
 
-async function poster(url, id, duration) {
-  const out = path.join(POSTERS, `${id}.webp`);
-  if (fs.existsSync(out)) return { ok: true };
-  const mp4 = path.join(TMP, `${id}.mp4`);
-  const got = await retry('yt-dlp download', async () => {
-    const r = await run('yt-dlp', ['--no-warnings', '--playlist-items', '1', '-f', 'best[protocol=https][ext=mp4][height<=480]/best[protocol=https][ext=mp4]', '-o', mp4, url]);
-    return r.ok ? { ok: true } : { ok: false, limited: /429/.test(r.stderr), why: `download: ${lastLine(r.stderr)}` };
-  });
-  if (!got.ok) return got;
-  const png = path.join(TMP, `${id}.png`);
-  const at = Math.min(Math.max(duration * 0.3, 1), 8).toFixed(1);
-  const still = await run(path.join(ROOT, 'bin/vawe'), ['still', mp4, '--at', at, '--out', png]);
-  fs.rmSync(mp4, { force: true });
-  if (!fs.existsSync(png)) return { ok: false, why: `still: ${lastLine(still.stderr || still.stdout)}` };
-  for (let q = 80; q >= 40; q -= 10) {
-    await sharp(png).resize({ width: POSTER_W, withoutEnlargement: true }).webp({ quality: q, effort: 6 }).toFile(out);
-    if (fs.statSync(out).size < POSTER_MAX) break;
-  }
-  fs.rmSync(png, { force: true });
-  return { ok: true };
-}
-
+// ---------- stages ----------
 const idOf = (url) => /status\/(\d+)/.exec(url)?.[1];
+const readJson = (file, fallback) => (fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : fallback);
+const timed = async (name, fn) => {
+  const t0 = Date.now();
+  const n = await fn();
+  console.log(`stage ${name}: ${n} in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+};
 
-// Hand fields (title, types, tags, a known tool) survive a rebuild; the rest comes from the post.
-function entryOf(id, meta, vid, old = {}, hint = {}) {
-  const text = vid.description || meta.text;
+async function videoStage(todo, st, failed) {
+  const need = todo.filter(({ id }) => !st.video[id]);
+  const fallback = [];
+  await pool(need, JOBS.head, async ({ id }) => {
+    const h = HINTS[id];
+    if (h?.playback && (await headOk(h.playback))) st.video[id] = { playback: h.playback, duration: h.duration ?? null };
+    else fallback.push(id);
+  });
+  const textNeeded = need.filter(({ id }) => st.video[id] && HINTS[id]?.promptPublished).map(({ id }) => id);
+  const viaYtdlp = [...new Set([...fallback, ...textNeeded])];
+  await pool(viaYtdlp, JOBS.ytdlp, async (id) => {
+    const r = await ytdlp(todo.find((t) => t.id === id).url);
+    if (r.ok) st.video[id] = { playback: st.video[id]?.playback ?? r.playback, duration: st.video[id]?.duration ?? r.duration, description: r.description };
+    else if (!st.video[id]) failed.set(id, r.why);
+  });
+  return `${need.length - fallback.length} by HEAD, ${viaYtdlp.length} by yt-dlp`;
+}
+
+async function postStage(todo, st, failed) {
+  const need = todo.filter(({ id }) => st.video[id] && !st.post[id]);
+  await pool(need, JOBS.oembed, async ({ id, url }) => {
+    const r = await oembed(url);
+    if (r.ok) st.post[id] = { text: r.text, name: r.name, handle: r.handle };
+    else failed.set(id, r.why);
+  });
+  return `${need.length} posts`;
+}
+
+async function posterStage(todo, st, failed) {
+  const need = todo.filter(({ id }) => st.video[id] && st.post[id] && !fs.existsSync(path.join(POSTERS, `${id}.webp`)));
+  await pool(need, JOBS.poster, async ({ id }) => {
+    const r = await poster(id, st.video[id].playback, st.video[id].duration);
+    if (!r.ok) failed.set(id, r.why);
+  });
+  return `${need.length} posters`;
+}
+
+// Hand fields (title, types, tags) survive a rebuild; the rest comes from the post.
+function entryOf(id, video, post, old = {}) {
+  const hint = HINTS[id] ?? {};
+  const text = video.description || post.text;
   const prompt = promptFrom(text, hint.promptPublished);
-  const source = `https://x.com/${meta.handle}/status/${id}`;
-  const keptTool = old.tool && old.tool !== 'unknown' ? old.tool : '';
+  const source = `https://x.com/${post.handle}/status/${id}`;
+  const title = old.title || titleFrom(post.text);
+  const made = madeWith([quoted(text, hint.toolQuote), text].join('\n'));
   const saves = Number.isFinite(hint.saves) ? hint.saves : old.saves;
+  const likes = Number.isFinite(hint.likes) ? hint.likes : old.likes;
   return {
     id,
-    title: old.title || titleFrom(meta.text),
-    creator: { name: meta.name, handle: meta.handle },
+    title,
+    creator: { name: post.name, handle: post.handle },
     url: source,
-    types: old.types ?? [],
+    types: typesFrom(`${text}\n${title}`, old.types ?? []),
     tags: old.tags ?? [],
-    tool: keptTool || quotedTool(text, hint.toolQuote) || toolFrom(text) || 'unknown',
+    maker: made.maker,
+    model: made.model,
     ...(prompt ? { prompt: { text: prompt, source } } : {}),
     poster: `/inspiration/${id}.webp`,
-    playback: vid.playback,
-    duration: vid.duration,
+    playback: video.playback,
+    duration: video.duration ?? null,
     ...(saves ? { saves } : {}),
+    ...(likes ? { likes } : {}),
   };
 }
 
-async function build(url, old) {
-  const id = idOf(url);
-  const meta = await oembed(url);
-  if (!meta.ok) return meta;
-  const vid = await video(url);
-  if (!vid.ok) return vid;
-  const pic = await poster(url, id, vid.duration);
-  if (!pic.ok) return pic;
-  return { ok: true, entry: entryOf(id, meta, vid, old, HINTS[id]) };
+// No request: maker, model and rule tags from what the entry already holds.
+function normalize(p) {
+  const known = [p.tool, ...(p.model ?? [])].filter((t) => t && t !== 'unknown').join(', ');
+  const made = madeWith(known);
+  const { tool, ...rest } = p;
+  return { ...rest, maker: p.maker && p.maker !== 'Unknown' ? p.maker : made.maker, model: made.model.length ? made.model : p.model ?? [], types: typesFrom(`${p.title}\n${p.prompt?.text ?? ''}`, p.types) };
 }
 
 async function main() {
   const urls = [...new Set(fs.readFileSync(LIST, 'utf8').split('\n').map((l) => l.trim()).filter((l) => /^https:\/\/x\.com\/\w+\/status\/\d+/.test(l)))];
-  const data = JSON.parse(fs.readFileSync(DATA, 'utf8'));
+  const data = readJson(DATA, { types: [], posts: [] });
   const known = new Map(data.posts.map((p) => [p.id, p]));
   const only = arg('--ids')?.split(',');
-  const todo = urls.filter((u) => (only ? only.includes(idOf(u)) : REFRESH || !known.has(idOf(u)))).slice(0, LIMIT);
-  console.log(`${urls.length} posts listed, ${todo.length} to build, ${JOBS} at a time`);
-  const order = new Map(urls.map((u, i) => [idOf(u), i]));
-  const failed = [];
-  let done = 0;
-  const queue = [...todo];
-  const worker = async () => {
-    for (let url = queue.shift(); url; url = queue.shift()) {
-      const r = await build(url, known.get(idOf(url)));
-      done++;
-      if (r.ok) {
-        known.set(r.entry.id, r.entry);
-        data.posts = [...known.values()].sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
-        fs.writeFileSync(DATA, `${JSON.stringify(data, null, 2)}\n`);
-        console.log(`[${done}/${todo.length}] ok ${url}`);
-      } else {
-        failed.push(`${url}  ${r.why}`);
-        console.log(`[${done}/${todo.length}] skip ${url}: ${r.why}`);
-      }
-      await wait(SPACING_MS);
-    }
+  const todo = urls.map((url) => ({ url, id: idOf(url) })).filter(({ id }) => (only ? only.includes(id) : argv.includes('--refresh') || !known.has(id)));
+  const st = readJson(STAGES, { video: {}, post: {} });
+  const failed = new Map();
+  const save = () => {
+    fs.mkdirSync(path.dirname(STAGES), { recursive: true });
+    fs.writeFileSync(STAGES, `${JSON.stringify(st)}\n`);
   };
-  await Promise.all(Array.from({ length: JOBS }, worker));
+  console.log(`${urls.length} posts listed, ${todo.length} to build`);
+
+  await timed('video', () => videoStage(todo, st, failed));
+  save();
+  await timed('post', () => postStage(todo, st, failed));
+  save();
+  await timed('poster', () => posterStage(todo, st, failed));
+
+  let built = 0;
+  for (const { id } of todo) {
+    if (!st.video[id] || !st.post[id] || !fs.existsSync(path.join(POSTERS, `${id}.webp`))) continue;
+    known.set(id, entryOf(id, st.video[id], st.post[id], known.get(id)));
+    built++;
+  }
+  const order = new Map(urls.map((u, i) => [idOf(u), i]));
+  data.posts = [...known.values()].map((p) => (argv.includes('--normalize') || !p.maker ? normalize(p) : p)).sort((a, b) => (order.get(a.id) ?? 1e9) - (order.get(b.id) ?? 1e9));
+  fs.writeFileSync(DATA, `${JSON.stringify(data, null, 2)}\n`);
   fs.rmSync(TMP, { recursive: true, force: true });
-  const untyped = data.posts.filter((p) => !p.types.length && p.playback).length;
-  console.log(`\n${todo.length - failed.length} built, ${failed.length} failed, ${data.posts.length} entries in all, ${untyped} without a type tag`);
-  for (const f of failed) console.log(`  failed: ${f}`);
+
+  const untyped = data.posts.filter((p) => !p.types.length).length;
+  console.log(`\n${built} built, ${failed.size} failed, ${data.posts.length} entries in all, ${untyped} without a type tag`);
+  for (const [id, why] of failed) console.log(`  failed: ${urls.find((u) => idOf(u) === id)}  ${why}`);
 }
 
 main();

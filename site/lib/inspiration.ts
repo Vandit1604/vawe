@@ -5,19 +5,23 @@ import type { InspirationCard, InspirationPost, InspirationType } from "./inspir
 export * from "./inspiration-shared";
 
 export const INSPIRATION_TYPES: InspirationType[] = data.types;
-const POSTS = data.posts as InspirationPost[];
+const POSTS = data.posts as unknown as InspirationPost[];
 
 // An X post id is a snowflake: the top bits are milliseconds since X's epoch.
 const X_EPOCH = BigInt(1288834974657);
 export const postedAt = (id: string) => new Date(Number((BigInt(id) >> BigInt(22)) + X_EPOCH)).toISOString();
+
+// Titles are the creator's own words; a profanity or slur in one is masked on the wall (the prompt keeps its text).
+const PROFANITY = /\b(fuck\w*|shit\w*|bullshit|cunt\w*|bitch\w*|asshole\w*|motherfuck\w*|nigg\w*|fag\w*|retard\w*)\b/gi;
+const mask = (s: string) => s.replace(PROFANITY, (w) => `${w[0]}${"*".repeat(w.length - 1)}`);
 
 const typeLabel = (p: InspirationPost) => INSPIRATION_TYPES.find((t) => t.id === p.types[0])?.label ?? "";
 
 // Newest first; a post with no title (its text could not be read) goes last.
 export const INSPIRATION: InspirationCard[] = POSTS.map(({ prompt, ...p }) => ({
   ...p,
-  title: smart(p.title),
-  tool: p.tool === "unknown" ? "" : p.tool,
+  title: mask(smart(p.title)),
+  madeWith: (p.model ?? []).join(", "),
   posted: postedAt(p.id),
   typeLabel: typeLabel(p),
   ...(prompt ? { promptSource: prompt.source } : {}),

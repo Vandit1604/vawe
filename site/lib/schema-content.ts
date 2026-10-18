@@ -112,7 +112,7 @@ export function inspirationSchema(opts: { name: string; description: string; cou
         item: {
           "@type": "VideoObject",
           name: p.title || `Video post by @${p.creator.handle}`,
-          description: [p.typeLabel, p.tool && `made with ${p.tool}`, `posted on X by @${p.creator.handle}`].filter(Boolean).join(", "),
+          description: [p.typeLabel, p.madeWith && `made with ${p.madeWith}`, `posted on X by @${p.creator.handle}`].filter(Boolean).join(", "),
           url: p.url,
           thumbnailUrl: [absolute(p.poster)],
           ...(p.playback ? { contentUrl: p.playback } : {}),

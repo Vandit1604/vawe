@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { Icon } from "../components/Icon";
-import { PROMPTS_PATH, refCommand, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration-shared";
+import { MatTile } from "../components/MatTile";
+import { MAKERS, PROMPTS_PATH, refCommand, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration-shared";
 
 // The --ease-out and --ease-in tokens: the Web Animations API cannot read a custom property.
 const EASE_OUT = "cubic-bezier(.23,1,.32,1)";
@@ -13,12 +14,32 @@ const FIRST_ROW = 6;
 // Eight rows of six: enough to browse, and the rest stay out of the DOM until asked for.
 const PAGE = 48;
 
-type Filters = { q: string; types: string[]; prompt: boolean };
+type Filters = { q: string; types: string[]; prompt: boolean; made: string };
 type Prompts = Record<string, string> | null;
 type OnCopied = (ok: boolean, what: string) => void;
-const EMPTY: Filters = { q: "", types: [], prompt: false };
+const EMPTY: Filters = { q: "", types: [], prompt: false, made: "" };
 
 type Sort = "new" | "saved";
+
+function readUrl(types: InspirationType[]): { filters: Filters; sort: Sort } {
+  const p = new URLSearchParams(window.location.search);
+  const known = new Set(types.map((t) => t.id));
+  return {
+    filters: { q: p.get("q") ?? "", types: (p.get("type") ?? "").split(",").filter((t) => known.has(t)), prompt: p.get("prompt") === "1", made: MAKERS.find((m) => m === p.get("made")) ?? "" },
+    sort: p.get("sort") === "saved" ? "saved" : "new",
+  };
+}
+
+function writeUrl(f: Filters, sort: Sort) {
+  const p = new URLSearchParams();
+  if (f.q) p.set("q", f.q);
+  if (f.types.length) p.set("type", f.types.join(","));
+  if (f.prompt) p.set("prompt", "1");
+  if (f.made) p.set("made", f.made);
+  if (sort !== "new") p.set("sort", sort);
+  const qs = p.toString().replace(/%2C/g, ",");
+  window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+}
 const SORTS: { id: Sort; label: string }[] = [
   { id: "new", label: "Newest" },
   { id: "saved", label: "Most saved" },
@@ -26,15 +47,16 @@ const SORTS: { id: Sort; label: string }[] = [
 
 const langOf = (s: string) =>
   /[぀-ヿ]/.test(s) ? "ja" : /[가-힯]/.test(s) ? "ko" : /[一-鿿]/.test(s) ? "zh" : "en";
-const factsOf = (p: InspirationCard) => [p.typeLabel, p.tool].filter(Boolean).join(" · ");
+const factsOf = (p: InspirationCard) => [p.typeLabel, p.madeWith].filter(Boolean).join(" · ");
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 function matches(p: InspirationCard, f: Filters, prompts: Prompts) {
   if (f.prompt && !p.promptSource) return false;
+  if (f.made && p.maker !== f.made) return false;
   if (f.types.length && !f.types.some((t) => p.types.includes(t))) return false;
   if (!f.q) return true;
-  const hay = [p.title, p.creator.name, p.creator.handle, p.tool, prompts?.[p.id] ?? "", p.typeLabel, ...p.tags].join(" ").toLowerCase();
+  const hay = [p.title, p.creator.name, p.creator.handle, p.madeWith, p.maker, prompts?.[p.id] ?? "", p.typeLabel, ...p.tags].join(" ").toLowerCase();
   return f.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
 }
 
@@ -89,12 +111,14 @@ function CopyButton({
   text,
   className,
   label,
+  tabIndex,
   onCopied,
   children,
 }: {
   text: string;
   className: string;
   label?: string;
+  tabIndex?: number;
   onCopied: OnCopied;
   children?: ReactNode;
 }) {
@@ -106,6 +130,7 @@ function CopyButton({
       type="button"
       className={className}
       data-state={done ? "done" : undefined}
+      tabIndex={tabIndex}
       aria-label={children ? undefined : "Copy the reference command"}
       title={label ?? `Copy: ${text}`}
       onClick={async (e) => {
@@ -150,6 +175,8 @@ function Fail({ url, onRetry }: { url: string; onRetry?: () => void }) {
 function Tile({
   post,
   first,
+  active,
+  onActive,
   allowPlay,
   revealed,
   onOpen,
@@ -157,6 +184,8 @@ function Tile({
 }: {
   post: InspirationCard;
   first: boolean;
+  active: boolean;
+  onActive: (id: string) => void;
   allowPlay: boolean;
   revealed: boolean;
   onOpen: (id: string, e: MouseEvent<HTMLButtonElement>) => void;
@@ -170,14 +199,19 @@ function Tile({
   const [playing, setPlaying] = useState(false);
   const [buffering, setBuffering] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [noPoster, setNoPoster] = useState(false);
   const img = useRef<HTMLImageElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const want = Boolean(post.playback) && allowPlay && !failed && !skel && (hover || focus || revealed);
   const wantRef = useRef(want);
   wantRef.current = want;
 
+  // A poster can fail before hydration, when onError is not yet attached: read the result on mount.
   useEffect(() => {
-    if (img.current && !img.current.complete) setSkel(true);
+    const el = img.current;
+    if (!el) return;
+    if (!el.complete) setSkel(true);
+    else if (el.naturalWidth === 0) setNoPoster(true);
   }, []);
 
   useEffect(() => {
@@ -203,7 +237,7 @@ function Tile({
 
   const title = titleOf(post);
   const facts = factsOf(post);
-  const cls = ["in-tile", skel && "is-skel", revealed && "is-revealed", playing && "is-playing", buffering && "is-buffering", failed && "is-failed"]
+  const cls = ["in-tile", skel && "is-skel", revealed && "is-revealed", playing && "is-playing", buffering && "is-buffering", failed && "is-failed", noPoster && "is-noposter"]
     .filter(Boolean)
     .join(" ");
 
@@ -213,13 +247,18 @@ function Tile({
       data-id={post.id}
       onPointerEnter={(e) => e.pointerType === "mouse" && setHover(true)}
       onPointerLeave={(e) => e.pointerType === "mouse" && setHover(false)}
-      onFocus={() => setFocus(true)}
+      onFocus={() => {
+        setFocus(true);
+        onActive(post.id);
+      }}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus(false);
       }}
     >
+      {noPoster ? <MatTile word="Video" tone="graphite" detail="films" /> : null}
       <img
         ref={img}
+        hidden={noPoster}
         src={post.poster}
         alt=""
         width={640}
@@ -228,7 +267,10 @@ function Tile({
         fetchPriority={first ? "high" : "auto"}
         decoding="async"
         onLoad={() => setSkel(false)}
-        onError={() => setSkel(false)}
+        onError={() => {
+          setSkel(false);
+          setNoPoster(true);
+        }}
       />
       {post.playback ? (
         <video
@@ -267,11 +309,12 @@ function Tile({
       <button
         className="in-open"
         type="button"
+        tabIndex={active ? 0 : -1}
         aria-label={`Open ${title}, by @${post.creator.handle}${facts ? `, ${facts}` : ""}`}
         onClick={(e) => onOpen(post.id, e)}
       />
       {post.promptSource ? <span className="in-badge">Prompt</span> : null}
-      {post.playback ? <CopyButton className="in-ref" text={refCommand(post)} onCopied={onCopied} /> : null}
+      {post.playback ? <CopyButton className="in-ref" text={refCommand(post)} tabIndex={active ? 0 : -1} onCopied={onCopied} /> : null}
       {failed ? (
         <Fail
           url={post.url}
@@ -413,7 +456,7 @@ function Viewer({
   };
 
   const title = post ? titleOf(post) : "";
-  const facts = post ? [post.typeLabel, post.tool, fmtDate(post.posted)].filter(Boolean).join(" · ") : "";
+  const facts = post ? [post.typeLabel, post.madeWith, fmtDate(post.posted)].filter(Boolean).join(" · ") : "";
 
   return (
     <dialog
@@ -535,6 +578,7 @@ export function InspirationWall({
   const [previewsOff, setPreviewsOff] = useState(false);
   const [revealed, setRevealed] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [live, setLive] = useState<{ text: string; on: boolean }>({ text: "", on: false });
   const reduced = useReducedMotion();
   const { prompts, load: loadPrompts } = usePrompts();
@@ -549,8 +593,25 @@ export function InspirationWall({
   const shownIds = useMemo(() => matched.map((p) => p.id), [matched]);
   const rendered = matched.slice(0, limit);
   const counts = useMemo(() => new Map(types.map((t) => [t.id, posts.filter((p) => p.types.includes(t.id)).length])), [posts, types]);
+  const makerCounts = useMemo(() => new Map(MAKERS.map((m) => [m, posts.filter((p) => p.maker === m).length])), [posts]);
   const byId = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
   const tiles = () => [...(wall.current?.children ?? [])] as HTMLElement[];
+  const active = rendered.some((p) => p.id === activeId) ? activeId : rendered[0]?.id;
+
+  // The URL carries the search, the type filters and the sort, so a filtered view can be shared.
+  useEffect(() => {
+    const read = readUrl(types);
+    setFilters(read.filters);
+    setSort(read.sort);
+  }, [types]);
+  const urlReady = useRef(false);
+  useEffect(() => {
+    if (!urlReady.current) {
+      urlReady.current = true;
+      return;
+    }
+    writeUrl(filters, sort);
+  }, [filters, sort]);
 
   // First paint: the tiles arrive in a diagonal wave, one step per row and column.
   useEffect(() => {
@@ -722,7 +783,7 @@ export function InspirationWall({
         <div className="in-chips">
           <fieldset>
             <legend className="sr-only">Type</legend>
-            {types.map((t) => (
+            {types.filter((t) => counts.get(t.id)).map((t) => (
               <label className="in-chip" key={t.id}>
                 <input type="checkbox" checked={filters.types.includes(t.id)} onChange={() => toggleType(t.id)} />
                 <span>
@@ -737,6 +798,17 @@ export function InspirationWall({
             <span>Prompt</span>
           </label>
         </div>
+        <label className="in-made">
+          <span className="sr-only">Made with</span>
+          <select value={filters.made} onChange={(e) => filter((f) => ({ ...f, made: e.target.value }))}>
+            <option value="">Made with: any</option>
+            {MAKERS.filter((m) => makerCounts.get(m)).map((m) => (
+              <option key={m} value={m}>
+                {m} ({makerCounts.get(m)})
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="in-sort" role="group" aria-label="Sort">
           {SORTS.map((s) => (
             <button
@@ -774,6 +846,8 @@ export function InspirationWall({
             key={p.id}
             post={p}
             first={i < FIRST_ROW}
+            active={p.id === active}
+            onActive={setActiveId}
             allowPlay={!previewsOff && !reduced && !openId}
             revealed={revealed === p.id}
             onOpen={onOpen}

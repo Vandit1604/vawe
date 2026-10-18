@@ -293,6 +293,8 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
   .nav{justify-content:space-between}
   .nav a,.nav [aria-current="page"]{padding:0 var(--sp-2)}
 }
+/* At 320 the five links need 4 px sides to fit the 288 px row (measured 278 px). */
+@media (max-width:360px){ .nav a,.nav [aria-current="page"]{padding:0 var(--sp-1)} }
 /* ===== SECTIONS: one centred column of studio panels, shared by every page =================== */
 .ls{max-width:1040px;margin:0 auto;padding-top:112px}
 .ls > h2{font-size:var(--fs-h2);font-weight:var(--fw-head);letter-spacing:var(--track-head);line-height:var(--lh-head);max-width:20ch}

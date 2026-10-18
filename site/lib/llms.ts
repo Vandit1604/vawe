@@ -15,7 +15,7 @@ export function llmsText() {
   ].join("\n");
   const inspiration = INSPIRATION.map((p) => {
     const by = p.creator.name ? `${p.creator.name} (@${p.creator.handle})` : `@${p.creator.handle}`;
-    return `- [${titleOf(p)}](${p.url}): by ${by}${p.tool ? `, made with ${p.tool}` : ""}`;
+    return `- [${titleOf(p)}](${p.url}): by ${by}${p.madeWith ? `, made with ${p.madeWith}` : ""}`;
   }).join("\n");
   return base.replace("{{BLOG}}", blog).replace("{{INSPIRATION}}", inspiration);
 }
