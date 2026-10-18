@@ -7,7 +7,7 @@
 .rs-list,.rs-cards{list-style:none;margin-top:var(--sp-4)}
 .rs-list li{border-top:1px solid var(--line)}
 .rs-list li:last-child{border-bottom:1px solid var(--line)}
-.rs-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--sp-4)}
+.rs-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-4)}
 
 .rs-row,.rs-card-body{display:grid;grid-template-columns:32px minmax(0,1fr) auto auto;grid-template-areas:"ico body meta arw";align-items:center;column-gap:var(--sp-3)}
 .rs-row > .rs-ico,.rs-card-body > .rs-ico{grid-area:ico}

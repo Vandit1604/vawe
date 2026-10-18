@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { Icon } from "../components/Icon";
-import { refCommand, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration";
+import { PROMPTS_PATH, refCommand, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration-shared";
 
 // The --ease-out and --ease-in tokens: the Web Animations API cannot read a custom property.
 const EASE_OUT = "cubic-bezier(.23,1,.32,1)";
@@ -10,20 +10,31 @@ const EASE_IN = "cubic-bezier(.55,.055,.675,.19)";
 const COPIED_MS = 1600;
 // The first row's posters are the largest paint on load, so they skip lazy loading.
 const FIRST_ROW = 6;
+// Eight rows of six: enough to browse, and the rest stay out of the DOM until asked for.
+const PAGE = 48;
 
 type Filters = { q: string; types: string[]; prompt: boolean };
+type Prompts = Record<string, string> | null;
+type OnCopied = (ok: boolean, what: string) => void;
 const EMPTY: Filters = { q: "", types: [], prompt: false };
 
-const langOf = (s: string) => (/[一-鿿]/.test(s) ? "zh" : "en");
+type Sort = "new" | "saved";
+const SORTS: { id: Sort; label: string }[] = [
+  { id: "new", label: "Newest" },
+  { id: "saved", label: "Most saved" },
+];
+
+const langOf = (s: string) =>
+  /[぀-ヿ]/.test(s) ? "ja" : /[가-힯]/.test(s) ? "ko" : /[一-鿿]/.test(s) ? "zh" : "en";
 const factsOf = (p: InspirationCard) => [p.typeLabel, p.tool].filter(Boolean).join(" · ");
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
-function matches(p: InspirationCard, f: Filters) {
-  if (f.prompt && !p.prompt) return false;
+function matches(p: InspirationCard, f: Filters, prompts: Prompts) {
+  if (f.prompt && !p.promptSource) return false;
   if (f.types.length && !f.types.some((t) => p.types.includes(t))) return false;
   if (!f.q) return true;
-  const hay = [p.title, p.creator.name, p.creator.handle, p.tool, p.prompt?.text ?? "", p.typeLabel, ...p.tags].join(" ").toLowerCase();
+  const hay = [p.title, p.creator.name, p.creator.handle, p.tool, prompts?.[p.id] ?? "", p.typeLabel, ...p.tags].join(" ").toLowerCase();
   return f.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
 }
 
@@ -37,6 +48,21 @@ function useReducedMotion() {
     return () => mq.removeEventListener("change", sync);
   }, []);
   return reduced;
+}
+
+// The prompt texts are one static file, fetched the first time a search or the viewer needs one.
+function usePrompts() {
+  const [prompts, setPrompts] = useState<Prompts>(null);
+  const asked = useRef(false);
+  const load = useCallback(() => {
+    if (asked.current) return;
+    asked.current = true;
+    fetch(PROMPTS_PATH)
+      .then((r) => (r.ok ? r.json() : {}))
+      .then(setPrompts)
+      .catch(() => setPrompts({}));
+  }, []);
+  return { prompts, load };
 }
 
 async function copyText(text: string) {
@@ -59,7 +85,19 @@ async function copyText(text: string) {
   }
 }
 
-function CopyButton({ text, className, onCopied, children }: { text: string; className: string; onCopied: (ok: boolean, text: string) => void; children?: ReactNode }) {
+function CopyButton({
+  text,
+  className,
+  label,
+  onCopied,
+  children,
+}: {
+  text: string;
+  className: string;
+  label?: string;
+  onCopied: OnCopied;
+  children?: ReactNode;
+}) {
   const [done, setDone] = useState(false);
   const timer = useRef<number>(undefined);
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -69,12 +107,12 @@ function CopyButton({ text, className, onCopied, children }: { text: string; cla
       className={className}
       data-state={done ? "done" : undefined}
       aria-label={children ? undefined : "Copy the reference command"}
-      title={`Copy: ${text}`}
+      title={label ?? `Copy: ${text}`}
       onClick={async (e) => {
         e.stopPropagation();
         const ok = await copyText(text);
         setDone(ok);
-        onCopied(ok, text);
+        onCopied(ok, label ? "the whole prompt" : text);
         window.clearTimeout(timer.current);
         timer.current = window.setTimeout(() => setDone(false), COPIED_MS);
       }}
@@ -111,7 +149,6 @@ function Fail({ url, onRetry }: { url: string; onRetry?: () => void }) {
 
 function Tile({
   post,
-  hidden,
   first,
   allowPlay,
   revealed,
@@ -119,12 +156,11 @@ function Tile({
   onCopied,
 }: {
   post: InspirationCard;
-  hidden: boolean;
   first: boolean;
   allowPlay: boolean;
   revealed: boolean;
   onOpen: (id: string, e: MouseEvent<HTMLButtonElement>) => void;
-  onCopied: (ok: boolean, text: string) => void;
+  onCopied: OnCopied;
 }) {
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
@@ -136,7 +172,7 @@ function Tile({
   const [attempt, setAttempt] = useState(0);
   const img = useRef<HTMLImageElement>(null);
   const video = useRef<HTMLVideoElement>(null);
-  const want = Boolean(post.playback) && allowPlay && !hidden && !failed && !skel && (hover || focus || revealed);
+  const want = Boolean(post.playback) && allowPlay && !failed && !skel && (hover || focus || revealed);
   const wantRef = useRef(want);
   wantRef.current = want;
 
@@ -175,7 +211,6 @@ function Tile({
     <li
       className={cls}
       data-id={post.id}
-      hidden={hidden}
       onPointerEnter={(e) => e.pointerType === "mouse" && setHover(true)}
       onPointerLeave={(e) => e.pointerType === "mouse" && setHover(false)}
       onFocus={() => setFocus(true)}
@@ -187,8 +222,8 @@ function Tile({
         ref={img}
         src={post.poster}
         alt=""
-        width={800}
-        height={450}
+        width={640}
+        height={360}
         loading={first ? "eager" : "lazy"}
         fetchPriority={first ? "high" : "auto"}
         decoding="async"
@@ -235,7 +270,7 @@ function Tile({
         aria-label={`Open ${title}, by @${post.creator.handle}${facts ? `, ${facts}` : ""}`}
         onClick={(e) => onOpen(post.id, e)}
       />
-      {post.prompt ? <span className="in-badge">Prompt</span> : null}
+      {post.promptSource ? <span className="in-badge">Prompt</span> : null}
       {post.playback ? <CopyButton className="in-ref" text={refCommand(post)} onCopied={onCopied} /> : null}
       {failed ? (
         <Fail
@@ -289,8 +324,47 @@ function ViewerMedia({ post, reduced }: { post: InspirationCard; reduced: boolea
   );
 }
 
+// The whole prompt, never cut: a long one scrolls inside its well, with a fade while more text lies below.
+function Prompt({ text, source, onCopied }: { text: string | null; source: string; onCopied: OnCopied }) {
+  const well = useRef<HTMLDivElement>(null);
+  const [more, setMore] = useState(false);
+  const sync = useCallback(() => {
+    const w = well.current;
+    if (w) setMore(w.scrollTop + w.clientHeight < w.scrollHeight - 2);
+  }, []);
+  useEffect(() => {
+    sync();
+    const ro = new ResizeObserver(sync);
+    if (well.current) ro.observe(well.current);
+    return () => ro.disconnect();
+  }, [sync, text]);
+  return (
+    <div className="in-blk">
+      <div className="in-blk-head">
+        <h3>
+          Prompt{" "}
+          <a className="in-src" href={source} rel="noopener">
+            source
+          </a>
+        </h3>
+        {text ? (
+          <CopyButton className="in-copy" text={text} label="Copy the whole prompt" onCopied={onCopied}>
+            Copy prompt
+          </CopyButton>
+        ) : null}
+      </div>
+      <div className={more ? "in-well in-prompt has-more" : "in-well in-prompt"}>
+        <div className="in-prompt-scroll" ref={well} onScroll={sync} tabIndex={0} role="region" aria-label="Prompt text">
+          {text === null ? <p className="in-loading">Loading the prompt…</p> : <pre lang={langOf(text)}>{text}</pre>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Viewer({
   post,
+  prompt,
   position,
   reduced,
   onStep,
@@ -299,11 +373,12 @@ function Viewer({
   toast,
 }: {
   post: InspirationCard | null;
+  prompt: { source: string; text: string | null } | null;
   position: string;
   reduced: boolean;
   onStep: (dir: number) => void;
   onClosed: () => void;
-  onCopied: (ok: boolean, text: string) => void;
+  onCopied: OnCopied;
   toast: ReactNode;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -393,22 +468,6 @@ function Viewer({
                 </p>
                 <p className="meta in-facts">{facts}</p>
               </div>
-              {post.prompt ? (
-                <div className="in-blk">
-                  <h3>
-                    Prompt{" "}
-                    <a className="in-src" href={post.prompt.source} rel="noopener">
-                      source
-                    </a>
-                  </h3>
-                  <div className="in-well">
-                    <pre lang={langOf(post.prompt.text)}>
-                      {post.prompt.text}
-                      {post.prompt.cut ? <span className="in-cut">…</span> : null}
-                    </pre>
-                  </div>
-                </div>
-              ) : null}
               {post.playback ? (
                 <div className="in-blk">
                   <h3>Use as a reference</h3>
@@ -420,6 +479,7 @@ function Viewer({
                   </div>
                 </div>
               ) : null}
+              {prompt ? <Prompt key={post.id} text={prompt.text} source={prompt.source} onCopied={onCopied} /> : null}
               <div className="in-lb-acts">
                 <a className="btn btn-ghost" href={post.url} rel="noopener">
                   Open on X <Icon name="external" size={14} />
@@ -434,6 +494,30 @@ function Viewer({
   );
 }
 
+// Arrow keys move focus to the nearest tile in that direction, by position on screen.
+function nearestTile(tiles: HTMLElement[], from: HTMLElement, d: number[]) {
+  const r0 = from.getBoundingClientRect();
+  const c0 = [r0.left + r0.width / 2, r0.top + r0.height / 2];
+  let best: HTMLElement | null = null;
+  let bestScore = Infinity;
+  for (const t of tiles) {
+    const h = t.querySelector<HTMLElement>(".in-open");
+    if (!h || h === from || !h.offsetParent) continue;
+    const r = h.getBoundingClientRect();
+    const c = [r.left + r.width / 2, r.top + r.height / 2];
+    const along = (c[0] - c0[0]) * d[0] + (c[1] - c0[1]) * d[1];
+    if (along <= 1) continue;
+    const score = along + 2 * (Math.abs((c[0] - c0[0]) * d[1]) + Math.abs((c[1] - c0[1]) * d[0]));
+    if (score < bestScore) {
+      bestScore = score;
+      best = h;
+    }
+  }
+  return best;
+}
+
+const ARROWS: Record<string, number[]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+
 export function InspirationWall({
   posts,
   types,
@@ -446,33 +530,39 @@ export function InspirationWall({
   children: ReactNode;
 }) {
   const [filters, setFilters] = useState<Filters>(EMPTY);
+  const [sort, setSort] = useState<Sort>("new");
+  const [limit, setLimit] = useState(PAGE);
   const [previewsOff, setPreviewsOff] = useState(false);
   const [revealed, setRevealed] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [live, setLive] = useState<{ text: string; on: boolean }>({ text: "", on: false });
   const reduced = useReducedMotion();
+  const { prompts, load: loadPrompts } = usePrompts();
   const wall = useRef<HTMLUListElement>(null);
   const search = useRef<HTMLInputElement>(null);
   const liveTimer = useRef<number>(undefined);
   const firstFilter = useRef(true);
+  const focusFrom = useRef<number | null>(null);
 
-  const shownIds = useMemo(() => posts.filter((p) => matches(p, filters)).map((p) => p.id), [posts, filters]);
-  const shown = new Set(shownIds);
+  const ordered = useMemo(() => (sort === "saved" ? [...posts].sort((a, b) => (b.saves ?? 0) - (a.saves ?? 0)) : posts), [posts, sort]);
+  const matched = useMemo(() => ordered.filter((p) => matches(p, filters, prompts)), [ordered, filters, prompts]);
+  const shownIds = useMemo(() => matched.map((p) => p.id), [matched]);
+  const rendered = matched.slice(0, limit);
   const counts = useMemo(() => new Map(types.map((t) => [t.id, posts.filter((p) => p.types.includes(t.id)).length])), [posts, types]);
   const byId = useMemo(() => new Map(posts.map((p) => [p.id, p])), [posts]);
-  const visibleTiles = () => [...(wall.current?.children ?? [])].filter((t) => !(t as HTMLElement).hidden) as HTMLElement[];
+  const tiles = () => [...(wall.current?.children ?? [])] as HTMLElement[];
 
   // First paint: the tiles arrive in a diagonal wave, one step per row and column.
   useEffect(() => {
-    const tiles = visibleTiles();
-    const rects = tiles.map((t) => t.getBoundingClientRect());
+    const list = tiles();
+    const rects = list.map((t) => t.getBoundingClientRect());
     const xs = [...new Set(rects.map((r) => Math.round(r.left)))].sort((a, b) => a - b);
     const ys = [...new Set(rects.map((r) => Math.round(r.top)))].sort((a, b) => a - b);
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    tiles.forEach((t, i) =>
+    list.forEach((t, i) =>
       t.animate(still ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: "scale(.97)" }, { opacity: 1, transform: "none" }], {
         duration: 360,
-        delay: still ? 0 : (xs.indexOf(Math.round(rects[i].left)) + ys.indexOf(Math.round(rects[i].top))) * 40,
+        delay: still ? 0 : Math.min(xs.indexOf(Math.round(rects[i].left)) + ys.indexOf(Math.round(rects[i].top)), 12) * 40,
         easing: EASE_OUT,
         fill: "backwards",
       }),
@@ -484,16 +574,25 @@ export function InspirationWall({
       firstFilter.current = false;
       return;
     }
-    visibleTiles().forEach((t, i) => {
-      t.getAnimations().forEach((a) => a.cancel());
-      t.animate(reduced ? [{ opacity: 0.4 }, { opacity: 1 }] : [{ opacity: 0, transform: "scale(.98)" }, { opacity: 1, transform: "none" }], {
-        duration: 180,
-        delay: reduced ? 0 : i * 14,
-        easing: EASE_OUT,
-        fill: "backwards",
+    tiles()
+      .slice(0, PAGE)
+      .forEach((t, i) => {
+        t.getAnimations().forEach((a) => a.cancel());
+        t.animate(reduced ? [{ opacity: 0.4 }, { opacity: 1 }] : [{ opacity: 0, transform: "scale(.98)" }, { opacity: 1, transform: "none" }], {
+          duration: 180,
+          delay: reduced ? 0 : Math.min(i, 12) * 14,
+          easing: EASE_OUT,
+          fill: "backwards",
+        });
       });
-    });
-  }, [filters, reduced]);
+  }, [filters, sort, reduced]);
+
+  // After "Show more", focus moves to the first new tile so a keyboard reader goes on from there.
+  useEffect(() => {
+    if (focusFrom.current === null) return;
+    wall.current?.children[focusFrom.current]?.querySelector<HTMLElement>(".in-open")?.focus();
+    focusFrom.current = null;
+  }, [limit]);
 
   // Touch has no hover: the first tap reveals a tile and plays it, a tap anywhere else hides it.
   useEffect(() => {
@@ -516,11 +615,16 @@ export function InspirationWall({
 
   useEffect(() => () => window.clearTimeout(liveTimer.current), []);
 
-  const onCopied = useCallback((ok: boolean, text: string) => {
-    setLive({ text: ok ? `Copied: ${text}` : "Copy failed. Select the command and copy it.", on: true });
+  const onCopied = useCallback((ok: boolean, what: string) => {
+    setLive({ text: ok ? `Copied: ${what}` : "Copy failed. Select the text and copy it.", on: true });
     window.clearTimeout(liveTimer.current);
     liveTimer.current = window.setTimeout(() => setLive((l) => ({ ...l, on: false })), COPIED_MS);
   }, []);
+
+  const view = (id: string) => {
+    if (byId.get(id)?.promptSource) loadPrompts();
+    setOpenId(id);
+  };
 
   const onOpen = (id: string, e: MouseEvent<HTMLButtonElement>) => {
     const touch = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -528,7 +632,7 @@ export function InspirationWall({
       setRevealed(id);
       return;
     }
-    setOpenId(id);
+    view(id);
   };
 
   const openRef = useRef(openId);
@@ -537,54 +641,42 @@ export function InspirationWall({
     const id = openRef.current;
     setOpenId(null);
     setRevealed(null);
-    if (id) wall.current?.querySelector<HTMLButtonElement>(`[data-id="${id}"]:not([hidden]) .in-open`)?.focus({ preventScroll: true });
+    if (id) wall.current?.querySelector<HTMLButtonElement>(`[data-id="${id}"] .in-open`)?.focus({ preventScroll: true });
   }, []);
 
+  const pool = () => (shownIds.length ? shownIds : posts.map((p) => p.id));
   const step = (dir: number) => {
-    const list = shownIds.length ? shownIds : posts.map((p) => p.id);
+    const list = pool();
     if (list.length < 2 || !openId) return;
     const i = list.indexOf(openId);
-    setOpenId(list[(i + dir + list.length) % list.length]);
+    view(list[(i + dir + list.length) % list.length]);
   };
-
   const surprise = () => {
-    const list = shownIds.length ? shownIds : posts.map((p) => p.id);
-    setOpenId(list[Math.floor(Math.random() * list.length)]);
+    const list = pool();
+    view(list[Math.floor(Math.random() * list.length)]);
   };
 
   const onWallKey = (e: KeyboardEvent<HTMLUListElement>) => {
-    const d = ({ ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] } as Record<string, number[]>)[e.key];
+    const d = ARROWS[e.key];
     const from = (e.target as HTMLElement).closest<HTMLElement>(".in-open");
     if (!d || !from) return;
     e.preventDefault();
-    const r0 = from.getBoundingClientRect();
-    const c0 = [r0.left + r0.width / 2, r0.top + r0.height / 2];
-    let best: HTMLElement | null = null;
-    let bestScore = Infinity;
-    for (const t of visibleTiles()) {
-      const h = t.querySelector<HTMLElement>(".in-open");
-      if (!h || h === from || !h.offsetParent) continue;
-      const r = h.getBoundingClientRect();
-      const c = [r.left + r.width / 2, r.top + r.height / 2];
-      const along = (c[0] - c0[0]) * d[0] + (c[1] - c0[1]) * d[1];
-      if (along <= 1) continue;
-      const score = along + 2 * (Math.abs((c[0] - c0[0]) * d[1]) + Math.abs((c[1] - c0[1]) * d[0]));
-      if (score < bestScore) {
-        bestScore = score;
-        best = h;
-      }
-    }
+    const best = nearestTile(tiles(), from, d);
     if (best) {
       best.focus();
       best.scrollIntoView({ block: "nearest" });
     }
   };
 
-  const toggleType = (id: string) =>
-    setFilters((f) => ({ ...f, types: f.types.includes(id) ? f.types.filter((t) => t !== id) : [...f.types, id] }));
+  const filter = (next: (f: Filters) => Filters) => {
+    setFilters(next);
+    setLimit(PAGE);
+  };
+  const toggleType = (id: string) => filter((f) => ({ ...f, types: f.types.includes(id) ? f.types.filter((t) => t !== id) : [...f.types, id] }));
 
   const open = openId ? byId.get(openId) ?? null : null;
   const position = open ? `${Math.max(shownIds.indexOf(open.id), 0) + 1} / ${shownIds.length || posts.length}` : "";
+  const left = matched.length - rendered.length;
   const toast = (
     <div className={live.on ? "in-live is-on" : "in-live"} role="status" aria-live="polite">
       {live.text}
@@ -616,11 +708,12 @@ export function InspirationWall({
             placeholder="Search"
             autoComplete="off"
             value={filters.q}
-            onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+            onFocus={loadPrompts}
+            onChange={(e) => filter((f) => ({ ...f, q: e.target.value }))}
             onKeyDown={(e) => {
               if (e.key === "Escape" && filters.q) {
                 e.stopPropagation();
-                setFilters((f) => ({ ...f, q: "" }));
+                filter((f) => ({ ...f, q: "" }));
               }
             }}
           />
@@ -640,9 +733,24 @@ export function InspirationWall({
           </fieldset>
           <span className="in-sep" aria-hidden="true" />
           <label className="in-chip">
-            <input type="checkbox" checked={filters.prompt} onChange={(e) => setFilters((f) => ({ ...f, prompt: e.target.checked }))} />
+            <input type="checkbox" checked={filters.prompt} onChange={(e) => filter((f) => ({ ...f, prompt: e.target.checked }))} />
             <span>Prompt</span>
           </label>
+        </div>
+        <div className="in-sort" role="group" aria-label="Sort">
+          {SORTS.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              aria-pressed={sort === s.id}
+              onClick={() => {
+                setSort(s.id);
+                setLimit(PAGE);
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
         </div>
         <span className="meta in-status" role="status" aria-live="polite">
           {shownIds.length}
@@ -661,11 +769,10 @@ export function InspirationWall({
       </div>
 
       <ul className="in-wall" ref={wall} aria-label="Posts" onKeyDown={onWallKey}>
-        {posts.map((p, i) => (
+        {rendered.map((p, i) => (
           <Tile
             key={p.id}
             post={p}
-            hidden={!shown.has(p.id)}
             first={i < FIRST_ROW}
             allowPlay={!previewsOff && !reduced && !openId}
             revealed={revealed === p.id}
@@ -674,6 +781,21 @@ export function InspirationWall({
           />
         ))}
       </ul>
+      {left > 0 ? (
+        <div className="in-more">
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => {
+              focusFrom.current = rendered.length;
+              setLimit((n) => n + PAGE);
+            }}
+          >
+            Show more
+            <span className="meta">{left} left</span>
+          </button>
+        </div>
+      ) : null}
       {shownIds.length ? null : (
         <div className="in-empty">
           <p>No match.</p>
@@ -681,7 +803,7 @@ export function InspirationWall({
             className="btn btn-ghost"
             type="button"
             onClick={() => {
-              setFilters(EMPTY);
+              filter(() => EMPTY);
               search.current?.focus();
             }}
           >
@@ -690,7 +812,16 @@ export function InspirationWall({
         </div>
       )}
 
-      <Viewer post={open} position={position} reduced={reduced} onStep={step} onClosed={onClosed} onCopied={onCopied} toast={toast} />
+      <Viewer
+        post={open}
+        prompt={open?.promptSource ? { source: open.promptSource, text: prompts?.[open.id] ?? null } : null}
+        position={position}
+        reduced={reduced}
+        onStep={step}
+        onClosed={onClosed}
+        onCopied={onCopied}
+        toast={toast}
+      />
       {open ? null : toast}
     </>
   );

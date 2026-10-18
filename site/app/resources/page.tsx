@@ -82,6 +82,14 @@ const GROUPS: Group[] = [
         meta: `${INSPIRATION.length}${NBSP}videos`,
         tile: { word: "Films", tone: "cobalt", detail: "films", shift: -1 },
       },
+      {
+        href: "/features",
+        title: "Features",
+        line: "What the engine decides for you, in three groups: agent experience, taste and speed.",
+        icon: "list",
+        meta: "page",
+        tile: { word: "Features", tone: "oxblood", detail: "features", flip: true },
+      },
     ],
   },
   {

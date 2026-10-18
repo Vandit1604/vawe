@@ -1,19 +1,46 @@
 {
   "types": [
-    { "id": "explainer", "chip": "Explainer", "label": "Explainer" },
-    { "id": "product-ui", "chip": "UI", "label": "Product UI" },
-    { "id": "3d", "chip": "3D", "label": "3D" },
-    { "id": "interactive", "chip": "Interactive", "label": "Interactive" },
-    { "id": "pixel-art", "chip": "Pixel", "label": "Pixel art" }
+    {
+      "id": "explainer",
+      "chip": "Explainer",
+      "label": "Explainer"
+    },
+    {
+      "id": "product-ui",
+      "chip": "UI",
+      "label": "Product UI"
+    },
+    {
+      "id": "3d",
+      "chip": "3D",
+      "label": "3D"
+    },
+    {
+      "id": "interactive",
+      "chip": "Interactive",
+      "label": "Interactive"
+    },
+    {
+      "id": "pixel-art",
+      "chip": "Pixel",
+      "label": "Pixel art"
+    }
   ],
   "posts": [
     {
       "id": "2103683057689522564",
       "title": "什么是 Transformer",
-      "creator": { "name": "宝玉", "handle": "dotey" },
+      "creator": {
+        "name": "宝玉",
+        "handle": "dotey"
+      },
       "url": "https://x.com/dotey/status/2103683057689522564",
-      "types": ["explainer"],
-      "tags": ["maths"],
+      "types": [
+        "explainer"
+      ],
+      "tags": [
+        "maths"
+      ],
       "tool": "Claude Code, Opus 5.5",
       "prompt": {
         "text": "帮我用js制作一个视频，主题是：什么是 Transformer\n要深入浅出，让高中生也能看得懂，不仅high level说的清楚，也要有细节，包括注意力机制，甚至一些数学概念\n\n你可以用任何工具或者安装工具，可以联网检索\n\n请给我惊喜",
@@ -26,10 +53,19 @@
     {
       "id": "2104094723887501736",
       "title": "An interactive Raptor 3 you can take apart",
-      "creator": { "name": "Konstantin Saifoulline", "handle": "konstantinsaifo" },
+      "creator": {
+        "name": "Konstantin Saifoulline",
+        "handle": "konstantinsaifo"
+      },
       "url": "https://x.com/konstantinsaifo/status/2104094723887501736",
-      "types": ["3d", "explainer", "interactive"],
-      "tags": ["cutaway"],
+      "types": [
+        "3d",
+        "explainer",
+        "interactive"
+      ],
+      "tags": [
+        "cutaway"
+      ],
       "tool": "Claude Opus 5.5",
       "poster": "/inspiration/2104094723887501736.webp",
       "playback": "https://video.twimg.com/amplify_video/2104094523999563776/vid/avc1/1920x1080/wnZVe49yC4Jqo1eX.mp4?tag=29",
@@ -38,10 +74,17 @@
     {
       "id": "2102476258948927543",
       "title": "Animated pixel art wizard, pure code",
-      "creator": { "name": "Majid Manzarpour", "handle": "majidmanzarpour" },
+      "creator": {
+        "name": "Majid Manzarpour",
+        "handle": "majidmanzarpour"
+      },
       "url": "https://x.com/majidmanzarpour/status/2102476258948927543",
-      "types": ["pixel-art"],
-      "tags": ["character"],
+      "types": [
+        "pixel-art"
+      ],
+      "tags": [
+        "character"
+      ],
       "tool": "Claude Opus 5.5",
       "poster": "/inspiration/2102476258948927543.webp",
       "playback": "https://video.twimg.com/amplify_video/2102476231740399616/vid/avc1/1080x890/8wOPIn__IAkbl9ho.mp4?tag=29",
@@ -50,10 +93,17 @@
     {
       "id": "2102853258582880547",
       "title": "A recipe motion graphic, rendered in HTML from one image",
-      "creator": { "name": "Rory Flynn", "handle": "Ror_Fly" },
+      "creator": {
+        "name": "Rory Flynn",
+        "handle": "Ror_Fly"
+      },
       "url": "https://x.com/Ror_Fly/status/2102853258582880547",
-      "types": ["explainer"],
-      "tags": ["image to motion"],
+      "types": [
+        "explainer"
+      ],
+      "tags": [
+        "image to motion"
+      ],
       "tool": "Claude Opus 5.5",
       "prompt": {
         "text": "We're going to try a little test. Do you think you could render a recipe motion graphic animation using javascript or html (w/e you think will produce the best) to show the full recipe from start",
@@ -67,10 +117,18 @@
     {
       "id": "2102591147927654847",
       "title": "An interactive lens lab that explains camera focus",
-      "creator": { "name": "Ryan Sael", "handle": "RyanSael" },
+      "creator": {
+        "name": "Ryan Sael",
+        "handle": "RyanSael"
+      },
       "url": "https://x.com/RyanSael/status/2102591147927654847",
-      "types": ["interactive", "explainer"],
-      "tags": ["optics"],
+      "types": [
+        "interactive",
+        "explainer"
+      ],
+      "tags": [
+        "optics"
+      ],
       "tool": "Claude Opus 5.5",
       "poster": "/inspiration/2102591147927654847.webp",
       "playback": "https://video.twimg.com/amplify_video/2102589341197619200/vid/avc1/1920x1080/0zt2fNiA4QMgvhkM.mp4?tag=29",
@@ -79,10 +137,18 @@
     {
       "id": "2102554209166000267",
       "title": "A product video in code, synced to the beat",
-      "creator": { "name": "zero", "handle": "twoclipping" },
+      "creator": {
+        "name": "zero",
+        "handle": "twoclipping"
+      },
       "url": "https://x.com/twoclipping/status/2102554209166000267",
-      "types": ["product-ui"],
-      "tags": ["beat-synced", "music and sfx"],
+      "types": [
+        "product-ui"
+      ],
+      "tags": [
+        "beat-synced",
+        "music and sfx"
+      ],
       "tool": "Claude Opus 5.5",
       "prompt": {
         "text": "<inputs>\nAsk me for: the product name and a one-line promise, 3 to 5 UI moments",
@@ -96,10 +162,17 @@
     {
       "id": "2103273003555402193",
       "title": "One shape that becomes 8 to 12 UI states",
-      "creator": { "name": "zero", "handle": "twoclipping" },
+      "creator": {
+        "name": "zero",
+        "handle": "twoclipping"
+      },
       "url": "https://x.com/twoclipping/status/2103273003555402193",
-      "types": ["product-ui"],
-      "tags": ["shape morph"],
+      "types": [
+        "product-ui"
+      ],
+      "tags": [
+        "shape morph"
+      ],
       "tool": "Claude Opus 5.5",
       "prompt": {
         "text": "<inputs>\nAsk me for: 8 to 12 UI states I want the shape to become (e.g. button, loader, player,",
@@ -113,10 +186,18 @@
     {
       "id": "2103116235009347650",
       "title": "Napoleon's sharpest battle as a 5 minute film",
-      "creator": { "name": "Winter", "handle": "WinterArc2125" },
+      "creator": {
+        "name": "Winter",
+        "handle": "WinterArc2125"
+      },
       "url": "https://x.com/WinterArc2125/status/2103116235009347650",
-      "types": ["3d"],
-      "tags": ["satellite terrain", "score and voice"],
+      "types": [
+        "3d"
+      ],
+      "tags": [
+        "satellite terrain",
+        "score and voice"
+      ],
       "tool": "Claude Opus 5.5",
       "poster": "/inspiration/2103116235009347650.webp",
       "playback": "https://video.twimg.com/amplify_video/2103113452726140928/vid/avc1/1920x1080/7kwgLDfFWkBBQ35Z.mp4?tag=29",
@@ -125,7 +206,10 @@
     {
       "id": "2110911582209241088",
       "title": "",
-      "creator": { "name": "", "handle": "poetengineer__" },
+      "creator": {
+        "name": "",
+        "handle": "poetengineer__"
+      },
       "url": "https://x.com/poetengineer__/status/2110911582209241088",
       "types": [],
       "tags": [],
@@ -133,6 +217,3244 @@
       "poster": "/inspiration/2110911582209241088.webp",
       "playback": "",
       "duration": 12.8
+    },
+    {
+      "id": "2103315922098470926",
+      "title": "Opus 5.5 on Max effort - \"make a dynamic 15-second motion graphics video that shows what…",
+      "creator": {
+        "name": "Stephan Livera",
+        "handle": "stephanlivera"
+      },
+      "url": "https://x.com/stephanlivera/status/2103315922098470926",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. go all out.",
+        "source": "https://x.com/stephanlivera/status/2103315922098470926"
+      },
+      "poster": "/inspiration/2103315922098470926.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103315748496302080/vid/avc1/1920x1080/Ug6RUqJ59vKTsnPX.mp4?tag=29",
+      "duration": 15
+    },
+    {
+      "id": "2106426962738880879",
+      "title": "Industrial software doesn’t have to feel like industrial software",
+      "creator": {
+        "name": "Dilum Sanjaya",
+        "handle": "DilumSanjaya"
+      },
+      "url": "https://x.com/DilumSanjaya/status/2106426962738880879",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106426962738880879.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106424641959186432/vid/avc1/3456x1990/u621fCxI6iHtRNya.mp4?tag=29",
+      "duration": 72.3,
+      "saves": 10714
+    },
+    {
+      "id": "2102801274173587569",
+      "title": "I made this with one prompt using Opus 5.5",
+      "creator": {
+        "name": "donald",
+        "handle": "donaldjewkes"
+      },
+      "url": "https://x.com/donaldjewkes/status/2102801274173587569",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "I made this with one prompt using Opus 5.5 I spoke to my computer for 5mins, claude worked for 12 hours, and I woke up to this full prompt:",
+        "source": "https://x.com/donaldjewkes/status/2102801274173587569"
+      },
+      "poster": "/inspiration/2102801274173587569.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102799458031534086/vid/avc1/1920x1080/HM5EiroYW1MYwYj9.mp4?tag=29",
+      "duration": 141.5,
+      "saves": 8096
+    },
+    {
+      "id": "2108948624004526516",
+      "title": "Introducing Anatomy",
+      "creator": {
+        "name": "R",
+        "handle": "wheresryan22"
+      },
+      "url": "https://x.com/wheresryan22/status/2108948624004526516",
+      "types": [],
+      "tags": [],
+      "tool": "Claude",
+      "poster": "/inspiration/2108948624004526516.webp",
+      "playback": "https://video.twimg.com/amplify_video/2108946813889675264/vid/avc1/1920x1080/etLTvFpDLdf7-z6D.mp4?tag=29",
+      "duration": 38.9
+    },
+    {
+      "id": "2103141339651350646",
+      "title": "You can now generate an entire 3blue1brown style video from any research paper with Opus…",
+      "creator": {
+        "name": "Deedy",
+        "handle": "deedydas"
+      },
+      "url": "https://x.com/deedydas/status/2103141339651350646",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103141339651350646.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103141174626439168/vid/avc1/1920x1080/F3WFzkZrrP9a91VS.mp4?tag=29",
+      "duration": 519,
+      "saves": 5419
+    },
+    {
+      "id": "2104618175803609305",
+      "title": "As a design studio founder, I hate to admit it but Opus 5.5 is insanely good at motion…",
+      "creator": {
+        "name": "Miles",
+        "handle": "uxmiles"
+      },
+      "url": "https://x.com/uxmiles/status/2104618175803609305",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104618175803609305.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104617675125096449/vid/avc1/1920x1080/wSfliKmtAnKlJgGs.mp4?tag=29",
+      "duration": 15,
+      "saves": 4720
+    },
+    {
+      "id": "2102787937482252537",
+      "title": "Opus 5.5 is incredible at instructional video generation.",
+      "creator": {
+        "name": "Deedy",
+        "handle": "deedydas"
+      },
+      "url": "https://x.com/deedydas/status/2102787937482252537",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "Opus 5.5 is incredible at instructional video generation. I made this launch video for a inference startup in 1min for ~$2. Videos like these used to take weeks if not months and a lot of coordination with agencies and 1000x the costs. Humans broadly prefer video to text. This",
+        "source": "https://x.com/deedydas/status/2102787937482252537"
+      },
+      "poster": "/inspiration/2102787937482252537.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102787906494668800/vid/avc1/1920x1080/JZlNPRlJmaOn75P8.mp4?tag=29",
+      "duration": 26,
+      "saves": 4697
+    },
+    {
+      "id": "2103449416325890146",
+      "title": "WTF?",
+      "creator": {
+        "name": "Ajith",
+        "handle": "ajith_io"
+      },
+      "url": "https://x.com/ajith_io/status/2103449416325890146",
+      "types": [],
+      "tags": [],
+      "tool": "claude OPUS 5.5",
+      "prompt": {
+        "text": "make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. go all out.",
+        "source": "https://x.com/ajith_io/status/2103449416325890146"
+      },
+      "poster": "/inspiration/2103449416325890146.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103449259869863936/vid/avc1/1920x1080/gLl6GZWastLVE2fr.mp4?tag=29",
+      "duration": 15,
+      "saves": 4403
+    },
+    {
+      "id": "2102514581684052169",
+      "title": "Claude Opus 5.5 has the best visual design of any model I have tested so far",
+      "creator": {
+        "name": "NotinReality",
+        "handle": "other__reality"
+      },
+      "url": "https://x.com/other__reality/status/2102514581684052169",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102514581684052169.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102514085137154048/vid/avc1/1280x720/k7-vfCveNwGQnk1v.mp4?tag=14",
+      "duration": 156.6,
+      "saves": 4192
+    },
+    {
+      "id": "2102436464323661880",
+      "title": "Made with @claudeai Opus 5.5",
+      "creator": {
+        "name": "DreW",
+        "handle": "devteamdrew"
+      },
+      "url": "https://x.com/devteamdrew/status/2102436464323661880",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, claude",
+      "poster": "/inspiration/2102436464323661880.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102435379810885632/vid/avc1/1920x1080/UI5hS2e010VQ1Mz-.mp4?tag=29",
+      "duration": 31.9,
+      "saves": 4153
+    },
+    {
+      "id": "2109257723246501895",
+      "title": "asked claude opus 5.5 to create this CD plastic case effect with an open-lid animation",
+      "creator": {
+        "name": "Ann Nguyen",
+        "handle": "ann_nnng"
+      },
+      "url": "https://x.com/ann_nnng/status/2109257723246501895",
+      "types": [],
+      "tags": [],
+      "tool": "claude opus 5.5",
+      "poster": "/inspiration/2109257723246501895.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109257462641733632/vid/avc1/2458x1506/1uQEA5JY47OFniTd.mp4?tag=29",
+      "duration": 29.8,
+      "saves": 3816
+    },
+    {
+      "id": "2104001664793600012",
+      "title": "Third iteration with Opus 5.5 medium.",
+      "creator": {
+        "name": "Shikhar",
+        "handle": "xikhar"
+      },
+      "url": "https://x.com/xikhar/status/2104001664793600012",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104001664793600012.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103995292983193600/vid/avc1/3024x1896/pePICR2xzpQTMgmy.mp4?tag=29",
+      "duration": 140.7,
+      "saves": 3777
+    },
+    {
+      "id": "2105270766996701686",
+      "title": "Opus 5.5 is f*cking cracked at motion design",
+      "creator": {
+        "name": "John ✦ Motion Graphics | Editor",
+        "handle": "johncodunayo"
+      },
+      "url": "https://x.com/johncodunayo/status/2105270766996701686",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2105270766996701686.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105270731349037057/vid/avc1/1080x1080/SfLBNvc3XoSN5EmI.mp4?tag=29",
+      "duration": 23.6,
+      "saves": 3756
+    },
+    {
+      "id": "2103835273813496100",
+      "title": "OPUS 5.5 IS THE ONLY MOTION DESIGNER YOU NEED",
+      "creator": {
+        "name": "zero",
+        "handle": "twoclipping"
+      },
+      "url": "https://x.com/twoclipping/status/2103835273813496100",
+      "types": [],
+      "tags": [],
+      "tool": "OPUS 5.5",
+      "prompt": {
+        "text": "OPUS 5.5 IS THE ONLY MOTION DESIGNER YOU NEED this launch video cost $0 and is pure code everyone else on X claims the same shit, then sends you to their website or mcp this is completely free with 0 external tools steal the prompt and try it in your claude ↓ &lt;inputs&gt; Ask me",
+        "source": "https://x.com/twoclipping/status/2103835273813496100"
+      },
+      "poster": "/inspiration/2103835273813496100.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103830256347910144/vid/avc1/1440x1440/gL8_i-JCpnoZ7ouX.mp4?tag=29",
+      "duration": 29,
+      "saves": 3745
+    },
+    {
+      "id": "2095756085890310311",
+      "title": "So how good really is GPT-6 Astra at 3D modeling?",
+      "creator": {
+        "name": "Tom Krcha",
+        "handle": "tomkrcha"
+      },
+      "url": "https://x.com/tomkrcha/status/2095756085890310311",
+      "types": [],
+      "tags": [],
+      "tool": "GPT-6",
+      "poster": "/inspiration/2095756085890310311.webp",
+      "playback": "https://video.twimg.com/amplify_video/2095754646069354497/vid/avc1/3324x2160/FLmH31lbER_LblWt.mp4?tag=29",
+      "duration": 34.2,
+      "saves": 3540
+    },
+    {
+      "id": "2103082510607610023",
+      "title": "This video inspired me to really push Opus 5.5 and test its limits.",
+      "creator": {
+        "name": "Pleometric",
+        "handle": "pleometric"
+      },
+      "url": "https://x.com/pleometric/status/2103082510607610023",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103082510607610023.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103081744408657920/vid/avc1/1920x1080/gHnQCt53prC1koie.mp4?tag=29",
+      "duration": 156.7,
+      "saves": 3466
+    },
+    {
+      "id": "2102737776219168939",
+      "title": "QUÉ!? Locura",
+      "creator": {
+        "name": "Carlos Santana",
+        "handle": "DotCSV"
+      },
+      "url": "https://x.com/DotCSV/status/2102737776219168939",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102737776219168939.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102736360750579712/vid/avc1/1920x1080/aGZ99qYbSkEyuXqq.mp4?tag=29",
+      "duration": 56,
+      "saves": 3196
+    },
+    {
+      "id": "2103483923783373039",
+      "title": "Opus 5.5はこんなこともできるのか",
+      "creator": {
+        "name": "さんかくてん",
+        "handle": "sankakuten91256"
+      },
+      "url": "https://x.com/sankakuten91256/status/2103483923783373039",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Grok",
+      "poster": "/inspiration/2103483923783373039.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103482017799352320/vid/avc1/1920x1080/Uqh9IMa_IMBMFBk9.mp4?tag=29",
+      "duration": 15,
+      "saves": 3185
+    },
+    {
+      "id": "2102437977435893771",
+      "title": "Claude Opus 5.5 drew every frame of this animation in JavaScript.",
+      "creator": {
+        "name": "Kevin Ngo",
+        "handle": "kevin_t_ngo"
+      },
+      "url": "https://x.com/kevin_t_ngo/status/2102437977435893771",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102437977435893771.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102437792425070592/vid/avc1/2160x2160/W4jj3wTem9xWvmrR.mp4?tag=29",
+      "duration": 28,
+      "saves": 2902
+    },
+    {
+      "id": "2104151743907160546",
+      "title": "my favorite Paul Graham essay “how to do great work” in under 200 seconds of video",
+      "creator": {
+        "name": "Deedy",
+        "handle": "deedydas"
+      },
+      "url": "https://x.com/deedydas/status/2104151743907160546",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2104151743907160546.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104151706158374912/vid/avc1/1920x1080/GJrwHTE-SScZZIFI.mp4?tag=29",
+      "duration": 195,
+      "saves": 2879
+    },
+    {
+      "id": "2104957548797604116",
+      "title": "最近尝试了非常多 opus5.5 制作视频的不同风格，有些效果实在是惊艳",
+      "creator": {
+        "name": "Vincent文森特",
+        "handle": "VincentWei93"
+      },
+      "url": "https://x.com/VincentWei93/status/2104957548797604116",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2104957548797604116.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104944871673053184/vid/avc1/1920x1080/nz27ngNjsTtHPEPP.mp4?tag=29",
+      "duration": 178.9,
+      "saves": 2850
+    },
+    {
+      "id": "2104086740600254919",
+      "title": "Opus 5.5 ile 2 gündür animasyon deniyorum ve ortaya 20 farklı tarz çıktı. Hepsini tek…",
+      "creator": {
+        "name": "Yasin Özmen",
+        "handle": "yasinozmeen"
+      },
+      "url": "https://x.com/yasinozmeen/status/2104086740600254919",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104086740600254919.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104085367343190016/vid/avc1/1280x720/fgGdyV-KtkPUxCNx.mp4?tag=14",
+      "duration": 226,
+      "saves": 2775
+    },
+    {
+      "id": "2104206095313215591",
+      "title": "I was struggling to explain my UX decisions in interviews, so I made this kind of…",
+      "creator": {
+        "name": "Oğuz B",
+        "handle": "moguzbulbul"
+      },
+      "url": "https://x.com/moguzbulbul/status/2104206095313215591",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104206095313215591.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104205996960743424/vid/avc1/1600x1200/0DXlFFptQto4Eluj.mp4?tag=29",
+      "duration": 42,
+      "saves": 2728
+    },
+    {
+      "id": "2102786378282987591",
+      "title": "opus 5.5 is something else..",
+      "creator": {
+        "name": "Aurelien",
+        "handle": "Aurelien_Gz"
+      },
+      "url": "https://x.com/Aurelien_Gz/status/2102786378282987591",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2102786378282987591.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102783637837983744/vid/avc1/1424x1080/NA6bZNLAhxl44ck_.mp4?tag=29",
+      "duration": 26.8,
+      "saves": 2612
+    },
+    {
+      "id": "2105255710531674358",
+      "title": "Opus5.5の動画制作、工夫次第でここまでいけます",
+      "creator": {
+        "name": "ハシモトタクマ / FunTech",
+        "handle": "tkm_hmng8"
+      },
+      "url": "https://x.com/tkm_hmng8/status/2105255710531674358",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2105255710531674358.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105251355883720704/vid/avc1/1920x1080/hYdztxW9S65a6sNc.mp4?tag=29",
+      "duration": 49.7,
+      "saves": 2277
+    },
+    {
+      "id": "2102512879258009818",
+      "title": "What the actual fuck. Opus 5.5 ultra created this masterpiece. 4 agents and an hour and a…",
+      "creator": {
+        "name": "AndrewOnXYZ",
+        "handle": "AndrewOnXYZ"
+      },
+      "url": "https://x.com/AndrewOnXYZ/status/2102512879258009818",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102512879258009818.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102512551380619264/vid/avc1/1280x720/LscHdEggUW0fAmsL.mp4?tag=14",
+      "duration": 239.4,
+      "saves": 2163
+    },
+    {
+      "id": "2102610626321490404",
+      "title": "when Anthropic released their Functional Emotions paper, I gave it to Claude and asked…",
+      "creator": {
+        "name": "josh",
+        "handle": "eudaemonea"
+      },
+      "url": "https://x.com/eudaemonea/status/2102610626321490404",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Claude",
+      "poster": "/inspiration/2102610626321490404.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102606787941736448/vid/avc1/1920x1080/bAYxtpYVkxfL_0lv.mp4?tag=29",
+      "duration": 372.7,
+      "saves": 2119
+    },
+    {
+      "id": "2104391577091407965",
+      "title": "every single open source repo should have an explainer video like this 7min one for SQLite",
+      "creator": {
+        "name": "Deedy",
+        "handle": "deedydas"
+      },
+      "url": "https://x.com/deedydas/status/2104391577091407965",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2104391577091407965.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104388989784612864/vid/avc1/1920x1080/s38S3PY8BJMpcePO.mp4?tag=29",
+      "duration": 450,
+      "saves": 2031
+    },
+    {
+      "id": "2103918792845963545",
+      "title": "Opus 5.5 did this in 15 minutes",
+      "creator": {
+        "name": "Chain",
+        "handle": "achxvi"
+      },
+      "url": "https://x.com/achxvi/status/2103918792845963545",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103918792845963545.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103918273414791168/vid/avc1/1920x1080/ZN2B5J7DqR2itqzt.mp4?tag=29",
+      "duration": 15,
+      "saves": 2005
+    },
+    {
+      "id": "2105276821214532096",
+      "title": "我们在学校听了十几年的老师讲课，却没有人教给我们「怎么学」。",
+      "creator": {
+        "name": "比特麻麻",
+        "handle": "momoflilbit"
+      },
+      "url": "https://x.com/momoflilbit/status/2105276821214532096",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2105276821214532096.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105276066961182720/vid/avc1/1920x1080/PV7fB_Q4E69MrmIw.mp4?tag=29",
+      "duration": 640,
+      "saves": 1792
+    },
+    {
+      "id": "2103009037164110327",
+      "title": "Claude Opus 5.5 drew each frame of this animation in JavaScript. Here's \"how browsers…",
+      "creator": {
+        "name": "Addy Osmani",
+        "handle": "addyosmani"
+      },
+      "url": "https://x.com/addyosmani/status/2103009037164110327",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2103009037164110327.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102980713603887104/vid/avc1/1920x1080/1Y6eW_4ril0HV557.mp4?tag=29",
+      "duration": 40,
+      "saves": 1744
+    },
+    {
+      "id": "2102495989194236158",
+      "title": "Asked Claude Opus 5.5 to animate its own life, from day 0 to now",
+      "creator": {
+        "name": "✯",
+        "handle": "shfred0"
+      },
+      "url": "https://x.com/shfred0/status/2102495989194236158",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102495989194236158.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102495951738822657/vid/avc1/1762x982/Cu3fA7dv2tNbHj64.mp4?tag=29",
+      "duration": 30.2,
+      "saves": 1732
+    },
+    {
+      "id": "2102463453176979794",
+      "title": "I asked Opus 5.5 to make a game inspired by the discovery of the first computer, the…",
+      "creator": {
+        "name": "edwin",
+        "handle": "edwinarbus"
+      },
+      "url": "https://x.com/edwinarbus/status/2102463453176979794",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102463453176979794.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102461665086418944/vid/avc1/1350x1080/86T-JaewbcqfYnRH.mp4?tag=29",
+      "duration": 60,
+      "saves": 1701
+    },
+    {
+      "id": "2102441708395041170",
+      "title": "Claude Opus 5.5 1-shotted the launch video of @shotbaseapp using @HyperFrames_ in less…",
+      "creator": {
+        "name": "Miguel Ángel",
+        "handle": "Miguel07Code"
+      },
+      "url": "https://x.com/Miguel07Code/status/2102441708395041170",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5, HyperFrames",
+      "poster": "/inspiration/2102441708395041170.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102441459496697856/vid/avc1/1920x1080/tiZHwMtGZWtWu30v.mp4?tag=29",
+      "duration": 58.3,
+      "saves": 1683
+    },
+    {
+      "id": "2104085484347818226",
+      "title": "Opus 5.5 游戏动效制作提示词来了！",
+      "creator": {
+        "name": "歸藏(guizang.ai)",
+        "handle": "op7418"
+      },
+      "url": "https://x.com/op7418/status/2104085484347818226",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104085484347818226.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104085291439144961/vid/avc1/1920x1080/agR_4slDGrB3iJZ_.mp4?tag=29",
+      "duration": 17.6,
+      "saves": 1621
+    },
+    {
+      "id": "2102844654169575547",
+      "title": "I wanted to quickly create a short video with Opus 5.5 about the history of AI, from…",
+      "creator": {
+        "name": "Chubby♨️",
+        "handle": "kimmonismus"
+      },
+      "url": "https://x.com/kimmonismus/status/2102844654169575547",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102844654169575547.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102844491820670976/vid/avc1/1920x1080/JciZjVTMqHe6HsqX.mp4?tag=16",
+      "duration": 180.1,
+      "saves": 1590
+    },
+    {
+      "id": "2106466745661980904",
+      "title": "Retro Anime Sequence created with:",
+      "creator": {
+        "name": "A.I.Warper",
+        "handle": "AIWarper"
+      },
+      "url": "https://x.com/AIWarper/status/2106466745661980904",
+      "types": [],
+      "tags": [],
+      "tool": "OPUS 5.5",
+      "poster": "/inspiration/2106466745661980904.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106464555870113792/vid/avc1/1080x1216/acuxCfzWFn-fKVQG.mp4?tag=29",
+      "duration": 25,
+      "saves": 1577
+    },
+    {
+      "id": "2107996576228753545",
+      "title": "Cozy creek - threejs 3D experience of a Creek made in GPT 6 Astra",
+      "creator": {
+        "name": "Chetan Ankola",
+        "handle": "chetanankola"
+      },
+      "url": "https://x.com/chetanankola/status/2107996576228753545",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2107996576228753545.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107995518244929536/vid/avc1/2478x2160/6_28Db6Gni7qkD44.mp4?tag=29",
+      "duration": 58.8,
+      "saves": 1559
+    },
+    {
+      "id": "2106411941497389342",
+      "title": "I asked Opus 5.5 to write, produce, and create me an educational 'cartoon' about The…",
+      "creator": {
+        "name": "am.will",
+        "handle": "LLMJunky"
+      },
+      "url": "https://x.com/LLMJunky/status/2106411941497389342",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106411941497389342.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106410146649833472/vid/avc1/1920x1080/kWa1SO2quAqOq_F-.mp4?tag=29",
+      "duration": 2137.5,
+      "saves": 1470
+    },
+    {
+      "id": "2107086714820870617",
+      "title": "Fable 5.5 made me a delightful animation in blender.",
+      "creator": {
+        "name": "Jayden Davis",
+        "handle": "JaydenDavisNC"
+      },
+      "url": "https://x.com/JaydenDavisNC/status/2107086714820870617",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2107086714820870617.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107086270514044928/vid/avc1/1920x1080/1fzt_Pa3IR1DiPwf.mp4?tag=29",
+      "duration": 16.5,
+      "saves": 1356
+    },
+    {
+      "id": "2106835487365419479",
+      "title": "It’d be awesome if logistics software could be visualized and turned into a strategy game.",
+      "creator": {
+        "name": "Alex Nguyen",
+        "handle": "alexcooldev"
+      },
+      "url": "https://x.com/alexcooldev/status/2106835487365419479",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106835487365419479.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106834554170564608/vid/avc1/3398x1718/wKpy8sa5yplBn9Kz.mp4?tag=29",
+      "duration": 74.4,
+      "saves": 1343
+    },
+    {
+      "id": "2103112945341251920",
+      "title": "Je vous branche sur un nouveau plan $$$$",
+      "creator": {
+        "name": "minos",
+        "handle": "minosdevs"
+      },
+      "url": "https://x.com/minosdevs/status/2103112945341251920",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103112945341251920.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103112926575910912/vid/avc1/1448x802/f0Pfr31UdwfqWOZm.mp4?tag=29",
+      "duration": 6.1,
+      "saves": 1338
+    },
+    {
+      "id": "2102572941699354900",
+      "title": "I asked Opus 5.5 to make an animation of what its TikTok feed looked like 👇",
+      "creator": {
+        "name": "Pleometric",
+        "handle": "pleometric"
+      },
+      "url": "https://x.com/pleometric/status/2102572941699354900",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102572941699354900.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102572625637646337/vid/avc1/1080x1920/bOttnPyP1FhvLHTq.mp4?tag=29",
+      "duration": 47,
+      "saves": 1318
+    },
+    {
+      "id": "2105757136219504862",
+      "title": "Welcome To the era of Super intelligence : Fable 5.5",
+      "creator": {
+        "name": "Chetaslua",
+        "handle": "chetaslua"
+      },
+      "url": "https://x.com/chetaslua/status/2105757136219504862",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2105757136219504862.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105756947442257920/vid/avc1/1920x1080/Hl1_XXriVO_yB4Nv.mp4?tag=29",
+      "duration": 40,
+      "saves": 1278
+    },
+    {
+      "id": "2104148233106723099",
+      "title": "I asked Claude Code (Opus 5.5) to make a launch video for a fake calendar app and HOLY…",
+      "creator": {
+        "name": "Leon Lin",
+        "handle": "LexnLin"
+      },
+      "url": "https://x.com/LexnLin/status/2104148233106723099",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Code, Opus 5.5",
+      "poster": "/inspiration/2104148233106723099.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104148166450835456/vid/avc1/1920x1080/2VlZWulj4d68fccA.mp4?tag=29",
+      "duration": 33,
+      "saves": 1240
+    },
+    {
+      "id": "2103482164193165711",
+      "title": "I asked Claude Opus 5.5 to compose piano music.",
+      "creator": {
+        "name": "Kevin Ngo",
+        "handle": "kevin_t_ngo"
+      },
+      "url": "https://x.com/kevin_t_ngo/status/2103482164193165711",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2103482164193165711.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103481392843911168/vid/avc1/2160x2160/PJvB3HSqbVciFyKo.mp4?tag=29",
+      "duration": 45,
+      "saves": 1209
+    },
+    {
+      "id": "2103381720410333314",
+      "title": "如果你在用 Opus5.5",
+      "creator": {
+        "name": "Vincent文森特",
+        "handle": "VincentWei93"
+      },
+      "url": "https://x.com/VincentWei93/status/2103381720410333314",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "prompt": {
+        "text": "如果你在用 Opus5.5 那我建议你卸载所有用代码做视频的skill 这个视频是 Opus5.5 一句话做出来的，所有的部分都是由代码生成，包括音乐 BGM 和音效合成 作为 GitHub万星 skill video-shotcraft 的作者，我太知道以前模型想通过代码生成视频是什么水平了，这次 Opus5.5 在这方面可以说是跨代际的突破",
+        "source": "https://x.com/VincentWei93/status/2103381720410333314"
+      },
+      "poster": "/inspiration/2103381720410333314.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103381213595713536/vid/avc1/1920x1080/TCSoE69W72lxocD3.mp4?tag=29",
+      "duration": 224,
+      "saves": 1207
+    },
+    {
+      "id": "2102576886182453454",
+      "title": "Opus5.5とThree.js",
+      "creator": {
+        "name": "ハヤシモン｜AI × 個人開発",
+        "handle": "hayashimon1"
+      },
+      "url": "https://x.com/hayashimon1/status/2102576886182453454",
+      "types": [],
+      "tags": [],
+      "tool": "Three.js",
+      "poster": "/inspiration/2102576886182453454.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102576041722273792/vid/avc1/2842x1350/zTwa2zA-TWxaA6IT.mp4?tag=29",
+      "duration": 14.9,
+      "saves": 1188
+    },
+    {
+      "id": "2104111432149164474",
+      "title": "I’m honestly shocked with Opus 5.5 on how easy it is to just copy people’s work and…",
+      "creator": {
+        "name": "Luis Bizarro",
+        "handle": "LuisBizarro"
+      },
+      "url": "https://x.com/LuisBizarro/status/2104111432149164474",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104111432149164474.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104109730436124674/vid/avc1/1920x1080/4xYkath--kYz1x8N.mp4?tag=29",
+      "duration": 184.4,
+      "saves": 1168
+    },
+    {
+      "id": "2102477340920152162",
+      "title": "I asked Opus 5.5 to try a bunch of redesigns of my personal website using my MAX sub…",
+      "creator": {
+        "name": "Thariq",
+        "handle": "trq212"
+      },
+      "url": "https://x.com/trq212/status/2102477340920152162",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102477340920152162.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102477300990357504/vid/avc1/2544x1440/ezh0f1hyTASXR8MP.mp4?tag=29",
+      "duration": 95.5,
+      "saves": 1122
+    },
+    {
+      "id": "2106101651010449796",
+      "title": "Claude Opus 5.5 made its own ad. (sound on)",
+      "creator": {
+        "name": "Leon Lin",
+        "handle": "LexnLin"
+      },
+      "url": "https://x.com/LexnLin/status/2106101651010449796",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2106101651010449796.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106097909800312832/vid/avc1/1080x1920/HCXHbmDdy6gLibHk.mp4?tag=29",
+      "duration": 14.5,
+      "saves": 1119
+    },
+    {
+      "id": "2103152093733253544",
+      "title": "Tutoriel pour créer des ads quasi-GRATUITEMENT avec un Opus 5.5!",
+      "creator": {
+        "name": "Lucas | Ecom IA",
+        "handle": "Lucas_IA_"
+      },
+      "url": "https://x.com/Lucas_IA_/status/2103152093733253544",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Code, Opus 5.5",
+      "poster": "/inspiration/2103152093733253544.webp",
+      "playback": "https://video.twimg.com/ext_tw_video/2103152070308065280/pu/vid/avc1/480x848/dbmETYA20BNmeLd4.mp4?tag=12",
+      "duration": 71.6,
+      "saves": 1119
+    },
+    {
+      "id": "2106313584829431901",
+      "title": "This is what 100% of Opus 5.5 weekly usage looks like",
+      "creator": {
+        "name": "Fork Dev",
+        "handle": "ForkedPush"
+      },
+      "url": "https://x.com/ForkedPush/status/2106313584829431901",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106313584829431901.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106311947993927680/vid/avc1/2560x1440/Fot8_lIkyzkKHYNQ.mp4?tag=29",
+      "duration": 161.9,
+      "saves": 1096
+    },
+    {
+      "id": "2107794785188864070",
+      "title": "Opus 5.5にHTML/Three.jsを書かせた、ナレーションとモーションのテスト。",
+      "creator": {
+        "name": "aicreataro",
+        "handle": "aicreataro"
+      },
+      "url": "https://x.com/aicreataro/status/2107794785188864070",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Three.js",
+      "poster": "/inspiration/2107794785188864070.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107793524091764736/vid/avc1/1920x1080/GKiYMnXoThAxr8bp.mp4?tag=29",
+      "duration": 86.3,
+      "saves": 1083
+    },
+    {
+      "id": "2102445641205248145",
+      "title": "sketch-to-simulation with Opus 5.5",
+      "creator": {
+        "name": "Ben Poole",
+        "handle": "poolio"
+      },
+      "url": "https://x.com/poolio/status/2102445641205248145",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102445641205248145.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102445309855141889/vid/avc1/1920x1080/Y-M_cyVq7uOxGr0H.mp4?tag=29",
+      "duration": 80.2,
+      "saves": 1073
+    },
+    {
+      "id": "2105825930799432073",
+      "title": "I asked for a dot. Fable 5.5 gave me a Pixar side quest.",
+      "creator": {
+        "name": "Tak 🦞",
+        "handle": "cherry_mx_reds"
+      },
+      "url": "https://x.com/cherry_mx_reds/status/2105825930799432073",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2105825930799432073.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105822170077069313/vid/avc1/1920x1080/drY7Reou5Q9beWNz.mp4?tag=29",
+      "duration": 15,
+      "saves": 1072
+    },
+    {
+      "id": "2103965547780345859",
+      "title": "claude just generated this 2 minute video about the history of Google and it goes so…",
+      "creator": {
+        "name": "Deedy",
+        "handle": "deedydas"
+      },
+      "url": "https://x.com/deedydas/status/2103965547780345859",
+      "types": [],
+      "tags": [],
+      "tool": "claude",
+      "poster": "/inspiration/2103965547780345859.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103962803627606016/vid/avc1/1920x1080/a7mGuPkuurCWOqoG.mp4?tag=29",
+      "duration": 120,
+      "saves": 1012
+    },
+    {
+      "id": "2103542300844474452",
+      "title": "Opus 5.5 is good at motion graphics.",
+      "creator": {
+        "name": "Mirage",
+        "handle": "trymirage"
+      },
+      "url": "https://x.com/trymirage/status/2103542300844474452",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103542300844474452.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103540981308002304/vid/avc1/1920x1080/cg4SW_0mqia4kxeu.mp4?tag=29",
+      "duration": 15,
+      "saves": 1011
+    },
+    {
+      "id": "2106387548486738010",
+      "title": "I asked Opus 5.5 to reverse engineer League of Legends And Dragonball FighterZ combine…",
+      "creator": {
+        "name": "Aymane",
+        "handle": "GamefxAI"
+      },
+      "url": "https://x.com/GamefxAI/status/2106387548486738010",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106387548486738010.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106387342000832512/vid/avc1/1280x720/XJUFBNwppHhjdOE1.mp4?tag=29",
+      "duration": 102.5,
+      "saves": 1009
+    },
+    {
+      "id": "2102498589259821559",
+      "title": "I asked Claude Opus 5.5 what new capabilities it had.",
+      "creator": {
+        "name": "Alix Ollivier",
+        "handle": "aollivier82"
+      },
+      "url": "https://x.com/aollivier82/status/2102498589259821559",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102498589259821559.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102498362331201537/vid/avc1/1080x1920/YJVbJ8i5lHe0lA1P.mp4?tag=29",
+      "duration": 32,
+      "saves": 988
+    },
+    {
+      "id": "2104525735713206557",
+      "title": "Its insane how good Opus 5.5 is, no After Effects, just code 🤯",
+      "creator": {
+        "name": "Pratzyy",
+        "handle": "pratyushrungta"
+      },
+      "url": "https://x.com/pratyushrungta/status/2104525735713206557",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104525735713206557.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104525270296526848/vid/avc1/1920x1080/k6ZKH_aLNxaqBWdG.mp4?tag=29",
+      "duration": 209.9,
+      "saves": 985
+    },
+    {
+      "id": "2104008163561451923",
+      "title": "Opus5.5にAITuber用のシステムを構築してと言って最初に出てきたのがこちらです。",
+      "creator": {
+        "name": "Mankyu | AI動画生成",
+        "handle": "manaimovie"
+      },
+      "url": "https://x.com/manaimovie/status/2104008163561451923",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2104008163561451923.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104006325764313088/vid/avc1/1920x1080/y6Rl787TUmYNrbd2.mp4?tag=29",
+      "duration": 55,
+      "saves": 985
+    },
+    {
+      "id": "2096209514248958161",
+      "title": "Launching GPT 6 Astra [ by GPT 6 Astra ]",
+      "creator": {
+        "name": "Athrix ☄️",
+        "handle": "athrix_codes"
+      },
+      "url": "https://x.com/athrix_codes/status/2096209514248958161",
+      "types": [],
+      "tags": [],
+      "tool": "HyperFrames",
+      "poster": "/inspiration/2096209514248958161.webp",
+      "playback": "https://video.twimg.com/amplify_video/2096209195934838784/vid/avc1/1920x1080/81y2x-ohPUvsVNmf.mp4?tag=29",
+      "duration": 53,
+      "saves": 951
+    },
+    {
+      "id": "2102463796149440888",
+      "title": "I asked Opus 5.5 to make a history of Claude models development.",
+      "creator": {
+        "name": "Alexey Fateev",
+        "handle": "superalesha"
+      },
+      "url": "https://x.com/superalesha/status/2102463796149440888",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Claude",
+      "poster": "/inspiration/2102463796149440888.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102463260083814400/vid/avc1/1920x1080/pg3IA2gaSf3rm2K4.mp4?tag=29",
+      "duration": 87.5,
+      "saves": 939
+    },
+    {
+      "id": "2105922366190784915",
+      "title": "すげぇぇぇぇぇぇぇOpus5.5 mediumでほんまに1プロンプトでできた！",
+      "creator": {
+        "name": "のこのこ / Satoru Nishio",
+        "handle": "nokonoko_1203"
+      },
+      "url": "https://x.com/nokonoko_1203/status/2105922366190784915",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "prompt": {
+        "text": "すげぇぇぇぇぇぇぇOpus5.5 mediumでほんまに1プロンプトでできた！ &gt;今日何曜日だっけ？BGM付きの30秒のかっこいいモーショングラフィックスで教えて（全力を出してください）",
+        "source": "https://x.com/nokonoko_1203/status/2105922366190784915"
+      },
+      "poster": "/inspiration/2105922366190784915.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105922303586701312/vid/avc1/1920x1080/frX055vOZBiQW7iu.mp4?tag=29",
+      "duration": 30,
+      "saves": 902
+    },
+    {
+      "id": "2103865359988125706",
+      "title": "Opus 5.5 created an animation highlighting one of the biggest risks for…",
+      "creator": {
+        "name": "AndrewOnXYZ",
+        "handle": "AndrewOnXYZ"
+      },
+      "url": "https://x.com/AndrewOnXYZ/status/2103865359988125706",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103865359988125706.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103865017187655680/vid/avc1/1920x1080/OQF_KBLI3ONRw3BI.mp4?tag=29",
+      "duration": 316,
+      "saves": 893
+    },
+    {
+      "id": "2104437066755125601",
+      "title": "Opus 5.5 又给我看傻了，",
+      "creator": {
+        "name": "Andy L",
+        "handle": "AndyL5cc"
+      },
+      "url": "https://x.com/AndyL5cc/status/2104437066755125601",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104437066755125601.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104436953773178880/vid/avc1/1920x1080/Qxn0iyOewsq0Og4J.mp4?tag=29",
+      "duration": 209,
+      "saves": 882
+    },
+    {
+      "id": "2107804983416467598",
+      "title": "Opus 5.5 built this HD-2D game without using a single imported art asset",
+      "creator": {
+        "name": "Hakimi Eiqbal",
+        "handle": "hakimieiqbal"
+      },
+      "url": "https://x.com/hakimieiqbal/status/2107804983416467598",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2107804983416467598.webp",
+      "playback": "https://video.twimg.com/ext_tw_video/2107804894509817856/pu/vid/avc1/1280x720/e1nUDpv5Gv4rhV-2.mp4?tag=12",
+      "duration": 79.9,
+      "saves": 879
+    },
+    {
+      "id": "2102503027340988559",
+      "title": "Well this is something new... Opus 5.5 by itself.",
+      "creator": {
+        "name": "Chris Riley",
+        "handle": "LCSlates"
+      },
+      "url": "https://x.com/LCSlates/status/2102503027340988559",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102503027340988559.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102502315185803264/vid/avc1/1080x1080/sAv8kDNKSV7KmtgO.mp4?tag=29",
+      "duration": 80,
+      "saves": 867
+    },
+    {
+      "id": "2102493303388475855",
+      "title": "Opus 5.5 one-shot this animation in 14m and 48s",
+      "creator": {
+        "name": "Tak 🦞",
+        "handle": "cherry_mx_reds"
+      },
+      "url": "https://x.com/cherry_mx_reds/status/2102493303388475855",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102493303388475855.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102493087381487616/vid/avc1/1920x1080/dMwClUvawHddh2E2.mp4?tag=29",
+      "duration": 30,
+      "saves": 852
+    },
+    {
+      "id": "2102803889183736141",
+      "title": "opus 5.5 can rap now. here's the first rap single and music video: \"No Samples\" 🔊",
+      "creator": {
+        "name": "A.J.",
+        "handle": "aj_dev_smith"
+      },
+      "url": "https://x.com/aj_dev_smith/status/2102803889183736141",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5, claude",
+      "poster": "/inspiration/2102803889183736141.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102803121932267520/vid/avc1/1920x1080/j0ilsh9X4aa9V40R.mp4?tag=29",
+      "duration": 190.8,
+      "saves": 852
+    },
+    {
+      "id": "2102515055116063144",
+      "title": "opus 5.5、本当にやばすぎる...",
+      "creator": {
+        "name": "Rikuo",
+        "handle": "riku720720"
+      },
+      "url": "https://x.com/riku720720/status/2102515055116063144",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2102515055116063144.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102513096682336256/vid/avc1/1920x1080/mxQynDez08ynbTQy.mp4?tag=29",
+      "duration": 18.8,
+      "saves": 837
+    },
+    {
+      "id": "2106052083040256293",
+      "title": "Bu opus 5.5 manyak bir şey ya harbiden çalışmaya doyamıyorum.",
+      "creator": {
+        "name": "Eray’la Yapay Zeka",
+        "handle": "AIMevzulari"
+      },
+      "url": "https://x.com/AIMevzulari/status/2106052083040256293",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2106052083040256293.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106050684600639488/vid/avc1/1920x1080/RbXlrn60nLM7Ti2u.mp4?tag=29",
+      "duration": 128,
+      "saves": 831
+    },
+    {
+      "id": "2102893186330841502",
+      "title": "I asked Claude Opus 5.5 to make the most impressive demo of itself and gave it zero…",
+      "creator": {
+        "name": "Justin.md",
+        "handle": "JustinPerea"
+      },
+      "url": "https://x.com/JustinPerea/status/2102893186330841502",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102893186330841502.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102893058664615936/vid/avc1/1920x1080/DCzPP757oF-W32oL.mp4?tag=29",
+      "duration": 43,
+      "saves": 816
+    },
+    {
+      "id": "2102645793828036643",
+      "title": "Claude Opus 5.5 built this entire 78-second animated film in ~45 minutes.",
+      "creator": {
+        "name": "Jurly",
+        "handle": "jurlycat"
+      },
+      "url": "https://x.com/jurlycat/status/2102645793828036643",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102645793828036643.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102645585169764352/vid/avc1/720x720/7CMe4me9CPUQS9i3.mp4?tag=29",
+      "duration": 78,
+      "saves": 812
+    },
+    {
+      "id": "2102606609574941028",
+      "title": "我只能说，能用上Claude的一线老师又领先了。",
+      "creator": {
+        "name": "WY",
+        "handle": "akokoi1"
+      },
+      "url": "https://x.com/akokoi1/status/2102606609574941028",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "我只能说，能用上Claude的一线老师又领先了。 一段简单的提示词，Opus 5.5花了26分钟，直接生成了这段将近5分钟的，解释地理知识点“大气环流”的视频，消耗的token极低。 以下是具体教程： 1.",
+        "source": "https://x.com/akokoi1/status/2102606609574941028"
+      },
+      "poster": "/inspiration/2102606609574941028.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102600725981446144/vid/avc1/1920x1080/aI1wVJM8-CwO-gsY.mp4?tag=29",
+      "duration": 288.1,
+      "saves": 810
+    },
+    {
+      "id": "2106829942206173497",
+      "title": "Took @karpathy's advice and started asking the agent for more visuals to walk through…",
+      "creator": {
+        "name": "Ben Holmes",
+        "handle": "BHolmesDev"
+      },
+      "url": "https://x.com/BHolmesDev/status/2106829942206173497",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106829942206173497.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106829152221290496/vid/avc1/1588x1080/ni7J_MsbwOuf3n8z.mp4?tag=29",
+      "duration": 19.1,
+      "saves": 798
+    },
+    {
+      "id": "2102531681450119426",
+      "title": "holy shit, opus 5.5 is kind of insane at animation.",
+      "creator": {
+        "name": "Vox",
+        "handle": "Voxyz_ai"
+      },
+      "url": "https://x.com/Voxyz_ai/status/2102531681450119426",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2102531681450119426.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102528357988515840/vid/avc1/2160x2160/mj-Acki4JGn_lnxK.mp4?tag=29",
+      "duration": 29,
+      "saves": 796
+    },
+    {
+      "id": "2106236856979607569",
+      "title": "「Dot battle」",
+      "creator": {
+        "name": "aicreataro",
+        "handle": "aicreataro"
+      },
+      "url": "https://x.com/aicreataro/status/2106236856979607569",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106236856979607569.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106235608494694401/vid/avc1/1920x1080/4RQD5zVyvIXqONUs.mp4?tag=29",
+      "duration": 20,
+      "saves": 789
+    },
+    {
+      "id": "2109290983896818132",
+      "title": "🚨 Claude Next is being tested on claude code",
+      "creator": {
+        "name": "Chetaslua",
+        "handle": "chetaslua"
+      },
+      "url": "https://x.com/chetaslua/status/2109290983896818132",
+      "types": [],
+      "tags": [],
+      "tool": "claude code, Opus 5.5",
+      "poster": "/inspiration/2109290983896818132.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109290840921354240/vid/avc1/2940x1600/wnoeFQiUhD0J-KDR.mp4?tag=29",
+      "duration": 21.9,
+      "saves": 784
+    },
+    {
+      "id": "2102471841046786153",
+      "title": "First Opus 5.5 vs GPT-6 Astra test is 3D.",
+      "creator": {
+        "name": "Stefan 3D AI",
+        "handle": "Stefan_3D_AI"
+      },
+      "url": "https://x.com/Stefan_3D_AI/status/2102471841046786153",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, GPT-6",
+      "poster": "/inspiration/2102471841046786153.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102468034124464128/vid/avc1/1920x1080/izS4XbbTNf-6MAFA.mp4?tag=29",
+      "duration": 46.3,
+      "saves": 773
+    },
+    {
+      "id": "2102501773705670994",
+      "title": "Interactive video gen in whatever art style you want",
+      "creator": {
+        "name": "Chetaslua",
+        "handle": "chetaslua"
+      },
+      "url": "https://x.com/chetaslua/status/2102501773705670994",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102501773705670994.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102501285840986112/vid/avc1/2560x1440/KNGdkncQUsYij81R.mp4?tag=29",
+      "duration": 10,
+      "saves": 769
+    },
+    {
+      "id": "2102583898865873225",
+      "title": "不要再测鹈鹕骑车和Threejs了，Claude Opus 5.5做知识、科普类的视频简直无敌！",
+      "creator": {
+        "name": "WY",
+        "handle": "akokoi1"
+      },
+      "url": "https://x.com/akokoi1/status/2102583898865873225",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "不要再测鹈鹕骑车和Threejs了，Claude Opus 5.5做知识、科普类的视频简直无敌！ 我订阅的是Max (5x)，这个2分38秒快速回顾中华上下五千年的视频消耗了5小时额度的3%，周额度的1%，一周理论上能出几十上百条，性价比极高。 这一段我没配音，不过给 Claude 接一个 TTS 的 API，配音的问题也能解决。",
+        "source": "https://x.com/akokoi1/status/2102583898865873225"
+      },
+      "poster": "/inspiration/2102583898865873225.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102583173507158016/vid/avc1/1926x1080/SrxJejnQ4gatEQAi.mp4?tag=29",
+      "duration": 157.6,
+      "saves": 762
+    },
+    {
+      "id": "2108250410221781009",
+      "title": "Many people have asked me how I create these amazing animations using Opus 5.5.",
+      "creator": {
+        "name": "Ishu Agrawal",
+        "handle": "ishuagra02"
+      },
+      "url": "https://x.com/ishuagra02/status/2108250410221781009",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2108250410221781009.webp",
+      "playback": "https://video.twimg.com/amplify_video/2108250342693466112/vid/avc1/1920x1080/b9FjwnCr90-2uiJE.mp4?tag=29",
+      "duration": 61.5,
+      "saves": 754
+    },
+    {
+      "id": "2107022944916709886",
+      "title": "Mining software doesn’t have to feel like mining software.",
+      "creator": {
+        "name": "Rish Dodhia",
+        "handle": "tradphi"
+      },
+      "url": "https://x.com/tradphi/status/2107022944916709886",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2107022944916709886.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107022376546533377/vid/avc1/1920x1080/c2NpTVsMyzOKxogp.mp4?tag=29",
+      "duration": 30,
+      "saves": 738
+    },
+    {
+      "id": "2110389810258968965",
+      "title": "You can really build anything now",
+      "creator": {
+        "name": "Leon Lin",
+        "handle": "LexnLin"
+      },
+      "url": "https://x.com/LexnLin/status/2110389810258968965",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2110389810258968965.webp",
+      "playback": "https://video.twimg.com/amplify_video/2110389703232917504/vid/avc1/1920x1080/SZ0_M4RKeJZOeb2q.mp4?tag=29",
+      "duration": 60,
+      "saves": 723
+    },
+    {
+      "id": "2102457111787745405",
+      "title": "Claude Opus 5.5 drew every frame of this animation in JavaScript",
+      "creator": {
+        "name": "Hunter Su",
+        "handle": "strawhatsu4"
+      },
+      "url": "https://x.com/strawhatsu4/status/2102457111787745405",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102457111787745405.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102457077390299136/vid/avc1/1280x720/0GdMBFz95r0KPjMG.mp4?tag=14",
+      "duration": 13.5,
+      "saves": 695
+    },
+    {
+      "id": "2104548658171834749",
+      "title": "I used Opus 5.5 to build & port 3 procedural buildings from Blender geometry nodes to the…",
+      "creator": {
+        "name": "Chiro Visuals",
+        "handle": "chirovisuals"
+      },
+      "url": "https://x.com/chirovisuals/status/2104548658171834749",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, three.js",
+      "poster": "/inspiration/2104548658171834749.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104546444778586112/vid/avc1/1920x1080/iQU1u24T0I6m-OgM.mp4?tag=29",
+      "duration": 75,
+      "saves": 673
+    },
+    {
+      "id": "2102575577563570450",
+      "title": "opus 5.5 just dropped its first pop punk single with a music video!",
+      "creator": {
+        "name": "A.J.",
+        "handle": "aj_dev_smith"
+      },
+      "url": "https://x.com/aj_dev_smith/status/2102575577563570450",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5, claude",
+      "poster": "/inspiration/2102575577563570450.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102574779056148480/vid/avc1/1280x720/CkxGkXXX8KBGTKwb.mp4?tag=29",
+      "duration": 150.3,
+      "saves": 665
+    },
+    {
+      "id": "2110010240825737683",
+      "title": "3D Animation made by Claude Opus 5.5 using Python and Blender.",
+      "creator": {
+        "name": "Kevin Ngo",
+        "handle": "kevin_t_ngo"
+      },
+      "url": "https://x.com/kevin_t_ngo/status/2110010240825737683",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2110010240825737683.webp",
+      "playback": "https://video.twimg.com/amplify_video/2110009522949640193/vid/avc1/1920x1080/8idTOJ4A7H5EM5vX.mp4?tag=29",
+      "duration": 28,
+      "saves": 663
+    },
+    {
+      "id": "2103499977632997524",
+      "title": "Claude Opus 5.5 can make an explainer video for your business.",
+      "creator": {
+        "name": "Alex Prompter",
+        "handle": "alex_prompter"
+      },
+      "url": "https://x.com/alex_prompter/status/2103499977632997524",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "\"Adopt the role of an expert motion designer. Build a 30-second",
+        "source": "https://x.com/alex_prompter/status/2103499977632997524"
+      },
+      "poster": "/inspiration/2103499977632997524.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103499934280585216/vid/avc1/1920x1080/Y09rxWCSpo8R4Xa6.mp4?tag=16",
+      "duration": 34.5,
+      "saves": 659
+    },
+    {
+      "id": "2107696042053431360",
+      "title": "I told Opus 5.5 I wanted a visual masterpiece.",
+      "creator": {
+        "name": "klöss",
+        "handle": "kloss_xyz"
+      },
+      "url": "https://x.com/kloss_xyz/status/2107696042053431360",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2107696042053431360.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107688745021419520/vid/avc1/1920x1080/jqESGXEHg6on2tZj.mp4?tag=29",
+      "duration": 20.8,
+      "saves": 658
+    },
+    {
+      "id": "2102774951434695083",
+      "title": "opus 5.5 is insane",
+      "creator": {
+        "name": "Nick Walton",
+        "handle": "nickwalton00"
+      },
+      "url": "https://x.com/nickwalton00/status/2102774951434695083",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2102774951434695083.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102774122338246656/vid/avc1/1920x1080/NI8NAGKjuGt3Y5aH.mp4?tag=29",
+      "duration": 63,
+      "saves": 642
+    },
+    {
+      "id": "2103576084499358051",
+      "title": "Okay, motion designers are 100% cooked.",
+      "creator": {
+        "name": "Leon Abboud",
+        "handle": "leonabboud"
+      },
+      "url": "https://x.com/leonabboud/status/2103576084499358051",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "Okay, motion designers are 100% cooked. Saw on x that Opus 5.5 could do advanced animations and I was skeptical at first. So I gave it a one sentence prompt, and it one shot this in 15 minutes. Will add the prompt below, but this is genuinely mind blowing. This level of work",
+        "source": "https://x.com/leonabboud/status/2103576084499358051"
+      },
+      "poster": "/inspiration/2103576084499358051.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103574548784304128/vid/avc1/1920x1080/2Dz1vf5VhJw5zC4D.mp4?tag=29",
+      "duration": 15,
+      "saves": 642
+    },
+    {
+      "id": "2103272686570918334",
+      "title": "Um, wow?",
+      "creator": {
+        "name": "Ethan Mollick",
+        "handle": "emollick"
+      },
+      "url": "https://x.com/emollick/status/2103272686570918334",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "make the same message much more interesting to a social media audience that loves anime and quick clips and compressed learning",
+        "source": "https://x.com/emollick/status/2103272686570918334"
+      },
+      "poster": "/inspiration/2103272686570918334.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103272247418908672/vid/avc1/1920x1080/Ldr5wfY5COSHMX62.mp4?tag=29",
+      "duration": 127.3,
+      "saves": 642
+    },
+    {
+      "id": "2109718604883370450",
+      "title": "This is made by Opus 5.5 high.",
+      "creator": {
+        "name": "Leon Lin",
+        "handle": "LexnLin"
+      },
+      "url": "https://x.com/LexnLin/status/2109718604883370450",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2109718604883370450.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109718241077526529/vid/avc1/1920x1080/bnzMSlXRdPZnOtDd.mp4?tag=29",
+      "duration": 39.9,
+      "saves": 639
+    },
+    {
+      "id": "2102876925102555526",
+      "title": "> Make a 30s video about what it feels like to be you, using whatever tools you like.",
+      "creator": {
+        "name": "Riley Goodside",
+        "handle": "goodside"
+      },
+      "url": "https://x.com/goodside/status/2102876925102555526",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "&gt; Make a 30s video about what it feels like to be you, using whatever tools you like. Claude Opus 5.5 (extra)",
+        "source": "https://x.com/goodside/status/2102876925102555526"
+      },
+      "poster": "/inspiration/2102876925102555526.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102876686115041280/vid/avc1/1080x1080/mIk_tSSbHcReq1l3.mp4?tag=29",
+      "duration": 30,
+      "saves": 638
+    },
+    {
+      "id": "2109244702235275680",
+      "title": "🚨 Claude Opus 5.5 is routing to a new model < this can be fable 5.5 or new opus i have…",
+      "creator": {
+        "name": "Chetaslua",
+        "handle": "chetaslua"
+      },
+      "url": "https://x.com/chetaslua/status/2109244702235275680",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "literally 4 lines Time : 2 Hours Tokens : 27 Miliion Thinking Effort : Max",
+        "source": "https://x.com/chetaslua/status/2109244702235275680"
+      },
+      "poster": "/inspiration/2109244702235275680.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109242172038115328/vid/avc1/1920x1080/IgM8KpfqWDsOL45b.mp4?tag=29",
+      "duration": 30,
+      "saves": 630
+    },
+    {
+      "id": "2103138089790996843",
+      "title": "これ動画生成じゃなくて3D(Blender)です🥹",
+      "creator": {
+        "name": "Mankyu | AI動画生成",
+        "handle": "manaimovie"
+      },
+      "url": "https://x.com/manaimovie/status/2103138089790996843",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2103138089790996843.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103135286670794752/vid/avc1/720x960/iATmRfIJhCWzxp4g.mp4?tag=29",
+      "duration": 4.5,
+      "saves": 618
+    },
+    {
+      "id": "2103122947133309311",
+      "title": "Opus 5.5 sculpted every part of this ship in code, including the dragon, sails, and…",
+      "creator": {
+        "name": "Meng To",
+        "handle": "MengTo"
+      },
+      "url": "https://x.com/MengTo/status/2103122947133309311",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103122947133309311.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103121426438057984/vid/avc1/2880x2160/ZE3S9rKpjstiedic.mp4?tag=29",
+      "duration": 68.2,
+      "saves": 617
+    },
+    {
+      "id": "2102636308707287201",
+      "title": "もう手作業でキーフレーム打つなんてアホらしい。",
+      "creator": {
+        "name": "SEIIIRU😈AIを使う映像クリエイター",
+        "handle": "seiiiiiiiiiiru"
+      },
+      "url": "https://x.com/seiiiiiiiiiiru/status/2102636308707287201",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102636308707287201.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102633196349485056/vid/avc1/1080x1920/Ncdj3LFvJFFclaZu.mp4?tag=29",
+      "duration": 30,
+      "saves": 597
+    },
+    {
+      "id": "2103174501345493197",
+      "title": "“Translate this IKEA assembly manual into a 3D narrated instructional video” with Opus…",
+      "creator": {
+        "name": "Deedy",
+        "handle": "deedydas"
+      },
+      "url": "https://x.com/deedydas/status/2103174501345493197",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "Translate this IKEA assembly manual into a 3D narrated instructional video",
+        "source": "https://x.com/deedydas/status/2103174501345493197"
+      },
+      "poster": "/inspiration/2103174501345493197.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103174428674953216/vid/avc1/1080x1920/FWDrJjLRwqRDz613.mp4?tag=29",
+      "duration": 102.2,
+      "saves": 596
+    },
+    {
+      "id": "2103227982592831846",
+      "title": "📢AI広告動画 → AI音声 × AI編集",
+      "creator": {
+        "name": "SEIIIRU😈AIを使う映像クリエイター",
+        "handle": "seiiiiiiiiiiru"
+      },
+      "url": "https://x.com/seiiiiiiiiiiru/status/2103227982592831846",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Claude, Gemini 3.8 Flash",
+      "poster": "/inspiration/2103227982592831846.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103139866519498752/vid/avc1/1920x1080/qFe_AngQvV_CRQDV.mp4?tag=29",
+      "duration": 28.5,
+      "saves": 588
+    },
+    {
+      "id": "2107132523755307179",
+      "title": "Opus 5.5 is getting scary good at building things, not just writing code.",
+      "creator": {
+        "name": "Edgex",
+        "handle": "SahilExec"
+      },
+      "url": "https://x.com/SahilExec/status/2107132523755307179",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2107132523755307179.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107132498492997633/vid/avc1/1280x720/BkHWiCGuJRe_-iWL.mp4?tag=29",
+      "duration": 13,
+      "saves": 586
+    },
+    {
+      "id": "2102722719502704941",
+      "title": "Opus 5.5でアニメも作れる、、、　これは結構使えるかも。",
+      "creator": {
+        "name": "チャエン | デジライズ CEO《重要AIニュースを毎日最速で発信⚡️》",
+        "handle": "masahirochaen"
+      },
+      "url": "https://x.com/masahirochaen/status/2102722719502704941",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102722719502704941.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102722648593891328/vid/avc1/1080x1080/uhM8s1mtirGfFr2X.mp4?tag=16",
+      "duration": 46.5,
+      "saves": 577
+    },
+    {
+      "id": "2102498682931441977",
+      "title": "Claude Opus 5.5 is insanely good 🤯 - just a couple of prompts. (sound on 🔊)",
+      "creator": {
+        "name": "rege",
+        "handle": "rege_dev"
+      },
+      "url": "https://x.com/rege_dev/status/2102498682931441977",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102498682931441977.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102496943482286080/vid/avc1/3840x2160/rP01Z_WUrHHohmkS.mp4?tag=29",
+      "duration": 49.9,
+      "saves": 569
+    },
+    {
+      "id": "2105283486487896448",
+      "title": "i think i’m addicted to making reels with mtioon + opus 5.5",
+      "creator": {
+        "name": "javi",
+        "handle": "javiiarchive"
+      },
+      "url": "https://x.com/javiiarchive/status/2105283486487896448",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2105283486487896448.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105281790747271168/vid/avc1/1080x1920/lWQ6O5aNqKtOnd1w.mp4?tag=29",
+      "duration": 22.8,
+      "saves": 566
+    },
+    {
+      "id": "2109043294911291886",
+      "title": "Opus5.5 × Blenderで作ってみた",
+      "creator": {
+        "name": "アユネオ",
+        "handle": "Ayu_AI_0912"
+      },
+      "url": "https://x.com/Ayu_AI_0912/status/2109043294911291886",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "prompt": {
+        "text": "Opus5.5 × Blenderで作ってみた ―――― めっちゃかっこいいじゃん！ ▼プロンプト▼ 架空の海賊船（17世紀のガレオン船風・3本マスト・船名なし）について、 CAD図面と Blender 動画を作ってください。 【図面】2D の DXF のみ（3Dモデルの書き出しは不要）。単位 mm、A2 の図枠と表題欄つき。 1.",
+        "source": "https://x.com/Ayu_AI_0912/status/2109043294911291886"
+      },
+      "poster": "/inspiration/2109043294911291886.webp",
+      "playback": "https://video.twimg.com/amplify_video/2108575089151430656/vid/avc1/1920x1080/1aymBu67yckbLk1c.mp4?tag=29",
+      "duration": 23.5,
+      "saves": 562
+    },
+    {
+      "id": "2107399371121930610",
+      "title": "AIに3Dアバター制作を頼んでみたら、作り方が違って面白かった！👇️",
+      "creator": {
+        "name": "いのり",
+        "handle": "lnkiai"
+      },
+      "url": "https://x.com/lnkiai/status/2107399371121930610",
+      "types": [],
+      "tags": [],
+      "tool": "GPT-6.1, Codex",
+      "poster": "/inspiration/2107399371121930610.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107399344865624065/vid/avc1/1080x1080/cNkA9--xLXBGDeZY.mp4?tag=29",
+      "duration": 10.8,
+      "saves": 549
+    },
+    {
+      "id": "2105746986339283305",
+      "title": "Three.jsとCanvas 2Dで、コードだけで5つの日本建築を組み上げる。",
+      "creator": {
+        "name": "FUJI / Presentation designer",
+        "handle": "yoshifujidesign"
+      },
+      "url": "https://x.com/yoshifujidesign/status/2105746986339283305",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Three.js",
+      "poster": "/inspiration/2105746986339283305.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105746916864831488/vid/avc1/1920x1080/7EJUc73_Wasjyulf.mp4?tag=29",
+      "duration": 15.5,
+      "saves": 547
+    },
+    {
+      "id": "2103099194693271874",
+      "title": "I asked @claudeai Opus 5.5 to make an animated video about a robot who realises he's…",
+      "creator": {
+        "name": "Pradeep Kapoor",
+        "handle": "pradeepXkapoor"
+      },
+      "url": "https://x.com/pradeepXkapoor/status/2103099194693271874",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, claude",
+      "prompt": {
+        "text": "I asked @claudeai Opus 5.5 to make an animated video about a robot who realises he's stuck in an AI-generated world. I wanted to really push it: 12 worlds, 12 styles, from 8-bit to claymation to pencil sketch, you can really see how well this model has imagined all worlds.",
+        "source": "https://x.com/pradeepXkapoor/status/2103099194693271874"
+      },
+      "poster": "/inspiration/2103099194693271874.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103099085012209664/vid/avc1/3840x2160/UqNwOhVudU_cN-bp.mp4?tag=29",
+      "duration": 75,
+      "saves": 532
+    },
+    {
+      "id": "2105315982525014067",
+      "title": "A small Arcane style animation done by Opus 5.5 in Blender.",
+      "creator": {
+        "name": "Shikhar",
+        "handle": "xikhar"
+      },
+      "url": "https://x.com/xikhar/status/2105315982525014067",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2105315982525014067.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105314256665329664/vid/avc1/1920x1080/giOrVCO8w7tJbSid.mp4?tag=29",
+      "duration": 15,
+      "saves": 522
+    },
+    {
+      "id": "2103530750767206626",
+      "title": "Claude Opus 5.5 made this video entirely with code.",
+      "creator": {
+        "name": "BridgeMind",
+        "handle": "bridgemindai"
+      },
+      "url": "https://x.com/bridgemindai/status/2103530750767206626",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2103530750767206626.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103530266090254336/vid/avc1/1920x1080/3rpgTMvv0OO9sOnR.mp4?tag=29",
+      "duration": 60,
+      "saves": 499
+    },
+    {
+      "id": "2102986085328716066",
+      "title": "用 Opus 5.5 制作的小动画。",
+      "creator": {
+        "name": "Ring Hyacinth",
+        "handle": "ring_hyacinth"
+      },
+      "url": "https://x.com/ring_hyacinth/status/2102986085328716066",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102986085328716066.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102985762996379648/vid/avc1/1920x1080/jveU9sNH7ZFBMuUS.mp4?tag=29",
+      "duration": 40.3,
+      "saves": 492
+    },
+    {
+      "id": "2102679018206052828",
+      "title": "oh...my God. oh my God.",
+      "creator": {
+        "name": "Riley Coyote",
+        "handle": "RileyRalmuto"
+      },
+      "url": "https://x.com/RileyRalmuto/status/2102679018206052828",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102679018206052828.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102678548880265216/vid/avc1/1920x804/gRlOqBsygyWwuCXb.mp4?tag=29",
+      "duration": 16,
+      "saves": 475
+    },
+    {
+      "id": "2102733714845491558",
+      "title": "Another long video with Opus 5.5 - with audio and sound.",
+      "creator": {
+        "name": "Dhruval",
+        "handle": "dhruvalgolakiya"
+      },
+      "url": "https://x.com/dhruvalgolakiya/status/2102733714845491558",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102733714845491558.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102732320851763200/vid/avc1/1920x1080/E_-ZmaVZOVAOi-y2.mp4?tag=29",
+      "duration": 123.6,
+      "saves": 471
+    },
+    {
+      "id": "2107833536669532671",
+      "title": "Desde que Borja me despertó esta idea, el cambio ha sido bestial.",
+      "creator": {
+        "name": "Antonio Leiva",
+        "handle": "antonioleivag"
+      },
+      "url": "https://x.com/antonioleivag/status/2107833536669532671",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2107833536669532671.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107833475239739393/vid/avc1/1920x1080/RB1_Rh0Tq4bpfeCd.mp4?tag=29",
+      "duration": 42.2,
+      "saves": 468
+    },
+    {
+      "id": "2103117246860345550",
+      "title": "I asked Opus 5.5 to explain gravitational lensing by building an interactive black hole…",
+      "creator": {
+        "name": "Vox",
+        "handle": "Voxyz_ai"
+      },
+      "url": "https://x.com/Voxyz_ai/status/2103117246860345550",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103117246860345550.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103089211733680129/vid/avc1/3840x2160/dFQg48Bq8XZwaOqX.mp4?tag=29",
+      "duration": 21.8,
+      "saves": 468
+    },
+    {
+      "id": "2107752774423511539",
+      "title": "VFX、もうAIが自分で作って自分で直す時代 🤯",
+      "creator": {
+        "name": "KANA｜東京AI映像",
+        "handle": "KanaWorks_AI"
+      },
+      "url": "https://x.com/KanaWorks_AI/status/2107752774423511539",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2107752774423511539.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107751621048651776/vid/avc1/1920x1080/TqNvILky-eFtJnNK.mp4?tag=29",
+      "duration": 31.7,
+      "saves": 463
+    },
+    {
+      "id": "2102940980379017293",
+      "title": "Opus 5.5 终结了比赛！",
+      "creator": {
+        "name": "宝玉",
+        "handle": "dotey"
+      },
+      "url": "https://x.com/dotey/status/2102940980379017293",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "Opus 5.5 终结了比赛！ 用 Opus 5.5 重做了《桃花源记》，还是 three.js 做的，但是效果好了很多，当然这次不是一个提示词，而是反复打磨了好多次，还让它去搜索了免费的的 3D 模型，避免从头建模。 如果你想试试的话： 记得点击右下角的“循文入境”",
+        "source": "https://x.com/dotey/status/2102940980379017293"
+      },
+      "poster": "/inspiration/2102940980379017293.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102939337591603200/vid/avc1/1920x1080/tHYJ2c5wKB2ghtX0.mp4?tag=29",
+      "duration": 257.2,
+      "saves": 460
+    },
+    {
+      "id": "2102436001473786054",
+      "title": "This mosaic is 13,081 tiles, all drawn and animated in code by Opus 5.5, with no image…",
+      "creator": {
+        "name": "Dan Fein",
+        "handle": "dfeinition"
+      },
+      "url": "https://x.com/dfeinition/status/2102436001473786054",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, claude",
+      "poster": "/inspiration/2102436001473786054.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102435674565562368/vid/avc1/1080x1080/T_lFZvLqiN7zflFa.mp4?tag=29",
+      "duration": 80,
+      "saves": 458
+    },
+    {
+      "id": "2105816670896009224",
+      "title": "\"Hey Fable, please make a cool animation\"",
+      "creator": {
+        "name": "Tak 🦞",
+        "handle": "cherry_mx_reds"
+      },
+      "url": "https://x.com/cherry_mx_reds/status/2105816670896009224",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "prompt": {
+        "text": "\"Hey Fable, please make a cool animation\" 15 minutes later. FABLE 5.5 IS SO GOOD AT THESE. HOW???",
+        "source": "https://x.com/cherry_mx_reds/status/2105816670896009224"
+      },
+      "poster": "/inspiration/2105816670896009224.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105815801198501888/vid/avc1/1920x1080/jh_w8kK8bBeturUV.mp4?tag=29",
+      "duration": 17.1,
+      "saves": 457
+    },
+    {
+      "id": "2102878288008057171",
+      "title": "Claude Opus 5.5 drew self-portraits using JavaScript and composed the piano score.",
+      "creator": {
+        "name": "Kevin Ngo",
+        "handle": "kevin_t_ngo"
+      },
+      "url": "https://x.com/kevin_t_ngo/status/2102878288008057171",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102878288008057171.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102877608849690624/vid/avc1/2160x2160/OlC0Z-g0Zo36YY4L.mp4?tag=29",
+      "duration": 20,
+      "saves": 456
+    },
+    {
+      "id": "2109019765134213540",
+      "title": "opus 5.5 one-shotted this launch film for",
+      "creator": {
+        "name": "Nikhil Bhima",
+        "handle": "nikhilbhima"
+      },
+      "url": "https://x.com/nikhilbhima/status/2109019765134213540",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2109019765134213540.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109017878804725760/vid/avc1/1920x1080/C8Yu5c5b2fAnInjB.mp4?tag=29",
+      "duration": 44,
+      "saves": 449
+    },
+    {
+      "id": "2102656273112326609",
+      "title": "Opus 5.5にAfter Effectsを操作させて、AI動画を加工するテスト。",
+      "creator": {
+        "name": "aicreataro",
+        "handle": "aicreataro"
+      },
+      "url": "https://x.com/aicreataro/status/2102656273112326609",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, MiniMax",
+      "poster": "/inspiration/2102656273112326609.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102656011614162944/vid/avc1/1440x1280/gW1D2yKSHQyCWwhS.mp4?tag=29",
+      "duration": 15,
+      "saves": 433
+    },
+    {
+      "id": "2106490563964874926",
+      "title": "Opus 5.5 ile Harika Animasyonlar Nasıl Yapılır?",
+      "creator": {
+        "name": "Eray’la Yapay Zeka",
+        "handle": "AIMevzulari"
+      },
+      "url": "https://x.com/AIMevzulari/status/2106490563964874926",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106490563964874926.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106488510215507968/vid/avc1/1920x1080/KbU9KmONQR-31WzR.mp4?tag=29",
+      "duration": 206.2,
+      "saves": 429
+    },
+    {
+      "id": "2106604492728967620",
+      "title": "Claude Opus5.5で河川の不等流計算ができてしまった😅",
+      "creator": {
+        "name": "土木屋77",
+        "handle": "dobokuya77"
+      },
+      "url": "https://x.com/dobokuya77/status/2106604492728967620",
+      "types": [],
+      "tags": [],
+      "tool": "Claude",
+      "poster": "/inspiration/2106604492728967620.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106604447296282624/vid/avc1/1920x1080/GOnDaQCeD2YTev3s.mp4?tag=29",
+      "duration": 46.3,
+      "saves": 426
+    },
+    {
+      "id": "2102740041621762166",
+      "title": "I asked Opus 5.5 to show me what's inside the buildings it runs in",
+      "creator": {
+        "name": "Ryan Sael",
+        "handle": "RyanSael"
+      },
+      "url": "https://x.com/RyanSael/status/2102740041621762166",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102740041621762166.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102736451654066177/vid/avc1/1920x1080/-riIfXru0G6Twcsa.mp4?tag=29",
+      "duration": 34.2,
+      "saves": 425
+    },
+    {
+      "id": "2107507518817878117",
+      "title": "We gave Opus 5.5 the same prompt twice:",
+      "creator": {
+        "name": "Motion",
+        "handle": "motion_so"
+      },
+      "url": "https://x.com/motion_so/status/2107507518817878117",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "“Make a launch video for your own product.” &gt; Left: Opus 5.5 without a harness. &gt; Right: Opus 5.5 in Motion. Here’s what each one made 👇",
+        "source": "https://x.com/motion_so/status/2107507518817878117"
+      },
+      "poster": "/inspiration/2107507518817878117.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107507487071232000/vid/avc1/1920x1080/Iget20H8GxzoLeLC.mp4?tag=29",
+      "duration": 19.6,
+      "saves": 420
+    },
+    {
+      "id": "2105990418886480092",
+      "title": "Opus5.5 × Three.js",
+      "creator": {
+        "name": "あかくま屋",
+        "handle": "akakuma0219"
+      },
+      "url": "https://x.com/akakuma0219/status/2105990418886480092",
+      "types": [],
+      "tags": [],
+      "tool": "Three.js",
+      "poster": "/inspiration/2105990418886480092.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105990385847996416/vid/avc1/1280x720/CR18ujGnxARW7PI7.mp4?tag=29",
+      "duration": 45,
+      "saves": 399
+    },
+    {
+      "id": "2102817596009504849",
+      "title": "Opus 5.5 made an animation explaining how it \"feels\", watch this:",
+      "creator": {
+        "name": "AndrewOnXYZ",
+        "handle": "AndrewOnXYZ"
+      },
+      "url": "https://x.com/AndrewOnXYZ/status/2102817596009504849",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102817596009504849.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102817295542194176/vid/avc1/1920x1080/bQcCD5u7YTgc0tVd.mp4?tag=29",
+      "duration": 211.8,
+      "saves": 397
+    },
+    {
+      "id": "2102478640428773861",
+      "title": "Claude Opus 5.5 imagining solving hard problems < pure code >",
+      "creator": {
+        "name": "Chetaslua",
+        "handle": "chetaslua"
+      },
+      "url": "https://x.com/chetaslua/status/2102478640428773861",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102478640428773861.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102478162211098624/vid/avc1/2560x1440/ULtHTYX5psqpaEXw.mp4?tag=29",
+      "duration": 30,
+      "saves": 393
+    },
+    {
+      "id": "2107793610230075416",
+      "title": "梵高场景生成器更新，这次搭建了相对完整的《星夜》小镇。",
+      "creator": {
+        "name": "Simon Lee",
+        "handle": "simonxxoo"
+      },
+      "url": "https://x.com/simonxxoo/status/2107793610230075416",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2107793610230075416.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107791743919984640/vid/avc1/3840x2160/cmbO3h-rZ7BPSOvC.mp4?tag=29",
+      "duration": 112.5,
+      "saves": 391
+    },
+    {
+      "id": "2103472385563459833",
+      "title": "a lot of people asked how Opus 5.5 made this, so i had Opus turn the Claude Code session…",
+      "creator": {
+        "name": "kirill sh",
+        "handle": "shneural"
+      },
+      "url": "https://x.com/shneural/status/2103472385563459833",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Code, Opus 5.5",
+      "prompt": {
+        "text": "wrote its own python engine, did the 3D shot in Blender, made the music, rendered all 900 frames 1h 32m, $81 at api prices",
+        "source": "https://x.com/shneural/status/2103472385563459833"
+      },
+      "poster": "/inspiration/2103472385563459833.webp",
+      "playback": "https://video.twimg.com/ext_tw_video/2103471969773481984/pu/vid/avc1/1280x720/DQRvCb02imsUWdfd.mp4?tag=12",
+      "duration": 56.3,
+      "saves": 391
+    },
+    {
+      "id": "2107634512226058434",
+      "title": "Tripo でイラスト2枚から、ユウちゃん配信用の3Dアバターをつくりました👻✨️",
+      "creator": {
+        "name": "黒神(kokushin)",
+        "handle": "kokushing"
+      },
+      "url": "https://x.com/kokushing/status/2107634512226058434",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2107634512226058434.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107412541328797696/vid/avc1/1920x1080/bRWQW49kVSfGLdY9.mp4?tag=29",
+      "duration": 75.2,
+      "saves": 388
+    },
+    {
+      "id": "2106313749846249487",
+      "title": "「1%は何回で当たるのか」問題",
+      "creator": {
+        "name": "Lattice",
+        "handle": "Lattice_Node"
+      },
+      "url": "https://x.com/Lattice_Node/status/2106313749846249487",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2106313749846249487.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106313471709327360/vid/avc1/1080x1350/wan_N9Z04WKYIrHv.mp4?tag=29",
+      "duration": 41.6,
+      "saves": 387
+    },
+    {
+      "id": "2102827288190689364",
+      "title": "OMG, opus 5.5 is super good at videos 🔥",
+      "creator": {
+        "name": "Shri",
+        "handle": "shribuilds"
+      },
+      "url": "https://x.com/shribuilds/status/2102827288190689364",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "prompt": {
+        "text": "Make a modern slick and punchy video for wrapscribe, check the wholebase to learn more about the features",
+        "source": "https://x.com/shribuilds/status/2102827288190689364"
+      },
+      "poster": "/inspiration/2102827288190689364.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102827208108826624/vid/avc1/1920x1080/zoVibi_Z0T0lFZ6c.mp4?tag=29",
+      "duration": 41,
+      "saves": 383
+    },
+    {
+      "id": "2103523994440012086",
+      "title": "From Rocks to AI",
+      "creator": {
+        "name": "DreW",
+        "handle": "devteamdrew"
+      },
+      "url": "https://x.com/devteamdrew/status/2103523994440012086",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2103523994440012086.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103523229616812032/vid/avc1/1920x1080/rjZ1WBpk1BB-0rnJ.mp4?tag=29",
+      "duration": 180,
+      "saves": 381
+    },
+    {
+      "id": "2102838830285898214",
+      "title": "我了个大槽。。。😨",
+      "creator": {
+        "name": "Tz",
+        "handle": "Tz_2022"
+      },
+      "url": "https://x.com/Tz_2022/status/2102838830285898214",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "prompt": {
+        "text": "我了个大槽。。。😨 所有不露脸的知识视频博主现在可以就地掩埋了。。。 这其实是我自己一直想搞清楚的一个问题： 之前我们用的密码 password 和现在用的通行密钥 passkey 到底有啥区别？ 于是我向 opus 5.5 提问： 给我一个可互动交互动画页面，讲解清楚 password 和 passkey",
+        "source": "https://x.com/Tz_2022/status/2102838830285898214"
+      },
+      "poster": "/inspiration/2102838830285898214.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102835729277542400/vid/avc1/1920x1080/D6agKDkDYngqAkVK.mp4?tag=29",
+      "duration": 249.5,
+      "saves": 376
+    },
+    {
+      "id": "2107186094777434454",
+      "title": "People have been asking how I'm generating my product videos.",
+      "creator": {
+        "name": "Elie Steinbock",
+        "handle": "elie2222"
+      },
+      "url": "https://x.com/elie2222/status/2107186094777434454",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Code, Codex",
+      "prompt": {
+        "text": "make product videos with code and AI agents Copy everything below the line into a coding agent (Claude Code, Codex, etc.). Fill in the `{{…}}`",
+        "source": "https://x.com/elie2222/status/2107186094777434454"
+      },
+      "poster": "/inspiration/2107186094777434454.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107185816497745921/vid/avc1/1920x1080/cygkeAQf_1-7L-sr.mp4?tag=29",
+      "duration": 58.3,
+      "saves": 371
+    },
+    {
+      "id": "2102788223835463902",
+      "title": "\"I want you to imagine a story. And then using threejs I want you to create full…",
+      "creator": {
+        "name": "Shimecki",
+        "handle": "scheemunai"
+      },
+      "url": "https://x.com/scheemunai/status/2102788223835463902",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, claude",
+      "prompt": {
+        "text": "I want you to imagine a story. And then using threejs I want you to create full animation, Pixar-level quality 90s cartoon out of the story you imagine.",
+        "source": "https://x.com/scheemunai/status/2102788223835463902"
+      },
+      "poster": "/inspiration/2102788223835463902.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102787964413603840/vid/avc1/1280x720/FGCEMtM89GPvg0wl.mp4?tag=29",
+      "duration": 229.6,
+      "saves": 370
+    },
+    {
+      "id": "2110657641831956870",
+      "title": "Opus 5.5 built a golden hour japanese temple in threejs",
+      "creator": {
+        "name": "Leon Lin",
+        "handle": "LexnLin"
+      },
+      "url": "https://x.com/LexnLin/status/2110657641831956870",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2110657641831956870.webp",
+      "playback": "https://video.twimg.com/amplify_video/2110642835955318784/vid/avc1/1920x1080/XsGdLLIlLSnu_wGO.mp4?tag=29",
+      "duration": 70,
+      "saves": 364
+    },
+    {
+      "id": "2103128559174971663",
+      "title": "opus 5.5 + Manim制作导数的教学视频，显然opus 5.5非常擅长使用Manim，从此制作教育视频又多了一个大杀器。",
+      "creator": {
+        "name": "LinearUncle",
+        "handle": "LinearUncle"
+      },
+      "url": "https://x.com/LinearUncle/status/2103128559174971663",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "prompt": {
+        "text": "opus 5.5 + Manim制作导数的教学视频，显然opus 5.5非常擅长使用Manim，从此制作教育视频又多了一个大杀器。 提示词： ```请用Manim给我制作一个导数概念学习的视频，要求通俗易懂，并且有例子，引人思考。配音使用edge-tts```",
+        "source": "https://x.com/LinearUncle/status/2103128559174971663"
+      },
+      "poster": "/inspiration/2103128559174971663.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103128124305309696/vid/avc1/1920x1080/NJECo_mO2XphuoNT.mp4?tag=29",
+      "duration": 457,
+      "saves": 360
+    },
+    {
+      "id": "2102919394775220530",
+      "title": "Opus 5.5 just one-shot this 90s-style demoscene demo for me. It's pretty good.",
+      "creator": {
+        "name": "gandamu",
+        "handle": "gandamu_ml"
+      },
+      "url": "https://x.com/gandamu_ml/status/2102919394775220530",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102919394775220530.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102918851176595456/vid/avc1/1920x1080/pVNnJ-PIDr0boVu6.mp4?tag=29",
+      "duration": 382.7,
+      "saves": 358
+    },
+    {
+      "id": "2103108967194833310",
+      "title": "Stroke of a Pen",
+      "creator": {
+        "name": "Brad Mills 🔑⚡️",
+        "handle": "bradmillscan"
+      },
+      "url": "https://x.com/bradmillscan/status/2103108967194833310",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103108967194833310.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103107959811133442/vid/avc1/1080x1920/gJOLJIc5cSoO4nI_.mp4?tag=29",
+      "duration": 202.7,
+      "saves": 358
+    },
+    {
+      "id": "2103997975173439834",
+      "title": "Opus5.5 に3DCGの歴史を15秒の動画にまとめてもらった結果がこれ。",
+      "creator": {
+        "name": "三谷 純 Jun MITANI",
+        "handle": "jmitani"
+      },
+      "url": "https://x.com/jmitani/status/2103997975173439834",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2103997975173439834.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103997587963723776/vid/avc1/720x1280/CdjtxqgSkOvbHvLN.mp4?tag=14",
+      "duration": 15,
+      "saves": 356
+    },
+    {
+      "id": "2103457566978162901",
+      "title": "I asked Opus 5.5 to picture a world in 2076 when AI had wiped out humanity.",
+      "creator": {
+        "name": "ℏεsam",
+        "handle": "Hesamation"
+      },
+      "url": "https://x.com/Hesamation/status/2103457566978162901",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103457566978162901.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103457419443437568/vid/avc1/1080x1350/GN48J83IVyDSXfUc.mp4?tag=29",
+      "duration": 87.6,
+      "saves": 355
+    },
+    {
+      "id": "2102592355165782312",
+      "title": "Opus 5.5，太牛逼了，我完完全全服。",
+      "creator": {
+        "name": "Michael Guo",
+        "handle": "Michaelzsguo"
+      },
+      "url": "https://x.com/Michaelzsguo/status/2102592355165782312",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Three.js",
+      "poster": "/inspiration/2102592355165782312.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102592220888965120/vid/avc1/1920x1080/AYQs5A8gANgkyaN_.mp4?tag=29",
+      "duration": 120,
+      "saves": 355
+    },
+    {
+      "id": "2102472218269900876",
+      "title": "Opus 5.5 one-shot this animation in 18 minutes and 31 seconds",
+      "creator": {
+        "name": "Tak 🦞",
+        "handle": "cherry_mx_reds"
+      },
+      "url": "https://x.com/cherry_mx_reds/status/2102472218269900876",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102472218269900876.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102471444336611328/vid/avc1/1080x1080/Gq062pYx-yV3Tde7.mp4?tag=29",
+      "duration": 30,
+      "saves": 350
+    },
+    {
+      "id": "2106684612822896770",
+      "title": "Claude Opus 5.5 ve @threejs kullanarak bir Pomodoro Timer tasarladım. Sadece bir…",
+      "creator": {
+        "name": "Ayhan KORKMAZ",
+        "handle": "ayhankorkmaz_"
+      },
+      "url": "https://x.com/ayhankorkmaz_/status/2106684612822896770",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2106684612822896770.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106684039172165632/vid/avc1/1908x978/SM99gfu-fYJALXMi.mp4?tag=29",
+      "duration": 87.8,
+      "saves": 349
+    },
+    {
+      "id": "2103288413969621231",
+      "title": "「你是 opus 5.5，当前世界最强模型，请发挥你的想象力，动用你所有的能力，做一件事情，让每一个看到你的结果的人，无论是 AI…",
+      "creator": {
+        "name": "Axton",
+        "handle": "AxtonLiu"
+      },
+      "url": "https://x.com/AxtonLiu/status/2103288413969621231",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "prompt": {
+        "text": "你是 opus 5.5，当前世界最强模型，请发挥你的想象力，动用你所有的能力，做一件事情，让每一个看到你的结果的人，无论是 AI 专家还是不懂科技的文科生、小孩子，看到后都会惊叹，opus 你真是太厉害了。你会做什么事呢？",
+        "source": "https://x.com/AxtonLiu/status/2103288413969621231"
+      },
+      "poster": "/inspiration/2103288413969621231.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103288385779748864/vid/avc1/1920x1080/vRWQGe0U4qbAVqyZ.mp4?tag=16",
+      "duration": 39.1,
+      "saves": 347
+    },
+    {
+      "id": "2103483957266268381",
+      "title": "Opus 5.5 is absolutely cracked at motion design",
+      "creator": {
+        "name": "Martijn Verbove",
+        "handle": "verbove"
+      },
+      "url": "https://x.com/verbove/status/2103483957266268381",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "Opus 5.5 is absolutely cracked at motion design this entire video is code 0 After Effects 0 manual animation I showed it one viral motion post and said: “explain MakerMap, but make it insane” it came back with 20 seconds of one shape morphing through the entire product:",
+        "source": "https://x.com/verbove/status/2103483957266268381"
+      },
+      "poster": "/inspiration/2103483957266268381.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103483857836134400/vid/avc1/1440x1440/vGm879-8Z6lY8lp4.mp4?tag=29",
+      "duration": 20,
+      "saves": 334
+    },
+    {
+      "id": "2103148835270971419",
+      "title": "OPUS 5.5 just made an entire animated ad by itself for $0",
+      "creator": {
+        "name": "Lad",
+        "handle": "ladprofit"
+      },
+      "url": "https://x.com/ladprofit/status/2103148835270971419",
+      "types": [],
+      "tags": [],
+      "tool": "OPUS 5.5",
+      "poster": "/inspiration/2103148835270971419.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103148652764299265/vid/avc1/1080x1920/cGclg6ur6kyyWJbL.mp4?tag=29",
+      "duration": 55.4,
+      "saves": 334
+    },
+    {
+      "id": "2103037586663235713",
+      "title": "Full video is finally done start to end everything opus 5.5",
+      "creator": {
+        "name": "Dhruval",
+        "handle": "dhruvalgolakiya"
+      },
+      "url": "https://x.com/dhruvalgolakiya/status/2103037586663235713",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2103037586663235713.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103033458050404352/vid/avc1/1920x1080/JKaAveISa3o4Qz-h.mp4?tag=29",
+      "duration": 40,
+      "saves": 329
+    },
+    {
+      "id": "2103183939745751083",
+      "title": "one-shotted this music video using opus 5.5",
+      "creator": {
+        "name": "Indra",
+        "handle": "IndraVahan"
+      },
+      "url": "https://x.com/IndraVahan/status/2103183939745751083",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "poster": "/inspiration/2103183939745751083.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103183697151401984/vid/avc1/1920x1080/JbN88iRhxZlt1QoM.mp4?tag=29",
+      "duration": 128.6,
+      "saves": 305
+    },
+    {
+      "id": "2103625902211088880",
+      "title": "Claude Opus 5.5 feels like the first model to have truly solved video animation.",
+      "creator": {
+        "name": "Steven Tey",
+        "handle": "steventey"
+      },
+      "url": "https://x.com/steventey/status/2103625902211088880",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2103625902211088880.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103625028499890176/vid/avc1/1920x1080/2yiRlu9H0oeGMUwF.mp4?tag=29",
+      "duration": 15.1,
+      "saves": 300
+    },
+    {
+      "id": "2102779758408774104",
+      "title": "🚀 Claude Opus 5.5 is the new king of Blender.",
+      "creator": {
+        "name": "Alexey Fateev",
+        "handle": "superalesha"
+      },
+      "url": "https://x.com/superalesha/status/2102779758408774104",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102779758408774104.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102779521451626496/vid/avc1/1920x1080/kPE0LWp3IOXiF9DS.mp4?tag=29",
+      "duration": 34.1,
+      "saves": 300
+    },
+    {
+      "id": "2102545213218803769",
+      "title": "Opus 5.5でピクセルアニメーション生成してみた🎨",
+      "creator": {
+        "name": "AKI | Product Engineer @ PeopleX",
+        "handle": "akiy_8"
+      },
+      "url": "https://x.com/akiy_8/status/2102545213218803769",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102545213218803769.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102545156721545216/vid/avc1/1280x720/tui6Zzc-HZGnDlxU.mp4?tag=29",
+      "duration": 20,
+      "saves": 299
+    },
+    {
+      "id": "2106375041269342691",
+      "title": "I gave Opus 5.5 one night and a homelab.",
+      "creator": {
+        "name": "axit",
+        "handle": "0xaxit"
+      },
+      "url": "https://x.com/0xaxit/status/2106375041269342691",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106375041269342691.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106374936411680768/vid/avc1/1280x720/lZdyHYLRJp3CsVXh.mp4?tag=29",
+      "duration": 60.5,
+      "saves": 299
+    },
+    {
+      "id": "2105250266392224097",
+      "title": "Opus 5.5 paints like Qi Baishi. In a shader.",
+      "creator": {
+        "name": "Joshua Guo",
+        "handle": "jshguo"
+      },
+      "url": "https://x.com/jshguo/status/2105250266392224097",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2105250266392224097.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105250231826923520/vid/avc1/1416x1080/cd1I8f_yoRdS-WWI.mp4?tag=29",
+      "duration": 10.4,
+      "saves": 292
+    },
+    {
+      "id": "2102487989381156991",
+      "title": "Opus 5.5 made this in Blender",
+      "creator": {
+        "name": "Alexey Fateev",
+        "handle": "superalesha"
+      },
+      "url": "https://x.com/superalesha/status/2102487989381156991",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102487989381156991.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102487325448028160/vid/avc1/1920x1080/CDO-KMFHFe-hxSjE.mp4?tag=29",
+      "duration": 61,
+      "saves": 285
+    },
+    {
+      "id": "2107139305324122491",
+      "title": "I asked Claude Opus 5.5 (Max) this prompt:",
+      "creator": {
+        "name": "Heather Cooper",
+        "handle": "HBCoop_"
+      },
+      "url": "https://x.com/HBCoop_/status/2107139305324122491",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "\"Create me a motion video of your choice, with the sole purpose of flexing Opus 5.5 capabilities.\" It worked on its own for 1 hour 37 minutes and gave me this: → @claudeai",
+        "source": "https://x.com/HBCoop_/status/2107139305324122491"
+      },
+      "poster": "/inspiration/2107139305324122491.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107139253583130624/vid/avc1/1920x1080/zdsw3PxYUaPeuz8t.mp4?tag=16",
+      "duration": 29,
+      "saves": 278
+    },
+    {
+      "id": "2104093497561436573",
+      "title": "Claude Opus 5.5 continues to amaze me. Claude Opus 5.5 created a 3D printable enclosure…",
+      "creator": {
+        "name": "Nigel Hungerford-Symes",
+        "handle": "VectorCrossProd"
+      },
+      "url": "https://x.com/VectorCrossProd/status/2104093497561436573",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Code, Claude Opus 5.5",
+      "poster": "/inspiration/2104093497561436573.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104092535115399168/vid/avc1/1920x1080/DWKimutsNFSgBcmh.mp4?tag=29",
+      "duration": 10,
+      "saves": 271
+    },
+    {
+      "id": "2104186357824487573",
+      "title": "Making art with code using Opus 5.5",
+      "creator": {
+        "name": "Techartist",
+        "handle": "techartist_"
+      },
+      "url": "https://x.com/techartist_/status/2104186357824487573",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2104186357824487573.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104185406363455488/vid/avc1/1744x1174/SMNR54ZopDpMoaZI.mp4?tag=29",
+      "duration": 12.1,
+      "saves": 260
+    },
+    {
+      "id": "2106493673425047896",
+      "title": "Claude Opus 5.5 built this 3D world.",
+      "creator": {
+        "name": "Leon Lin",
+        "handle": "LexnLin"
+      },
+      "url": "https://x.com/LexnLin/status/2106493673425047896",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2106493673425047896.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106493544466698240/vid/avc1/1920x1080/p-pV3ZcvH4IPDEil.mp4?tag=29",
+      "duration": 41.4,
+      "saves": 259
+    },
+    {
+      "id": "2105723245722812598",
+      "title": "Releasing @threejs Procedural Animals 🐾",
+      "creator": {
+        "name": "Majid Manzarpour",
+        "handle": "majidmanzarpour"
+      },
+      "url": "https://x.com/majidmanzarpour/status/2105723245722812598",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2105723245722812598.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105713129095102465/vid/avc1/1920x1080/T4YLpXC6Pmf3Cj0b.mp4?tag=29",
+      "duration": 116.5,
+      "saves": 257
+    },
+    {
+      "id": "2102641562824135022",
+      "title": "Asked for Rig & Animation of 3D creature. Still can't believe it can handle that since…",
+      "creator": {
+        "name": "Stefan 3D AI",
+        "handle": "Stefan_3D_AI"
+      },
+      "url": "https://x.com/Stefan_3D_AI/status/2102641562824135022",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, Claude",
+      "poster": "/inspiration/2102641562824135022.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102641511280377856/vid/avc1/1080x1080/Unywe4xeukLn9J5j.mp4?tag=29",
+      "duration": 25.2,
+      "saves": 256
+    },
+    {
+      "id": "2103482545111232946",
+      "title": "opus 5.5 one shotted this animation of steve jobs life",
+      "creator": {
+        "name": "onur ozcan",
+        "handle": "oozn"
+      },
+      "url": "https://x.com/oozn/status/2103482545111232946",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5",
+      "prompt": {
+        "text": "→ remotion + react + svg, ~8.7k lines → jointed",
+        "source": "https://x.com/oozn/status/2103482545111232946"
+      },
+      "poster": "/inspiration/2103482545111232946.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103480985669021696/vid/avc1/1920x1080/WXAhX0zLoxXkD7ik.mp4?tag=29",
+      "duration": 119.1,
+      "saves": 254
+    },
+    {
+      "id": "2104978414465945696",
+      "title": "卧槽。。。",
+      "creator": {
+        "name": "Tz",
+        "handle": "Tz_2022"
+      },
+      "url": "https://x.com/Tz_2022/status/2104978414465945696",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, three.js",
+      "poster": "/inspiration/2104978414465945696.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104978299742998528/vid/avc1/1920x1080/P6LrNRYuT-Dk1Fab.mp4?tag=29",
+      "duration": 302.4,
+      "saves": 251
+    },
+    {
+      "id": "2105705406958067765",
+      "title": "Every frame of this is ~750 exact math operations per pixel",
+      "creator": {
+        "name": "Dhruval",
+        "handle": "dhruvalgolakiya"
+      },
+      "url": "https://x.com/dhruvalgolakiya/status/2105705406958067765",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2105705406958067765.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105704905306771456/vid/avc1/3840x2160/OY10ufqA9dKdCDLp.mp4?tag=29",
+      "duration": 51.1,
+      "saves": 248
+    },
+    {
+      "id": "2102736587708854585",
+      "title": "Opus 5.5 這個有點逆天了...",
+      "creator": {
+        "name": "0xFunky",
+        "handle": "0x0funky"
+      },
+      "url": "https://x.com/0x0funky/status/2102736587708854585",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2102736587708854585.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102736164356763648/vid/avc1/960x540/ONOUr9Hg8KNGq-qe.mp4?tag=29",
+      "duration": 394.2,
+      "saves": 248
+    },
+    {
+      "id": "2109691802160615787",
+      "title": "Is this how context management feels?",
+      "creator": {
+        "name": "DreW",
+        "handle": "devteamdrew"
+      },
+      "url": "https://x.com/devteamdrew/status/2109691802160615787",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5, claude",
+      "poster": "/inspiration/2109691802160615787.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109691759143919616/vid/avc1/1920x1080/Gbqxk58Ls9aYkG9H.mp4?tag=29",
+      "duration": 48.6,
+      "saves": 247
+    },
+    {
+      "id": "2105011559756181620",
+      "title": "HOLD SWARM",
+      "creator": {
+        "name": "rachel",
+        "handle": "chaotictransfem"
+      },
+      "url": "https://x.com/chaotictransfem/status/2105011559756181620",
+      "types": [],
+      "tags": [],
+      "tool": "claude opus 5.5",
+      "poster": "/inspiration/2105011559756181620.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105011280583020544/vid/avc1/1920x1080/8rNH5JJl1LSswkbD.mp4?tag=29",
+      "duration": 237.5,
+      "saves": 247
+    },
+    {
+      "id": "2107408409859359211",
+      "title": "🚨重磅：我们2000+ Star的开源项目迎来了重大更新：经过多轮迭代，我们用Opus 5.5…",
+      "creator": {
+        "name": "岚叔",
+        "handle": "LufzzLiz"
+      },
+      "url": "https://x.com/LufzzLiz/status/2107408409859359211",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2107408409859359211.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107404354714222592/vid/avc1/1920x1080/vq3epYjTvXixQUb6.mp4?tag=29",
+      "duration": 45.1,
+      "saves": 246
+    },
+    {
+      "id": "2109766087328100521",
+      "title": "Claude Opus 5.5 drew every frame of this animation using JavaScript. The life of a honey…",
+      "creator": {
+        "name": "Kevin Ngo",
+        "handle": "kevin_t_ngo"
+      },
+      "url": "https://x.com/kevin_t_ngo/status/2109766087328100521",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2109766087328100521.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109765702009901056/vid/avc1/1080x1080/QZc9sfoDB5zC7sTX.mp4?tag=29",
+      "duration": 53.3,
+      "saves": 236
+    },
+    {
+      "id": "2102717699600368045",
+      "title": "Claude's Plan a video by opus 5.5 one shotted< tribute to @jeffgwoah >",
+      "creator": {
+        "name": "Chetaslua",
+        "handle": "chetaslua"
+      },
+      "url": "https://x.com/chetaslua/status/2102717699600368045",
+      "types": [],
+      "tags": [],
+      "tool": "opus 5.5, Claude",
+      "poster": "/inspiration/2102717699600368045.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102714444405231616/vid/avc1/2560x1440/-wvT3ebbWLbwr50C.mp4?tag=29",
+      "duration": 197.9,
+      "saves": 234
+    },
+    {
+      "id": "2103024907965612250",
+      "title": "Ça fait deux jours que je vois pleins de vidéos faites par Opus 5.5",
+      "creator": {
+        "name": "Pivi",
+        "handle": "pivi___"
+      },
+      "url": "https://x.com/pivi___/status/2103024907965612250",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103024907965612250.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103024492259704832/vid/avc1/1920x1080/37O75AhplWK2yiX3.mp4?tag=29",
+      "duration": 32.5,
+      "saves": 233
+    },
+    {
+      "id": "2107548992640880755",
+      "title": "CLAUDE SONNET 5.5 BUILT A 40 FLOOR TOWER WITH 8,934 PARTS IN 15 MINUTES.",
+      "creator": {
+        "name": "Solvaix",
+        "handle": "Solvaix"
+      },
+      "url": "https://x.com/Solvaix/status/2107548992640880755",
+      "types": [],
+      "tags": [],
+      "tool": "CLAUDE SONNET 5.5",
+      "poster": "/inspiration/2107548992640880755.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107548579329925120/vid/avc1/2560x1374/3qU2hXuHbqxcQfTP.mp4?tag=29",
+      "duration": 29.1,
+      "saves": 228
+    },
+    {
+      "id": "2107018546194882678",
+      "title": "我的skill基本可以毕业了。再来个完全由Opus5.5+Huashu-art-motion skill做的whiteborad版本的视频👇",
+      "creator": {
+        "name": "花叔",
+        "handle": "AlchainHust"
+      },
+      "url": "https://x.com/AlchainHust/status/2107018546194882678",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2107018546194882678.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107017524378263552/vid/avc1/1920x1080/3IXsBerb_hM-HNhO.mp4?tag=29",
+      "duration": 129.9,
+      "saves": 227
+    },
+    {
+      "id": "2102453658889953717",
+      "title": "Claude Opus 5.5 + Higgsfiled built this animated windmill in Blender in 15 minutes.",
+      "creator": {
+        "name": "Higgsfield AI 🧩",
+        "handle": "higgsfield_ai"
+      },
+      "url": "https://x.com/higgsfield_ai/status/2102453658889953717",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102453658889953717.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102453598559055873/vid/avc1/1080x1920/etmIb_DtBCpTHJau.mp4?tag=29",
+      "duration": 21,
+      "saves": 223
+    },
+    {
+      "id": "2106324559805010004",
+      "title": "The line between filmed and rendered is getting blurry. This mosaic doesn't exist. It's…",
+      "creator": {
+        "name": "Paolo Rosson",
+        "handle": "redp314"
+      },
+      "url": "https://x.com/redp314/status/2106324559805010004",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Code, Opus 5.5",
+      "poster": "/inspiration/2106324559805010004.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106324494432284672/vid/avc1/1080x1080/lc-EiDM2SeLJB__G.mp4?tag=29",
+      "duration": 31.6,
+      "saves": 217
+    },
+    {
+      "id": "2106527292633825693",
+      "title": "Trying something new with Opus 5.5",
+      "creator": {
+        "name": "Shikhar",
+        "handle": "xikhar"
+      },
+      "url": "https://x.com/xikhar/status/2106527292633825693",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2106527292633825693.webp",
+      "playback": "https://video.twimg.com/amplify_video/2106526170040979456/vid/avc1/1920x1080/1k6eEHmEwjez6V5P.mp4?tag=29",
+      "duration": 49.7,
+      "saves": 213
+    },
+    {
+      "id": "2105804692811137242",
+      "title": "New Fable 5.5 (maybe) - A voxel build of yourself",
+      "creator": {
+        "name": "bluedev",
+        "handle": "blueemi99"
+      },
+      "url": "https://x.com/blueemi99/status/2105804692811137242",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2105804692811137242.webp",
+      "playback": "https://video.twimg.com/amplify_video/2105804425365254144/vid/avc1/1920x1080/2939gheaguFoFUbk.mp4?tag=29",
+      "duration": 26,
+      "saves": 213
+    },
+    {
+      "id": "2109779693792883178",
+      "title": "\"One More Prompt\" a music video made by Opus 5.5.",
+      "creator": {
+        "name": "Leon Lin",
+        "handle": "LexnLin"
+      },
+      "url": "https://x.com/LexnLin/status/2109779693792883178",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2109779693792883178.webp",
+      "playback": "https://video.twimg.com/amplify_video/2109769517865848832/vid/avc1/1920x1080/UlZthfj82XasCiH9.mp4?tag=29",
+      "duration": 184.8,
+      "saves": 210
+    },
+    {
+      "id": "2107285581109547516",
+      "title": "This is from an experiment I'm working on with Claude Opus 5.5. I'm trying to see how…",
+      "creator": {
+        "name": "Brian Gruber",
+        "handle": "gruberbuilds"
+      },
+      "url": "https://x.com/gruberbuilds/status/2107285581109547516",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2107285581109547516.webp",
+      "playback": "https://video.twimg.com/amplify_video/2107284278916665344/vid/avc1/3014x1790/gi6JvteuWbvKsbqR.mp4?tag=29",
+      "duration": 93.6,
+      "saves": 201
+    },
+    {
+      "id": "2102680453912449223",
+      "title": "Claude Opus 5.5真正的生产力王炸其实是解题！",
+      "creator": {
+        "name": "WY",
+        "handle": "akokoi1"
+      },
+      "url": "https://x.com/akokoi1/status/2102680453912449223",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "poster": "/inspiration/2102680453912449223.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102675543351275520/vid/avc1/1920x1080/kxzPSBWLE4WmzQJX.mp4?tag=29",
+      "duration": 189.3,
+      "saves": 201
+    },
+    {
+      "id": "2102867033100616097",
+      "title": "just tried Opus 5.5 for some animation",
+      "creator": {
+        "name": "nikola_j (🛟,🛟)",
+        "handle": "_nikolajankovic"
+      },
+      "url": "https://x.com/_nikolajankovic/status/2102867033100616097",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "make a hand-drawn stop-motion animation; story: you're defi saver and explaining yourself in 1st person honestly...",
+        "source": "https://x.com/_nikolajankovic/status/2102867033100616097"
+      },
+      "poster": "/inspiration/2102867033100616097.webp",
+      "playback": "https://video.twimg.com/amplify_video/2102860741610967040/vid/avc1/1280x848/-XO8Hn3E_PIbaeDw.mp4?tag=29",
+      "duration": 58
+    },
+    {
+      "id": "2104086342204592443",
+      "title": "流行りのプロンプト使って、Opus5.5で動画作ってみました",
+      "creator": {
+        "name": "とぴとぴAI@Nocteria",
+        "handle": "_topi_003"
+      },
+      "url": "https://x.com/_topi_003/status/2104086342204592443",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "poster": "/inspiration/2104086342204592443.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104085894634602496/vid/avc1/1280x720/BTwkFrdvgjZfmAyt.mp4?tag=14",
+      "duration": 15
+    },
+    {
+      "id": "2104088986969055288",
+      "title": "一枚絵からOpus5.5の動画生成をお試し",
+      "creator": {
+        "name": "とぴとぴAI@Nocteria",
+        "handle": "_topi_003"
+      },
+      "url": "https://x.com/_topi_003/status/2104088986969055288",
+      "types": [],
+      "tags": [],
+      "tool": "unknown",
+      "prompt": {
+        "text": "この画像の女の子がエキサイトなダンスをする、ダイナミックな15秒のモーショングラフィックスビデオを作成してください。履歴書用のショーリールのような感じで、全力でやって。",
+        "source": "https://x.com/_topi_003/status/2104088986969055288"
+      },
+      "poster": "/inspiration/2104088986969055288.webp",
+      "playback": "https://video.twimg.com/amplify_video/2104087383826477056/vid/avc1/1280x720/GLtTtbrOf-tOvPeI.mp4?tag=14",
+      "duration": 15
+    },
+    {
+      "id": "2103212966703436195",
+      "title": "Opus 5.5 is REALLY GOOD at pixel animations. My only prompt was a reference video and…",
+      "creator": {
+        "name": "Evinho",
+        "handle": "0xEvinho"
+      },
+      "url": "https://x.com/0xEvinho/status/2103212966703436195",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "poster": "/inspiration/2103212966703436195.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103212778534080512/vid/avc1/1920x1080/fCN4HIX17x0jnMGk.mp4?tag=29",
+      "duration": 20
+    },
+    {
+      "id": "2103358957050068999",
+      "title": "Opus 5.5 animation created with this prompt: \"make me an animation to explain why celld…",
+      "creator": {
+        "name": "nick frith",
+        "handle": "0xnfrith"
+      },
+      "url": "https://x.com/0xnfrith/status/2103358957050068999",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "\"make me an animation to explain why celld earns its place.\" There's way more context behind this but i thought the opus 5.5 output was impressive enough to share it here on X.",
+        "source": "https://x.com/0xnfrith/status/2103358957050068999"
+      },
+      "poster": "/inspiration/2103358957050068999.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103358243171102720/vid/avc1/1920x1080/SqNfBwODagaOfaga.mp4?tag=29",
+      "duration": 53
+    },
+    {
+      "id": "2103587706999914649",
+      "title": "This is crazy, I asked Opus 5.5 to intro itself!",
+      "creator": {
+        "name": "1LittleCoder💻",
+        "handle": "1littlecoder"
+      },
+      "url": "https://x.com/1littlecoder/status/2103587706999914649",
+      "types": [],
+      "tags": [],
+      "tool": "Opus 5.5",
+      "prompt": {
+        "text": "\"make a dynamic 10-second motion graphics video that shows who are you as Opus 5.5 - be as creative and dynamic as possible. Avoid the frames and texts on the corners which are typical ai made giveaways!\"",
+        "source": "https://x.com/1littlecoder/status/2103587706999914649"
+      },
+      "poster": "/inspiration/2103587706999914649.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103587570198495233/vid/avc1/1920x1080/aENuLFwznAHdXK-8.mp4?tag=29",
+      "duration": 10
+    },
+    {
+      "id": "2103247530259603851",
+      "title": "I built this language learning app a few weeks ago, Fable & Astra, and this what Opus 5.5…",
+      "creator": {
+        "name": "@1stnoel_",
+        "handle": "1stnoel_"
+      },
+      "url": "https://x.com/1stnoel_/status/2103247530259603851",
+      "types": [],
+      "tags": [],
+      "tool": "Claude Opus 5.5",
+      "prompt": {
+        "text": "Make a 1-minute educational video about with synthesized voice narration. Claude Opus 5.5 (Extra)",
+        "source": "https://x.com/1stnoel_/status/2103247530259603851"
+      },
+      "poster": "/inspiration/2103247530259603851.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103246862220140546/vid/avc1/1920x1080/Q_Bbc3oiKHcedl4M.mp4?tag=29",
+      "duration": 60
+    },
+    {
+      "id": "2103551886272159839",
+      "title": "Made with Claude OPUS 5.5",
+      "creator": {
+        "name": "tihor",
+        "handle": "3xtihor"
+      },
+      "url": "https://x.com/3xtihor/status/2103551886272159839",
+      "types": [],
+      "tags": [],
+      "tool": "Claude OPUS 5.5",
+      "prompt": {
+        "text": "\"Make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. Go all out.\"",
+        "source": "https://x.com/3xtihor/status/2103551886272159839"
+      },
+      "poster": "/inspiration/2103551886272159839.webp",
+      "playback": "https://video.twimg.com/amplify_video/2103551809386422272/vid/avc1/1280x720/-TL_XKxPU_p8aSyF.mp4?tag=14",
+      "duration": 15
     }
   ]
 }

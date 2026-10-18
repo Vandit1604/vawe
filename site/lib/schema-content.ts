@@ -93,7 +93,9 @@ export function movesItemListSchema() {
 
 // Each post is credited to its creator and its url is the X post. contentUrl is X's CDN file, only where
 // the post has one; the CDN serves it to a request that sends no Referer.
-export function inspirationSchema(opts: { name: string; description: string }) {
+// The list names the posts the page shows first, not all of them, so the JSON-LD stays a few KB.
+export function inspirationSchema(opts: { name: string; description: string; count: number }) {
+  const listed = INSPIRATION.slice(0, opts.count);
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -103,8 +105,8 @@ export function inspirationSchema(opts: { name: string; description: string }) {
     publisher,
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: INSPIRATION.length,
-      itemListElement: INSPIRATION.map((p, i) => ({
+      numberOfItems: listed.length,
+      itemListElement: listed.map((p, i) => ({
         "@type": "ListItem",
         position: i + 1,
         item: {

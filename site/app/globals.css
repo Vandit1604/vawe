@@ -289,7 +289,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
   .mark{order:1}
   .ghbtn{order:2;margin-left:auto}
   .nav{order:3;width:100%;flex-wrap:wrap}
-  .nav a,.nav [aria-current="page"]{padding:0 var(--sp-3)}
+  /* Five links on one line at 390: 8 px sides keep the row at about 320 px of the 358 the gutters leave. */
+  .nav{justify-content:space-between}
+  .nav a,.nav [aria-current="page"]{padding:0 var(--sp-2)}
 }
 /* ===== SECTIONS: one centred column of studio panels, shared by every page =================== */
 .ls{max-width:1040px;margin:0 auto;padding-top:112px}

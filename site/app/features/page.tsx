@@ -180,7 +180,7 @@ function SpeedBars() {
 export default function Features() {
   return (
     <div className="shell">
-      <Header active="features" />
+      <Header active="resources" />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "Features", url: "/features" }]))} />
       <div className="wrap">
         <main id="content" className="ipage xp" tabIndex={-1}>

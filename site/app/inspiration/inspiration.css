@@ -39,6 +39,14 @@
 .in-chip input:focus-visible + span{outline:var(--focus-ring);outline-offset:2px}
 @media (hover:hover){ .in-chip input:not(:checked):hover + span{color:var(--ink);background:var(--raised)} }
 .in-sep{flex:none;width:1px;height:20px;background:var(--line-2)}
+.in-sort{flex:none;display:flex;padding:2px;border-radius:var(--r-pill);background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)}
+.in-sort button{min-height:32px;padding:0 var(--sp-3);border:0;border-radius:var(--r-pill);background:none;color:var(--muted);font:inherit;font-size:var(--fs-ui);
+  white-space:nowrap;cursor:pointer;transition:background-color var(--dur-hover) var(--ease-out),color var(--dur-hover) var(--ease-out),scale var(--dur-press) var(--ease-press)}
+.in-sort button:active{scale:var(--press)}
+.in-sort button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+@media (hover:hover){ .in-sort button:not([aria-pressed="true"]):hover{color:var(--ink)} }
+.in-more{display:flex;justify-content:center;margin-top:var(--sp-6)}
+.in-more .meta{color:var(--dim)}
 .in-status{flex:none;min-width:3ch;text-align:right}
 
 .in-icon{flex:none;display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:var(--r-pill);background:var(--raised);color:var(--ink);
@@ -126,8 +134,17 @@
   color:var(--dim);margin-bottom:var(--sp-2)}
 .in-src{color:var(--accent);text-transform:none;letter-spacing:0;text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px;margin-left:var(--sp-1)}
 .in-well{background:var(--bg);border-radius:var(--r-in);box-shadow:var(--ring);padding:var(--sp-3) var(--sp-4)}
-.in-well pre{font-family:var(--font-mono),monospace;font-size:var(--fs-code);line-height:1.6;color:var(--ink-2);white-space:pre-wrap;word-break:break-word}
-.in-cut{color:var(--dim)}
+.in-well pre{font-family:var(--font-mono),monospace;font-size:var(--fs-code);line-height:1.6;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}
+.in-blk-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-2)}
+.in-blk-head h3{margin-bottom:0}
+/* A long prompt scrolls inside its well; the fade says more text lies below and goes at the end. */
+.in-prompt{position:relative;padding:0}
+.in-prompt-scroll{max-height:min(320px,40dvh);overflow:auto;overscroll-behavior:contain;padding:var(--sp-3) var(--sp-4);scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;border-radius:inherit}
+.in-prompt-scroll:focus-visible{outline:var(--focus-ring);outline-offset:-2px}
+.in-prompt::after{content:"";position:absolute;inset:auto 0 0;height:48px;border-radius:0 0 var(--r-in) var(--r-in);pointer-events:none;
+  background:linear-gradient(to bottom,transparent,var(--bg));opacity:0;transition:opacity var(--dur-state) var(--ease-out)}
+.in-prompt.has-more::after{opacity:1}
+.in-loading{font-size:var(--fs-ui);color:var(--muted)}
 .in-cmd{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
 .in-cmd code{font-family:var(--font-mono),monospace;font-size:var(--fs-code);color:var(--ink-2);word-break:break-all;min-width:0;flex:1}
 .in-copy{position:relative;display:inline-grid;min-height:32px;padding:0 var(--sp-3);border:0;border-radius:var(--r-ctl);font:inherit;font-size:var(--fs-ui);font-weight:500;
@@ -161,7 +178,7 @@
 @media (max-width:640px){
   .in-rail{margin-inline:calc(var(--sp-4) * -1);padding-inline:var(--sp-4)}
   .in-wall{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-2)}
-  .in-chip span,.in-icon{min-height:var(--hit)}
+  .in-chip span,.in-icon,.in-sort button{min-height:var(--hit)}
   .in-icon{width:var(--hit);height:var(--hit)}
   .in-fail p{font-size:var(--fs-label)}
   .btn.in-sm{min-height:36px}
