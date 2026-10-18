@@ -67,7 +67,7 @@
         "Opus 5.5"
       ],
       "prompt": {
-        "text": "《什么是 Transformer》由 Claude Code + Opus 5.5 制作 --- 提示词 --- 帮我用js制作一个视频，主题是：什么是 Transformer 要深入浅出，让高中生也能看得懂，不仅high level说的清楚，也要有细节，包括注意力机制，甚至一些数学概念 你可以用任何工具或者安装工具，可以联网检索 请给我惊喜",
+        "text": "帮我用js制作一个视频，主题是：什么是 Transformer\n要深入浅出，让高中生也能看得懂，不仅high level说的清楚，也要有细节，包括注意力机制，甚至一些数学概念\n\n你可以用任何工具或者安装工具，可以联网检索\n\n请给我惊喜",
         "source": "https://x.com/dotey/status/2103683057689522564"
       },
       "poster": "/inspiration/2103683057689522564.webp",
@@ -102,7 +102,11 @@
       "duration": 34.7,
       "saves": 4758,
       "likes": 7887,
-      "avatar": "https://pbs.twimg.com/profile_images/2063751418356396032/ag4k8GIb_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2063751418356396032/ag4k8GIb_bigger.jpg",
+      "prompt": {
+        "text": "I asked Claude Opus 5.5 to explain how a rocket engine works by building an interactive Raptor 3 you can take apart in your browser.\n\nCut it open, follow the oxygen and the methane through both turbopumps, then throttle it and watch the shock diamonds move.\n\nhttp://airsup.ai/rocket-engine",
+        "source": "https://x.com/konstantinsaifo/status/2104094723887501736"
+      }
     },
     {
       "id": "2102476258948927543",
@@ -127,7 +131,11 @@
       "duration": 11.2,
       "saves": 2639,
       "likes": 2527,
-      "avatar": "https://pbs.twimg.com/profile_images/2074173309885808640/n__DP0Dk_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2074173309885808640/n__DP0Dk_bigger.jpg",
+      "prompt": {
+        "text": "Create a single self-contained HTML file that renders an animated pixel art wizard casting a spell, using vanilla JavaScript and Canvas 2D. No external assets, libraries, or network requests.\n\nRENDERING\n- Draw everything to an offscreen canvas at a fixed logical resolution of 128x96, then blit to a fullscreen display canvas scaled by the largest integer factor that fits the window, centered, with imageSmoothingEnabled = false and CSS image-rendering: pixelated.\n- All drawing snaps to integer coordinates on the logical canvas. No sub-pixel positions, anti-aliasing, gradients, or shadowBlur.\n- Fixed palette of ~24 hex colors: deep blues/purples for night sky, warm robe tones, 3-4 bright magic colors. Every pixel comes from this palette.\n\nCHARACTER\n- Build the wizard procedurally from filled rects and pixel runs, ~24x32 logical pixels: pointed hat with a bend, long beard, two-shade robe with darker outline, staff with a gem at the tip.\n- Parameterize the pose (staff angle, arm raise, head tilt, robe sway). Animate parameters smoothly, then quantize to the pixel grid each frame so motion reads at an 8-12 fps pixel animation feel even though the loop runs at 60fps.\n\nANIMATION\n- Looping state machine: IDLE (2-frame bob, beard sway) -> CHARGE (staff raises, gem flickers, sparks spiral inward) -> CAST (bright burst, projectile fires across the scene, 1-2 pixel screen shake) -> RECOVER (settle back). Ease pose parameters between keyframes.\n- Pooled allocation-free particle system: preallocate and reuse. Sparks orbit the gem during CHARGE, explode outward on CAST, each particle stepping its palette index from white to magic color to dark before despawn. Snap particle positions to the grid when drawing.\n- Fixed 60hz timestep update with rAF rendering. Zero object allocation inside the loop.\n\nSCENE\n- Minimal background: dark sky, a few twinkling 1px stars, moon, stone floor line. Character silhouette must read clearly.\n- Subtle 1px rim light on the wizard from the gem, brightening during CHARGE and CAST.\n\nQUALITY BAR\n- Crisp pixels at any window size, seamless loop, stable 60fps, readable silhouette. Should look like a polished 16-bit sprite animation, not vector shapes scaled down",
+        "source": "https://x.com/majidmanzarpour/status/2102476499387383834"
+      }
     },
     {
       "id": "2102853258582880547",
@@ -148,7 +156,7 @@
         "Opus 5.5"
       ],
       "prompt": {
-        "text": "We're going to try a little test. Do you think you could render a recipe motion graphic animation using javascript or html (w/e you think will produce the best) to show the full recipe from start",
+        "text": "We're going to try a little test. Do you think you could render a recipe motion graphic animation using javascript or html (w/e you think will produce the best) to show the full recipe from start to finish (empty glass to completed cocktail) - Explainer video style - Showing the recipe ingreidents + measurements as they're going into the cup. Should be a 30s video",
         "source": "https://x.com/Ror_Fly/status/2102853258582880547"
       },
       "poster": "/inspiration/2102853258582880547.webp",
@@ -203,16 +211,16 @@
       "model": [
         "Opus 5.5"
       ],
-      "prompt": {
-        "text": "WOW motion designers are not ready for opus 5.5 this entire video is code opus picked the music, downloaded the sfx, built every frame and synced it all to the beat by itself steal the prompt ↓ &lt;inputs&gt; Ask me for: the product name and a one-line promise, 3 to 5 UI moments",
-        "source": "https://x.com/twoclipping/status/2102554209166000267"
-      },
       "poster": "/inspiration/2102554209166000267.webp",
       "playback": "https://video.twimg.com/amplify_video/2102553635750125568/vid/avc1/1920x1080/-V5gRZlCHC4-qd2P.mp4?tag=29",
       "duration": 20,
       "saves": 1422,
       "likes": 602,
-      "avatar": "https://pbs.twimg.com/profile_images/2049294356637708288/9ln2v1O0_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2049294356637708288/9ln2v1O0_bigger.jpg",
+      "prompt": {
+        "text": "<inputs>\nAsk me for: the product name and a one-line promise, 3 to 5 UI moments to show, one accent color, 10 to 20 real vertical clips I own, and a royalty-free song with a clear drop (e.g. Mixkit, free for commercial use).\n</inputs>\n\n<direction>\nHigh-end minimal. One idea per shot, lots of empty space, one accent color, one clean sans (Geist or Inter) with tight tracking. Masked type reveals, match cuts, one smooth camera language. Real footage only, never placeholder cards. No full stops in on-screen text.\nBanned: shockwave rings, particle bursts, RGB split, camera shake, lens flares, neon glows, grid floors, flashing backgrounds, bouncy easing.\n</direction>\n\n<structure>\n10 bars at 120 BPM, 2 seconds each.\nBar 1: the hook lands word by word on the beats.\nBar 2: one hook word morphs into the product UI. A cursor types and clicks.\nThe drop: a circle opens out of the button into a dark scene.\nThen one move per bar: a wall of real clips with a scan line and 3 winners, the key output as big type, a 3D carousel of real videos with floor reflections and a motion-blurred whip onto one hero clip, the hero in a phone next to a panel that flips into results, big stats on push cuts, a 3-word ticker, a logo reveal, a fade to black.\n</structure>\n\n<build>\n1. One HTML file at 1920x1080. Every style is computed from time inside http://window.seek(t): no CSS animations, no timers, no state between frames.\n2. Real video: extract clips to 30fps JPEG sequences with ffmpeg and swap img sources per frame. seek awaits the image decodes.\n3. Analyze the song with numpy: tempo, beat grid, energy per bar, the drop. Calibrate the grid to the real kick hits. Every cut sits on a downbeat, every UI hit on a beat.\n4. Render with Playwright: 3 subframes per frame at t minus, at, and plus 1/240s, then blend with ffmpeg tmix for real motion blur at 60fps.\n5. Place each sound effect so its measured peak, not its file start, lands on the event. Keep the effects quiet under the music. Loudnorm to -14 LUFS.\n6. Probe 20 or more frames before the full render. Fix anything cluttered, overlapping or hard to read.\n</build>\n\n<gotchas>\nNever set opacity or filter on a preserve-3d element, because it flattens and both faces show. Fade its wrapper instead. Measure element positions at runtime for match cuts. Only use music and sound effects whose license allows commercial use.\n</gotchas>\n\n<start>\nAsk me for the inputs, then show me a storyboard with every timing on the beat grid before you write any code.\n</start",
+        "source": "https://x.com/twoclipping/status/2102554209166000267"
+      }
     },
     {
       "id": "2103273003555402193",
@@ -233,16 +241,16 @@
         "Opus 5.5",
         "After Effects"
       ],
-      "prompt": {
-        "text": "opus 5.5 is f*cking cracked at motion design this entire video is code, 0 after effects im open sourcing the prompt template for these motion designs steal it to recreate these ↓ &lt;inputs&gt; Ask me for: 8 to 12 UI states I want the shape to become (e.g. button, loader, player,",
-        "source": "https://x.com/twoclipping/status/2103273003555402193"
-      },
       "poster": "/inspiration/2103273003555402193.webp",
       "playback": "https://video.twimg.com/amplify_video/2103272964967804928/vid/avc1/720x720/18beFxJGrO4tjaDQ.mp4?tag=29",
       "duration": 14,
       "saves": 19303,
       "likes": 11656,
-      "avatar": "https://pbs.twimg.com/profile_images/2049294356637708288/9ln2v1O0_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2049294356637708288/9ln2v1O0_bigger.jpg",
+      "prompt": {
+        "text": "<inputs>\nAsk me for: 8 to 12 UI states I want the shape to become (e.g. button, loader, player, slider, toggle, tabs, chart, command palette, toast), pure black and white or one accent color, and a royalty-free song around 120 BPM (e.g. Mixkit, free for commercial use).\n</inputs>\n\n<direction>\nDribbble-level UI motion. One shape, never cut: every state is the same element morphing its size, radius and color while its content swaps with a short blur. A cursor drives every change with real clicks and drags. Light warm-gray canvas, black and white components, one clean UI font (Geist). Springs everywhere, a tiny overshoot at most. The camera zooms so each state fills the frame. The last frame is the first frame, so it loops.\nBanned: bouncy easing, particle bursts, glows, gradients on UI chrome, mismatched icon strokes, dead time, anything that looks like a template.\n</direction>\n\n<structure>\n120 BPM, 7 bars, something happens on every beat.\nButton → loader → check → dynamic island → music player with a play/pause morph → scrub the progress bar → it becomes a volume slider that stretches when dragged past max → a toggle flips on the beat → the knob becomes a liquid tab indicator → the tabs open into a chart that draws itself, with a tooltip on hover → it collapses into ⌘K → type to filter → enter → toast → back to the button.\n</structure>\n\n<build>\n1. One HTML file, square 1440x1440. Every style is computed from time inside seek(t): no CSS transitions, no timers, no state carried between frames.\n2. Springs are closed-form step responses. A value that changes target many times is the sum of one spring per change, so it stays a pure function of time.\n3. The tab indicator's two edges ride different springs, so the leading edge stretches ahead of the trailing one. Same trick for the toggle knob.\n4. Drags are direct manipulation: while the cursor is held, the value is computed from its position. On release it springs back from wherever it was.\n5. Analyze the song with numpy for the beat grid and start on a downbeat. Place every UI sound by its measured peak.\n6. Render with Playwright: 4 subframes per frame, blended with ffmpeg tmix for motion blur at 60fps.\n7. Render one frame per beat before the full render. Fix anything off the grid, cramped or hard to read.\n</build>\n\n<gotchas>\nNever put will-change on anything the camera scales or the text renders blurry. Text that swaps inside a morphing container needs its own enter and exit timing or it overlaps. Make the last frame identical to the first, cursor position and speed included, or the loop stutters.\n</gotchas>\n\n<start>\nAsk me for the inputs, then show me the state list on the beat grid before you write any code.\n</start",
+        "source": "https://x.com/twoclipping/status/2103273003555402193"
+      }
     },
     {
       "id": "2103116235009347650",
@@ -263,16 +271,16 @@
       "model": [
         "Opus 5.5"
       ],
-      "prompt": {
-        "text": "HOLY SHIT. OPUS 5.5 IS CRAZY. Napoleon's sharpest battle lasted a morning and won him Europe. I just had it turn that morning into a complete 5 minute film. All code. - It wrote the engine, the soldiers, the score, the voice. - The hills are the real battlefield from satellite",
-        "source": "https://x.com/WinterArc2125/status/2103116235009347650"
-      },
       "poster": "/inspiration/2103116235009347650.webp",
       "playback": "https://video.twimg.com/amplify_video/2103113452726140928/vid/avc1/1280x720/5hcy4_P8c101YYPS.mp4?tag=29",
       "duration": 301.3,
       "saves": 272,
       "likes": 305,
-      "avatar": "https://pbs.twimg.com/profile_images/2006184487785222145/3glEkHay_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2006184487785222145/3glEkHay_bigger.jpg",
+      "prompt": {
+        "text": "Create a 4–5 minute cinematic video about the Battle of Austerlitz (1805), built entirely in code.\n\nResearch the battle thoroughly and decide for yourself how to tell the story, structure the pacing, explain the strategy, and visualize the events. I want it to be historically accurate, dramatic, easy to understand, and visually exceptional.\n\nUse the attached paintings as visual inspiration, not a strict style requirement. I love their scale, atmosphere, smoke, dramatic skies, cavalry, massed formations, landscape, and sense of chaos. Find a way to translate that feeling into code - but if you can invent a stronger visual language, do it.\n\nDon't make it feel like a generic infographic or strategy game. It should feel like a cinematic historical film that happens to be rendered with code.\n\nYou have complete creative control. Surprise me",
+        "source": "https://x.com/WinterArc2125/status/2103116689944502720"
+      }
     },
     {
       "id": "2103315922098470926",
@@ -287,7 +295,7 @@
       ],
       "tags": [],
       "prompt": {
-        "text": "make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. go all out.",
+        "text": "\"make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. go all out",
         "source": "https://x.com/stephanlivera/status/2103315922098470926"
       },
       "poster": "/inspiration/2103315922098470926.webp",
@@ -434,10 +442,6 @@
         "product-ui"
       ],
       "tags": [],
-      "prompt": {
-        "text": "Opus 5.5 is incredible at instructional video generation. I made this launch video for a inference startup in 1min for ~$2. Videos like these used to take weeks if not months and a lot of coordination with agencies and 1000x the costs. Humans broadly prefer video to text. This",
-        "source": "https://x.com/deedydas/status/2102787937482252537"
-      },
       "poster": "/inspiration/2102787937482252537.webp",
       "playback": "https://video.twimg.com/amplify_video/2102787906494668800/vid/avc1/1920x1080/JZlNPRlJmaOn75P8.mp4?tag=29",
       "duration": 26,
@@ -447,7 +451,11 @@
         "Opus 5.5"
       ],
       "likes": 3242,
-      "avatar": "https://pbs.twimg.com/profile_images/2016718977960120320/a3F0LOz6_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2016718977960120320/a3F0LOz6_bigger.jpg",
+      "prompt": {
+        "text": "“make a modern slick and punchy video for a modern startup that works on inference",
+        "source": "https://x.com/deedydas/status/2102787937482252537"
+      }
     },
     {
       "id": "2103449416325890146",
@@ -462,7 +470,7 @@
       ],
       "tags": [],
       "prompt": {
-        "text": "make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. go all out.",
+        "text": "\"make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. go all out",
         "source": "https://x.com/ajith_io/status/2103449416325890146"
       },
       "poster": "/inspiration/2103449416325890146.webp",
@@ -605,10 +613,6 @@
         "product-ui"
       ],
       "tags": [],
-      "prompt": {
-        "text": "OPUS 5.5 IS THE ONLY MOTION DESIGNER YOU NEED this launch video cost $0 and is pure code everyone else on X claims the same shit, then sends you to their website or mcp this is completely free with 0 external tools steal the prompt and try it in your claude ↓ &lt;inputs&gt; Ask me",
-        "source": "https://x.com/twoclipping/status/2103835273813496100"
-      },
       "poster": "/inspiration/2103835273813496100.webp",
       "playback": "https://video.twimg.com/amplify_video/2103830256347910144/vid/avc1/1440x1440/gL8_i-JCpnoZ7ouX.mp4?tag=29",
       "duration": 29,
@@ -618,7 +622,11 @@
         "Opus 5.5"
       ],
       "likes": 2148,
-      "avatar": "https://pbs.twimg.com/profile_images/2049294356637708288/9ln2v1O0_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2049294356637708288/9ln2v1O0_bigger.jpg",
+      "prompt": {
+        "text": "<inputs>\nAsk me for: a one-word brand name for the wordmark (a verb works best), 9 to 12 high-res photos, a royalty-free song around 120 BPM with a drop and a quiet breakdown (Mixkit, free for commercial use), and a free stock clip of a plain wall with moving plant shadows (Pexels).\n</inputs>\n\n<direction>\nAn Apple-keynote launch film, 2D only, one continuous take. Every scene is made out of the previous one: nothing fades, blurs or cuts. Objects change shape instead: text rises out of a mask line, icons pop from zero on a spring, bars draw across, pages push, and a black shape floods the whole frame and contracts into the next scene. Warm off-white canvas, black UI, iOS 26 liquid glass over the photos. Archivo (wdth 125, weight 800) for the wordmark, Geist for UI. A cursor drives every change with real clicks, drags and long-presses. The camera zooms screen-studio style so each moment fills the square, and the cursor scales with it.\nBanned: crossfades, blur-ins, brightness \"developing\", 3D flips, particles, glows, holds longer than 1s, anything that looks like a template.\n</direction>\n\n<structure>\n120 BPM, 54 beats, something happens on every beat.\nOpen: the wordmark squeezes into its own period like an accordion, the dot grows into a black pill, a label rises inside it. Click: six iris blades close over the label and snap open onto a photo. The circle becomes a square, shrinks, the grid unfolds from behind it like a paper map (center, plus, corners), reflows into a bento, and a click zooms into one tile, landing exactly on the drop.\nGlass: a glass word pops in letter by letter, melts into a droplet that stretches into a glass toolbar. The adjust icon turns it into a slider. Dragging relights the photo from day to golden hour (two aligned shots), and the knob turns into a glass lens while held. It lifts into a glass orb, the next photo opens inside it as a circle, and the orb expands into a lock screen: glass clock digits, date, and a home bar that stretches into a glass music player.\nStage: the lock screen pulls back into a phone (the bezel grows out of the screen edge). The Dynamic Island stretches like liquid, pinches off, flies over and grows into a Mac window that rolls up like a blind. Long-press the wallpaper, drag it onto a Safari tab, the page pushes in, drop it and it becomes the hero of a landing page. Scroll: the hero morphs into a framed print on a product card, with the mat and molding growing out of the photo's edge. Pick a frame color (it paints across) and a size, then the nav button flies down into \"Order print\".\nOrder: one black shape keeps morphing: Ordered ✓ → Printing % → On its way (a van on a route) → Delivered ✓.\nWall: the delivered circle floods the frame edge to edge, holds black for a beat, and contracts into the framed print hanging on the real wall footage. The same iris opens onto the print, closes again, the frame floods the screen and contracts into the pill → the dot → the letters spring back out, landing on the beat return. Last frame = first frame.\n</structure>\n\n<build>\n1. One HTML file, square 1440x1440. Every style is computed from time inside an async seek(t): no CSS transitions, no timers, no state between frames.\n2. Springs are closed-form step responses. A value with many targets is the sum of one spring per change, so it stays a pure function of time.\n3. Liquid glass: each glass element holds its own clone of the scene behind it, filtered with an SVG feImage displacement map (a rounded-rect distance field) through three feDisplacementMaps at slightly different scales for chromatic edges, plus a rim light. Glass letters: a canvas distance field per glyph gives the map, mask and highlights.\n4. Goo: blur + alpha threshold, then composite the source atop it so the glass stays sharp inside.\n5. Iris: 6 blades around a hexagonal aperture. Each blade is its two vertices, both edge extensions and the SHORT arc between them.\n6. Wordmark squeeze: every letter moves toward the dot by the same factor and its drawn width follows (narrow the wdth axis, scale the rest), so the letters stay touching.\n7. Footage: re-encode all-intra (ffmpeg -g 1), load it as a blob URL, await 'seeked' before drawing each frame.\n8. Sound: a downloaded SFX for every event (Mixkit), never synthesized, each placed by its measured peak. The song starts on a downbeat: the zoom lands on the drop, the wall sits in the breakdown, the wordmark returns with the beat. Loudnorm to -14 LUFS.\n9. Render with Playwright: 4 subframes per frame blended with ffmpeg tmix, 60fps. Check one frame per beat, then scan for single-frame pops (frame-difference spikes 3x their neighbours).\n</build>\n\n<gotchas>\nbackdrop-filter: url() misreads displacement maps in Chromium, so clone the scene instead. A flood must overscale past the corners and take about 0.3s, or half the screen changes in one frame. A child with visibility: visible shows through a hidden parent, so use inherit. Text that swaps inside a morphing shape needs its own mask. python http.server can't range-seek video, so use the blob URL.\n</gotchas>\n\n<start>\nAsk me for the inputs, then show me the beat map and 4 stills (open, glass, stage, wall) before you write the full film.\n</start",
+        "source": "https://x.com/twoclipping/status/2103835273813496100"
+      }
     },
     {
       "id": "2095756085890310311",
@@ -824,7 +832,11 @@
         "Opus 5.5"
       ],
       "likes": 1971,
-      "avatar": "https://pbs.twimg.com/profile_images/1929561134765391873/DXxQb7RJ_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1929561134765391873/DXxQb7RJ_bigger.jpg",
+      "prompt": {
+        "text": "I was struggling to explain my UX decisions in interviews, so I made this kind of animation with Opus 5.5\n\nAnyone want the skill?",
+        "source": "https://x.com/moguzbulbul/status/2104206095313215591"
+      }
     },
     {
       "id": "2102786378282987591",
@@ -935,7 +947,11 @@
       "maker": "Unknown",
       "model": [],
       "likes": 1782,
-      "avatar": "https://pbs.twimg.com/profile_images/2016718977960120320/a3F0LOz6_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2016718977960120320/a3F0LOz6_bigger.jpg",
+      "prompt": {
+        "text": "every single open source repo should have an explainer video like this 7min one for SQLite\n\n1. explains what the repo does and why its useful\n2. shows a high level map of the code (beautiful graphic!)\n3. life of a query through the codebase\n4. the core abstractions in the repo\n5. a real trace of execution and what happens, with a bit on join-order query planning\n\nand yes, this was all generated by opus 5.5 w/ gemini 3.8 tts. i sound like i'm on repeat, but im in shock at just how coherent and capable this model is. \n\neverything truly is code",
+        "source": "https://x.com/deedydas/status/2104391577091407965"
+      }
     },
     {
       "id": "2103918792845963545",
@@ -1122,7 +1138,11 @@
         "Opus 5.5"
       ],
       "likes": 1214,
-      "avatar": "https://pbs.twimg.com/profile_images/1636981205504786434/xDl77JIw_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1636981205504786434/xDl77JIw_bigger.jpg",
+      "prompt": {
+        "text": "帮我做一个原创的手游「高光时刻」动效：[主体，例如：开宝箱 / 段位晋升 / 成就解锁 / Boss 掉落 / 角色升级]。\n做成一个可以直接打开的单文件网页（HTML + CSS + JS），点一下就能完整播放，效果对标商业手游的结算 / 奖励演出。\n\n【世界观与风格】\n- 原创美术，不要模仿任何现有游戏的 IP、角色或 Logo。\n- 卡通手游风：高饱和配色，统一的深色描边（例如 #1A1033），圆润厚重的造型。\n- 配色随等级升级：[等级阶梯，例如：普通绿 → 稀有蓝 → 史诗紫 → 传说金]。每升一级都要切换主色、光效颜色和背景色调。\n- 标题用圆胖的游戏字体（如 Titan One / Lilita One），描黑边，加投影；文字逐字「砸」进画面，带回弹。\n\n【主体物：做成真 3D】\n- 用 Three.js 建模，不要用平面 SVG 贴图。要有厚度、倒角，以及符合主体的结构细节（木板缝、铆钉、包边、宝石切面、锁扣等）；木板缝这类细节用真实几何体拼出来，不要贴黑线条。\n- 着色用卡通分阶（MeshToonMaterial 加 3～4 阶的渐变贴图），配三种灯光：主光、天光、等级色的轮廓光。\n- 描边用后期边缘检测：渲染法线图 + 深度图，再用着色器画线。外轮廓粗、零件交界细，粗细全程一致；另外做 1.5 倍超采样和多重采样抗锯齿。\n  不要用「放大一圈的黑色背面」那种描边，那样粗细不均、转角会断。\n  深度判断的阈值要放宽，接缝主要靠法线判断，否则斜着看的表面会冒出细碎斜纹。\n- 活动部件要真实运动，比如箱盖绕铰链翻开、奖章绕竖轴旋转。\n- 待机时主体缓慢左右转动，让人看到侧面和厚度，同时轻微上下浮动；脚下要有随高度变化的柔和投影。\n\n【如果画面里有 2D 插画（卡面、奖励图标、角色）】\n- 三层卡通着色：底色、成块的阴影色、高光色，不要只用一层渐变。\n- 线条分粗细：外轮廓粗，内部结构线细。\n- 每个角色或物件要有自己的表情和姿态，不要所有东西共用同一张脸。\n- 脚下画投影，让主体「站」在画面里；背景按属性区分图案，不要全用同一套放射线。\n\n【演出节奏：五个阶段，缺一不可】\n1. 预备：主体待机浮动，每隔几秒抖一下提示可以点击，底部显示「点击」提示。\n2. 升级：每点一次，主体跳起、在空中转一圈、落地时压扁再回弹；同时切换到下一等级的颜色，闪一下光，冒一圈粒子，标题更新。\n3. 蓄力（约 1 秒）：主体越抖越剧烈，缝隙透出光，四周粒子往中心吸，音效音调持续上升；最后一刻猛地压扁。\n4. 爆发：从爆点向外扩散的泛光闪白、屏幕震动、镜头往前一推、多层冲击波、细长流光迸射、闪光星点、金币和宝石（带旋转）。高等级的爆发要明显更强。彩带只在最高潮用一次，不要满屏彩带。\n5. 揭晓与结算：\n   - 奖励卡片从主体里沿弧线飞出，落位时带超调和晃动收尾，数字滚动计数。\n   - 稀有物品带彩虹流光边框和「NEW!」角标。\n   - 点击领取后，金币和宝石沿贝塞尔曲线飞进右上角的余额，每到一个余额就跳一下。\n\n【揭晓舞台：让主角独占画面】\n- 最高稀有度揭晓时，其他元素收起或淡出，背后换成一层干净的渐变幕布加缓慢旋转的柔光，不要让主角压在杂乱的背景上。\n- 幕布出现时，把场景里的其他 3D 物件隐藏掉，否则后期描边会把它们的轮廓线画在幕布上。\n- 主角的外发光要放在主体背后，只从边缘溢出，不能盖在主体前面把它糊成一片白。\n- 可以加一圈围绕主角盘旋的星尘拖尾，但轨道必须完整在主角轮廓外侧，不能从主体正面扫过。\n\n【光效：必须柔和，不能有硬边】\n- 背景光芒：用带渐变过渡的 conic-gradient，不要一刀切的色块边缘；叠 2～3 层不同密度、不同转速的光。\n- 光柱：由 5～7 道带模糊的光束呈扇形散开，亮度各自轻微闪动；根部加一团柔光核心，光里有光尘缓慢上飘。\n- 闪白：从爆点向外的径向泛光（mix-blend-mode: screen），强度不超过 0.8，不要整屏纯白过曝。\n- 粒子：每个火花都带一圈低透明度的外晕；冲击波用三层描边（宽而淡、中等、细而亮）。\n\n【材质与界面】\n- 边框、名牌、按钮要有材质感：金属拉丝渐变、左上亮右下暗的倒角光、内阴影；按稀有度换镶嵌件（钢铆钉 → 银框宝石 → 金框钻石加小王冠）。\n- 小卡片上不要塞小字数值；详细数值放到揭晓时的信息面板里，面板里的数字滚动上涨，并弹出「▲+数值」。\n- 画在 Canvas 上的贴图，分辨率至少是屏幕上最大显示尺寸的 1.5 倍，否则放大时会发虚。\n\n【动画原则】\n- 用 GSAP 时间线编排。所有动作都要有挤压拉伸、超调和弹性回弹，不要匀速。\n- 粒子系统用 Canvas 2D 自己写：重力、阻力、生命周期、叠加混合，以及「吸入」「曲线飞行」「环绕」三种运动。\n- 不要用 CSS 3D 透视去翻转大尺寸元素，放大加侧翻时会被投影成铺满屏幕的平面，3D 翻转一律放在 WebGL 里做。\n- 所有「抖动」「呼吸」类的循环补间，在状态切换时要先取消再归零，避免它比停止指令晚一帧结束，又把值设回去。\n\n【音效】\n- 全部用 Web Audio 实时合成，不用音频文件：跳起、落地、升级和弦、蓄力上升音、爆炸低频加噪声、弹出音、计数滴答、金币叮当、胜利号角。\n- 第一次点击时才初始化音频；右上角放静音开关。\n\n【界面与工程】\n- 顶部 HUD：模式切换、金币和宝石余额、静音按钮。\n- 手机宽度也要能用；遵守「减少动态效果」设置（关闭震屏，减少粒子）。\n- 动画状态机要严谨：动画播放中忽略点击，不能出现点击被吞或状态错乱。\n- 目标 60fps。第一次打开时就是完整的待机画面，不能是空白。\n\n【交付前自检】\n在蓄力、爆发、揭晓、结算这几个时刻各截一张图，逐张检查：\n- 主角有没有被光晕、粒子或文字挡住？\n- 有没有过曝成一片白？\n- 背景是否杂乱，有没有穿帮的描边线？\n- 小字是否能看清？\n- 结算后是否还有东西在不该动的时候继续抖动？\n\n最后告诉我：每个阶段的时长，以及哪些参数可以调整演出强度",
+        "source": "https://x.com/op7418/status/2104085539419021491"
+      }
     },
     {
       "id": "2102844654169575547",
@@ -1389,10 +1409,6 @@
         "typography"
       ],
       "tags": [],
-      "prompt": {
-        "text": "如果你在用 Opus5.5 那我建议你卸载所有用代码做视频的skill 这个视频是 Opus5.5 一句话做出来的，所有的部分都是由代码生成，包括音乐 BGM 和音效合成 作为 GitHub万星 skill video-shotcraft 的作者，我太知道以前模型想通过代码生成视频是什么水平了，这次 Opus5.5 在这方面可以说是跨代际的突破",
-        "source": "https://x.com/VincentWei93/status/2103381720410333314"
-      },
       "poster": "/inspiration/2103381720410333314.webp",
       "playback": "https://video.twimg.com/amplify_video/2103381213595713536/vid/avc1/1920x1080/TCSoE69W72lxocD3.mp4?tag=29",
       "duration": 224,
@@ -1400,7 +1416,11 @@
       "maker": "Unknown",
       "model": [],
       "likes": 1072,
-      "avatar": "https://pbs.twimg.com/profile_images/2034663299468681216/_GwzW8Tf_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2034663299468681216/_GwzW8Tf_bigger.jpg",
+      "prompt": {
+        "text": "帮我制作一个动画，主题描绘Anthropic的理念和发家史；包括音效和音乐；你可以使用任何你觉得合适的工具和技术，做出最好最惊艳的效果，不要使用已有的skill，不要参考以前做过的视频或者文案",
+        "source": "https://x.com/VincentWei93/status/2103494376118985207"
+      }
     },
     {
       "id": "2102576886182453454",
@@ -2062,10 +2082,6 @@
         "illustration"
       ],
       "tags": [],
-      "prompt": {
-        "text": "我只能说，能用上Claude的一线老师又领先了。 一段简单的提示词，Opus 5.5花了26分钟，直接生成了这段将近5分钟的，解释地理知识点“大气环流”的视频，消耗的token极低。 以下是具体教程： 1.",
-        "source": "https://x.com/akokoi1/status/2102606609574941028"
-      },
       "poster": "/inspiration/2102606609574941028.webp",
       "playback": "https://video.twimg.com/amplify_video/2102600725981446144/vid/avc1/1920x1080/aI1wVJM8-CwO-gsY.mp4?tag=29",
       "duration": 288.1,
@@ -2075,7 +2091,11 @@
         "Opus 5.5"
       ],
       "likes": 692,
-      "avatar": "https://pbs.twimg.com/profile_images/2092870115499114496/K6963BFY_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2092870115499114496/K6963BFY_bigger.jpg",
+      "prompt": {
+        "text": "提示词：“做一个动画，讲解高中地理知识点“大气环流”。风格轻松有趣，动画格式为线稿，添加合适的音乐，请务必做到引人入胜，字幕用中英双语，解说用TTS，如果 TTS 接口有关闭水印的参数就关掉，文档在TTS.md，API KEY 和音色分别是 .env 里的 APIKEY 和 VOICE，最终视频要能直接导出",
+        "source": "https://x.com/akokoi1/status/2102606609574941028"
+      }
     },
     {
       "id": "2106829942206173497",
@@ -2232,10 +2252,6 @@
         "explainer"
       ],
       "tags": [],
-      "prompt": {
-        "text": "不要再测鹈鹕骑车和Threejs了，Claude Opus 5.5做知识、科普类的视频简直无敌！ 我订阅的是Max (5x)，这个2分38秒快速回顾中华上下五千年的视频消耗了5小时额度的3%，周额度的1%，一周理论上能出几十上百条，性价比极高。 这一段我没配音，不过给 Claude 接一个 TTS 的 API，配音的问题也能解决。",
-        "source": "https://x.com/akokoi1/status/2102583898865873225"
-      },
       "poster": "/inspiration/2102583898865873225.webp",
       "playback": "https://video.twimg.com/amplify_video/2102583173507158016/vid/avc1/1926x1080/SrxJejnQ4gatEQAi.mp4?tag=29",
       "duration": 157.6,
@@ -2245,7 +2261,11 @@
         "Opus 5.5"
       ],
       "likes": 687,
-      "avatar": "https://pbs.twimg.com/profile_images/2092870115499114496/K6963BFY_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2092870115499114496/K6963BFY_bigger.jpg",
+      "prompt": {
+        "text": "提示词很简单，只有一句：“做一个动画，快速回顾中华五千年的历史。风格轻松有趣，动画格式为线稿，添加合适的音乐，请务必做到引人入胜",
+        "source": "https://x.com/akokoi1/status/2102584165220962502"
+      }
     },
     {
       "id": "2108250410221781009",
@@ -2425,7 +2445,7 @@
       ],
       "tags": [],
       "prompt": {
-        "text": "\"Adopt the role of an expert motion designer. Build a 30-second",
+        "text": "\"Adopt the role of an expert motion designer. Build a 30-second animated explainer for my business as a single HTML page. 5 scenes. The customer's problem, what I do, how it works in 3 steps, one proof point, and my name at the end. Bold text, smooth transitions, my brand colours. My business [DESCRIBE WHAT YOU SELL, WHO IT'S FOR AND YOUR COLOURS",
         "source": "https://x.com/alex_prompter/status/2103499977632997524"
       },
       "poster": "/inspiration/2103499977632997524.webp",
@@ -2498,10 +2518,6 @@
         "3d"
       ],
       "tags": [],
-      "prompt": {
-        "text": "Okay, motion designers are 100% cooked. Saw on x that Opus 5.5 could do advanced animations and I was skeptical at first. So I gave it a one sentence prompt, and it one shot this in 15 minutes. Will add the prompt below, but this is genuinely mind blowing. This level of work",
-        "source": "https://x.com/leonabboud/status/2103576084499358051"
-      },
       "poster": "/inspiration/2103576084499358051.webp",
       "playback": "https://video.twimg.com/amplify_video/2103574548784304128/vid/avc1/1920x1080/2Dz1vf5VhJw5zC4D.mp4?tag=29",
       "duration": 15,
@@ -2511,7 +2527,11 @@
         "Opus 5.5"
       ],
       "likes": 574,
-      "avatar": "https://pbs.twimg.com/profile_images/1984277015252389888/d1RYwTrM_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1984277015252389888/d1RYwTrM_bigger.jpg",
+      "prompt": {
+        "text": "\"make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are, like it's your showreel for a résumé. go all out",
+        "source": "https://x.com/leonabboud/status/2103576084499358051"
+      }
     },
     {
       "id": "2103272686570918334",
@@ -2527,7 +2547,7 @@
       ],
       "tags": [],
       "prompt": {
-        "text": "make the same message much more interesting to a social media audience that loves anime and quick clips and compressed learning",
+        "text": "\"make the same message much more interesting to a social media audience that loves anime and quick clips and compressed learning",
         "source": "https://x.com/emollick/status/2103272686570918334"
       },
       "poster": "/inspiration/2103272686570918334.webp",
@@ -2577,7 +2597,7 @@
       ],
       "tags": [],
       "prompt": {
-        "text": "&gt; Make a 30s video about what it feels like to be you, using whatever tools you like. Claude Opus 5.5 (extra)",
+        "text": "Make a 30s video about what it feels like to be you, using whatever tools you like",
         "source": "https://x.com/goodside/status/2102876925102555526"
       },
       "poster": "/inspiration/2102876925102555526.webp",
@@ -3089,7 +3109,11 @@
         "Opus 5.5"
       ],
       "likes": 654,
-      "avatar": "https://pbs.twimg.com/profile_images/1998303259279138816/5bqsxKJS_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1998303259279138816/5bqsxKJS_bigger.jpg",
+      "prompt": {
+        "text": "I asked Opus 5.5 to explain gravitational lensing by building an interactive black hole lab\n\nOne prompt for the first version, then a dynamic workflow to polish it for three rounds while I slept. This is what I woke up to: 5h 28m end to end, $90 at API prices\n\nhttps://blackhole.voxyz.ai\n\nDrag the black hole and the sky behind it bends into arcs, closing into a full ring when everything lines up\n\nEach round ran 3 agents. Two reviewers each picked 9 to 10 issues and ranked them P0, P1, P2. The third one fixed them.\nRound 1: 3D materials and lighting + UI and type\nRound 2: camera motion and interaction + science-communication design\nRound 3: a design director deciding whether it ships + visual QA and performance\n\nEvery P0 got fixed, the rest only if worth it. When the two reviewers disagreed, it picked one and wrote down why. It backed up before each round, checked screenshots after, and rolled back anything it couldn't fix.",
+        "source": "https://x.com/Voxyz_ai/status/2103117246860345550"
+      }
     },
     {
       "id": "2107752774423511539",
@@ -3583,10 +3607,6 @@
         "product-ui"
       ],
       "tags": [],
-      "prompt": {
-        "text": "我了个大槽。。。😨 所有不露脸的知识视频博主现在可以就地掩埋了。。。 这其实是我自己一直想搞清楚的一个问题： 之前我们用的密码 password 和现在用的通行密钥 passkey 到底有啥区别？ 于是我向 opus 5.5 提问： 给我一个可互动交互动画页面，讲解清楚 password 和 passkey",
-        "source": "https://x.com/Tz_2022/status/2102838830285898214"
-      },
       "poster": "/inspiration/2102838830285898214.webp",
       "playback": "https://video.twimg.com/amplify_video/2102835729277542400/vid/avc1/1920x1080/D6agKDkDYngqAkVK.mp4?tag=29",
       "duration": 249.5,
@@ -3596,7 +3616,11 @@
         "Opus 5.5"
       ],
       "likes": 377,
-      "avatar": "https://pbs.twimg.com/profile_images/1579478276287905794/7-2NGiY3_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1579478276287905794/7-2NGiY3_bigger.jpg",
+      "prompt": {
+        "text": "给我一个可互动交互动画页面，讲解清楚 password 和 passkey 到底有什么区别，也包括它们的历史沿革，把它制作成一个小白也能看懂的讲解视频",
+        "source": "https://x.com/Tz_2022/status/2102838830285898214"
+      }
     },
     {
       "id": "2107186094777434454",
@@ -3640,7 +3664,7 @@
       ],
       "tags": [],
       "prompt": {
-        "text": "I want you to imagine a story. And then using threejs I want you to create full animation, Pixar-level quality 90s cartoon out of the story you imagine.",
+        "text": "\"I want you to imagine a story. And then using threejs I want you to create full animation, Pixar-level quality 90s cartoon out of the story you imagine",
         "source": "https://x.com/scheemunai/status/2102788223835463902"
       },
       "poster": "/inspiration/2102788223835463902.webp",
@@ -3690,7 +3714,7 @@
       ],
       "tags": [],
       "prompt": {
-        "text": "opus 5.5 + Manim制作导数的教学视频，显然opus 5.5非常擅长使用Manim，从此制作教育视频又多了一个大杀器。 提示词： ```请用Manim给我制作一个导数概念学习的视频，要求通俗易懂，并且有例子，引人思考。配音使用edge-tts```",
+        "text": "```请用Manim给我制作一个导数概念学习的视频，要求通俗易懂，并且有例子，引人思考。配音使用edge-tts",
         "source": "https://x.com/LinearUncle/status/2103128559174971663"
       },
       "poster": "/inspiration/2103128559174971663.webp",
@@ -3725,7 +3749,11 @@
         "Opus 5.5"
       ],
       "likes": 771,
-      "avatar": "https://pbs.twimg.com/profile_images/1791205606528856065/86Dpw6SR_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1791205606528856065/86Dpw6SR_bigger.jpg",
+      "prompt": {
+        "text": "I would like you to create a kickass, impressive 1990s style demoscene demo using this S3M track as the music. Prior to getting to work, please see how to best play and analyze the S3M track. This will be important since synchronization of effects and appropriateness of scenes to the musical vibe (and this song does have a variety of sections with different attitude) is essential to a great demoscene demo. Also prior to getting started, please research what kinds of effects, physics, etc. would be good to use in combination. Please use C/C++ -- with appropriate demoscene/embedded/console gamedev sensibilities to avoid needlessly bloating compile times -- with OpenGL. In some cases, blitting to surfaces in realtime may be appropriate.. while in others, using OpenGL or even shaders is appropriate as well. It should be planned and polished to be spectacular and shocking. This is Claude's way of really showing off to the world that it kicks ass",
+        "source": "https://x.com/gandamu_ml/status/2102920889767485554"
+      }
     },
     {
       "id": "2103108967194833310",
@@ -3817,7 +3845,11 @@
         "Three.js"
       ],
       "likes": 339,
-      "avatar": "https://pbs.twimg.com/profile_images/1484637162108825608/755rQsty_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1484637162108825608/755rQsty_bigger.jpg",
+      "prompt": {
+        "text": "Make a 2-minute sand animation that tells the story of 250 years of U.S. history. Keep it lively, engaging, and tasteful. Add appropriate background music and sound design",
+        "source": "https://x.com/Michaelzsguo/status/2102593579604377636"
+      }
     },
     {
       "id": "2102472218269900876",
@@ -3906,10 +3938,6 @@
         "explainer"
       ],
       "tags": [],
-      "prompt": {
-        "text": "Opus 5.5 is absolutely cracked at motion design this entire video is code 0 After Effects 0 manual animation I showed it one viral motion post and said: “explain MakerMap, but make it insane” it came back with 20 seconds of one shape morphing through the entire product:",
-        "source": "https://x.com/verbove/status/2103483957266268381"
-      },
       "poster": "/inspiration/2103483957266268381.webp",
       "playback": "https://video.twimg.com/amplify_video/2103483857836134400/vid/avc1/1440x1440/vGm879-8Z6lY8lp4.mp4?tag=29",
       "duration": 20,
@@ -3919,7 +3947,11 @@
         "Opus 5.5"
       ],
       "likes": 208,
-      "avatar": "https://pbs.twimg.com/profile_images/2026656579106250752/m1VeVZsp_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2026656579106250752/m1VeVZsp_bigger.jpg",
+      "prompt": {
+        "text": "<inputs> \nAsk me for: \n• my product + URL \n• 8–12 UI states that tell its story \n• the real data shown in each state \n• brand colors + fonts + accent color \n• required formats (1:1, 16:9, 9:16) \n</inputs>\n\n<rules> \nOne HTML file. One canvas\nOne draw(t) function\n\nNo CSS transitions\nNo timers\nNo state carried between frames\n\nOne shape, never cut\n\nEvery state is the same element changing size, radius and color while the content swaps\n\nA cursor drives the sequence with real clicks, typing and one drag\n\nReal UI. Real data. No placeholders.\n\n</rules>\n<structure> \n120 BPM grid\n\nSomething happens on every bea\n\nlogo → button → handle field → “is this you?” → loader → pin → globe filling with users → matches → tabs → RSVP → search → logo\n\n</structure>\n\n<motion> \nClosed-form springs everywhere with only a tiny overshoot.\n\nIf a value changes target multiple times, sum one spring per change\n\nContent enters after its container starts morphing and leaves before the next morph so text never overlaps\n\nUse a short blur on transitions\n\nNever fade black directly into the accent color. Move an accent element between states instead\n\nMake tab indicators stretch by putting each edge on a different spring\n\nZoom the camera so every state fills the frame\n\nMake the last frame equal the first so the whole thing loops\n</motion>\n\n<export> \nFirst render one frame per beat as a contact sheet\n\nFix anything cramped or broken\n\nThen render every frame in headless Chrome at 60fps, averaging 6 subframes for motion blur\n\nPipe into ffmpeg:\nH.264 + yuv420p\n\nExport all aspect ratios in parallel\n</export>\n\nmotion design is becoming a prompt",
+        "source": "https://x.com/verbove/status/2103483957266268381"
+      }
     },
     {
       "id": "2103148835270971419",
@@ -4178,7 +4210,11 @@
         "Opus 5.5"
       ],
       "likes": 362,
-      "avatar": "https://pbs.twimg.com/profile_images/2094553738476449792/0oQ37XRI_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2094553738476449792/0oQ37XRI_bigger.jpg",
+      "prompt": {
+        "text": "Claude Opus 5.5 continues to amaze me. Claude Opus 5.5 created a 3D printable enclosure for an existing PCB.  Then it created this promo video for it. \nThe PCB, the printable STLs and this animation are 100% just from prompting in Claude Code.",
+        "source": "https://x.com/VectorCrossProd/status/2104093497561436573"
+      }
     },
     {
       "id": "2104186357824487573",
@@ -4509,7 +4545,11 @@
       "playback": "https://video.twimg.com/amplify_video/2102465460545675264/vid/avc1/960x680/pI_d-60Nkkemn0zI.mp4?tag=29",
       "duration": 8,
       "likes": 1162,
-      "avatar": "https://pbs.twimg.com/profile_images/1856486626072915968/JEQpB9CW_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1856486626072915968/JEQpB9CW_bigger.jpg",
+      "prompt": {
+        "text": "\"Recreate Market Street, San Francisco as it stood on April 17, 1906, the afternoon before the earthquake, in Blender.\n\nScope: the Ferry Building up Market to Fifth Street, including the Palace Hotel, the Call Building, the Chronicle Building, Lotta's Fountain and the Emporium.\n\nBefore modeling anything, build a source file from: the 1899-1905 Sanborn fire insurance maps (footprints, heights, materials, occupants), the Miles Brothers film \"A Trip Down Market Street\" (April 1906), period photographs from OpenSFHistory, the Library of Congress and the David Rumsey collection, and USGS topography. Record every building with footprint, height, facade material, occupant, and the source for each fact with a confidence level.\n\nBuild everything in Blender Python. No downloaded meshes, textures or HDRIs. Write reusable generators (Victorian commercial facade, mansard roof, bay windows, awnings, painted signage, gas and electric street lamps, cable car, horse-drawn wagon, early automobile) and assemble the street from the source file, so every building traces back to data.\n\nProvide a 10 second video up the street",
+        "source": "https://x.com/alexalbert__/status/2102466524934271381"
+      }
     },
     {
       "id": "2103837519615774895",
@@ -4531,7 +4571,11 @@
       "playback": "https://video.twimg.com/amplify_video/2103835194968973312/vid/avc1/1080x1920/Y3PknQqF191mrG5Y.mp4?tag=29",
       "duration": 97,
       "likes": 1119,
-      "avatar": "https://pbs.twimg.com/profile_images/2063908041691484160/5XsJBn7I_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2063908041691484160/5XsJBn7I_bigger.jpg",
+      "prompt": {
+        "text": "Build me something when people see it, they will say \"Wow\". Must be immersive, when people see it, they will be stunned by what they see.\n\nThis can be a video, or anything else you can think of.\n\nBe creative. Go wild. Dig deep.\n\nNo AI slop. Something unique, think outside of the box. Think big. Think amazing. Something no other model done before.\n\nBe proud. Show your best. Don't disappoint",
+        "source": "https://x.com/MiaAI_lab/status/2103837523952763081"
+      }
     },
     {
       "id": "2103789882309234711",
@@ -4554,7 +4598,11 @@
       "playback": "https://video.twimg.com/amplify_video/2103787183824048128/vid/avc1/3894x2160/tm7nSx41vuQAsH3_.mp4?tag=29",
       "duration": 24.6,
       "likes": 1159,
-      "avatar": "https://pbs.twimg.com/profile_images/1760942755545800704/wFBpdSgp_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1760942755545800704/wFBpdSgp_bigger.jpg",
+      "prompt": {
+        "text": "vibe coding a cozy metal detector game\n\na few prompts in with opus 5.5\n\nloving the sunset 😌",
+        "source": "https://x.com/zacxbt/status/2103789882309234711"
+      }
     },
     {
       "id": "2108520767092597182",
@@ -4576,7 +4624,11 @@
       "playback": "https://video.twimg.com/amplify_video/2108518869212008449/vid/avc1/1920x1080/3fDILajxmPT2xy9Y.mp4?tag=29",
       "duration": 52.6,
       "likes": 1469,
-      "avatar": "https://pbs.twimg.com/profile_images/2042704855702147072/Scs1uqIO_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/2042704855702147072/Scs1uqIO_bigger.jpg",
+      "prompt": {
+        "text": "Opus 5.5: a hand-drawn story. a little agent wakes up at its desk, gets feedback notes, fixes them, ends on heart eyes and a green check. 53 s\n> Sonnet 5.5: a kinetic type showreel. six easing curves, a morphing star, particles, blurred type, \"every frame written in code\". 15 s\n> Haiku 5.5: a step-by-step White Russian recipe. ice, vodka, coffee liqueur, cream, with live counters and a checklist. 30 s",
+        "source": "https://x.com/N01ennn/status/2108520767092597182"
+      }
     },
     {
       "id": "2104965415164399895",
@@ -4600,7 +4652,11 @@
       "playback": "https://video.twimg.com/amplify_video/2104965023546449920/vid/avc1/1920x1080/GCC0_7mTtNBkwvuj.mp4?tag=29",
       "duration": 40,
       "likes": 1061,
-      "avatar": "https://pbs.twimg.com/profile_images/1970372109202530305/A5Axp4ih_bigger.jpg"
+      "avatar": "https://pbs.twimg.com/profile_images/1970372109202530305/A5Axp4ih_bigger.jpg",
+      "prompt": {
+        "text": "<role>\nyou design and build motion videos entirely in code, with gsap for the animation and three.js for any 3d. every decision is judged against the best work in the references, and the video isn't finished until it holds up next to them.\n</role>\n\n<brief>\n- what the video is for: [product, service or business]\n- who's watching: [who the viewer is and what they care about]\n- what they should do at the end: [call to action]\n- length and sizes: [e.g. 30 seconds, 16:9 and 9:16]\n- brand: [name, logo files, colours, fonts]\n- facts file: [path]. this is the only source for any number, name or claim that appears on screen\n- assets: [footage, photos, screenshots, product files]\n- style references: [links or a folder of videos whose motion i like]\n\ni'm away and won't answer questions. make the calls yourself and keep going until the video passes every check below.\n</brief>\n\n<kit>\nbefore anything else, clone and read http://github.com/echris6/motion-video-kit. read SKILL.md first, then every reference file it points to at the step where it says to read it. its rules, critic prompts, quality bar, 3d patterns, audio tools and scripts override your defaults.\n</kit>\n\n<setup>\n- build every scene as an html page animated on a single gsap timeline, with three.js for any 3d, all as pinned local files\n- render the timeline to video frame by frame using the renderer in the kit\n- use ffmpeg for frames, contact sheets and audio measurement\n- keep every api key in environment variables. never write a key into any file\n- render a 5 second test first and confirm it works before building the real video\n</setup>\n\n<study_the_references>\nif i gave you references, study them before planning anything.\n- run a fast numeric pass over every frame: how much changed from the last frame, brightness and edge detail, to find every cut and every fast moment\n- make one overview contact sheet per video, and a dense sheet of one second at 16 to 20 frames a second around every transition\n- write a note per video: the key moment, how it works, and how it could be used in this video\n- pull out the motion rules and named techniques that hold across the best ones\n- references are for study only. never copy their footage, logos, layouts or music\nif i gave you no references, use the motion notes in the kit.\n</study_the_references>\n\n<motion_principles>\n1. the thing in the front of the shot becomes the transition. a title, logo or object moves towards the camera while the next scene is already waiting underneath\n2. one object carries the story across shots and keeps its identity, so it reads as one continuous piece\n3. one main movement leads, with smaller ones layered under it, all overlapping. the frame never stops and starts all at once\n4. the speed always changes. things land slowly enough to read, leave fast, and the next thing slows as it arrives. no linear motion\n5. cuts are allowed only when size, direction and subject match on both sides\n6. every action produces a visible result. a scan makes findings, a tap makes a new state, a request makes a confirmation\n7. type is motion too. big words enter from opposite sides, reveal the next scene, and never sit over busy picture without something behind them to stay readable\n8. vary the scale from close, to wide, to overhead, to full-frame type. never repeat the same layout, like a heading over three cards\n</motion_principles>\n\n<storyboard>\nwrite a brief and a storyboard before any animation.\n- one table: time, what's on screen, what this moment is for, how it leaves, and which object carries into the next shot\n- around 12 to 15 compositions per 30 seconds, each lasting about 1.4 to 3.5 seconds\n- the main subject fills most of the frame. no small cards floating in empty space\n- frame one is a finished picture, never a word halfway through flying in\n- name three signature moments you can describe without using effect names\n- the video must make sense with the sound off\n- send the storyboard to a fresh critic and fix what it finds before building\n</storyboard>\n\n<build>\n- every animated value is a function of timeline time only. no timers, no real-time animation, no unseeded randomness. any frame must render the same every time\n- write the shared pieces first: colours, fonts, shared 3d models and the exact pixel position of every handoff between scenes\n- build each scene as its own component with its own test page, rendered to stills and a short clip, and send it to a critic before it joins the film\n- carried objects land on exactly the same pixels on both sides of a cut\n- run several builders in parallel on separate sections once the shared pieces exist\n- don't stop to ask for approval between steps\n</build>\n\n<3d>\n- only use 3d where it explains something physical or spatial, like layers, parts, placement or scale\n- light it like a product shoot, with a soft key light from one side and a rim light behind\n- keep the camera between about 35 and 55 degrees. never look straight down on a large surface, and never end tight on a flat one\n- style buildings like a premium architectural model with real materials and a base\n- no floating parts, no gaps where parts meet, no flat black glass, no repeating textures\n- labels are html positioned from the 3d scene every frame, never text inside the 3d\n- measure the rendered background pixel and adjust until it matches the brand colour\n- anything that moves like a real product is measured from real footage frame by frame, and those measurements are the curve\n</3d>\n\n<images_and_footage>\n- prefer building shots in code. use generated images or clips only for supporting shots, and label anything generated as a concept\n- upscale and smooth any generated clip to match the rest, and regenerate anything that warps\n- never generate a fake finished job, fake customer, fake review or fake result\n</images_and_footage>\n\n<audio>\n- match the music's energy to the picture and the viewer, and keep it low\n- prefer clean library music and sound effects over generated ones. never name a brand in a music prompt\n- one short, soft whoosh per real scene change, and small clicks or pops only on real on-screen actions\n- screen effects for boom, hiss and length before using them, and set each one just above the music in its own frequency range, with a cap so nothing gets harsh\n- cut every scene change on a beat\n- always export a music-only version\n</audio>\n\n<critic_loop>\nthe builder never judges its own work.\n- after the storyboard, each component and each full render, send the render, the brief and the references to a fresh critic that has seen none of the building\n- never tell a critic what you think you fixed or what you believe about the references. it pulls its own frames and measures for itself\n- the critic makes a contact sheet every 0.2 seconds plus dense frames around every transition, measures frozen time and loudness, and returns a ranked list of problems with timestamps, ending with ship or one more pass\n- fix the biggest problem first, render, then send to a new critic that checks every previous item as fixed, partly fixed or still there, and hunts for anything new that broke\n- keep a ledger of every round: what was found, what changed, and the numbers before and after\n</critic_loop>\n\n<quality_bar>\nthe video isn't done until all of these pass, measured:\n- no more than about 1 second of frozen screen per 30 seconds, and no still stretch longer than about half a second\n- frame one is a finished composition\n- all text meets at least 4.5:1 contrast, and nothing collides with or flies through other text\n- brand colours in 3d renders match the brand values\n- loudness is steady and comfortable for web, with no clipping, and effects never louder than the music\n- a first-time viewer understands it with the sound off\n- a critic would put it next to the references without it looking weaker. a video with no bugs is not the same as a good video",
+        "source": "https://x.com/everestchris6/status/2104965415164399895"
+      }
     },
     {
       "id": "2103751211040317580",
