@@ -9,6 +9,9 @@ case "$hooks_path" in
   /*) echo "! core.hooksPath is absolute ($hooks_path); it will not follow this worktree. Run: make install-hooks" >&2 ;;
 esac
 
+# git exports these to a hook; a test that makes a temp repo would otherwise commit to, configure and push this repo.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES GIT_PREFIX GIT_CONFIG_PARAMETERS
+
 # push-guard reads the refs git hands this hook on stdin and scans the whole pushed range for an
 # assistant attribution or a force-added ignored file. The site build check runs only when the range
 # touches something the site build reads.
