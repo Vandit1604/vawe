@@ -10,7 +10,7 @@ export const VAWE_TEXT = {
     avoid: ['Hero moves over 0.6 s. The softer start loses the punch that land has.', 'Exits. Use launch or leave.'],
   },
   settle: {
-    blurb: 'Eases at both ends, with long dead stops.',
+    blurb: 'Eases at both ends, with long dead stops: it starts and ends at rest. It is for 0.5 s or more, and for a camera only at 2 s or more. A camera under 2 s takes land.',
   },
   swap: {
     blurb: 'A swap: the value waits at each key and changes in the middle.',
@@ -98,7 +98,7 @@ export const CSS_TEXT = {
 };
 
 // The words that quote a computed number (the test of 5 moves, 2026-10-19); they replace VAWE_TEXT's fields of the same name.
-export const vaweWords = ({ firstFrame, REAL_FIRST_FRAME, lateStart, STATS, EXIT, sec, EXIT_EXAMPLE, span, BANDS, popPeakAt, popSettleFrames, FPS, SEND }) => ({
+export const vaweWords = ({ firstFrame, REAL_FIRST_FRAME, lateStart, STATS, EXIT, sec, EXIT_EXAMPLE, EXIT_FALLBACK, span, BANDS, popPeakAt, popSettleFrames, FPS, SEND }) => ({
   land: {
     use: ['Entrances of titles, cards and panels from 0.5 to 0.8 s. It is the default of enter().', 'A camera move under 2 s that must arrive, such as a pull-back: it settles in the first quarter.'],
     avoid: [`Staggered rows under 0.4 s: at 0.3 s the first frame jumps ${firstFrame('land', 0.3)}% of the way. Use land-soft (${firstFrame('landSoft', 0.3)}%).`, 'Exits and loops. It ends on a dead stop and starts at full speed, so it does not chain.'],
@@ -124,10 +124,10 @@ export const vaweWords = ({ firstFrame, REAL_FIRST_FRAME, lateStart, STATS, EXIT
     avoid: [`A plain exit. Exits run ${EXIT.exit_share_min} to ${EXIT.exit_share_max} of the entrance and accelerate: use launch.`, 'Entrances. It is built to finish, not to start.'],
   },
   launch: {
-    use: [`The default exit, ${EXIT.exit_share_min} to ${EXIT.exit_share_max} of the entrance (${sec(EXIT_EXAMPLE.exitMs / 1000)} s after a ${sec(EXIT_EXAMPLE.entranceS)} s one): opacity 1 to 0 while it moves out. leave() uses it.`, 'Wipes and clears that hand the frame to the next beat.'],
+    use: [`The default exit, ${EXIT.exit_share_min} to ${EXIT.exit_share_max} of the entrance (${sec(EXIT_EXAMPLE.exitMs / 1000)} s after a ${sec(EXIT_EXAMPLE.entranceS)} s one), or ${span(...EXIT_FALLBACK)} when the entrance length is unknown: opacity 1 to 0 while it moves out. leave() uses it.`, 'Wipes and clears that hand the frame to the next beat.'],
     avoid: ['Any move that has to land. It ends at speed.', 'A settle or a hand-off the page names: use leave.'],
   },
   pop: {
-    use: [`A call to action, a check mark, a notification: one small thing that must feel alive, in ${span(...BANDS.gravity)}.`, `The peak comes at ${Math.round(popPeakAt * 100)}% of the move: a 0.5 s pop leaves ${popSettleFrames(0.5)} frames of settle at ${FPS} fps. For a faster snap on a small item use the send spring (k ${SEND.k}, d ${SEND.d}).`],
+    use: [`A call to action, a check mark, a corner notification that slides in over more than 20 px: one small thing that must feel alive, in ${span(...BANDS.gravity)}.`, `The peak comes at ${Math.round(popPeakAt * 100)}% of the move: a 0.5 s pop leaves ${popSettleFrames(0.5)} frames of settle at ${FPS} fps. For a small item that moves 3 to 20 px (a bubble, a chip, a tip) use the send spring instead (k ${SEND.k}, d ${SEND.d}).`],
   },
 });

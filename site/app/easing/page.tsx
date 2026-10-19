@@ -126,6 +126,8 @@ function ProductUi() {
   );
 }
 
+const peakOf = (slug: string) => speedText(VAWE.find((e) => e.slug === slug)!);
+
 export default function EasingIndex() {
   return (
     <div className="shell">
@@ -150,6 +152,9 @@ export default function EasingIndex() {
           <section className="ez-sec" id="jobs" aria-labelledby="h-jobs">
             <h2 id="h-jobs">Pick by job</h2>
             <p>Find the job, take the ease and the duration. Durations come from the speed bands, the stagger and exit limits and the product UI numbers in <code>core/motion</code>.</p>
+            <p className="ez-note">
+              The house exit is <Link href="/easing/launch" prefetch={false}>launch</Link>: it speeds up as it leaves (peak {peakOf("launch")}). <Link href="/easing/leave" prefetch={false}>leave</Link> slows into its end (peak {peakOf("leave")}), for a settle or a hand-off the page names. <Link href="/easing/carry" prefetch={false}>carry</Link> is not an exit: it ends still moving fast (peak {peakOf("carry")}), so the next move takes over its speed.
+            </p>
             <div className="ez-scroll">
               <table className="ez-table ez-stack">
                 <thead>
