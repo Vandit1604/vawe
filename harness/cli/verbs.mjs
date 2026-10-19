@@ -18,6 +18,7 @@ import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs'
 import { readFindings } from '../lib/findings.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { refsDir, refsEmpty } from '../lib/refs.mjs';
+import { isClipDemo } from '../lib/clip-demo.mjs';
 import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
 import { critiqueProblem, critiqueCommand, judgeCommand } from '../lib/critique-gate.mjs';
 export { commitsBehind } from '../lib/stale-checkout.mjs';
@@ -46,6 +47,7 @@ const pageName = (page) => {
   return base === 'page' ? path.basename(path.dirname(path.resolve(page))) : base;
 };
 const devNext = (v, [page]) => {
+  if (isClipDemo(page)) return nextStep(path.resolve(page), ROOT).next;
   if (v.from != null || v.to != null) return `bin/vawe strip ${page} --at <the second you fixed> and Read it; when every named second is fixed: ${SAY.critique(pageName(page), page)}`;
   if (critiqueProblem(page, { root: ROOT })) return `before anything else: ${judgeCommand(page)} (its own session), or in a separate terminal ${critiqueCommand(page)}`;
   const state = nextStep(path.resolve(page), ROOT);
@@ -436,7 +438,7 @@ export const VERBS = [
   },
   {
     tier: 'maintainer',
-    name: 'moves', summary: 'render the stale prompts/moves/demo/<move>.html clips to prompts/moves/<move>.mp4 (640 px, 60 fps) in parallel; a clip is stale when its demo, demo.css or a core/ import changed',
+    name: 'moves', summary: 'render the stale prompts/moves/demo/<move>.html clips to prompts/moves/<move>.mp4 (1280 px, 60 fps) in parallel; a clip is stale when its demo, demo.css or a core/ import changed; a demo with a variants meta also renders <move>-<theme>.mp4',
     positional: [],
     flags: [
       { name: 'only', type: 'string', help: 'render one move by name, for example weight-morph, even when current' },

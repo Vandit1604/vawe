@@ -88,7 +88,7 @@ import { boardVerify } from '../lib/board-verify.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, sightedRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { barLint, boxMotion, overshootPct, timedArrivals } from '../lib/bar-lint.mjs';
-import { measureDraftShape, rangeLines } from '../lib/draft-range.mjs';
+import { measureDraftShape, overshootLine, rangeLines } from '../lib/draft-range.mjs';
 import { groundHueLines, GROUND_HUE } from '../lib/ground-hue.mjs';
 import { namedRef, refsDir, refGround } from '../lib/refs.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
@@ -1029,11 +1029,11 @@ export function pageAdvice(pagePath, { probe, motion }) {
   const directions = directionsLines(brief, dir).filter((l) => !(l.startsWith('attractor:') && isWaived(authoring, 'attractor', /^attractor: direction (\w+)/.exec(l)?.[1] ?? null)));
   return {
     text: textProblems(probe.samples, { ...probe, rules: rulesWith(readDecls(pagePath), RULES) }),
-    brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
+    brief: authoring._clip || isWaived(authoring, 'no-brief') ? null : briefLine(brief),
     lines: [...probeAdvice(pagePath, { probe, motion }), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...(isWaived(authoring, 'transitions') || boardFilled(brief ?? '') !== true ? [] : handoffAdvice(moveRows(brief)).flatMap((l) => [l, waiverHint('transitions')])), ...ideasAdvice(brief, authoring), ...moveDocLines(brief),
       ...beatLines(pagePath, probe.worlds, authoring),
-      ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
+      ...(authoring._clip || isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };
 }
 
@@ -1078,7 +1078,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const chosen = chosenSignature(pagePath);
   const measured = measureMotion(motionRecords(motion));
   const taste = draftTasteLines(hard);
-  const signature = { chosen, measured, line: signatureLine(chosen, measured) };
+  const signature = { chosen, measured, line: authoring._clip ? '' : signatureLine(chosen, measured) };
   return { red: [...(table ? table.rows.filter((r) => r.status === 'advice').map(redLine) : []), ...loose, ...firedLines(fired)], signature, fired, notes: { advice, taste, signature: signature.line, fired: firedLines(fired, fired.length), rows: table?.rows ?? [] }, rows: table?.rows ?? null, was: table?.was ?? null, sync: table?.sync ?? null };
 }
 
@@ -1101,12 +1101,13 @@ function groundHueAdvice(pagePath, shape) {
   return lines.length ? [...lines, waiverHint(GROUND_HUE)] : [];
 }
 
-/** The reference-range lines of a whole draft; [] when the page has under two worlds or the measure fails (advice must never stop a draft). */
+/** The reference-range lines of a whole draft; only the overshoot line when the page has under two worlds; [] when the measure fails (advice must never stop a draft). */
 async function rangeBlock(mp4, pagePath, r, fps, checks) {
   try {
     return await checks.time('range', async () => {
       const shape = measureDraftShape(mp4, r.probe?.worlds, fps);
-      return shape ? [...rangeLines({ ...shape.values, overshoot_pct: overshootPct(motionRecords(r.motion), r.probe?.speed?.arrivals) }), ...groundHueAdvice(pagePath, shape)] : [];
+      const overshoot = overshootPct(motionRecords(r.motion), r.probe?.speed?.arrivals);
+      return shape ? [...rangeLines({ ...shape.values, overshoot_pct: overshoot }), ...groundHueAdvice(pagePath, shape)] : overshootLine(overshoot);
     });
   } catch (e) { console.error(`  no reference range: ${e.message}`); return []; }
 }

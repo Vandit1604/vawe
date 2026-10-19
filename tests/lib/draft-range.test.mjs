@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { markOf, rangeLines, worldShots } from '../../harness/lib/draft-range.mjs';
+import { markOf, overshootLine, rangeLines, worldShots } from '../../harness/lib/draft-range.mjs';
 import { shotSpans } from '../../harness/lib/ref-measure/transition.mjs';
 import { rangeOf } from '../../harness/dev/bar-from-refs.mjs';
 
@@ -55,4 +55,10 @@ test('the committed range holds aggregates only', () => {
   assert.equal(Object.keys(out.metrics).length, 9);
   assert.match(out._source, /3 in-scope reference films \(9 cuts/);
   for (const m of Object.values(out.metrics)) assert.deepEqual(Object.keys(m), ['p10', 'median', 'p90', 'n']);
+});
+
+test('the overshoot line stands alone, marked outside the band, and is empty without a count', () => {
+  assert.match(overshootLine(33, range)[0], /^range: arrivals that overshoot 33%, reference p10\.\.p90 21\.\.41 \(median 30\)$/);
+  assert.match(overshootLine(10, range)[0], /<$/);
+  assert.deepEqual(overshootLine(null, range), []);
 });

@@ -45,6 +45,14 @@ export function rangeLines(values, range = RANGE) {
   ];
 }
 
+/** The overshoot row alone, for a page the shape measure skips (under two worlds, as a one-beat clip is); [] when the page has too few arrivals to count. Pure. */
+export function overshootLine(pct, range = RANGE) {
+  if (pct == null) return [];
+  const r = range.metrics.overshoot_pct;
+  const mark = markOf(pct, r);
+  return [`range: arrivals that overshoot ${num(pct)}%, reference p10..p90 ${num(r.p10)}..${num(r.p90)} (median ${num(r.median)})${mark ? `  ${mark}` : ''}`];
+}
+
 /**
  * Frame spans of the measured worlds, in start order; the shots the ref-measure code reads. A world that opens while the last
  * one still shows (the starter cuts a frame early) takes the shot from it: the last frame of a shot must be its own world. Pure.

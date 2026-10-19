@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { isClipDemo } from './clip-demo.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const STAMP_DIR = path.join(ROOT, '.vawe-data', 'motion-verified');
@@ -37,6 +38,6 @@ export function pageAuthoring(pagePath) {
     const html = fs.readFileSync(pagePath, 'utf8');
     const m = /<script[^>]*id=["']authoring["'][^>]*>([\s\S]*?)<\/script>/.exec(html);
     const worlds = [...html.matchAll(/data-world=["']([^"']+)["']/g)].map((w) => w[1]);
-    return { ...(m ? JSON.parse(m[1]) : { allow: [] }), _worlds: [...new Set(worlds)] };
+    return { ...(m ? JSON.parse(m[1]) : { allow: [] }), _worlds: [...new Set(worlds)], _clip: isClipDemo(pagePath) };
   } catch { return { allow: [] }; }
 }

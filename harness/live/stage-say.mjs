@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { verbRanSince } from '../lib/verb-log.mjs';
+import { isClipDemo } from '../lib/clip-demo.mjs';
 import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf, moveRows, briefLengthLine } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
 import { ideasFilled, IDEATE_ASK } from '../lib/ideas.mjs';
@@ -95,6 +96,10 @@ function stripsSince(root, name, sinceMs) {
 }
 
 export function nextStep(page, root = process.cwd()) {
+  if (isClipDemo(page)) {
+    const clip = path.basename(page, '.html');
+    return { name: clip, stage: 'clip', next: `bin/vawe moves --only ${clip}`, why: 'a page under prompts/moves/demo/ is a clip: it has no brief, and bin/vawe moves renders it' };
+  }
   const name = path.basename(path.dirname(page));
   const rel = path.relative(root, page);
   const dir = path.dirname(page);

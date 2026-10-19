@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { recordClips } from '../../harness/media/render-moves.mjs';
+import { recordClips, clipsOf, sourceHash, assertOwnAssets } from '../../harness/media/render-moves.mjs';
 import { ensureFonts, fontFilesIn } from '../../harness/lib/ensure-fonts.mjs';
 import { filmKeyOf } from '../../harness/lib/runlog.mjs';
 import { filmOfCall } from '../../harness/lib/verb-log.mjs';
@@ -53,4 +53,43 @@ test('a clip render holds a slot under the name wait takes: the clip name', () =
   assert.equal(filmKeyOf('prompts/moves/demo/iris-wipe.html'), 'iris-wipe');
   assert.equal(filmKeyOf('prompts/moves/iris-wipe.mp4'), 'iris-wipe');
   assert.equal(filmOfCall('moves', [], ['--only', 'iris-wipe']), 'iris-wipe');
+});
+
+const demoIn = (moves, name, html) => {
+  fs.mkdirSync(path.join(moves, 'demo'), { recursive: true });
+  fs.writeFileSync(path.join(moves, 'demo', 'demo.css'), 'body{}');
+  fs.writeFileSync(path.join(moves, 'demo', `${name}.html`), html);
+};
+
+test('clipsOf: the default clip, then one per theme in the variants meta', () => {
+  const moves = tmp();
+  demoIn(moves, 'plain', '<html data-theme="dark"><head></head>');
+  demoIn(moves, 'themed', '<html data-theme="dark"><head><meta name="variants" content="light"></head>');
+  assert.deepEqual(clipsOf('plain', moves), [{ id: 'plain', name: 'plain', theme: null }]);
+  assert.deepEqual(clipsOf('themed', moves), [
+    { id: 'themed', name: 'themed', theme: null },
+    { id: 'themed-light', name: 'themed', theme: 'light' },
+  ]);
+});
+
+test('sourceHash: swapped footage in the demo assets folder changes it, credits.json does not', () => {
+  const moves = tmp();
+  demoIn(moves, 'walk', '<video src="/prompts/moves/demo/assets/walk/a.source.mp4">');
+  const dir = path.join(moves, 'demo', 'assets', 'walk');
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'a.source.mp4'), 'one');
+  const before = sourceHash('walk', null, moves);
+  fs.writeFileSync(path.join(dir, 'credits.json'), '{}');
+  assert.equal(sourceHash('walk', null, moves), before);
+  fs.writeFileSync(path.join(dir, 'a.source.mp4'), 'two');
+  assert.notEqual(sourceHash('walk', null, moves), before);
+});
+
+test('assertOwnAssets: a missing footage file is named with the credits.json that says where to get it', () => {
+  const moves = tmp();
+  demoIn(moves, 'walk', '<video src="/prompts/moves/demo/assets/walk/a.source.mp4">');
+  assert.throws(() => assertOwnAssets('walk', moves), /assets\/walk\/a\.source\.mp4 is missing.*assets\/walk\/credits\.json/);
+  fs.mkdirSync(path.join(moves, 'demo', 'assets', 'walk'), { recursive: true });
+  fs.writeFileSync(path.join(moves, 'demo', 'assets', 'walk', 'a.source.mp4'), 'x');
+  assert.doesNotThrow(() => assertOwnAssets('walk', moves));
 });

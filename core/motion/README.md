@@ -130,6 +130,30 @@ Button press 100 ms down and 180 ms up, scale 1 to 0.96. Hover lift 150 to 200 m
 Checkmark draw 300 to 400 ms (`stroke-dashoffset`). Ripple 300 to 600 ms, alpha 0.3 to 0. Number tick 400 to 800 ms. Success pulse once, 300 to 600 ms, scale 1 to 1.05 to 1.
 Error shake 300 to 400 ms, `translateX` 6 to 10 px decaying. Skeleton shimmer about 1200 ms a loop. Cursor and zoom timing: `prompts/moves/cursor-click.md`, `prompts/moves/ui-focus-zoom.md`.
 
+### Product UI presets
+
+`ui.js` holds the numbers of a real product screen (a chat, a dashboard), re-exported by `presets.js` as `UI`. Milliseconds, because they feed Web Animations.
+Source: the everestchris component clips (ChatGPT, Vercel Analytics), 30 fps, read off frames, plus or minus 33 ms. Light and dark share one timeline.
+
+```js
+import { UI, EASE } from '../../core/motion/presets.js';
+```
+
+| name | value | measured |
+|---|---|---|
+| `UI.typing` | `charMs` 30, `spaceMs` 70 more after a space, `jitter` 25 percent (seed it with `rng`) | 20 to 27 characters a second with pauses at word gaps: 38 in 1.5 s, 35 in 1.3 s, 61 in 3 s |
+| `UI.stream` | `gapMs` 55 to 110 a chunk of 1 to 3 words, `fadeMs` 200, `tintMs` 500 | 15 to 25 words a second; a word fades in 0.2 to 0.3 s, tinted (green), and settles to ink in about 0.5 s |
+| `UI.send` | spring `k` 500, `d` 25 | a sent bubble overshoots 11 to 14 percent (x1.11 in 0.1 s); the spring gives 12 percent |
+| `UI.panel` | `fadeMs` 220, `rise` 0.8vh | a window fades in 0.10 to 0.23 s with at most 2 px of rise, no scale |
+| `UI.row` | `fadeMs` 300, `rise` 1vh, `staggerMs` 70 | a row or line arrives in 0.15 to 0.3 s; rows 70 to 100 ms apart (7 rows in 0.5 s) |
+| `UI.roll` | `outMs` 150, `inMs` 260, `rise` 0.8vh | a digit or label rolls in its own clipped slot, never half of two readings |
+| `UI.exit` | `ms` 300, `endGapMs` 100, `drift` -1.2vh | the whole window fades in 0.3 to 0.4 s to the empty ground; frame 0 is the same ground |
+| `UI.snap` | `overshoot` 0.09 to 0.2 | overshoot is a snap on small, fast arrivals (3 to 20 px); a large panel does not overshoot |
+
+The presets are for surfaces that animate (a chat, a menu, a chart). A terminal steps: `show` and `runDot` in `stage.js` print rows and toggle dots in whole frames, and only `UI.typing` and `UI.panel` apply.
+
+The demo helpers in `prompts/moves/demo/assets/stage.js` (`arrive`, `flipFrom`, `typeTimes`, `rollSwap`, `leave`, `show`, `runDot`) read these and nothing else.
+
 ## After Effects handles
 
 A segment is shaped by two handles, one per key. `influence` is how far along the segment the handle
@@ -165,6 +189,8 @@ Use `easing: EASE.land` on a plain `el.animate` for one segment. In per-frame co
 Every `EASE` name, the 30 classic eases and the CSS keywords have a page with the curve, the velocity,
 the `linear()` string and the handle data: <https://vawe.dev/easing>. `node scripts/site/easing.mjs`
 builds its data from this library.
+
+Which ease for which job is the table at the top of that page (`JOBS` in `scripts/site/easing.mjs`). Two choices the table makes that this README does not state elsewhere: a camera move under 2 s takes `land`, because `settle` and `glide` look dead for their first 14 to 20 per cent (a 1.6 s pull-back measured 0.43 s settled on `land`, 1.28 s on `settle`); a scan or wipe line travels on `settle` and `swap` is only for the value it flips (`swap`'s steep middle blurs a long travel).
 
 ## 1. CSS and WAAPI: a spring as an easing
 

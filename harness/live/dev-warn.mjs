@@ -12,6 +12,7 @@ import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { ideasFilled } from '../lib/ideas.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
 import { readRuns } from '../lib/runlog.mjs';
+import { isClipDemo } from '../lib/clip-demo.mjs';
 import { nextStep } from './stage-say.mjs';
 import { planStatusLines } from './plan-status.mjs';
 import { readPlan } from '../media/plan-read.mjs';
@@ -54,7 +55,7 @@ async function readPage(page) {
 }
 
 const [page] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-if (page && import.meta.url === `file://${process.argv[1]}`) {
+if (page && !isClipDemo(page) && import.meta.url === `file://${process.argv[1]}`) {
   const lines = planStatusLines(readPlanState(page, ROOT, await readPage(page)));
   if (lines.length) console.log(`${lines.join('\n')}\n`);
   process.exit(0);

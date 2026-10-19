@@ -6,6 +6,8 @@ import { handleCurve } from './motion.js';
 import { readSignature } from './signature.js';
 import LIMITS from './taste-limits.js';
 
+export { UI } from './ui.js';
+
 // taste/rules/speed-bands.md, seconds
 const BAND = LIMITS['speed-bands'];
 export const BANDS = {
