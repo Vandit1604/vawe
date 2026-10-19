@@ -56,12 +56,13 @@ const nextConfig = {
     const canonicalLink = (path) => ({ key: "Link", value: `<https://vawe.dev${path}>; rel="canonical"` });
     return [
       // The .md copies are alternate forms of the page; the Link header names the page as canonical.
-      { source: "/moves/:name([a-z0-9-]+).md", headers: [canonicalLink("/moves/:name")] },
+      { source: "/moves/:name([a-z0-9-]+).md", headers: [canonicalLink("/video-components/:name")] },
+      { source: "/video-components/:name([a-z0-9-]+).md", headers: [canonicalLink("/video-components/:name")] },
       { source: "/blog/:slug([a-z0-9-]+).md", headers: [canonicalLink("/blog/:slug")] },
       { source: "/ai-agents.md", headers: [canonicalLink("/ai-agents")] },
       // Data files for agents: fetchable, not for the index.
       { source: "/:file(llms\\.txt|llms-full\\.txt)", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
-      { source: "/moves/index.json", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
+      { source: "/:dir(moves|video-components)/index.json", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
       { source: media, headers: [{ key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" }] },
       {
         source: media,
@@ -72,6 +73,9 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      // The files for agents keep their /moves path (clips, .md, index.json); the gallery moved to /video-components, so its twin URLs serve the same files.
+      { source: "/video-components/index.json", destination: "/moves/index.json" },
+      { source: "/video-components/:name([a-z0-9-]+).md", destination: "/moves/:name.md" },
       // the docs pages (fumadocs already routes these at /docs in its own app)
       { source: "/blog/:slug([a-z0-9-]+).md", destination: "/blog-md/:slug" },
       { source: "/docs", destination: `${DOCS_ORIGIN}/docs` },

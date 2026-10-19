@@ -61,7 +61,7 @@ export function Footer({ note, bookend = false, active }: { note?: string; booke
           <p className="foot-cta">Write the page.</p>
           <div className="foot-act">
             <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
-            <a className="btn btn-ghost" href="/moves">See the moves</a>
+            <a className="btn btn-ghost" href="/video-components">See the video components</a>
           </div>
         </div>
       )}

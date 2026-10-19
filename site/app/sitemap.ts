@@ -28,7 +28,7 @@ export const revalidate = 3600;
 function entries(): Entry[] {
   return [
     ...[...pages.routes, ...pages.docs].map((r) => ({ path: r.path, lastmod: r.path === "/blog" ? latestDate() : dates[r.path] })),
-    ...MOVES.map((m) => ({ path: `/moves/${m.name}`, lastmod: m.modified })),
+    ...MOVES.map((m) => ({ path: `/video-components/${m.name}`, lastmod: m.modified })),
     ...EASES.map((e) => ({ path: `/easing/${e.slug}`, lastmod: dates["/easing"] })),
     ...allPosts().map((p) => ({ path: `/blog/${p.slug}`, lastmod: p.updated })),
   ];

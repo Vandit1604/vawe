@@ -1,40 +1,22 @@
 # Before and after wipe
 
-**Use when** the claim is a change and the change should be a picture: the same card in two states,
-and a scan line carries the after state over the before. Both states share one layout, so only the
-numbers and the colour change; the before is grey, the after holds the one accent. Clip:
-[before-after-wipe.mp4](before-after-wipe.mp4). Demo: [demo/before-after-wipe.html](demo/before-after-wipe.html).
+**Use when** the claim is a change and the change should be a picture: the same dashboard in two states, and a scan line carries the after over the before. A copy of the real Vercel Web Analytics screen (Geist, the triangle mark, the Visitors, Page Views and Bounce Rate cards, a blue bar chart) in a Chrome window. Every reading and every bar changes the moment the line is over it, so no glyph is ever half of two numbers. Clip:
+[before-after-wipe.mp4](before-after-wipe.mp4) (5 s, light; `before-after-wipe-dark.mp4` is the dark theme). Demo: [demo/before-after-wipe.html](demo/before-after-wipe.html).
 
-```html
-<div class="card">
-  <div class="top">...service, metric, range: shared, never wiped...</div>
-  <div class="stage">
-    <div class="state before"><span class="tag">Before v4.2</span>...812 ms, 2.4%, 1.2k rps, grey week...</div>
-    <div class="state after"><span class="tag">After v4.3</span>...96 ms, 0.1%, 4.8k rps, accent week, -88% p95...</div>
-    <div class="scan"><div class="grip"></div></div>   <!-- a 2 px accent hairline and a white pill grip with an accent ring -->
-  </div>
-</div>
-<script type="module">
+```js
+import { arrive, crossAt, rollSwap } from '../../prompts/moves/demo/assets/stage.js';
 import { EASE } from '../../core/motion/presets.js';
-const W = stage.getBoundingClientRect().width, at = 300, dur = 900;
-after.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
-scan.animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
-scan.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, delay: at - 60, easing: 'linear', fill: 'both' });
-scan.animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: EASE.launch, fill: 'both' });
-</script>
+const AT = 1550, MS = 700, W = card.offsetWidth;   // measure with offsetWidth: a transformed parent changes getBoundingClientRect
+scan.animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: MS, delay: AT, easing: EASE.settle, fill: 'both' });
+// each slot (a reading with both values stacked in one grid cell) swaps when the line crosses its centre
+slots.forEach(({ out, in: inn, f }, i) => rollSwap(out, inn, crossAt('settle', AT, MS, f), '0.8vh', EASE.land));
+// each bar grows from its before height to its after height at the same moment (fill: 'forwards' so the rise before it keeps its start)
+bars.forEach(({ el, f, r }) => el.animate([{ scale: `1 ${r}` }, { scale: '1 1' }], { duration: 380, delay: crossAt('settle', AT, MS, f), easing: EASE.land, fill: 'forwards' }));
+// the tooltip fades 0.12 s with no rise: arrive(tip, 2700, { ms: 120, from: '0px' })
 ```
 
-Sound: bloom at 1.00 s into the move, so its slow peak meets the scan line clearing the card at about 1.15 s (default gain).
+Sound: none in the clip. A cue for a film: whoosh at 1.55 s as the line starts, pluck at 2.30 s when the after state lands, tick at 3.00 s when the cursor stops on a bar. No bed.
 
-The clip and the line run the same curve over the same width, so the line is always on the edge of
-the after state. The curve is the iris curve: a soft start, a fast middle, a soft landing, so the
-eye has time to read the before and again the after. The line fades in just before it moves and
-leaves faster than it came; the exit keyframe has no `from`. Keep what did not change (the service,
-the metric, the range) in a header above the wipe, so the scan only crosses what changed. Label
-each state with a tag at the same corner: the tag flips from a grey "Before" to an accent "After"
-as the line passes it. Put the number the claim rests on (812 ms to 96 ms) at the same
-spot in both states, and keep a shared reference (the SLO line, the same axis and the same days) so the change is
-measured, not just stated. Two or three secondary numbers beside the big one make it read as a
-real dashboard; draw the week from a seeded `rng`, never a hand zigzag.
+`rollSwap` (in `demo/assets/stage.js`) rolls the old reading up and out in 0.15 s and the new one in from below in 0.26 s, after it, so two glyphs never share a spot; `crossAt` solves the second at which the eased line reaches a slot's centre. The line runs the iris curve (`EASE.settle`): a soft start, a fast middle, a soft landing. The before week builds first: seven bars rise 70 ms apart (0.32 s each) from 0.45 s on `EASE.land`, as a Vercel chart draws on load; the three readings are already in place, because Vercel does not count them up. The wipe takes 0.7 s (reference moves take 0.2 to 0.4 s; a wipe across a whole card needs the longer band). After it lands a cursor travels to a bar (0.65 s, `EASE.carry`), the bar turns the hot blue, a tip fades in 0.12 s at 2.7 s, and the cursor steps to the next bar at 3.5 s (the hold is alive through what the real chart does on hover). Keep what did not change (breadcrumb, tabs, filters, days) outside the swap. The clip is a real-product copy (`prompts/skill-combos.md`, "Real product"): a Chrome window 74 percent of the frame width on the flat ground, readings 4.6 percent of the frame height, labels 1.4 to 1.8 percent. Nothing overshoots, as in the product, so the printed overshoot share is 0 percent and is waived as "real surface: Vercel does not overshoot"; the scan line and the reading swap are the move itself, a creative device the clip was asked for. The window leaves in 0.3 s at 4.6 s (`leave()`) and the camera stays still.
 
-Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
+Looks (ground, window chrome) live in `demo/demo.css` (`data-look="product"`); the Vercel colours are tokens in the demo.

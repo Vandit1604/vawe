@@ -111,7 +111,7 @@ The fix re-stamps the timestamps after the concat with `setpts=N/fps/TB` and use
 
 We have not measured the quality cost of the cap of 16. The minutes estimate comes from one measurement. The tests are `tests/media/render-blur-travel.test.mjs` and `tests/media/render-reuse.test.mjs`.
 
-The [smear stretch](/moves/smear-stretch) move is a fast motion to try this on. For the command-line options, see the [CLI docs](/docs/cli). The loop that spends these subframes is in [speed up Puppeteer screenshots](/blog/fast-drafts).
+The [smear stretch](/video-components/smear-stretch) video component is a fast motion to try this on. For the command-line options, see the [CLI docs](/docs/cli). The loop that spends these subframes is in [speed up Puppeteer screenshots](/blog/fast-drafts).
 
 ## FAQ
 

@@ -35,7 +35,7 @@ export default function LaunchVideo() {
             <Toc items={[
               { href: "#route", label: "The route" },
               { href: "#beats", label: "The beats" },
-              { href: "#moves", label: "The moves" },
+              { href: "#moves", label: "The video components" },
               { href: "#invent", label: "What not to invent" },
             ]} />
           </section>
@@ -59,7 +59,7 @@ export default function LaunchVideo() {
               <p>
                 The beat list comes first, each beat with a timestamp, one message and the real
                 capture that proves it. The hook is the promise, under 12 words on the first frame.
-                Then one move per beat:
+                Then one video component per beat:
               </p>
               <ol className="xp-list">
                 <li><span>The hook word becomes the product.</span></li>
@@ -75,8 +75,8 @@ export default function LaunchVideo() {
           </section>
 
           <section className="ifilms" id="moves">
-            <h2>The moves a launch film is built from.</h2>
-            <p>A click doing its job, a zoom to one part of the UI, a number proved, the product handed to the brand. Open a move for its snippet and notes.</p>
+            <h2>The video components a launch film is built from.</h2>
+            <p>A click doing its job, a zoom to one part of the UI, a number proved, the product handed to the brand. Open a video component for its snippet and notes.</p>
             <MoveClips names={["cursor-click", "ui-focus-zoom", "count-up", "ui-strip-away"]} />
           </section>
 
@@ -99,7 +99,7 @@ export default function LaunchVideo() {
             lead={<><code>bin/vawe new</code> starts from the brand-launch template unless you name another: a starter page and a brief whose questions each carry a default.</>}
             primary={{ href: REPO_URL, label: "Start a launch film" }}
             related={[
-              { href: "/moves", label: "Every move, with its clip" },
+              { href: "/video-components", label: "Every video component, with its clip" },
               { href: "/ai-agents", label: "Let an agent write the film" },
             ]}
           />

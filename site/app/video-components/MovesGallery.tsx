@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Facet, MoveCard } from "../../lib/moves";
-import { clip } from "../../lib/clip";
+import { clip, type Theme } from "../../lib/clip";
 import { moveAlt } from "../../lib/move-words";
+import { GroupIcon, MiscSvg } from "./icons";
+import { ThemeToggle, useClipTheme } from "./ThemeToggle";
 
 // Enough to show the grid is alive; each playing clip holds a decoder, and phones drop frames past this.
 const MAX_PLAYING = 6;
 const PLAY_RATIO = 0.5;
-// The first row's posters are the largest paint on load, so they skip lazy loading.
+// The first row's posters are the largest paint on load, so they skip lazy loading. Cards are numbered in page order.
 const FIRST_ROW = 3;
 
 type Facets = { group: string[]; look: string[]; job: string[] };
@@ -29,6 +31,8 @@ function writeUrl(f: Filters) {
   const p = new URLSearchParams();
   if (f.q) p.set("q", f.q);
   for (const k of FACETS) if (f[k].length) p.set(k, f[k].join(","));
+  const theme = new URLSearchParams(window.location.search).get("theme");
+  if (theme) p.set("theme", theme);
   const qs = p.toString().replace(/%2C/g, ",");
   window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
 }
@@ -49,20 +53,22 @@ function matches(m: MoveCard, f: Filters, skip?: FacetKey) {
 
 const Card = memo(function Card({
   move,
-  groupLabel,
+  num,
   first,
   live,
   reduced,
+  theme,
   onToggle,
 }: {
   move: MoveCard;
-  groupLabel: string;
+  num: number;
   first: boolean;
   live: boolean;
   reduced: boolean;
+  theme: Theme | null;
   onToggle: (name: string) => void;
 }) {
-  const files = clip(move);
+  const files = clip(move, theme);
   return (
     <li className="mv-card panel" data-name={move.name}>
       <div className="mv-media">
@@ -81,6 +87,7 @@ const Card = memo(function Card({
         )}
         {live && move.clipHash ? (
           <video
+            key={files.mp4}
             muted
             loop
             playsInline
@@ -92,6 +99,17 @@ const Card = memo(function Card({
             <source src={files.mp4} type="video/mp4" />
           </video>
         ) : null}
+        <span className="mv-chip mv-chip-num" aria-hidden="true">{String(num).padStart(2, "0")}</span>
+        {move.duration ? (
+          <span className="mv-chip mv-chip-dur" aria-hidden="true">
+            <MiscSvg name="play" size={9} />
+            {move.duration} s
+          </span>
+        ) : null}
+        <p className="mv-use">{move.use}</p>
+        {move.clipHash ? (
+          <span className="mv-bar-t" aria-hidden="true" style={{ "--len": `${move.duration ?? 2}s` } as React.CSSProperties} />
+        ) : null}
         {reduced && move.clipHash ? (
           <button type="button" className="mv-play" aria-pressed={live} onClick={() => onToggle(move.name)}>
             {live ? "Stop" : "Play"}
@@ -100,62 +118,23 @@ const Card = memo(function Card({
         ) : null}
       </div>
       <div className="mv-cap">
-        <h2 className="mv-title">
-          <Link href={`/moves/${move.name}`} prefetch={false}>{move.title}</Link>
-        </h2>
-        <p className="mv-use">{move.use}</p>
-        <p className="meta mv-meta">
-          {groupLabel}, {move.look}
-        </p>
+        <GroupIcon id={move.group} size={14} />
+        <h3 className="mv-title">
+          <Link href={`/video-components/${move.name}`} prefetch={false}>{move.title}</Link>
+        </h3>
+        <p className="mv-use-touch">{move.use}</p>
       </div>
     </li>
   );
 });
 
-// The bento above the grid: the first move large, the next four around it. It hides under a filter or
-// a search, which means the reader is looking for something specific.
-function Featured({ moves, groupText, reduced }: { moves: MoveCard[]; groupText: Map<string, string>; reduced: boolean }) {
-  return (
-    <section className="mv-feat" aria-labelledby="mv-feat-h">
-      <h2 className="meta mv-feat-h" id="mv-feat-h">Start here</h2>
-      <ul className="mv-bento">
-        {moves.map((m, i) => {
-          const files = clip(m);
-          return (
-            <li key={m.name} className="mv-card panel" data-hero={i === 0 || undefined}>
-              <div className="mv-media">
-                <img src={i === 0 ? files.posterHd : files.poster} alt={moveAlt(m)} width={i === 0 ? 1280 : 640} height={i === 0 ? 720 : 360} decoding="async" fetchPriority={i === 0 ? "high" : "auto"} />
-                {reduced ? null : (
-                  <video muted loop playsInline autoPlay aria-hidden="true" onPlaying={(e) => e.currentTarget.setAttribute("data-on", "")}>
-                    {i === 0 ? null : <source src={files.webm} type="video/webm" />}
-                    <source src={files.mp4} type="video/mp4" />
-                  </video>
-                )}
-              </div>
-              <div className="mv-cap">
-                <h3 className="mv-title">
-                  <Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link>
-                </h3>
-                {i === 0 ? <p className="mv-use">{m.use}</p> : null}
-                <p className="meta mv-meta">{groupText.get(m.group ?? "") ?? ""}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
-
 export function MovesGallery({
   moves,
-  featured,
   groups,
   looks,
   jobs,
 }: {
   moves: MoveCard[];
-  featured: MoveCard[];
   groups: Facet[];
   looks: string[];
   jobs: Facet[];
@@ -164,10 +143,16 @@ export function MovesGallery({
   const [panelOpen, setPanelOpen] = useState(false);
   const [live, setLive] = useState<string[]>([]);
   const [reduced, setReduced] = useState(false);
-  const grid = useRef<HTMLUListElement>(null);
+  const [theme, setTheme] = useClipTheme();
+  const defaultTheme: Theme = moves.filter((m) => m.theme === "light").length * 2 > moves.length ? "light" : "dark";
+  const grid = useRef<HTMLDivElement>(null);
 
-  const groupText = useMemo(() => new Map(groups.map((g) => [g.id, g.label])), [groups]);
-  const shown = useMemo(() => moves.filter((m) => matches(m, filters)), [moves, filters]);
+  const numbers = useMemo(() => new Map(moves.map((m, i) => [m.name, i + 1])), [moves]);
+  const sections = useMemo(
+    () => groups.map((g) => ({ ...g, moves: moves.filter((m) => m.group === g.id && matches(m, filters)) })).filter((g) => g.moves.length),
+    [moves, groups, filters],
+  );
+  const total = sections.reduce((n, g) => n + g.moves.length, 0);
   const counts = useMemo(() => {
     const out = {} as Record<FacetKey, Map<string, number>>;
     for (const k of FACETS) {
@@ -206,12 +191,13 @@ export function MovesGallery({
   useEffect(() => {
     const root = grid.current;
     if (!root || reduced) return;
+    const cards = [...root.querySelectorAll<HTMLElement>("[data-name]")];
     const ratios = new Map<Element, number>();
     const pick = () => {
-      const names = [...root.children]
+      const names = cards
         .filter((el) => (ratios.get(el) ?? 0) >= PLAY_RATIO)
         .slice(0, MAX_PLAYING)
-        .map((el) => (el as HTMLElement).dataset.name as string);
+        .map((el) => el.dataset.name as string);
       setLive((prev) => (prev.length === names.length && prev.every((n, i) => n === names[i]) ? prev : names));
     };
     const io = new IntersectionObserver(
@@ -221,9 +207,9 @@ export function MovesGallery({
       },
       { threshold: [0, PLAY_RATIO, 1] },
     );
-    for (const el of root.children) io.observe(el);
+    for (const el of cards) io.observe(el);
     return () => io.disconnect();
-  }, [reduced, shown]);
+  }, [reduced, sections]);
 
   const toggle = useCallback(
     (name: string) =>
@@ -235,20 +221,21 @@ export function MovesGallery({
   const picked = FACETS.reduce((n, k) => n + filters[k].length, 0);
   const active = picked > 0 || filters.q !== "";
 
-  const options: { key: FacetKey; legend: string; items: Facet[]; fold?: boolean }[] = [
-    { key: "group", legend: "Job group", items: groups },
+  const options: { key: FacetKey; legend: string; items: Facet[] }[] = [
+    { key: "group", legend: "Category", items: groups },
     { key: "look", legend: "Look", items: looks.map((l) => ({ id: l, label: l })) },
-    { key: "job", legend: "Pick by job", items: jobs, fold: true },
+    { key: "job", legend: "Pick by job", items: jobs },
   ];
 
   return (
     <>
-      <div className="mv-top" role="search">
+      <div className="mv-bar" role="search">
         <label className="mv-find">
-          <span className="sr-only">Search moves by name or when line</span>
+          <span className="sr-only">Search components by name or when line</span>
+          <MiscSvg name="search" size={15} />
           <input
             type="search"
-            placeholder="Search name or when to use"
+            placeholder="Search"
             value={filters.q}
             onChange={(e) => update({ ...filters, q: e.target.value })}
           />
@@ -260,74 +247,89 @@ export function MovesGallery({
           aria-controls="mv-filters"
           onClick={() => setPanelOpen(!panelOpen)}
         >
+          <MiscSvg name="sliders" size={15} />
           Filters{picked ? ` (${picked})` : ""}
         </button>
         <p className="meta mv-count" role="status">
-          {shown.length} {shown.length === 1 ? "move" : "moves"}
+          {total}
+          <span className="sr-only"> {total === 1 ? "component" : "components"}</span>
         </p>
+        <ThemeToggle shown={theme ?? defaultTheme} onChange={setTheme} />
+        <nav className="mv-jump" aria-label="Categories">
+          {sections.map((g) => (
+            <a key={g.id} href={`#g-${g.id}`}>
+              <GroupIcon id={g.id} size={15} />
+              {g.label}
+              <span className="mv-n">{g.moves.length}</span>
+            </a>
+          ))}
+        </nav>
       </div>
 
-      {active || !featured.length ? null : <Featured moves={featured} groupText={groupText} reduced={reduced} />}
-      <div className="mv-layout">
-        <form className="mv-filters" id="mv-filters" data-open={panelOpen || undefined} onSubmit={(e) => e.preventDefault()}>
-          {options.map(({ key, legend, items, fold }) => {
-            const body = (
-              <ul>
-                {items.map((it) => {
-                  const n = counts[key].get(it.id) ?? 0;
-                  const on = filters[key].includes(it.id);
-                  return (
-                    <li key={it.id}>
-                      <label className={on || n ? "" : "is-zero"}>
-                        <input type="checkbox" checked={on} onChange={() => toggleValue(key, it.id)} />
-                        <span>{it.label}</span>
-                        <span className="mv-n">{n}</span>
-                      </label>
-                    </li>
-                  );
-                })}
+      <form className="mv-filters" id="mv-filters" data-open={panelOpen || undefined} onSubmit={(e) => e.preventDefault()}>
+        {options.map(({ key, legend, items }) => (
+          <fieldset key={key}>
+            <legend>{legend}</legend>
+            <ul>
+              {items.map((it) => {
+                const n = counts[key].get(it.id) ?? 0;
+                const on = filters[key].includes(it.id);
+                return (
+                  <li key={it.id}>
+                    <label className={on || n ? "" : "is-zero"}>
+                      <input type="checkbox" checked={on} onChange={() => toggleValue(key, it.id)} />
+                      <span>{it.label}</span>
+                      <span className="mv-n">{n}</span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </fieldset>
+        ))}
+        <button type="button" className="mv-clear" disabled={!active} onClick={() => update(EMPTY)}>
+          Clear filters
+        </button>
+      </form>
+
+      {total ? (
+        <div ref={grid}>
+          {sections.map((g) => (
+            <section key={g.id} className="mv-sec" id={`g-${g.id}`} aria-labelledby={`h-${g.id}`}>
+              <h2 id={`h-${g.id}`} className="mv-sec-h">
+                <span className="mv-sec-ico"><GroupIcon id={g.id} size={18} /></span>
+                {g.label}
+                <span className="meta">{g.moves.length}</span>
+                <span className="mv-rule" aria-hidden="true" />
+                <span className="meta mv-range" aria-hidden="true">
+                  {String(numbers.get(g.moves[0].name)).padStart(2, "0")}&ndash;{String(numbers.get(g.moves[g.moves.length - 1].name)).padStart(2, "0")}
+                </span>
+              </h2>
+              <ul className="mv-grid">
+                {g.moves.map((m) => (
+                  <Card
+                    key={m.name}
+                    move={m}
+                    num={numbers.get(m.name) ?? 0}
+                    first={(numbers.get(m.name) ?? 0) <= FIRST_ROW}
+                    live={liveSet.has(m.name)}
+                    reduced={reduced}
+                    theme={theme}
+                    onToggle={toggle}
+                  />
+                ))}
               </ul>
-            );
-            return fold ? (
-              <details key={key} open={filters[key].length > 0 || undefined}>
-                <summary>{legend}{filters[key].length ? ` (${filters[key].length})` : ""}</summary>
-                {body}
-              </details>
-            ) : (
-              <fieldset key={key}>
-                <legend>{legend}</legend>
-                {body}
-              </fieldset>
-            );
-          })}
-          <button type="button" className="mv-clear" disabled={!active} onClick={() => update(EMPTY)}>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <div className="mv-empty">
+          <p>No component matches these filters.</p>
+          <button type="button" className="btn btn-ghost" onClick={() => update(EMPTY)}>
             Clear filters
           </button>
-        </form>
-
-        {shown.length ? (
-          <ul className="mv-grid" ref={grid}>
-            {shown.map((m, i) => (
-              <Card
-                key={m.name}
-                move={m}
-                first={i < FIRST_ROW}
-                groupLabel={groupText.get(m.group ?? "") ?? ""}
-                live={liveSet.has(m.name)}
-                reduced={reduced}
-                onToggle={toggle}
-              />
-            ))}
-          </ul>
-        ) : (
-          <div className="mv-empty">
-            <p>No move matches these filters.</p>
-            <button type="button" className="btn btn-ghost" onClick={() => update(EMPTY)}>
-              Clear filters
-            </button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }

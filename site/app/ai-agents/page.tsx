@@ -119,8 +119,8 @@ export default function AiAgents() {
           </section>
 
           <section className="ifilms">
-            <h2>What an agent writes: moves to copy.</h2>
-            <p>Each move is a clip and a markdown file with the snippet. An agent copies one into the page.</p>
+            <h2>What an agent writes: video components to copy.</h2>
+            <p>Each video component is a clip and a markdown file with the snippet. An agent copies one into the page.</p>
             <MoveClips names={["agent-progress", "cursor-click", "text-scramble-decode", "counter-dive"]} />
           </section>
 
@@ -130,7 +130,7 @@ export default function AiAgents() {
             primary={{ href: "/determinism", label: "Read the mechanism" }}
             secondary={{ href: REPO_URL, label: "The source, on GitHub" }}
             related={[
-              { href: "/moves", label: "Moves to copy, each with its clip" },
+              { href: "/video-components", label: "Video components to copy, each with its clip" },
               { href: "/ai-agents.md", label: "This guide as Markdown" },
               { href: "/llms-full.txt", label: "llms-full.txt" },
             ]}

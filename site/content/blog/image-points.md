@@ -10,7 +10,7 @@ hero: /blog/image-points/hero.webp
 heroAlt: "Timeline. Photo parallax was removed on 2026-10-01. imagePoints was added on 2026-10-11. Both decisions follow one question: does the move depend on processing the image?"
 ---
 
-To turn an image into particles in three.js, give every pixel a weight. Draw points from those weights with a seeded random generator. Keep each point's colour, position and normal. The same photo then gives the same cloud on every render. Our `photo-particles` move does this with a public-domain Hubble mosaic of the Crab Nebula. It becomes 120,000 points that gather from a seeded scatter over 1.5 seconds, then hold and breathe for 1.5 seconds.
+To turn an image into particles in three.js, give every pixel a weight. Draw points from those weights with a seeded random generator. Keep each point's colour, position and normal. The same photo then gives the same cloud on every render. Our `photo-particles` video component does this with a public-domain Hubble mosaic of the Crab Nebula. It becomes 120,000 points that gather from a seeded scatter over 1.5 seconds, then hold and breathe for 1.5 seconds.
 
 The function is `imagePoints(image, options)` in `core/surfaces/image-points.js`. It has 144 lines.
 
@@ -19,9 +19,9 @@ The function is `imagePoints(image, options)` in `core/surfaces/image-points.js`
 | Test | Result |
 | --- | --- |
 | Clip size of `photo-particles`, 120,000 points, filmed through the WebGL lens (`prompts/moves/photo-particles.mp4`) | 1,342,076 bytes (about 1.3 MB), CRF 31, under a 2 MiB budget; the gallery copy is a separate encode of 2.48 MB |
-| Clip size of the removed photo parallax move | 29,964,958 bytes (about 30 MB) |
+| Clip size of the removed photo parallax video component | 29,964,958 bytes (about 30 MB) |
 | Unit tests for `imagePoints` (`tests/*/image-points.test.mjs`) | 10 of 10 pass |
-| Speed, 1,000,000 points from a 2048 by 1536 noise image, this machine | 1.16 s (the move doc says about 0.5 s) |
+| Speed, 1,000,000 points from a 2048 by 1536 noise image, this machine | 1.16 s (the video component doc says about 0.5 s) |
 
 ![Clip sizes. The removed photo parallax clip was 29.96 MB. The photo particles clip is 1.34 MB, under a 2 MB budget.](/blog/image-points/size.webp "Clip sizes against the 2 MB budget.")
 
@@ -78,15 +78,15 @@ console.log("same seed, same cloud:", a.positions.every((v, i) => v === b.positi
 
 We ran it and it printed `same seed, same cloud: true`. In a page, pass a loaded `<img>` or canvas instead of the `{ width, height, data }` object. The result has `positions`, `colors`, `luma` and `normals` as typed arrays, ready for a three.js `BufferGeometry`.
 
-We did not measure whether films made with the point cloud score higher. The move came from a direct request for detailed particle subjects, and we judged it by looking at the clip.
+We did not measure whether films made with the point cloud score higher. The video component came from a direct request for detailed particle subjects, and we judged it by looking at the clip.
 
-## Why a photo move was allowed after we deleted one
+## Why a photo video component was allowed after we deleted one
 
-On 2026-10-01 we removed the move `photo-parallax-2.5d`. Parallax on captured photos is not motion design. vawe animates designed things: type, shapes, UI, illustration and colour fields. A move that cuts a captured image into depth layers, fakes camera depth inside it, tracks it or rotoscopes it is a footage technique. It depends on the photo and fails on an illustration. Its clip was 29,964,958 bytes.
+On 2026-10-01 we removed the video component `photo-parallax-2.5d`. Parallax on captured photos is not motion design. vawe animates designed things: type, shapes, UI, illustration and colour fields. A video component that cuts a captured image into depth layers, fakes camera depth inside it, tracks it or rotoscopes it is a footage technique. It depends on the photo and fails on an illustration. Its clip was 29,964,958 bytes.
 
 We could have added an exception: "photos are allowed for particles". That is a second way to say one thing, and it leaves the next case unclear. We replaced the rule with a question: does the move depend on processing the image? Parallax depth cuts do. A card, a tile, a window or a carousel item that shows a photo whole does not. A particle form that uses the photo as a source of detail, and never shows it as footage, does not either. The moves README follows this question, and no agent prompt says "no photos".
 
-For a public example film that puts a three.js scene through the same lens, see the [moth photogram example](https://github.com/Vandit1604/vawe/tree/main/films/examples/moth-photogram). The page rules for images are in the [backgrounds and images docs](/docs/backgrounds-and-images). The move doc is `prompts/moves/photo-particles.md`. For the looks, curves and cuts around a move like this one, read [CSS animation library: 125 copyable motion moves](/blog/site-after-json).
+For a public example film that puts a three.js scene through the same lens, see the [moth photogram example](https://github.com/Vandit1604/vawe/tree/main/films/examples/moth-photogram). The page rules for images are in the [backgrounds and images docs](/docs/backgrounds-and-images). The video component doc is `prompts/moves/photo-particles.md`. For the looks, curves and cuts around a video component like this one, read [CSS animation library: 126 copyable video components](/blog/site-after-json).
 
 ## FAQ
 
@@ -97,7 +97,7 @@ Weight each pixel by brightness and edge strength. Draw points from those weight
 Use a seeded random generator, not `Math.random`. With the same seed and the same image, the same cloud comes out. We test this.
 
 **How many particles can I use?**
-Our move uses 120,000 points. Building 1,000,000 points from a 2048 by 1536 image took 1.16 s in our test on one machine.
+Our video component uses 120,000 points. Building 1,000,000 points from a 2048 by 1536 image took 1.16 s in our test on one machine.
 
 **Why did the clip need a size budget?**
 A dense point cloud encodes to a large file. We re-encode at a higher CRF until a clip fits 2 MB. This clip ended at CRF 31 and 1.3 MB.

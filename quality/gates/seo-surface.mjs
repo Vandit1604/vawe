@@ -206,7 +206,7 @@ const out = {};
 out.organization = m.organizationSchema();
 out.website = m.websiteSchema();
 out.softwareApplication = m.softwareApplicationSchema();
-out.breadcrumb = m.breadcrumbSchema([{ name: 'Moves', url: '/moves' }, { name: 'probe', url: '/moves/probe' }]);
+out.breadcrumb = m.breadcrumbSchema([{ name: 'Moves', url: '/video-components' }, { name: 'probe', url: '/video-components/probe' }]);
 process.stdout.write(JSON.stringify(out));
 `;
     fs.writeFileSync(runnerFile, runner);

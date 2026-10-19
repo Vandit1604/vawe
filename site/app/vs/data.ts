@@ -58,7 +58,7 @@ export const RIVALS: Rival[] = [
       "You want an agent to write the film in plain HTML, CSS and Web Animations, with no framework to learn.",
       "Your company has more than 3 employees and you want a licence with no size or per-render terms.",
       "You want one page to render to the same frames every time, with the clock, timers and Math.random controlled for you.",
-      `You want built-in motion blur, dither and a library of ${MOVES.length} moves with After Effects eases.`,
+      `You want built-in motion blur, dither and a library of ${MOVES.length} video components with After Effects eases.`,
     ],
     rows: [
       { feature: "What it is", them: "Framework to make videos with React", vawe: "Framework to make films from one HTML page" },
@@ -132,7 +132,7 @@ export const RIVALS: Rival[] = [
     choosevawe: [
       "You want ordinary web code to keep working: vawe replaces Date, timers and Math.random with seek-driven versions, where HyperFrames forbids them.",
       "You want timing from CSS keyframes, element.animate() or a seek(t) function, with no timing attributes in the markup.",
-      `You want built-in adaptive motion blur and a library of ${MOVES.length} moves with After Effects eases.`,
+      `You want built-in adaptive motion blur and a library of ${MOVES.length} video components with After Effects eases.`,
       "You want a film judged by a fresh session that did not write it.",
     ],
     rows: [
@@ -156,7 +156,7 @@ export const RIVALS: Rival[] = [
       },
       {
         q: "Which one has more templates and blocks?",
-        a: `HyperFrames. It ships a block catalog and a template gallery. vawe ships ${MOVES.length} moves and film templates in its prompts folder.`,
+        a: `HyperFrames. It ships a block catalog and a template gallery. vawe ships ${MOVES.length} video components and film templates in its prompts folder.`,
       },
       {
         q: "Does vawe have cloud rendering?",

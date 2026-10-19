@@ -1,8 +1,8 @@
 ---
 title: "HTML video aspect ratio: 16:9, 9:16 and 1:1"
 description: "Lay out one HTML page with --vw and --vh so the same file renders in 16:9, 9:16 and 1:1. The CSS, the flag, three stills."
-date: 2026-11-09
-updated: 2026-11-09
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "aspect ratio, responsive video, css, vertical video, html to video"
 keywords: "responsive video layout html, html video 9:16, vertical video from html, video aspect ratio css, 16:9 to 9:16"

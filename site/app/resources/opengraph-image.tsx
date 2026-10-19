@@ -8,7 +8,7 @@ export default function Image() {
     tag: "resources",
     title: "Resources for motion graphics by code",
     description:
-      "Easing curves, a library of motion moves, files for AI agents, guides and comparisons. Every link goes to a page or file that exists.",
+      "Easing curves, a library of video components, files for AI agents, guides and comparisons. Every link goes to a page or file that exists.",
     path: "/resources",
   });
 }

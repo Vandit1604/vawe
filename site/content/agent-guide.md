@@ -75,9 +75,9 @@ Skills in the repo: `vawe-brief` (request to brief), `vawe-page` (write the page
 - Land a sound cue with the move.
 - A rule broken on purpose is declared in the page, with a reason, in a `<script type="application/json" id="authoring">` block.
 
-## Moves to copy
+## Video components to copy
 
-Every proven move is one markdown file with the CSS and Web Animations snippet: index at https://vawe.dev/moves/index.json, each at https://vawe.dev/moves/<name>.md, listed in https://vawe.dev/llms.txt.
+Every proven video component is one markdown file with the CSS and Web Animations snippet: index at https://vawe.dev/moves/index.json, each at https://vawe.dev/moves/<name>.md, listed in https://vawe.dev/llms.txt.
 
 ## Limits to state honestly
 

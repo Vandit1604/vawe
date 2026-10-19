@@ -289,9 +289,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
   .mark{order:1}
   .ghbtn{order:2;margin-left:auto}
   .nav{order:3;width:100%;flex-wrap:wrap}
-  /* Five links on one line at 390: 8 px sides keep the row at about 320 px of the 358 the gutters leave. */
-  .nav{justify-content:space-between}
-  .nav a,.nav [aria-current="page"]{padding:0 var(--sp-2)}
+  /* Five links on one line at 390: 13 px type and 4 px sides measure 340 px of the 358 the gutters leave. */
+  .nav{justify-content:space-between;font-size:.8125rem}
+  .nav a,.nav [aria-current="page"]{padding:0 var(--sp-1)}
 }
 /* At 320 the five links need 4 px sides to fit the 288 px row (measured 278 px). */
 @media (max-width:360px){ .nav a,.nav [aria-current="page"]{padding:0 var(--sp-1)} }

@@ -1,8 +1,8 @@
 ---
 title: "Product launch video generator from a website URL"
 description: "Capture a site, read its palette and type, and build a launch film from the real UI. The steps, a 9 s example and the mistakes."
-date: 2026-10-26
-updated: 2026-10-26
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "product launch video, saas promo video, website to video, brand kit, vawe"
 keywords: "product launch video from website, saas promo video generator, create launch video for github project, website to video, launch video from url"
@@ -41,7 +41,7 @@ The template asks for the URL, the one-line promise, three to five moments worth
 
 ## Step 3: write the page and render a draft
 
-Copy the captures you need into `films/<name>/assets/`. Our example uses two: the hero section and the gallery of moves. The page has three scenes. The first pushes slowly into the real hero. The second shows the real gallery. The third is the wordmark in the kit colours.
+Copy the captures you need into `films/<name>/assets/`. Our example uses two: the hero section and the gallery of video components. The page has three scenes. The first pushes slowly into the real hero. The second shows the real gallery. The third is the wordmark in the kit colours.
 
 ```bash
 bin/vawe dev films/blogdemo/page.html

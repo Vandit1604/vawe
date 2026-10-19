@@ -18,7 +18,7 @@ import "./features.css";
 export const metadata = pageMetadata({
   title: "vawe features: deterministic HTML to video rendering",
   description:
-    "vawe features, in three groups: agents write a film in plain HTML and every command names the next step, a moves library and a fresh-session critique keep it from looking generated, and drafts render in seconds.",
+    "vawe features, in three groups: agents write a film in plain HTML and every command names the next step, a library of video components and a fresh-session critique keep it from looking generated, and drafts render in seconds.",
   path: "/features",
 });
 
@@ -220,15 +220,15 @@ export default function Features() {
           <Section
             id="taste"
             title="It looks made, not generated."
-            lead="Copy a proven move, let the renderer film it, and let a fresh session judge."
+            lead="Copy a proven video component, let the renderer film it, and let a fresh session judge."
             visual={<MoveClips names={["caret-typing", "bracket-callout", "iris-wipe", "camera-moves", "text-on-path", "letter-stagger"]} />}
           >
             <Feature
-              title={`${MOVES.length} moves and ${EASES.length} easing curves`}
+              title={`${MOVES.length} video components and ${EASES.length} easing curves`}
               proof={ease ? <Link href="/easing/land" className="panel ft-curve"><Thumb e={ease} /><span className="meta">{ease.name}: cubic-bezier({ease.bezier.params.join(", ")}), {ease.points} linear() points</span></Link> : null}
             >
-              The moves sit in {GROUPS.length} groups. Each is a clip and one markdown file with the snippet and its sound cue. Every curve
-              copies as CSS. 15 recipes chain moves into a film type. <a href="/moves">Browse the moves</a>, <a href="/easing">the curves</a>{" "}
+              The video components sit in {GROUPS.length} groups. Each is a clip and one markdown file with the snippet and its sound cue. Every curve
+              copies as CSS. 15 recipes chain video components into a film type. <a href="/video-components">Browse the video components</a>, <a href="/easing">the curves</a>{" "}
               and <a href="/docs/recipes">the recipes</a>.
             </Feature>
             <Feature title="Real motion blur and a lens" proof={<BlurDemo />}>

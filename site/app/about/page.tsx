@@ -105,7 +105,7 @@ export default function About() {
               <h2>What it is</h2>
               <p>
                 You write one <code>page.html</code>. The renderer seeks it frame by frame and encodes an MP4.
-                The library has {MOVES.length} motion moves, each a short clip and one markdown file to copy.
+                The library has {MOVES.length} video components, each a short clip and one markdown file to copy.
               </p>
             </div>
             <div className="isec-art">

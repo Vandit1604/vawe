@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // The copy buttons arrive in the generated markdown HTML (scripts/site/moves.mjs), so one delegated
 // listener serves every code block instead of the page shipping the markdown twice.
@@ -30,4 +30,23 @@ function flash(button: HTMLButtonElement, label: string) {
     button.textContent = "Copy";
     delete button.dataset.done;
   }, 1600);
+}
+
+export function CopyMarkdown({ href }: { href: string }) {
+  const [label, setLabel] = useState("Copy markdown");
+  const copy = async () => {
+    try {
+      const text = await fetch(href).then((r) => r.text());
+      await navigator.clipboard.writeText(text);
+      setLabel("Copied");
+    } catch {
+      setLabel("Open the .md and copy");
+    }
+    window.setTimeout(() => setLabel("Copy markdown"), 1600);
+  };
+  return (
+    <button type="button" className="mv-copy mvd-copy" onClick={copy}>
+      {label}
+    </button>
+  );
 }

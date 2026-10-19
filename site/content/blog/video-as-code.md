@@ -1,8 +1,8 @@
 ---
 title: "Video as code: what it is and how to start"
 description: "Video as code means a film is a text file that a program renders. Three approaches, one tiny example each, and when not to use it."
-date: 2026-11-03
-updated: 2026-11-03
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "video as code, programmatic video, ffmpeg, remotion, html to video"
 keywords: "video as code, video editing as code, declarative video, programmatic video generation, code to video"

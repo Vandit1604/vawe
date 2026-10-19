@@ -10,11 +10,11 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - The page contract: one `films/<name>/page.html`, `<meta name="duration" content="seconds">`, time is the seek (CSS keyframes, Web Animations or `window.seek(t)`), no timers or unseeded random, relative assets, `<audio>` tags for sound. Read AGENTS.md in the repo first.
 
 ## Site
-- [Home](https://vawe.dev/): Write a web page, get a film. Move clips rendered by vawe, how a page becomes a film, and questions.
+- [Home](https://vawe.dev/): Write a web page, get a film. Video component clips rendered by vawe, how a page becomes a film, and questions.
 - [features](https://vawe.dev/features): The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.
-- [moves](https://vawe.dev/moves): Proven motion moves, each a 1 to 2 s clip and one markdown file an agent copies. Every move file is listed under Moves below.
+- [video-components](https://vawe.dev/video-components): Proven motion video components, each a short clip and one markdown file an agent copies. Every video component file is listed under Video components below.
 - [inspiration](https://vawe.dev/inspiration): Motion videos made with Claude and other AI, from posts on X. Each one is listed under Inspiration below.
-- [resources](https://vawe.dev/resources): Every vawe resource in one list: easing curves, the moves library, the plain files for agents, the five agent skills, guides, comparisons and the project pages.
+- [resources](https://vawe.dev/resources): Every vawe resource in one list: easing curves, the video components library, the plain files for agents, the five agent skills, guides, comparisons and the project pages.
 - [about](https://vawe.dev/about): What vawe is, why a film is one HTML page, how it is built (Apache-2.0, public since 2026-09-16), its five rules, who makes it and how to help.
 - [determinism](https://vawe.dev/determinism): A page seeked, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true and how it checks it.
 - [ai-agents](https://vawe.dev/ai-agents): An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges the result.
@@ -31,14 +31,14 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [Brand reflection](https://vawe.dev/docs/brand-reflection): Turn a real website into an on-brand film. Study the site and capture it before you write the page.
 - [CLI](https://vawe.dev/docs/cli): Every bin/vawe verb and its flags.
 - [Determinism](https://vawe.dev/docs/determinism): Why a frame is a function of the seek time, what the virtual clock owns, and how to check your page.
-- [Motion](https://vawe.dev/docs/motion): Springs, keyframe tables, the motion rules, and the moves to copy.
+- [Motion](https://vawe.dev/docs/motion): Springs, keyframe tables, the motion rules, and the video components to copy.
 - [Prompting](https://vawe.dev/docs/prompting): You do not write the page alone. You answer five questions and an agent writes the brief, the stills and the page.
 - [Quality gates](https://vawe.dev/docs/quality-gates): The checks you can run by name, and the ones that advise.
 - [Quickstart](https://vawe.dev/docs/quickstart): Install, write the starter page, and render a draft.
 - [Make a video from code](https://vawe.dev/docs/video-from-code): Three ways to render a video from code, and the commands to turn one HTML page into an mp4.
 - [HTML to MP4 with Claude Code](https://vawe.dev/docs/html-to-mp4-with-claude-code): Install vawe, ask Claude Code for a film, and render one HTML page to an MP4 in four commands.
 - [Reading your own film](https://vawe.dev/docs/reading-your-film): Checks read structure. They cannot see whether a film is good. These tools put the frames in front of you.
-- [Recipes](https://vawe.dev/docs/recipes): Chains of built moves for common short films, with the beat table and the traps at each seam.
+- [Recipes](https://vawe.dev/docs/recipes): Chains of built video components for common short films, with the beat table and the traps at each seam.
 - [The page](https://vawe.dev/docs/the-page): The page contract. One HTML file, a duration, a seek, relative assets.
 - [When it looks wrong](https://vawe.dev/docs/troubleshooting): Symptom to cause, for the failures that repeat. Most of them do not throw an error.
 
@@ -48,10 +48,10 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 ## Inspiration
 {{INSPIRATION}}
 
-## Moves
-Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/moves.
-To filter: fetch https://vawe.dev/moves/index.json. Top-level groups, looks and jobs list the ids. Each move has group, look, jobs, use (the when line), clip, md and duration.
-A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=paper&q=wipe (group, look and job take comma lists: OR within one, AND across).
+## Video components
+Each video component is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/video-components.
+To filter: fetch https://vawe.dev/moves/index.json. Top-level groups, looks and jobs list the ids. Each video component has group, look, jobs, use (the when line), clip, md and duration.
+A human link filters the same way: https://vawe.dev/video-components?group=end-a-film&look=paper&q=wipe (group, look and job take comma lists: OR within one, AND across).
 
 - [Mask rise](https://vawe.dev/moves/mask-rise.md): a line of type enters from under an invisible edge; the mask box is tall enough for descenders
 - [Tracking collapse](https://vawe.dev/moves/tracking-collapse.md): a title or wordmark arrives: letters converge from wide tracking while the word sharpens
@@ -166,6 +166,10 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Gooey filter](https://vawe.dev/moves/gooey-filter.md): a tab, pill or panel must melt into the next: shapes that touch merge into one soft outline through the SVG gooey filter (blur 15, alpha matrix 19 and -9), the active tab box slides on a critically damped spring and the page swaps in 0.2 s
 - [Agent progress](https://vawe.dev/moves/agent-progress.md): an AI agent works through steps: a card springs in, an arc turns beside a status line that swaps states, and numbered rows flip to checks one by one, ending mid-list
 - [Panel live sync](https://vawe.dev/moves/panel-live-sync.md): an edit and its result in one frame: a cursor scrubs fields in a panel and the button on the page beside it rotates, rounds and grows in the same frames
+- [Terminal run](https://vawe.dev/moves/terminal-run.md): a coding agent works in a real Claude Code terminal: the task is typed and sent, a status line counts tokens, Read, Update (red and green diff) and Bash calls arrive, the answer lands
+- [Approval gate](https://vawe.dev/moves/approval-gate.md): the agent asks before it acts: the Claude Code permission prompt replaces the input, the selection looks at option 2 and returns, Enter runs the command and the work goes on
+- [Model picker](https://vawe.dev/moves/model-picker.md): a model choice: on claude.ai a pointer opens the model menu, picks Opus, the check moves and the label rolls to the new name
+- [Diff card](https://vawe.dev/moves/diff-card.md): code review as proof: a GitHub pull request diff builds, the diffstat counts to +312 -48, checks pass and the Open badge becomes Merged
 - [Aurora drift](https://vawe.dev/moves/aurora-drift.md): three soft bands of light hang from the top of the frame and fold slowly in one shader while the copy sits low; the light thins out above the type
 - [Grain field](https://vawe.dev/moves/grain-field.md): a quiet printed or filmic frame breathes: a slow tonal ground and film grain that turns over 24 times a second, seeded from the seek time, never from Math.random
 - [Halftone field](https://vawe.dev/moves/halftone-field.md): a physical or retro frame gets a 45 degree dot screen whose dot size waves across the frame while every dot stays in its cell

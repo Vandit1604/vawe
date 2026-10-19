@@ -5,10 +5,10 @@ export const contentType = "image/png";
 
 export default function Image() {
   return staticOgImage({
-    tag: "moves",
-    title: "Moves",
+    tag: "video components",
+    title: "Video components",
     description:
-      "Each move is a clip and one markdown file: when to use it, the snippet, the notes and the sound cue.",
-    path: "/moves",
+      "Each video component is a clip and one markdown file: when to use it, the snippet, the notes and the sound cue.",
+    path: "/video-components",
   });
 }

@@ -37,7 +37,7 @@ Each change answers a failure at the point of action, with the fix printed in th
 - Judge ledger. The judge gives each fix an id. The next judge marks each open fix as fixed, partly or still before it adds new ones. It must say why a new fix reverses an old one. After three rounds on one target, the ledger prints a stop line.
 - Motion lint for `window.seek` pages. The five motion rules also run on element boxes sampled over time (`harness/lib/box-track.mjs`). Canvas contents are out of scope, and the output says so.
 
-Later, repeated judge findings became defaults in the starter page, the moves and the taste digest. The first 5 s sting that passed a fresh judge became the gold example, [`films/examples/colour-sting`](https://github.com/Vandit1604/vawe/tree/main/films/examples/colour-sting).
+Later, repeated judge findings became defaults in the starter page, the video components and the taste digest. The first 5 s sting that passed a fresh judge became the gold example, [`films/examples/colour-sting`](https://github.com/Vandit1604/vawe/tree/main/films/examples/colour-sting).
 
 ## What we found
 

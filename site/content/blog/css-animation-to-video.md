@@ -1,8 +1,8 @@
 ---
 title: "CSS animation to video: export an MP4 or WebM"
 description: "Turn a CSS keyframe or Web Animation into an MP4 or WebM. Pause, seek, capture and encode. Covers SVG and canvas too."
-date: 2026-10-20
-updated: 2026-10-20
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "css animation to mp4, webm, svg animation, canvas animation, puppeteer"
 keywords: "export css animation as video, css animation to mp4, svg animation to video, canvas animation export mp4, css animation to webm"

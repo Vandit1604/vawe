@@ -1,4 +1,4 @@
-// Build the /moves gallery's data from prompts/moves: one JSON file the site imports at build time,
+// Build the /video-components gallery's data from prompts/moves: one JSON file the site imports at build time,
 // the raw move markdown served as text, the moves section of llms.txt, and (with --clips) the web
 // copies of each clip, and public/moves/index.json (the same data, filterable by an agent).
 //
@@ -20,6 +20,7 @@ const REPO_BLOB = 'https://github.com/Vandit1604/vawe/blob/main/prompts/moves/';
 const SITE = 'https://vawe.dev';
 const NOT_MOVES = new Set(['README.md', 'RECIPES.md']);
 const DEFAULT_LOOK = 'vawe';
+const DEFAULT_THEME = 'dark';
 
 const { EASE_HANDLES } = await import(pathToFileURL(path.join(root, 'core', 'motion', 'presets.js')));
 const { resolveHandle } = await import(pathToFileURL(path.join(root, 'core', 'motion', 'motion.js')));
@@ -68,7 +69,7 @@ function readIndex() {
 function href(target) {
   if (/^(https?:|#|\/)/.test(target)) return target;
   const md = target.match(/^([a-z0-9-]+)\.md$/);
-  if (md) return `/moves/${md[1]}`;
+  if (md) return `/video-components/${md[1]}`;
   const clip = target.match(/^([a-z0-9-]+)\.mp4$/);
   if (clip) return `/moves/${clip[1]}.mp4`;
   return REPO_BLOB + target;
@@ -193,7 +194,7 @@ function renderMarkdown(md) {
     if (!line.trim()) { i++; continue; }
     const para = [];
     while (i < lines.length && lines[i].trim() && !/^(```|#{1,3} |- |\d+\. )/.test(lines[i])) para.push(lines[i++].trim());
-    const text = para.join(' ');
+    const text = para.join(' ').replace(/^(\*\*Use when\*\*.*?)\s*Clip:.*$/, '$1');
     const sound = text.startsWith('Sound:');
     html.push(sound ? `<p class="mv-sound">${inline(text)}</p>` : `<p>${inline(text)}</p>`, sound ? 'sound' : 'text');
   }
@@ -254,8 +255,13 @@ function readMove(file, index) {
   const usePara = md.match(/\*\*Use when\*\*([\s\S]*?)(?:\n\n|$)/)?.[1] ?? '';
   const useWhen = plain(usePara.replace(/\s*Clip:[\s\S]*$/, ''));
   const demo = path.join(SRC, 'demo', `${name}.html`);
-  const look = fs.existsSync(demo) ? (read(demo).match(/data-look="([a-z-]+)"/)?.[1] ?? DEFAULT_LOOK) : DEFAULT_LOOK;
+  const page = fs.existsSync(demo) ? read(demo) : '';
+  const look = page.match(/data-look="([a-z-]+)"/)?.[1] ?? DEFAULT_LOOK;
+  const theme = page.match(/<html[^>]*data-theme="([a-z]+)"/)?.[1] ?? DEFAULT_THEME;
+  const declared = (page.match(/<meta name="variants" content="([^"]*)"/)?.[1] ?? '').split(/\s+/);
   const clip = path.join(SRC, `${name}.mp4`);
+  const variant = declared.find((t) => t && t !== theme && fs.existsSync(path.join(SRC, `${name}-${t}.mp4`))) ?? null;
+  const alt = variant && path.join(SRC, `${name}-${variant}.mp4`);
   const sound = md.match(/^Sound:\s*(.+)/m)?.[1].trim() ?? null;
   const blocks = renderMarkdown(md);
   const firstCode = blocks.findIndex((b) => b.type === 'code');
@@ -271,11 +277,14 @@ function readMove(file, index) {
     jobs: index.jobs.filter((j) => j.moves.includes(name)).map((j) => j.id),
     sound: sound ? plain(sound) : null,
     snippet,
-    eases: easesOf(snippet, fs.existsSync(demo) ? read(demo) : ''),
+    eases: easesOf(snippet, page),
     published: firstCommitted(path.join(SRC, file)),
-    modified: lastChanged([path.join(SRC, file), clip]),
+    modified: lastChanged([path.join(SRC, file), clip, ...(alt ? [alt] : [])]),
     clipDate: fs.existsSync(clip) ? lastChanged([clip]) : null,
     clipHash: fs.existsSync(clip) ? hashFile(clip) : null,
+    theme,
+    variant,
+    variantHash: alt ? hashFile(alt) : null,
     duration: fs.existsSync(clip) ? mp4Seconds(clip) : null,
     useHtml: joined(blocks.slice(0, Math.max(firstCode, 0))),
     codeHtml: firstCode === -1 ? '' : blocks[firstCode].html,
@@ -289,9 +298,10 @@ function readMove(file, index) {
 // copy at full size; the gallery grid plays a 640 px VP9 copy over a 640 px poster.
 const CLIP_FILES = ['mp4', 'webm', 'webp', 'hd.webp'];
 
-function encodeClip(name) {
-  const src = path.join(SRC, `${name}.mp4`);
-  const out = (ext) => path.join(OUT_DIR, `${name}.${ext}`);
+// `stem` is the move name, or `<name>-<theme>` for its theme variant.
+function encodeClip(stem) {
+  const src = path.join(SRC, `${stem}.mp4`);
+  const out = (ext) => path.join(OUT_DIR, `${stem}.${ext}`);
   const ff = (args) => execFileSync('ffmpeg', ['-v', 'error', '-y', ...args], { stdio: 'inherit' });
   const small = ['-vf', 'scale=640:-2:flags=lanczos'];
   ff(['-i', src, '-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', '22', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out('mp4')]);
@@ -305,10 +315,10 @@ function encodeClip(name) {
 // ---- llms.txt: the moves section is regenerated, the rest is hand-written ---------------------------
 function llmsSection(moves) {
   const lines = moves.map((m) => `- [${m.title}](${SITE}/moves/${m.name}.md): ${m.use}`);
-  return `## Moves
-Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is ${SITE}/moves.
-To filter: fetch ${SITE}/moves/index.json. Top-level groups, looks and jobs list the ids. Each move has group, look, jobs, use (the when line), clip, md and duration.
-A human link filters the same way: ${SITE}/moves?group=end-a-film&look=paper&q=wipe (group, look and job take comma lists: OR within one, AND across).
+  return `## Video components
+Each video component is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is ${SITE}/video-components.
+To filter: fetch ${SITE}/moves/index.json. Top-level groups, looks and jobs list the ids. Each video component has group, look, jobs, use (the when line), clip, md and duration.
+A human link filters the same way: ${SITE}/video-components?group=end-a-film&look=paper&q=wipe (group, look and job take comma lists: OR within one, AND across).
 
 ${lines.join('\n')}
 `;
@@ -323,8 +333,9 @@ function writeIndex(moves, data) {
     jobs: m.jobs,
     use: m.use,
     clip: `${SITE}/moves/${m.name}.mp4`,
+    ...(m.variant ? { variants: { [m.variant]: `${SITE}/moves/${m.name}-${m.variant}.mp4` } } : {}),
     md: `${SITE}/moves/${m.name}.md`,
-    page: `${SITE}/moves/${m.name}`,
+    page: `${SITE}/video-components/${m.name}`,
     duration: m.duration,
   }));
   fs.writeFileSync(INDEX, `${JSON.stringify({ site: SITE, groups: data.groups, looks: data.looks, featured: data.featured, jobs: data.jobs.map(({ id, label }) => ({ id, label })), moves: out }, null, 1)}\n`);
@@ -333,7 +344,7 @@ function writeIndex(moves, data) {
 function writeLlms(moves, data) {
   const text = read(LLMS);
   const section = llmsSection(moves);
-  const start = text.indexOf('## Moves\n');
+  const start = text.indexOf('## Video components\n');
   if (start === -1) return fs.writeFileSync(LLMS, `${text.trimEnd()}\n\n${section}`);
   const next = text.indexOf('\n## ', start + 1);
   fs.writeFileSync(LLMS, text.slice(0, start) + section + (next === -1 ? '' : text.slice(next)));
@@ -350,7 +361,7 @@ if (!fs.existsSync(SRC)) {
 const withClips = process.argv.includes('--clips');
 const index = readIndex();
 const previous = fs.existsSync(DATA) ? JSON.parse(read(DATA)) : { moves: [] };
-const encodedHash = new Map(previous.moves.map((m) => [m.name, m.clipHash]));
+const encodedHash = new Map(previous.moves.flatMap((m) => [[m.name, m.clipHash], [`${m.name}-${m.variant}`, m.variantHash]]));
 const files = fs.readdirSync(SRC).filter((f) => f.endsWith('.md') && !NOT_MOVES.has(f)).sort();
 const readmeOrder = [...index.groupOf.keys()];
 const rank = (m) => (readmeOrder.includes(m.name) ? readmeOrder.indexOf(m.name) : readmeOrder.length);
@@ -363,17 +374,25 @@ fs.mkdirSync(OUT_DIR, { recursive: true });
 let encoded = 0;
 for (const m of moves) {
   fs.copyFileSync(path.join(SRC, `${m.name}.md`), path.join(OUT_DIR, `${m.name}.md`));
-  if (!m.clipHash) continue;
-  const have = CLIP_FILES.every((e) => fs.existsSync(path.join(OUT_DIR, `${m.name}.${e}`)));
-  const fresh = have && encodedHash.get(m.name) === m.clipHash;
-  if (fresh) continue;
-  if (!withClips) {
-    console.warn(`~ ${m.name}: clip changed or missing, run with --clips`);
-    m.clipHash = encodedHash.get(m.name) ?? null;
-    continue;
+  for (const [stem, hash, key] of [[m.name, m.clipHash, 'clipHash'], [`${m.name}-${m.variant}`, m.variantHash, 'variantHash']]) {
+    if (!hash) continue;
+    const have = CLIP_FILES.every((e) => fs.existsSync(path.join(OUT_DIR, `${stem}.${e}`)));
+    if (have && encodedHash.get(stem) === hash) continue;
+    if (!withClips) {
+      console.warn(`~ ${stem}: clip changed or missing, run with --clips`);
+      m[key] = encodedHash.get(stem) ?? null;
+      continue;
+    }
+    encodeClip(stem);
+    encoded++;
   }
-  encodeClip(m.name);
-  encoded++;
+  if (!m.variantHash) m.variant = null;
+}
+
+const published = new Set(moves.flatMap((m) => [m.name, ...(m.variant ? [`${m.name}-${m.variant}`] : [])]));
+for (const file of fs.readdirSync(OUT_DIR)) {
+  const stem = file.match(/^(.+-(?:light|dark))\.(?:mp4|webm|hd\.webp|webp)$/)?.[1];
+  if (stem && !published.has(stem)) fs.rmSync(path.join(OUT_DIR, file));
 }
 
 const looks = [...new Set(moves.map((m) => m.look))].sort((a, b) => (a === DEFAULT_LOOK ? -1 : b === DEFAULT_LOOK ? 1 : a.localeCompare(b)));

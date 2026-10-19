@@ -6,10 +6,10 @@
 //
 // The JSON engine's pages are gone. A removed page goes to the page that now answers the same
 // question: a move for a motion effect, /easing/<name> for an easing, /docs/<page> for an engine
-// concept. /moves is the fallback only for a URL with no nearer page.
+// concept. /video-components is the fallback only for a URL with no nearer page.
 
-const MOVES = "/moves";
-const move = (name) => `/moves/${name}`;
+const MOVES = "/video-components";
+const move = (name) => `/video-components/${name}`;
 
 // Old effect families (/arsenal/effects/family/<id> and /arsenal/effects/<id>--<name>) and where each lands.
 export const FAMILY_DESTINATIONS = {
@@ -223,4 +223,7 @@ export const LEGACY_REDIRECTS = [
   permanent("/deck.html", "/docs/motion"),
   permanent("/vawe-rules.md", "/docs/prompting"),
   ...REMOVED_MOVE_RULES,
+  // The gallery was /moves until 2026-10-19. The clip, markdown and index.json files keep that path, so :name stops at a dot.
+  permanent("/moves", MOVES),
+  permanent("/moves/:name([a-z0-9-]+)", "/video-components/:name"),
 ];

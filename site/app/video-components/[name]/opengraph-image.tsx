@@ -15,10 +15,10 @@ export default async function Image({ params }: { params: Promise<{ name: string
   const fonts = await loadOgFonts();
   return new ImageResponse(
     renderOgCard({
-      tag: "move",
-      title: move?.title ?? "Moves",
+      tag: "video component",
+      title: move?.title ?? "Video components",
       description: move ? `Use when ${move.use}.` : "",
-      path: `/moves/${name}`,
+      path: `/video-components/${name}`,
       panel: move?.snippet ? { kind: "code", text: move.snippet } : null,
     }),
     { ...OG_SIZE, fonts },

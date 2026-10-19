@@ -30,7 +30,7 @@ const COLUMNS: { title: string; lead: string; items: Item[] }[] = [
     lead: "Planned after Now.",
     items: [
       { name: "Windowed drafts with their checks", note: "Draft one window of a film and run the checks on that window.", problem: 6 },
-      { name: "vawe moves --check", note: "A command that checks the move library.", problem: 4 },
+      { name: "vawe moves --check", note: "A command that checks the video component library.", problem: 4 },
       { name: "A pairwise judge", note: "The judge compares two films instead of scoring one.", problem: 9 },
       { name: "Motion-shape measures", note: "Numbers for the shape of a move.", problem: 10 },
       { name: "Hook and palette numbers", note: "Numbers for the opening hook and the palette.", problem: 10 },

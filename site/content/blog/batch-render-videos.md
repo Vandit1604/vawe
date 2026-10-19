@@ -1,8 +1,8 @@
 ---
 title: "Batch render videos from one HTML template"
 description: "Batch render videos from a template: fill one HTML page with JSON rows and render a clip per row with a Node loop. We ran three rows."
-date: 2026-11-05
-updated: 2026-11-05
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "batch render videos, html template, node, automation, personalized video"
 keywords: "batch render videos from template, automate social media video generation, personalized video from data, html template to video, render many videos node"

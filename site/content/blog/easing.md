@@ -10,7 +10,7 @@ hero: /blog/easing/hero.webp
 heroAlt: "Large number 44 with the caption easing pages, 9 named curves, one vocabulary for every move"
 ---
 
-This is a CSS easing functions cheat sheet for motion graphics. Every vawe move uses one of ten named easing curves. Below is what each one is for, how fast it peaks, and which two needed a fix on real clips. Each curve has its own page at [/easing](/easing), generated from the same source file.
+This is a CSS easing functions cheat sheet for motion graphics. Every vawe video component uses one of ten named easing curves. Below is what each one is for, how fast it peaks, and which two needed a fix on real clips. Each curve has its own page at [/easing](/easing), generated from the same source file.
 
 ## What we found
 
@@ -33,7 +33,7 @@ Peak speed is the top speed of the curve compared with a straight line (linear) 
 
 ## Why name a curve
 
-Our moves, and the agents that wrote them, typed `cubic-bezier` numbers by hand. Across the library those numbers had no shared meaning. Short pops landed too hard. Exits ran as long as their entrances. Two moves that should feel alike used unrelated curves.
+Our video components, and the agents that wrote them, typed `cubic-bezier` numbers by hand. Across the library those numbers had no shared meaning. Short pops landed too hard. Exits ran as long as their entrances. Two video components that should feel alike used unrelated curves.
 
 A table of names is the usual fix. We had one more reason. Agents write these pages. An agent that sees `EASE.launch` chooses better than one that sees four floats, because the name carries the purpose.
 
@@ -69,7 +69,7 @@ How much overshoot is normal? Across 22 reference films, the median share of arr
 
 ## Match speed across a cut with ramp()
 
-`ramp()` is a speed ramp across a cut. The outgoing element accelerates into the cut. The incoming element leaves the cut at the same speed and slows down. So the velocity matches on both sides, which is the part people get wrong by eye. See [the speed-ramp move](/moves/speed-ramp), and read [motion graphics transitions](/blog/transitions) for other ways to carry motion over a seam.
+`ramp()` is a speed ramp across a cut. The outgoing element accelerates into the cut. The incoming element leaves the cut at the same speed and slows down. So the velocity matches on both sides, which is the part people get wrong by eye. See [the speed-ramp video component](/video-components/speed-ramp), and read [motion graphics transitions](/blog/transitions) for other ways to carry motion over a seam.
 
 ## Where the handle values came from
 
@@ -121,7 +121,7 @@ Here `k` is the stiffness and `d` is the damping. A higher `d` removes the bounc
 
 A script reads the motion library and writes one JSON file per curve. Each holds the curve, its velocity, the `linear()` string, a cubic-bezier fit and the After Effects handle values. The site renders 45 pages from it. They cover the ten vawe curves, 30 classic ones (ten families, each in, out and in-out) and the 5 CSS keywords including `linear`. A person types only the words. Each vawe page carries a 2 s clip of the curve moving a square next to a linear one.
 
-We have no before-and-after score. We did not render one film with ad hoc curves and again with named ones. The short-move fixes came from a measurement, but no number says how much better the films got. The names live in one file and the rest is generated, so the duplicate curves are gone. The looks that dress a clip are in [CSS animation library: 125 copyable motion moves](/blog/site-after-json).
+We have no before-and-after score. We did not render one film with ad hoc curves and again with named ones. The short-move fixes came from a measurement, but no number says how much better the films got. The names live in one file and the rest is generated, so the duplicate curves are gone. The looks that dress a clip are in [CSS animation library: 126 copyable video components](/blog/site-after-json).
 
 | File | What it holds |
 | --- | --- |

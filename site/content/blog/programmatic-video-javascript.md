@@ -1,8 +1,8 @@
 ---
 title: "Programmatic video: 6 JavaScript tools compared"
 description: "Remotion, Revideo, Motion Canvas, HyperFrames, vawe and ffmpeg scripts compared on language, determinism, agent use, license and hosting."
-date: 2026-10-27
-updated: 2026-10-27
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "programmatic video, javascript, remotion, revideo, motion canvas, hyperframes"
 keywords: "programmatic video javascript, video from code, create video in node.js, remotion vs revideo, programmatic video generation"

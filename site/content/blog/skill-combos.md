@@ -53,7 +53,7 @@ This is one reviewer and one run, with two frames for one fictional product. It 
 
 A combo proven for one kind of frame is proven for that kind only. A blended score across kinds would have hidden that Soft glass wins on type and loses on product UI. An untested combo becomes proven only after a still-frame test and a sign-off.
 
-We used the same kind of blind choice for the [motion move gallery](/blog/site-after-json). A featured bento of five moves sits above the gallery. A blind score from three reviewers on every clip chose them.
+We used the same kind of blind choice for the [video component gallery](/blog/site-after-json). A featured bento of five video components sits above the gallery. A blind score from three reviewers on every clip chose them.
 
 ## How to use it
 

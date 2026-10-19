@@ -15,11 +15,11 @@
       "label": "Features"
     },
     {
-      "path": "/moves",
+      "path": "/video-components",
       "priority": 0.9,
       "changeFrequency": "weekly",
       "group": "product",
-      "label": "Moves"
+      "label": "Video components"
     },
     {
       "path": "/easing",

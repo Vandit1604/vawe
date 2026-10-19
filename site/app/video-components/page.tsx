@@ -1,52 +1,57 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import { FEATURED, GROUPS, JOBS, LOOKS, MOVES, moveByName, toCard } from "../../lib/moves";
+import { GROUPS, JOBS, LOOKS, MOVES, NUMBERED, clip, toCard } from "../../lib/moves";
 import { jsonLdScript } from "../../lib/schema";
 import { movesItemListSchema } from "../../lib/schema-content";
 import { MovesGallery } from "./MovesGallery";
 import { Next } from "../components/Xp";
+import { Hero } from "./Hero";
+import { MiscSvg } from "./icons";
 import "./moves.css";
 
 export const metadata = pageMetadata({
-  title: `${MOVES.length} CSS motion graphics moves for AI-agent video | vawe`,
-  description: `${MOVES.length} proven motion moves, each a clip and the markdown an agent copies: when to use it, the CSS and Web Animations snippet, the notes and the sound cue.`,
-  path: "/moves",
+  title: `${MOVES.length} CSS video components for AI-agent video | vawe`,
+  description: `${MOVES.length} proven motion video components, each a clip and the markdown an agent copies: when to use it, the CSS and Web Animations snippet, the notes and the sound cue.`,
+  path: "/video-components",
 });
+
+const withClip = NUMBERED.filter((m) => m.clipHash);
+const HERO = [4, 28, 52, 76, 100].map((i) => ({ src: clip(withClip[Math.min(i, withClip.length - 1)]).poster }));
 
 export default function Moves() {
   return (
     <div className="shell">
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(movesItemListSchema())} />
-      <Header active="moves" />
+      <Header active="video-components" />
       <main className="wrap" id="content" tabIndex={-1}>
         <section className="ls ls-top mv">
-          <h1>Moves</h1>
-          <p className="ls-sub">
-            Each move is a clip and one markdown file: when to use it, the snippet, the notes and the
-            sound cue. Agents can filter the same list in <a href="/moves/index.json">index.json</a>. The eases the moves use are listed as <a href="/easing">easing functions as CSS</a>.
+          <h1>Video components.</h1>
+          <p className="mv-links">
+            <a href="/moves/index.json"><MiscSvg name="json" size={14} />index.json</a>
+            <a href="/easing"><MiscSvg name="curve" size={14} />Easing</a>
           </p>
+          <Hero posters={HERO} />
           <MovesGallery
-            moves={MOVES.map(toCard)}
-            featured={FEATURED.map((n) => toCard(moveByName(n)!))}
+            moves={NUMBERED.map(toCard)}
             groups={GROUPS}
             looks={LOOKS}
             jobs={JOBS.map(({ id, label }) => ({ id, label }))}
           />
           <Next
             title="Copy one into a page."
-            lead="Chain moves with the recipes, or hand the list to an agent."
-            primary={{ href: "/docs/recipes", label: "Chain moves with recipes" }}
+            lead="Chain video components with the recipes, or hand the list to an agent."
+            primary={{ href: "/docs/recipes", label: "Chain components with recipes" }}
             secondary={{ href: "/ai-agents", label: "Let an agent use them" }}
             related={[
               { href: "/easing", label: "Easing functions as CSS" },
               { href: "/docs/motion", label: "The motion guide" },
-              { href: "/launch-video", label: "A launch film, built from these moves" },
+              { href: "/launch-video", label: "A launch film, built from these video components" },
             ]}
           />
         </section>
       </main>
-      <Footer active="/moves" />
+      <Footer active="/video-components" />
     </div>
   );
 }

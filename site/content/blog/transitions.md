@@ -26,7 +26,7 @@ We have no measured gain in film scores from these rules yet. The check is advic
 | Same family on adjacent cuts | 0 allowed |
 | Same family in one film | 2 at most |
 | Exposure flashes | 3 per second at most |
-| Continuous-take moves in the library | 10 |
+| Continuous-take video components in the library | 10 |
 
 ## 1. Name the one thing that crosses the cut
 
@@ -36,7 +36,7 @@ To check, write the carried element in the plan before you build. If the cell is
 
 ## 2. Pick a family from the twelve, and read its cost
 
-The table in `taste/craft/transitions.md` gives each family four facts. It says what the family is, when the story fits it, its cost or risk, and which moves to copy. The cost column keeps an agent from using the showiest family on every cut.
+The table in `taste/craft/transitions.md` gives each family four facts. It says what the family is, when the story fits it, its cost or risk, and which video components to copy. The cost column keeps an agent from using the showiest family on every cut.
 
 | Family | What breaks it |
 | --- | --- |
@@ -78,9 +78,9 @@ cut 4 plans colour or light flood but the film measures a hard cut at 4.37 s; bu
 
 A single event is a choice: one crossfade for a time jump is not a tell. We set the thresholds so that our two public example films stay clean. They are `colour-sting` and `tracking-hud`. A test reads their page shape through the same rules. Run it with `bin/vawe check slideshow <page>`. On `colour-sting` we saw `score 0/10`. The check also said it skipped the entrance and exit tells. The reason: that page paints in `seek(t)`, so no element boxes were sampled.
 
-## 7. Copy a continuous-take move when the story allows one
+## 7. Copy a continuous-take video component when the story allows one
 
-Ten handoff moves in the library carry one shared element from scene A to scene B, with no cut and no crossfade. They are highlight sweep, shadow handoff, word portal, underline road, caret door, swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid. Each has a clip and a page under [/moves](/moves).
+Ten handoff video components in the library carry one shared element from scene A to scene B, with no cut and no crossfade. They are highlight sweep, shadow handoff, word portal, underline road, caret door, swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid. Each has a clip and a page under [/video-components](/video-components).
 
 <figure>
 <video src="/blog/transitions/swipe-continues.mp4" poster="/blog/transitions/swipe-continues.hd.webp" muted loop playsinline controls></video>
@@ -119,7 +119,7 @@ We folded the older seam rules into three: `seam-timing`, `hard-cut-default` and
 | Slideshow score | ten tells, score out of 10 | `harness/lib/slideshow.mjs` |
 | Flash cap | at most 3 per second | exposure flash helper |
 
-See the clips on their move pages: [swipe-continues](/moves/swipe-continues), [word-portal](/moves/word-portal) and [exposure-flash](/moves/exposure-flash). For the looks that dress these cuts, read [CSS animation library: 125 copyable motion moves](/blog/site-after-json).
+See the clips on their video component pages: [swipe-continues](/video-components/swipe-continues), [word-portal](/video-components/word-portal) and [exposure-flash](/video-components/exposure-flash). For the looks that dress these cuts, read [CSS animation library: 126 copyable video components](/blog/site-after-json).
 
 ## FAQ
 

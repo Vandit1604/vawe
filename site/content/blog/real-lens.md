@@ -54,7 +54,7 @@ A `text-shadow` lights the element that asks for it and nothing else. A real blo
 
 <figure>
 <video src="/blog/real-lens/lens.mp4" poster="/blog/real-lens/lens.hd.webp" muted loop playsinline controls></video>
-<figcaption>The lens move clip. Six stages, each on for one second: flat, perspective, depth of field, palette and aberration, bloom and LED grid, tear and grain.</figcaption>
+<figcaption>The lens video component clip. Six stages, each on for one second: flat, perspective, depth of field, palette and aberration, bloom and LED grid, tear and grain.</figcaption>
 </figure>
 
 ## Cost per frame
@@ -77,7 +77,7 @@ The long option list became its own problem for agents. So the lens has a `LOOKS
 
 ## Use the lens in a page
 
-This is the example from the lens move doc. The page draws `#screen` as plain HTML, and the lens films it:
+This is the example from the lens video component doc. The page draws `#screen` as plain HTML, and the lens films it:
 
 ```js
 import { lens, htmlSource, PALETTES } from '/core/surfaces/lens.js';
@@ -104,7 +104,7 @@ We ran it and it wrote `out/looks-demo/looks-2s.png`: the page as is, plus two l
 
 Use CSS when one element needs a soft glow, the camera does not move, and nobody will compare the frame with real footage. Use an image-space lens in three cases. The camera moves. Several effects must agree (blur, bloom and perspective on one plane). Or a reference was shot through glass. The [image to particles guide](/blog/image-points) shows a point cloud filmed through the same lens with the `film-halation` look.
 
-See the clip and its code on the [lens move page](/moves/lens). For a framework that treats the browser as the renderer, compare [vawe with Remotion](/remotion-alternatives).
+See the clip and its code on the [lens video component page](/video-components/lens). For a framework that treats the browser as the renderer, compare [vawe with Remotion](/remotion-alternatives).
 
 | File | What it holds |
 | --- | --- |

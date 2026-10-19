@@ -1,8 +1,8 @@
 ---
 title: "Puppeteer video: screenshots to MP4 with ffmpeg"
 description: "Capture frames with Puppeteer, pipe them into ffmpeg and get an MP4. The frame loop, the pixel format flag and the traps."
-date: 2026-10-22
-updated: 2026-10-22
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "puppeteer, ffmpeg, screenshots to video, headless chrome, mp4"
 keywords: "puppeteer screenshots to mp4, puppeteer record animation to mp4, headless chrome render video frames, ffmpeg image2pipe, ffmpeg width not divisible by 2"

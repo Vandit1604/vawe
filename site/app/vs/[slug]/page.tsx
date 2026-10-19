@@ -154,7 +154,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
             lead="Write a page, run one command, get an MP4."
             primary={{ href: "/docs/html-to-mp4-with-claude-code", label: "HTML to MP4 with Claude Code" }}
             secondary={{ href: REPO_URL, label: "Star vawe on GitHub" }}
-            related={[...r.related, { href: "/moves", label: "See the moves" }, { href: "/problems", label: "Hard problems and where vawe stands" }]}
+            related={[...r.related, { href: "/video-components", label: "See the video components" }, { href: "/problems", label: "Hard problems and where vawe stands" }]}
           />
           <Sources count={r.sources.length + VAWE_SOURCES.length}>
             {[...r.sources, ...VAWE_SOURCES].map((s) => (

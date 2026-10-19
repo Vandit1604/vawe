@@ -10,5 +10,5 @@ export const agentGuide = () => read("content/agent-guide.md");
 export function llmsFull() {
   const llms = llmsText();
   const start = llms.indexOf("## Site\n");
-  return `${agentGuide().trimEnd()}\n\n---\n\n# Site map and moves (same content as https://vawe.dev/llms.txt)\n\n${llms.slice(start >= 0 ? start : 0)}`;
+  return `${agentGuide().trimEnd()}\n\n---\n\n# Site map and video components (same content as https://vawe.dev/llms.txt)\n\n${llms.slice(start >= 0 ? start : 0)}`;
 }

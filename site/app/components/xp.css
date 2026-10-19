@@ -1,5 +1,5 @@
 /* xp.css: the content pages' shared layer (Laws of UX pass, DESIGN.md "Laws of UX").
-   Scoped to .xp and to the heads of /moves and /easing, so /features and the blog keep their own look. */
+   Scoped to .xp and to the heads of /video-components and /easing, so /features and the blog keep their own look. */
 /* The h1 is the peak of every content page: one size, --fs-h1, on all of them. */
 .xp .phead,.mvd-head,.ez-head{padding-top:var(--sp-7)}
 .xp .phead h1,.mvd-head h1,.ez-head h1,.mv.ls-top > h1{font-size:var(--fs-h1);line-height:var(--lh-display);letter-spacing:var(--track-display);max-width:18ch}

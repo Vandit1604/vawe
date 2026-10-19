@@ -49,9 +49,9 @@ To test it, seek to the end, then back to the middle. Compare the result with a 
 
 ## 3. Give each render worker its own Chrome, and composite SVG filters in software
 
-The "gooey filter" move draws a tab bar through an SVG filter. In a shared draft browser, GPU compositing painted that filter in two different states. We found no pattern. Two renders of the same page differed in 70 of 216 frames.
+The "gooey filter" video component draws a tab bar through an SVG filter. In a shared draft browser, GPU compositing painted that filter in two different states. We found no pattern. Two renders of the same page differed in 70 of 216 frames.
 
-![The gooey filter move: shapes merge into one soft outline](/blog/determinism/gooey-filter.webp "The gooey filter move, the page that showed the drift.")
+![The gooey filter video component: shapes merge into one soft outline](/blog/determinism/gooey-filter.webp "The gooey filter video component, the page that showed the drift.")
 
 We made two changes. Each draft worker now has its own Chrome, and the difference fell to 1 of 1,296 frames. A page that draws an SVG filter also composites in software, and the difference fell to 0 of 648.
 

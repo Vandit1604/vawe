@@ -21,8 +21,8 @@ import "./resources.css";
 export const revalidate = 3600;
 
 export const metadata = pageMetadata({
-  title: "Motion graphics resources: CSS easing, moves and AI agent video | vawe",
-  description: `${EASES.length} CSS easing functions, ${MOVES.length} motion moves with clips, the files an AI agent reads to make a video, guides, and comparisons with Remotion, HyperFrames, Motion Canvas and Lottie.`,
+  title: "Motion graphics resources: CSS easing, video components and AI agent video | vawe",
+  description: `${EASES.length} CSS easing functions, ${MOVES.length} video components with clips, the files an AI agent reads to make a video, guides, and comparisons with Remotion, HyperFrames, Motion Canvas and Lottie.`,
   path: "/resources",
 });
 
@@ -67,12 +67,12 @@ const GROUPS: Group[] = [
         tile: { word: "Easing", tone: "mat", detail: "easing" },
       },
       {
-        href: "/moves",
-        title: "The moves library",
-        line: `${MOVES.length} motion moves. Each has a short clip, the CSS and one markdown file to copy.`,
+        href: "/video-components",
+        title: "The video components library",
+        line: `${MOVES.length} video components. Each has a short clip, the CSS and one markdown file to copy.`,
         icon: "play",
-        meta: `${MOVES.length}${NBSP}moves`,
-        tile: { word: "Moves", tone: "ochre", detail: "moves", shift: 1, flip: true },
+        meta: `${MOVES.length}${NBSP}video components`,
+        tile: { word: "Components", tone: "ochre", detail: "moves", shift: 1, flip: true },
       },
       {
         href: INSPIRATION_PATH,
@@ -98,10 +98,10 @@ const GROUPS: Group[] = [
     lead: "Plain files an AI agent can fetch without a browser.",
     tile: { word: "Agents", tone: "graphite", detail: "agents", shift: -1 },
     items: [
-      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and move.", icon: "file", meta: kb(Buffer.byteLength(llmsText())), code: true },
-      { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the moves in one text file.", icon: "file", meta: kb(Buffer.byteLength(llmsFull())), code: true },
+      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and video component.", icon: "file", meta: kb(Buffer.byteLength(llmsText())), code: true },
+      { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the video components in one text file.", icon: "file", meta: kb(Buffer.byteLength(llmsFull())), code: true },
       { href: "/ai-agents.md", title: "/ai-agents.md", line: "How an agent writes and renders a film, as Markdown.", icon: "markdown", meta: kb(Buffer.byteLength(agentGuide())), code: true },
-      { href: "/moves/index.json", title: "/moves/index.json", line: "Every move with its group, look, jobs, duration and file, to filter by script.", icon: "json", meta: publicSize("moves/index.json"), code: true },
+      { href: "/moves/index.json", title: "/moves/index.json", line: "Every video component with its group, look, jobs, duration and file, to filter by script.", icon: "json", meta: publicSize("moves/index.json"), code: true },
       { href: "/ai-agents", title: "How an agent installs vawe", line: "Clone the repo, run bin/vawe doctor, then write one HTML page.", icon: "terminal", meta: "guide" },
     ],
   },
@@ -124,7 +124,7 @@ const GROUPS: Group[] = [
     tile: { word: "Learn", tone: "cobalt", detail: "learn", shift: 1 },
     items: [
       { href: "/docs", title: "Docs", line: "Quickstart, the page contract, the CLI and troubleshooting.", icon: "book", meta: "docs" },
-      { href: "/docs/recipes", title: "Recipes", line: "Chains of moves for common short films, with the traps at each seam.", icon: "list", meta: "recipes" },
+      { href: "/docs/recipes", title: "Recipes", line: "Chains of video components for common short films, with the traps at each seam.", icon: "list", meta: "recipes" },
       { href: "/determinism", title: "Determinism", line: "Why the same page gives the same frames, and how a test proves it.", icon: "book", meta: "essay" },
       { href: "/when-determinism-matters", title: "When determinism matters", line: "When byte-identical output decides the engine, and when it does not.", icon: "book", meta: "essay" },
       { href: "/launch-video", title: "Launch videos", line: "A product launch film built from captured UI, one message per beat.", icon: "play", meta: "guide" },
@@ -210,7 +210,7 @@ export default function Resources() {
           <section className="phead">
             <PageTop current="Resources" />
             <h1>Resources for motion graphics by code</h1>
-            <p>Easing curves, motion moves, files for AI agents, guides and comparisons: {COUNT} links in six groups.</p>
+            <p>Easing curves, video components, files for AI agents, guides and comparisons: {COUNT} links in six groups.</p>
             <Toc items={GROUPS.map((g) => ({ href: `#${g.id}`, label: g.title }))} label="Groups" />
           </section>
 

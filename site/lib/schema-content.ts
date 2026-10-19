@@ -32,7 +32,7 @@ export function videoObjectSchema(m: Move) {
   return {
     "@context": "https://schema.org",
     "@type": "VideoObject",
-    name: `${m.title}: motion graphics move`,
+    name: `${m.title}: motion graphics video component`,
     description: moveSeoDescription(m),
     thumbnailUrl: [absolute(files.posterHd)],
     contentUrl: absolute(files.mp4),
@@ -45,7 +45,7 @@ export function videoObjectSchema(m: Move) {
 }
 
 export function techArticleSchema(m: Move) {
-  const url = `${SITE_URL}/moves/${m.name}`;
+  const url = `${SITE_URL}/video-components/${m.name}`;
   return {
     "@context": "https://schema.org",
     "@type": "TechArticle",
@@ -66,9 +66,9 @@ export function techArticleSchema(m: Move) {
 export function moveBreadcrumbSchema(m: Move) {
   return breadcrumbSchema([
     { name: "Home", url: "/" },
-    { name: "Moves", url: "/moves" },
-    { name: groupLabel(m.group), url: `/moves?group=${m.group}` },
-    { name: m.title, url: `/moves/${m.name}` },
+    { name: "Video components", url: "/video-components" },
+    { name: groupLabel(m.group), url: `/video-components?group=${m.group}` },
+    { name: m.title, url: `/video-components/${m.name}` },
   ]);
 }
 
@@ -76,15 +76,15 @@ export function movesItemListSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `${MOVES.length} CSS motion graphics moves for video`,
-    url: `${SITE_URL}/moves`,
+    name: `${MOVES.length} CSS motion graphics video components`,
+    url: `${SITE_URL}/video-components`,
     mainEntity: {
       "@type": "ItemList",
       numberOfItems: MOVES.length,
       itemListElement: MOVES.map((m, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `${SITE_URL}/moves/${m.name}`,
+        url: `${SITE_URL}/video-components/${m.name}`,
         name: m.title,
       })),
     },

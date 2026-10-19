@@ -76,7 +76,7 @@ export default function Home() {
               <p className="lp-lede">Write one HTML page. vawe renders it to an mp4. You write the page, or an agent does.</p>
               <div className="lp-row">
                 <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
-                <Link className="btn lp-btn-line" href="/moves">See the moves</Link>
+                <Link className="btn lp-btn-line" href="/video-components">See the video components</Link>
               </div>
             </div>
           </div>
@@ -121,16 +121,16 @@ export default function Home() {
         </section>
 
         <div className="lp-moves-head" id="moves">
-          <h2>{MOVES.length} moves to copy.</h2>
-          <Link className="btn lp-btn-line" href="/moves">See every move</Link>
+          <h2>{MOVES.length} video components to copy.</h2>
+          <Link className="btn lp-btn-line" href="/video-components">See every video component</Link>
         </div>
-        <section className="lp-grid" aria-label="Move clips">
+        <section className="lp-grid" aria-label="Video component clips">
           {SHOWN_MOVES.map((name) => {
             const m = moveByName(name);
             if (!m) return null;
             const f = clip(m);
             return (
-              <Link className="lp-cell" href={`/moves/${m.name}`} key={m.name} prefetch={false}>
+              <Link className="lp-cell" href={`/video-components/${m.name}`} key={m.name} prefetch={false}>
                 <div className="lp-frame"><Clip className="lp-film" webm={f.webm} src={f.mp4} poster={f.poster} decorative /></div>
                 <span className="mono">{m.title}</span>
               </Link>

@@ -1,8 +1,8 @@
 ---
 title: "Three.js to MP4: render a scene frame by frame"
 description: "Render a three js animation to MP4 with one window.seek(t) function. No real clock, so the same page gives the same frames. Code and tests."
-date: 2026-11-02
-updated: 2026-11-02
+date: 2026-10-19
+updated: 2026-10-19
 section: how-to
 tags: "three.js, threejs to mp4, webgl, headless chrome, vawe"
 keywords: "three js to mp4, render three js animation to video, threejs record video frame by frame, webgl headless chrome render, three js animation to video"

@@ -19,13 +19,13 @@ const json = (...p) => JSON.parse(fs.readFileSync(path.join(root, ...p), 'utf8')
 const legacy = json('scripts', 'site', 'legacy-urls.json');
 const moves = new Set(json('site', 'lib', 'moves.json').moves.map((m) => m.name));
 const pages = json('site', 'lib', 'site-pages.json');
-const live = new Set(['/', '/moves', ...pages.routes.map((r) => r.path), ...pages.docs.map((d) => d.path)]);
+const live = new Set(['/', '/video-components', ...pages.routes.map((r) => r.path), ...pages.docs.map((d) => d.path)]);
 
 const rules = LEGACY_REDIRECTS.map((r) => ({ ...r, test: match(r.source) }));
 const resolve = (url) => rules.find((r) => r.test(url));
 
 function exists(dest) {
-  if (dest.startsWith('/moves/')) return moves.has(dest.slice('/moves/'.length));
+  if (dest.startsWith('/video-components/')) return moves.has(dest.slice('/video-components/'.length));
   if (dest.startsWith('/easing/')) return EASING_SLUGS.includes(dest.slice('/easing/'.length));
   return live.has(dest);
 }
@@ -64,7 +64,7 @@ const table = (list) => list.map((r) => `| \`${r.url}\` | ${r.kind} | \`${r.to}\
 const out = `# Redirect map: old /arsenal URLs to the new pages
 
 ${LEGACY_REDIRECTS.length} permanent (308) rules in site/lib/redirects.mjs cover ${rows.length} known old URLs.
-${generic.length} of them reach the generic /arsenal -> /moves fallback; the rest land on a nearer page.
+${generic.length} of them reach the generic /arsenal -> /video-components fallback; the rest land on a nearer page.
 ${problems.length ? `PROBLEMS: ${problems.length}\n${problems.map((p) => `- ${p}`).join('\n')}` : 'Every destination exists.'}
 
 ## Search Console URLs (the ones Google lists today)

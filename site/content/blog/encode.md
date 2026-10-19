@@ -61,7 +61,7 @@ The extra encode does not add to the wait. The render reports the mp4 as soon as
 
 ## The gallery: a 2 MB budget per clip
 
-Every move on the [moves gallery](/moves) has a clip. Each clip has a budget of 2 MB. The render encodes at CRF 16. If the file is over budget, the render encodes again at CRF 19, 22, and so on up to 31. It keeps the first file that fits (`chooseCrf` in `harness/lib/clip-budget.mjs`). The winning CRF goes into `clips.lock.json` beside the source hash. A reader can then see how far the CRF rose for each clip.
+Every video component on the [video components gallery](/video-components) has a clip. Each clip has a budget of 2 MB. The render encodes at CRF 16. If the file is over budget, the render encodes again at CRF 19, 22, and so on up to 31. It keeps the first file that fits (`chooseCrf` in `harness/lib/clip-budget.mjs`). The winning CRF goes into `clips.lock.json` beside the source hash. A reader can then see how far the CRF rose for each clip.
 
 ## A bug the benchmark found: dropped frames
 

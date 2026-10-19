@@ -107,7 +107,7 @@ h1 { font-size: 120px; animation: collapse 1.1s cubic-bezier(.2,.9,.2,1) 0.2s bo
 
 We rendered the five clips with the script from [export a CSS animation as a video file](/blog/css-animation-to-video). Each is 2 seconds at 30 fps, 1280 by 720 pixels, and 17 to 32 KB. We looked at the frames of each clip before we wrote the text above.
 
-vawe ships the same effects as copyable files in the [moves library](/moves): [per-letter stagger](/moves/letter-stagger), [scale punch](/moves/scale-punch), [mask rise](/moves/mask-rise), [tracking collapse](/moves/tracking-collapse) and [variable weight wave](/moves/variable-weight-wave). Each move file has the snippet, the notes and a sound cue. To see how a page becomes a film, read [render HTML to MP4 with headless Chrome](/blog/render-html-to-mp4).
+vawe ships the same effects as copyable files in the [video components library](/video-components): [per-letter stagger](/video-components/letter-stagger), [scale punch](/video-components/scale-punch), [mask rise](/video-components/mask-rise), [tracking collapse](/video-components/tracking-collapse) and [variable weight wave](/video-components/variable-weight-wave). Each video component file has the snippet, the notes and a sound cue. To see how a page becomes a film, read [render HTML to MP4 with headless Chrome](/blog/render-html-to-mp4).
 
 ## FAQ
 

@@ -67,7 +67,7 @@ spacing:
 ## Overview
 
 Vawe turns one HTML page into one film, and the site shows what it rendered: the landing page, the
-`/moves` gallery and `/launch-video` play the move clips in `public/moves/`. The look is Vercel's
+`/video-components` gallery and `/launch-video` play the move clips in `public/moves/`. The look is Vercel's
 restraint with Framer's staging (provenance row "the redesign, 2026-10-14"): a pure black ground, white
 type, neutral greys, hairlines and a faint grid, Geist and IBM Plex Mono, huge tight headlines, and films in
 big rounded frames that scale in on scroll. The brief it answers to is `IDENTITY.md`.
@@ -157,8 +157,7 @@ bands; grouping is done with panels.
   breadcrumb (`.kicker`).
 - `.isec`: one argument per panel, the text on the left and its proof on the right; a panel with no
   proof is one column.
-- `.mv-grid` / `.mv-card`: move cards on `/moves`, three columns at desktop, two, then one.
-- `.mv-bento`: the featured moves above the `/moves` grid, the first at 2 by 2 and four around it, two columns under 760; hidden under a filter or a search. The list is `## Featured` in `prompts/moves/README.md`.
+- `.mv-grid` / `.mv-card`: numbered component cards on `/video-components`, one grid per category, auto-fill columns of 300 px or more, one column under 640. `.mv-bar` is the sticky search and category jump row.
 - `.imoves`: a row of four move clips on an intent page (`MoveClips.tsx`), two under 900.
 
 Breakpoints are 640, 760 and 900. A few older ones ship (560, 700, 860, 1000) and should fold into
@@ -501,8 +500,9 @@ was tried.
 | `/`, split hero with a live film, timeline and scene file | brand | `mengto/landing-page`, `emilkowalski/emil-design-eng` | The hero plays a film through the in-browser engine, with its layer bars in lane colours and its scene file one tab away; all three read one scene JSON. Rejected: mp4 loops, which had drifted from their scenes. |
 | `/showcase`, `/launch-video`, `/product-tour-video` film cards | brand | `pbakaus/colorize` | Idle face is the film's own layer timeline; only a hovered card boots an engine. |
 | `site/app/components/ogCard.tsx`, `site/og/card.html` | brand | local tokens only | Black ground since 2026-10-14; the card still sets Archivo, because Satori reads woff and Geist ships as woff2. Satori reads woff, so the font lock carries `Archivo-400/800.woff`. |
-| `/moves`, `/moves/[name]` filters and fluff pass | product | ui-skills `jakubkrehel/better-accessibility`, `pbakaus/distill`, `leonxlnx/minimalist-skill` | Taken: native checkboxes and fieldsets, visible focus, a polite status count, 44 px targets on touch (accessibility); remove what carries no information, show less until asked (distill); no emoji, no gradient, no stacked shadow, plain copy (minimalist). Rejected from minimalist: its serif and warm palette, pastel pill tags, staggered scroll entry, drifting background blob, card lift on hover. Local tokens and Archivo win. |
-| `/moves` featured bento | product | ui-skills `zeke/swiss-design` (grid principles only), four local mock layouts chosen by the owner (bento) | Taken: one grid, size as the rank signal, one accent. Rejected: its IBM Plex face and stone palette, which the studio tokens replace. Picks come from a blind three-reviewer score of every clip. |
+| `/video-components`, `/video-components/[name]` filters and fluff pass | product | ui-skills `jakubkrehel/better-accessibility`, `pbakaus/distill`, `leonxlnx/minimalist-skill` | Taken: native checkboxes and fieldsets, visible focus, a polite status count, 44 px targets on touch (accessibility); remove what carries no information, show less until asked (distill); no emoji, no gradient, no stacked shadow, plain copy (minimalist). Rejected from minimalist: its serif and warm palette, pastel pill tags, staggered scroll entry, drifting background blob, card lift on hover. Local tokens and Archivo win. |
+| `/video-components` index layout, 2026-10-19 | product | everestchris.com/components (fetched layout only) | Taken: hero heading plus one line, a numbered card per component grouped by category with counts, title and one-line description under the preview, jump links. Rejected: its variant sub-links and avatar header; the site's tokens, Geist and black ground stay. The featured bento is removed. |
+| `/video-components` index (was the `/moves` featured bento) | product | ui-skills `zeke/swiss-design` (grid principles only), four local mock layouts chosen by the owner (bento) | Taken: one grid, size as the rank signal, one accent. Rejected: its IBM Plex face and stone palette, which the studio tokens replace. Picks come from a blind three-reviewer score of every clip. |
 | `/` hero film switcher (tracking HUD, retro remix) | brand | ui-skills `pbakaus/layout`, `ibelick/fixing-motion-performance` | Taken: group by meaning with proximity (tabs sit with the caption they switch, no new card), `gap` for rhythm, collapse at 640 to 44 px targets; one video element mounted at a time, no layout-affecting animation. Rejected: layout's 4-unit spacing scale and density param (no scale here), a separate gallery section (the hero already owns the film slot), motion-performance's will-change and scroll-linked advice (nothing scroll-linked). Local tokens and Archivo win. |
 | `/arsenal` | product | `ibelick/improve-ui` (ui-skills), rail pass only | Its PROOF GATE taken: a hierarchy finding needs rendered or user evidence, never a source read, so the rail was screenshotted before and after rather than argued about. That gate is what turned "the two levels look alike" into the actual cause: `.rail a` in globals.css is (0,1,1) and `.ar-ax-kind` was (0,1,0), so the leader's `--ink` never applied and it rendered in its children's grey. Its READ-ONLY boundary rejected, because a fix was asked for. The rest of the page predates this convention: hairlines for structure, one elevation step and only on hover, mono for anything literal, sources lost. Re-derive from the code, do not guess. |
 | `/editor` | product | **UNRECORDED** | Same. |
@@ -576,3 +576,17 @@ fingerprint, its 440px column and its button-size question; the local tokens win
 ### About page (2026-10-16)
 
 `/about` (`app/about/`, `about.css`, classes `ab-`) is on the `.xp` layer: breadcrumb, h1, one-line lede, jump links, six `.isec` panels (what, why, how built, five rules, who, get involved), one `showcase` clip in the first panel, then `Next` pointing to /roadmap. No skill shaped it beyond the `.xp` layer and the Laws of UX above; nothing fetched, nothing rejected. Not in the header nav (five items); footer group Project.
+
+### Video components pages (2026-10-19)
+
+`/video-components` and `/video-components/<name>` (`app/video-components/`, classes `mv-` and `mvd-`): a hero editor graphic
+(filmstrip of real clip frames, timeline with lane-coloured blocks, keyframe diamonds, an accent playhead; `Hero.tsx`) that reads as
+video with the text blurred; numbered cards with a duration chip and a category icon; the `use` line shows on hover or focus over the clip
+and under the title on `(hover:none)`; a progress bar runs under the playing clip; the detail page has a timecode and scrubber bar
+(`StageBar.tsx`), meta pills and thumbnail prev/next. Icons are inline SVG in the Lucide style (`icons.tsx`).
+
+Used: `jakubkrehel/better-ui` (image outlines in pure white at 10%, shadow over border for depth, press scale, 100 ms staged entrance with
+12 px and 4 px blur, hover only under `(hover:hover)`, transitions on named properties). Rejected: its cross-fade icon swap (no icon changes state here).
+Desengs: limit details (cards at rest hold clip, number, duration, title and one icon), Jakob (the reference component-index layout), Hick (the filter panel stays
+folded), von Restorff (the accent marks only the playhead, the current frame and the progress), Fitts (the whole card is the link). Rejected:
+"you don't need animations" for the hero, because the playhead is the signal that this page is about video; it is off under reduced motion.

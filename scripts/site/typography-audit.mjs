@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // scripts/site/typography-audit.mjs: measure the rendered site against site/DESIGN.md "Typography rules".
 //
-//   node scripts/site/typography-audit.mjs --base http://localhost:3987 [--shots out/dir] [--json file] [--only /,/moves]
+//   node scripts/site/typography-audit.mjs --base http://localhost:3987 [--shots out/dir] [--json file] [--only /,/video-components]
 //
 // Reads computed styles in a real browser (the measuring code is typography-audit.browser.js): body size,
 // line height, line length (characters per line, by character rects), heading levels and weights, caps
@@ -18,14 +18,14 @@ const BASE = arg('--base', 'http://localhost:3000');
 const SHOTS = arg('--shots', '');
 const JSON_OUT = arg('--json', '');
 const ONLY = arg('--only', '');
-const SHOT_ROUTES = ['/', '/features', '/moves', '/moves/mask-rise', '/easing', '/blog', '/vs/remotion', '/blog/advise-refuse'];
+const SHOT_ROUTES = ['/', '/features', '/video-components', '/video-components/mask-rise', '/easing', '/blog', '/vs/remotion', '/blog/advise-refuse'];
 const BROWSER_SRC = fs.readFileSync(path.join(ROOT, 'scripts/site/typography-audit.browser.js'), 'utf8');
 
 function routeList() {
   if (ONLY) return ONLY.split(',');
   const pages = JSON.parse(fs.readFileSync(path.join(ROOT, 'site/lib/site-pages.json'), 'utf8')).routes.map((r) => r.path);
   const post = fs.readdirSync(path.join(ROOT, 'site/content/blog')).sort()[0].replace(/\.md$/, '');
-  return [...new Set([...pages, '/moves/mask-rise', '/easing/land', `/blog/${post}`])];
+  return [...new Set([...pages, '/video-components/mask-rise', '/easing/land', `/blog/${post}`])];
 }
 
 const median = (a) => (a.length ? [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)] : 0);

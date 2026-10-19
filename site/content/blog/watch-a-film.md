@@ -59,7 +59,7 @@ The `zoom` and `see` verbs take `--vs <ref>` and print deltas. The code is in `h
 
 <figure>
 <video src="/blog/watch-a-film/exposure-flash.mp4" poster="/blog/watch-a-film/exposure-flash.hd.webp" muted loop playsinline controls></video>
-<figcaption>A 3-frame exposure flash from our move library, the <a href="/moves/exposure-flash">exposure-flash move</a>. At 30 frames a second it lasts 0.10 s. The agent's 0.20 s runs were twice as long.</figcaption>
+<figcaption>A 3-frame exposure flash from our video component library, the <a href="/video-components/exposure-flash">exposure-flash video component</a>. At 30 frames a second it lasts 0.10 s. The agent's 0.20 s runs were twice as long.</figcaption>
 </figure>
 
 ## How to test a measuring tool against ground truth

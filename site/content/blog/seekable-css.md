@@ -111,13 +111,13 @@ Our version is `tests/media/seek-fill-none.test.mjs`. It uses a CSS animation an
 - A cancelled animation comes back: the set still holds it. See fix 3.
 - Edge pixels differ between two renders of the first frame: the timeline ran before the first seek. See fix 1.
 - Text shows the wrong face: the font was not ready. Fix 4 turns that into an error that names the family.
-- An SVG filter outline flips by 1.5 px between frames on a still shape. This came from the gooey filter, one of our [motion moves](/moves/gooey-filter). The default filter region is 10 percent of the box, and it cuts the blur. We gave the filter a wide region (`x="-30%" y="-30%" width="160%" height="160%"`) and put `will-change: transform` on its wrapper.
+- An SVG filter outline flips by 1.5 px between frames on a still shape. This came from the gooey filter, one of our [video components](/video-components/gooey-filter). The default filter region is 10 percent of the box, and it cuts the blur. We gave the filter a wide region (`x="-30%" y="-30%" width="160%" height="160%"`) and put `will-change: transform` on its wrapper.
 
 <figure>
 
 <video src="/blog/seekable-css/gooey-filter.mp4" poster="/blog/seekable-css/gooey-filter-poster.webp" muted loop playsinline autoplay width="680"></video>
 
-<figcaption>The gooey filter move after the fix, rendered from a page that seeks to each frame.</figcaption>
+<figcaption>The gooey filter video component after the fix, rendered from a page that seeks to each frame.</figcaption>
 
 </figure>
 
