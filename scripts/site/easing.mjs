@@ -1,17 +1,20 @@
 // Build the /easing pages' data from the motion library: one JSON file the site imports at build time.
 // Every number on an easing page is computed here from core/motion (the curve, its velocity, the
-// linear() string, the bezier fit, the After Effects handles) and from the real handle data in
-// scripts/site/data/ae-handles.json. Nothing is typed by hand except the words in easing-text.mjs.
+// linear() string, the bezier fit, the After Effects handles, the speed bands, the stagger and exit
+// limits, the product UI numbers) and from the real handle data in scripts/site/data/ae-handles.json.
+// The words are in easing-text.mjs (vaweWords takes the numbers this file computes) and in the JOBS
+// table below, which picks which core number goes where.
 //
 //   node scripts/site/easing.mjs     writes site/lib/easing.json (pure node, runs in prebuild)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { EASE, EASE_HANDLES, easeFn } from '../../core/motion/presets.js';
+import { EASE, EASE_HANDLES, easeFn, UI, BANDS } from '../../core/motion/presets.js';
+import LIMITS from '../../core/motion/taste-limits.js';
 import { resolveHandle, HANDLE_REGISTRY } from '../../core/motion/motion.js';
-import { curveToLinear } from '../../core/motion/springs.js';
+import { curveToLinear, spring, springDuration } from '../../core/motion/springs.js';
 import * as curves from '../../core/motion/curves.js';
-import { VAWE_TEXT, FAMILY, DIRECTION, SPECIAL, CSS_TEXT } from './easing-text.mjs';
+import { VAWE_TEXT, vaweWords, FAMILY, DIRECTION, SPECIAL, CSS_TEXT } from './easing-text.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'site', 'lib', 'easing.json');
@@ -185,6 +188,95 @@ const rmsGap = (a, b) => {
   return Math.sqrt(s / 101);
 };
 
+// ---- jobs: what to pick for each job, with the numbers read from core/motion ------------------------------------------
+const FPS = 30;
+const sec = (n) => `${+n.toFixed(2)}`;
+const span = (lo, hi) => `${sec(lo)} to ${sec(hi)} s`;
+const firstFrame = (name, d) => Math.round(easeFn(name)(1 / FPS / d) * 100);
+const timeTo = (name, level) => {
+  const f = easeFn(name);
+  for (let i = 0; i <= DENSE; i++) if (f(i / DENSE) >= level) return i / DENSE;
+  return 1;
+};
+const lateStart = (name) => Math.round(timeTo(name, 0.05) * 100);
+const EXIT = LIMITS['exits-shorter'];
+const EXIT_EXAMPLE = { entranceS: 0.5, exitMs: Math.round(EXIT.preset_leave_share * 0.5 * 1000) };
+const GAP = LIMITS.stagger;
+const POP = easeFn('pop');
+const popPeakAt = (() => {
+  let best = 0, at = 0;
+  for (let i = 0; i <= DENSE; i++) if (POP(i / DENSE) > best) { best = POP(i / DENSE); at = i / DENSE; }
+  return at;
+})();
+const popSettleFrames = (d) => +((1 - popPeakAt) * d * FPS).toFixed(1);
+
+const JOBS = [
+  { id: 'title', job: 'Title or text entrance', ease: 'land', time: span(...BANDS.gravity), avoid: 'pop or any overshoot on text: held text that overshoots reads as shaking.' },
+  { id: 'panel', job: 'UI panel or card in', ease: 'land', time: span(UI.panel.fadeMs / 1000, BANDS.professional[1]), avoid: `scale or overshoot on a panel. A copied product panel only fades in ${UI.panel.fadeMs} ms with a ${UI.panel.rise} rise.` },
+  { id: 'value', job: 'Value change (number swap)', ease: 'swap', time: `${sec(UI.roll.outMs / 1000)} s out, ${sec(UI.roll.inMs / 1000)} s in`, avoid: 'a spring on a number: it shows a figure that is not true. Roll each digit in its own slot; never half of two readings.' },
+  { id: 'stagger', job: 'List stagger', ease: 'land-soft', also: ['nudge'], time: `${span(...BANDS.energy)} a row, ${GAP.gap_min_s * 1000} to ${GAP.gap_max_s * 1000} ms apart, the run within ${GAP.total_max_s} s`, avoid: 'land on every row: a hard first frame on each reads as flicker. Overshoot on more than every third row.' },
+  { id: 'pop', job: 'Small pop or notification', ease: 'pop', time: span(...BANDS.gravity), avoid: `text blocks and more than one moving item. A pop under 0.35 s leaves ${popSettleFrames(0.35)} frames of settle at ${FPS} fps: use the send spring there.` },
+  { id: 'exit', job: 'Exit', ease: 'launch', also: ['leave'], time: `${EXIT.exit_share_min} to ${EXIT.exit_share_max} of the entrance (${sec(EXIT_EXAMPLE.exitMs / 1000)} s after a ${sec(EXIT_EXAMPLE.entranceS)} s one)`, avoid: `an exit on the entrance's own ease: it arrives while leaving. Use leave only for a settle or a hand-off the page names.` },
+  { id: 'camera-short', job: 'Camera move under 2 s', ease: 'land', time: span(BANDS.gravity[0], BANDS.cinematic[1]), avoid: `settle or glide: they reach 5% of the travel only after ${lateStart('settle')}% and ${lateStart('glide')}% of the time, so a 1.6 s pull-back looks dead for its first ${sec(timeTo('settle', 0.05) * 1.6)} s.` },
+  { id: 'camera-long', job: 'Camera move of 2 s or more', ease: 'glide', also: ['settle'], time: `${sec(BANDS.cinematic[1])} s or more`, avoid: 'land: it stops dead on arrival. Glide for a push or a drift; settle for a pull that starts and ends at rest.' },
+  { id: 'scan', job: 'Scan or wipe travel', ease: 'settle', time: span(BANDS.gravity[0], 1), avoid: 'swap: its steep middle turns the travelling line into a blur. Keep swap for the value the line flips.' },
+  { id: 'hold', job: 'Hold drift', ease: 'glide', time: 'the length of the hold, 2 s or more', avoid: 'a copied product surface: it holds still and stays alive through what the product does (a caret, a timer, a hover).' },
+];
+
+for (const j of JOBS) {
+  for (const slug of [j.ease, ...(j.also ?? [])]) {
+    if (!entries.some((e) => e.slug === slug)) throw new Error(`easing: job "${j.id}" names the unknown ease "${slug}"`);
+  }
+}
+
+// ---- product UI: the numbers of core/motion/ui.js, plus the curves they imply ---------------------------------------
+const tauOf = (k) => -1 / (FPS * Math.log(1 - k));
+const APPROACH_WINDOW = 0.3;
+const approachFn = (tau) => (u) => (1 - Math.exp((-u * APPROACH_WINDOW) / tau)) / (1 - Math.exp(-APPROACH_WINDOW / tau));
+const SEND = (() => {
+  let over = 0;
+  for (let t = 0; t < 1; t += 0.001) over = Math.max(over, spring(t, UI.send.k, UI.send.d) - 1);
+  return { k: UI.send.k, d: UI.send.d, overshoot: Math.round(over * 100), settleS: r2(springDuration(UI.send.k, UI.send.d, 0.01)) };
+})();
+const FIRST_FRAME_AT = [0.2, 0.3, 0.4, 0.5, 0.8];
+const FAST_OUT_K = [0.27, 0.39];
+const REAL_FIRST_FRAME = FAST_OUT_K.map((k) => Math.round(k * 100));
+
+function productUi(list) {
+  const approach = FAST_OUT_K.map((k) => {
+    const tau = tauOf(k);
+    const mine = sampled(approachFn(tau));
+    const nearest = list.map((o) => ({ o, gap: rmsGap(mine, o) })).sort((a, b) => a.gap - b.gap)[0];
+    return { k, tau: r2(tau), settle99: r2(tau * Math.log(100)), nearest: { slug: nearest.o.slug, name: nearest.o.name, gap: r4(nearest.gap) } };
+  });
+  return {
+    window: APPROACH_WINDOW,
+    realFirstFrame: REAL_FIRST_FRAME,
+    rows: [
+      { name: 'Move length', value: '0.15 to 0.4 s', rule: 'A state change takes 0.2 to 0.4 s, a row or line 0.15 to 0.3 s. Holds are long: 1.5 to 2.5 s.' },
+      { name: 'Panel in', value: `fade ${UI.panel.fadeMs} ms, rise ${UI.panel.rise}`, rule: 'A panel fades only. No scale, no overshoot.' },
+      { name: 'Row in, stagger', value: `fade ${UI.row.fadeMs} ms, rise ${UI.row.rise}, ${UI.row.staggerMs} ms apart`, rule: 'Real rows arrive 70 to 100 ms apart. The vawe limit is 30 to 80 ms.' },
+      { name: 'Send, small arrival', value: `spring k ${SEND.k}, d ${SEND.d}`, rule: `Overshoot ${SEND.overshoot}%, settled in ${SEND.settleS} s. Small items only: a bubble, a chip, a tip (3 to 20 px of travel). Real overshoot is ${UI.snap.overshoot.map((n) => Math.round(n * 100)).join(' to ')}%.` },
+      { name: 'Typing', value: `${UI.typing.charMs} ms a character, +${UI.typing.spaceMs} ms after a space, ${UI.typing.jitter * 100}% jitter`, rule: '20 to 27 characters a second with pauses at word gaps. Seed the jitter with rng.' },
+      { name: 'Stream', value: `${UI.stream.gapMs[0]} to ${UI.stream.gapMs[1]} ms a chunk, fade ${UI.stream.fadeMs} ms`, rule: '15 to 25 words a second. A word fades in, the text never moves, the layout is reserved.' },
+      { name: 'Digit roll', value: `${UI.roll.outMs} ms out, ${UI.roll.inMs} ms in, rise ${UI.roll.rise}`, rule: 'Each digit rolls in its own clipped slot. A counter never overshoots.' },
+      { name: 'Exit', value: `fade ${UI.exit.ms} ms, drift ${UI.exit.drift}`, rule: 'The whole window fades to the empty ground in 0.3 to 0.4 s, shorter than the entrance.' },
+    ],
+    approach,
+    firstFrame: {
+      at: FIRST_FRAME_AT,
+      rows: ['land', 'landSoft'].map((name) => ({ slug: kebab(name), name, shares: FIRST_FRAME_AT.map((d) => firstFrame(name, d)) })),
+    },
+    realSurface: [
+      'A copied product surface moves as the real one does: its timing, its curve and its steps.',
+      'A terminal steps and never eases its text: characters and whole lines appear on a frame, with no slide or fade.',
+      'No overshoot where the real UI has none: a panel fades, a counter never springs.',
+    ],
+  };
+}
+
+const FIX = vaweWords({ firstFrame, REAL_FIRST_FRAME, lateStart, STATS, EXIT, sec, EXIT_EXAMPLE, span, BANDS, popPeakAt, popSettleFrames, FPS, SEND });
+
 const out = entries.map((e) => {
   const { y, vel } = sampled(e.fn);
   const m = measure(e.fn);
@@ -194,10 +286,12 @@ const out = entries.map((e) => {
     const [outH, inH] = EASE_HANDLES[e.name];
     const o = resolveHandle(outH, 'easeOut'), i = resolveHandle(inH, 'easeIn');
     const hname = (h) => (typeof h === 'string' ? h : null);
-    entry.handles = { out: { ...o, name: hname(outH) }, in: { ...i, name: hname(inH) }, shares: handleShares(o, i) };
+    const shown = (h, name) => ({ ...h, influence: r2(h.influence), name });
+    entry.handles = { out: shown(o, hname(outH)), in: shown(i, hname(inH)), shares: handleShares(o, i) };
     entry.bezier = { params: [r4(o.influence / 100), r4(o.speed * (o.influence / 100)), r4(1 - i.influence / 100), r4(1 - i.speed * (i.influence / 100))], exact: true };
     entry.moves = movesUsing(e.name);
-    Object.assign(entry, VAWE_TEXT[e.slug]);
+    Object.assign(entry, VAWE_TEXT[e.slug], FIX[e.slug]);
+    entry.jobs = JOBS.filter((j) => j.ease === e.slug || j.also?.includes(e.slug)).map(({ id, job, time }) => ({ id, job, time }));
   } else {
     const bad = (e.family === 'elastic' || e.family === 'bounce');
     const worst = e.slug === 'linear' ? 0 : fit.worst;
@@ -230,5 +324,6 @@ for (const e of out) {
   }
 }
 
-fs.writeFileSync(OUT, JSON.stringify({ stats: STATS, families: FAMILIES, handleNames: HANDLE_REGISTRY.names, eases: out }));
+const jobsOut = JOBS.map(({ also, ...j }) => ({ ...j, also: (also ?? []).map((slug) => ({ slug, name: out.find((e) => e.slug === slug).name })), easeName: out.find((e) => e.slug === j.ease).name }));
+fs.writeFileSync(OUT, JSON.stringify({ stats: STATS, jobs: jobsOut, exitExample: EXIT_EXAMPLE, ui: productUi(out), popPeakAt: r4(popPeakAt), families: FAMILIES, handleNames: HANDLE_REGISTRY.names, eases: out }));
 console.log(`easing: ${out.length} eases, ${(fs.statSync(OUT).size / 1024).toFixed(0)} KB -> ${path.relative(root, OUT)}`);

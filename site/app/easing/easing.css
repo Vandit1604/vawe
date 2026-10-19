@@ -211,3 +211,22 @@
   .ez-lab *{animation:none!important}
   .ez-ph,.ez-lab-motion{display:none}
 }
+
+/* job table, product UI, stacked tables on a phone */
+.ez-jump{display:flex;flex-wrap:wrap;gap:0 var(--sp-5);margin-top:var(--sp-5);font-size:var(--fs-ui)}
+.ez-jump a{display:inline-flex;align-items:center;min-height:var(--hit);color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
+.ez-all{margin-top:var(--sp-8);scroll-margin-top:var(--sp-5)}
+.ez-table a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
+.ez-table caption{caption-side:top;text-align:left;padding-bottom:var(--sp-2);color:var(--muted);font-size:var(--fs-ui);line-height:var(--lh-body)}
+.ez-table td.ez-hit{color:var(--ink);background:var(--surface-2)}
+.ez-first{margin-top:var(--sp-4)}
+.ez-sub{margin-top:var(--sp-6);font-size:var(--fs-body);font-weight:var(--fw-head);color:var(--ink)}
+.ez-rules{list-style:disc;padding-left:var(--sp-5);margin-top:var(--sp-3);color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-body);max-width:var(--measure)}
+.ez-rules li + li{margin-top:var(--sp-2)}
+@media (max-width:640px){
+  .ez-stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .ez-stack,.ez-stack tbody,.ez-stack tr,.ez-stack caption{display:block}
+  .ez-stack tr{padding:var(--sp-3) 0;border-bottom:1px solid var(--line)}
+  .ez-stack td{display:grid;grid-template-columns:88px minmax(0,1fr);gap:var(--sp-3);padding:var(--sp-1) 0;border:0}
+  .ez-stack td::before{content:attr(data-label);font-family:var(--font-mono),monospace;font-size:var(--fs-label);letter-spacing:var(--track-caps);text-transform:uppercase;color:var(--muted)}
+}

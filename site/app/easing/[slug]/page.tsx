@@ -5,13 +5,13 @@ import { Footer } from "../../components/Footer";
 import { Clip } from "../../components/Clip";
 import { pageMetadata } from "../../components/seo";
 import { jsonLdScript, breadcrumbSchema } from "../../../lib/schema";
-import { CopyCode } from "../../moves/[name]/CopyCode";
+import { CopyCode } from "../../video-components/[name]/CopyCode";
 import { EASES, STATS, classicIn, bezierText, camelOf, copyIsBezier, copyValue, easeBySlug, importLine, pageDescription, pageTitle, roleOf, speedText, summary, techArticleSchema, waapi, type Ease } from "../../../lib/easing";
 import { MoveClips } from "../../components/MoveClips";
 import { CopyBtn } from "../CopyBtn";
 import { Lab, type Variant } from "../Lab";
 import { Next, Toc } from "../../components/Xp";
-import "../../moves/moves.css";
+import "../../video-components/moves.css";
 import "../../components/intent.css";
 import "../easing.css";
 
@@ -105,11 +105,11 @@ function Handles({ e }: { e: Ease }) {
   const s = h.shares;
   const row = (side: string, x: typeof h.out, share: number) => (
     <tr>
-      <td>{side}</td>
-      <td>{x.name ?? "custom"}</td>
-      <td className="n">{x.influence}%</td>
-      <td className="n">{x.speed}x</td>
-      <td className="n">{share}%</td>
+      <td data-label="Handle">{side}</td>
+      <td data-label="Name">{x.name ?? "custom"}</td>
+      <td data-label="Influence" className="n">{x.influence}%</td>
+      <td data-label="Speed" className="n">{x.speed}x</td>
+      <td data-label="Real handles near it" className="n">{share}%</td>
     </tr>
   );
   return (
@@ -119,7 +119,7 @@ function Handles({ e }: { e: Ease }) {
         Set these in After Effects under Keyframe Velocity: the outgoing handle on the first key, the incoming handle on the second. <strong>Influence</strong> is how far along the segment the handle reaches, in per cent of its duration. <strong>Speed</strong> is the pace at the key as a multiple of the segment’s average (0 stops dead, 1 is straight).
       </p>
       <div className="ez-scroll">
-        <table className="ez-table">
+        <table className="ez-table ez-stack">
           <thead>
             <tr><th>Handle</th><th>Name</th><th>Influence</th><th>Speed</th><th>Real handles near it</th></tr>
           </thead>
@@ -247,13 +247,31 @@ export default async function EasePage({ params }: Params) {
                 <ul>{e.avoid.map((t) => <li key={t}>{t}</li>)}</ul>
               </div>
             </div>
+            {e.jobs?.length ? (
+              <div className="ez-scroll">
+                <table className="ez-table ez-stack">
+                  <caption>Jobs for {e.name}, from <Link href="/easing#jobs">the job table</Link></caption>
+                  <thead>
+                    <tr><th>Job</th><th>Duration</th></tr>
+                  </thead>
+                  <tbody>
+                    {e.jobs.map((j) => (
+                      <tr key={j.id}>
+                        <td data-label="Job">{j.job}</td>
+                        <td data-label="Duration" className="n">{j.time}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
           </section>
 
           {e.nearestVawe ? (
             <section className="ez-sec" aria-labelledby="vawe-near">
               <h2 id="vawe-near">Nearest vawe ease</h2>
               <p>
-                <Link href={`/easing/${e.nearestVawe.slug}`}>{e.nearestVawe.name}</Link>, RMS gap {e.nearestVawe.gap} in progress.
+                <Link href={`/easing/${e.nearestVawe.slug}`}>{e.nearestVawe.name}</Link>, curve gap {e.nearestVawe.gap}.
               </p>
             </section>
           ) : null}
@@ -273,12 +291,12 @@ export default async function EasePage({ params }: Params) {
 
           {e.moves?.length ? (
             <section className="ez-sec" aria-labelledby="moves">
-              <h2 id="moves">Moves that use {e.name}</h2>
-              <p>{e.moves.length} moves set <code>EASE.{camelOf(e.slug)}</code>. The first four play here.</p>
+              <h2 id="moves">Video components that use {e.name}</h2>
+              <p>{e.moves.length} video components set <code>EASE.{camelOf(e.slug)}</code>. The first four play here.</p>
               <MoveClips names={e.moves.slice(0, 4).map((m) => m.name)} />
               <ul className="ez-moves">
                 {e.moves.slice(0, 12).map((m) => (
-                  <li key={m.name}><Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link></li>
+                  <li key={m.name}><Link href={`/video-components/${m.name}`} prefetch={false}>{m.title}</Link></li>
                 ))}
               </ul>
               {e.moves.length > 12 ? (
@@ -286,7 +304,7 @@ export default async function EasePage({ params }: Params) {
                   <summary>Show the other {e.moves.length - 12}</summary>
                   <ul className="ez-moves">
                     {e.moves.slice(12).map((m) => (
-                      <li key={m.name}><Link href={`/moves/${m.name}`} prefetch={false}>{m.title}</Link></li>
+                      <li key={m.name}><Link href={`/video-components/${m.name}`} prefetch={false}>{m.title}</Link></li>
                     ))}
                   </ul>
                 </details>
@@ -296,7 +314,7 @@ export default async function EasePage({ params }: Params) {
           <Next
             title="More easing"
             primary={{ href: "/easing", label: "All easing functions" }}
-            secondary={{ href: "/moves", label: "See the moves" }}
+            secondary={{ href: "/video-components", label: "See the video components" }}
             related={[{ href: "/docs/motion", label: "Motion in the docs" }]}
           />
           <CopyCode rootId="ez-main" />

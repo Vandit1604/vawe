@@ -1,31 +1,22 @@
-// The words on /easing/<slug>: what each ease is for, and when to leave it alone. Plain data; the
-// numbers on the page come from scripts/site/easing.mjs, never from here.
+// The words on /easing/<slug>: what each ease is for, and when to leave it alone. The numbers come
+// from scripts/site/easing.mjs, never from here: vaweWords takes them as arguments.
 
 export const VAWE_TEXT = {
   land: {
     blurb: 'An entrance: it leaves fast and arrives on a long, soft stop.',
-    use: ['Entrances of titles, cards and panels from 0.4 to 0.9 s. It is the default of enter().', 'A move that must read as arriving: the eye catches the fast start and rests on the stop.'],
-    avoid: ['Moves under 0.4 s: the first frame jumps about a quarter of the way. Use land-soft there.', 'Exits and loops. It ends on a dead stop and starts at full speed, so it does not chain.'],
   },
   'land-soft': {
     blurb: 'An entrance for short moves: a gentler start than land, the same long stop.',
-    use: ['Entrances of 0.15 to 0.4 s: list rows, labels, small UI.', 'Staggered groups, where a hard first frame on every item reads as flicker.'],
     avoid: ['Hero moves over 0.6 s. The softer start loses the punch that land has.', 'Exits. Use launch or leave.'],
   },
   settle: {
     blurb: 'Eases at both ends, with long dead stops.',
-    use: ['Big or heavy objects crossing the frame in 0.5 to 1 s: panels, full-width bars, device frames.', 'Moves that start from rest and end at rest, where land would feel too fast at the start.'],
-    avoid: ['Small, quick UI. Both ends are slow, so a 0.2 s move spends most of it standing still.', 'Anything that must start the instant the viewer looks: the first frames barely move.'],
   },
   swap: {
     blurb: 'A swap: the value waits at each key and changes in the middle.',
-    use: ['Replacing one thing with another: a label, a number, a tab, a crop.', 'Camera cuts on the move, where you want a crisp hit and a hold on both sides.'],
-    avoid: ['Long travel. The middle is steep, so a big distance becomes a blur.', 'Slow, floating motion. It is the opposite of a drift.'],
   },
   glide: {
     blurb: 'A slow drift: it starts gently and never fully stops.',
-    use: ['Camera pushes and slow scale on a held shot, over 2 s or more.', 'A background layer behind a still title, where motion must be felt and not followed.'],
-    avoid: ['Entrances. There is no clear arrival, so the viewer cannot tell when the thing has landed.', 'Short moves. The slow tail needs time to be seen.'],
   },
   carry: {
     blurb: 'It starts gently and is still moving fast at the end, so the next key can carry on.',
@@ -33,18 +24,13 @@ export const VAWE_TEXT = {
     avoid: ['A move that must come to rest. It ends at speed and looks cut off.', 'Moves with no next move to take the speed.'],
   },
   leave: {
-    blurb: 'An exit that eases away and slows into its end.',
-    use: ['Exits of panels and labels that should settle out of the frame rather than snap away.', 'Real exits: most tuned exits in the After Effects data end on this shape.'],
-    avoid: ['Exits that must clear the frame fast. It is slow at the end. Use launch.', 'Entrances. It is built to finish, not to start.'],
+
   },
   launch: {
     blurb: 'An exit that starts gently and speeds up, at most 3x average at the cut.',
-    use: ['Exits shorter than the entrance (about 0.6 of it), where the element should be gone before the eye follows it.', 'Wipes and clears that hand the frame to the next beat.'],
-    avoid: ['Any move that has to land. It ends at speed.', 'Exits the viewer should watch. Real exits in the data slow down at the end; use leave.'],
   },
   pop: {
     blurb: 'A fast start, then it passes its mark by about 15 per cent and settles back.',
-    use: ['A call to action, a check mark, a notification: one small thing that must feel alive.', 'Scale and position of a single focal element.'],
     avoid: ['Text blocks and anything with more than one item moving: overshoot on many things reads as shaking.', 'Opacity. A value past 1 is clamped, so the overshoot does nothing.'],
   },
   nudge: {
@@ -110,3 +96,38 @@ export const CSS_TEXT = {
     avoid: ['Quick UI feedback: the slow start delays the response.', 'Film entrances. Land gives a clearer arrival.'],
   },
 };
+
+// The words that quote a computed number (the test of 5 moves, 2026-10-19); they replace VAWE_TEXT's fields of the same name.
+export const vaweWords = ({ firstFrame, REAL_FIRST_FRAME, lateStart, STATS, EXIT, sec, EXIT_EXAMPLE, span, BANDS, popPeakAt, popSettleFrames, FPS, SEND }) => ({
+  land: {
+    use: ['Entrances of titles, cards and panels from 0.5 to 0.8 s. It is the default of enter().', 'A camera move under 2 s that must arrive, such as a pull-back: it settles in the first quarter.'],
+    avoid: [`Staggered rows under 0.4 s: at 0.3 s the first frame jumps ${firstFrame('land', 0.3)}% of the way. Use land-soft (${firstFrame('landSoft', 0.3)}%).`, 'Exits and loops. It ends on a dead stop and starts at full speed, so it does not chain.'],
+  },
+  'land-soft': {
+    use: ['Entrances of 0.15 to 0.4 s: list rows, labels, small UI.', `A copied product move: a real surface covers ${REAL_FIRST_FRAME[0]} to ${REAL_FIRST_FRAME[1]}% in its first frame, and land-soft gives ${firstFrame('landSoft', 0.3)}% at 0.3 s.`],
+  },
+  settle: {
+    use: ['Scan or wipe travel of 0.5 to 1 s: the line starts and ends at rest.', 'Big or heavy objects crossing the frame in 0.5 to 1 s: panels, full-width bars, device frames, a camera pull of 2 s or more.'],
+    avoid: [`Moves under 0.5 s and camera moves under 2 s: both ends are slow, so the dead start wastes the first ${lateStart('settle')}% of the move. Use land.`, 'Small, quick UI. A 0.2 s move spends most of it standing still.'],
+  },
+  swap: {
+    use: ['The value change: a label, a number, a tab, a crop, in 0.15 to 0.4 s.', 'Camera cuts on the move, where you want a crisp hit and a hold on both sides.'],
+    avoid: ['Scan or wipe travel, and any long distance. The middle is steep, so the line becomes a blur. Use settle.', 'Slow, floating motion. It is the opposite of a drift.'],
+  },
+  glide: {
+    use: ['Camera pushes and slow scale on a held shot, over 2 s or more.', 'A background layer behind a still title, where motion must be felt and not followed.'],
+    avoid: ['Camera moves under 2 s: the slow tail needs time to be seen. Use land.', 'Entrances. There is no clear arrival, so the viewer cannot tell when the thing has landed.'],
+  },
+  leave: {
+    blurb: 'A decelerating exit: it eases away and slows into its end. The house exit is launch.',
+    use: ['An exit that is a settle or a hand-off into the next shot, when the page says so.', `Outside reference: ${STATS.exitSegments - STATS.exitsFasterThan15} of ${STATS.exitSegments} Lottie exits end at 1.5x the average or slower.`],
+    avoid: [`A plain exit. Exits run ${EXIT.exit_share_min} to ${EXIT.exit_share_max} of the entrance and accelerate: use launch.`, 'Entrances. It is built to finish, not to start.'],
+  },
+  launch: {
+    use: [`The default exit, ${EXIT.exit_share_min} to ${EXIT.exit_share_max} of the entrance (${sec(EXIT_EXAMPLE.exitMs / 1000)} s after a ${sec(EXIT_EXAMPLE.entranceS)} s one): opacity 1 to 0 while it moves out. leave() uses it.`, 'Wipes and clears that hand the frame to the next beat.'],
+    avoid: ['Any move that has to land. It ends at speed.', 'A settle or a hand-off the page names: use leave.'],
+  },
+  pop: {
+    use: [`A call to action, a check mark, a notification: one small thing that must feel alive, in ${span(...BANDS.gravity)}.`, `The peak comes at ${Math.round(popPeakAt * 100)}% of the move: a 0.5 s pop leaves ${popSettleFrames(0.5)} frames of settle at ${FPS} fps. For a faster snap on a small item use the send spring (k ${SEND.k}, d ${SEND.d}).`],
+  },
+});

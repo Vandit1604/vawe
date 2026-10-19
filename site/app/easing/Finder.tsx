@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { ROLES } from "../../lib/easing";
 import { SpacingChart, spacingDomain } from "./Spacing";
 
 type Pick = { slug: string; name: string; ez: string; sp: number[] };
@@ -11,10 +10,10 @@ const MAX_ECHO = 40;
 
 // The cards are server-rendered so every ease stays a plain link. This wrapper filters them by
 // toggling `hidden`, copies a card's value, and runs the comparison tray.
-export function Finder({ children, total }: { children: ReactNode; total: number }) {
+export function Finder({ children, total, jobs }: { children: ReactNode; total: number; jobs: { id: string; job: string }[] }) {
   const root = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
-  const [role, setRole] = useState<string>("All");
+  const [job, setJob] = useState<string>("all");
   const [picks, setPicks] = useState<Pick[]>([]);
   const [shown, setShown] = useState(total);
   const [replay, setReplay] = useState(0);
@@ -34,7 +33,7 @@ export function Finder({ children, total }: { children: ReactNode; total: number
     const q = query.trim().toLowerCase();
     let n = 0;
     for (const card of cards()) {
-      const hit = (role === "All" || card.dataset.role === role) && (!q || (card.dataset.search ?? "").includes(q));
+      const hit = (job === "all" || (card.dataset.jobs ?? "").split(" ").includes(job)) && (!q || (card.dataset.search ?? "").includes(q));
       card.hidden = !hit;
       if (hit) n++;
     }
@@ -42,7 +41,7 @@ export function Finder({ children, total }: { children: ReactNode; total: number
       g.hidden = !g.querySelector("[data-ez-card]:not([hidden])");
     });
     setShown(n);
-  }, [query, role, cards]);
+  }, [query, job, cards]);
 
   useEffect(() => {
     const slugs = new Set(picks.map((p) => p.slug));
@@ -81,16 +80,16 @@ export function Finder({ children, total }: { children: ReactNode; total: number
           <span className="ez-sr">Search easing functions</span>
           <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search: out, bounce, land" autoComplete="off" spellCheck={false} />
         </label>
-        <div className="ez-chips" role="group" aria-label="Filter by use">
-          {["All", ...ROLES].map((r) => (
-            <button key={r} type="button" className="ez-chip" aria-pressed={role === r} onClick={() => setRole(r)}>{r}</button>
+        <div className="ez-chips" role="group" aria-label="Filter by job">
+          {[{ id: "all", job: "All" }, ...jobs].map((j) => (
+            <button key={j.id} type="button" className="ez-chip" aria-pressed={job === j.id} onClick={() => setJob(j.id)}>{j.job}</button>
           ))}
         </div>
         <p className="ez-count meta" aria-live="polite">{shown === total ? `${total} eases` : `${shown} of ${total}`}</p>
       </div>
       {shown === 0 ? (
         <p className="ez-empty">
-          {query.trim() ? <>No ease matches &ldquo;{query.trim().slice(0, MAX_ECHO)}{query.trim().length > MAX_ECHO ? "\u2026" : ""}&rdquo;.</> : "No ease matches these filters."} <button type="button" className="ez-link" onClick={() => { setQuery(""); setRole("All"); }}>Clear the filters</button>
+          {query.trim() ? <>No ease matches &ldquo;{query.trim().slice(0, MAX_ECHO)}{query.trim().length > MAX_ECHO ? "\u2026" : ""}&rdquo;.</> : "No ease matches these filters."} <button type="button" className="ez-link" onClick={() => { setQuery(""); setJob("all"); }}>Clear the filters</button>
         </p>
       ) : null}
       {children}

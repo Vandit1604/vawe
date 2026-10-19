@@ -34,12 +34,26 @@ export type Ease = {
     shares: { outShare: number; inShare: number; pairShare: number; pairCount: number; entranceShare: number; exitShare: number; hfCount: number };
   };
   moves?: { name: string; title: string; uses: number }[];
+  jobs?: { id: string; job: string; time: string }[];
 };
 
-const typeset = (e: Ease): Ease => ({ ...e, blurb: smart(e.blurb), use: e.use.map(smart), avoid: e.avoid.map(smart) });
+export type Job = { id: string; job: string; ease: string; easeName: string; also: { slug: string; name: string }[]; time: string; avoid: string };
+export type ProductUi = {
+  window: number;
+  realFirstFrame: number[];
+  rows: { name: string; value: string; rule: string }[];
+  approach: { k: number; tau: number; settle99: number; nearest: Related }[];
+  firstFrame: { at: number[]; rows: { slug: string; name: string; shares: number[] }[] };
+  realSurface: string[];
+};
+
+const typeset = (e: Ease): Ease => ({ ...e, blurb: smart(e.blurb), use: e.use.map(smart), avoid: e.avoid.map(smart), jobs: e.jobs?.map((j) => ({ ...j, time: smart(j.time) })) });
 
 export const EASES = (data.eases as Ease[]).map(typeset);
 export const STATS = data.stats;
+export const JOBS = (data.jobs as Job[]).map((j) => ({ ...j, time: smart(j.time), avoid: smart(j.avoid[0].toUpperCase() + j.avoid.slice(1)) }));
+const ui = data.ui as ProductUi;
+export const PRODUCT_UI: ProductUi = { ...ui, rows: ui.rows.map((r) => ({ name: r.name, value: smart(r.value), rule: smart(r.rule) })), realSurface: ui.realSurface.map(smart) };
 export const FAMILIES = data.families as string[];
 
 export const easeBySlug = (slug: string) => EASES.find((e) => e.slug === slug) ?? null;
@@ -83,7 +97,12 @@ export function waapi(e: Ease) {
   return `el.animate({ translate: ['0 0', '240px 0'] }, { duration: 600, easing: '${easing}', fill: 'both' });`;
 }
 
+const EXIT_EASES = ["launch", "leave"];
+const EXIT_EXAMPLE = data.exitExample as { entranceS: number; exitMs: number };
+const EXIT_SHARE = EXIT_EXAMPLE.exitMs / (EXIT_EXAMPLE.entranceS * 1000);
+
 export function importLine(e: Ease) {
+  if (e.kind === "vawe" && EXIT_EASES.includes(e.slug)) return `import { EASE } from '../../core/motion/presets.js';\n\n// ${EXIT_EXAMPLE.exitMs / 1000} s: ${EXIT_SHARE} of a ${EXIT_EXAMPLE.entranceS} s entrance. fill forwards, never both: a backwards fill would cover the entrance.\nel.animate(\n  [{ translate: '0 0', opacity: 1 }, { translate: '0 -0.3em', opacity: 0 }],\n  { duration: ${EXIT_EXAMPLE.exitMs}, easing: EASE.${camelOf(e.slug)}, fill: 'forwards' },\n);\n\n// the helper does the same from the entrance's length: leave(el, { ease: '${camelOf(e.slug)}' })\n// per-frame code (window.seek, vawe.onFrame): easeFn('${camelOf(e.slug)}')(u)`;
   if (e.kind === "vawe") return `import { EASE } from '../../core/motion/presets.js';\n\nel.animate(\n  [{ translate: '0 4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }],\n  { duration: 500, easing: EASE.${camelOf(e.slug)}, fill: 'both' },\n);\n\n// per-frame code (window.seek, vawe.onFrame): easeFn('${camelOf(e.slug)}')(u)`;
   if (e.kind === "css") return `animation: slide 600ms ${e.name};`;
   return `import { ${e.name} } from '../../core/motion/curves.js';\nimport { curveToLinear } from '../../core/motion/springs.js';\n\nconst easing = curveToLinear(${e.name}, { tolerance: 0.002 }); // the linear() string above\nconst x = ${e.name}(u);                                         // per-frame code, u in 0..1`;
@@ -102,6 +121,8 @@ export function roleOf(e: Ease): Role {
   if (e.family === "back" || e.family === "elastic" || e.family === "bounce") return "Overshoot";
   return DIR_ROLE[e.dir ?? "inOut"];
 }
+
+export const jobIdsOf = (slug: string) => JOBS.filter((j) => j.ease === slug || j.also.some((a) => a.slug === slug)).map((j) => j.id);
 
 export const copyIsBezier = (e: Ease) => e.kind !== "classic" || e.bezier.express !== "no";
 export const copyValue = (e: Ease) => (copyIsBezier(e) ? bezierText(e) : e.linear);
