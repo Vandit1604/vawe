@@ -1,108 +1,164 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="daylight">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2">
+<meta name="duration" content="5">
+<meta name="variants" content="dark">
 <title>move: before and after wipe</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  .card { position: relative; width: calc(var(--u) * 136); height: calc(var(--u) * 74); padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  /* the Vercel dashboard (Web Analytics) in a Chrome window, set in Geist as the real one is. Sizes are u (1 percent of the frame height). */
+  html { --v-bg: #fafafa; --v-card: #fff; --v-line: #ebebeb; --v-ink: #171717; --v-muted: #666; --v-bar: #7cb8ff; --v-hot: #0070f3; --v-up: #12803d; --v-grid: #f0f0f0; --v-pill: #f2f2f2; --v-sans: 'Geist', system-ui, sans-serif; }
+  html[data-theme="dark"] { --v-bg: #000; --v-card: #0a0a0a; --v-line: #2e2e2e; --v-ink: #ededed; --v-muted: #a1a1a1; --v-bar: #1f5fb4; --v-hot: #3291ff; --v-up: #4cc38a; --v-grid: #1a1a1a; --v-pill: #1a1a1a; }
+  .win .strip, .win .bar { font-family: var(--v-sans); }
+  .page { display: flex; flex-direction: column; background: var(--v-bg); color: var(--v-ink); font-family: var(--v-sans); }
+  .nav { flex: none; display: flex; align-items: center; gap: calc(var(--u) * 1.1); height: calc(var(--u) * 5.4); padding: 0 calc(var(--u) * 2.6); background: var(--v-card); font: 500 calc(var(--u) * 1.9)/1 var(--v-sans); }
+  .nav .tri { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); fill: var(--v-ink); }
+  .nav .sl { color: var(--v-line); font-weight: 300; }
+  .nav .av { width: calc(var(--u) * 2.5); height: calc(var(--u) * 2.5); border-radius: 50%; background: linear-gradient(135deg, #ff6a3d, #ffb347 45%, #7c5cff); }
+  .nav .who { display: flex; align-items: center; gap: calc(var(--u) * 0.9); }
+  .nav .icon, .filters .icon { width: calc(var(--u) * 1.4); height: calc(var(--u) * 1.4); color: var(--v-muted); stroke-width: 1.8; }
+  .nav .right { margin-left: auto; display: flex; align-items: center; gap: calc(var(--u) * 1.8); color: var(--v-muted); font-weight: 400; }
+  .nav .right .btn { padding: calc(var(--u) * 0.8) calc(var(--u) * 1.5); border-radius: calc(var(--u) * 0.8); box-shadow: 0 0 0 1px var(--v-line); color: var(--v-ink); font-size: calc(var(--u) * 1.6); }
+  .nav .right .icon { width: calc(var(--u) * 2); height: calc(var(--u) * 2); }
+  .nav .me { width: calc(var(--u) * 2.8); height: calc(var(--u) * 2.8); border-radius: 50%; background: linear-gradient(135deg, #0070f3, #7c5cff); }
+  .tabs2 { flex: none; display: flex; gap: calc(var(--u) * 2.8); height: calc(var(--u) * 4.4); padding: 0 calc(var(--u) * 2.6); background: var(--v-card); box-shadow: 0 1px 0 var(--v-line); font: 400 calc(var(--u) * 1.8)/1 var(--v-sans); color: var(--v-muted); }
+  .tabs2 span { display: flex; align-items: center; height: 100%; }
+  .tabs2 .on { color: var(--v-ink); box-shadow: inset 0 -2px 0 var(--v-ink); }
+  .body { flex: 1; min-height: 0; padding: calc(var(--u) * 3) calc(var(--u) * 3.6) 0; }
+  .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: calc(var(--u) * 2.4); }
+  .head h1 { margin: 0; font: 600 calc(var(--u) * 3.4)/1 var(--v-sans); letter-spacing: -0.03em; }
+  .filters { display: flex; gap: calc(var(--u) * 1.2); }
+  .filters span { display: flex; align-items: center; gap: calc(var(--u) * 0.8); padding: calc(var(--u) * 1) calc(var(--u) * 1.5); border-radius: calc(var(--u) * 0.8); background: var(--v-card); box-shadow: 0 0 0 1px var(--v-line); font: 500 calc(var(--u) * 1.7)/1 var(--v-sans); }
 
-  /* the header is shared and never wiped: only what changed sits under the scan */
-  .top { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 12); padding: 0 calc(var(--u) * 4.4); box-shadow: 0 1px 0 var(--line); font: 600 var(--t-small)/1 var(--sans); color: var(--muted); }
-  .top b { color: var(--ink); font-weight: 700; letter-spacing: -0.01em; }
-  .svc { display: grid; place-items: center; width: calc(var(--u) * 6); height: calc(var(--u) * 6); border-radius: calc(var(--u) * 1.5); background: var(--raised); color: var(--ink); box-shadow: var(--ring); }
-  .svc .logo-mark { width: 62%; height: 62%; }
-  .top .range { margin-left: auto; font-weight: 500; color: var(--muted); }
+  .card { position: relative; border-radius: calc(var(--u) * 1); background: var(--v-card); box-shadow: 0 0 0 1px var(--v-line); overflow: hidden; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); box-shadow: 0 1px 0 var(--v-line); }
+  .kpi { position: relative; padding: calc(var(--u) * 2) calc(var(--u) * 2.6) calc(var(--u) * 2.2); }
+  .kpi + .kpi { box-shadow: -1px 0 0 var(--v-line); }
+  .kpi.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--v-ink); }
+  .kpi .lab { font: 400 calc(var(--u) * 1.8)/1 var(--v-sans); color: var(--v-muted); }
+  .kpi .row { display: flex; align-items: baseline; gap: calc(var(--u) * 1.3); margin-top: calc(var(--u) * 1.3); }
+  .kpi .val { font: 600 calc(var(--u) * 4.6)/1 var(--v-sans); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+  .kpi .dl { font: 500 calc(var(--u) * 1.7)/1 var(--v-sans); font-variant-numeric: tabular-nums; }
+  .slot { display: inline-grid; }
+  .slot > * { grid-area: 1 / 1; white-space: nowrap; }
+  .slot .a.dim, .dl .a { color: var(--v-muted); }
+  .dl .b { color: var(--v-up); }
 
-  .stage { position: relative; flex: 1; }
-  .state { position: absolute; inset: 0; padding: calc(var(--u) * 3.6) calc(var(--u) * 4.4) calc(var(--u) * 3); display: flex; flex-direction: column; background: var(--surface); }
-  .tag { position: absolute; top: calc(var(--u) * 3.6); display: inline-flex; align-items: center; gap: calc(var(--u) * 1); height: calc(var(--u) * 5); padding: 0 calc(var(--u) * 1.8); border-radius: 999px; font: 700 calc(var(--u) * 2.9)/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; }
-  .tag i { font: 500 calc(var(--u) * 2.9)/1 var(--mono); letter-spacing: 0; text-transform: none; font-style: normal; opacity: 0.7; }
-  .before .tag { right: calc(var(--u) * 4.4); background: var(--raised); color: var(--muted); box-shadow: var(--ring); }
-  .after .tag { right: calc(var(--u) * 4.4); background: var(--accent); color: var(--on-accent); box-shadow: var(--accent-edge); }
+  .chart { position: relative; height: calc(var(--u) * 30.5); margin: calc(var(--u) * 2.2) calc(var(--u) * 2.6) 0; }
+  .plot { position: absolute; left: calc(var(--u) * 4); right: 0; top: 0; bottom: calc(var(--u) * 3.2); }
+  .gl { position: absolute; left: 0; right: 0; height: 1px; background: var(--v-grid); }
+  .gl b { position: absolute; left: calc(var(--u) * -4); top: calc(var(--u) * -0.9); width: calc(var(--u) * 3.2); text-align: right; font: 400 calc(var(--u) * 1.4)/1 var(--v-sans); color: var(--v-muted); }
+  .bars { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: 100%; column-gap: calc(var(--u) * 2.6); align-items: end; padding: 0 calc(var(--u) * 1.3); }
+  .bar2 { height: var(--a); border-radius: calc(var(--u) * 0.5) calc(var(--u) * 0.5) 0 0; background: var(--v-bar); transform-origin: 50% 100%; }
+  .days { position: absolute; left: calc(var(--u) * 4); right: 0; bottom: 0; display: grid; grid-template-columns: repeat(7, 1fr); column-gap: calc(var(--u) * 2.6); padding: 0 calc(var(--u) * 1.3); font: 400 calc(var(--u) * 1.4)/1 var(--v-sans); color: var(--v-muted); text-align: center; }
+  .tip { position: absolute; padding: calc(var(--u) * 1.1) calc(var(--u) * 1.5); border-radius: calc(var(--u) * 0.9); background: var(--v-card); box-shadow: 0 0 0 1px var(--v-line), 0 calc(var(--u) * 0.8) calc(var(--u) * 2.4) rgb(0 0 0 / 0.12); font: 500 calc(var(--u) * 1.5)/1 var(--v-sans); white-space: nowrap; }
+  .tip .d { color: var(--v-muted); font-weight: 400; margin-bottom: calc(var(--u) * 0.9); }
+  .tip .r { display: flex; align-items: center; gap: calc(var(--u) * 0.8); }
+  .tip .r i { width: calc(var(--u) * 0.9); height: calc(var(--u) * 0.9); border-radius: 50%; background: var(--v-hot); }
+  .tip .r b { margin-left: calc(var(--u) * 1.4); font-weight: 600; }
 
-  .read { display: flex; align-items: flex-end; gap: calc(var(--u) * 6); }
-  .big { display: flex; align-items: baseline; gap: calc(var(--u) * 1.2); }
-  .num { font: 800 calc(var(--u) * 15)/0.9 var(--sans); letter-spacing: -0.05em; }
-  .unit { font: 600 var(--t-lead)/1 var(--sans); color: var(--muted); }
-  .before .num { color: var(--muted); }
-  .stat { display: flex; flex-direction: column; gap: calc(var(--u) * 1.2); padding-bottom: calc(var(--u) * 0.6); }
-  .stat span { font: 500 calc(var(--u) * 3.1)/1 var(--sans); color: var(--muted); }
-  .stat b { font: 700 calc(var(--u) * 4.6)/1 var(--sans); letter-spacing: -0.02em; }
-  .before .stat b { color: var(--muted); }
-  .delta { align-self: center; margin-left: calc(var(--u) * -3); }
-
-  .chart { position: relative; flex: 1; min-height: 0; margin-top: calc(var(--u) * 3.4); }
-  .plot { position: absolute; inset: 0 0 calc(var(--u) * 5) 0; }
-  .plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
-  .slo { position: absolute; right: 0; top: 80%; translate: 0 -50%; font: 600 calc(var(--u) * 2.8)/1 var(--sans); color: var(--muted); background: var(--surface); padding-left: calc(var(--u) * 1); }
-  .days { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; font: 500 calc(var(--u) * 2.8)/1 var(--sans); color: var(--muted); }
-
-  /* the divider: a 2 px accent hairline and a white grip with a ring, like a real compare slider */
   .scan { position: absolute; top: 0; bottom: 0; left: 0; width: 0; }
-  .scan::before { content: ''; position: absolute; top: 0; bottom: 0; left: calc(var(--u) * -0.2); width: calc(var(--u) * 0.4); background: var(--accent); }
-  .grip { position: absolute; top: 50%; left: 0; translate: -50% -50%; width: calc(var(--u) * 6.4); height: calc(var(--u) * 10); border-radius: 999px; background: var(--surface); color: var(--accent); display: grid; place-items: center;
-          box-shadow: 0 0 0 calc(var(--u) * 0.4) var(--accent), 0 calc(var(--u) * 0.8) calc(var(--u) * 2.4) rgba(60, 50, 160, 0.28); }
-  .grip .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); stroke-width: 2; }
+  .scan::before { content: ''; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--v-hot); }
+  .grip { position: absolute; top: 44%; left: 0; translate: -50% -50%; width: calc(var(--u) * 4.6); height: calc(var(--u) * 3.2); border-radius: 999px; background: var(--v-card); color: var(--v-hot); display: grid; place-items: center; box-shadow: 0 0 0 2px var(--v-hot); }
+  .grip .icon { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); stroke-width: 2; }
+  .cursor { position: absolute; left: 0; top: 0; width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); z-index: 5; filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.35)); }
 </style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "overshoot-share", "world-held@0.0-5.0", "static-window@1-1.8", "tile-run@0.2-4.6", "static-window@3.7-4.6"], "_why": {"text-unreadable-hold": "the dashboard holds 2.3 s after the wipe lands at 2.25 s in a 5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 4.6 s, 0.4 s before the 5 s end, so the readings hold 2.35 s, short of the 5.4 s the check asks", "overshoot-share": "real surface: Vercel does not overshoot: 0 of 9 arrivals, 0%, bars rise on a plain ease from 0.45 s to 2.25 s", "world-held@0.0-5.0": "one Vercel dashboard holds 5.0 s: its readings swap at the scan line from 1.55 s to 2.25 s and the cursor moves at 2.05 s and 3.5 s", "static-window@1-1.8": "0.8 s from 1.0 s: the seven before bars have landed at 1.19 s and the page waits for the scan line at 1.55 s, as a loaded dashboard does", "tile-run@0.2-4.6": "23 near-identical tiles from 0.2 s to 4.6 s: the dashboard changes at the scan line from 1.55 s to 2.25 s and at the cursor steps at 2.05 s and 3.5 s", "static-window@3.7-4.6": "0.9 s from 3.7 s: the after reading holds as the Vercel page does once the cursor has stepped to the second bar at 3.5 s"}}</script>
 </head>
 <body>
-<div class="card">
-  <div class="top"><span class="svc" data-logo="parcel"></span><b>checkout-api</b>p95 latency, eu-west<span class="range">Last 7 days</span></div>
-  <div class="stage">
-    <div class="state before">
-      <span class="tag">Before <i>v4.2</i></span>
-      <div class="read"><div class="big"><span class="num">812</span><span class="unit">ms</span></div>
-        <div class="stat"><span>Error rate</span><b>2.4%</b></div><div class="stat"><span>Throughput</span><b>1.2k rps</b></div></div>
-      <div class="chart"><div class="plot"><svg viewBox="0 0 600 100" preserveAspectRatio="none"></svg><span class="slo">SLO 200 ms</span></div>
-        <div class="days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>
+<div class="win">
+  <div class="strip" data-chrome><span class="lights"><i></i><i></i><i></i></span>
+    <span class="tab"><svg class="tri" viewBox="0 0 24 24" style="width:1.3em;height:1.3em;fill:currentColor"><path d="M12 3 23 21H1z"/></svg><span>Analytics – checkout-web – Vercel</span><svg class="icon x" data-i="x"></svg></span>
+    <svg class="icon newtab" data-i="plus"></svg></div>
+  <div class="bar" data-chrome><svg class="icon" data-i="back"></svg><svg class="icon" data-i="fwd"></svg><svg class="icon" data-i="reload"></svg>
+    <span class="omni"><svg class="icon" data-i="tune"></svg>vercel.com/acme/checkout-web/analytics</span><i class="avatar-dot"></i><svg class="icon" data-i="dots-v"></svg></div>
+  <div class="page">
+    <div class="nav" data-chrome><svg class="tri" viewBox="0 0 24 24"><path d="M12 3 23 21H1z"/></svg><span class="sl">/</span>
+      <span class="who"><i class="av"></i>acme<svg class="icon" data-i="chev"></svg></span><span class="sl">/</span>
+      <span class="who">checkout-web<svg class="icon" data-i="chev"></svg></span>
+      <span class="right"><span class="btn">Feedback</span><svg class="icon" data-i="search"></svg><svg class="icon" data-i="bell"></svg><i class="me"></i></span></div>
+    <div class="tabs2" data-chrome><span>Overview</span><span>Deployments</span><span class="on">Analytics</span><span>Speed Insights</span><span>Logs</span><span>Observability</span><span>Storage</span><span>Settings</span></div>
+    <div class="body">
+      <div class="head"><h1>Analytics</h1><div class="filters" data-chrome><span>Last 7 days<svg class="icon" data-i="chev"></svg></span><span>Production<svg class="icon" data-i="chev"></svg></span></div></div>
+      <div class="card">
+        <div class="kpis">
+          <div class="kpi on"><div class="lab">Visitors</div><div class="row"><span class="val slot"><span class="a">8.4K</span><span class="b">19.6K</span></span><span class="dl slot"><span class="a">▲ 3%</span><span class="b">▲ 133%</span></span></div></div>
+          <div class="kpi"><div class="lab">Page Views</div><div class="row"><span class="val slot"><span class="a">21.3K</span><span class="b">52.8K</span></span><span class="dl slot"><span class="a">▲ 2%</span><span class="b">▲ 148%</span></span></div></div>
+          <div class="kpi"><div class="lab">Bounce Rate</div><div class="row"><span class="val slot"><span class="a">64%</span><span class="b">38%</span></span><span class="dl slot"><span class="a">▲ 1%</span><span class="b">▼ 41%</span></span></div></div>
+        </div>
+        <div class="chart">
+          <div class="plot">
+            <div class="gl" style="top:0"><b>4K</b></div><div class="gl" style="top:25%"><b>3K</b></div><div class="gl" style="top:50%"><b>2K</b></div><div class="gl" style="top:75%"><b>1K</b></div><div class="gl" style="top:100%"><b>0</b></div>
+            <div class="bars"></div>
+          </div>
+          <div class="days" data-chrome><span>Oct 13</span><span>Oct 14</span><span>Oct 15</span><span>Oct 16</span><span>Oct 17</span><span>Oct 18</span><span>Oct 19</span></div>
+          <div class="tip t1"><div class="d">Oct 17</div><div class="r"><i></i>Visitors<b>3.4K</b></div></div>
+          <div class="tip t2"><div class="d">Oct 18</div><div class="r"><i></i>Visitors<b>3.2K</b></div></div>
+        </div>
+        <div class="scan"><div class="grip"><svg class="icon" data-i="lr"></svg></div></div>
+      </div>
     </div>
-    <div class="state after">
-      <span class="tag">After <i>v4.3</i></span>
-      <div class="read"><div class="big"><span class="num accent">96</span><span class="unit">ms</span></div>
-        <div class="stat"><span>Error rate</span><b>0.1%</b></div><div class="stat"><span>Throughput</span><b>4.8k rps</b></div><span class="pill up delta">-88% p95</span></div>
-      <div class="chart"><div class="plot"><svg viewBox="0 0 600 100" preserveAspectRatio="none"></svg><span class="slo">SLO 200 ms</span></div>
-        <div class="days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>
-    </div>
-    <div class="scan"><div class="grip"><svg class="icon" viewBox="0 0 24 24"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg></div></div>
+    <svg class="cursor" viewBox="0 0 24 24"><path d="M5 3l14 8.2-6.2 1.6L9.6 19z" fill="var(--cursor)" stroke="var(--cursor-edge)" stroke-width="1.6" stroke-linejoin="round"/></svg>
   </div>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
-import '/prompts/moves/demo/assets/logos.js';
-import { rng } from '/core/motion/springs.js';
-import { EASE } from '/core/motion/presets.js';
-const q = (s) => document.querySelector(s);
+import { EASE, UI } from '/core/motion/presets.js';
+import { leave, arrive, crossAt, rollSwap } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const END = 5000, WIPE_AT = 1550, WIPE_MS = 700;
 
-// seven days of p95 samples on a 0 to 1000 ms axis, from a seeded rng so every render draws the same week
-const series = (seed, base, spread, spikes) => {
-  const r = rng(seed);
-  return Array.from({ length: 57 }, (_, i) => base + (r() - 0.5) * spread + (i % 8 === 3 ? spikes * r() : 0));
+const ICONS = {
+  x: '<path d="M6 6l12 12M18 6L6 18"/>', plus: '<path d="M12 5v14M5 12h14"/>', back: '<path d="M19 12H5M11 6l-6 6 6 6"/>', fwd: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  reload: '<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/>', tune: '<path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/>',
+  'dots-v': '<path d="M12 5v.01M12 12v.01M12 19v.01"/>', chev: '<path d="M6 9l6 6 6-6"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"/>', lr: '<path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/>',
 };
-const y = (ms) => 100 - ms / 10, slo = y(200);   // 80: .slo's top: 80% sits on it
-const draw = (svg, values, stroke, fillTop) => {
-  const pts = values.map((v, i) => `${(i * 600 / (values.length - 1)).toFixed(1)} ${y(v).toFixed(1)}`);
-  const id = `g${fillTop.replace(/\W/g, '')}`;
-  svg.innerHTML = `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${fillTop}" stop-opacity="0.22"/><stop offset="1" stop-color="${fillTop}" stop-opacity="0"/></linearGradient></defs>`
-    + [25, 50, 75].map((g) => `<line x1="0" y1="${g}" x2="600" y2="${g}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')
-    + `<line x1="0" y1="${slo}" x2="600" y2="${slo}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 5" vector-effect="non-scaling-stroke"/>`
-    + `<path d="M${pts.join(' L')} L600 100 L0 100 Z" fill="url(#${id})"/>`
-    + `<path d="M${pts.join(' L')}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
-};
-draw(q('.before svg'), series(3, 760, 160, 180), 'var(--faint)', '#8f92b5');
-draw(q('.after svg'), series(4, 96, 22, 30), 'var(--accent)', '#5b3df0');
+for (const el of all('[data-i]')) { el.setAttribute('viewBox', '0 0 24 24'); el.innerHTML = ICONS[el.dataset.i]; }
 
-const scan = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
-const W = q('.stage').getBoundingClientRect().width, at = 300, dur = 900;
+// seven days of visitors on a 0 to 4K axis: before the change 8.4K a week, after it 19.6K
+const BEFORE = [0.9, 1.4, 1.3, 1.1, 1.5, 1.1, 1.1], AFTER = [1.9, 2.3, 2.7, 2.9, 3.4, 3.2, 3.2];
+const bars = q('.bars');
+BEFORE.forEach((v, i) => { const el = document.createElement('i'); el.className = 'bar2'; el.style.setProperty('--a', `${(AFTER[i] / 4) * 100}%`); bars.append(el); });
+const barEls = all('.bar2');
 
-q('.after').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
-q('.scan').animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
-// the divider leaves faster than it came, on the move it was already making
-q('.scan').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, delay: at - 60, easing: 'linear', fill: 'both' });
-q('.scan').animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: EASE.launch, fill: 'both' });
-q('.after .delta').animate([{ scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 400, delay: at + dur - 120, easing: EASE.land, fill: 'both' });
-q('.card').animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: EASE.glide, fill: 'both' });
+// measure the finished layout, then animate
+const card = q('.card'), cr = card.getBoundingClientRect(), W = card.offsetWidth;
+const frac = (el) => { const r = el.getBoundingClientRect(); return (r.left + r.width / 2 - cr.left) / W; };
+const slots = all('.slot').map((s) => ({ out: s.querySelector('.a'), in: s.querySelector('.b'), f: frac(s) }));
+const bar = barEls.map((el, i) => ({ el, f: frac(el), r: BEFORE[i] / AFTER[i] }));
+const tipAt = (i) => { const b = barEls[i].getBoundingClientRect(), c = q('.chart').getBoundingClientRect(); return { x: b.left + b.width / 2 - c.left, y: b.top - c.top }; };
+const pos = [tipAt(4), tipAt(5)], t1 = q('.tip.t1'), t2 = q('.tip.t2');
+t1.style.left = `${pos[0].x - t1.offsetWidth / 2}px`; t1.style.top = `${pos[0].y - t1.offsetHeight - 14}px`;
+t2.style.left = `${pos[1].x - t2.offsetWidth / 2}px`; t2.style.top = `${pos[1].y - t2.offsetHeight - 14}px`;
+const cardPos = (b) => { const r = b.getBoundingClientRect(), p = q('.page').getBoundingClientRect(); return { x: r.left + r.width / 2 - p.left, y: r.top - p.top + 6 }; };
+const spots = [cardPos(barEls[4]), cardPos(barEls[5])];
+
+// the window arrives and the before week builds: bars rise 70 ms apart from the baseline, as a Vercel chart draws on load
+arrive(q('.win'), 100, { ms: UI.panel.fadeMs, from: UI.panel.rise });
+bar.forEach(({ el, r }, i) => el.animate([{ scale: '1 0' }, { scale: `1 ${r}` }], { duration: 320, delay: 450 + i * UI.row.staggerMs, easing: EASE.land, fill: 'both' }));
+
+// the wipe: one line crosses the card on one curve; each reading and each bar changes the moment the line is over it, so no glyph is ever half of two numbers
+const scan = q('.scan');
+scan.animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: WIPE_MS, delay: WIPE_AT, easing: EASE.settle, fill: 'both' });
+scan.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, delay: WIPE_AT - 60, easing: EASE.land, fill: 'both' });
+scan.animate([{ opacity: 0 }], { duration: 160, delay: WIPE_AT + WIPE_MS - 120, easing: EASE.launch, fill: 'both' });
+slots.forEach(({ out, in: inn, f }, i) => rollSwap(out, inn, crossAt('settle', WIPE_AT, WIPE_MS, f), '0.8vh', EASE.land));
+bar.forEach(({ el, f, r }, i) => el.animate([{ scale: `1 ${r}` }, { scale: '1 1' }], { duration: 380, delay: crossAt('settle', WIPE_AT, WIPE_MS, f), easing: EASE.land, fill: 'forwards' }));
+
+// the reading is then inspected: the cursor travels to a bar, its tip pops, then it steps to the next bar
+const cur = q('.cursor');
+const HOVER_AT = 2700, STEP_AT = 3500;
+cur.animate([{ opacity: 0, translate: `${spots[0].x + 90}px ${spots[0].y + 70}px` }, { opacity: 1, translate: `${spots[0].x + 90}px ${spots[0].y + 70}px`, offset: 0.001 }, { opacity: 1, translate: `${spots[0].x}px ${spots[0].y}px` }], { duration: 650, delay: HOVER_AT - 650, easing: EASE.carry, fill: 'both' });
+cur.animate([{ translate: `${spots[0].x}px ${spots[0].y}px` }, { translate: `${spots[1].x}px ${spots[1].y}px` }], { duration: 300, delay: STEP_AT, easing: EASE.land, fill: 'forwards' });
+const hot = (el, from, to) => el.animate([{ backgroundColor: 'var(--v-bar)' }, { backgroundColor: 'var(--v-hot)', offset: 0.001 }, { backgroundColor: 'var(--v-hot)', offset: 0.999 }, { backgroundColor: 'var(--v-bar)' }], { duration: to - from, delay: from, fill: 'both' });
+hot(barEls[4], HOVER_AT, STEP_AT); hot(barEls[5], STEP_AT, END);
+arrive(t1, HOVER_AT, { ms: 120, from: '0px' });
+t1.animate([{ opacity: 0 }], { duration: 120, delay: STEP_AT, easing: EASE.launch, fill: 'forwards' });
+arrive(t2, STEP_AT + 60, { ms: 120, from: '0px' });
+
+leave(q('.win'), END);
 </script>
 </body>
 </html>

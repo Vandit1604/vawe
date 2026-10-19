@@ -74,6 +74,7 @@ Skills, read before the stage: `html-to-video` (start here), `vawe-brief`, `vawe
 | ideas for a beat or a cut | `guides/IDEATE.md` |
 | transitions: the twelve handoff families | `taste/craft/transitions.md`, `skills/vawe-transitions/SKILL.md` |
 | moves to copy, with clips | `prompts/moves/README.md` (`prompts/moves/RECIPES.md` chains them) |
+| a new video component (clip) | `prompts/moves/README.md` Clip bar, the stage helpers in `prompts/moves/demo/assets/stage.js`, the UI presets in `core/motion/ui.js` (README Product UI presets) |
 | lens: depth of field, bloom, LED grid | `prompts/moves/lens.md` |
 | sound effects and where to get them | `taste/craft/sound.md`, `resources/README.md` |
 | skill combos for DESIGN.md | `prompts/skill-combos.md` |

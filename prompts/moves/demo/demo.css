@@ -2,6 +2,7 @@
    Foundation (:root): type scale, spacing, radius steps, line weights, shadow recipe and one 12-column grid, all as a
    share of frame height (--u is 1 percent of it). A look (html[data-look="name"], end of file) changes colour, faces,
    which radius and line steps it picks, and its depth; it never changes a size or a class. Rules: the Looks section of prompts/moves/README.md.
+   The stage (a lit ground, .glass, data-theme) is the shared set for a clip that meets the Clip bar of that README.
    Check the contrast of every look with: node prompts/moves/demo/contrast.mjs */
 @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
 @font-face { font-family: 'Unbounded'; font-weight: 200 900; font-display: block; src: url('/assets/fonts/Unbounded.woff2') format('woff2'); }
@@ -169,6 +170,34 @@ body {
 .logo-lockup { display: inline-flex; align-items: center; gap: 0.3em; line-height: 1; white-space: nowrap; }
 .logo-lockup .logo-word { font-size: 1em; line-height: 1; }
 
+/* ---- stage: a lit ground, a glass panel, a light and a dark theme. Opt in with <html data-stage data-look="soft|editorial" data-theme="light|dark">. ----
+   The ground is four soft lights (--light-a to --light-d) plus a pool that drifts, and a fixed grain; there is no vignette.
+   --pool-x and --pool-y move the pool; driftLight() in assets/stage.js loops them over the clip so its last frame matches its first.
+   A look sets the stage tokens for its start theme; its theme block (end of file) sets them for the other theme.
+   .glass is the soft-skill double bezel: an outer shell (translucent, hairline ring, blur) around an inner .core with its own highlight and a concentric radius. */
+@property --pool-x { syntax: '<percentage>'; inherits: true; initial-value: 50%; }
+@property --pool-y { syntax: '<percentage>'; inherits: true; initial-value: 44%; }
+:root {
+  --noise-white: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
+  --noise-ink: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.08  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
+  --pool-core: transparent; --light-a: transparent; --light-b: transparent; --light-c: transparent; --light-d: transparent;
+  --grain: 0.05; --grain-img: var(--noise-ink); --grain-blend: multiply;
+  --shell: rgb(255 255 255 / 0.62); --shell-ring: rgb(0 0 0 / 0.06); --core-hi: rgb(255 255 255 / 0.9); --glass-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 14) calc(var(--u) * -6) rgb(0 0 0 / 0.2);
+  --glass-pad: calc(var(--u) * 1.1); --r-glass: calc(var(--u) * 5);
+}
+html[data-stage] body { isolation: isolate; background: transparent; }
+html[data-stage] body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(46% 58% at var(--pool-x) var(--pool-y), var(--pool-core), transparent 76%),
+    radial-gradient(46% 56% at 6% 4%, var(--light-a), transparent 72%),
+    radial-gradient(48% 58% at 98% 8%, var(--light-b), transparent 72%),
+    radial-gradient(50% 60% at 4% 100%, var(--light-c), transparent 72%),
+    radial-gradient(56% 50% at 72% 106%, var(--light-d), transparent 72%);
+}
+.glass { position: relative; padding: var(--glass-pad); border-radius: var(--r-glass); background: var(--shell); box-shadow: 0 0 0 1px var(--shell-ring), var(--glass-shadow); backdrop-filter: blur(calc(var(--u) * 1.4)); }
+.glass > .core { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: calc(var(--r-glass) - var(--glass-pad)); background: var(--surface); box-shadow: inset 0 1px 1px var(--core-hi); }
+
 /* ---- looks: ten token sets on the one foundation above. Sizes, spacing and every class stay the same. ---- */
 
 /* vawe, the default: pure black, a grey surface ladder, hairlines, one blue used rarely. Black ink on the accent, as on the site. */
@@ -323,3 +352,143 @@ html[data-look="chrome"] {
   --backdrop: radial-gradient(circle, rgba(61, 79, 151, 0.2) 1px, transparent 1.6px) 0 0 / calc(var(--u) * 1.6) calc(var(--u) * 1.6) #aab7dd;
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
+
+/* soft: the Soft light combo (prompts/skill-combos.md). Near white with a warm cast, cool near-black ink, one coral accent, Geist, tinted diffused shadows; light carries the colour. */
+html[data-look="soft"] {
+  --ground: #faf8f5; --surface: #fdfcfb; --raised: #f2f0f5; --hover: #e9e6ee;
+  --ink: #1d1a26; --muted: #6b6776; --faint: #a5a2ae; --accent: #c8380f; --on-accent: #fff; --up-ink: #a82d0b;
+  --line: rgba(29, 26, 38, 0.08); --edge: rgba(29, 26, 38, 0.07); --dot: #dcd8e2; --bar: rgba(29, 26, 38, 0.2); --dim: rgba(29, 26, 38, 0.7);
+  --cursor: #1d1a26; --cursor-edge: #fff; --paper: #1d1a26; --paper-ink: #f6f3fa; --paper-muted: #a5a2ae; --star: #c8380f;
+  --sans: 'Geist', system-ui, sans-serif; --head: 'Geist', system-ui, sans-serif; --display: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  --head-weight: 500; --head-track: -0.03em;
+  --sh: 90 70 160; --sa: 1.1; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.06); --accent-edge: 0 0 0 0 transparent;
+  --light-a: rgb(255 208 170 / 0.65); --light-b: rgb(212 198 255 / 0.65); --light-c: rgb(160 214 250 / 0.55); --light-d: rgb(188 240 218 / 0.5); --pool-core: rgb(255 255 255 / 0.6);
+  --glass-shadow: 0 calc(var(--u) * 4.4) calc(var(--u) * 8.9) calc(var(--u) * -3.3) rgb(110 80 200 / 0.2), 0 calc(var(--u) * 1.3) calc(var(--u) * 3.1) calc(var(--u) * -1.3) rgb(240 96 58 / 0.16);
+}
+
+/* editorial: the Warm editorial combo (prompts/skill-combos.md). Warm bone ground, warm ink, 1 px hairlines, Hanken Grotesk 300, one terracotta accent, one very soft warm light. */
+html[data-look="editorial"] {
+  --ground: #f6f2ea; --surface: #fcfaf6; --raised: #eee8dc; --hover: #e4ddce;
+  --ink: #2a2520; --muted: #6a6157; --faint: #a39a8d; --accent: #a6461f; --on-accent: #fff; --up-ink: #a04323;
+  --line: rgba(42, 37, 32, 0.14); --edge: rgba(42, 37, 32, 0.08); --dot: #d8d0c0; --bar: rgba(42, 37, 32, 0.2); --dim: rgba(42, 37, 32, 0.7);
+  --cursor: #2a2520; --cursor-edge: #fcfaf6; --paper: #2a2520; --paper-ink: #f6f2ea; --paper-muted: #a39a8d; --star: #a6461f;
+  --sans: 'Hanken Grotesk', sans-serif; --head: 'Hanken Grotesk', sans-serif; --display: 'Hanken Grotesk', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  --head-weight: 300; --head-track: -0.02em;
+  --sh: 60 40 10; --sa: 1; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.08); --accent-edge: 0 0 0 0 transparent;
+  --light-b: rgb(255 214 168 / 0.55); --pool-core: rgb(255 250 238 / 0.55);
+  --grain: 0.07;
+}
+
+/* ---- theme alternates: the colour roles of a look in the polarity it does not start in (paper starts light, terminal dark).
+   Colour only, as every look. A look without a block here has one polarity and ignores data-theme. ---- */
+
+/* vawe, light: cool white, the same near-black ink, a deeper cobalt */
+html[data-look="vawe"][data-theme="light"] {
+  --ground: #f3f4f7; --surface: #fff; --raised: #eceef2; --hover: #e1e4ea;
+  --ink: #0a0a0a; --muted: #5a606c; --faint: #9aa0ab; --accent: #1f6bf0; --on-accent: #fff; --up-ink: #1456c9;
+  --line: rgba(10, 10, 10, 0.1); --edge: rgba(10, 10, 10, 0.08); --dot: #cfd3db; --bar: rgba(10, 10, 10, 0.2); --dim: rgba(10, 10, 10, 0.72);
+  --cursor: #0a0a0a; --cursor-edge: #fff; --paper: #0a0a0a; --paper-ink: #fff; --paper-muted: #9aa0ab; --star: #1f6bf0;
+  --sh: 20 30 60; --sa: 1.5; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.08); --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* paper, dark: warm charcoal, the same serif, a lighter brick */
+html[data-look="paper"][data-theme="dark"] {
+  --ground: #14110d; --surface: #1d1913; --raised: #29231a; --hover: #342d22;
+  --ink: #f3ecdd; --muted: #a89f8e; --faint: #7a7162; --accent: #e8693f; --on-accent: #1c0f08; --up-ink: #f08a64;
+  --line: rgba(243, 236, 221, 0.14); --edge: rgba(243, 236, 221, 0.1); --dot: #3a3326; --bar: rgba(243, 236, 221, 0.26); --dim: rgba(8, 6, 3, 0.8);
+  --cursor: #f3ecdd; --cursor-edge: #14110d; --paper: #f3ecdd; --paper-ink: #1c1915; --paper-muted: #665d4f; --star: #e8693f;
+  --sh: 0 0 0; --sa: 3.4; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--stack); --img-edge: rgba(255, 255, 255, 0.1); --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* daylight, dark: midnight navy, the same Inter, a lighter indigo */
+html[data-look="daylight"][data-theme="dark"] {
+  --ground: #0b1220; --surface: #111a2c; --raised: #1a2540; --hover: #243152;
+  --ink: #eaf0fb; --muted: #93a1bb; --faint: #5f6e89; --accent: #7a6bff; --on-accent: #0b1220; --up-ink: #a79dff;
+  --line: rgba(234, 240, 251, 0.1); --edge: rgba(234, 240, 251, 0.08); --dot: #25314d; --bar: rgba(234, 240, 251, 0.24); --dim: rgba(5, 9, 18, 0.78);
+  --cursor: #eaf0fb; --cursor-edge: #0b1220; --paper: #eef2fb; --paper-ink: #0f2033; --paper-muted: #58687d; --star: #8f82ff;
+  --sh: 2 6 20; --sa: 3.6; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--stack); --img-edge: rgba(255, 255, 255, 0.1); --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* terminal, light: pale green-white, the same mono, a deeper green */
+html[data-look="terminal"][data-theme="light"] {
+  --ground: #eef3ee; --surface: #f8fbf8; --raised: #e0e9e1; --hover: #d2ded4;
+  --ink: #0d1a12; --muted: #4a5f52; --faint: #7a8f81; --accent: #087d3c; --on-accent: #fff; --up-ink: #076c34;
+  --line: rgba(13, 26, 18, 0.14); --edge: rgba(13, 26, 18, 0.12); --dot: #c8d6cb; --bar: rgba(13, 26, 18, 0.2); --dim: rgba(13, 26, 18, 0.75);
+  --cursor: #0d1a12; --cursor-edge: #f8fbf8; --paper: #0d1a12; --paper-ink: #e5f4ea; --paper-muted: #8ea597; --star: #087d3c;
+  --sh: 10 40 20; --sa: 1.6; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.08);
+}
+
+/* soft, dark: a single-hue night, the same lights at low lightness, composed and not inverted */
+html[data-look="soft"][data-theme="dark"] {
+  --ground: #0f0d16; --surface: #171421; --raised: #221e2f; --hover: #2c2739;
+  --ink: #f1eef7; --muted: #a39eb2; --faint: #6f6a7d; --accent: #ff7a52; --on-accent: #1a0b06; --up-ink: #ff9a7a;
+  --line: rgba(241, 238, 247, 0.1); --edge: rgba(241, 238, 247, 0.08); --dot: #2c2739; --bar: rgba(241, 238, 247, 0.24); --dim: rgba(15, 13, 22, 0.78);
+  --cursor: #f1eef7; --cursor-edge: #0f0d16; --paper: #f1eef7; --paper-ink: #1d1a26; --paper-muted: #6b6776; --star: #ff7a52;
+  --sh: 0 0 0; --sa: 3.4; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--stack); --img-edge: rgba(255, 255, 255, 0.1);
+  --light-a: rgb(130 60 40 / 0.5); --light-b: rgb(86 64 170 / 0.5); --light-c: rgb(36 90 140 / 0.5); --light-d: rgb(30 104 90 / 0.4); --pool-core: rgb(255 255 255 / 0.06);
+  --grain: 0.07; --grain-img: var(--noise-white); --grain-blend: screen;
+  --shell: rgb(255 255 255 / 0.06); --shell-ring: rgb(255 255 255 / 0.1); --core-hi: rgb(255 255 255 / 0.1);
+  --glass-shadow: 0 calc(var(--u) * 5) calc(var(--u) * 12) calc(var(--u) * -3.3) rgb(0 0 0 / 0.55), 0 calc(var(--u) * 1.3) calc(var(--u) * 3.1) calc(var(--u) * -1.3) rgb(255 122 82 / 0.14);
+}
+
+/* editorial, dark: warm charcoal, the same terracotta lifted, the warm light kept */
+html[data-look="editorial"][data-theme="dark"] {
+  --ground: #16120e; --surface: #1e1914; --raised: #29231b; --hover: #342d23;
+  --ink: #f1eadf; --muted: #aaa194; --faint: #6f675b; --accent: #e07a52; --on-accent: #1c0f08; --up-ink: #ec9570;
+  --line: rgba(241, 234, 223, 0.14); --edge: rgba(241, 234, 223, 0.09); --dot: #3a3328; --bar: rgba(241, 234, 223, 0.26); --dim: rgba(8, 6, 3, 0.8);
+  --cursor: #f1eadf; --cursor-edge: #16120e; --paper: #f1eadf; --paper-ink: #2a2520; --paper-muted: #6a6157; --star: #e07a52;
+  --sh: 0 0 0; --sa: 3.4; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--stack); --img-edge: rgba(255, 255, 255, 0.1);
+  --light-b: rgb(160 96 52 / 0.38); --pool-core: rgb(255 226 190 / 0.05);
+  --grain: 0.07; --grain-img: var(--noise-white); --grain-blend: screen;
+}
+
+/* product: a real product copied inside a browser window on a flat neutral ground (owner approved 2026-10-19; prompts/skill-combos.md "Real product").
+   The ground is measured from the everestchris reference clips (#f3f3f0 light, #0c0c0c dark). No lights, no grain, no glass: the window's own shadow is the only depth (the layered neutral recipe of mengto/beautiful-shadows "lg", in u).
+   The product's colours live in its demo; this look holds the neutral ground, the shared Chrome frame (.win) and the text roles. */
+html[data-look="product"] {
+  --ground: #f3f3f0; --surface: #fff; --raised: #f4f4f4; --hover: #ececec;
+  --ink: #0d0d0d; --muted: #5d5d5d; --faint: #8f8f8f; --accent: #0d0d0d; --on-accent: #fff; --up-ink: #0d0d0d;
+  --line: rgba(13, 13, 13, 0.1); --edge: rgba(13, 13, 13, 0.1); --dot: #d9d9d9; --bar: rgba(13, 13, 13, 0.2); --dim: rgba(13, 13, 13, 0.7);
+  --cursor: #0d0d0d; --cursor-edge: #fff; --paper: #0d0d0d; --paper-ink: #fff; --paper-muted: #8f8f8f; --star: #0d0d0d;
+  --sans: 'Inter', system-ui, sans-serif; --head: 'Inter', system-ui, sans-serif; --display: 'Inter', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  --head-weight: 600; --head-track: -0.02em;
+  --sh: 0 0 0; --sa: 1; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.06); --accent-edge: 0 0 0 0 transparent;
+  --chrome-strip: #d3e3fd; --chrome-omni: #eaf0fa; --chrome-ink: #3c4043; --chrome-ring: rgba(0, 0, 0, 0.1);
+  --win-shadow: 0 calc(var(--u) * 0.26) calc(var(--u) * 0.20) rgb(0 0 0 / 0.034), 0 calc(var(--u) * 0.62) calc(var(--u) * 0.49) rgb(0 0 0 / 0.048), 0 calc(var(--u) * 1.16) calc(var(--u) * 0.93) rgb(0 0 0 / 0.060), 0 calc(var(--u) * 2.06) calc(var(--u) * 1.66) rgb(0 0 0 / 0.072), 0 calc(var(--u) * 3.87) calc(var(--u) * 3.09) rgb(0 0 0 / 0.086), 0 calc(var(--u) * 9.26) calc(var(--u) * 7.41) rgb(0 0 0 / 0.120);
+}
+html[data-look="product"][data-theme="dark"] {
+  --ground: #0c0c0c; --surface: #212121; --raised: #303030; --hover: #3a3a3a;
+  --ink: #ececec; --muted: #b4b4b4; --faint: #7a7a7a; --accent: #ececec; --on-accent: #0d0d0d; --up-ink: #ececec;
+  --line: rgba(255, 255, 255, 0.1); --edge: rgba(255, 255, 255, 0.1); --dot: #3a3a3a; --bar: rgba(255, 255, 255, 0.24); --dim: rgba(0, 0, 0, 0.7);
+  --cursor: #ececec; --cursor-edge: #0c0c0c; --paper: #ececec; --paper-ink: #0d0d0d; --paper-muted: #5d5d5d; --star: #ececec;
+  --img-edge: rgba(255, 255, 255, 0.1);
+  --chrome-strip: #202124; --chrome-omni: #202124; --chrome-ink: #bdc1c6; --chrome-ring: rgba(255, 255, 255, 0.1);
+  --win-shadow: 0 calc(var(--u) * 0.26) calc(var(--u) * 0.20) rgb(0 0 0 / 0.170), 0 calc(var(--u) * 0.62) calc(var(--u) * 0.49) rgb(0 0 0 / 0.240), 0 calc(var(--u) * 1.16) calc(var(--u) * 0.93) rgb(0 0 0 / 0.300), 0 calc(var(--u) * 2.06) calc(var(--u) * 1.66) rgb(0 0 0 / 0.360), 0 calc(var(--u) * 3.87) calc(var(--u) * 3.09) rgb(0 0 0 / 0.430), 0 calc(var(--u) * 9.26) calc(var(--u) * 7.41) rgb(0 0 0 / 0.600);
+}
+
+html[data-look="product"] { -webkit-font-smoothing: antialiased; }
+/* the browser window is drawn 13 percent larger than the measured 116.7 x 77.8 u so its text reads in a 640 px card: 131.9 x 87.9 u, the height share the terminal window takes */
+html[data-look="product"] .win:not(.term) { --u: calc(var(--vh) / 100 * 1.13); }
+html[data-look="product"] :is(.n, .add, .rem, .files, .cnt, .no, .o, .w, .gl b, .tip b, .dl) { font-variant-numeric: tabular-nums; }
+
+/* the browser window: 116.7 u wide and 77.8 u tall, the share the reference chat-prompt measures (65.6 percent of the width, 77.8 percent of the height).
+   Strip 3.2 u, toolbar 3.6 u. Centred with auto margins so its translate stays free for an entrance. */
+.win { position: absolute; inset: 0; margin: auto; width: calc(var(--u) * 116.7); height: calc(var(--u) * 77.8); display: flex; flex-direction: column; overflow: hidden; border-radius: calc(var(--u) * 1.2); background: var(--surface); box-shadow: var(--win-shadow), 0 0 0 1px var(--chrome-ring); }
+.win .strip { flex: none; display: flex; align-items: flex-end; height: calc(var(--u) * 3.2); padding-left: calc(var(--u) * 1.3); background: var(--chrome-strip); color: var(--chrome-ink); font: 400 calc(var(--u) * 1.25)/1 var(--sans); }
+.win .lights { display: flex; align-items: center; gap: calc(var(--u) * 0.55); align-self: center; margin-right: calc(var(--u) * 1.6); }
+.win .lights i { width: calc(var(--u) * 0.95); height: calc(var(--u) * 0.95); border-radius: 50%; background: #ff5f57; }
+.win .lights i:nth-child(2) { background: #febc2e; }
+.win .lights i:nth-child(3) { background: #28c840; }
+.win .tab { display: flex; align-items: center; gap: calc(var(--u) * 0.7); height: calc(var(--u) * 2.6); width: calc(var(--u) * 21); padding: 0 calc(var(--u) * 1); border-radius: calc(var(--u) * 0.9) calc(var(--u) * 0.9) 0 0; background: var(--surface); color: var(--ink); white-space: nowrap; }
+.win .tab .fav { width: calc(var(--u) * 1.3); height: calc(var(--u) * 1.3); border-radius: 50%; background: var(--ink); flex: none; }
+.win .tab .x { margin-left: auto; width: calc(var(--u) * 1.1); height: calc(var(--u) * 1.1); }
+.win .newtab { align-self: center; width: calc(var(--u) * 1.3); height: calc(var(--u) * 1.3); margin-left: calc(var(--u) * 1); }
+.win .bar { flex: none; display: flex; align-items: center; gap: calc(var(--u) * 1.1); height: calc(var(--u) * 3.6); padding: 0 calc(var(--u) * 1.3); background: var(--surface); color: var(--chrome-ink); box-shadow: 0 1px 0 var(--chrome-ring); }
+.win .bar .icon { width: calc(var(--u) * 1.6); height: calc(var(--u) * 1.6); stroke-width: 1.7; flex: none; }
+.win .omni { flex: 1; display: flex; align-items: center; gap: calc(var(--u) * 0.9); height: calc(var(--u) * 2.5); padding: 0 calc(var(--u) * 1.2); border-radius: 999px; background: var(--chrome-omni); color: var(--ink); font: 400 calc(var(--u) * 1.3)/1 var(--sans); }
+.win .omni .icon { width: calc(var(--u) * 1.3); height: calc(var(--u) * 1.3); color: var(--chrome-ink); }
+.win .avatar-dot { width: calc(var(--u) * 2); height: calc(var(--u) * 2); border-radius: 50%; background: var(--raised); box-shadow: 0 0 0 1px var(--chrome-ring); flex: none; }
+.win .page { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--surface); }
+
+/* the stage grain replaces a look's own (paper, dusk); it comes last so it wins the tie */
+html[data-stage]::after { content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: var(--grain); mix-blend-mode: var(--grain-blend); background-image: var(--grain-img); }

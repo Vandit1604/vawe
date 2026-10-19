@@ -1,164 +1,190 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="terminal">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2.4">
+<meta name="duration" content="6">
+<meta name="variants" content="dark">
 <title>move: AI stream response</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  /* product sizes: --px is one CSS pixel of a 510 px tall window, so the app reads at laptop scale */
-  :root { --px: calc(var(--vh) / 510); --sans: 'Geist', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace; }
-  body { font-size: calc(var(--px) * 15); }
+  /* ChatGPT in a Chrome window. The face is Inter standing in for Sohne. Sizes are u (1 percent of the frame height). */
+  .page { --tint: #2f9d6a; display: flex; font-family: var(--sans); color: var(--ink); }
+  .rail { flex: none; width: calc(var(--u) * 5); display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * 1.3); padding: calc(var(--u) * 1.4) 0; background: color-mix(in srgb, var(--ink) 3%, var(--surface)); box-shadow: 1px 0 0 var(--line); color: var(--muted); }
+  .rail .icon { width: calc(var(--u) * 2.1); height: calc(var(--u) * 2.1); stroke-width: 1.6; }
+  .rail .mark { width: calc(var(--u) * 2.6); height: calc(var(--u) * 2.6); stroke-width: 1.2; color: var(--ink); }
+  .rail .me { margin-top: auto; width: calc(var(--u) * 2.6); height: calc(var(--u) * 2.6); border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font: 600 calc(var(--u) * 1.1)/1 var(--sans); }
+  .main { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .top { flex: none; display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 4); padding: 0 calc(var(--u) * 1.8); }
+  .top .model { display: flex; align-items: center; gap: calc(var(--u) * 0.5); font: 500 calc(var(--u) * 2.1)/1 var(--sans); }
+  .top .model .icon { width: calc(var(--u) * 1.5); height: calc(var(--u) * 1.5); color: var(--muted); }
+  .top .share { display: flex; align-items: center; gap: calc(var(--u) * 1); font: 500 calc(var(--u) * 1.8)/1 var(--sans); }
+  .top .share .icon { width: calc(var(--u) * 1.9); height: calc(var(--u) * 1.9); }
+  .top .share span { display: flex; align-items: center; gap: calc(var(--u) * 0.6); padding: calc(var(--u) * 0.8) calc(var(--u) * 1.3); border-radius: 999px; }
 
-  .win { position: relative; display: grid; grid-template-columns: calc(var(--px) * 188) 1fr; width: calc(var(--px) * 860); height: calc(var(--px) * 470); padding: 0; overflow: hidden; border-radius: calc(var(--px) * 16); }
-
-  .rail { display: flex; flex-direction: column; gap: calc(var(--px) * 2); padding: calc(var(--px) * 14) calc(var(--px) * 10); background: var(--ground); box-shadow: 1px 0 0 var(--line); font: 500 calc(var(--px) * 13)/1 var(--sans); color: var(--muted); }
-  .rail .brand { display: flex; align-items: center; gap: calc(var(--px) * 8); height: calc(var(--px) * 30); padding: 0 calc(var(--px) * 8); margin-bottom: calc(var(--px) * 10); font: 700 calc(var(--px) * 15)/1 var(--sans); letter-spacing: -0.02em; color: var(--ink); }
-  .rail .brand .logo-mark { width: calc(var(--px) * 18); height: calc(var(--px) * 18); color: var(--accent); }
-  .rail .new { display: flex; align-items: center; gap: calc(var(--px) * 8); height: calc(var(--px) * 34); padding: 0 calc(var(--px) * 10); margin-bottom: calc(var(--px) * 14); border-radius: calc(var(--px) * 9); background: var(--raised); box-shadow: var(--ring); color: var(--ink); }
-  .rail .new .icon { width: calc(var(--px) * 15); height: calc(var(--px) * 15); }
-  .rail .when { height: calc(var(--px) * 24); padding: 0 calc(var(--px) * 10); font-size: calc(var(--px) * 11.5); color: var(--muted); display: flex; align-items: center; }
-  .rail .chat { display: block; line-height: calc(var(--px) * 32); height: calc(var(--px) * 32); padding: 0 calc(var(--px) * 10); border-radius: calc(var(--px) * 8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rail .chat.on { background: var(--raised); color: var(--ink); }
-  .rail .me { display: flex; align-items: center; gap: calc(var(--px) * 10); margin-top: auto; height: calc(var(--px) * 44); padding: 0 calc(var(--px) * 8); color: var(--ink); }
-  .rail .me .avatar { --size: calc(var(--px) * 26); }
-  .rail .me small { display: block; margin-top: calc(var(--px) * 3); font-size: calc(var(--px) * 11.5); color: var(--muted); }
-
-  .main { position: relative; display: flex; flex-direction: column; min-width: 0; background: var(--surface); }
-  .bar { display: flex; align-items: center; gap: calc(var(--px) * 8); height: calc(var(--px) * 48); padding: 0 calc(var(--px) * 16); font: 600 calc(var(--px) * 14)/1 var(--sans); }
-  .bar .model { display: flex; align-items: center; gap: calc(var(--px) * 6); height: calc(var(--px) * 30); padding: 0 calc(var(--px) * 10); border-radius: calc(var(--px) * 8); }
-  .bar .model .icon { width: calc(var(--px) * 14); height: calc(var(--px) * 14); color: var(--muted); }
-  .bar .share { margin-left: auto; height: calc(var(--px) * 30); padding: 0 calc(var(--px) * 12); border-radius: 999px; box-shadow: var(--ring); display: flex; align-items: center; font-weight: 500; font-size: calc(var(--px) * 13); color: var(--muted); }
-
-  .col { position: relative; width: calc(var(--px) * 540); margin: 0 auto; flex: 1; display: flex; flex-direction: column; }
-  .hello { position: absolute; left: 0; right: 0; top: calc(var(--px) * 118); text-align: center; font: 500 calc(var(--px) * 26)/1.2 var(--sans); letter-spacing: -0.025em; }
-  .hello .logo-mark { display: inline-block; vertical-align: -0.12em; width: 1em; height: 1em; margin-right: calc(var(--px) * 8); color: var(--accent); }
-  .thread { display: flex; flex-direction: column; gap: calc(var(--px) * 22); padding-top: calc(var(--px) * 12); }
-  .user { align-self: flex-end; max-width: 72%; padding: calc(var(--px) * 10) calc(var(--px) * 16); border-radius: calc(var(--px) * 20); background: var(--raised); font: 400 calc(var(--px) * 15)/1.45 var(--sans); }
-
-  .ai { display: flex; gap: calc(var(--px) * 14); }
-  .ai .mark { display: grid; place-items: center; flex: none; width: calc(var(--px) * 28); height: calc(var(--px) * 28); border-radius: 50%; box-shadow: var(--ring); color: var(--accent); }
-  .ai .mark .logo-mark { width: calc(var(--px) * 16); height: calc(var(--px) * 16); }
-  .body { position: relative; flex: 1; min-height: calc(var(--px) * 100); padding-top: calc(var(--px) * 4); }
-  .answer { font: 400 calc(var(--px) * 15.5)/1.62 var(--sans); letter-spacing: -0.005em; }
-  .answer b { font-weight: 600; color: var(--accent); }
+  .col { width: calc(var(--u) * 62); margin: 0 auto; }
+  .thread { flex: 1; min-height: 0; padding-top: calc(var(--u) * 1.2); }
+  .user { margin-left: auto; width: fit-content; max-width: 70%; padding: calc(var(--u) * 1.2) calc(var(--u) * 2.2); border-radius: calc(var(--u) * 2.6); background: color-mix(in srgb, var(--tint) 13%, var(--surface)); font: 400 calc(var(--u) * 2.3)/1.5 var(--sans); }
+  .answer { position: relative; margin-top: calc(var(--u) * 3.2); font: 400 calc(var(--u) * 2.5)/1.65 var(--sans); }
+  .answer h2 { margin: 0 0 calc(var(--u) * 1.4); font: 600 calc(var(--u) * 3.1)/1.2 var(--sans); letter-spacing: -0.01em; }
+  .answer p { margin: 0 0 calc(var(--u) * 1.3); }
+  .answer ul { margin: 0; padding-left: calc(var(--u) * 2.6); }
+  .answer li { margin-bottom: calc(var(--u) * 0.9); padding-left: calc(var(--u) * 0.3); }
+  .answer code { font: 500 0.86em/1 var(--mono); font-variant-ligatures: none; padding: 0.18em 0.42em; border-radius: 0.4em; background: color-mix(in srgb, var(--ink) 7%, transparent); }
   .chunk { display: inline; }
+  .pn { margin-left: -0.4em; }
   .caret { position: relative; display: inline-block; width: 0; }
-  .caret::after { content: ''; position: absolute; left: 0.2em; bottom: -0.2em; width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--ink); }
-  /* the working state: a status line whose shine sweeps left to right */
-  .status { position: absolute; left: 0; top: calc(var(--px) * 4); font: 500 calc(var(--px) * 14.5)/1.62 var(--sans);
-            background: linear-gradient(90deg, var(--muted) 0%, var(--muted) 40%, var(--ink) 50%, var(--muted) 60%, var(--muted) 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .src { display: flex; flex-wrap: wrap; gap: calc(var(--px) * 8); margin-top: calc(var(--px) * 12); }
-  .src span { display: inline-flex; align-items: center; gap: calc(var(--px) * 7); height: calc(var(--px) * 26); padding: 0 calc(var(--px) * 10) 0 calc(var(--px) * 6); border-radius: 999px; background: var(--raised); box-shadow: var(--ring); font: 500 calc(var(--px) * 12)/1 var(--sans); color: var(--muted); }
-  .src i { display: grid; place-items: center; width: calc(var(--px) * 16); height: calc(var(--px) * 16); border-radius: calc(var(--px) * 4); background: var(--hover); color: var(--ink); font: 600 calc(var(--px) * 9)/1 var(--mono); font-style: normal; }
-  .acts { display: flex; gap: calc(var(--px) * 4); margin-top: calc(var(--px) * 10); margin-left: calc(var(--px) * -6); color: var(--faint); }
-  .acts span { display: grid; place-items: center; width: calc(var(--px) * 28); height: calc(var(--px) * 28); border-radius: calc(var(--px) * 7); }
-  .acts .icon { width: calc(var(--px) * 15); height: calc(var(--px) * 15); }
+  .caret::after, .think { content: ''; width: calc(var(--u) * 1.15); height: calc(var(--u) * 1.15); border-radius: 50%; background: var(--ink); }
+  .caret::after { position: absolute; left: 0.25em; bottom: -0.2em; }
+  .think { position: absolute; left: 0; top: calc(var(--u) * 0.9); }
+  .acts { display: flex; gap: calc(var(--u) * 0.3); margin-left: calc(var(--u) * -0.7); color: var(--muted); }
+  .acts .icon { box-sizing: content-box; width: calc(var(--u) * 1.9); height: calc(var(--u) * 1.9); padding: calc(var(--u) * 0.7); stroke-width: 1.6; }
 
-  .composer { position: absolute; left: 0; right: 0; bottom: calc(var(--px) * 30); padding: calc(var(--px) * 12) calc(var(--px) * 12) calc(var(--px) * 10) calc(var(--px) * 16); border-radius: calc(var(--px) * 22); background: var(--raised); box-shadow: var(--ring), 0 calc(var(--px) * 8) calc(var(--px) * 24) rgba(0, 0, 0, 0.28); }
-  .field { position: relative; display: flex; align-items: center; height: calc(var(--px) * 26); white-space: nowrap; font: 400 calc(var(--px) * 15)/1 var(--sans); }
+  .dock { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; padding-bottom: calc(var(--u) * 1.1); }
+  .composer { display: flex; align-items: center; gap: calc(var(--u) * 1); width: calc(var(--u) * 62); height: calc(var(--u) * 7.2); padding: 0 calc(var(--u) * 1.5); border-radius: 999px; background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 calc(var(--u) * 0.4) calc(var(--u) * 1.4) rgb(0 0 0 / 0.06); }
+  html[data-theme="dark"] .composer { background: var(--raised); box-shadow: none; }
+  .composer .plus { display: grid; place-items: center; flex: none; width: calc(var(--u) * 4); height: calc(var(--u) * 4); }
+  .composer .plus .icon { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  .field { position: relative; flex: 1; display: flex; align-items: center; white-space: nowrap; font: 400 calc(var(--u) * 2.3)/1 var(--sans); }
   .ph { position: absolute; color: var(--muted); }
   .type { position: relative; display: inline-flex; align-items: center; }
-  .cur { width: calc(var(--px) * 1.5); height: calc(var(--px) * 18); margin-left: calc(var(--px) * 1); background: var(--accent); }
-  .tools { display: flex; align-items: center; gap: calc(var(--px) * 8); margin-top: calc(var(--px) * 10); font: 500 calc(var(--px) * 12.5)/1 var(--sans); color: var(--muted); }
-  .tools .round { display: grid; place-items: center; width: calc(var(--px) * 30); height: calc(var(--px) * 30); border-radius: 50%; box-shadow: var(--ring); }
-  .tools .pill2 { display: flex; align-items: center; gap: calc(var(--px) * 6); height: calc(var(--px) * 30); padding: 0 calc(var(--px) * 12); border-radius: 999px; box-shadow: var(--ring); }
-  .tools .icon { width: calc(var(--px) * 15); height: calc(var(--px) * 15); }
-  .tools .pick { margin-left: auto; display: flex; align-items: center; gap: calc(var(--px) * 4); }
-  .send { display: grid; place-items: center; width: calc(var(--px) * 32); height: calc(var(--px) * 32); border-radius: 50%; background: var(--ink); color: var(--ground); }
-  .send .icon { width: calc(var(--px) * 16); height: calc(var(--px) * 16); stroke-width: 2.2; }
-  .note { position: absolute; left: 0; right: 0; bottom: calc(var(--px) * 9); text-align: center; font: 400 calc(var(--px) * 11)/1 var(--sans); color: var(--muted); }
+  .cur { width: 1.5px; height: calc(var(--u) * 2.4); margin-left: 1px; background: var(--ink); animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 0%, 49.9% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  .mic { flex: none; width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); color: var(--muted); }
+  .go { position: relative; flex: none; width: calc(var(--u) * 4.2); height: calc(var(--u) * 4.2); border-radius: 50%; background: var(--ink); color: var(--surface); }
+  .go .icon { position: absolute; inset: 0; margin: auto; width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); stroke-width: 2; }
+  .go .icon.fill { fill: currentColor; stroke: none; }
+  .fine { margin-top: calc(var(--u) * 1); font: 400 calc(var(--u) * 1.4)/1 var(--sans); color: var(--muted); }
+  .greet { position: absolute; left: 0; right: 0; top: 36%; text-align: center; font: 500 calc(var(--u) * 3.5)/1.2 var(--sans); letter-spacing: -0.01em; }
+  .slot { display: inline-grid; }
+  .slot > * { grid-area: 1 / 1; white-space: nowrap; }
 </style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.77-5.6", "overshoot-share", "world-held@0.0-6.0", "tile-run@0.2-5.6"], "_why": {"text-unreadable-hold": "the answer holds 1.2 s after its last chunk at 4.4 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, 0.4 s before the 6 s end, so the answer holds 1.2 s, short of the 5.4 s the check asks", "static-window@4.77-5.6": "0.83 s: the finished ChatGPT answer holds still as the product does after the tab title changes at 4.77 s", "overshoot-share": "real surface: ChatGPT does not overshoot: 1 of 6 arrivals, 17%, the sent bubble that the reference clip shows at x1.11 in 0.1 s", "world-held@0.0-6.0": "one ChatGPT thread holds 6.0 s: the prompt types from 0.75 s, the bubble sends at 2.05 s and the answer streams to 4.4 s", "tile-run@0.2-5.6": "28 near-identical tiles from 0.2 s to 5.6 s: the chat screen changes in one text block, streamed at 24 words a second from 2.5 s to 4.4 s"}}</script>
 </head>
 <body>
-<div class="win card">
-  <aside class="rail">
-    <div class="brand"><span data-logo="compass"></span>Compass</div>
-    <div class="new"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New chat</div>
-    <div class="when">Today</div>
-    <div class="chat on">Q3 churn drivers</div>
-    <div class="chat">Refunds by region</div>
-    <div class="when">Last week</div>
-    <div class="chat">Annual plan pricing test</div>
-    <div class="chat">Seats per account, Aug</div>
-    <div class="chat">Failed payments retry</div>
-    <div class="me"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg"></div><div>Dana Reyes<small>Billing team</small></div></div>
-  </aside>
-  <section class="main">
-    <div class="bar"><span class="model">Compass 2<svg class="icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span><span class="share">Share</span></div>
-    <div class="col">
-      <div class="hello"><span data-logo="compass"></span>What should we look into?</div>
-      <div class="thread">
-        <div class="user">Why did churn drop in Q3?</div>
-        <div class="ai"><div class="mark" data-logo="compass"></div>
-          <div class="body"><div class="status">Reading invoices_q3.csv</div><div class="answer"></div>
-            <div class="src"><span><i>csv</i>invoices_q3.csv</span><span><i>pdf</i>Cohort report, Sep</span></div>
-            <div class="acts">
-              <span><svg class="icon" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg></span>
-              <span><svg class="icon" viewBox="0 0 24 24"><path d="M7 10v10H4V10zM7 10l4-6.5a2 2 0 0 1 3.6 1.6L13.5 9H19a2 2 0 0 1 2 2.3l-1.2 7A2 2 0 0 1 17.8 20H7"/></svg></span>
-              <span><svg class="icon" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg></span>
-            </div>
-          </div></div>
-      </div>
-      <div class="composer">
-        <div class="field"><span class="ph">Ask about your billing data</span><span class="type"><span class="typed"></span><i class="cur"></i></span></div>
-        <div class="tools">
-          <span class="round"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
-          <span class="pill2"><svg class="icon" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></svg>Billing warehouse</span>
-          <span class="pick">Compass 2<svg class="icon" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></svg></span>
-          <span class="send"><svg class="icon" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span>
-        </div>
-      </div>
-      <div class="note">Compass can make mistakes. Check the figures that matter.</div>
+<div class="win">
+  <div class="strip" data-chrome><span class="lights"><i></i><i></i><i></i></span>
+    <span class="tab"><i class="fav"></i><span class="slot"><span class="t1">ChatGPT</span><span class="t2">Undo a git commit</span></span><svg class="icon x" data-i="x"></svg></span>
+    <svg class="icon newtab" data-i="plus"></svg></div>
+  <div class="bar" data-chrome><svg class="icon" data-i="back"></svg><svg class="icon" data-i="fwd"></svg><svg class="icon" data-i="reload"></svg>
+    <span class="omni"><svg class="icon" data-i="tune"></svg><span class="slot"><span class="u1">chatgpt.com</span><span class="u2">chatgpt.com/c/68f4a1c2-7d3e-4b9a</span></span></span><i class="avatar-dot"></i><svg class="icon" data-i="dots-v"></svg></div>
+  <div class="page">
+    <div class="rail" data-chrome><svg class="icon mark" data-i="mark"></svg><svg class="icon" data-i="compose"></svg><svg class="icon" data-i="search"></svg><svg class="icon" data-i="library"></svg><span class="me">V</span></div>
+    <div class="main">
+      <div class="top" data-chrome><span class="model">ChatGPT<svg class="icon" data-i="chev"></svg></span><span class="share"><span><svg class="icon" data-i="share"></svg>Share</span><svg class="icon" data-i="dots"></svg></span></div>
+      <div class="greet">What can I help with?</div>
+      <div class="thread"><div class="col">
+        <div class="user">How do I undo a git commit?</div>
+        <div class="answer"><i class="think"></i></div>
+        <div class="acts"><svg class="icon" data-i="copy"></svg><svg class="icon" data-i="up2"></svg><svg class="icon" data-i="down2"></svg><svg class="icon" data-i="share"></svg><svg class="icon" data-i="retry"></svg></div>
+      </div></div>
+      <div class="dock"><div class="composer">
+        <span class="plus"><svg class="icon" data-i="plus"></svg></span>
+        <div class="field"><span class="ph">Ask anything</span><span class="type"><span class="typed"></span><i class="cur"></i></span></div>
+        <svg class="icon mic" data-i="mic"></svg>
+        <span class="go"><svg class="icon fill" data-i="wave"></svg><svg class="icon" data-i="up"></svg><svg class="icon fill" data-i="stop"></svg></span>
+      </div><div class="fine" data-chrome>ChatGPT can make mistakes. Check important info.</div></div>
     </div>
-  </section>
+  </div>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
-import '/prompts/moves/demo/assets/logos.js';
 import { rng } from '/core/motion/springs.js';
-import { EASE } from '/core/motion/presets.js';
+import { EASE, UI } from '/core/motion/presets.js';
+import { leave, arrive, show, flipFrom, typeTimes, typedCount, between } from '/prompts/moves/demo/assets/stage.js';
 const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const END = 6000, TYPE_AT = 750, SEND_AT = 2050, STREAM_AT = 2500;
 
-// typed prompt: the text is a pure function of t
-const prompt = q('.user').textContent, typeAt = 0.05, perChar = 0.016, sendAt = 0.5;
-const typed = q('.typed'), cur = q('.cur'), ph = q('.ph');
-vawe.onFrame((t) => {
-  const n = Math.min(prompt.length, Math.max(0, Math.floor((t - typeAt) / perChar)));
-  typed.textContent = t >= sendAt ? '' : prompt.slice(0, n);
-  ph.style.visibility = n === 0 || t >= sendAt + 0.12 ? 'visible' : 'hidden';
-  cur.style.visibility = t < sendAt + 0.12 ? 'visible' : 'hidden';
+const ICONS = {
+  x: '<path d="M6 6l12 12M18 6L6 18"/>', plus: '<path d="M12 5v14M5 12h14"/>', back: '<path d="M19 12H5M11 6l-6 6 6 6"/>', fwd: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  reload: '<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/>', tune: '<path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/>',
+  'dots-v': '<path d="M12 5v.01M12 12v.01M12 19v.01"/>', dots: '<path d="M5 12h.01M12 12h.01M19 12h.01"/>', chev: '<path d="M6 9l6 6 6-6"/>',
+  mark: [0, 1, 2, 3, 4, 5].map((i) => `<rect x="-5.5" y="-2.8" width="11" height="5.6" rx="2.8" transform="translate(12 12) rotate(${i * 60}) translate(0 -5.6) rotate(30)"/>`).join(''), compose: '<path d="M12 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-5"/><path d="M17.5 3.5a2 2 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>', library: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9.5" r="1.6"/><path d="M4.5 17l5-4.5 4 3.5 2.5-2L20 17"/>',
+  share: '<path d="M12 15V4M8 8l4-4 4 4M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/>', mic: '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/>',
+  wave: '<path d="M4 10v4h2.4v-4zM8.8 6.5v11h2.4v-11zM13.6 3.5v17H16V3.5zM18.4 8v8h2.4V8z"/>', up: '<path d="M12 19V5M6 11l6-6 6 6"/>', stop: '<rect x="7" y="7" width="10" height="10" rx="2.2"/>',
+  copy: '<rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2.5 2.5 0 0 0-2.5-2.5H6.5A2.5 2.5 0 0 0 4 6.5V13a2.5 2.5 0 0 0 2.5 2.5h2"/>',
+  up2: '<path d="M7 11l4-7c1.5 0 2.4 1.1 2.1 2.6L12.6 9H18a2 2 0 0 1 2 2.4l-1.2 6A2.5 2.5 0 0 1 16.3 19H7zM3.5 11H7v8H3.5z"/>',
+  down2: '<path d="M17 13l-4 7c-1.5 0-2.4-1.1-2.1-2.6l.5-2.4H6a2 2 0 0 1-2-2.4l1.2-6A2.5 2.5 0 0 1 7.7 5H17zM20.5 13H17V5h3.5z"/>', retry: '<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/>',
+};
+for (const el of all('[data-i]')) { el.setAttribute('viewBox', '0 0 24 24'); el.innerHTML = ICONS[el.dataset.i]; }
+
+// measure the finished layout, then send the bubble from the centred composer: nothing is animated yet, so nothing is displaced
+const page = q('.page'), composer = q('.composer'), user = q('.user'), answer = q('.answer');
+const pr = page.getBoundingClientRect(), cr = composer.getBoundingClientRect();
+const centerTop = pr.top + pr.height * 0.5 - cr.height / 2;
+const lift = centerTop - cr.top;
+flipFrom(user, centerTop + (cr.height - user.getBoundingClientRect().height) / 2, SEND_AT);
+
+// the answer streams in chunks of 1 to 3 words from a seeded rng; a dot rides the newest chunk, and the newest words arrive tinted and settle to ink
+const BLOCKS = [
+  ['h2', 'Undo the last commit, keep the work'],
+  ['p', 'Run `git reset --soft HEAD~1`. It moves the branch back one commit and keeps your changes staged.'],
+  ['li', '`--mixed` (the default) keeps the changes but unstages them.'],
+  ['li', '`--hard` discards the changes, so use it with care.'],
+];
+const render = (tok) => tok.replace(/^`([^`]+)`([.,;:]?)/, (_, code, mark) => `<code>${code}</code>${mark && `<span class="pn">${mark}</span>`}`);
+const ul = document.createElement('ul');
+const r = rng(7);
+let t = STREAM_AT;
+for (const [tag, text] of BLOCKS) {
+  const block = document.createElement(tag);
+  if (tag === 'li') { ul.append(block); if (!ul.isConnected) answer.append(ul); } else answer.append(block);
+  const toks = text.match(/`[^`]+`[.,;:]?|\S+/g);
+  const chunks = [];
+  for (let i = 0; i < toks.length;) { const n = 1 + Math.floor(r() * 3); chunks.push(toks.slice(i, i + n).map(render).join(' ')); i += n; }
+  block.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: t, easing: EASE.land, fill: 'both' });
+  chunks.forEach((c, i) => {
+    const el = Object.assign(document.createElement('span'), { className: 'chunk', innerHTML: c + (i < chunks.length - 1 ? ' ' : '') });
+    const caret = Object.assign(document.createElement('span'), { className: 'caret' });
+    block.append(el, caret);
+    const from = t, [gapMin, gapMax] = UI.stream.gapMs; t += gapMin + r() * (gapMax - gapMin);
+    el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: UI.stream.fadeMs, delay: from, easing: EASE.land, fill: 'both' });
+    el.animate([{ color: 'var(--tint)' }, { color: 'var(--ink)' }], { duration: UI.stream.tintMs, delay: from, easing: EASE.land, fill: 'both' });
+    caret.animate([{ opacity: 0 }, { opacity: 1, offset: 0.001 }, { opacity: 1, offset: 0.999 }, { opacity: 0 }], { duration: t - from, delay: from, fill: 'both' });
+  });
+}
+const DONE = t;
+
+// the window arrives, then the greeting and the composer 80 ms apart
+arrive(q('.win'), 100, { ms: UI.panel.fadeMs, from: UI.panel.rise });
+arrive(q('.greet'), 220, { ms: 300, from: '0.8vh' });
+composer.animate([{ opacity: 0, translate: `0 ${lift + 12}px` }, { opacity: 1, translate: `0 ${lift}px` }], { duration: 300, delay: 300, easing: EASE.land, fill: 'both' });
+arrive(q('.fine'), 300, { ms: 300, from: '0.6vh' });
+
+
+// the prompt is typed: the text is a pure function of t
+const prompt = user.textContent;
+const times = typeTimes(prompt, TYPE_AT);
+const typed = q('.typed'), ph = q('.ph');
+vawe.onFrame((s) => {
+  const ms = s * 1000, n = typedCount(times, ms);
+  typed.textContent = ms >= SEND_AT ? '' : prompt.slice(0, n);
+  ph.style.visibility = n === 0 || ms >= SEND_AT ? 'visible' : 'hidden';
 });
-const user = q('.user'), composer = q('.composer');
-q('.hello').animate([{ opacity: 1 }, { opacity: 0, translate: '0 -1vh' }], { duration: 140, delay: sendAt * 1000 - 120, easing: EASE.launch, fill: 'both' });
-user.animate([{ opacity: 0, translate: `0 ${composer.getBoundingClientRect().top - user.getBoundingClientRect().top}px`, scale: 0.96 }, { opacity: 1, translate: '0 0', scale: 1 }],
-  { duration: 420, delay: sendAt * 1000, easing: EASE.land, fill: 'both' });
-q('.send').animate([{ scale: 1 }, { scale: 0.96, offset: 0.4 }, { scale: 1 }], { duration: 200, delay: (sendAt - 0.08) * 1000, easing: EASE.land, fill: 'both' });
 
-// working state: the mark arrives, the status line shines once, then the answer starts on its spot
-const ai = q('.ai'), streamAt = 1.0;
-ai.animate([{ opacity: 0, translate: '0 1.4vh' }, { opacity: 1, translate: '0 0' }], { duration: 420, delay: 640, easing: EASE.land, fill: 'both' });
-q('.status').animate([{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }], { duration: 700, delay: 640, easing: 'linear', fill: 'both' });
-q('.status').animate([{ opacity: 0 }], { duration: 110, delay: streamAt * 1000 - 30, easing: EASE.launch, fill: 'both' });
+// the round button reads waveform, up arrow while typing, stop square while the model answers, then waveform again
+const [wave, up, stop] = all('.go .icon');
+between(up, times[0], SEND_AT, END);
+between(stop, SEND_AT, DONE + 400, END);
+wave.animate([{ opacity: 1 }, { opacity: 1, offset: (times[0] - 60) / END }, { opacity: 0, offset: (times[0] + 60) / END }, { opacity: 0, offset: (DONE + 340) / END }, { opacity: 1, offset: (DONE + 460) / END }, { opacity: 1 }], { duration: END, fill: 'both' });
 
-// the answer streams in chunks of 1 to 3 words, 55 to 110 ms apart, drawn from a seeded rng
-const words = 'Churn fell to <b>2.1%</b> in Q3, down from 3.4% in Q2. Annual plans drove most of the drop: 38% of new accounts chose them.'.split(' ');
-const r = rng(7), chunks = [];
-for (let i = 0; i < words.length;) { const n = 1 + Math.floor(r() * 3); chunks.push(words.slice(i, i + n).join(' ')); i += n; }
-const answer = q('.answer');
-let t = streamAt * 1000;
-const starts = chunks.map(() => { const s = t; t += 55 + r() * 55; return s; });
-chunks.forEach((c, i) => {
-  const el = Object.assign(document.createElement('span'), { className: 'chunk', innerHTML: c + (i < chunks.length - 1 ? ' ' : '') });
-  const caret = Object.assign(document.createElement('span'), { className: 'caret' });
-  answer.append(el, caret);
-  const end = i < chunks.length - 1 ? starts[i + 1] : starts[i] + 260;
-  el.animate([{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 150, delay: starts[i], easing: EASE.land, fill: 'both' });
-  caret.animate([{ opacity: 0 }, { opacity: 1, offset: 0.001 }, { opacity: 1, offset: 0.999 }, { opacity: 0 }], { duration: end - starts[i], delay: starts[i], fill: 'both' });
-});
-const done = t;
-all('.src span, .acts span').forEach((p, i) => p.animate([{ opacity: 0, translate: '0 0.8vh' }, { opacity: 1, translate: '0 0' }], { duration: 380, delay: done + 40 + i * 50, easing: EASE.land, fill: 'both' }));
-q('.win').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2400, easing: EASE.glide, fill: 'both' });
+// send: the greeting is gone when the bubble flies, so no text crosses text; the composer glides to the dock, the header gains Share, the address gains the chat id
+q('.greet').animate([{ opacity: 0 }], { duration: 120, delay: SEND_AT - 120, easing: EASE.launch, fill: 'forwards' });
+composer.animate([{ translate: `0 ${lift}px` }, { translate: '0 0' }], { duration: 320, delay: SEND_AT, easing: EASE.land, fill: 'both' });
+arrive(q('.share'), SEND_AT + 150, { ms: 150, from: '0px' });
+show(q('.u1'), null, SEND_AT + 100);
+show(q('.u2'), SEND_AT + 100);
+
+// the model thinks: one dot fades in, then the first chunk's own dot takes over
+const think = q('.think');
+think.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, delay: SEND_AT + 200, easing: EASE.land, fill: 'both' });
+think.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 60, delay: STREAM_AT - 20, fill: 'forwards' });
+
+// the answer ends: the action row arrives and the tab names the chat
+arrive(q('.acts'), DONE + 40, { ms: 150, from: '0px' });
+show(q('.t1'), null, DONE + 350);
+show(q('.t2'), DONE + 350);
+leave(q('.win'), END);
 </script>
 </body>
 </html>

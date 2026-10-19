@@ -1,0 +1,86 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="product" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="6">
+<meta name="variants" content="dark">
+<title>move: terminal run</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<link rel="stylesheet" href="/prompts/moves/demo/assets/terminal.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.53-5.6", "world-held@0.0-6.0", "tile-run@0.2-5.6"], "_why": {"text-unreadable-hold": "the answer holds 1.1 s after its last line at 4.5 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, 0.4 s before the 6 s end, so the finished session holds 1.1 s, short of the 5.4 s the check asks", "static-window@4.53-5.6": "terminal, 1.07 s from 4.53 s: the finished Claude Code session holds still as the product does and only the input caret blinks every 0.5 s", "world-held@0.0-6.0": "one terminal session holds 6.0 s: the task types from 0.6 s, the tools print from 2.45 s and the window leaves at 5.6 s", "tile-run@0.2-5.6": "28 near-identical tiles from 0.2 s to 5.6 s: a terminal changes by whole text rows, each under 4% of the frame, and no row slides or fades"}}</script>
+</head>
+<body>
+<div class="win term">
+  <div class="tbar" data-chrome><span class="lights"><i></i><i></i><i></i></span><span class="ttl"><span class="t1">Claude Code</span><span class="t2">Fix invoice tax</span></span></div>
+  <div class="tbody">
+    <div class="log">
+      <div class="welcome" data-chrome><div class="hd"><svg class="star" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></svg><b>Claude Code</b><span class="sub">· ~/code/billing-api</span></div></div>
+      <div class="you past"><span class="gt" data-chrome>❯</span><span>Why do discounted invoices show the wrong tax?</span></div>
+      <div class="step"><div class="hd"><i class="dot" style="background:var(--ink)"></i><span>The tax line uses the price before the discount, in <span class="code">src/billing/tax.ts</span>.</span></div></div>
+      <div class="you now"><span class="gt" data-chrome>❯</span><span>Fix it, and keep the tests green.</span></div>
+      <div class="step read"><div class="hd"><i class="dot"></i><span><b>Read</b>(src/billing/tax.ts)</span></div><div class="res"><span>Read 112 lines (ctrl+r to expand)</span></div></div>
+      <div class="step edit"><div class="hd"><i class="dot"></i><span><b>Update</b>(src/billing/tax.ts)</span></div><div class="res"><span>Updated <b>src/billing/tax.ts</b> with 1 addition and 1 removal</span></div>
+        <div class="diff">
+          <div class="row"><span class="no">18</span><span>  export function invoiceTax(lines: Line[], rate: number): number {</span></div>
+          <div class="row"><span class="no">19</span><span>    // tax applies after discounts</span></div>
+          <div class="row del"><span class="no">20 -</span><span>  const net = lines.reduce((s, l) =&gt; s + <mark>l.qty * l.price</mark>, 0);</span></div>
+          <div class="row add"><span class="no">20 +</span><span>  const net = lines.reduce((s, l) =&gt; s + <mark>lineNet(l)</mark>, 0);</span></div>
+          <div class="row"><span class="no">21</span><span>    return round2(net * rate);</span></div>
+        </div></div>
+      <div class="step bash"><div class="hd"><i class="dot"></i><span><b>Bash</b>(pnpm vitest run billing)</span></div><div class="res"><span class="slot"><span class="r1">Running…</span><span class="r2">Tests  37 passed (37)</span></span></div></div>
+      <div class="step say"><div class="hd"><i class="dot" style="background:var(--ink)"></i><span>Fixed. <span class="code">invoiceTax</span> now taxes the discounted amount. All 37 tests pass.</span></div></div>
+    </div>
+    <div class="live" data-chrome><svg class="spin" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></svg><span>Cogitating…</span><span class="meta"></span></div>
+    <div class="box"><span class="gt" data-chrome>❯</span><span class="field"><span class="typed"></span><i class="cur"></i></span></div>
+    <div class="foot" data-chrome><span class="mode">accept edits on</span><span>(shift+tab to cycle)</span><span class="esc">· esc to interrupt</span></div>
+  </div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { leave, arrive, show, runDot, typeTimes, typedCount } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const END = 6000, TYPE_AT = 600, SEND_AT = 2100, WORK_AT = 2200, DONE_AT = 4500;
+
+const you = q('.you.now');
+
+// only the window arrives; the session inside is already running
+arrive(q('.win'), 100, { ms: 220, from: '0.8vh' });
+
+// Enter: the terminal reprints the prompt line in place
+show(you, SEND_AT);
+
+// the prompt is typed: the text is a pure function of t
+const prompt = you.textContent.slice(1);
+const times = typeTimes(prompt, TYPE_AT);
+const typed = q('.typed');
+const SPIN_MS = 120;
+const count = (n) => (n < 1000 ? `${n}` : `${(n / 1000).toFixed(1)}k`);
+vawe.onFrame((s) => {
+  const ms = s * 1000;
+  typed.textContent = ms >= SEND_AT ? '' : prompt.slice(0, typedCount(times, ms));
+  const run = Math.max(0, ms - WORK_AT);
+  q('.spin').style.rotate = `${Math.floor(run / SPIN_MS) * 30}deg`;
+  q('.meta').textContent = `(${Math.floor(run / 1000)}s · ↓ ${count(Math.floor(run * 0.63 / 40) * 40)} tokens)`;
+});
+
+// the status line shows while the model works; "esc to interrupt" shows with it
+show(q('.live'), WORK_AT, DONE_AT);
+show(q('.esc'), SEND_AT + 100, DONE_AT);
+
+// tool calls: a head, then its result; the dot blinks until the result; the diff rows print one per frame pair
+const step = (sel, at, runMs = 150) => { show(q(`${sel} .hd`), at); runDot(q(`${sel} .dot`), at, at + runMs); show(q(`${sel} .res`), at + runMs); };
+step('.read', 2450);
+step('.edit', 2900);
+all('.diff .row').forEach((row, i) => show(row, 3200 + i * 34));
+step('.bash', 3800, 600);
+show(q('.r1'), null, 4400);
+show(q('.r2'), 4400);
+show(q('.t1'), null, 3150);
+show(q('.t2'), 3150);
+
+// the answer prints as the status line leaves
+show(q('.say .hd'), DONE_AT);
+leave(q('.win'), END);
+</script>
+</body>
+</html>

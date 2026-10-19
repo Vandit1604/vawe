@@ -4,7 +4,7 @@ step: motion
 principle: Overshoot is a claim about mass. Type, UI and a counting number do not overshoot by default, and a number never passes its final figure. Some arrivals of things with mass land with a spring, so a film where none do reads stiff.
 limit: 21 to 61 percent of the arrivals that move overshoot; a count never passes its final figure
 range: reference films overshoot 21 to 41 percent of their arrivals (p10 to p90); EASE.pop (about 15 percent) only where the move is a press or a pop, named in the page, and only on things that then hold still; roll-up 0.8 to 1.4 s, the last 30 percent of the time covers the last 5 percent of the count
-break-when: the brief asks for a playful register (the one reference profile where overshoot is right is a playful consumer app), or one deliberate stiff register (a terminal, a ticker) the brief names
+break-when: the brief asks for a playful register (the one reference profile where overshoot is right is a playful consumer app), or one deliberate stiff register (a terminal, a ticker) the brief names, or a copy of a real product surface that does not overshoot (a terminal, a dashboard)
 instead: arrive fast, land soft: EASE.land, or approach(k 0.12 to 0.19). Give about 1 in 3 arrivals a spring: EASE.pop, or curveToLinear(CURVES.overshoot) from core/motion/springs.js. Never on text held for reading (it wobbles). Ease a count with expo-out or quart-out: the deceleration is the weight; counting to a small number is a stunt, cut it.
 check: judge, overshoot-share
 judge: Does any word, UI element or count overshoot with no stated reason? Does any count pass its final figure and fall back? Does any arrival settle past its rest position and return, or do none?

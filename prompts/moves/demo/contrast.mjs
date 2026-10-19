@@ -9,7 +9,9 @@ const css = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url
 
 const tokensOf = (body) => Object.fromEntries([...body.matchAll(/--([a-z-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
 const root = tokensOf(css.match(/:root \{([\s\S]*?)\n\}/)[1]);
-const looks = [...css.matchAll(/html\[data-look="([a-z]+)"\] \{([\s\S]*?)\n\}/g)].map((m) => [m[1], { ...root, ...tokensOf(m[2]) }]);
+const blocks = [...css.matchAll(/html\[data-look="([a-z]+)"\](?:\[data-theme="([a-z]+)"\])? \{([\s\S]*?)\n\}/g)];
+const base = Object.fromEntries(blocks.filter((m) => !m[2]).map((m) => [m[1], tokensOf(m[3])]));
+const looks = blocks.map((m) => [m[2] ? `${m[1]}/${m[2]}` : m[1], { ...root, ...base[m[1]], ...tokensOf(m[3]) }]);
 
 const full = (hex) => (hex.length === 4 ? `#${[...hex.slice(1)].map((c) => c + c).join('')}` : hex);
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(full(hex).slice(i, i + 2), 16));

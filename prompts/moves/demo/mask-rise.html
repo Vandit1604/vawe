@@ -1,27 +1,66 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="paper">
+<html data-aspect="16:9" data-look="editorial" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1">
-<meta name="blank" content="0-0.12">
+<meta name="duration" content="6">
+<meta name="blank" content="0-0.3">
 <title>move: mask rise</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  h1 { margin: 0; }
+  html, body { background: #0b0604; }
+  video { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .scene { position: absolute; inset: 0; }
+  .hero { position: absolute; left: 20%; top: 24%; margin: 0; display: flex; gap: 0.26em; font: 400 calc(var(--u) * 14)/1.06 'Instrument Serif', serif; letter-spacing: -0.02em; color: #1c0d05; }
+  .hero em { font-style: italic; }
 
-  /* the mask box is taller than the line: 0.25em below for descenders (g, y, p), 0.1em above for accents */
-  .mask { overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
-  .mask > span { display: block; translate: 0 118%;
-                 animation-name: rise; animation-duration: 0.7s; animation-delay: 0.1s;
-                 animation-timing-function: var(--settle); animation-fill-mode: both; }
-  @keyframes rise { to { translate: 0 0; } }
+  /* the mask box is taller than the line: 0.25em below for descenders, 0.2em above so a 15 percent overshoot stays inside */
+  .mask { display: block; overflow: hidden; padding: 0.2em 0.1em 0.25em; margin: -0.2em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.5s var(--ease, linear) var(--in) both; }
+  @keyframes rise { from { opacity: 0; } to { translate: 0 0; opacity: 1; } }
 </style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.0-5.5"], "_why": {"text-unreadable-hold": "two words held 2.7 s on a 6 s clip: a read of 2 words, and the check asks 5.4 s", "text-moves-before-hold": "the line leaves at 5.5 s, so it holds 2.7 s after landing, short of the 5.4 s the check asks", "static-window@3.0-5.5": "from 3.0 s the title holds still while read; only the footage's walker moves"}}</script>
 </head>
 <body>
-<h1 class="hero mask"><span>typography</span></h1>
+<video muted playsinline></video>
+<canvas width="1920" height="1080"></canvas>
+<main class="scene">
+  <h1 class="hero">
+    <span class="mask"><span style="--in: 0.55s; --ease: var(--land)">Light</span></span>
+    <span class="mask"><span style="--in: 2.3s; --ease: var(--pop)"><em>follows</em>.</span></span>
+  </h1>
+</main>
 <script type="module">
 import { EASE } from '/core/motion/presets.js';
-document.documentElement.style.setProperty('--settle', EASE.land);
+import { leave } from '/prompts/moves/demo/assets/stage.js';
+const root = document.documentElement.style;
+root.setProperty('--land', EASE.land);
+root.setProperty('--pop', EASE.pop);
+
+const FOOTAGE_START = 0.4;
+const video = document.querySelector('video');
+const canvas = document.querySelector('canvas');
+const ctx = canvas.getContext('2d');
+// a blob URL is fully seekable: the preview server does not answer range requests, and a streamed file clamps every seek to the start
+video.src = URL.createObjectURL(await (await fetch('/prompts/moves/demo/assets/mask-rise/walker.source.mp4')).blob());
+await new Promise((done) => (video.readyState >= 1 ? done() : video.addEventListener('loadedmetadata', done, { once: true })));
+
+// the footage is mirrored so she walks left to right
+function paint() {
+  ctx.setTransform(-1, 0, 0, 1, canvas.width, 0);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+}
+window.seek = async (t) => {
+  const at = FOOTAGE_START + t;
+  if (Math.abs(video.currentTime - at) > 0.001) {
+    await new Promise((done) => { video.addEventListener('seeked', done, { once: true }); video.currentTime = at; });
+  }
+  paint();
+};
+
+canvas.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'linear', fill: 'both' });
+leave(document.querySelector('.scene'), 6000);
+canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, delay: 5720, easing: 'linear', fill: 'forwards' });
 </script>
 </body>
 </html>

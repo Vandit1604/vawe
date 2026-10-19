@@ -1,0 +1,64 @@
+/* A Claude Code session in a macOS terminal window, shared by terminal-run and approval-gate. Sizes are u (1 percent of the frame height).
+   Needs demo.css (the .win frame, data-look="product"). Layout is reserved: every line is in place and shown by opacity, so nothing reflows. */
+html[data-look="product"] { --cc: #c2562f; --add-bg: #a9e8b7; --add-word: #52c970; --del-bg: #fbbfc3; --del-word: #ee6d77; --ok: #1a7f37; --link: #2f6fcf; --term-bg: #fff; }
+html[data-look="product"][data-theme="dark"] { --cc: #d97757; --add-bg: #1d4129; --add-word: #2c7a43; --del-bg: #4a1f27; --del-word: #8a2f3b; --ok: #4cc26a; --link: #7aa7f0; --term-bg: #1a1a1a; }
+
+.term { background: var(--term-bg); font-family: var(--mono); font-variant-ligatures: none; color: var(--ink); }
+.term .tbar { position: relative; flex: none; display: flex; align-items: center; height: calc(var(--u) * 3.8); padding: 0 calc(var(--u) * 1.6); background: var(--chrome-strip); box-shadow: 0 1px 0 var(--chrome-ring); color: var(--chrome-ink); font: 500 calc(var(--u) * 1.4)/1 var(--sans); }
+.term .lights { display: flex; align-items: center; gap: calc(var(--u) * 0.7); }
+.term .lights i { width: calc(var(--u) * 1.15); height: calc(var(--u) * 1.15); border-radius: 50%; background: #ff5f57; }
+.term .lights i:nth-child(2) { background: #febc2e; }
+.term .lights i:nth-child(3) { background: #28c840; }
+.term .ttl { position: absolute; left: 0; right: 0; display: grid; justify-items: center; pointer-events: none; }
+.term .ttl > * { grid-area: 1 / 1; white-space: nowrap; }
+
+.term .tbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: calc(var(--u) * 2) calc(var(--u) * 2.4) calc(var(--u) * 1.4); font-size: calc(var(--u) * 2.35); line-height: 1.48; }
+.term .log { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 0.8); }
+.term .welcome { align-self: flex-start; padding: calc(var(--u) * 0.6) calc(var(--u) * 2.4) calc(var(--u) * 0.6) calc(var(--u) * 1.4); border: 1px solid var(--cc); border-radius: calc(var(--u) * 0.8); }
+.term .welcome b { font-weight: 500; }
+.term .welcome .sub { color: var(--muted); }
+.term .you { display: flex; gap: calc(var(--u) * 1.2); padding: 0 calc(var(--u) * 0.8); margin: 0 calc(var(--u) * -0.8); background: var(--raised); }
+.term .you .gt, .term .box .gt { color: var(--muted); }
+.term .step { display: flex; flex-direction: column; }
+.term .hd { display: flex; align-items: center; gap: calc(var(--u) * 1); }
+.term .hd b { font-weight: 600; }
+.term .dot { flex: none; width: calc(var(--u) * 1.05); height: calc(var(--u) * 1.05); border-radius: 50%; background: var(--ok); }
+.term .res { display: flex; align-items: flex-start; gap: calc(var(--u) * 1); padding-left: calc(var(--u) * 0.4); color: var(--muted); }
+.term .res::before { content: ''; flex: none; width: calc(var(--u) * 0.8); height: calc(var(--u) * 1); margin-top: calc(var(--u) * 0.2); border-left: 1px solid var(--muted); border-bottom: 1px solid var(--muted); }
+.term .slot { display: inline-grid; }
+.term .slot > * { grid-area: 1 / 1; white-space: nowrap; }
+.term .diff { margin: calc(var(--u) * 0.2) 0 0 calc(var(--u) * 3.2); font-size: calc(var(--u) * 2.15); line-height: 1.42; }
+.term .diff .row { display: flex; white-space: pre; }
+.term .diff .no { flex: none; width: calc(var(--u) * 4.6); padding-right: calc(var(--u) * 1); text-align: right; color: var(--muted); }
+.term .diff .row.add { background: var(--add-bg); }
+.term .diff .row.del { background: var(--del-bg); }
+.term .diff .row.add .no, .term .diff .row.del .no { color: var(--ink); }
+.term .diff .row.add mark { background: var(--add-word); }
+.term .diff .row.del mark { background: var(--del-word); }
+.term .diff mark { color: inherit; }
+.term .code { color: var(--link); }
+.term .live { flex: none; display: flex; align-items: center; gap: calc(var(--u) * 1); margin-bottom: calc(var(--u) * 0.9); color: var(--cc); }
+.term .star { flex: none; width: calc(var(--u) * 1.8); height: calc(var(--u) * 1.8); stroke: var(--cc); stroke-width: 2; stroke-linecap: round; fill: none; }
+.term .live svg { flex: none; width: calc(var(--u) * 1.8); height: calc(var(--u) * 1.8); stroke: currentColor; stroke-width: 2; stroke-linecap: round; fill: none; }
+.term .live .meta { color: var(--muted); }
+.term .box { flex: none; display: flex; align-items: center; gap: calc(var(--u) * 1.2); padding: calc(var(--u) * 0.5) calc(var(--u) * 1.4); border: 1px solid var(--line); border-radius: calc(var(--u) * 0.8); }
+.term .box .field { display: flex; align-items: center; white-space: nowrap; }
+.term .cur { width: calc(var(--u) * 1.05); height: calc(var(--u) * 2.1); background: var(--ink); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 0%, 49.9% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.term .foot { flex: none; margin-top: calc(var(--u) * 0.7); padding-left: calc(var(--u) * 0.4); color: var(--muted); font-size: calc(var(--u) * 1.7); display: flex; align-items: center; gap: calc(var(--u) * 1); }
+.term .foot .mode { color: var(--cc); }
+
+/* The terminal window takes the reference's share of the frame (62 percent of the width, 88 percent of the height), a 24 px mono face at 1080 p, and the terminal's own colour in the title bar under a hairline. */
+.win.term { width: calc(var(--u) * 109.6); height: calc(var(--u) * 88.2); border-radius: calc(var(--u) * 1.7); }
+.term .tbar { height: calc(var(--u) * 4.8); padding: 0 calc(var(--u) * 2.3); background: var(--term-bg); box-shadow: 0 1px 0 var(--line); color: var(--muted); font: 600 calc(var(--u) * 2.2)/1 var(--sans); }
+.term .lights { gap: calc(var(--u) * 1.4); }
+.term .lights i { width: calc(var(--u) * 2.05); height: calc(var(--u) * 2.05); }
+.term .tbody { padding: calc(var(--u) * 2.2) calc(var(--u) * 3) calc(var(--u) * 2); font-size: calc(var(--u) * 2.22); }
+.term .diff { font-size: calc(var(--u) * 2.1); }
+.term .dot { width: calc(var(--u) * 1.2); height: calc(var(--u) * 1.2); }
+
+/* current Claude Code: a plain header line and a composer ruled above and below, full width */
+.term .welcome { padding: 0; border: 0; }
+.term .welcome .hd { display: flex; align-items: center; gap: calc(var(--u) * 1); }
+.term .welcome .sub { color: var(--muted); }
+.term .box { padding: calc(var(--u) * 0.7) 0; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; }

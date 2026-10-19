@@ -1,0 +1,111 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="product" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="6">
+<meta name="variants" content="dark">
+<title>move: approval gate</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<link rel="stylesheet" href="/prompts/moves/demo/assets/terminal.css">
+<style>
+  /* the Claude Code permission prompt takes the place of the input box; the colour is the product's permission blue */
+  html[data-look="product"] { --perm: #4a5bd9; }
+  html[data-look="product"][data-theme="dark"] { --perm: #b1b9f9; }
+  .dock { flex: none; display: grid; align-items: end; }
+  .dock > * { grid-area: 1 / 1; }
+  .perm { line-height: 1.6; padding: calc(var(--u) * 1) calc(var(--u) * 1.8) calc(var(--u) * 1.2); border: 1px solid var(--perm); border-radius: calc(var(--u) * 0.8); }
+  .perm .pt { color: var(--perm); font-weight: 600; }
+  .perm .cmd { margin: calc(var(--u) * 0.4) 0 calc(var(--u) * 0.8) calc(var(--u) * 2); }
+  .perm .cmd .dim { color: var(--muted); }
+  .perm .note, .perm .hint { color: var(--muted); }
+  .perm .hint { margin-top: calc(var(--u) * 0.8); font-size: 0.86em; }
+  .perm .o { display: flex; align-items: center; gap: calc(var(--u) * 0.9); color: var(--muted); white-space: nowrap; }
+  .perm .mk { flex: none; width: calc(var(--u) * 1.4); height: calc(var(--u) * 1.4); stroke: var(--perm); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .perm .o .mk { opacity: 0; }
+</style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.43-5.6", "world-held@0.0-6.0", "static-window@2.7-3.4", "tile-run@0.2-5.6"], "_why": {"text-unreadable-hold": "the answer holds 1.2 s after its last line at 4.4 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, 0.4 s before the 6 s end, so the finished session holds 1.2 s, short of the 5.4 s the check asks", "static-window@4.43-5.6": "terminal, 1.17 s from 4.43 s: the finished Claude Code session holds still after the answer as the product does and only the input caret blinks every 0.5 s", "world-held@0.0-6.0": "one terminal session holds 6.0 s: the permission prompt opens at 2.45 s, the marker steps at 2.85 s and Enter lands at 3.35 s", "static-window@2.7-3.4": "0.7 s from 2.7 s: the reader looks at option 2 while the marker steps at 2.85 s, a few pixels, as the product does", "tile-run@0.2-5.6": "28 near-identical tiles from 0.2 s to 5.6 s: a terminal changes by whole text rows, each under 4% of the frame, and no row slides or fades"}}</script>
+</head>
+<body>
+<div class="win term">
+  <div class="tbar" data-chrome><span class="lights"><i></i><i></i><i></i></span><span class="ttl"><span class="t1">Claude Code</span><span class="t2">Clear build cache</span></span></div>
+  <div class="tbody">
+    <div class="log">
+      <div class="welcome" data-chrome><div class="hd"><svg class="star" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></svg><b>Claude Code</b><span class="sub">· ~/code/billing-api</span></div></div>
+      <div class="you past"><span class="gt" data-chrome>❯</span><span>Which cache does the build reuse?</span></div>
+      <div class="step"><div class="hd"><i class="dot" style="background:var(--ink)"></i><span>The bundler keeps its transforms in <span class="code">node_modules/.cache</span>.</span></div></div>
+      <div class="you now"><span class="gt" data-chrome>❯</span><span>Clear the build cache</span></div>
+      <div class="step say1"><div class="hd"><i class="dot" style="background:var(--ink)"></i><span>I'll clear the build cache, then rerun the tests.</span></div></div>
+      <div class="step rm"><div class="hd"><i class="dot"></i><span><b>Bash</b>(rm -rf node_modules/.cache)</span></div><div class="res"><span>(No content)</span></div></div>
+      <div class="step test"><div class="hd"><i class="dot"></i><span><b>Bash</b>(pnpm vitest run)</span></div><div class="res"><span class="slot"><span class="r1">Running…</span><span class="r2">Tests  52 passed (52)</span></span></div></div>
+      <div class="step say2"><div class="hd"><i class="dot" style="background:var(--ink)"></i><span>Cache cleared. All 52 tests pass.</span></div></div>
+    </div>
+    <div class="dock">
+      <div class="box"><span class="gt" data-chrome>❯</span><span class="field"><span class="typed"></span><i class="cur"></i></span></div>
+      <div class="perm">
+        <div class="pt">Bash command</div>
+        <div class="cmd"><div>rm -rf node_modules/.cache</div><div class="dim">Remove the build cache</div></div>
+        <div class="note">This command requires approval</div>
+        <div>Do you want to proceed?</div>
+        <div class="o"><svg class="mk" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg><span>1. Yes</span></div>
+        <div class="o"><svg class="mk" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg><span>2. Yes, and don't ask again for rm commands in ~/code/billing-api</span></div>
+        <div class="o"><svg class="mk" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg><span>3. No, and tell Claude what to do differently (esc)</span></div>
+        <div class="hint">Esc to cancel · Tab to amend</div>
+      </div>
+    </div>
+    <div class="foot" data-chrome><span class="mode">accept edits on</span><span>(shift+tab to cycle)</span></div>
+  </div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { leave, arrive, show, runDot, typeTimes, typedCount } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const END = 6000, TYPE_AT = 600, SEND_AT = 1800, ASK_AT = 2450, DOWN_AT = 2850, ENTER_AT = 3350, ANSWER_AT = 3500;
+
+const box = q('.box'), you = q('.you.now'), perm = q('.perm');
+
+// only the window arrives; the session inside is already running
+arrive(q('.win'), 100, { ms: 220, from: '0.8vh' });
+
+// Enter: the terminal reprints the prompt line in place
+show(you, SEND_AT);
+
+const prompt = you.textContent.slice(1);
+const times = typeTimes(prompt, TYPE_AT);
+const typed = q('.typed');
+vawe.onFrame((s) => { typed.textContent = s * 1000 >= SEND_AT ? '' : prompt.slice(0, typedCount(times, s * 1000)); });
+
+// the agent says what it will do, then the command it wants to run
+show(q('.say1 .hd'), 2200);
+show(q('.t1'), null, 2300);
+show(q('.t2'), 2300);
+show(q('.rm .hd'), ASK_AT - 100);
+runDot(q('.rm .dot'), ASK_AT - 100, ANSWER_AT);
+
+// the permission prompt replaces the input box in one frame, and the box returns after the answer
+const steps = (keys, prop) => keys.flatMap(([t, v], i) => (i ? [{ [prop]: keys[i - 1][1], offset: (t - 1) / END }] : []).concat({ [prop]: v, offset: t / END }));
+box.animate(steps([[0, 'visible'], [ASK_AT, 'hidden'], [ANSWER_AT + 100, 'visible']], 'visibility').concat({ visibility: 'visible', offset: 1 }), { duration: END, fill: 'both' });
+show(perm, ASK_AT, ENTER_AT + 150);
+
+// Down moves the selection to option 2 in one step: the marker and the colour follow it
+const lit = (row, windows) => {
+  const mk = row.querySelector('.mk'), txt = row.querySelector('span');
+  const marks = [[0, 0], ...windows.flatMap(([a, b]) => [[a, 1], [b, 0]])];
+  mk.animate(steps(marks, 'opacity').concat({ opacity: 0, offset: 1 }), { duration: END, fill: 'both' });
+  txt.animate(steps(marks.map(([t, v]) => [t, v ? 'var(--perm)' : 'var(--muted)']), 'color').concat({ color: 'var(--muted)', offset: 1 }), { duration: END, fill: 'both' });
+};
+const [o1, o2] = all('.perm .o');
+lit(o1, [[ASK_AT, DOWN_AT]]);
+lit(o2, [[DOWN_AT, ENTER_AT + 150]]);
+
+// Enter: the command runs and the next tool call follows
+show(q('.rm .res'), ANSWER_AT);
+show(q('.test .hd'), ANSWER_AT + 150);
+runDot(q('.test .dot'), ANSWER_AT + 150, 4000);
+show(q('.test .res'), ANSWER_AT + 300);
+show(q('.r1'), null, 4000);
+show(q('.r2'), 4000);
+show(q('.say2 .hd'), 4400);
+leave(q('.win'), END);
+</script>
+</body>
+</html>
