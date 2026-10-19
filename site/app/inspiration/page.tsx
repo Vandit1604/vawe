@@ -11,7 +11,7 @@ import "./inspiration.css";
 
 const TITLE = "Motion video inspiration: AI-made motion design | vawe";
 const DESCRIPTION =
-  "Motion videos made with Claude and other AI, from posts on X. Each one credits its creator, links the post and gives the command to use it as a reference.";
+  "Motion videos made with Claude and other AI, from posts on X. Each one credits its creator, links the post and gives a prompt to recreate it with vawe.";
 const SUGGEST = `${REPO_URL}/issues/new?title=${encodeURIComponent("Inspiration post: ")}`;
 
 // The videos play from X's CDN, which answers 403 to a request that carries a foreign Referer.
@@ -41,9 +41,9 @@ export default function Inspiration() {
           </InspirationWall>
           <Next
             title="Make one of your own."
-            lead="Add a post as a reference, then write the page it inspired."
+            lead="Copy a recreation prompt and give it to your agent, or write the page it inspired."
             primary={{ href: "/docs/quickstart", label: "Start with the quickstart" }}
-            secondary={{ href: "/moves", label: "See the moves" }}
+            secondary={{ href: "/video-components", label: "See the video components" }}
           />
         </main>
       </div>

@@ -207,7 +207,7 @@ export function frameLines(manifest) {
 
 /** One line per film for `vawe refs list`. */
 export function listLines(registry) {
-  const rows = registry.map((r) => [r.id, r.inScope ? r.type : `out (${r.why})`, `${Math.round(r.seconds)} s`, r.studio ?? '-', r.title]);
+  const rows = registry.map((r) => [r.id, r.inScope ? r.type ?? 'no type' : `out (${r.why})`, `${Math.round(r.seconds)} s`, r.studio ?? '-', r.title]);
   const wide = [0, 1, 2, 3].map((c) => Math.max(...rows.map((r) => r[c].length)));
   return rows.map((r) => `${r.slice(0, 4).map((cell, c) => cell.padEnd(wide[c])).join('  ')}  ${r[4]}`);
 }

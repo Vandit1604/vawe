@@ -189,3 +189,8 @@ test("positionals keeps the source after a bool flag and drops the value of a va
   assert.deepEqual(positionals(["add", "https://x/a.mp4", "--no-measure"]), ["add", "https://x/a.mp4"]);
   assert.deepEqual(positionals(["add", "--type", "brand", "a.mp4", "--title", "T"]), ["add", "a.mp4"]);
 });
+
+test('listLines lists a film added with --no-measure, which has no type', () => {
+  const [line] = listLines([{ id: 'x1', type: null, seconds: 6, inScope: true, studio: null, title: 'X' }]);
+  assert.match(line, /^x1 {2}no type {2}6 s/);
+});

@@ -92,6 +92,7 @@ function add() {
   const registry = (readRegistry(dir) ?? []).filter((r) => r.id !== got.id);
   writeRegistry(dir, [...registry, recorded(meta, got.file)].sort((a, b) => a.id.localeCompare(b.id)));
   console.log(`added ${got.id} (${type ?? 'no type'}) to ${path.join(dir, 'refs.json')}`);
+  console.log(`video: ${got.file}`);
   if (!plan.includes('measure')) console.log(`not measured; measure it later: bin/vawe see ${got.id}`);
 }
 

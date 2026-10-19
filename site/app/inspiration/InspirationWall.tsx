@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { Icon } from "../components/Icon";
 import { MatTile } from "../components/MatTile";
-import { MAKERS, PROMPTS_PATH, refCommand, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration-shared";
+import { MAKERS, PROMPTS_PATH, recreatePrompt, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration-shared";
 
 // The --ease-out and --ease-in tokens: the Web Animations API cannot read a custom property.
 const EASE_OUT = "cubic-bezier(.23,1,.32,1)";
@@ -131,13 +131,13 @@ function CopyButton({
       className={className}
       data-state={done ? "done" : undefined}
       tabIndex={tabIndex}
-      aria-label={children ? undefined : "Copy the reference command"}
+      aria-label={children ? undefined : label}
       title={label ?? `Copy: ${text}`}
       onClick={async (e) => {
         e.stopPropagation();
         const ok = await copyText(text);
         setDone(ok);
-        onCopied(ok, label ? "the whole prompt" : text);
+        onCopied(ok, label ? label.replace(/^Copy /, "") : text);
         window.clearTimeout(timer.current);
         timer.current = window.setTimeout(() => setDone(false), COPIED_MS);
       }}
@@ -338,7 +338,7 @@ function Tile({
         onClick={(e) => onOpen(post.id, e)}
       />
       {post.promptSource ? <span className="in-badge">Prompt</span> : null}
-      {post.playback ? <CopyButton className="in-ref" text={refCommand(post)} tabIndex={active ? 0 : -1} onCopied={onCopied} /> : null}
+      {post.playback ? <CopyButton className="in-ref" text={recreatePrompt(post)} label="Copy the recreation prompt" tabIndex={active ? 0 : -1} onCopied={onCopied} /> : null}
       {failed ? (
         <Fail
           url={post.url}
@@ -391,8 +391,8 @@ function ViewerMedia({ post, reduced }: { post: InspirationCard; reduced: boolea
   );
 }
 
-// The whole prompt, never cut: a long one scrolls inside its well, with a fade while more text lies below.
-function Prompt({ text, source, onCopied }: { text: string | null; source: string; onCopied: OnCopied }) {
+// The whole text, never cut: a long one scrolls inside its well, with a fade while more text lies below.
+function TextWell({ title, source, text, copy, onCopied }: { title: string; source?: string; text: string | null; copy: string; onCopied: OnCopied }) {
   const well = useRef<HTMLDivElement>(null);
   const [more, setMore] = useState(false);
   const sync = useCallback(() => {
@@ -409,19 +409,24 @@ function Prompt({ text, source, onCopied }: { text: string | null; source: strin
     <div className="in-blk">
       <div className="in-blk-head">
         <h3>
-          Prompt{" "}
-          <a className="in-src" href={source} rel="noopener">
-            source
-          </a>
+          {title}
+          {source ? (
+            <>
+              {" "}
+              <a className="in-src" href={source} rel="noopener">
+                source
+              </a>
+            </>
+          ) : null}
         </h3>
         {text ? (
-          <CopyButton className="in-copy" text={text} label="Copy the whole prompt" onCopied={onCopied}>
-            Copy prompt
+          <CopyButton className="in-copy" text={text} label={`Copy the ${title.toLowerCase()}`} onCopied={onCopied}>
+            {copy}
           </CopyButton>
         ) : null}
       </div>
       <div className={more ? "in-well in-prompt has-more" : "in-well in-prompt"}>
-        <div className="in-prompt-scroll" ref={well} onScroll={sync} tabIndex={0} role="region" aria-label="Prompt text">
+        <div className="in-prompt-scroll" ref={well} onScroll={sync} tabIndex={0} role="region" aria-label={title}>
           {text === null ? <p className="in-loading">Loading the prompt…</p> : <pre lang={langOf(text)}>{text}</pre>}
         </div>
       </div>
@@ -537,17 +542,15 @@ function Viewer({
                 <p className="meta in-facts">{facts}</p>
               </div>
               {post.playback ? (
-                <div className="in-blk">
-                  <h3>Use as a reference</h3>
-                  <div className="in-well in-cmd">
-                    <code>{refCommand(post)}</code>
-                    <CopyButton className="in-copy" text={refCommand(post)} onCopied={onCopied}>
-                      Copy
-                    </CopyButton>
-                  </div>
-                </div>
+                <TextWell
+                  key={`r${post.id}`}
+                  title="Recreation prompt"
+                  text={prompt?.text === null ? null : recreatePrompt(post, prompt?.text)}
+                  copy="Copy"
+                  onCopied={onCopied}
+                />
               ) : null}
-              {prompt ? <Prompt key={post.id} text={prompt.text} source={prompt.source} onCopied={onCopied} /> : null}
+              {prompt ? <TextWell key={post.id} title="Prompt" source={prompt.source} text={prompt.text} copy="Copy prompt" onCopied={onCopied} /> : null}
               <div className="in-lb-acts">
                 <a className="btn btn-ghost" href={post.url} rel="noopener">
                   Open on X <Icon name="external" size={14} />
