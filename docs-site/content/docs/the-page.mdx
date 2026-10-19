@@ -32,10 +32,11 @@ A film is `films/<name>/page.html` plus its own assets folder. Every path in the
 </style>
 <h1 id="word">One page in</h1>
 <div id="bar"></div>
-<script>
+<script type="module">
+  import { EASE } from '../../core/motion/presets.js';
   document.getElementById('word').animate(
     [{ transform: 'translateY(0.5em)', opacity: 0 }, { transform: 'none', opacity: 1 }],
-    { duration: 500, delay: 300, easing: 'ease-out', fill: 'both' });
+    { duration: 500, delay: 300, easing: EASE.land, fill: 'both' });
 
   window.seek = (t) => {
     const p = Math.min(1, Math.max(0, (t - 0.6) / 1.2));

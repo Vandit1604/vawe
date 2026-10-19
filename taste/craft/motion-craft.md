@@ -32,7 +32,7 @@ effect choice is in [selection.md](selection.md). Restraint by film type is belo
 | Idea | What it means in practice | Rule |
 |---|---|---|
 | Timing is a voice, not a constant | Entry pace varies with intent. One duration everywhere reads as monotone narration. | [speed-bands](../rules/speed-bands.md) |
-| Entrances land, exits launch | Entrances decelerate (arrivals are landings). Exits accelerate (departures are launches). Never linear on a visible move. | [entrance-ease](../rules/entrance-ease.md), [exits-shorter](../rules/exits-shorter.md) |
+| Entrances land, exits launch | Entrances decelerate (arrivals are landings). Exits accelerate (departures are launches). Never linear on a move over 0.3 s (a camera's interior legs aside). | [entrance-ease](../rules/entrance-ease.md), [exits-shorter](../rules/exits-shorter.md) |
 | Hierarchy through offset | Related elements arrive one after another. The hero moves last or largest. Motion order is reading order. | [stagger](../rules/stagger.md), [arrival-rhythm](../rules/arrival-rhythm.md) |
 | Choreograph arrivals | Elements in one beat arrive as one phrase, not as independent events. Anticipation is the tiny pre-move before the main move. | [arrival-rhythm](../rules/arrival-rhythm.md), [anticipation](../rules/anticipation.md) |
 | Settle and hold | A clip, card or line of text stays still long enough to read. | [readable-hold](../rules/readable-hold.md) |
@@ -144,7 +144,7 @@ default and never a hand-fitted cubic-bezier ([named-eases](../rules/named-eases
 | Dramatic arrival | EASE.land on a hero at cinematic length, or a spring | very fast then a long tail; weighty |
 | Press or pop (rare) | EASE.pop | passes its mark by about 15 percent and settles |
 | Ambient loop (breathing, drifting) | EASE.glide | gentlest curve, no hard stop |
-| Handover between two seen positions | EASE.carry | travels, eases at both ends |
+| Handover between two seen positions | EASE.carry | eases in, still fast at the end so the next move takes the speed |
 | Exit | EASE.launch | accelerates away; EASE.leave decelerates for a settle or hand-off |
 | Speed ramp inside one move | slow to fast to slow | a camera or counter reads as intentional, not a lerp |
 | No travel at all | a stepped swap | holds the from value and jumps at the far key |
@@ -162,7 +162,7 @@ call it overlapping action ([follow-through](../rules/follow-through.md)).
 
 ### What a graph editor does that a curve table cannot say
 
-1. **A key in the middle of a move should not stop.** Every curve above lands at rest at both ends, so three keys read as two moves with a full stop between. Compute the tangent at a waypoint key from its neighbours so the velocity entering equals the velocity leaving ([camera-path-linear](../rules/camera-path-linear.md)).
+1. **A key in the middle of a move should not stop.** Most curves above come to rest at their end, so three keys read as two moves with a full stop between. Compute the tangent at a waypoint key from its neighbours so the velocity entering equals the velocity leaving ([camera-path-linear](../rules/camera-path-linear.md)).
 2. **A key has two sides, and their shape is the speed graph.** A spike then decay reads as a hit that settles. A flat plateau reads as a machine. A symmetric hump ("easy ease") reads as soft and generic by default: it is the reason so much motion looks competent and characterless. Choose the shape the motion means. Do not push influence near 100 on both sides of one key: the hump collapses to a spike and the object skips.
 
 ### Reading the tells
