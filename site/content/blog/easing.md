@@ -48,7 +48,7 @@ On a move under 0.4 s, `land` jumps: at 0.3 s and 30 frames a second the first f
 
 <figure>
 <video src="/blog/easing/land.mp4" poster="/blog/easing/land.webp" muted loop playsinline autoplay width="640" height="360"></video>
-<figcaption><a href="/easing/land">land</a>: a fast start and a long soft stop, against linear.</figcaption>
+<figcaption><a href="/easing/land">land</a> against ease-in-out, both 0.7 s: land covers 39.5% of the distance in the first 10% of the time.</figcaption>
 </figure>
 
 ## 2. An exit is shorter, and it accelerates
@@ -67,7 +67,7 @@ Break the rule when the exit is a settle or a hand-off into the next shot and th
 
 <figure>
 <video src="/blog/easing/launch.mp4" poster="/blog/easing/launch.webp" muted loop playsinline autoplay width="640" height="360"></video>
-<figcaption><a href="/easing/launch">launch</a>: a gentle start, then a fast exit, capped at 3x.</figcaption>
+<figcaption><a href="/easing/launch">launch</a>: the right exit takes 0.3 s, 0.6 of the 0.5 s entrance. The left exit runs the full 0.5 s.</figcaption>
 </figure>
 
 ## 3. Overshoot is a claim about mass
@@ -94,6 +94,11 @@ window.seek = (t) => {
 
 Break the rule for a playful brand, which wants more. Break it the other way for a copy of a real surface that does not overshoot, such as a terminal. The method for the 22 films is in [motion graphics benchmark: 167 cuts measured](/blog/quality-bar).
 
+<figure>
+<video src="/blog/easing/overshoot.mp4" poster="/blog/easing/overshoot.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>Left: the text bounces and the count passes 1,822. Right: the card springs on EASE.pop (15.3% overshoot) and the count stops on 1,822.</figcaption>
+</figure>
+
 ## 4. Use a named ease, not a keyword
 
 The CSS words `ease`, `ease-out` and `ease-in-out` are what a browser picks when you pick nothing. A hand-fitted `cubic-bezier` is worse: it starts too hard and stops too early. So take every curve from the `EASE` names, which are exact `linear()` strings, and use one or two eases per scene. Do not run a move longer than 0.3 s on `linear`.
@@ -108,6 +113,11 @@ el.animate(frames, { duration: 600, easing: EASE.land });
 
 Break the rule on the interior legs of a camera path, where constant speed is the point (rule 9). A loop between two resting positions can use `ease-in-out`. Two layers that move in one beat should differ in duration or start time, or they move in lockstep.
 
+<figure>
+<video src="/blog/easing/named.mp4" poster="/blog/easing/named.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>linear against EASE.land over 0.6 s. The outlines are 75 ms apart: linear spaces them evenly, land bunches them at the end.</figcaption>
+</figure>
+
 ## 5. Speed is a voice: use bands
 
 If every move takes 0.45 s, the film reads as one flat tone. So each move sits in a named band, and the slowest move runs at least 3 times the fastest.
@@ -121,6 +131,11 @@ If every move takes 0.45 s, the film reads as one flat tone. So each move sits i
 
 Give the hero gravity or cinematic and the payoff energy. A 0.25 s hook entrance followed by a 1.0 s reveal is right. Every entrance at 0.45 s is wrong. Speed has a ceiling: a card that slides 40 percent of the frame in 0.25 s peaks near 6 frame heights per second, and in 0.1 s near 15. Reference films peak at 4 to 13 frame heights per second and our limit is 12.6. Our early films ran at 14 to 30. Break the rule for one deliberate tempo that the brief names, such as a metric-cut list.
 
+<figure>
+<video src="/blog/easing/bands.mp4" poster="/blog/easing/bands.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>Left: every move 0.45 s. Right: 0.25, 0.8 and 0.25 s, so the slowest move is 3.2 times the fastest.</figcaption>
+</figure>
+
 ## 6. Follow-through: the trailing part finishes later
 
 A card whose every property stops on one frame reads as a slide changing. When the scale settles after the position, the card has weight. Delay the trailing property by 0.05 to 0.15 s. The draft check fires when all properties end within one frame (0.017 s at 60 fps).
@@ -132,9 +147,19 @@ card.animate([{ scale: 0.96 }, { scale: 1 }], { duration: 700, easing: EASE.land
 
 Break it for rigid things: a card that drags reads as jelly. Follow-through is not stagger. Stagger delays siblings, and follow-through delays the parts of one element.
 
+<figure>
+<video src="/blog/easing/follow.mp4" poster="/blog/easing/follow.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>The shadow plate ends 0.12 s after the card on the right (0.72 s against 0.6 s). On the left both stop on one frame.</figcaption>
+</figure>
+
 ## 7. Anticipation: on the hero move only
 
 A small opposite move readies the eye for a big one. Use a scale dip of 2 to 4 percent for about 4 frames, or a counter-move of 10 to 20 percent of the travel. `enter(el, { anticipate: 0.12 })` does the second in one call. A wind-up on every move reads as a wobble, so keep it for the one move near the spectacle second. Skip it on information and on anything the viewer already looks at.
+
+<figure>
+<video src="/blog/easing/anticipation.mp4" poster="/blog/easing/anticipation.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>The right card first moves back 20% of its travel, then lands: enter(el, { anticipate: 0.2 }).</figcaption>
+</figure>
 
 ## 8. Stagger: one beat with an inner rhythm
 
@@ -145,6 +170,11 @@ stagger(document.querySelectorAll(".facts li"), { at: 2.0, band: "energy", from:
 ```
 
 Break it when the group must read as one object, such as a logo that locks. Use 0 ms and say so in the page.
+
+<figure>
+<video src="/blog/easing/stagger.mp4" poster="/blog/easing/stagger.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>Six rows, 0.3 s each on landSoft. Left: all start on one frame. Right: 50 ms apart, the last row starts 0.26 s after the first.</figcaption>
+</figure>
 
 ## 9. A camera flight is constant in the middle
 
@@ -163,13 +193,28 @@ keys(camera, "translate", [
 
 A camera move under 2 s takes `land`. `settle` and `glide` reach 5 percent of the travel only after 20 percent and 14 percent of the time, so a 1.6 s pull-back sits dead for its first 0.33 s. Use `glide` for a push or a drift of 2 s or more, and `settle` for a pull of 2 s or more that starts and ends at rest. If the beats are unrelated claims, use cuts instead.
 
+<figure>
+<video src="/blog/easing/camera.mp4" poster="/blog/easing/camera.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>Three legs of 0.7 s. Left: every key eased, so the camera stops twice. Right: eased ends and constant speed in the middle.</figcaption>
+</figure>
+
 ## 10. One hero motion per beat
 
 One element owns the motion in a beat. The rest support it quietly, with at most one secondary motion that is lower in contrast and offset in time. Two animations that compete read as none. Slide up plus fade is one claim, arriving. Rise plus rotate is two claims about one object, so drop one. The draft check fires on 4 or more movers that start within 0.03 s when the top mover holds under 30 percent of the motion. In practice: the card slides in, and its shadow settles a beat later.
 
+<figure>
+<video src="/blog/easing/one-hero.mp4" poster="/blog/easing/one-hero.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>Left: five parts move at once. Right: the card leads, the rest holds still, and one chip fades in behind it.</figcaption>
+</figure>
+
 ## 11. No dead stops
 
 A hold keeps one part alive: a line that types, a counter that ticks, a glint. A frozen frame is not a hold. No span longer than 0.5 s should sit still unless the page declares it, for example the held wordmark on the last beat. A camera drift does not count as life, because the camera holds still by default. A dead stop is also a speed jump: a move that stops within one step from over 600 px per second reads as a jolt. Fix it at the curve. End the move on `EASE.land` or a spring, and rest 0.4 to 0.6 s after it settles.
+
+<figure>
+<video src="/blog/easing/stops.mp4" poster="/blog/easing/stops.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>Left: ease-in ends a 0.5 s slide at full speed (1,530 px/s on a 1080p frame) and stops in one frame. Right: EASE.land slows into the stop and rests.</figcaption>
+</figure>
 
 ## 12. A real surface moves as the real product does
 
@@ -195,6 +240,11 @@ panel.animate(
 ```
 
 A panel fades and does not scale. A counter never springs. A terminal never eases its text: characters and lines appear on a frame, with no slide or fade. Only a small, fast item takes the send spring, a bubble or a chip with 3 to 20 px of travel. A real surface covers 27 to 39 percent of the way in its first frame. Pick the ease whose first frame lands in that band at your duration: `land` at 0.4 s gives 34 percent, `landSoft` at 0.3 s gives 30. Break this rule only when someone asks for creative motion on a real surface.
+
+<figure>
+<video src="/blog/easing/surface.mp4" poster="/blog/easing/surface.webp" muted loop playsinline autoplay width="640" height="360"></video>
+<figcaption>Left: terminal rows fade in over 0.3 s. Right: whole rows on one frame, 70 ms apart, as a real terminal prints them.</figcaption>
+</figure>
 
 ## Pick by job
 
@@ -283,6 +333,7 @@ A script reads the motion library and writes one JSON file per curve. Each holds
 | `core/motion/presets.js` | the `EASE` vocabulary, `enter()`, `leave()` and `ramp()` |
 | `core/motion/ui.js` | the measured product UI numbers |
 | `scripts/site/easing.mjs` | builds the easing page data from the motion library |
+| `scripts/site/easing-rule-clips.mjs` | renders the twelve rule clips above, wrong on the left and right on the right |
 | `site/app/easing/` | the 45 pages and [the index](/easing) |
 | `taste/rules/` | one file per rule above, with its numbers |
 
