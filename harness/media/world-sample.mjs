@@ -67,18 +67,31 @@ export const SHOWS_SOURCE = elementShows.toString();
 const WORLDS_SOURCE = [elementShows, worldsSample].map((fn) => fn.toString()).join('\n');
 export const readWorlds = (page) => page.evaluate((src, o, s) => new Function(`${src}\nreturn worldsSample(${o}, ${s});`)(), WORLDS_SOURCE, SEEN_MIN_OPACITY, GROUND_MIN_SHARE);
 
+// A seek runs the page's own frame hooks (a video decode, a texture upload), so worlds are read every STRIDE frames, and every frame
+// between two reads that show different worlds: a world of STRIDE frames (0.1 s) or more always meets a read, and its span stays exact.
+const STRIDE = 3;
+const shownIds = (sample) => sample.worlds.filter((w) => w.visible).map((w) => w.id).join(' ');
+
 /**
- * Seek to every frame of the draft grid and read the worlds there; returns [{ id, start, end, ground, readNeed }] in page order.
- * A fixed coarse step misses a world shorter than the step, so no world can fall between samples. start is the first visible frame
+ * Read the worlds on the draft grid; returns [{ id, start, end, ground, readNeed }] in page order. start is the first visible frame
  * and end the first hidden frame after it. `seek(ms)` is a layout seek.
  */
 export async function sampleWorlds(page, dur, seek, from = 0, fps = FPS) {
-  const samples = [];
-  for (let j = 0; j / fps <= dur + 1e-9; j++) {
+  const last = Math.floor(dur * fps + 1e-9);
+  const byFrame = new Map();
+  const read = async (j) => {
     const t = +(from + j / fps).toFixed(3);
     await seek(t * 1000);
-    samples.push({ t, worlds: await readWorlds(page) });
+    byFrame.set(j, { t, worlds: await readWorlds(page) });
+    return byFrame.get(j);
+  };
+  let before = await read(0);
+  for (let j = Math.min(STRIDE, last), prev = 0; prev < last; prev = j, j = Math.min(j + STRIDE, last)) {
+    const now = await read(j);
+    if (shownIds(now) !== shownIds(before)) for (let k = prev + 1; k < j; k++) await read(k);
+    before = now;
   }
+  const samples = [...byFrame.keys()].sort((a, b) => a - b).map((j) => byFrame.get(j));
   const end = from + dur;
   return worldSpans(samples, { step: 0, dur: end }).map((s) => (s.start == null ? s : { ...s, end: Math.min(end, round(s.end + 1 / fps)) }));
 }

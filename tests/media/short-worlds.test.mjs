@@ -13,7 +13,9 @@ test('worlds of 0.1, 0.25 and 1.0 s are all found within one frame', async () =>
   try {
     await opened.page.goto(opened.url, { waitUntil: 'load' });
     await settle(opened.page);
-    const spans = await sampleWorlds(opened.page, 4, (ms) => seekAll(opened.page, ms));
+    let seeks = 0;
+    const spans = await sampleWorlds(opened.page, 4, (ms) => { seeks++; return seekAll(opened.page, ms); });
+    assert.ok(seeks < 60, `${seeks} seeks for 121 frames`);
     const want = { a: [0.5, 0.6], b: [1, 1.25], c: [2, 3] };
     assert.deepEqual(spans.map((s) => s.id), ['a', 'b', 'c']);
     for (const s of spans) {
