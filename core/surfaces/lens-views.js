@@ -101,3 +101,26 @@ export function shadowFor(backdrop, page, { tint = null } = {}) {
   const rim = tint ? lifted.map((c, k) => 0.5 * c + 0.5 * tint[k]) : lifted;
   return { mode: 'dark', layers: [{ dx: 0.01, dy: 0.036, blur: 26, alpha: 0.7 }, { dx: 0.002, dy: 0.008, blur: 6, alpha: 0.85 }], rim: { alpha: 0.3, width: 1.5, color: rim }, reflection: { alpha: 0.07, blur: 44, dy: 0.05 } };
 }
+
+export const READ_DEG = 10;
+
+const deg = (radians) => (radians * 180) / Math.PI;
+
+/** The pose in degrees { x, y, z } of lens options { tiltX, tiltY, roll }: the inverse of lensPose. Pure. */
+export const poseOf = ({ tiltX = 0, tiltY = 0, roll = 0 }) => ({ x: -deg(tiltX) || 0, y: -deg(tiltY) || 0, z: deg(roll) });
+
+const contrastOf = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+const SHADOW_MIN = 1.2;
+
+/**
+ * What the depth cue earns on `backdrop` for a page edge `page` (both [r, g, b] 0..1): the contrast of the page edge against the backdrop, the contrast of the
+ * densest shadow against the backdrop, and whether the shadow itself reads (the rim light of a dark backdrop is returned apart). The layers come from shadowFor. Pure.
+ */
+export function cueRead(backdrop, page, options = {}) {
+  const cue = shadowFor(backdrop, page, options);
+  const covered = 1 - cue.layers.reduce((keep, l) => keep * (1 - l.alpha), 1);
+  const lb = luminance(backdrop);
+  const shadow = contrastOf(lb, lb * (1 - covered));
+  const rim = cue.rim.alpha > 0 ? contrastOf(lb, luminance(backdrop.map((c, k) => c + (cue.rim.color[k] - c) * cue.rim.alpha))) : 1;
+  return { mode: cue.mode, edge: contrastOf(lb, luminance(page)), shadow, rim, visible: shadow >= SHADOW_MIN };
+}

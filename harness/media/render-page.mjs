@@ -59,6 +59,8 @@ import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
 import { sampleTail } from './tail-sample.mjs';
 import { tailMoving } from '../lib/tail-motion.mjs';
+import { sampleLens } from './lens-probe.mjs';
+import { lensLines } from '../lib/lens-advice.mjs';
 import { sampleText, sampleTextMotion, sampleLayout, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
 import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
 import { createChecks, timeLine } from '../lib/check-runner.mjs';
@@ -1003,10 +1005,11 @@ export async function probePage(page, dur, pagePath, { checks: all = createCheck
   const tail = whole ? await checks.run('tail', () => sampleTail(page, dur, seekLayout(page)), window) : null;
   const contrast = await checks.run('contrast', () => sampleContrast(page, text.samples, (ms) => seekAll(page, ms)), window);
   const layout = await checks.run('layout', () => sampleLayout(page, layoutTimes(text.samples, window), seekLayout(page)), window);
+  const lens = whole ? await checks.run('lens', () => sampleLens(page, dur, (ms) => seekAll(page, ms)), window) : null;
   const specKey = { tables, dur };
   const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
   const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
-  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, canvasFilm, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, canvasFilm, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, lens, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The cut-off-beat advice of a page with a music bed; [] for a window, a waiver with its reason, no bed, or a bed that cannot be read (advice must never stop a draft). */
@@ -1133,7 +1136,7 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
   appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired, worlds: r.probe?.worlds }));
   const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
-  console.log([timing, look, report.signature.line, soundSummary(r.level), ...report.red, ...range, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
+  console.log([timing, look, ...lensLines(r.probe?.lens, r.probe?.worlds), report.signature.line, soundSummary(r.level), ...report.red, ...range, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
 
 // Test hook for the CLI: VAWE_TEST_SLICE_FAULT=<lo>:<n> makes the slice starting at frame <lo> lose its page on its first n attempts.

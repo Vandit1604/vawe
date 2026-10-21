@@ -37,8 +37,8 @@ test('an empty film: at most 8 lines, the skill file per empty stage, the ban li
   const lines = status(film({ brief: TAKEN_EMPTY + IDEAS_EMPTY + BOARD_EMPTY }));
   assert.ok(lines.length <= STATUS_MAX_LINES, lines.join('\n'));
   assert.match(lines[0], /^plan of f: \d+ open/);
-  assert.match(lines.join('\n'), /the brief Board is empty: skills\/vawe-transitions\/SKILL\.md/);
-  assert.match(lines.join('\n'), /the Ideas ledger is empty: skills\/vawe-transitions\/SKILL\.md/);
+  assert.equal(lines.filter((l) => /brief\.md sections empty/.test(l)).length, 1);
+  assert.match(lines.join('\n'), /brief\.md sections empty: Ideas, Board: skills\/vawe-transitions\/SKILL\.md/);
   assert.equal(lines.filter((l) => l.startsWith('ban: ')).length, 2);
   assert.match(lines.join('\n'), /ban: No tells unless the brief asks/);
   assert.match(lines.join('\n'), /slideshow tells: taste\/craft\/transitions\.md/);
@@ -48,9 +48,15 @@ test('an empty film: at most 8 lines, the skill file per empty stage, the ban li
 
 test('a half-filled film names only what is still open', () => {
   const text = status(film({ brief: TAKEN + IDEAS + BOARD })).join('\n');
-  assert.doesNotMatch(text, /Board is empty|Ideas ledger is empty|reference study/);
+  assert.doesNotMatch(text, /sections empty|reference study/);
   assert.match(text, /DESIGN\.md has no line for builder, type, colour, depth, frame: skills\/vawe-page\/SKILL\.md/);
   assert.match(text, /no storyboard run: bin\/vawe storyboard films\/f\/page\.html/);
+});
+
+test('after a draft the Motion pass joins the empty sections in one line', () => {
+  const f = film({ brief: `${TAKEN}${IDEAS}${BOARD}## Motion pass\n\n| cut | a |\n|---|---|\n| [s1 to s2] | [ok] |\n` });
+  fs.writeFileSync(path.join(f.root, 'out', 'f-draft.mp4'), '');
+  assert.match(status(f).join('\n'), /brief\.md sections empty: Motion pass: skills\/vawe-page\/SKILL\.md/);
 });
 
 test('a full film is quiet', () => {
@@ -64,7 +70,7 @@ test('after a draft the pre-draft items are dropped and an empty Board still war
   const f = film({ brief: TAKEN + IDEAS + BOARD_EMPTY });
   fs.writeFileSync(path.join(f.root, 'out', 'f-draft.mp4'), '');
   const text = status(f).join('\n');
-  assert.match(text, /the brief Board is empty/);
+  assert.match(text, /brief\.md sections empty: Board/);
   assert.doesNotMatch(text, /storyboard|frames|DESIGN/);
 });
 
@@ -74,7 +80,7 @@ test('the block is capped: many open items and findings stay inside 8 lines and 
     findings: Array.from({ length: 30 }, (_, i) => `finding ${i}`), digest: DIGEST, next: 'bin/vawe frames films/f/page.html',
   });
   assert.ok(lines.length <= STATUS_MAX_LINES);
-  assert.match(lines.join('\n'), /- \+4 more: /);
+  assert.match(lines.join('\n'), /- \+3 more: /);
   assert.match(lines.join('\n'), /\(\+29 more: bin\/vawe storyboard films\/f\/page\.html\)/);
   assert.match(lines.at(-1), /^next: /);
 });
@@ -98,7 +104,7 @@ test('the bans the page shows come first: the slideshow score in the head, two l
   assert.equal(lines[1], '  page: same-entrance at 0.7 s: 17 of 17 elements enter with one move (blur + moves up + scale in). Fix: vary the moves of the hero, the support and the detail; stagger them (taste/craft/transitions.md)');
   assert.equal(lines[2], '  page: swap-no-carry at 2.3, 5 s: 2 of 2 cuts swap the whole frame with no element carried across. Fix: name a handoff object that leaves A and starts B (taste/craft/transitions.md)');
   assert.equal(lines[3], '  page: +2 more before the render: bin/vawe storyboard films/f/page.html');
-  assert.match(lines[4], /the brief Board is empty/);
+  assert.match(lines[4], /brief\.md sections empty: Board/);
   const clean = { name: 'f', rel: 'p', brief: TAKEN + IDEAS + BOARD, design: RUNGS, early: false, frames: 'ok', storyboardRan: true, digest: DIGEST, next: 'x' };
   assert.deepEqual(planStatusLines({ ...clean, page: [] }), []);
   assert.match(planStatusLines({ ...clean, page: [page[0]] })[1], /^ {2}page: rule stagger .* \(taste\/rules\/stagger\.md\)$/);

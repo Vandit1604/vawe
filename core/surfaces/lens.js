@@ -4,6 +4,7 @@
 // everything random is hashed from `seed` and floor(t * fps).
 // The technique is learned from ff-tracking's lens shader (MIT) and the bloom chain of Call of Duty: Advanced Warfare (Jimenez, 2014). The code is our own.
 import { canvasSource, htmlSource } from './lens-source.js';
+import { poseOf } from './lens-views.js';
 
 export { canvasSource, htmlSource };
 
@@ -159,6 +160,9 @@ export function projectWith(p, src, view, x, y) {
   const visible = sx >= 0 && sy >= 0 && sx <= view.w && sy <= view.h && x >= 0 && y >= 0 && x <= src[0] && y <= src[1];
   return { x: sx, y: sy, scale, depth, visible };
 }
+
+/** Screen px (at a frame the size of `view`) per texture px at source point [x, y]: above 1 the texture is drawn larger than its pixels and reads soft. Pure. */
+export const texelRatio = (p, src, view, texScale, [x, y]) => projectWith(p, src, view, x, y).scale / texScale;
 
 // The source point seen at view pixel (x, y), or null above the horizon of a plane tilted edge-on.
 function unprojectWith(p, src, view, x, y) {
@@ -635,6 +639,26 @@ function finalPass(rig, p, t) {
   draw3(gl);
 }
 
+const EDGE_INSET_PX = 10;
+
+// The mean colour [r, g, b] 0..1 of the drawn page just inside the middle of each quad edge that is on screen, or null when none is.
+function edgeColour(gl, canvas, quad, view) {
+  const mid = quad.reduce((a, q) => [a[0] + q.x / 4, a[1] + q.y / 4], [0, 0]);
+  const px = new Uint8Array(4);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  const found = quad.flatMap((a, i) => {
+    const b = quad[(i + 1) % 4];
+    const m = [(a.x + b.x) / 2, (a.y + b.y) / 2];
+    const d = Math.hypot(mid[0] - m[0], mid[1] - m[1]) || 1;
+    const x = m[0] + ((mid[0] - m[0]) / d) * EDGE_INSET_PX;
+    const y = m[1] + ((mid[1] - m[1]) / d) * EDGE_INSET_PX;
+    if (!(x >= 0 && y >= 0 && x < view.w && y < view.h)) return [];
+    gl.readPixels(Math.floor((x * canvas.width) / view.w), Math.floor(canvas.height - 1 - (y * canvas.height) / view.h), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    return [[px[0] / 255, px[1] / 255, px[2] / 255]];
+  });
+  return found.length ? [0, 1, 2].map((c) => found.reduce((s, f) => s + f[c], 0) / found.length) : null;
+}
+
 export function lens(source, options = {}) {
   const opts = resolveOptions(options);
   const pixelRatio = opts.pixelRatio || window.devicePixelRatio || 1;
@@ -653,10 +677,13 @@ export function lens(source, options = {}) {
     return { ...placed, shift: weaveShift(p, t) };
   };
 
+  let texScale = null;
+
   async function draw(t) {
     const p = params(t);
     bind(gl, 0, rig.srcTex);
     const tex = await source.upload(gl);
+    texScale = tex.width / source.size[0];
     const hasDepth = typeof source.uploadDepth === 'function';
     if (hasDepth) {
       bind(gl, DEPTH_UNIT, rig.depthTex);
@@ -672,9 +699,18 @@ export function lens(source, options = {}) {
   }
 
   const corners = [[0, 0], [1, 0], [1, 1], [0, 1]];
-  return {
-    canvas, gl, source, draw, params,
-    project: (x, y, t) => projectWith(params(t), source.size, view, x, y),
-    quad: (t) => corners.map(([u, v]) => projectWith(params(t), source.size, view, u * source.size[0], v * source.size[1])),
+  const quad = (t) => corners.map(([u, v]) => projectWith(params(t), source.size, view, u * source.size[0], v * source.size[1]));
+  // What dev reads after draw(t): the tilt in degrees, the texel ratio at the focus, the page edge colour on screen and the backdrop beside it.
+  const measure = (t) => {
+    const p = params(t);
+    const focus = Array.isArray(p.dof.focus) ? p.dof.focus : aimOf(p, source.size);
+    return { t, pose: poseOf(p), texel: texScale ? texelRatio(p, source.size, view, texScale, focus) : null, edge: edgeColour(gl, canvas, quad(t), view), backdrop: Array.isArray(p.outside) ? p.outside : null };
   };
+  const api = {
+    canvas, gl, source, draw, params, measure,
+    project: (x, y, t) => projectWith(params(t), source.size, view, x, y),
+    quad,
+  };
+  (globalThis.__vaweLenses ??= []).push(api);
+  return api;
 }

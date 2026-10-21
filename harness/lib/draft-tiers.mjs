@@ -14,6 +14,7 @@ export const CHECK_TIER = {
   layout: 'settled',
   spec: 'settled',
   speed: 'settled',
+  lens: 'settled',
   'box-motion': 'ship',
   objects: 'ship',
 };
