@@ -237,3 +237,13 @@ test('rawTools counts hand-rolled edits even beside a verb, and matches commands
   assert.deepEqual(rawTools('grep -n ffmpeg harness/x.mjs', false), []);
   assert.deepEqual(rawTools('cd out && ffmpeg -i a b', false).filter((t) => t === 'ffmpeg'), ['ffmpeg']);
 });
+
+test('a brief write with Ideas and Board starts both stages, and design is seen before dev', async () => {
+  const fold = await foldOf([
+    callRow(10, 'a', "cat > films/f/DESIGN.md <<'EOF'\n# d\nEOF"), resultRow(11, 'a'),
+    callRow(20, 'b', "python3 - <<'EOF'\np='films/f/brief.md'\nopen(p,'w').write('## Ideas\\n## Board')\nEOF"), resultRow(21, 'b'),
+    callRow(30, 'c', 'bin/vawe dev films/f/page.html'), resultRow(31, 'c'),
+  ]);
+  const { first } = analyze(fold, 'x.jsonl').stages;
+  assert.deepEqual([first.design, first.ideas, first.board, first.dev], [0, 10, 10, 20]);
+});

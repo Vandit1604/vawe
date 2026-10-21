@@ -15,7 +15,8 @@ const FILM_FILES = /films\/([a-z0-9][\w-]*)\/(page\.html|brief\.md|DESIGN\.md|ki
 const SHELL_WRITE = /(?:>>?|\btee\b(?: -a)?|\bcp\b|\bmv\b|\bsed -i\b)[^\n|;&<]*?(films\/[a-z0-9][\w-]*\/(?:page\.html|brief\.md|DESIGN\.md|kit\/))/g;
 const WRITE_KIND = { 'page.html': 'page', 'brief.md': 'brief', 'DESIGN.md': 'design', 'kit/': 'kit' };
 const PYTHON = /\bpython3?\b/;
-const PY_WRITE = /open\([^)]*['"][wa]b?['"]|\.write_text\(|\.write_bytes\(/;
+const PY_PATH_VAR = /\b(\w+)\s*=\s*(['"])(films\/[^'"]+)\2/g;
+const PY_WRITE_TARGET = /open\(\s*(?:(['"])(films\/[^'"]+)\1|(\w+))\s*,\s*['"][wa]b?['"]|(?:Path\(\s*(['"])(films\/[^'"]+)\4\s*\)|\b(\w+))\.write_text\(/g;
 const PY_EDIT = /\.replace\(|open\([^)]*['"][wa]b?['"]|\.write_text\(/;
 const atCommand = (name) => new RegExp(`(?:^|[\\n;&|(\`]\\s*|\\$\\()(?:[A-Z_]+=\\S+\\s+)*(?:\\S*/)?${name}\\s`);
 
@@ -103,14 +104,20 @@ export function filmWrites(name, input = {}) {
   return name === 'Bash' ? shellWrites(String(input.command ?? '')) : [];
 }
 
+function pythonWrites(cmd) {
+  const assigned = [...cmd.matchAll(PY_PATH_VAR)].map((m) => ({ at: m.index, name: m[1], path: m[3] }));
+  const resolve = (name, at) => assigned.filter((a) => a.name === name && a.at < at).at(-1)?.path;
+  return [...cmd.matchAll(PY_WRITE_TARGET)].map((m) => m[2] ?? m[5] ?? resolve(m[3] ?? m[6], m.index)).filter(Boolean);
+}
+
 function shellWrites(cmd) {
   const script = withoutHeredocs(cmd);
   const targets = [...script.matchAll(SHELL_WRITE)].map((m) => m[1]);
-  if (PYTHON.test(cmd) && PY_WRITE.test(cmd)) targets.push(...cmd.matchAll(FILM_FILES).map((m) => m[0]));
+  if (PYTHON.test(cmd)) targets.push(...pythonWrites(cmd));
   const seen = new Map();
   for (const target of targets) {
     const m = target.match(FILM_FILE);
-    seen.set(`${m[1]}/${m[2]}`, { film: m[1], what: WRITE_KIND[m[2]], text: cmd });
+    if (m) seen.set(`${m[1]}/${m[2]}`, { film: m[1], what: WRITE_KIND[m[2]], text: cmd });
   }
   return [...seen.values()];
 }

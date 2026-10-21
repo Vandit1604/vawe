@@ -15,11 +15,10 @@ function verbStage({ verb, args }, seen) {
   return { new: 'new', frames: 'frames', storyboard: 'storyboard', timeline: 'storyboard', approve: 'approve' }[verb] ?? null;
 }
 
-function writeStage({ what, text }) {
-  if (what === 'page') return 'page';
-  if (what === 'design' || what === 'kit') return 'design';
-  if (/\bIdeas?\b/.test(text)) return 'ideas';
-  return /\bBoard\b|Rhythm|Spectacle/.test(text) ? 'board' : null;
+function writeStages({ what, text }) {
+  if (what === 'page') return ['page'];
+  if (what === 'design' || what === 'kit') return ['design'];
+  return [/\bIdeas?\b/.test(text) && 'ideas', /\bBoard\b|Rhythm|Spectacle/.test(text) && 'board'].filter(Boolean);
 }
 
 /** First-use second of each stage of the AGENTS.md loop, from the calls in order. Pure. */
@@ -33,7 +32,7 @@ export function stageFirstUse(calls, events, startMs) {
   };
   for (const call of calls) {
     for (const verb of call.verbs.filter((v) => !v.help)) note(verbStage(verb, seen), call.ms);
-    for (const write of call.writes) note(writeStage(write), call.ms);
+    for (const write of call.writes) writeStages(write).forEach((stage) => note(stage, call.ms));
   }
   return first;
 }
