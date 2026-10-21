@@ -11,6 +11,7 @@ import { frameTile, tileGrid } from '../lib/tile.mjs';
 import { durationOf } from '../lib/contact-sheet.mjs';
 import { worldAt, worldRows } from '../lib/timeline.mjs';
 import { parseAt } from './compare-frames.mjs';
+import { filmNameOf } from './see/strip-math.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const EVEN_TILES = 12;
@@ -78,6 +79,12 @@ function videoTiles(mp4, at, from) {
   return { shots: times.map((t, i) => ({ t, at: local[i], png: mp4, world: null })), size: videoSize(mp4) };
 }
 
+/** The tiles of an mp4, each labelled with the world its page shows at that film second. */
+async function withPageWorlds(read, page) {
+  const { spans } = await (await import('./timeline.mjs')).readTimeline(page);
+  return { ...read, shots: read.shots.map((s) => ({ ...s, world: worldAt(spans, s.t) })) };
+}
+
 /** One tile per image of a folder, sorted by name, each labelled with its file name (at most IMAGE_TILES_MAX). */
 function imageTiles(dir) {
   const files = fs.readdirSync(dir).filter((f) => IMAGE.test(f)).sort().slice(0, IMAGE_TILES_MAX);
@@ -95,13 +102,15 @@ async function main(argv) {
   const labels = argv.includes('--labels');
   const isPage = source.endsWith('.html');
   const isFolder = fs.statSync(source).isDirectory();
-  if (labels && !isPage) die('--labels names the world on each tile, which only a page has; give the page');
+  const labelPage = labels && !isPage ? `films/${filmNameOf(source)}/page.html` : null;
+  if (labels && (isFolder || (labelPage && !fs.existsSync(labelPage)))) die(`--labels reads the worlds from the film's page${labelPage ? ` (${labelPage} does not exist)` : ''}; give the page, or an mp4 named after its film`);
   const out = path.resolve(flag('--out') || path.join('out', `sheet-${path.basename(source, path.extname(source)) === 'page' ? path.basename(path.dirname(path.resolve(source))) : path.basename(source, path.extname(source))}.png`));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-sheet-'));
   try {
     let read;
     try { read = isFolder ? imageTiles(source) : isPage ? await pageTiles(source, flag('--at'), labels, dir) : videoTiles(source, flag('--at'), Number(flag('--from') ?? 0)); } catch (e) { die(e.message); }
+    if (labelPage) read = await withPageWorlds(read, labelPage);
     const th = Math.round((TILE_W * read.size.h) / read.size.w);
     const tiles = read.shots.map((s, i) => frameTile(s.png, s.at ?? s.t, path.join(dir, `t${i}.png`), { tw: TILE_W, th, label: s.label ?? tileLabel(s.t, s.world) }));
     const cols = Number(flag('--cols')) || Math.min(tiles.length, 4);
