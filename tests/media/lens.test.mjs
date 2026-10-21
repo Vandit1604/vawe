@@ -103,6 +103,23 @@ test('depth of field: sharp at the focus point, blurred at the far edge, flat pl
   assert.ok(flat.far / sharp.far > 0.5 || flat.far > 5, 'a plane facing the camera has no depth to defocus');
 });
 
+test('depth of field band: inside the band the focus is exactly as sharp as with no blur, outside it still softens', async (t) => {
+  const tilt = { tiltY: 0.5, aim: [1100, 650], dof: { focus: [1100, 650], soft: 0, blur: 0 } };
+  const grads = async (dof) => {
+    const img = await shoot({ ...tilt, dof: { ...tilt.dof, ...dof } }, { only: 'stripes', probe: [[1100, 650], [560, 650], [1160, 650]] });
+    const grad = ({ x: x0, y: y0 }) => mean(Array.from({ length: 40 * 30 }, (_, i) => { const x = Math.round(x0) - 20 + (i % 40), y = Math.round(y0) - 15 + Math.floor(i / 40); return Math.abs(luma(img.px(x + 1, y)) - luma(img.px(x, y))); }));
+    return { focus: grad(img.probes[0]), far: grad(img.probes[1]), near: grad(img.probes[2]) };
+  };
+  const sharp = await grads({ blur: 0 });
+  const unbanded = await grads({ blur: 0.9 });
+  const banded = await grads({ blur: 0.9, band: 4 });
+  t.diagnostic(`focus kept ${(banded.focus / sharp.focus).toFixed(3)}, far edge kept ${(banded.far / sharp.far).toFixed(2)}`);
+  assert.ok(unbanded.near / sharp.near < 0.97, `without a band the area near the focus softens ${unbanded.near.toFixed(1)} vs ${sharp.near.toFixed(1)}`);
+  assert.ok(banded.near / sharp.near > 0.99, `near the focus, inside the band ${banded.near.toFixed(1)} vs ${sharp.near.toFixed(1)}`);
+  assert.ok(banded.focus / sharp.focus > 0.99, `inside the band ${banded.focus.toFixed(2)} vs ${sharp.focus.toFixed(2)}`);
+  assert.ok(banded.far / sharp.far < 0.6, `the far edge still softens ${banded.far.toFixed(1)} vs ${sharp.far.toFixed(1)}`);
+});
+
 test('palette: a 50% grey maps to the stop mix at its brightness', async () => {
   const stops = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [1, 1, 1]];
   const img = await shoot({ palette: { stops } }, { only: 'patch' });

@@ -3,7 +3,7 @@ import path from 'node:path';
 
 export const DEFAULT_WIDTHS = [1440, 390];
 export const DEFAULT_BASE = 'http://localhost:3080';
-const USAGE = 'usage: bin/vawe shot <route|url|page.html>[,more] [--w 1440,390] [--full] [--base http://localhost:3080]';
+const USAGE = 'usage: bin/vawe shot <route|url|page.html>[,more] [--w 1440,390] [--full] [--base http://localhost:3080] [--tour steps.json --fps 60]';
 
 /** The widths of `--w`, in order, or null when the text is not a comma list of widths from 200 to 4000. Pure. */
 export function parseWidths(text) {
@@ -15,10 +15,13 @@ export function parseWidths(text) {
 export const parseTargets = (text) => String(text || '').split(',').map((s) => s.trim()).filter(Boolean);
 
 /** The first problem in the arguments of shot, or null. Pure. */
-export function shotProblem({ targets, w, base }) {
+export function shotProblem({ targets, w, base, tour, fps, scale }) {
   if (!targets.length) return `missing <route|url|page.html>; ${USAGE}`;
   if (w !== undefined && !parseWidths(w)) return `--w is not a comma list of widths from 200 to 4000: "${w}"`;
   if (base !== undefined && !/^https?:\/\//.test(base)) return `--base is not an http(s) url: "${base}"`;
+  if (tour !== undefined && targets.length !== 1) return '--tour takes one route, url or html file, not a list';
+  if (fps !== undefined && !(Number.isInteger(fps) && fps >= 1 && fps <= 120)) return `--fps is not a whole number from 1 to 120: "${fps}"`;
+  if (scale !== undefined && !(scale >= 1 && scale <= 4)) return `--scale is not a number from 1 to 4: "${scale}"`;
   const bare = targets.find((t) => !/^https?:\/\//.test(t) && !t.startsWith('/') && !t.endsWith('.html'));
   if (bare) return `"${bare}" is not a route (/blog), a url (https://...) or a .html file; ${USAGE}`;
   return null;

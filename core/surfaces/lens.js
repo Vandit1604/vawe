@@ -26,10 +26,11 @@ const LIT_SHARE = { stripe: 0.232, triad: 0.152, dot: 0.458 };
 // identity camera) so a test or a page can turn on one effect at a time.
 const DEFAULTS = {
   seed: 1, fps: 30,
+  lodBias: 0, // texture detail: below 0 keeps the texture sharper where it is drawn near 1:1 (text), at some aliasing
   aim: null, zoom: 1, tiltX: 0, tiltY: 0, roll: 0, focal: 1.7, outside: [0.012, 0.012, 0.016],
   edge: 'extend', // 'extend' repeats the screen's edge pixels past the border; 'black' shows `outside`
   fit: { keep: null, margin: 60, cover: false }, // keep: a source point or list the view must hold; cover: never show the border
-  dof: { blur: 0.5, focus: null, max: 46, bokeh: 7, taps: 48, soft: 2.5, blades: 6, rotation: 0.3, roundness: 0.15, catEye: 0.5 },
+  dof: { blur: 0.5, band: 0, focus: null, max: 46, bokeh: 7, taps: 48, soft: 2.5, blades: 6, rotation: 0.3, roundness: 0.15, catEye: 0.5 },
   palette: null, // { stops: [[r,g,b] ...2 to 8], amount: 1, keepColor: 0 }
   bloom: { strength: 0.9, radius: 42, threshold: 0.3, knee: 0.3 },
   halation: { strength: 0, radius: 90, threshold: 0.6, knee: 0.3, tint: [1, 0.3, 0.1] },
@@ -232,7 +233,7 @@ uniform float u_focusDepth;  // < 0: the focus depth is read at u_focusPt
 uniform vec2 u_focusPt;
 #endif
 uniform vec3 u_eu, u_ev, u_n, u_outside;
-uniform float u_cocK, u_cocMax, u_bokeh, u_soft, u_blades, u_rot, u_round, u_cat;
+uniform float u_cocK, u_cocMax, u_bokeh, u_soft, u_blades, u_rot, u_round, u_cat, u_band, u_lodBias;
 uniform int u_taps;
 uniform vec3 u_pal[8];
 uniform float u_palN, u_palAmt, u_keep;
@@ -322,7 +323,7 @@ void main() {
   vec2 base = u_aim + vec2(dot(rel, u_eu), dot(rel, u_ev)) * K;
   float z = hit3.z;
   float logPerPx = u_src.y / (u_zoom * u_res.y) * z;
-  float lod0 = max(0.0, log2(logPerPx * u_texScale));
+  float lod0 = max(0.0, log2(logPerPx * u_texScale) + u_lodBias);
 
 #ifdef DEPTH
   float dCenter = depthAt(base);
@@ -331,12 +332,14 @@ void main() {
 #else
   float coc = max(clamp(u_cocK * abs(1.0 - u_zf / z), 0.0, u_cocMax), u_soft);
 #endif
+  coc = max(coc - u_band, 0.0);
+  bool inFocus = u_band > 0.0 && coc <= 0.0;
   if (u_tsBlur > 0.0) {
     float excess = max(abs(screenY - u_tsCenter) - 0.5 * u_tsWidth, 0.0);
     coc = max(coc, u_tsBlur * smoothstep(0.0, 1.0, excess / TS_RAMP));
   }
-  float rLog = max(coc, 0.7) * logPerPx;
-  int taps = coc < 0.7 ? 3 : min(u_taps, max(8, int(coc * 2.0)));
+  float rLog = inFocus ? 0.0 : max(coc, 0.7) * logPerPx;
+  int taps = inFocus ? 1 : coc < 0.7 ? 3 : min(u_taps, max(8, int(coc * 2.0)));
   float lodT = max(lod0, log2(max(1.0, rLog * sqrt(3.14159 / float(taps)) * u_texScale)) - 1.0);
   float spin = hash(vec3(fp, u_frame + u_seed)) * 6.2831853;
   float rho = clamp(length(s) / 0.9, 0.0, 1.0);
@@ -535,6 +538,7 @@ function setDepthOfField(gl, prog, p, rig) {
   const h = rig.canvas.height;
   u1('u_cocK', p.dof.blur * 190 * h / 1080); u1('u_cocMax', p.dof.max * h / 1080);
   u1('u_bokeh', p.dof.bokeh); u1('u_soft', p.dof.soft * rig.pxs);
+  u1('u_band', p.dof.band * rig.pxs); u1('u_lodBias', p.lodBias);
   u1('u_blades', p.dof.blades); u1('u_rot', p.dof.rotation); u1('u_round', p.dof.roundness); u1('u_cat', p.dof.catEye);
   gl.uniform1i(prog.loc('u_taps'), Math.min(64, p.dof.taps | 0));
 }

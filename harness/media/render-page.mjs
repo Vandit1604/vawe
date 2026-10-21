@@ -46,6 +46,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { scratch } from '../lib/scratch.mjs';
+import { BLANK_RETRY_WAIT_MS, isBlankShot, shouldRetake } from '../lib/blank-shot.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, awaitReady, installPageReady, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
@@ -531,7 +532,15 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
         const t2 = performance.now();
         mark('screenshot');
         const stats = BENCH_TIMING_FILE ? {} : null;
-        const bytes = await exclusive(() => captureShot(page, format.shot, stats));
+        let bytes = await exclusive(() => captureShot(page, format.shot, stats));
+        for (let retake = 0; shouldRetake(bytes.length, local.size, retake); retake++) {
+          mark('screenshot (taken again: the first of a slice, or a blank one)');
+          await new Promise((resolve) => setTimeout(resolve, BLANK_RETRY_WAIT_MS));
+          await page.evaluate(seekThenKey, baseMs + (j / k) * SHUTTER * (1000 / fps));
+          await settle(page);
+          bytes = await exclusive(() => captureShot(page, format.shot, stats));
+        }
+        if (!isBlankShot(bytes.length, local.size)) local.size = bytes.length;
         const t3 = performance.now();
         fs.writeFileSync(file, bytes);
         if (stats) fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, call: stats.call, decode: stats.decode, write: performance.now() - t3, bytes: bytes.length })}\n`);

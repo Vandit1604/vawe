@@ -49,6 +49,9 @@ the world moving: no still tail. For 20 to 30 s, start from a chain in `prompts/
    window.seek(t) with every style computed from t. No timers, no state carried between frames.
 3. Captures live in films/<name>/assets/. Each capture is a real screenshot with its source URL in a
    comment next to the <img>.
+   A real page worked by a cursor is one mp4, not screenshots: `bin/vawe shot <url> --tour steps.json --w 1280 --out films/<name>/assets/tour.mp4`
+   (steps: `harness/media/tour-math.mjs`; every frame is made at its exact second, hover and click are real). Play it in the page like
+   `prompts/moves/demo/mask-rise.html` plays its footage.
 4. Audio is <audio data-at="…"> elements, never played live. Soft ticks on a few key moments:
    <audio data-synth="pluck" data-at="1.85" data-gain="-8"> (the same number the CSS --beat-2
    holds; every delay in that beat reads it), and one swell (-6 dB) into the big cut. Music: <audio src="music.mp3" data-at="0"

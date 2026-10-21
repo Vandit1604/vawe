@@ -333,21 +333,24 @@ export const VERBS = [
   },
   {
     tier: 'more',
-    name: 'shot', summary: 'a PNG of a site route, a url or a static html page at each width (default 1440 and 390): lazy images loaded, the site server reused or started and stopped, and page errors, failed requests and sideways overflow reported',
+    name: 'shot', summary: 'a PNG of a site route, a url or a static html page at each width (default 1440 and 390): lazy images loaded, the site server reused or started and stopped, and page errors, failed requests and sideways overflow reported; with --tour, an mp4 of a scripted cursor working the page, every frame at its exact second',
     positional: [{ name: 'target', required: true, help: 'a route (/blog), a url, or a .html file; a comma list shoots each' }],
     flags: [
       { name: 'w', type: 'string', default: '1440,390', help: 'comma list of viewport widths' },
       { name: 'full', type: 'bool', help: 'the whole page height, not the first screen' },
       { name: 'base', type: 'string', default: 'http://localhost:3080', help: 'the site server for routes; a localhost one that is down is started and stopped by this verb' },
-      { name: 'out', type: 'path', default: 'out/shot', help: 'the folder for the PNGs, named <route>-<width>.png' },
+      { name: 'out', type: 'path', default: 'out/shot', help: 'the folder for the PNGs, named <route>-<width>.png; with --tour, the mp4 file (default <that folder>/<route>-<width>-tour.mp4)' },
+      { name: 'tour', type: 'path', help: 'a steps file (JSON list of { t, move | click | scrollTo | scroll, dur }, see harness/media/tour-math.mjs): drives a drawn macOS cursor with real mouse events through one route or url, at a 16:9 viewport of the first --w, and writes an mp4' },
+      { name: 'fps', type: 'number', default: 60, help: 'with --tour: the frame rate of the mp4' },
+      { name: 'scale', type: 'number', default: 1, help: 'with --tour: the device scale factor (3 gives a 3840 by 2160 mp4 of a 1280 wide page, sharp enough for a macro close-up)' },
     ],
-    example: 'vawe shot /,/blog --full   |   vawe shot /moves --w 390   |   vawe shot films/design/frame.html --w 1920',
+    example: 'vawe shot /,/blog --full   |   vawe shot /moves --w 390   |   vawe shot films/design/frame.html --w 1920   |   vawe shot https://vawe.dev/easing --tour tour.json --w 1600 --out out/easing-tour.mp4',
     build: (v, [target]) => {
-      const problem = shotProblem({ targets: parseTargets(target), w: v.w, base: v.base });
+      const problem = shotProblem({ targets: parseTargets(target), w: v.w, base: v.base, tour: v.tour, fps: v.fps, scale: v.scale });
       if (problem) throw new UsageError(problem);
-      return [{ script: 'harness/media/shot.mjs', args: [target, ...opt('--w', v.w), ...(v.full ? ['--full'] : []), ...opt('--base', v.base), ...opt('--out', v.out)] }];
+      return [{ script: 'harness/media/shot.mjs', args: [target, ...opt('--w', v.w), ...(v.full ? ['--full'] : []), ...opt('--base', v.base), ...opt('--out', v.out), ...opt('--tour', v.tour), ...(v.tour ? [...opt('--fps', v.fps), ...opt('--scale', v.scale)] : [])] }];
     },
-    next: () => 'Read each PNG at full size; the 390 one shows the phone layout; vawe check links crawls every link of the site',
+    next: (v) => v.tour ? 'play the mp4 in a film page (prompts/moves/demo/mask-rise.html); vawe sheet <film mp4> reads it' : 'Read each PNG at full size; the 390 one shows the phone layout; vawe check links crawls every link of the site',
   },
   {
     tier: 'core',
