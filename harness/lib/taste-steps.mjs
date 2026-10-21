@@ -4,6 +4,7 @@ import STEPS from '../../taste/build/steps.json' with { type: 'json' };
 import RULES from '../../taste/build/rules.json' with { type: 'json' };
 
 export const TASTE_STEPS = STEPS;
+export const TASTE_RULES = RULES;
 
 const CARD = 'taste/build/CARD.md';
 

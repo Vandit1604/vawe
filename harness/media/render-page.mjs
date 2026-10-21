@@ -78,9 +78,9 @@ import { slideshowTells, slideshowLines, NO_RECORDS_NOTE } from '../lib/slidesho
 import { worldRows } from '../lib/timeline.mjs';
 import { moveDocLines } from '../lib/move-docs.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
-import { isWaived, waiverHint, waiverProblems } from '../lib/waivers.mjs';
+import { isWaived, waiverAdvice, waiverHint, waiverProblems } from '../lib/waivers.mjs';
 import { beatAdvice } from '../lib/sound-read.mjs';
-import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
+import { draftTasteLines, firedRules, firedLines, TASTE_RULES } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { cameraOnlySpans, cameraSpans } from '../lib/camera-moves.mjs';
@@ -1023,11 +1023,14 @@ function slideshowAdvice(pagePath, motion, probe, authoring) {
   return [...(skipped ? [NO_RECORDS_NOTE] : []), ...(live.length ? [...slideshowLines({ score: live.length, of: 10, tells: live }), waiverHint('slideshow')] : [])];
 }
 
+/** The waiver count line and the "fix first" lines, from the rules the earlier drafts of this film fired. */
+const earlierWaiverAdvice = (pagePath, authoring) => waiverAdvice(authoring, readRuns(pagePath).filter((e) => e.cmd === 'dev' && Array.isArray(e.rules_fired)).map((e) => e.rules_fired.map((f) => f.id)), TASTE_RULES);
+
 /** The advice lines read from the probed page alone (text, motion, slideshow, bar and layout lint), waivers applied; no brief line and no video. */
 export function probeAdvice(pagePath, { probe, motion }) {
   const authoring = pageAuthoring(pagePath);
   const contrast = contrastLines(unwaivedContrast(probe.contrast, authoring));
-  return [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe))];
+  return [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...earlierWaiverAdvice(pagePath, authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe))];
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */

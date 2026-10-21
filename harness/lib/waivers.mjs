@@ -102,3 +102,17 @@ export function waiverVerdicts(authoring = {}) {
 
 /** One line per allow entry that waives nothing, with the reason: a retired code, or a reason that does not count. */
 export const waiverProblems = (authoring = {}) => waiverVerdicts(authoring).filter((v) => v.problem).map((v) => `waiver "${v.entry}" ${v.problem}`);
+
+const waivedCodes = (authoring) => [...new Set((authoring.allow ?? []).map((e) => splitWaiver(e).code))];
+
+/**
+ * Advice for the waivers on a page: one line with the count and the waived rules, then a "fix first" line for each rule that no earlier draft fired.
+ * `drafts` is the rules_fired ids of each earlier draft ([] for a first draft: no line, nothing to compare); `rules` maps a rule id to { instead }.
+ */
+export function waiverAdvice(authoring = {}, drafts = [], rules = {}) {
+  const codes = waivedCodes(authoring);
+  if (!codes.length) return [];
+  const seen = new Set(drafts.flat());
+  const fixFirst = drafts.length ? codes.filter((c) => !seen.has(c)).map((c) => `fix first: ${c}${rules[c]?.instead ? `: ${rules[c].instead.split(/(?<=\.) /)[0]}` : ''}`) : [];
+  return [`${codes.length} waived: ${codes.join(', ')}`, ...fixFirst];
+}
