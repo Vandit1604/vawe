@@ -247,3 +247,17 @@ test('a brief write with Ideas and Board starts both stages, and design is seen 
   const { first } = analyze(fold, 'x.jsonl').stages;
   assert.deepEqual([first.design, first.ideas, first.board, first.dev], [0, 10, 10, 20]);
 });
+
+test('aggregate: studyFirst needs a refs verb, and AGENTS.md is not a guide doc', async () => {
+  const agent = async (study, doc) => analyze(await foldOf([
+    callRow(0, 'a', `bin/vawe ${study} out/x.mp4`), resultRow(1, 'a'),
+    callRow(2, 'r', `sed -n 1,5p ${doc}`), resultRow(3, 'r'),
+    callRow(4, 'w', 'cat x > films/f/page.html'), resultRow(5, 'w'),
+    callRow(6, 'd', 'bin/vawe dev films/f/page.html'), resultRow(7, 'd'),
+  ]), 'x.jsonl');
+  const agg = aggregate([await agent('sheet', 'AGENTS.md'), await agent('refs list', 'taste/build/DIGEST.md')]);
+  const row = (id) => agg.rows.find((r) => r.id === id);
+  assert.equal(row('studyFirst').count, 1);
+  assert.equal(row('docBeforePage').count, 1);
+  assert.equal(row('digestBeforePage').count, 1);
+});

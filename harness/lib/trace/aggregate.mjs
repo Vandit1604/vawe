@@ -6,12 +6,15 @@ const failed = (a, cls) => (a.failures.byClass[cls] ?? 0) > 0;
 const read = (a, doc) => a.docs.some((d) => d.doc === doc);
 const sawBan = (a, ban) => ban in a.banSeen;
 const withDev = (a) => used(a, 'dev');
+const firstSec = (a, pred) => a.verbs.find((v) => !v.help && pred(v))?.sec ?? null;
+const refsBeforeDev = (a) => { const refs = firstSec(a, (v) => v.verb === 'refs'); return refs !== null && refs <= firstSec(a, (v) => v.verb === 'dev'); };
+const GUIDE_DOC = /^(taste|guides)\/|^prompts\/moves\/lens\.md$/;
 const rate = (list, outcome) => list.filter((x) => x.outcome === outcome).length;
 
 /** Each row: id, label, applies (which agents count in the denominator), test (which of those count). */
 export const METRICS = [
   { id: 'new', label: 'ran bin/vawe new', test: (a) => used(a, 'new') },
-  { id: 'studyFirst', label: 'a study verb before the first dev', applies: withDev, test: (a) => before(a, 'study', 'dev') },
+  { id: 'studyFirst', label: 'a refs study before the first dev', applies: withDev, test: refsBeforeDev },
   { id: 'designFirst', label: 'DESIGN.md or kit written before the first dev', applies: withDev, test: (a) => before(a, 'design', 'dev') },
   { id: 'framesFirst', label: 'vawe frames before the first dev', applies: withDev, test: (a) => before(a, 'frames', 'dev') },
   { id: 'ideasFirst', label: 'Ideas rows written before the first dev', applies: withDev, test: (a) => before(a, 'ideas', 'dev') },
@@ -30,7 +33,8 @@ export const METRICS = [
   { id: 'shipBeforeDraft', label: 'final render attempt before a full draft', applies: (a) => a.breaks.shipAttempted, test: (a) => a.breaks.shipBeforeFullDraft },
   { id: 'readAgents', label: 'read AGENTS.md', test: (a) => read(a, 'AGENTS.md') },
   { id: 'readDigest', label: 'read taste/build/DIGEST.md', test: (a) => read(a, 'taste/build/DIGEST.md') },
-  { id: 'docBeforePage', label: 'read a taste or guide doc before the first page write', applies: (a) => a.wrotePage, test: (a) => a.docs.some((d) => d.beforePage) },
+  { id: 'docBeforePage', label: 'read a taste or guide doc before the first page write (AGENTS.md not counted)', applies: (a) => a.wrotePage, test: (a) => a.docs.some((d) => d.beforePage && GUIDE_DOC.test(d.doc)) },
+  { id: 'digestBeforePage', label: 'read taste/build/DIGEST.md before the first page write', applies: (a) => a.wrotePage, test: (a) => a.docs.some((d) => d.beforePage && d.doc === 'taste/build/DIGEST.md') },
   { id: 'sawNoTells', label: 'saw the no-tells ban line in verb output', test: (a) => sawBan(a, 'noTells') },
   { id: 'sawAttractors', label: 'saw the attractors ban line in verb output', test: (a) => sawBan(a, 'attractors') },
   { id: 'sawSlideshow', label: 'saw the slideshow ban line in verb output', test: (a) => sawBan(a, 'slideshow') },
