@@ -40,6 +40,8 @@ test('commandVerbs finds each vawe call of a chain and skips prose and help', ()
   assert.deepEqual(commandVerbs('bin/vawe nonsense films/f/page.html'), []);
   assert.deepEqual(commandVerbs('git commit -m "x" <<EOF\nbin/vawe dev p\nEOF'), []);
   assert.deepEqual(commandVerbs('cat <<EOF\nbin/vawe dev p\nEOF'), []);
+  assert.deepEqual(commandVerbs("python3 - <<'EOF'\nx = 1\nEOF\nbin/vawe dev p").map((v) => v.verb), ['dev']);
+  assert.deepEqual(commandVerbs("python3 - <<'EOF'\nbin/vawe dev p"), []);
   assert.equal(commandVerbs('bin/vawe dev --help')[0].help, true);
   assert.equal(commandVerbs('bin/vawe dev p')[0].help, false);
 });
@@ -181,4 +183,30 @@ test('the CLI prints JSON with every field and honours --films and --compare', (
   assert.match(text.stdout, /Before and after 2026-10-11 \(1 agents before, 1 after\)/);
   assert.equal(run().status, 2);
   assert.notEqual(run('--project', project, '--since', 'zzz-nope').status, 0);
+});
+
+const T0 = Date.parse('2026-10-10T10:00:00Z');
+const stamp = (sec) => new Date(T0 + sec * 1000).toISOString();
+const callRow = (sec, id, command, name = 'Bash', input = { command }) => ({ type: 'assistant', timestamp: stamp(sec), message: { id: `m-${id}`, content: [{ type: 'tool_use', id, name, input }] } });
+const resultRow = (sec, id, text = 'ok') => ({ type: 'user', timestamp: stamp(sec), message: { content: [{ type: 'tool_result', tool_use_id: id, content: text }] } });
+const foldOf = (list) => foldRows(rows(list));
+
+test('render and wait seconds come from the run log, the footer is the fallback', async () => {
+  const fold = await foldOf([
+    callRow(0, 'a', 'VAWE_AGENT=x bin/vawe dev films/f/page.html > log 2>&1 &'), resultRow(1, 'a'),
+    callRow(10, 'b', 'bin/vawe wait films/f/page.html'), resultRow(12, 'b'),
+    callRow(20, 'c', 'bin/vawe dev films/f/page.html'), resultRow(30, 'c', 'vawe: dev ok in 9.0s'),
+    callRow(40, 'd', 'bin/vawe dev films/f/page.html --help'), resultRow(44, 'd'),
+  ]);
+  const runs = [
+    { cmd: 'verb', verb: 'dev', session: 's', start: stamp(0.5), durationS: 600, slotWaitS: 30, exitCode: 0 },
+    { cmd: 'verb', verb: 'wait', session: 's', start: stamp(10.2), durationS: 170, slotWaitS: null, exitCode: 0 },
+  ];
+  const a = analyze(fold, 'x.jsonl', () => runs);
+  assert.equal(a.cost.renderSecs, 600);
+  assert.equal(a.cost.unloggedRenderSecs, 9);
+  assert.equal(a.cost.waitSecs, 170);
+  assert.equal(a.cost.slotWaitSecs, 30);
+  assert.equal(a.verbs[0].ok, true);
+  assert.equal(analyze(fold, 'x.jsonl').cost.renderSecs, 9 + 1);
 });

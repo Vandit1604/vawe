@@ -51,7 +51,7 @@ export function agentMarkdown(a) {
     `raw tools: ${entries(a.raw)}`,
     `docs read: ${list(a.docs.map((d) => `${d.doc}@${d.sec}s${d.beforePage ? '' : ' (after page)'}`))}; ban lines seen ${entries(Object.fromEntries(Object.entries(a.banSeen).map(([k, v]) => [k, v.join('/')])))}`,
     `failures ${a.failures.total}: ${entries(a.failures.byClass)}; hook errors ${a.failures.hookErrors}`,
-    `cost: ${a.cost.calls} calls, ${a.cost.repeats} repeats, ${a.cost.bigResults} big results (${a.cost.bigChars} chars), wait ${a.cost.waitSecs}s, render ${a.cost.renderSecs}s`,
+    `cost: ${a.cost.calls} calls, ${a.cost.repeats} repeats, ${a.cost.bigResults} big results (${a.cost.bigChars} chars), wait ${a.cost.waitSecs}s, render ${a.cost.renderSecs}s${a.cost.unloggedRenderSecs ? ` (+${a.cost.unloggedRenderSecs}s in render calls with no run-log record)` : ''}, slot wait ${a.cost.slotWaitSecs}s`,
     `rule breaks: ${list(Object.entries(a.breaks).filter(([, v]) => v).map(([k]) => k))}`,
   ];
   for (const f of a.failures.list.slice(0, 5)) lines.push(`  - ${f.cls}: ${f.call} :: ${f.why}`);

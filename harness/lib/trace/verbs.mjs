@@ -3,15 +3,27 @@ import { brief } from './redact.mjs';
 
 const HINT_WINDOW_CALLS = 5;
 
-/** Every vawe verb the agent ran, in order: { verb, args, call, sec, ok, reason, secs }; ok is null when no footer line was printed. Pure. */
-export function verbEvents(calls, startMs) {
+const RUN_START_SLACK_MS = 5000;
+
+function takeRun(runs, verb, from, until) {
+  const at = runs.findIndex((r) => r.verb === verb && Date.parse(r.start) >= from - RUN_START_SLACK_MS && Date.parse(r.start) < until);
+  return at >= 0 ? runs.splice(at, 1)[0] : null;
+}
+
+const nextCallMs = (calls, call, verb) => calls.find((c) => c.index > call.index && c.verbs.some((v) => v.verb === verb && !v.help))?.ms ?? Infinity;
+
+/** Every vawe verb the agent ran, in order: { verb, args, call, sec, ok, reason, secs, slotWaitS }; secs comes from the run log record joined by verb and start time, else the result footer; ok is null when neither exists. Pure. */
+export function verbEvents(calls, startMs, runLog = []) {
+  const runs = [...runLog].sort((a, b) => Date.parse(a.start) - Date.parse(b.start));
   const events = [];
   for (const call of calls) {
     const footers = [...(call.footers ?? [])];
     for (const { verb, args, help } of call.verbs) {
       const at = footers.findIndex((f) => f.verb === verb);
       const footer = at >= 0 ? footers.splice(at, 1)[0] : null;
-      events.push({ verb, help, refused: call.flags?.noApproval === true, args: brief(args, 80), call: call.index, sec: Math.round((call.ms - startMs) / 1000), ok: footer ? footer.ok : null, reason: footer?.reason ?? null, secs: footer?.secs ?? null, callSecs: Math.max(0, Math.round((call.resultMs - call.ms) / 1000) || 0) });
+      const run = help ? null : takeRun(runs, verb, call.ms, nextCallMs(calls, call, verb));
+      const ok = run ? run.exitCode === 0 : footer ? footer.ok : null;
+      events.push({ verb, help, refused: call.flags?.noApproval === true, args: brief(args, 80), call: call.index, sec: Math.round((call.ms - startMs) / 1000), ok, reason: footer?.reason ?? run?.error ?? null, secs: run?.durationS ?? footer?.secs ?? null, slotWaitS: run?.slotWaitS ?? null, fromRunLog: run !== null, callSecs: Math.max(0, Math.round((call.resultMs - call.ms) / 1000) || 0) });
     }
   }
   return events;

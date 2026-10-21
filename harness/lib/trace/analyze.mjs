@@ -60,14 +60,20 @@ function repeatsOf(calls) {
   return [...seen].filter(([, n]) => n > 1).sort((a, b) => b[1] - a[1]).map(([k, n]) => ({ call: k.slice(0, 120), times: n }));
 }
 
-function waitSecs(calls) {
-  const waits = calls.filter((c) => WAIT_TOOLS.has(c.name) || c.raw.some((r) => /^(sleep|psPoll|hint:wait)$/.test(r))
-    || c.verbs.some((v) => v.verb === 'wait' || (v.verb === 'ship' && /--(status|wait)\b/.test(v.args))));
-  return Math.round(waits.reduce((t, c) => t + callSecs(c), 0));
+const isWaitVerb = (v) => v.verb === 'wait' || (v.verb === 'ship' && /--(status|wait)\b/.test(v.args));
+const eventSecs = (e) => e.secs ?? e.callSecs;
+
+function waitSecs(calls, events) {
+  const waits = calls.filter((c) => !c.verbs.some(isWaitVerb)
+    && (WAIT_TOOLS.has(c.name) || c.raw.some((r) => /^(sleep|psPoll|hint:wait)$/.test(r))));
+  const verbSecs = events.filter((e) => !e.help && isWaitVerb(e)).reduce((t, e) => t + eventSecs(e), 0);
+  return Math.round(waits.reduce((t, c) => t + callSecs(c), verbSecs));
 }
 
 function costOf(calls, events) {
   const repeats = repeatsOf(calls);
+  const renders = events.filter((e) => !e.help && ['dev', 'ship'].includes(e.verb) && !/--(status|wait)\b/.test(e.args));
+  const hasLog = events.some((e) => e.fromRunLog);
   const big = calls.filter((c) => c.chars > BIG_RESULT).sort((a, b) => b.chars - a.chars);
   return {
     calls: calls.length,
@@ -77,8 +83,10 @@ function costOf(calls, events) {
     bigResults: big.length,
     bigChars: big.reduce((t, c) => t + c.chars, 0),
     topBig: big.slice(0, 3).map((c) => ({ chars: c.chars, call: `${c.name} ${c.cmd}`.slice(0, 100) })),
-    waitSecs: waitSecs(calls),
-    renderSecs: Math.round(events.filter((e) => ['dev', 'ship'].includes(e.verb) && !/--(status|wait)\b/.test(e.args)).reduce((t, e) => t + (e.secs ?? e.callSecs), 0)),
+    waitSecs: waitSecs(calls, events),
+    renderSecs: Math.round(renders.filter((e) => e.fromRunLog || !hasLog).reduce((t, e) => t + eventSecs(e), 0)),
+    unloggedRenderSecs: hasLog ? Math.round(renders.filter((e) => !e.fromRunLog).reduce((t, e) => t + eventSecs(e), 0)) : 0,
+    slotWaitSecs: Math.round(events.reduce((t, e) => t + (e.slotWaitS ?? 0), 0)),
   };
 }
 
@@ -121,10 +129,10 @@ function banSeen(calls) {
 }
 
 /** One agent's record: identity, verb sequence, stages, routing, raw tools, docs, failures, cost, rule breaks. Pure over a fold. */
-export function analyze(fold, file) {
+export function analyze(fold, file, readRuns = () => []) {
   const { calls, meta } = fold;
   const startMs = meta.startMs ?? 0;
-  const events = verbEvents(calls, startMs);
+  const events = verbEvents(calls, startMs, filmsOf(calls).flatMap((film) => readRuns(film, meta)));
   const writes = calls.flatMap((c) => c.writes.map((w) => ({ ...w, ms: c.ms })));
   const pageMs = writes.find((w) => w.what === 'page')?.ms ?? null;
   const devMs = calls.find((c) => c.verbs.some((v) => v.verb === 'dev' && !v.help))?.ms ?? null;

@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import { parseArgs } from 'node:util';
 import { rowsOf, cutoffMs, transcriptFiles } from '../lib/trace/read.mjs';
 import { foldRows } from '../lib/trace/fold.mjs';
+import { readRunLog } from '../lib/trace/runlog.mjs';
 import { analyze } from '../lib/trace/analyze.mjs';
 import { selectAgents } from '../lib/trace/select.mjs';
 import { aggregate, compareAt } from '../lib/trace/aggregate.mjs';
@@ -26,7 +27,7 @@ const OPTIONS = {
 };
 
 async function review(file) {
-  return analyze(await foldRows(rowsOf(file)), file);
+  return analyze(await foldRows(rowsOf(file)), file, (film, meta) => readRunLog(film, { cwd: meta.cwd, session: meta.session }));
 }
 
 // The verb table imports harness/lib/findings.mjs, which sends process.stdout to stderr under --json: write to fd 1 directly.

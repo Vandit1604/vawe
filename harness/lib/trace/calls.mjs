@@ -6,6 +6,7 @@ const HELP = /(?:^|\s)(?:--help|-h)(?:\s|$)/;
 const SEGMENT = /&&|\|\||;|\n|\|/;
 const VERB_CALL = /^\s*(?:[A-Z_][A-Z0-9_]*=\S*\s+)*(?:(?:node|rtk)\s+)?(?:\S*\/)?vawe\s+([a-z0-9-]+)(.*)$/;
 const FOOTER = /^vawe: ([a-z0-9-]+) (ok|FAILED)(?: \((.*)\))? in ([\d.]+)s$/gm;
+const HEREDOC_BODY = /<<-?\s*(['"]?)(\w+)\1([^\n]*)(?:\n[\s\S]*?\n\s*\2(?=\n|$)|[\s\S]*$)/g;
 const NEXT_LINE = /^next: (.*)$/gm;
 const READER = /\b(cat|head|tail|sed|grep|rg|awk|less|bat)\b/;
 const DOC = /(?:^|[\s'"=/])(AGENTS\.md|taste\/build\/DIGEST\.md|taste\/rules\/[\w.-]+\.md|taste\/craft\/[\w.-]+\.md|guides\/[\w.-]+\.md|skills\/[\w-]+\/SKILL\.md|prompts\/moves\/[\w.-]+\.md)/g;
@@ -36,7 +37,7 @@ export const textOf = (content) => (typeof content === 'string' ? content
 /** The vawe verbs a shell command calls, in order, as { verb, args }. Pure. */
 export function commandVerbs(cmd) {
   const found = [];
-  const [script] = String(cmd).split('<<');
+  const script = String(cmd).replace(HEREDOC_BODY, '$3');
   if (/^\s*(?:git|gh)\s/.test(script)) return found;
   for (const segment of script.split(SEGMENT)) {
     const m = segment.match(VERB_CALL);
