@@ -1,5 +1,7 @@
 import { brief } from './redact.mjs';
 import { hintOutcomes, nextLineOutcomes, verbEvents } from './verbs.mjs';
+import { roundsOf } from './rounds.mjs';
+import { stallsOf } from './stalls.mjs';
 import { stageFirstUse, stageOrder } from './stages.mjs';
 
 const BIG_RESULT = 8000;
@@ -145,7 +147,7 @@ export function analyze(fold, file, readRuns = () => []) {
     model: [...meta.models].join(',') || null, cwd: meta.cwd ?? null, branch: meta.branch ?? null,
     start: meta.startMs ? new Date(meta.startMs).toISOString() : null, end: meta.endMs ? new Date(meta.endMs).toISOString() : null,
     minutes: meta.startMs ? Number(((meta.endMs - meta.startMs) / 60000).toFixed(1)) : 0,
-    activeMinutes: Number(((meta.activeMs ?? 0) / 60000).toFixed(1)), helpCalls: events.filter((e) => e.help).length,
+    activeMinutes: Number((fold.active.reduce((t, a) => t + a.dt, 0) / 60000).toFixed(1)), helpCalls: events.filter((e) => e.help).length,
     tokens: tokensOf(fold.usage), films: filmsOf(calls),
     filmAgent: wrotePage, wrotePage: pageMs !== null, ranNew: calls.some((c) => c.newFilm),
     verbs: events,
@@ -155,6 +157,8 @@ export function analyze(fold, file, readRuns = () => []) {
     docs: docReads(calls, startMs, pageMs, devMs),
     banSeen: banSeen(calls),
     failures: { total: failures.length, byClass: count(failures, (f) => f.cls), hookErrors: fold.hookErrors, list: failures.slice(0, 20) },
+    rounds: roundsOf(fold, events),
+    stalls: stallsOf(fold),
     cost: costOf(calls, events),
     breaks: ruleBreaks(events, wrotePage, calls.some((c) => c.unattended)),
   };

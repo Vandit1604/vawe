@@ -211,6 +211,35 @@ test('render and wait seconds come from the run log, the footer is the fallback'
   assert.equal(analyze(fold, 'x.jsonl').cost.renderSecs, 9 + 1);
 });
 
+const usageRow = (sec, id, write) => ({ type: 'assistant', timestamp: stamp(sec), message: { id, usage: { cache_creation_input_tokens: write, cache_read_input_tokens: 2 * write }, content: [] } });
+const textRow = (sec, text) => ({ type: 'user', timestamp: stamp(sec), message: { content: text } });
+
+test('rounds start at a coordinator note, not at a cut-off, a nudge after it or a system reminder', async () => {
+  const fold = await foldOf([
+    textRow(0, 'build the film'), usageRow(1, 'm1', 100),
+    callRow(2, 'a', 'bin/vawe dev films/f/page.html'), resultRow(62, 'a', 'vawe: dev ok in 60.0s'),
+    textRow(100, 'The coordinator sent a message while you were working: owner notes'), usageRow(101, 'm2', 10),
+    textRow(200, 'Your response above was cut off mid-stream'),
+    textRow(201, 'The coordinator sent a message while you were working: you stalled'),
+    textRow(202, '<system-reminder>x</system-reminder>'), usageRow(203, 'm3', 5),
+  ]);
+  const rounds = analyze(fold, 'x.jsonl').rounds;
+  assert.deepEqual(rounds.map((r) => [r.startMin, r.endMin, r.calls, r.renders, r.cacheWrite]), [[0, 1, 1, 1, 100], [1.7, 3.4, 0, 0, 15]]);
+  assert.match(rounds[1].note, /owner notes/);
+});
+
+test('stalls list every gap over 5 min with the kind of the row that ends it and the next cache write', async () => {
+  const fold = await foldOf([
+    textRow(0, 'go'), usageRow(1, 'm1', 1),
+    usageRow(1 + 400, 'm2', 77),
+    callRow(802, 'a', 'ls'), resultRow(1300, 'a'),
+    textRow(1700, 'The coordinator sent a message'), usageRow(1701, 'm3', 9),
+  ]);
+  const { stalls } = analyze(fold, 'x.jsonl');
+  assert.deepEqual(stalls.list.map((s) => [s.kind, s.min, s.nextCacheWrite]), [['model', 6.7, 77], ['model', 6.7, 9], ['tool', 8.3, 9], ['wait', 6.7, 9]]);
+  assert.deepEqual([stalls.modelMin, stalls.toolMin, stalls.waitMin], [13.4, 8.3, 6.7]);
+});
+
 test('a streamed message counts its largest output_tokens once', async () => {
   const row = (sec, out) => ({ type: 'assistant', timestamp: stamp(sec), message: { id: 'm1', usage: { input_tokens: 1, output_tokens: out, cache_creation_input_tokens: 5 }, content: [] } });
   const fold = await foldOf([row(0, 3), row(1, 40), row(2, 12)]);
