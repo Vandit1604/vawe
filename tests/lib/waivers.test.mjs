@@ -70,6 +70,10 @@ test('waiverAdvice counts waived rules and says fix first for a rule no earlier 
   const rules = { 'moving-tail': { instead: 'Move the tail. Then check.' } };
   assert.deepEqual(waiverAdvice({}, [['a']], rules), []);
   assert.deepEqual(waiverAdvice(authoring, [], rules), ['2 waived: moving-tail, slideshow']);
-  assert.deepEqual(waiverAdvice(authoring, [['slideshow']], rules), ['2 waived: moving-tail, slideshow', 'fix first: moving-tail: Move the tail.']);
+  const hint = ' (no earlier draft showed it; after a fix that failed, write "tried <what>" in its _why)';
+  assert.deepEqual(waiverAdvice(authoring, [['slideshow']], rules), ['2 waived: moving-tail, slideshow', `fix first: moving-tail: Move the tail.${hint}`]);
+  assert.deepEqual(waiverAdvice(authoring, [['x']], rules), ['2 waived: moving-tail, slideshow', `fix first: moving-tail, slideshow${hint}`]);
+  const tried = { ...authoring, _why: { ...authoring._why, 'moving-tail': 'at 3 s tried a 0.4 s exit, the tail still moved 12 px' } };
+  assert.deepEqual(waiverAdvice(tried, [['slideshow']], rules), ['2 waived: moving-tail, slideshow']);
   assert.deepEqual(waiverAdvice(authoring, [['slideshow', 'moving-tail']], rules), ['2 waived: moving-tail, slideshow']);
 });

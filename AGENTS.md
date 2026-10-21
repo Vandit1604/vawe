@@ -18,7 +18,7 @@ canvas, three.js); if natural code fails, report it as a framework bug.
 - Each beat is one element with `data-world="<id>"` (lowercase, the brief's Shots ids). `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the one big moment.
 - Every tunable number is a literal (a `[[f, v]]` table, a keyframe stop, a `:root` property): the studio edits it.
 - Sound is `<audio>` tags: small effects on actions, a recorded effect first, no bed. A music track only from a file the user gives; `data-synth="bed"` is refused (`taste/craft/sound.md`).
-- A rule broken for cause is declared in the page with a measured reason, nowhere else (`skills/vawe-page/SKILL.md`, Waivers). A waiver is for a break that is the point of the shot: for anything else, try the fix first and name it in the `_why`.
+- A rule broken for cause is declared in the page with a measured reason, nowhere else (`skills/vawe-page/SKILL.md`, Waivers). A waiver is for a break that is the point of the shot. For any other break, try the fix first and write `tried <what>` in the `_why`.
 - Use a `bin/vawe` verb, never raw `ffmpeg`, Chrome or a script. If no verb does the job, say so in your report.
 - Do the stages in order and follow the `next:` line each verb prints: `frames` before `dev`, the Board before the draft.
 - Drafts, then approval, then ship: show the full draft (`bin/vawe sheet <draft>`) and stop. The owner runs `bin/vawe approve <page>`; never run it yourself.
@@ -61,9 +61,8 @@ Set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell: 
 - Never `sleep`: wait with `bin/vawe wait <page>` (it returns within about 3.5 minutes; on STILL RUNNING call it again; run it alone), or `bin/vawe ship --status <page> --wait` for a final.
 - Every verb ends with `vawe: <verb> ok|FAILED (<reason>) in <s>s`: read that line, not a filtered tail.
 - One file per `cat` or `head`: a hook rewrites `cat a b` and it breaks.
-- A call over 120 s moves to the background and keeps its render slot: run `dev` alone.
-- Run a render longer than a minute in the background and keep working while it runs.
-- Edit a file with the Edit tool, or with a replace that asserts the old text exists.
+- A call over 120 s moves to the background and keeps its render slot: run `dev` alone, start a long render in the background yourself, and keep working.
+- Edit with a tool that fails when the old text is missing, never a silent replace.
 - macOS has no `timeout`, and `sed -i` needs `''`. Read a page over about 25k tokens with offset and limit.
 
 Skills, read before the stage: `html-to-video` (start here), `vawe-brief`, `vawe-page`, `vawe-transitions`, `vawe-critique`, `vawe-reference` (`skills/<name>/SKILL.md`).

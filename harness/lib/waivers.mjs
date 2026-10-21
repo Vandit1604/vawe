@@ -105,14 +105,20 @@ export const waiverProblems = (authoring = {}) => waiverVerdicts(authoring).filt
 
 const waivedCodes = (authoring) => [...new Set((authoring.allow ?? []).map((e) => splitWaiver(e).code))];
 
+const TRIED = /\btried\b/i;
+const triedFix = (authoring, code) => (authoring.allow ?? []).some((e) => splitWaiver(e).code === code && TRIED.test(String(authoring._why?.[e] ?? '')));
+
 /**
- * Advice for the waivers on a page: one line with the count and the waived rules, then a "fix first" line for each rule that no earlier draft fired.
- * `drafts` is the rules_fired ids of each earlier draft ([] for a first draft: no line, nothing to compare); `rules` maps a rule id to { instead }.
+ * Advice for the waivers on a page: one line with the count and the waived rules, then one "fix first" line for the rules no earlier
+ * draft fired and whose _why names no fix tried. `drafts` is the rules_fired ids of each earlier draft ([] for a first draft: nothing
+ * to compare); `rules` maps a rule id to { instead }.
  */
 export function waiverAdvice(authoring = {}, drafts = [], rules = {}) {
   const codes = waivedCodes(authoring);
   if (!codes.length) return [];
   const seen = new Set(drafts.flat());
-  const fixFirst = drafts.length ? codes.filter((c) => !seen.has(c)).map((c) => `fix first: ${c}${rules[c]?.instead ? `: ${rules[c].instead.split(/(?<=\.) /)[0]}` : ''}`) : [];
+  const untried = drafts.length ? codes.filter((c) => !seen.has(c) && !triedFix(authoring, c)) : [];
+  const only = untried.length === 1 && rules[untried[0]]?.instead ? `: ${rules[untried[0]].instead.split(/(?<=\.) /)[0]}` : '';
+  const fixFirst = untried.length ? [`fix first: ${untried.join(', ')}${only} (no earlier draft showed it; after a fix that failed, write "tried <what>" in its _why)`] : [];
   return [`${codes.length} waived: ${codes.join(', ')}`, ...fixFirst];
 }

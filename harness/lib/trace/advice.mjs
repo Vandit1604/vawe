@@ -1,8 +1,9 @@
 import { allowOf } from './calls.mjs';
+import { splitWaiver } from '../waivers.mjs';
 
 const IGNORED_DRAFTS = 3;
 
-const ruleOf = (entry) => entry.split('@')[0];
+const ruleOf = (entry) => splitWaiver(entry).code;
 const adviceKey = (text) => (/^frame \d/.test(text) ? 'blank frame' : text);
 const roundAt = (notes, ms) => 1 + notes.filter((n) => n.ms <= ms).length;
 
