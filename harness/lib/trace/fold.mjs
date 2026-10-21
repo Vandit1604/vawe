@@ -1,5 +1,5 @@
 import { brief } from './redact.mjs';
-import { commandVerbs, docsRead, filmWrites, footersOf, namedVerbs, newFilm, nextNamed, rawTools, resultFlags, textOf } from './calls.mjs';
+import { adviceOf, commandVerbs, docsRead, filmWrites, footersOf, namedVerbs, newFilm, nextNamed, rawTools, resultFlags, textOf } from './calls.mjs';
 
 const stampOf = (row) => Date.parse(row.timestamp);
 
@@ -25,6 +25,7 @@ function settle(call, block, ms) {
   call.chars = text.length;
   call.flags = resultFlags(text, block.is_error);
   call.footers = footersOf(text);
+  call.advice = adviceOf(text);
   call.next = call.verbs.length ? nextNamed(text) : [];
   call.lastLine = brief(text.split('\n').filter(Boolean).at(-1) ?? '', 160);
 }

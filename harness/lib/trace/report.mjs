@@ -43,6 +43,12 @@ function roundsTable(rounds) {
     rounds.map((r) => [r.index, `${r.startMin}-${r.endMin}`, r.wallMin, r.activeMin, r.calls, `${r.renders} (${r.renderSecs}s)`, M(r.cacheWrite), M(r.cacheRead), `${r.note.slice(0, 90).replace(/\|/g, '/')}`]));
 }
 
+function adviceLine({ drafts, items, waived, waivedEntries }) {
+  const named = (outcome) => items.filter((i) => i.outcome === outcome).map((i) => i.id).join(', ') || 'none';
+  const same = items.filter((i) => i.waivedSameRound).map((i) => i.id).join(', ') || 'none';
+  return `advice over ${drafts} drafts: waived ${waived} (${waivedEntries} allow entries; same round as first fired: ${same}); ignored: ${named('ignored')}; still open: ${named('open')}; fixed ${items.filter((i) => i.outcome === 'fixed').length}`;
+}
+
 function stallsLine(st) {
   const gaps = st.list.map((s) => `${s.kind} ${s.min} min at ${s.startMin} (next cache write ${M(s.nextCacheWrite)}M)`).join('; ') || 'none';
   return `stalls over 5 min: model-silent ${st.modelMin} min, tool ${st.toolMin} min, wait or cut-off ${st.waitMin} min: ${gaps}`;
@@ -66,7 +72,7 @@ export function agentMarkdown(a) {
     `cost: ${a.cost.calls} calls, ${a.cost.repeats} repeats, ${a.cost.bigResults} big results (${a.cost.bigChars} chars), wait ${a.cost.waitSecs}s, render ${a.cost.renderSecs}s${a.cost.unloggedRenderSecs ? ` (+${a.cost.unloggedRenderSecs}s in render calls with no run-log record)` : ''}, slot wait ${a.cost.slotWaitSecs}s`,
     `rule breaks: ${list(Object.entries(a.breaks).filter(([, v]) => v).map(([k]) => k))}`,
   ];
-  lines.push(stallsLine(a.stalls), '', roundsTable(a.rounds));
+  lines.push(stallsLine(a.stalls), adviceLine(a.advice), '', roundsTable(a.rounds));
   for (const f of a.failures.list.slice(0, 5)) lines.push(`  - ${f.cls}: ${f.call} :: ${f.why}`);
   for (const r of a.cost.topRepeats.slice(0, 3)) lines.push(`  - ${r.times}x ${r.call}`);
   return lines.join('\n');

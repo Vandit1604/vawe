@@ -240,6 +240,31 @@ test('stalls list every gap over 5 min with the kind of the row that ends it and
   assert.deepEqual([stalls.modelMin, stalls.toolMin, stalls.waitMin], [13.4, 8.3, 6.7]);
 });
 
+const devText = (rules, advice = []) => ['plan of f: 2 open', ...rules.map((r) => `  page: rule ${r} @1.00s x: why (taste/rules/${r}.md)`), ...advice.map((a) => `advice: ${a}`)].join('\n');
+const authoring = (allow) => `<script id="authoring">{"allow": [${allow.map((a) => `"${a}"`).join(', ')}]}</script>`;
+
+test('advice outcomes: fixed, ignored after 3 drafts, waived, and a waiver in the round the rule first fired', async () => {
+  const draft = (sec, id, text) => [callRow(sec, id, 'bin/vawe dev films/f/page.html'), resultRow(sec + 1, id, text)];
+  const fold = await foldOf([
+    textRow(0, 'go'),
+    ...draft(1, 'd1', devText(['gone', 'stuck', 'waive-me'], ['board: fill it'])),
+    callRow(5, 'w', 'x', 'Write', { file_path: '/w/films/f/page.html', content: authoring(['waive-me@1-2']) }), resultRow(6, 'w'),
+    ...draft(10, 'd2', devText(['stuck'], ['board: fill it'])),
+    textRow(20, 'The coordinator sent a message while you were working: notes'),
+    ...draft(30, 'd3', devText(['stuck', 'late'])),
+  ]);
+  const { advice } = analyze(fold, 'x.jsonl');
+  const by = (id) => advice.items.find((i) => i.id === id);
+  assert.equal(advice.drafts, 3);
+  assert.deepEqual(['gone', 'stuck', 'waive-me', 'board', 'late'].map((id) => by(id).outcome), ['fixed', 'ignored', 'waived', 'fixed', 'open']);
+  assert.equal(by('waive-me').waivedSameRound, true);
+  assert.equal(advice.waived, 1);
+  assert.equal(advice.waivedEntries, 1);
+  const agg = aggregate([analyze(fold, 'x.jsonl')]);
+  assert.equal(agg.rows.find((r) => r.id === 'ignoredFindings').count, 1);
+  assert.equal(agg.rows.find((r) => r.id === 'waivedSameRound').count, 1);
+});
+
 test('a streamed message counts its largest output_tokens once', async () => {
   const row = (sec, out) => ({ type: 'assistant', timestamp: stamp(sec), message: { id: 'm1', usage: { input_tokens: 1, output_tokens: out, cache_creation_input_tokens: 5 }, content: [] } });
   const fold = await foldOf([row(0, 3), row(1, 40), row(2, 12)]);

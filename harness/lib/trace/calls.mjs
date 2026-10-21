@@ -138,3 +138,21 @@ export function resultFlags(text, isError) {
     ban: Object.keys(BAN_LINES).filter((k) => BAN_LINES[k].test(text)),
   };
 }
+
+const RULE_LINE = /^\s*page: rule ([\w-]+)[^\n]*$/gm;
+const ADVICE_LINE = /^advice: ([^:;\n]+)/gm;
+const ALLOW_BLOCK = /"allow"\s*:\s*\[([^\]]*)\]/g;
+
+/** The rule ids and advice keys one dev result prints, or null when the text is no dev plan. A rule line may name a waiver token. Pure. */
+export function adviceOf(text) {
+  if (!/^plan of /m.test(text)) return null;
+  const rules = [...text.matchAll(RULE_LINE)].map((m) => ({ id: m[1], token: m[0].match(/"allow": \["([\w-]+)/)?.[1] ?? null }));
+  const advice = [...text.matchAll(ADVICE_LINE)].map((m) => m[1].trim().slice(0, 50));
+  return { rules, advice };
+}
+
+/** The entries of the authoring allow block in a page text (rule ids, some with an @window), or null when it has no block. Pure. */
+export function allowOf(text) {
+  const blocks = [...String(text).matchAll(ALLOW_BLOCK)];
+  return blocks.length ? blocks.flatMap((m) => [...m[1].matchAll(/"([\w-]+(?:@[^"]*)?)"/g)].map((x) => x[1])) : null;
+}

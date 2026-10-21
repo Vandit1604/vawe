@@ -1,5 +1,6 @@
 import { brief } from './redact.mjs';
 import { hintOutcomes, nextLineOutcomes, verbEvents } from './verbs.mjs';
+import { adviceOutcomes } from './advice.mjs';
 import { roundsOf } from './rounds.mjs';
 import { stallsOf } from './stalls.mjs';
 import { stageFirstUse, stageOrder } from './stages.mjs';
@@ -159,6 +160,7 @@ export function analyze(fold, file, readRuns = () => []) {
     failures: { total: failures.length, byClass: count(failures, (f) => f.cls), hookErrors: fold.hookErrors, list: failures.slice(0, 20) },
     rounds: roundsOf(fold, events),
     stalls: stallsOf(fold),
+    advice: adviceOutcomes(calls, fold.notes),
     cost: costOf(calls, events),
     breaks: ruleBreaks(events, wrotePage, calls.some((c) => c.unattended)),
   };
