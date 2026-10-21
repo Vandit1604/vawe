@@ -11,11 +11,26 @@ const NEXT_LINE = /^next: (.*)$/gm;
 const READER = /\b(cat|head|tail|sed|grep|rg|awk|less|bat)\b/;
 const DOC = /(?:^|[\s'"=/])(AGENTS\.md|taste\/build\/DIGEST\.md|taste\/rules\/[\w.-]+\.md|taste\/craft\/[\w.-]+\.md|guides\/[\w.-]+\.md|skills\/[\w-]+\/SKILL\.md|prompts\/moves\/[\w.-]+\.md)/g;
 const FILM_FILE = /films\/([a-z0-9][\w-]*)\/(page\.html|brief\.md|DESIGN\.md|kit\/)/;
-const SHELL_WRITE = /(?:>|\btee\b|\bcp\b|\bmv\b)[^\n|;&]*films\/([a-z0-9][\w-]*)\/(page\.html)|sed -i[^\n]*films\/([a-z0-9][\w-]*)\/(page\.html|brief\.md)/;
+const FILM_FILES = /films\/([a-z0-9][\w-]*)\/(page\.html|brief\.md|DESIGN\.md|kit\/)/g;
+const SHELL_WRITE = /(?:>>?|\btee\b(?: -a)?|\bcp\b|\bmv\b|\bsed -i\b)[^\n|;&<]*?(films\/[a-z0-9][\w-]*\/(?:page\.html|brief\.md|DESIGN\.md|kit\/))/g;
+const WRITE_KIND = { 'page.html': 'page', 'brief.md': 'brief', 'DESIGN.md': 'design', 'kit/': 'kit' };
+const PYTHON = /\bpython3?\b/;
+const PY_WRITE = /open\([^)]*['"][wa]b?['"]|\.write_text\(|\.write_bytes\(/;
+const PY_EDIT = /\.replace\(|open\([^)]*['"][wa]b?['"]|\.write_text\(/;
+const atCommand = (name) => new RegExp(`(?:^|[\\n;&|(\`]\\s*|\\$\\()(?:[A-Z_]+=\\S+\\s+)*(?:\\S*/)?${name}\\s`);
+
+const HAND_TOOLS = {
+  pyEdit: (cmd) => PYTHON.test(cmd) && PY_EDIT.test(cmd),
+  pyEditNoAssert: (cmd) => PYTHON.test(cmd) && PY_EDIT.test(cmd) && !/\bassert\b/.test(cmd),
+  pil: (cmd) => PYTHON.test(cmd) && /\b(?:PIL|numpy|cv2)\b/.test(cmd),
+  nodeEval: (cmd) => /\bnode\s+(?:-e|--eval|-p)\b/.test(withoutHeredocs(cmd)),
+  sedInPlace: (cmd) => /\bsed\s+(?:-[a-zA-Z]*i|--in-place)/.test(withoutHeredocs(cmd)),
+  pkill: (cmd) => /\b(?:pkill|killall)\b|\bkill\s+-9\b|\bxargs\s+kill\b/.test(withoutHeredocs(cmd)),
+};
 
 export const RAW_TOOLS = {
-  ffmpeg: /\bffmpeg\b/,
-  ffprobe: /\bffprobe\b/,
+  ffmpeg: atCommand('ffmpeg'),
+  ffprobe: atCommand('ffprobe'),
   browser: /puppeteer|playwright|--headless|--screenshot/i,
   sleep: /\bsleep\s+\d/,
   psPoll: /\b(?:ps\s+(?:aux|-[a-zA-Z]+)|pgrep)\b/,
@@ -34,10 +49,12 @@ const BAN_LINES = {
 export const textOf = (content) => (typeof content === 'string' ? content
   : Array.isArray(content) ? content.map((c) => c.text ?? '').join('\n') : '');
 
+const withoutHeredocs = (cmd) => String(cmd).replace(HEREDOC_BODY, '$3');
+
 /** The vawe verbs a shell command calls, in order, as { verb, args }. Pure. */
 export function commandVerbs(cmd) {
   const found = [];
-  const script = String(cmd).replace(HEREDOC_BODY, '$3');
+  const script = withoutHeredocs(cmd);
   if (/^\s*(?:git|gh)\s/.test(script)) return found;
   for (const segment of script.split(SEGMENT)) {
     const m = segment.match(VERB_CALL);
@@ -46,10 +63,11 @@ export function commandVerbs(cmd) {
   return found;
 }
 
-/** The raw tools a command uses: every verb-hint rule that matches, and the raw extras when the command calls no vawe verb. Pure. */
+/** The raw tools a command uses: every verb-hint rule that matches, the hand-rolled edit tools always, and the raw extras when the command calls no vawe verb. Pure. */
 export function rawTools(cmd, hasVerb) {
   const ids = RULES.filter((r) => r.test.test(cmd)).map((r) => `hint:${r.id}`);
-  if (!hasVerb) ids.push(...Object.entries(RAW_TOOLS).filter(([, re]) => re.test(cmd)).map(([id]) => id));
+  if (!hasVerb) ids.push(...Object.entries(RAW_TOOLS).filter(([, re]) => re.test(withoutHeredocs(cmd))).map(([id]) => id));
+  ids.push(...Object.entries(HAND_TOOLS).filter(([, test]) => test(cmd)).map(([id]) => id));
   return ids;
 }
 
@@ -78,14 +96,23 @@ const writtenText = (input) => String(input.content ?? input.new_string ?? '') +
 
 /** The film files a call writes, as { film, what, text }: what is page, brief, design or kit. Pure. */
 export function filmWrites(name, input = {}) {
-  const asWhat = (file) => ({ 'page.html': 'page', 'brief.md': 'brief', 'DESIGN.md': 'design', 'kit/': 'kit' })[file];
   if (['Write', 'Edit', 'MultiEdit'].includes(name)) {
     const m = String(input.file_path ?? '').match(FILM_FILE);
-    return m ? [{ film: m[1], what: asWhat(m[2]), text: writtenText(input) }] : [];
+    return m ? [{ film: m[1], what: WRITE_KIND[m[2]], text: writtenText(input) }] : [];
   }
-  const m = name === 'Bash' ? String(input.command ?? '').match(SHELL_WRITE) : null;
-  if (!m) return [];
-  return [{ film: m[1] ?? m[3], what: asWhat(m[2] ?? m[4]), text: '' }];
+  return name === 'Bash' ? shellWrites(String(input.command ?? '')) : [];
+}
+
+function shellWrites(cmd) {
+  const script = withoutHeredocs(cmd);
+  const targets = [...script.matchAll(SHELL_WRITE)].map((m) => m[1]);
+  if (PYTHON.test(cmd) && PY_WRITE.test(cmd)) targets.push(...cmd.matchAll(FILM_FILES).map((m) => m[0]));
+  const seen = new Map();
+  for (const target of targets) {
+    const m = target.match(FILM_FILE);
+    seen.set(`${m[1]}/${m[2]}`, { film: m[1], what: WRITE_KIND[m[2]], text: cmd });
+  }
+  return [...seen.values()];
 }
 
 /** The film a `vawe new` call starts, or null. Pure. */

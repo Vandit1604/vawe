@@ -216,3 +216,24 @@ test('a streamed message counts its largest output_tokens once', async () => {
   const fold = await foldOf([row(0, 3), row(1, 40), row(2, 12)]);
   assert.deepEqual(analyze(fold, 'x.jsonl').tokens, { input: 1, output: 40, cacheRead: 0, cacheWrite: 5 });
 });
+
+test('filmWrites sees shell and python writes of every film file', () => {
+  const what = (command) => filmWrites('Bash', { command }).map((w) => `${w.film}/${w.what}`);
+  assert.deepEqual(what("cat > films/a/DESIGN.md <<'EOF'\nnote > films/b/page.html\nEOF"), ['a/design']);
+  assert.deepEqual(what('cp x.css films/a/kit/ground.css'), ['a/kit']);
+  assert.deepEqual(what("python3 - <<'EOF'\np='films/a/brief.md'\nopen(p,'w').write('## Board')\nEOF"), ['a/brief']);
+  assert.deepEqual(what("python3 -c \"Path('films/a/page.html').write_text('x')\""), ['a/page']);
+  assert.deepEqual(what('grep ffmpeg films/a/page.html > out/hits.txt'), []);
+  assert.deepEqual(what("python3 - <<'EOF'\nprint(open('films/a/page.html').read())\nEOF"), []);
+  assert.match(filmWrites('Bash', { command: "cat > films/a/brief.md <<'EOF'\n## Board\nEOF" })[0].text, /Board/);
+});
+
+test('rawTools counts hand-rolled edits even beside a verb, and matches commands not words', () => {
+  const edit = "python3 - <<'EOF'\ns=open(p).read()\ns=s.replace('a','b')\nEOF\nbin/vawe dev p";
+  assert.deepEqual(rawTools(edit, true), ['pyEdit', 'pyEditNoAssert']);
+  assert.deepEqual(rawTools(edit.replace("s=s.replace", "assert 1\ns=s.replace"), true), ['pyEdit']);
+  assert.deepEqual(rawTools('python3 -c "import numpy"', false), ['pil']);
+  assert.deepEqual(rawTools("node -e 'x' && sed -i '' s/a/b/ f && pkill -f vite", false), ['nodeEval', 'sedInPlace', 'pkill']);
+  assert.deepEqual(rawTools('grep -n ffmpeg harness/x.mjs', false), []);
+  assert.deepEqual(rawTools('cd out && ffmpeg -i a b', false).filter((t) => t === 'ffmpeg'), ['ffmpeg']);
+});
