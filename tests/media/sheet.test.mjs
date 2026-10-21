@@ -39,3 +39,14 @@ test('sheet of a span mp4 maps --at with --from and refuses a second outside the
   assert.match(bad.stderr, /outside the film seconds 0-3/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('sheet --labels on an mp4 needs the page of its film, and names the path it looked for', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-sheet-labels-'));
+  const mp4 = path.join(dir, 'no-such-film.mp4');
+  assert.equal(spawnSync('ffmpeg', ['-v', 'error', '-f', 'lavfi', '-i', 'testsrc=size=320x180:rate=10:duration=1', '-pix_fmt', 'yuv420p', mp4]).status, 0);
+  const sheet = path.join(import.meta.dirname, '../../harness/media/sheet.mjs');
+  const r = spawnSync(process.execPath, [sheet, mp4, '--labels', '--out', path.join(dir, 'o.png')], { encoding: 'utf8' });
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /films\/no-such-film\/page\.html does not exist/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

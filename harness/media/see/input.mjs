@@ -24,7 +24,7 @@ export async function resolveInput(input) {
 async function filmCuts(name, page) {
   const { lastWorlds } = await import('../acceptance-run.mjs');
   const worlds = lastWorlds(name) ?? (page ? await pageSpans(page) : null);
-  if (!worlds) die(`no measured data-world spans for ${name}: run bin/vawe dev ${page ?? `films/${name}/page.html`} first (a full draft, no --from or --to), then repeat`);
+  if (!worlds) die(`no measured data-world spans for ${name}: run bin/vawe dev ${page ?? `films/${name}/page.html`} first (a full draft, no --from or --to), then repeat; or strip one moment now with --at <second>`);
   const cuts = worldCuts(worlds);
   const unseen = worlds.filter((w) => w.start == null).map((w) => w.id);
   if (unseen.length) console.log(`note: the last draft never showed ${unseen.join(', ')} (a --from/--to draft covers part of the film): run bin/vawe dev ${page ?? `films/${name}/page.html`} with no range for every cut`);

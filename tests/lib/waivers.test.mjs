@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { reasonProblem, hasReason, isWaived, waiverCovers, waiverProblems, RETIRED_CODES, entryHasReason } from '../../harness/lib/waivers.mjs';
+import { reasonProblem, hasReason, isWaived, waiverCovers, waiverProblems, waiverAdvice, RETIRED_CODES, entryHasReason } from '../../harness/lib/waivers.mjs';
 
 const ctx = { worlds: ['s1', 's4', 'hero'] };
 const GOOD = 'world s4 holds the wordmark 3.5 s as the last beat';
@@ -63,4 +63,13 @@ test('entryHasReason vets a reason the same way for every check', () => {
   assert.equal(entryHasReason(authoring, 'static-window@1-2'), false);
   authoring._why['static-window@1-2'] = 'world s1 holds 1.0 s on the logo';
   assert.equal(entryHasReason(authoring, 'static-window@1-2'), true);
+});
+
+test('waiverAdvice counts waived rules and says fix first for a rule no earlier draft fired', () => {
+  const authoring = { allow: ['moving-tail', 'slideshow@1-2', 'slideshow'] };
+  const rules = { 'moving-tail': { instead: 'Move the tail. Then check.' } };
+  assert.deepEqual(waiverAdvice({}, [['a']], rules), []);
+  assert.deepEqual(waiverAdvice(authoring, [], rules), ['2 waived: moving-tail, slideshow']);
+  assert.deepEqual(waiverAdvice(authoring, [['slideshow']], rules), ['2 waived: moving-tail, slideshow', 'fix first: moving-tail: Move the tail.']);
+  assert.deepEqual(waiverAdvice(authoring, [['slideshow', 'moving-tail']], rules), ['2 waived: moving-tail, slideshow']);
 });

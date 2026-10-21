@@ -322,7 +322,7 @@ export const VERBS = [
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
       { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },
-      { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page only)' },
+      { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page, or an mp4 named after its film: the worlds come from films/<name>/page.html)' },
       { name: 'cols', type: 'number', default: 4, help: 'tiles per row' },
       { name: 'ref', type: 'path', help: 'a reference mp4 (a page or an mp4, never a folder): each row is the reference left, yours right, at the same second; --at may be \`cuts\` for the middle of each world change of the last full draft', kind: 'file' },
       { name: 'out', type: 'path', default: 'out/sheet-<name>.png (--ref: out/compare-<name>.png)', help: 'the PNG path' },
@@ -379,7 +379,7 @@ export const VERBS = [
       { name: 'scale', type: 'number', default: ZOOM_SCALE, help: 'whole-number enlargement, 1 to 16' },
       { name: 'vs', type: 'string', help: 'a second film (same kinds as <film>): its region goes right of the first, labelled' },
       { name: 'at-b', type: 'string', help: 'with --vs: the second of the second film (default: --at)' },
-      { name: 'out', type: 'path', default: 'out/zoom/<film>', help: 'folder for the PNG' },
+      { name: 'out', type: 'path', default: 'out/zoom/<film>', help: 'folder for the PNG, or a path ending in .png for the file itself' },
     ],
     example: 'vawe zoom out/my-launch.mp4 --vs <ref-id> --at 2.4 --box 800,400,240,135   |   vawe zoom films/my-launch/page.html --auto --at 3',
     build: (v, [film]) => {
