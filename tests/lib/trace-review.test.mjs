@@ -210,3 +210,9 @@ test('render and wait seconds come from the run log, the footer is the fallback'
   assert.equal(a.verbs[0].ok, true);
   assert.equal(analyze(fold, 'x.jsonl').cost.renderSecs, 9 + 1);
 });
+
+test('a streamed message counts its largest output_tokens once', async () => {
+  const row = (sec, out) => ({ type: 'assistant', timestamp: stamp(sec), message: { id: 'm1', usage: { input_tokens: 1, output_tokens: out, cache_creation_input_tokens: 5 }, content: [] } });
+  const fold = await foldOf([row(0, 3), row(1, 40), row(2, 12)]);
+  assert.deepEqual(analyze(fold, 'x.jsonl').tokens, { input: 1, output: 40, cacheRead: 0, cacheWrite: 5 });
+});

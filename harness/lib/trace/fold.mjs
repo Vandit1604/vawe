@@ -56,11 +56,16 @@ function noteMeta(meta, row, ms) {
   for (const [key, field] of Object.entries(META_KEYS)) meta[key] ??= row[field];
 }
 
+function noteUsage(fold, id, usage) {
+  const seen = fold.usage.get(id);
+  fold.usage.set(id, { ...usage, output_tokens: Math.max(seen?.output_tokens ?? 0, usage.output_tokens ?? 0) });
+}
+
 function noteMessage(fold, row, ms) {
   const { message } = row;
   if (row.type === 'assistant') {
     if (message.model && message.model !== '<synthetic>') fold.meta.models.add(message.model);
-    if (message.usage) fold.usage.set(message.id ?? row.uuid, message.usage);
+    if (message.usage) noteUsage(fold, message.id ?? row.uuid, message.usage);
   }
   for (const block of Array.isArray(message.content) ? message.content : []) {
     if (block.type === 'tool_use') {
