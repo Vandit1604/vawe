@@ -55,6 +55,15 @@ export function worldSpans(samples, { step, dur }) {
 /** The second to take the still of one world: the middle of its visible span, or 0 when the page never shows it. Pure. */
 export const stillTime = (span) => (span && span.start != null ? round((span.start + span.end) / 2) : 0);
 
+/** The second of the one full-size look at a draft: the spectacle second, else the middle of the longest world, else null. Pure. */
+export function reviewStillSecond(spans, spectacle) {
+  if (Number.isFinite(spectacle)) return spectacle;
+  const shown = (spans ?? []).filter((s) => s.start != null);
+  if (!shown.length) return null;
+  const longest = shown.reduce((a, b) => (b.end - b.start > a.end - a.start ? b : a));
+  return stillTime(longest);
+}
+
 /** True when the run { a, b } lies inside worlds that show text: a flat ground with words on it is a frame to read, not a blank. Pure. */
 export function insideTextWorlds(spans, run) {
   const covering = spans.filter((s) => s.start != null && s.readNeed > 0).sort((x, y) => x.start - y.start);
