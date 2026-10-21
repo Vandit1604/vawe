@@ -1,6 +1,6 @@
 // What `vawe dev` says before it renders (the plan status) and after it (the top advice): short, ranked, capped. Pure: the page's
 // state in, lines out; dev-warn.mjs and dev-end.mjs read the files. Each stage names the one skill file that covers it.
-import { boardFilled } from '../lib/board.mjs';
+import { boardFilled, motionFilled } from '../lib/board.mjs';
 import { ideasFilled } from '../lib/ideas.mjs';
 import { NOTE_LINES } from '../lib/draft-check.mjs';
 import { takenFromCount, missingRungs } from './stage-say.mjs';
@@ -17,6 +17,7 @@ export const SKILLS = {
   ideas: 'skills/vawe-transitions/SKILL.md',
   study: 'skills/vawe-reference/SKILL.md',
   design: 'skills/vawe-page/SKILL.md',
+  motion: 'skills/vawe-page/SKILL.md',
 };
 
 const BAN_IDS = { tells: 'no-tells', slideshow: 'thread' };
@@ -46,12 +47,21 @@ export function banLines(digest) {
   return [tells, attractors].filter(Boolean).map((l) => `ban: ${short(l)}`);
 }
 
+/** The brief sections still empty, in the order they are written: [{ title, skill }]. The Motion pass comes after the first draft, so `early` leaves it out. */
+function emptySections(brief, early) {
+  return [
+    { title: 'Ideas', skill: 'ideas', empty: ideasFilled(brief) === false },
+    { title: 'Board', skill: 'board', empty: boardFilled(brief) === false },
+    { title: 'Motion pass', skill: 'motion', empty: !early && motionFilled(brief) === false },
+  ].filter((e) => e.empty);
+}
+
 /** What is empty or stale for a page, most costly first: [{ what, fix }]. `early` is true until a draft exists. */
 export function openItems({ rel, brief, design, early, frames, storyboardRan }) {
   if (brief === null) return [{ what: 'brief.md is missing', fix: SKILLS.brief }];
   const items = [];
-  if (boardFilled(brief) === false) items.push({ what: 'the brief Board is empty', fix: SKILLS.board });
-  if (ideasFilled(brief) === false) items.push({ what: 'the Ideas ledger is empty', fix: SKILLS.ideas });
+  const empty = emptySections(brief, early);
+  if (empty.length) items.push({ what: `brief.md sections empty: ${empty.map((e) => e.title).join(', ')}`, fix: SKILLS[empty[0].skill] });
   if (early && !storyboardRan) items.push({ what: 'no storyboard run', fix: `bin/vawe storyboard ${rel}` });
   const taken = takenFromCount(brief);
   if (early && taken !== null && taken < 4) items.push({ what: `the reference study names ${taken} of 4 frames`, fix: SKILLS.study });
