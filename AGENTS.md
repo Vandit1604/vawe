@@ -62,6 +62,8 @@ Set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell: 
 - Every verb ends with `vawe: <verb> ok|FAILED (<reason>) in <s>s`: read that line, not a filtered tail.
 - One file per `cat` or `head`: a hook rewrites `cat a b` and it breaks.
 - A call over 120 s moves to the background and keeps its render slot: run `dev` alone.
+- Run a render longer than a minute in the background and keep working while it runs.
+- Edit a file with the Edit tool, or with a replace that asserts the old text exists.
 - macOS has no `timeout`, and `sed -i` needs `''`. Read a page over about 25k tokens with offset and limit.
 
 Skills, read before the stage: `html-to-video` (start here), `vawe-brief`, `vawe-page`, `vawe-transitions`, `vawe-critique`, `vawe-reference` (`skills/<name>/SKILL.md`).
