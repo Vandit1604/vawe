@@ -184,7 +184,7 @@ Speed is a voice. Every move sits in a named band, and the slowest move runs at 
 A group reads as one beat with an inner rhythm: not a chord on one frame and not a queue.
 
 - Limit: no 3 or more elements landing on one frame at 60 fps; the whole run at most 0.5 s
-- Range: 30 to 80 ms between siblings (engine default 45 ms); calm 80 to 120 ms. The total (n minus 1) times the gap, so delay = 0.5 / (n minus 1) capped at 80 ms; past about 7 items stagger a few and bring the rest as a block; board cards 60 to 90 ms
+- Range: 30 to 80 ms between siblings (engine default 50 ms); calm 80 to 120 ms. The total (n minus 1) times the gap, so delay = 0.5 / (n minus 1) capped at 80 ms; past about 7 items stagger a few and bring the rest as a block; board cards 60 to 90 ms; a copied product UI follows its measured row gap (`UI.row`, 70 to 100 ms), a film follows this range
 - Judge: Do siblings land on one frame, or does the last land in another beat?
 
 ## transitions
