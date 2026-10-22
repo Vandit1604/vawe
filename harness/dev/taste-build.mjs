@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DIALS } from '../../core/motion/signature.js';
-import { JOBS } from '../../core/motion/ease-jobs.js';
+import { JOBS, easeRef } from '../../core/motion/ease-jobs.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const STEPS = ['concept', 'look', 'motion', 'transitions', 'finish', 'sound', 'preship'];
@@ -229,11 +229,10 @@ export function readmeText(rules, craft) {
 
 export const JOBS_BEGIN = '<!-- jobs table: written by harness/dev/taste-build.mjs from core/motion/ease-jobs.js: do not edit -->';
 export const JOBS_END = '<!-- end jobs table -->';
-const easeName = (slug) => `EASE.${slug.replace(/-(\w)/g, (_, c) => c.toUpperCase())}`;
 
 /** The ease-per-job table as markdown, one row per job of `jobs`. Pure. */
 export function jobsTable(jobs = JOBS) {
-  const rows = jobs.map((j) => `| ${j.job} | ${[j.ease, ...(j.also ?? [])].map(easeName).join(', ')} | ${j.time} | ${j.avoid} |`);
+  const rows = jobs.map((j) => `| ${j.job} | ${[j.ease, ...(j.also ?? [])].map(easeRef).join(', ')} | ${j.time} | ${j.avoid} |`);
   return ['| Job | Ease | Time | Avoid |', '|---|---|---|---|', ...rows].join('\n');
 }
 

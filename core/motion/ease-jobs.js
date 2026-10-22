@@ -40,3 +40,12 @@ export const JOBS = [
   { id: 'hold', job: 'Hold drift', ease: 'glide', time: 'the length of the hold, 2 s or more', avoid: 'a copied product surface: it holds still and stays alive through what the product does (a caret, a timer, a hover).' },
 ];
 
+
+export const easeRef = (slug) => `EASE.${slug.replace(/-(\w)/g, (_, c) => c.toUpperCase())}`;
+
+/** One job row as a fix line: "<job>: <eases>, <time>". An error on an unknown job id. */
+export function jobLine(id) {
+  const j = JOBS.find((x) => x.id === id);
+  if (!j) throw new Error(`ease-jobs: no job "${id}"`);
+  return `${j.job}: ${[j.ease, ...(j.also ?? [])].map(easeRef).join(' or ')}, ${j.time}`;
+}

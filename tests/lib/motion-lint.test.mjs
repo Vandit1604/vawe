@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mergeRecords, motionLint, exitLength, groupLanding, linearMove, seamRepeat, oneBand, durationSize, moveDirection, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
+import { mergeRecords, motionLint, exitLength, groupLanding, linearMove, easeFix, seamRepeat, oneBand, durationSize, moveDirection, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
 
 const rec = (o) => ({ target: 0, label: 'h1 "Hi"', id: '', props: ['opacity'], delay: 0, duration: 0.5, easing: 'linear',
   kfEasings: ['ease', 'ease'], opacity: null, from: '', fullFrame: false, ...o });
@@ -144,4 +144,14 @@ test('durationSize: a small element on a longer move than a large one fires; a s
   assert.deepEqual(durationSize([title, { ...chip, area: 200000 }]), [], 'under the area ratio');
   assert.deepEqual(durationSize([title, { ...chip, decorative: true }]), []);
   assert.deepEqual(durationSize([title, { ...chip, area: undefined }]), []);
+});
+
+test('a keyword-eased move gets the ease-table row for its job as the fix', () => {
+  const move = { props: ['translate'], kfEasings: ['linear', 'linear'] };
+  assert.match(linearMove([rec({ ...move, id: 'leave', duration: 0.8 })])[0].fix, /^Exit: EASE\.launch or EASE\.leave, 0\.35 to 0\.6 of the entrance/);
+  assert.match(easeFix(rec({ ...move, fullFrame: true, duration: 1.6 })), /^Camera move under 2 s: EASE\.land,/);
+  assert.match(easeFix(rec({ ...move, fullFrame: true, duration: 2.4 })), /^Camera move of 2 s or more: EASE\.glide or EASE\.settle,/);
+  assert.match(easeFix(rec({ ...move, opacity: [0, 1], duration: 0.8 })), /^Title or text entrance: EASE\.land, .*; UI panel or card in: EASE\.land,/);
+  assert.match(easeFix(rec({ ...move, duration: 0.8 })), /^easing: EASE\.land to arrive/);
+  assert.match(easeFix(rec({ ...move, duration: 0.8 })), /taste\/craft\/motion-craft\.md$/);
 });

@@ -9,6 +9,7 @@ import { DECORATIVE } from './draft-check.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
 import { CUT, moves, moveProps, moveParts, entering, exiting, measured, byTarget, easeName, moveDirection } from './motion-records.mjs';
 import { motionVariety } from './motion-variety.mjs';
+import { jobLine } from '../../core/motion/ease-jobs.js';
 
 export { moveDirection };
 
@@ -125,6 +126,16 @@ export function tightStagger(records) {
 }
 
 const EASE_ADVICE = 'easing: EASE.land to arrive, EASE.leave or EASE.launch to exit, EASE.glide for a drift (core/motion/presets.js), or enter(el)';
+const CAMERA_LONG_S = 2;
+const JOBS_DOC = 'the ease for each job: taste/craft/motion-craft.md';
+
+/** The fix for a move on a keyword ease: the row of the ease table for the job the move does (an exit, a camera move, an entrance), else the general advice. Pure. */
+export function easeFix(r) {
+  if (exiting(r)) return `${jobLine('exit')} (${JOBS_DOC})`;
+  if (r.fullFrame) return `${jobLine(r.duration < CAMERA_LONG_S ? 'camera-short' : 'camera-long')} (${JOBS_DOC})`;
+  if (entering(r)) return `${jobLine('title')}; ${jobLine('panel')} (${JOBS_DOC})`;
+  return `${EASE_ADVICE}; ${JOBS_DOC}`;
+}
 
 /** A move longer than 0.3 s on linear easing, or on a default CSS keyword (ease, ease-in-out) with no curve of its own (rule named-eases). */
 export function linearMove(records) {
@@ -132,7 +143,7 @@ export function linearMove(records) {
     const linear = isLinear(r);
     return { code: linear ? 'linear-move' : 'default-ease', rule: 'named-eases', at: r.delay,
       what: `${r.label} moves ${moveProps(r).join(',')} for ${s2(r.duration)} s on ${linear ? 'linear' : `the CSS keyword ${[r.easing, ...r.kfEasings].find((e) => e !== 'linear')}`} easing`,
-      fix: EASE_ADVICE };
+      fix: easeFix(r) };
   });
 }
 
