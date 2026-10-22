@@ -109,7 +109,7 @@ export async function awaitReady(timeoutMs = 10000) {
 }
 
 // Runs in the page before any page script: the frame facts a page lays out against. documentElement does not exist yet at this point, so its attributes wait for the parser.
-export function installPageFrame({ aspect, width, height }) {
+export function installPageFrame({ aspect, width, height, eases = {} }) {
   const vawe = window.vawe || (window.vawe = {});
   Object.assign(vawe, { aspect, width, height });
   vawe.onFrame = (fn) => (window.__vaweFrameHooks || (window.__vaweFrameHooks = [])).push(fn);
@@ -122,6 +122,7 @@ export function installPageFrame({ aspect, width, height }) {
     root.dataset.aspect = aspect;
     root.style.setProperty('--vw', `${width}px`);
     root.style.setProperty('--vh', `${height}px`);
+    for (const [name, curve] of Object.entries(eases)) root.style.setProperty(`--ease-${name}`, curve);
   };
   if (document.documentElement) { apply(); return; }
   new MutationObserver((_, obs) => { if (document.documentElement) { obs.disconnect(); apply(); } })
