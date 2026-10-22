@@ -49,6 +49,9 @@ const linearOf = (out, into) => curveToLinear(handleCurve(out, into), { toleranc
 /** The named eases as CSS linear() strings for `easing:`. */
 export const EASE = Object.fromEntries(Object.entries(EASE_HANDLES).map(([name, [out, into]]) => [name, linearOf(out, into)]));
 
+/** Each named ease by its CSS custom property name (landSoft as land-soft): the renderer and the studio set them as --ease-<name> on :root. */
+export const EASE_VARS = Object.fromEntries(Object.entries(EASE).map(([name, curve]) => [name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`), curve]));
+
 /** The same named ease as a function of u in 0..1, for `vawe.onFrame` and `window.seek`, where a `linear()` string cannot run. */
 export function easeFn(name) {
   if (!EASE_HANDLES[name]) throw new Error(`presets: unknown ease "${name}"; valid: ${Object.keys(EASE).join(' ')}`);

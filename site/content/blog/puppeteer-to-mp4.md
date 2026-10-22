@@ -21,7 +21,7 @@ Save this page as `page.html`:
 <style>
   body { margin: 0; background: #0b0d12; color: #f4f6fb; font: 700 64px system-ui; }
   h1 { position: absolute; left: 8%; top: 40%; margin: 0;
-       animation: rise 0.6s var(--ease-land) both 0.4s; }
+       animation: rise 0.6s cubic-bezier(.2,.9,.2,1) both 0.4s; }
   @keyframes rise { from { transform: translateY(40px); opacity: 0 } to { transform: none; opacity: 1 } }
 </style>
 <h1>one page, one film</h1>

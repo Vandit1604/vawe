@@ -167,7 +167,7 @@ function scanBlock(css, from, to, base, out) {
 }
 
 const TIME_RE = /^-?[\d.]+m?s$/;
-const EASE_RE = /^(ease|linear|ease-in|ease-out|ease-in-out|step-start|step-end|(cubic-bezier|steps|linear)\(.*\))$/;
+const EASE_RE = /^(ease|linear|ease-in|ease-out|ease-in-out|step-start|step-end|(cubic-bezier|steps|linear)\(.*\)|var\(--ease-[\w-]+\))$/;
 
 function splitTop(text, start) {
   const toks = [];

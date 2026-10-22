@@ -49,7 +49,7 @@ import { scratch } from '../lib/scratch.mjs';
 import { BLANK_RETRY_WAIT_MS, isBlankShot, shouldRetake } from '../lib/blank-shot.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, awaitReady, installPageReady, installPageFrame } from '../../core/engine/page-seek.js';
-import { EASE } from '../../core/motion/presets.js';
+import { EASE_VARS } from '../../core/motion/presets.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun, filmKeyOf, readRuns } from '../lib/runlog.mjs';
 import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
@@ -108,9 +108,6 @@ import { canvasCoversFrame, CANVAS_SHARE, DOM_PICTURE_CHECKS, canvasFilmNote } f
 import { takeRenderSlot, slotsInUse } from '../lib/render-slots.mjs';
 import { noteVerb } from '../lib/verb-log.mjs';
 import { machineLanes } from '../lib/lane-budget.mjs';
-
-// Every named ease as a CSS custom property, so plain CSS writes `animation: rise 0.6s var(--ease-land) both`.
-const EASE_VARS = Object.fromEntries(Object.entries(EASE).map(([name, curve]) => [name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`), curve]));
 
 // A laptop running two renders at 4 workers each overheats and throttles; the second render starts cool.
 const COOL_WORKERS = 2;

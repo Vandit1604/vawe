@@ -59,6 +59,8 @@ More: over 120 moves to copy, each with a clip, at [vawe.dev/moves](https://vawe
   `requestAnimationFrame`, timers and a seeded `Math.random` all follow the seek). It also sets
   `<html data-aspect>`, `--vw`/`--vh` and `window.vawe`, so one page lays out for `16:9 9:16 1:1 4:5 4:3`
   (`bin/vawe ship <page> --aspect all` renders every one).
+- The named eases are CSS variables too: `var(--ease-land)` to arrive, `var(--ease-launch)` to exit. The renderer and
+  the studio set them; a plain browser does not, so there the page shows its end state with no motion.
 - Audio is `<audio>` tags with `data-at`, `data-gain` and `data-fade-out`. `loop` marks a music file the
   user gives. `data-synth` picks a fallback effect voice from `core/audio/kit.mjs` (a recorded effect
   comes first). The mix is offline and as written; `<meta name="loudness">` opts in to a target.
