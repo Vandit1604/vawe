@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, STEPS, readInputs, staleFiles, parseRule, ruleProblems, withContents, buildFiles, jobsTable, withJobsTable, JOBS_BEGIN, JOBS_END } from '../../harness/dev/taste-build.mjs';
-import { JOBS } from '../../core/motion/ease-jobs.js';
+import { JOBS, jobsOf } from '../../core/motion/ease-jobs.js';
+import TASTE_LIMITS from '../../core/motion/taste-limits.js';
 import { TASTE_CARD_REL } from '../../harness/lib/judge-prompt.mjs';
 import { PEAK_DBFS } from '../../harness/lib/peak-limit.mjs';
 import { RUN_TILES, TAIL_TILES } from '../../harness/lib/sheet-tiles.mjs';
@@ -102,4 +103,6 @@ test('the jobs table has one row per job, names each ease as EASE.<name>, and fi
   const doc = `top\n${JOBS_BEGIN}\nold row\n${JOBS_END}\nbottom\n`;
   assert.equal(withJobsTable(doc), `top\n${JOBS_BEGIN}\n${table}\n${JOBS_END}\nbottom\n`);
   assert.throws(() => withJobsTable('no markers'), /needs the lines/);
+  assert.throws(() => withJobsTable(`${doc}${JOBS_END}\n`), /once each/);
+  assert.match(jobsTable(jobsOf({ ...TASTE_LIMITS, 'exits-shorter': { ...TASTE_LIMITS['exits-shorter'], exit_share_min: 0.4 } })), /\| Exit \| EASE\.launch, EASE\.leave \| 0\.4 to /);
 });

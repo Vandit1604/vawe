@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DIALS } from '../../core/motion/signature.js';
-import { JOBS, easeRef } from '../../core/motion/ease-jobs.js';
+import { JOBS, easeRef, jobsOf } from '../../core/motion/ease-jobs.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const STEPS = ['concept', 'look', 'motion', 'transitions', 'finish', 'sound', 'preship'];
@@ -191,11 +191,11 @@ export function rulesJson(rules) {
   return `${JSON.stringify(out, null, 1)}\n`;
 }
 
+const limitsOf = (rules) => Object.fromEntries(rules.filter((r) => Object.keys(r.numbers).length).map((r) => [r.id, r.numbers]));
+
 /** taste/build/limits.json: rule id to the numbers its check or its range uses. Pure. */
 export function limitsJson(rules) {
-  const limits = {};
-  for (const r of rules) if (Object.keys(r.numbers).length) limits[r.id] = r.numbers;
-  return `${JSON.stringify(limits, null, 1)}\n`;
+  return `${JSON.stringify(limitsOf(rules), null, 1)}\n`;
 }
 
 const PAGE_RULES = ['speed-bands', 'stagger', 'exits-shorter'];
@@ -240,7 +240,8 @@ export function jobsTable(jobs = JOBS) {
 export function withJobsTable(text, jobs = JOBS) {
   const a = text.indexOf(JOBS_BEGIN);
   const b = text.indexOf(JOBS_END);
-  if (a < 0 || b < a) throw new Error(`taste/craft/motion-craft.md needs the lines ${JOBS_BEGIN} and ${JOBS_END}`);
+  const once = a === text.lastIndexOf(JOBS_BEGIN) && b === text.lastIndexOf(JOBS_END);
+  if (a < 0 || b < a || !once) throw new Error(`taste/craft/motion-craft.md needs the lines ${JOBS_BEGIN} and ${JOBS_END}, once each and in that order`);
   return `${text.slice(0, a + JOBS_BEGIN.length)}\n${jobsTable(jobs)}\n${text.slice(b)}`;
 }
 
@@ -254,7 +255,7 @@ export function buildFiles({ rules, attractors, anti, craft, motionCraft }) {
     'taste/build/rules.json': rulesJson(rules),
     'taste/README.md': readmeText(rules, craft),
     'core/motion/taste-limits.js': pageLimitsJs(rules),
-    'taste/craft/motion-craft.md': withJobsTable(motionCraft),
+    'taste/craft/motion-craft.md': withJobsTable(motionCraft, jobsOf(limitsOf(rules))),
   };
 }
 

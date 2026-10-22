@@ -9,7 +9,8 @@ import { DECORATIVE } from './draft-check.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
 import { CUT, moves, moveProps, moveParts, entering, exiting, measured, byTarget, easeName, moveDirection } from './motion-records.mjs';
 import { motionVariety } from './motion-variety.mjs';
-import { jobLine } from '../../core/motion/ease-jobs.js';
+import { easeRef, jobLine, jobOf } from '../../core/motion/ease-jobs.js';
+import { isCameraMove } from './camera-moves.mjs';
 
 export { moveDirection };
 
@@ -129,11 +130,12 @@ const EASE_ADVICE = 'easing: EASE.land to arrive, EASE.leave or EASE.launch to e
 const CAMERA_LONG_S = 2;
 const JOBS_DOC = 'the ease for each job: taste/craft/motion-craft.md';
 
-/** The fix for a move on a keyword ease: the row of the ease table for the job the move does (an exit, a camera move, an entrance), else the general advice. Pure. */
+const entranceLine = () => `Entrance: ${easeRef(jobOf('title').ease)}, ${jobOf('title').time} for a title, ${jobOf('panel').time} for a panel`;
+
 export function easeFix(r) {
   if (exiting(r)) return `${jobLine('exit')} (${JOBS_DOC})`;
-  if (r.fullFrame) return `${jobLine(r.duration < CAMERA_LONG_S ? 'camera-short' : 'camera-long')} (${JOBS_DOC})`;
-  if (entering(r)) return `${jobLine('title')}; ${jobLine('panel')} (${JOBS_DOC})`;
+  if (entering(r)) return `${entranceLine()} (${JOBS_DOC})`;
+  if (isCameraMove(r)) return `${jobLine(r.duration < CAMERA_LONG_S ? 'camera-short' : 'camera-long')} (${JOBS_DOC})`;
   return `${EASE_ADVICE}; ${JOBS_DOC}`;
 }
 
