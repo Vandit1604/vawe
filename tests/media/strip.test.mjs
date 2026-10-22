@@ -138,13 +138,18 @@ test('firstCapture reads the first progress line of a render log', () => {
   assert.equal(firstCapture('page load'), null);
 });
 
-test('holdBefore measures the still run before a cut, leaving the cut sample out', () => {
+test('holdBefore measures the still run before a cut, on whole samples, leaving out the samples of both cuts', () => {
   const at = (t, v) => ({ t, v });
-  const energy = [at(0, 0), at(0.1, 2), at(0.2, 2), at(0.3, 0.2), at(0.4, 0.1), at(0.5, 0.1), at(0.6, 9), at(0.7, 3)];
-  assert.deepEqual(holdBefore(energy, 0.6, 0.6), { holdS: 0.2, whole: false });
-  assert.deepEqual(holdBefore(energy, 0.8, 0.6, 0.6), { holdS: 0, whole: false });
-  assert.deepEqual(holdBefore(energy.map((p) => ({ ...p, v: 0 })), 0.6, 0.6), { holdS: 0.6, whole: true });
+  const energy = [at(0, 2), at(0.1, 2), at(0.2, 2), at(0.3, 0.2), at(0.4, 0.1), at(0.5, 0.1), at(0.6, 9), at(0.7, 0.1), at(0.8, 0.1), at(0.9, 3)];
+  assert.deepEqual(holdBefore(energy, 0.6, 0.6), { holdS: 0.3, whole: false });
+  assert.deepEqual(holdBefore(energy, 0.65, 0.6), { holdS: 0.3, whole: false });
+  assert.deepEqual(holdBefore(energy, 0.95, 0.6, 0.6), { holdS: 0.2, whole: true });
+  assert.deepEqual(holdBefore(energy, 0.1, 0.6), { holdS: 0, whole: false });
+  assert.equal(holdBefore(energy, 0.75, 0.6, 0.6), null);
+  assert.equal(holdLine(null), 'hold before the cut: not measured, the shot is under 0.2 s');
   assert.equal(holdLine({ holdS: 0, whole: false }), 'hold before the cut: none, the cut lands on motion');
   assert.equal(holdLine({ holdS: 0.4, whole: false }), 'hold before the cut: 0.40 s');
-  assert.match(holdsSummary([{ holdS: 0.4 }, { holdS: 0 }]), /^pauses: 1 of 2 cuts hold still 0\.3 s or more/);
+  const [count, ref] = holdsSummary([{ holdS: 0.4 }, { holdS: 0 }, null]);
+  assert.match(count, /^pauses: 1 of 2 measured cuts hold 0\.3 s or more/);
+  assert.match(ref, /^for comparison, the shot cuts of 22 reference films/);
 });

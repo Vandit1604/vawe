@@ -48,5 +48,5 @@ export async function runStrip(input, opts) {
     printStrip(`${i + 1}. ${c.from} to ${c.to}, cut at ${c.at.toFixed(2)} s`, stripOne(found.video, outRoot, energy, { at: c.at, ...common }, dur), opts.fps, { compact: true, energy });
     console.log(`  ${holdLine(holds[i])}`);
   }
-  console.log(`\n${holdsSummary(holds)}`);
+  console.log(`\n${holdsSummary(holds).join('\n')}`);
 }

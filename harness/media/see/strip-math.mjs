@@ -99,27 +99,37 @@ export function energyLines(energy, from, to, { compact = false } = {}) {
 /** The film name a mp4 of out/ belongs to: `out/<name>.mp4`, `<name>-draft.mp4` or `<name>.web.mp4` give <name>. Pure. */
 export const filmNameOf = (file) => file.split('/').pop().replace(/\.(web\.)?mp4$/, '').replace(/-draft$/, '');
 
+const bucketOf = (t) => Math.floor(t / SAMPLE_S + 1e-9) * SAMPLE_S;
+
 /**
- * Seconds the picture holds still before the cut at `at`: from the last energy sample over `floor` (after `since`, the cut before) to the
- * cut. The sample that holds the cut itself is left out. `whole` when nothing moved since the cut before. Pure.
+ * Seconds the picture holds still before the cut at `at`, or null when the shot since the cut before (`since`) has no whole sample to read.
+ * A sample covers [t, t + SAMPLE_S); the samples that hold this cut and the cut before are left out. `whole` when no sample of the shot
+ * is over `floor`. Pure.
  */
 export function holdBefore(energy, at, floor, since = 0) {
-  const shot = energy.filter((p) => p.t >= since + SAMPLE_S - 1e-9 && p.t < at - SAMPLE_S - 1e-9);
-  if (!shot.length) return { holdS: 0, whole: false };
+  const start = since > 0 ? bucketOf(since) + SAMPLE_S : 0;
+  const end = bucketOf(at);
+  const shot = energy.filter((p) => p.t >= start - 1e-9 && p.t < end - 1e-9);
+  if (!shot.length) return null;
   const moving = shot.filter((p) => p.v > floor).at(-1);
-  return { holdS: round(Math.max(0, moving ? at - SAMPLE_S - (moving.t + SAMPLE_S) : at - since)), whole: !moving };
+  return { holdS: round(end - (moving ? moving.t + SAMPLE_S : start)), whole: !moving };
 }
 
-// A hold this long reads as a deliberate pause before the cut.
 export const PAUSE_S = 0.3;
-// Measured with holdBefore over the 22 reference films (1159 cuts, 2026-10): the share of a film's cuts that pause varies with its style.
-const REF_PAUSES = '7 of 22 reference films never pause, the median film pauses before 3 cuts in 10';
+// holdBefore over the shot cuts of the 22 reference films in ~/.vawe/refs (harness/dev/pause-bar.mjs prints it again).
+const REF_PAUSES = 'the shot cuts of 22 reference films: 5 films never pause, the median film pauses before 2 cuts in 10';
 
-/** One line on the hold before one cut. Pure. */
-export const holdLine = (h) => (h.whole ? `hold before the cut: ${h.holdS.toFixed(2)} s, the whole shot (no move over the motion floor; a slow fade stays under it)` : h.holdS < SAMPLE_S ? 'hold before the cut: none, the cut lands on motion' : `hold before the cut: ${h.holdS.toFixed(2)} s`);
+/** One line on the hold before one cut (`h` from holdBefore). Pure. */
+export function holdLine(h) {
+  if (!h) return 'hold before the cut: not measured, the shot is under 0.2 s';
+  if (h.whole) return `hold before the cut: ${h.holdS.toFixed(2)} s, the whole shot is under the motion floor`;
+  return h.holdS < SAMPLE_S ? 'hold before the cut: none, the cut lands on motion' : `hold before the cut: ${h.holdS.toFixed(2)} s`;
+}
 
-/** The count of cuts with a pause of PAUSE_S or more, beside the reference films. Pure. */
+/** Two lines: how many measured cuts pause PAUSE_S or more, then the reference range. Pure. */
 export function holdsSummary(holds) {
-  const paused = holds.filter((h) => h.holdS >= PAUSE_S).length;
-  return `pauses: ${paused} of ${holds.length} cut${holds.length === 1 ? '' : 's'} hold still ${PAUSE_S} s or more before the cut (${REF_PAUSES}); a pause is a choice: put it before the cut you want felt`;
+  const measured = holds.filter(Boolean);
+  const paused = measured.filter((h) => h.holdS >= PAUSE_S).length;
+  return [`pauses: ${paused} of ${measured.length} measured cuts hold ${PAUSE_S} s or more under the motion floor (a slow fade or dissolve counts as still)`,
+    `for comparison, ${REF_PAUSES}`];
 }
