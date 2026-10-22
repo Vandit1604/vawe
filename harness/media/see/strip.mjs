@@ -3,7 +3,7 @@
 import path from 'node:path';
 import { computeEnergy, die, HOLD_FLOOR, probeVideo } from './core.mjs';
 import { runShot } from './compare.mjs';
-import { energyLines, motionLines, motionRead, stripFpsProblem, stripWindow } from './strip-math.mjs';
+import { energyLines, holdBefore, holdLine, holdsSummary, motionLines, motionRead, stripFpsProblem, stripWindow } from './strip-math.mjs';
 import { resolveInput } from './input.mjs';
 
 /** The seconds of the cuts of a page or mp4, for `vawe sheet --ref --at cuts`. */
@@ -43,5 +43,10 @@ export async function runStrip(input, opts) {
   }
   const cuts = await found.cuts();
   console.log(`${cuts.length} cut${cuts.length === 1 ? '' : 's'} in ${found.video}, one strip each (${opts.span} s centred on the cut)`);
-  for (const [i, c] of cuts.entries()) printStrip(`${i + 1}. ${c.from} to ${c.to}, cut at ${c.at.toFixed(2)} s`, stripOne(found.video, outRoot, energy, { at: c.at, ...common }, dur), opts.fps, { compact: true, energy });
+  const holds = cuts.map((c, i) => holdBefore(energy, c.at, HOLD_FLOOR, i ? cuts[i - 1].at : 0));
+  for (const [i, c] of cuts.entries()) {
+    printStrip(`${i + 1}. ${c.from} to ${c.to}, cut at ${c.at.toFixed(2)} s`, stripOne(found.video, outRoot, energy, { at: c.at, ...common }, dur), opts.fps, { compact: true, energy });
+    console.log(`  ${holdLine(holds[i])}`);
+  }
+  console.log(`\n${holdsSummary(holds)}`);
 }

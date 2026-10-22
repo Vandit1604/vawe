@@ -272,7 +272,7 @@ export const VERBS = [
     positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list (uses the 1080p copy); --velocity reads a page only' }],
     flags: [
       { name: 'at', type: 'string', help: 'the second to centre the strip on' },
-      { name: 'cuts', type: 'bool', help: 'one strip per world change (a page or mp4: the data-world spans of the last full draft) or per shot cut (a reference: spec.json); the strip is centred on the cut' },
+      { name: 'cuts', type: 'bool', help: 'one strip per world change (a page or mp4: the data-world spans of the last full draft) or per shot cut (a reference: spec.json); the strip is centred on the cut, with the hold before each cut and how many cuts pause' },
       { name: 'span', type: 'number', default: `${STRIP_SPAN} (--onion ${ONION_SPAN}, --velocity ${VELOCITY_SPAN})`, help: 'seconds of film in the strip, the onion or the velocity window' },
       { name: 'fps', type: 'number', default: STRIP_FPS, help: 'frames per second of film in the strip, at most the fps of the video read (a draft 30, a final 60); a grid holds 9 frames, more make a second grid' },
       { name: 'onion', type: 'bool', help: 'instead of a grid: several frames of the move at --at blended into ONE image, newest strongest, older ones fainter and tinted cool to warm: the spacing, path and overshoot of the move' },

@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { stripProblem, stripFpsProblem, stripWindow, worldCuts, shotCuts, motionRead, motionLines, energyLines, filmNameOf } from '../../harness/media/see/strip-math.mjs';
+import { stripProblem, stripFpsProblem, stripWindow, worldCuts, shotCuts, motionRead, motionLines, energyLines, filmNameOf, holdBefore, holdLine, holdsSummary } from '../../harness/media/see/strip-math.mjs';
 import { captureEtaMs, firstCapture } from '../../harness/lib/ship-status.mjs';
 import { compareProblem } from '../../harness/media/compare-frames.mjs';
 
@@ -136,4 +136,15 @@ test('captureEtaMs: a long set-up before the capture does not inflate the estima
 test('firstCapture reads the first progress line of a render log', () => {
   assert.deepEqual(firstCapture('checks ok\n\r  capturing 12/3400 subframe(s)...\r  capturing 30/3400 subframe(s)...'), { done: 12, total: 3400 });
   assert.equal(firstCapture('page load'), null);
+});
+
+test('holdBefore measures the still run before a cut, leaving the cut sample out', () => {
+  const at = (t, v) => ({ t, v });
+  const energy = [at(0, 0), at(0.1, 2), at(0.2, 2), at(0.3, 0.2), at(0.4, 0.1), at(0.5, 0.1), at(0.6, 9), at(0.7, 3)];
+  assert.deepEqual(holdBefore(energy, 0.6, 0.6), { holdS: 0.2, whole: false });
+  assert.deepEqual(holdBefore(energy, 0.8, 0.6, 0.6), { holdS: 0, whole: false });
+  assert.deepEqual(holdBefore(energy.map((p) => ({ ...p, v: 0 })), 0.6, 0.6), { holdS: 0.6, whole: true });
+  assert.equal(holdLine({ holdS: 0, whole: false }), 'hold before the cut: none, the cut lands on motion');
+  assert.equal(holdLine({ holdS: 0.4, whole: false }), 'hold before the cut: 0.40 s');
+  assert.match(holdsSummary([{ holdS: 0.4 }, { holdS: 0 }]), /^pauses: 1 of 2 cuts hold still 0\.3 s or more/);
 });
