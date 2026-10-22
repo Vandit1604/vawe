@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, STEPS, readInputs, staleFiles, parseRule, ruleProblems, withContents, buildFiles } from '../../harness/dev/taste-build.mjs';
+import { ROOT, STEPS, readInputs, staleFiles, parseRule, ruleProblems, withContents, buildFiles, jobsTable, withJobsTable, JOBS_BEGIN, JOBS_END } from '../../harness/dev/taste-build.mjs';
+import { JOBS } from '../../core/motion/ease-jobs.js';
 import { TASTE_CARD_REL } from '../../harness/lib/judge-prompt.mjs';
 import { PEAK_DBFS } from '../../harness/lib/peak-limit.mjs';
 import { RUN_TILES, TAIL_TILES } from '../../harness/lib/sheet-tiles.mjs';
@@ -92,4 +93,13 @@ test('limits.json agrees with the numbers the checks hold today', () => {
   assert.equal(limits['readable-text-size'].chrome_cap_height_pct, DRAFT.chromeCapFrac * 100);
   assert.deepEqual([BANDS.energy[0], BANDS.energy[1], BANDS.professional[1], BANDS.gravity[1], BANDS.cinematic[1]],
     ['energy_min_s', 'energy_max_s', 'professional_max_s', 'gravity_max_s', 'cinematic_max_s'].map((k) => limits['speed-bands'][k]));
+});
+
+test('the jobs table has one row per job, names each ease as EASE.<name>, and fills only the marked part', () => {
+  const table = jobsTable();
+  assert.equal(table.split('\n').length, JOBS.length + 2);
+  assert.match(table, /\| List stagger \| EASE\.landSoft, EASE\.nudge \|/);
+  const doc = `top\n${JOBS_BEGIN}\nold row\n${JOBS_END}\nbottom\n`;
+  assert.equal(withJobsTable(doc), `top\n${JOBS_BEGIN}\n${table}\n${JOBS_END}\nbottom\n`);
+  assert.throws(() => withJobsTable('no markers'), /needs the lines/);
 });

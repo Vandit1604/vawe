@@ -131,6 +131,25 @@ EASE.land, not a bounce ([overshoot](../rules/overshoot.md)).
 - **A counter must never overshoot.** A number has no mass, and a count that springs flies past its true figure and falls back, so for a few frames the film shows a number that is not true. A film that says 1,822 and paints 1,900 on the way breaks the rule to use real figures ([overshoot](../rules/overshoot.md)).
 - **Let the brand own the personality.** A punchy brand tightens durations and stagger, a calm one stretches them. Set it once per film as `:root` custom properties, not per element ([named-eases](../rules/named-eases.md)).
 
+## Easing: which ease for which job
+
+Pick the row for the job the element does. The times come from the speed bands and the limits in `core/motion`.
+
+<!-- jobs table: written by harness/dev/taste-build.mjs from core/motion/ease-jobs.js: do not edit -->
+| Job | Ease | Time | Avoid |
+|---|---|---|---|
+| Title or text entrance | EASE.land | 0.5 to 0.8 s | pop or any overshoot on text: held text that overshoots reads as shaking. |
+| UI panel or card in | EASE.land | 0.22 to 0.5 s | scale or overshoot on a panel. A copied product panel only fades in 220 ms with a 0.8vh rise. |
+| Value change (number swap) | EASE.swap | 0.15 s out, 0.26 s in | a spring on a number: it shows a figure that is not true. Roll each digit in its own slot; never half of two readings. |
+| List stagger | EASE.landSoft, EASE.nudge | 0.15 to 0.3 s a row, 30 to 80 ms apart, the run within 0.5 s | land on every row: a hard first frame on each reads as flicker. Overshoot on more than every third row. |
+| Small pop or notification | EASE.pop | 0.5 to 0.8 s for a corner notification that slides in over more than 20 px | text blocks and more than one moving item. A pop under 0.35 s leaves 2.4 frames of settle at 30 fps. A small item that moves 3 to 20 px (a bubble, a chip, a tip) takes the send spring instead: k 500, d 25. |
+| Exit | EASE.launch, EASE.leave | 0.35 to 0.6 of the entrance (0.3 s after a 0.5 s one); 0.18 to 0.3 s when the entrance length is unknown | an exit on the entrance's own ease: it arrives while leaving. Use leave only for a settle or a hand-off the page names. |
+| Camera move under 2 s | EASE.land | 0.5 to 2 s | settle or glide: they reach 5% of the travel only after 20% and 14% of the time, so a 1.6 s pull-back looks dead for its first 0.33 s. |
+| Camera move of 2 s or more | EASE.glide, EASE.settle | 2 s or more | land: it stops dead on arrival. Glide for a push or a drift; settle for a pull of 2 s or more that starts and ends at rest. A camera move under 2 s takes land. |
+| Scan or wipe travel | EASE.settle | 0.5 to 1 s | swap: its steep middle turns the travelling line into a blur. Keep swap for the value the line flips. |
+| Hold drift | EASE.glide | the length of the hold, 2 s or more | a copied product surface: it holds still and stays alive through what the product does (a caret, a timer, a hover). |
+<!-- end jobs table -->
+
 ## Easing: which curve, and what it feels like
 
 An easing curve is the acceleration of a move: how it starts and stops. Choose by intent from the
@@ -145,7 +164,6 @@ default and never a hand-fitted cubic-bezier ([named-eases](../rules/named-eases
 | Press or pop (rare) | EASE.pop | passes its mark by about 15 percent and settles |
 | Ambient loop (breathing, drifting) | EASE.glide | gentlest curve, no hard stop |
 | Handover between two seen positions | EASE.carry | eases in, still fast at the end so the next move takes the speed |
-| Exit | EASE.launch | accelerates away; EASE.leave decelerates for a settle or hand-off |
 | Speed ramp inside one move | slow to fast to slow | a camera or counter reads as intentional, not a lerp |
 | No travel at all | a stepped swap | holds the from value and jumps at the far key |
 

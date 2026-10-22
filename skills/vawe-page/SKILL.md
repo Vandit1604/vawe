@@ -79,7 +79,7 @@ const rot = kf(t * 30, [[0, 0], [24, 90], [60, 90]], 'easeInOutCubic');
 Never approximate a curve with `cubic-bezier()`: a hand-fitted bezier starts too hard and stops too
 early, and the motion reads jerky. Use the After Effects eases in `EASE` (`core/motion/presets.js`):
 `land` to arrive, `landSoft` for a move under 0.4 s, `launch` or `leave` to exit, `glide` for a drift,
-`settle`, `swap`, `carry`, `pop`. Each is an exact CSS `linear()` easing; in `window.seek` or
+`settle`, `swap`, `carry`, `pop`. Which ease and how long for each job (a title, a panel, an exit, a camera move): the table in `taste/craft/motion-craft.md`. Each is an exact CSS `linear()` easing; in `window.seek` or
 `vawe.onFrame` code use `easeFn(name)`, a function of 0..1. Multi-key motion: `keys()`.
 
 ```js
