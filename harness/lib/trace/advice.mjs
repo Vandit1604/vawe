@@ -41,9 +41,26 @@ function outcomeOf(f, lastDraft, waivedMs) {
   return f.drafts.length >= IGNORED_DRAFTS ? 'ignored' : 'open';
 }
 
-/** Each rule and advice key the dev results printed: fixed, ignored (in the last draft and in 3 or more drafts), waived (in the page allow block), or open. Pure. */
-export function adviceOutcomes(calls, notes) {
-  const drafts = calls.filter((c) => c.advice).map((c) => ({ ms: c.ms, ...c.advice }));
+const RUN_START_SLACK_MS = 5000;
+const isDev = (c) => c.verbs.some((v) => v.verb === 'dev' && !v.help);
+
+function printedDrafts(calls) {
+  return calls.filter((c) => c.advice && isDev(c)).map((c) => ({ ms: c.ms, ...c.advice }));
+}
+
+function loggedDrafts(calls, runs) {
+  const devCalls = calls.filter(isDev);
+  return runs.filter((r) => !r.failed).map((run) => {
+    const at = Date.parse(run.at);
+    const call = devCalls.findLast((c) => c.ms - RUN_START_SLACK_MS <= at);
+    return { ms: call?.ms ?? at, advice: call?.advice?.advice ?? [], rules: (run.rules_fired ?? []).map((f) => ({ id: f.id, token: null })) };
+  }).sort((a, b) => a.ms - b.ms);
+}
+
+/** Each rule and advice key the dev runs fired: fixed, ignored (in the last draft and in 3 or more drafts), waived (in the page allow block), or open. A draft is one dev run-log row, else one dev call with printed lines. Pure. */
+export function adviceOutcomes(calls, notes, runLog = []) {
+  const runs = runLog.filter((r) => r.cmd === 'dev');
+  const drafts = runs.length ? loggedDrafts(calls, runs) : printedDrafts(calls);
   const { added, entries } = allowHistory(calls);
   const items = findings(drafts).map((f) => {
     const waivedMs = [f.id, ...f.tokens].map((id) => added.get(id)).find((ms) => ms !== undefined) ?? null;

@@ -265,6 +265,40 @@ test('advice outcomes: fixed, ignored after 3 drafts, waived, and a waiver in th
   assert.equal(agg.rows.find((r) => r.id === 'waivedSameRound').count, 1);
 });
 
+const devRun = (sec, fired, extra = {}) => ({ cmd: 'dev', at: stamp(sec + 1), rules_fired: fired.map((id) => ({ id })), ...extra });
+
+test('advice outcomes read every fired rule from the dev run log, one draft per run', async () => {
+  const draft = (sec, id, text) => [callRow(sec, id, 'bin/vawe dev films/f/page.html'), resultRow(sec + 1, id, text)];
+  const fold = await foldOf([
+    textRow(0, 'go'),
+    ...draft(1, 'd1', devText(['a'])),
+    callRow(3, 'r1', 'cat out/f.dev.md'), resultRow(3, 'r1', devText(['a'])),
+    callRow(4, 'r2', 'cat out/f.dev.md'), resultRow(4, 'r2', devText(['a'])),
+    ...draft(10, 'd2', devText(['a'])),
+    ...draft(20, 'd3', devText([])),
+  ]);
+  const runLog = [devRun(1, ['a', 'hidden', 'gone']), devRun(10, ['a', 'hidden']), devRun(20, ['a'])];
+  const { advice } = analyze(fold, 'x.jsonl', () => runLog);
+  const by = (id) => advice.items.find((i) => i.id === id);
+  assert.equal(advice.drafts, 3);
+  assert.deepEqual(['a', 'hidden', 'gone'].map((id) => [by(id).drafts, by(id).outcome]), [[3, 'ignored'], [2, 'fixed'], [1, 'fixed']]);
+});
+
+test('advice outcomes without a run log count a draft per dev call, not per read of its log', async () => {
+  const fold = await foldOf([
+    textRow(0, 'go'),
+    callRow(1, 'd1', 'bin/vawe dev films/f/page.html'), resultRow(2, 'd1', devText(['a'])),
+    callRow(3, 'r1', 'cat out/f.dev.md'), resultRow(3, 'r1', devText(['a'])),
+    callRow(4, 'r2', 'cat out/f.dev.md'), resultRow(4, 'r2', devText(['a'])),
+  ]);
+  assert.equal(analyze(fold, 'x.jsonl').advice.drafts, 1);
+});
+
+test('a failed dev run is no draft', async () => {
+  const fold = await foldOf([textRow(0, 'go'), callRow(1, 'd1', 'bin/vawe dev films/f/page.html'), resultRow(2, 'd1', 'boom')]);
+  assert.equal(analyze(fold, 'x.jsonl', () => [devRun(1, [], { failed: true })]).advice.drafts, 0);
+});
+
 test('a streamed message counts its largest output_tokens once', async () => {
   const row = (sec, out) => ({ type: 'assistant', timestamp: stamp(sec), message: { id: 'm1', usage: { input_tokens: 1, output_tokens: out, cache_creation_input_tokens: 5 }, content: [] } });
   const fold = await foldOf([row(0, 3), row(1, 40), row(2, 12)]);

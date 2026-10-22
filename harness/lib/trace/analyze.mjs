@@ -135,7 +135,8 @@ function banSeen(calls) {
 export function analyze(fold, file, readRuns = () => []) {
   const { calls, meta } = fold;
   const startMs = meta.startMs ?? 0;
-  const events = verbEvents(calls, startMs, filmsOf(calls).flatMap((film) => readRuns(film, meta)));
+  const runLog = filmsOf(calls).flatMap((film) => readRuns(film, meta));
+  const events = verbEvents(calls, startMs, runLog);
   const writes = calls.flatMap((c) => c.writes.map((w) => ({ ...w, ms: c.ms })));
   const pageMs = writes.find((w) => w.what === 'page')?.ms ?? null;
   const devMs = calls.find((c) => c.verbs.some((v) => v.verb === 'dev' && !v.help))?.ms ?? null;
@@ -160,7 +161,7 @@ export function analyze(fold, file, readRuns = () => []) {
     failures: { total: failures.length, byClass: count(failures, (f) => f.cls), hookErrors: fold.hookErrors, list: failures.slice(0, 20) },
     rounds: roundsOf(fold, events),
     stalls: stallsOf(fold),
-    advice: adviceOutcomes(calls, fold.notes),
+    advice: adviceOutcomes(calls, fold.notes, runLog),
     cost: costOf(calls, events),
     breaks: ruleBreaks(events, wrotePage, calls.some((c) => c.unattended)),
   };
