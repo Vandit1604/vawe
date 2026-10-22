@@ -56,7 +56,7 @@ A virtual clock owns `Date`, `requestAnimationFrame`, timers and `Math.random`. 
 
 ## How one page fits five aspect ratios
 
-Before any page script runs, the renderer sets `data-aspect` on `<html>`. It also sets `--vw` and `--vh` (pixel lengths) on `:root` and on `window.vawe`. The document element does not exist at that moment. So `installPageFrame` in `core/engine/page-seek.js` waits with a `MutationObserver` and applies the values when the element appears.
+Before any page script runs, the renderer sets `data-aspect` on `<html>`. It also sets `--vw` and `--vh` (pixel lengths) on `:root` and on `window.vawe`. It sets each named ease as `--ease-<name>` on `:root` too, so plain CSS can write `var(--ease-land)`. The document element does not exist at that moment. So `installPageFrame` in `core/engine/page-seek.js` waits with a `MutationObserver` and applies the values when the element appears.
 
 You lay out in CSS for the five aspects and never crop. The [aspect ratio guide](/docs/aspect-ratios) has the details. A brief can name a different length or aspect than the page. That gives an advice line, not a refusal, because the page owns its length.
 

@@ -25,8 +25,8 @@ The template is `template.html`:
   :root { --bg: #0b0d12; --accent: #4f7cff; }
   body { margin: 0; background: var(--bg); color: #f4f6fb; font: 700 calc(var(--vh) * 0.09) system-ui; }
   .card { position: absolute; inset: 0; display: grid; place-content: center; padding: 0 8%; }
-  h1 { margin: 0; animation: rise 0.6s cubic-bezier(.2,.9,.2,1) both 0.3s; }
-  p { margin: 0.3em 0 0; font-size: 0.5em; color: var(--accent); animation: rise 0.6s cubic-bezier(.2,.9,.2,1) both 0.6s; }
+  h1 { margin: 0; animation: rise 0.6s var(--ease-land) both 0.3s; }
+  p { margin: 0.3em 0 0; font-size: 0.5em; color: var(--accent); animation: rise 0.6s var(--ease-land) both 0.6s; }
   @keyframes rise { from { transform: translateY(calc(var(--vh) * 0.04)); opacity: 0 } to { transform: none; opacity: 1 } }
 </style>
 <script type="application/json" id="data">{"title":"Hello","line":"First variant","accent":"#4f7cff"}</script>

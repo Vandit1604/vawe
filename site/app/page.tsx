@@ -104,7 +104,7 @@ export default function Home() {
               <i>{"<!doctype html>\n<html data-aspect=\"16:9\">\n"}</i>
               <b>{"<meta"}</b>{" name=\"duration\" content=\"3\""}<b>{">"}</b>{"\n"}
               <b>{"<meta"}</b>{" name=\"message\" content=\"One page. One film.\""}<b>{">"}</b>{"\n"}
-              <b>{"<style>"}</b>{"\n  body { margin: 0; display: grid; place-items: center start;\n         height: 100vh; padding-left: 8vw; background: #000; }\n  h1 { font: 800 9vh/1 system-ui; color: #fff;\n       animation: rise 0.7s cubic-bezier(.2,.8,.2,1) 0.3s both; }\n  @keyframes rise {\n    from { translate: 0 6vh; clip-path: inset(0 0 100% 0); }\n    to   { translate: 0 0;   clip-path: inset(0 0 0 0); }\n  }\n"}<b>{"</style>"}</b>{"\n"}
+              <b>{"<style>"}</b>{"\n  body { margin: 0; display: grid; place-items: center start;\n         height: 100vh; padding-left: 8vw; background: #000; }\n  h1 { font: 800 9vh/1 system-ui; color: #fff;\n       animation: rise 0.7s var(--ease-land) 0.3s both; }\n  @keyframes rise {\n    from { translate: 0 6vh; clip-path: inset(0 0 100% 0); }\n    to   { translate: 0 0;   clip-path: inset(0 0 0 0); }\n  }\n"}<b>{"</style>"}</b>{"\n"}
               <b>{"<h1>"}</b>{"One page. One film."}<b>{"</h1>"}</b>
             </pre>
             <p className="mono lp-code-note">films/hello/page.html</p>

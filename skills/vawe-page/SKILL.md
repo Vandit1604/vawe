@@ -80,7 +80,8 @@ Never approximate a curve with `cubic-bezier()`: a hand-fitted bezier starts too
 early, and the motion reads jerky. Use the After Effects eases in `EASE` (`core/motion/presets.js`):
 `land` to arrive, `landSoft` for a move under 0.4 s, `launch` or `leave` to exit, `glide` for a drift,
 `settle`, `swap`, `carry`, `pop`. The ease and the time for each job (a title, a panel, an exit, a
-camera move) are in the table in `taste/craft/motion-craft.md`. Each is an exact CSS `linear()` easing;
+camera move) are in the table in `taste/craft/motion-craft.md`. Each is an exact CSS `linear()` easing,
+and plain CSS reads it as `var(--ease-land)`, `var(--ease-launch)` (the renderer sets them on `:root`);
 in `window.seek` or `vawe.onFrame` code use `easeFn(name)`, a function of 0..1. Multi-key motion: `keys()`.
 
 ```js

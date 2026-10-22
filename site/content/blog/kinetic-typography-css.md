@@ -26,7 +26,7 @@ Each letter starts 45 ms after the one before it. That gap is short enough to re
 ```
 
 ```css
-h1 span { display: inline-block; animation: rise 0.55s cubic-bezier(.2,.9,.2,1) both;
+h1 span { display: inline-block; animation: rise 0.55s var(--ease-land) both;
           animation-delay: calc(0.1s + var(--i) * 45ms); }
 @keyframes rise { from { transform: translateY(0.6em); opacity: 0 } to { transform: none; opacity: 1 } }
 ```
@@ -77,7 +77,7 @@ A box with `overflow: hidden` hides the line. The text moves up from below the b
 
 ```css
 .line { overflow: hidden; padding: 0.1em 0.2em 0.2em; }
-.line span { display: block; animation: up 0.7s cubic-bezier(.2,.9,.2,1) 0.2s both; }
+.line span { display: block; animation: up 0.7s var(--ease-land) 0.2s both; }
 @keyframes up { from { transform: translateY(110%) } to { transform: none } }
 ```
 
@@ -91,7 +91,7 @@ A box with `overflow: hidden` hides the line. The text moves up from below the b
 The letters start far apart and blurred. They close up to normal spacing and sharpen. Tight final spacing (here -0.02 em) suits large text.
 
 ```css
-h1 { font-size: 120px; animation: collapse 1.1s cubic-bezier(.2,.9,.2,1) 0.2s both; }
+h1 { font-size: 120px; animation: collapse 1.1s var(--ease-land) 0.2s both; }
 @keyframes collapse {
   from { letter-spacing: 0.5em; opacity: 0; filter: blur(12px) }
   to   { letter-spacing: -0.02em; opacity: 1; filter: blur(0) }

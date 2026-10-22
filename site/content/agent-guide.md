@@ -49,7 +49,7 @@ A whole film:
 <meta name="message" content="One page. One film.">
 <style>
   body { margin: 0; display: grid; place-items: center start; height: 100vh; padding-left: 8vw; background: #16151a; }
-  h1 { font: 800 9vh/1 system-ui; color: #f4f2ee; animation: rise 0.7s cubic-bezier(.2,.8,.2,1) 0.3s both; }
+  h1 { font: 800 9vh/1 system-ui; color: #f4f2ee; animation: rise 0.7s var(--ease-land) 0.3s both; }
   @keyframes rise { from { translate: 0 6vh; clip-path: inset(0 0 100% 0); } to { translate: 0 0; clip-path: inset(0 0 0 0); } }
 </style>
 <h1>One page. One film.</h1>

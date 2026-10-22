@@ -26,7 +26,7 @@ The starter page has this shape:
 <style>
   body { margin: 0; background: #f4f6fb; color: #0b0d12; font: 700 calc(var(--vh) * 0.1) system-ui; }
   h1 { position: absolute; left: 8%; top: 42%; margin: 0;
-       animation: in 0.5s cubic-bezier(.2,.9,.2,1) 0.3s both, out 0.25s ease-in 4.4s both; }
+       animation: in 0.5s var(--ease-land) 0.3s both, out 0.25s var(--ease-launch) 4.4s both; }
   @keyframes in  { from { transform: translateY(0.6em); opacity: 0 } to { transform: none; opacity: 1 } }
   @keyframes out { to { transform: translateY(-0.4em); opacity: 0 } }
 </style>

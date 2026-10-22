@@ -37,8 +37,8 @@ This is the whole page. The font size comes from `--vh`, so the text scales with
 <style>
   body { margin: 0; background: #0b0d12; color: #f4f6fb; font: 700 calc(var(--vh) * 0.09) system-ui; }
   .card { position: absolute; inset: 0; display: grid; place-content: center; padding: 0 8%; }
-  h1 { margin: 0; line-height: 1.05; animation: rise 0.6s cubic-bezier(.2,.9,.2,1) both 0.3s; }
-  p { margin: 0.4em 0 0; font-size: 0.45em; color: #4f7cff; animation: rise 0.6s cubic-bezier(.2,.9,.2,1) both 0.6s; }
+  h1 { margin: 0; line-height: 1.05; animation: rise 0.6s var(--ease-land) both 0.3s; }
+  p { margin: 0.4em 0 0; font-size: 0.45em; color: #4f7cff; animation: rise 0.6s var(--ease-land) both 0.6s; }
   @keyframes rise { from { transform: translateY(calc(var(--vh) * 0.03)); opacity: 0 } to { transform: none; opacity: 1 } }
   [data-aspect="9:16"] h1 { font-size: 1.15em; }
   [data-aspect="9:16"] .card { place-content: start; padding-top: 30%; }

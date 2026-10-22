@@ -31,7 +31,7 @@ Install Puppeteer and check that ffmpeg is on your path. Save this page as `page
 <style>
   body { margin: 0; background: #0b0d12; color: #f4f6fb; font: 700 64px system-ui; }
   h1 { position: absolute; left: 8%; top: 40%; margin: 0;
-       animation: rise 0.6s cubic-bezier(.2,.9,.2,1) both 0.4s; }
+       animation: rise 0.6s var(--ease-land) both 0.4s; }
   @keyframes rise { from { transform: translateY(40px); opacity: 0 } to { transform: none; opacity: 1 } }
 </style>
 <h1>one page, one film</h1>
@@ -93,7 +93,7 @@ bin/vawe doctor
 <meta name="duration" content="3">
 <style>
   body { margin: 0; background: #0b0d12; color: #f4f6fb; font: 700 calc(var(--vh) * 0.08) system-ui; }
-  h1 { position: absolute; left: 8%; top: 40%; animation: rise 0.6s cubic-bezier(.2,.9,.2,1) both 0.4s; }
+  h1 { position: absolute; left: 8%; top: 40%; animation: rise 0.6s var(--ease-land) both 0.4s; }
   @keyframes rise { from { transform: translateY(40px); opacity: 0 } to { transform: none; opacity: 1 } }
 </style>
 <h1 data-world="title">one page, one film</h1>
