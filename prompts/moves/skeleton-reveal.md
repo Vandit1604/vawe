@@ -16,6 +16,10 @@ real.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, delay: t, easing
 skeleton.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, delay: t, easing: 'linear', fill: 'both' });
 ```
 
+The chart bars grow from the axis on `EASE.land` (600 ms, 40 ms apart): `b.animate([{ scale: '1 0' }, { scale: '1 1' }], { duration: 600, delay: 3400 + i * 40, easing: EASE.land, fill: 'both' })`.
+
+Common mistake: a skeleton that does not match the loaded layout, so the page jumps when the content arrives. Draw each grey block where its real content lands.
+
 Sound: none. The clip is silent.
 
 ## How it looks and moves

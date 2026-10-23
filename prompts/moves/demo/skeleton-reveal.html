@@ -6,7 +6,7 @@
 <meta name="variants" content="dark">
 <title>move: skeleton reveal</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
-<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.1-5.6", "world-held@0.0-6.0"], "_why": {"text-unreadable-hold": "the loaded dashboard holds 2.0 s after its last region arrives at 3.7 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, so the loaded page holds 1.9 s, short of the 5.4 s the check asks", "static-window@4.1-5.6": "dashboard, 1.5 s from 4.1 s: a loaded page holds still as the product does, and only the online counter ticks", "world-held@0.0-6.0": "one dashboard holds 6.0 s: the skeleton sweeps from 0.3 s, the regions load from 2.9 s and the window leaves at 5.6 s"}}</script>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.1-5.6", "world-held@0.0-6.0", "linear-move@0.30"], "_why": {"text-unreadable-hold": "the loaded dashboard holds 2.0 s after its last region arrives at 3.7 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, so the loaded page holds 1.9 s, short of the 5.4 s the check asks", "static-window@4.1-5.6": "dashboard, 1.5 s from 4.1 s: a loaded page holds still as the product does, and only the online counter ticks", "linear-move@0.30": "the shimmer light crosses at constant speed for 1.4 s, three times from 0.3 s: a real loading sweep does not ease, and an ease would make the light stall at each page edge", "world-held@0.0-6.0": "one dashboard holds 6.0 s: the skeleton sweeps from 0.3 s, the regions load from 2.9 s and the window leaves at 5.6 s"}}</script>
 <style>
   html[data-look="product"] { --bar-c: #1f6f68; --sk: color-mix(in srgb, var(--ink) 8%, var(--surface)); --sk-light: color-mix(in srgb, var(--surface) 60%, transparent); }
   html[data-look="product"][data-theme="dark"] { --bar-c: #4fb3aa; }
@@ -113,6 +113,7 @@
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import { EASE } from '/core/motion/presets.js';
 import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
 const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
 const END = 6000, SWEEP_MS = 1400;
@@ -144,7 +145,7 @@ Object.entries(at).forEach(([sel, t]) => {
   });
 });
 // a chart draws on load: each bar grows from the axis
-all('.bk').forEach((b, i) => b.animate([{ scale: '1 0' }, { scale: '1 1' }], { duration: 600, delay: 3400 + i * 40, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' }));
+all('.bk').forEach((b, i) => b.animate([{ scale: '1 0' }, { scale: '1 1' }], { duration: 600, delay: 3400 + i * 40, easing: EASE.land, fill: 'both' }));
 // the online counter is the one live number after the load
 const online = q('.online');
 vawe.onFrame((s) => { online.textContent = s >= 5.0 ? '36' : s >= 4.4 ? '35' : '34'; });
