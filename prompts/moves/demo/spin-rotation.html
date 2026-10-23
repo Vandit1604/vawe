@@ -66,12 +66,11 @@ const OMEGA = 330, SPIN_AT = 0.4, BRAKE_AT = 1.6, BRAKE_S = 0.7, CLOSE_S = 0.7, 
 const C = 2 * Math.PI * 42, ARC0 = 0.25;           // circumference of the ring; the share of it the arc covers while it spins
 // the head turns at one speed, then brakes from that speed to a stop with the same ease the arc closes with (land starts at 4.8 times the average speed)
 const head = (t) => (t < BRAKE_AT ? OMEGA * Math.max(0, t - SPIN_AT) : OMEGA * (BRAKE_AT - SPIN_AT) + (OMEGA * BRAKE_S / 4.8) * land(clamp((t - BRAKE_AT) / BRAKE_S)));
-arc.style.stroke = '#0d0d0d';
+arc.style.stroke = '#1a7f4b';
 vawe.onFrame((t) => {
-  const close = land(clamp((t - BRAKE_AT) / CLOSE_S)), p = land(clamp((t - MOVE.at) / MOVE.dur)), k = clamp((t - MOVE.at) / MOVE.dur);
+  const close = land(clamp((t - BRAKE_AT) / CLOSE_S)), p = land(clamp((t - MOVE.at) / MOVE.dur));
   const share = ARC0 + (1 - ARC0) * close;
   arc.style.strokeDasharray = `${C * share} ${C}`;
-  arc.style.stroke = `rgb(${Math.round(13 + (26 - 13) * k)} ${Math.round(13 + (127 - 13) * k)} ${Math.round(13 + (75 - 13) * k)})`;
   ring.style.transform = `translate(${dx * p}px, ${dy * p}px) scale(${1 - (1 - S1) * p})`;
   spin.style.transform = `rotate(${head(t).toFixed(2)}deg)`;
   check.style.strokeDasharray = '60 60';
@@ -79,12 +78,12 @@ vawe.onFrame((t) => {
   ring.style.opacity = String(clamp((t - 0.1) / 0.2));
 });
 
-// the page: the caption leaves as the ring closes; the header and rows arrive after the ring has landed
+// the page: the caption leaves as the ring closes; the header and rows arrive while the ring travels
 q('#say').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: BRAKE_AT * 1000 + 300, easing: EASE.launch, fill: 'both' });
-arrive(q('#h2'), 2700, { ms: 300, from: '1vh' });
-arrive(q('#pill'), 2770, { ms: 300, from: '1vh' });
-arrive(q('#note'), 3000, { ms: 300, from: '1vh' });
-[...q('#stats').children].forEach((el, i) => arrive(el, 2800 + i * 70, { ms: 300, from: '1vh' }));
+arrive(q('#h2'), 2650, { ms: 300, from: '1vh' });
+arrive(q('#pill'), 2720, { ms: 300, from: '1vh' });
+arrive(q('#note'), 2600, { ms: 300, from: '1vh' });
+[...q('#stats').children].forEach((el, i) => arrive(el, 2350 + i * 70, { ms: 300, from: '1vh' }));
 arrive(q('.win'), 100, { ms: 220, from: '0.8vh' });
 leave(q('.win'), 4600);
 </script>
