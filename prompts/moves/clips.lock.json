@@ -118,7 +118,10 @@
     "hash": "6164f67333ca7570",
     "crf": 16
   },
-  "gradient-mesh-field": "46bf6d819f633c3d",
+  "gradient-mesh-field": {
+    "hash": "1b6889a075c64164",
+    "crf": 16
+  },
   "grain-field": "bf8d3a52663969c8",
   "grid-stagger-wave": "c268dc724ff350a3",
   "grid-tile-flip": "3d14a6f0c0b503c8",
