@@ -1,301 +1,424 @@
 {
   "agent-progress": {
-    "hash": "bee27b73b9110581",
+    "hash": "f45c6cc97346015a",
     "crf": 16
   },
   "ai-stream-response": {
-    "crf": 16,
-    "hash": "8aac4e3c990d8ec4"
+    "hash": "680b0d2c1ea4d89f",
+    "crf": 16
   },
   "ai-stream-response-dark": {
-    "crf": 16,
-    "hash": "1915b0d67f9329f8"
+    "hash": "e1649bcb930d881f",
+    "crf": 16
   },
-  "anchor-cycle": "13fe6a88c9ce4dc7",
+  "anchor-cycle": {
+    "hash": "a5edad80d4bca520",
+    "crf": 16
+  },
   "approval-gate": {
-    "crf": 16,
-    "hash": "026ec0ec62d4c21c"
+    "hash": "c4e556edc6154ba3",
+    "crf": 16
   },
   "approval-gate-dark": {
-    "crf": 16,
-    "hash": "726690a935b83184"
+    "hash": "b9384c41998365c0",
+    "crf": 16
   },
-  "aurora-drift": "a37862560dcfe716",
+  "aurora-drift": {
+    "hash": "852abbb9717894f6",
+    "crf": 16
+  },
   "avatar-world": {
-    "crf": 16,
-    "hash": "3b6c962543bc6c15"
+    "hash": "af1cebca94a785ef",
+    "crf": 16
   },
   "before-after-wipe": {
-    "crf": 16,
-    "hash": "8d510978641313e2"
+    "hash": "58641e992af38e40",
+    "crf": 16
   },
   "before-after-wipe-dark": {
-    "crf": 16,
-    "hash": "0469fd5fabea6523"
+    "hash": "e6504eafa11b7f15",
+    "crf": 16
   },
-  "blur-word-cascade": "accb93de1d3f9a7c",
-  "bracket-callout": "2532f77f62259480",
+  "blur-word-cascade": {
+    "hash": "3e9bc648aa12b6a3",
+    "crf": 16
+  },
+  "bracket-callout": {
+    "hash": "4f15fe30dce06d93",
+    "crf": 16
+  },
   "calm-lockup": {
-    "crf": 16,
-    "hash": "97060a98ec6d4322"
+    "hash": "d61c5c500a32853f",
+    "crf": 16
   },
   "camera-moves": {
-    "hash": "be348beb505529c0",
+    "hash": "27d1c5e803d0156c",
     "crf": 19
   },
-  "caption-editorial": "8c33b06b8a9bc540",
+  "caption-editorial": {
+    "hash": "2984553cd593ab53",
+    "crf": 16
+  },
   "caption-karaoke": {
-    "crf": 16,
-    "hash": "98256b9732e0543b"
+    "hash": "3a488153a012a667",
+    "crf": 16
   },
   "card-assemble": {
-    "hash": "a251e7b7c1ed5731",
+    "hash": "d8be032a4616af32",
     "crf": 16
   },
   "caret-door": {
-    "hash": "b3941806f45f29ef",
+    "hash": "7aceb499d182c38e",
     "crf": 16
   },
-  "caret-follow": "3d1cefff47fe2cb6",
+  "caret-follow": {
+    "hash": "569c594bb114b5ae",
+    "crf": 16
+  },
   "caret-typing": {
-    "hash": "34c1e4a3ea4688d1",
+    "hash": "7ac267d16fb5a1ee",
     "crf": 16
   },
-  "chain-beats": "a9f87ec35d03f3bb",
-  "chart-build": "0161845983894f1b",
+  "chain-beats": {
+    "hash": "a7b1cea3c51f0307",
+    "crf": 16
+  },
+  "chart-build": {
+    "hash": "c186f6c4b0e27f63",
+    "crf": 16
+  },
   "circling-elements": {
-    "crf": 16,
-    "hash": "6dadf4c376df98e4"
+    "hash": "4b031ce8cbe3b6c9",
+    "crf": 16
   },
   "clip-expand": {
-    "crf": 16,
-    "hash": "e8cb84f85c10f585"
+    "hash": "cc200524b51c5e6e",
+    "crf": 16
   },
-  "color-block-wipe": "0b74913f4a01b0d6",
+  "color-block-wipe": {
+    "hash": "684b0166b5a32986",
+    "crf": 16
+  },
   "command-palette-summon": {
-    "crf": 16,
-    "hash": "d2622496963d03c8"
+    "hash": "a3a7c913f12b0118",
+    "crf": 16
   },
-  "count-up": "df185d5e13844c65",
-  "counter-dive": "e024f8e2e274b570",
-  "crash-zoom": "73309ce2bfdb045b",
+  "count-up": {
+    "hash": "61cba40ae39a0b0e",
+    "crf": 16
+  },
+  "counter-dive": {
+    "hash": "0b0db7d38381e406",
+    "crf": 16
+  },
+  "crash-zoom": {
+    "hash": "5bd4d59b022583af",
+    "crf": 16
+  },
   "css-box": {
-    "crf": 19,
-    "hash": "206f281e47e04525"
+    "hash": "46a9fe8bd4f4b3b2",
+    "crf": 19
   },
   "css-box-dark": {
-    "crf": 19,
-    "hash": "b4a91bfa9db3af61"
+    "hash": "e507069f160db5ac",
+    "crf": 19
   },
   "cta-morph-press": {
-    "crf": 16,
-    "hash": "e6c484bc54a8ad74"
+    "hash": "e1927694402d251a",
+    "crf": 16
   },
-  "cta-pop": "0b7874ee1eda7a8c",
-  "cursor-click": "e09100c2c66b4407",
+  "cta-pop": {
+    "hash": "a792ec4a342ed5ca",
+    "crf": 16
+  },
+  "cursor-click": {
+    "hash": "68deae17f83cde34",
+    "crf": 16
+  },
   "cursor-spotlight": {
-    "crf": 16,
-    "hash": "65f1b80eff4ab6b5"
+    "hash": "f0ecda090a7b0e05",
+    "crf": 16
   },
-  "cut-on-motion": "774b6457e35614e2",
+  "cut-on-motion": {
+    "hash": "0095d13492838272",
+    "crf": 16
+  },
   "device-tilt-stage": {
-    "crf": 19,
-    "hash": "0c23c02011782712"
+    "hash": "7479885f31e3ffdc",
+    "crf": 19
   },
   "device-tilt-stage-dark": {
-    "crf": 19,
-    "hash": "48f84a198ceeb861"
+    "hash": "5c8308cd872f9ac5",
+    "crf": 19
   },
   "diff-card": {
-    "crf": 16,
-    "hash": "eaf2429d79b053cf"
+    "hash": "1a3d05a912d449a4",
+    "crf": 16
   },
   "diff-card-dark": {
-    "crf": 16,
-    "hash": "13f5a5b713810f88"
+    "hash": "f25236705c46c329",
+    "crf": 16
   },
   "dot-grid-wave": {
-    "crf": 19,
-    "hash": "7771c766f491ccd6"
+    "hash": "85ca51ad89038713",
+    "crf": 19
   },
-  "drift-hold": "e10b3bfa4bfde279",
-  "drop-and-land": "325a03e22d605331",
+  "drift-hold": {
+    "hash": "bae1a71db5f13a6d",
+    "crf": 16
+  },
+  "drop-and-land": {
+    "hash": "75cc98840afc12cb",
+    "crf": 16
+  },
   "echo-trail": {
     "crf": 16,
     "hash": "0889da8fc0c1aecc"
   },
-  "exit-fast": "bd616b7f7918efcb",
+  "exit-fast": {
+    "hash": "f6de90c301cae9ab",
+    "crf": 16
+  },
   "exposure-flash": {
-    "hash": "cc8e4b17e19b2c94",
+    "hash": "f2ee7927c6519427",
     "crf": 22
   },
   "flap-resolve": {
-    "crf": 19,
-    "hash": "0b4086e0a91d6cd3"
+    "hash": "b70393396181695f",
+    "crf": 19
   },
   "flap-resolve-dark": {
-    "crf": 16,
-    "hash": "72063b1d2bada57c"
+    "hash": "c53aaf6afc052c87",
+    "crf": 16
   },
   "glow-record": {
-    "hash": "f436496318fec97a",
+    "hash": "77aa40c8d861ed8d",
     "crf": 16
   },
   "gooey-filter": {
-    "crf": 16,
-    "hash": "6164f67333ca7570"
+    "hash": "2dfa92be6041b945",
+    "crf": 16
   },
   "gradient-mesh-field": {
-    "hash": "592793362b42c729",
+    "hash": "88f724d0aa09106d",
     "crf": 16
   },
   "grain-field": {
-    "crf": 25,
-    "hash": "0d6cef454bf399da"
+    "hash": "95b548538604a038",
+    "crf": 25
   },
   "grid-stagger-wave": {
-    "crf": 16,
-    "hash": "a7e098f54d73a9c3"
+    "hash": "b43bf685b1d89a4e",
+    "crf": 16
   },
-  "grid-tile-flip": "3d14a6f0c0b503c8",
+  "grid-tile-flip": {
+    "hash": "ddf725a886904ab2",
+    "crf": 16
+  },
   "halftone-field": {
-    "hash": "15e490e1b28a6a1b",
+    "hash": "a29a3dc59adb21cd",
     "crf": 19
   },
-  "hand-drawn-notes": "695c4e34bd4ff383",
-  "highlight-sweep": "0aa8f7c1e54ba3cc",
-  "ink-warp": "64a415f1297c1add",
-  "integration-hub": "bec37d2a11a831b4",
+  "hand-drawn-notes": {
+    "hash": "bf0d94234eb5e8e0",
+    "crf": 16
+  },
+  "highlight-sweep": {
+    "hash": "6316dd3e4a866c4d",
+    "crf": 16
+  },
+  "ink-warp": {
+    "hash": "1314ffd34dcb04cc",
+    "crf": 22
+  },
+  "integration-hub": {
+    "hash": "be7f57ae4ad3351b",
+    "crf": 16
+  },
   "iris-wipe": {
-    "crf": 16,
-    "hash": "6c397b00df72d963"
+    "hash": "d82aa9aae3a0a01c",
+    "crf": 16
   },
-  "lens": "74a5a14ff552c672",
+  "lens": {
+    "hash": "ab49de3c68516396",
+    "crf": 19
+  },
   "letter-3d-swap": {
-    "crf": 16,
-    "hash": "26d18a12965cc093"
+    "hash": "3c909a0c6b141bca",
+    "crf": 16
   },
-  "letter-stagger": "aa26493298ac3b34",
-  "letter-swap": "1a03e5b29479bf16",
+  "letter-stagger": {
+    "hash": "0dd399ab3f6a45d0",
+    "crf": 16
+  },
+  "letter-swap": {
+    "hash": "ca649c5dfa44fda5",
+    "crf": 16
+  },
   "light-leak-transition": {
-    "crf": 16,
-    "hash": "014be14487923cea"
+    "hash": "481b33b3b4cd93f7",
+    "crf": 16
   },
   "light-pool": {
-    "crf": 16,
-    "hash": "244631c9301b23c9"
+    "hash": "6db634eee058fd14",
+    "crf": 16
   },
-  "liquid-displace": "658866f80a955089",
-  "liquid-wipe": "5a82a5359554b127",
+  "liquid-displace": {
+    "hash": "c05c7608263602d7",
+    "crf": 16
+  },
+  "liquid-wipe": {
+    "hash": "ae71c595fdb28300",
+    "crf": 16
+  },
   "logo-sting": {
-    "crf": 16,
-    "hash": "e7736fbc50f75a32"
+    "hash": "e5f58d76d166ec61",
+    "crf": 16
   },
   "logo-wall": {
-    "hash": "9a2d79ec88c348b8",
+    "hash": "afb7b10bc2861f7f",
     "crf": 19
   },
-  "lower-third": "6c58bc4796a06fa9",
-  "luma-matte-dissolve": {
-    "crf": 22,
-    "hash": "7c754c2b83bc54af"
+  "lower-third": {
+    "hash": "40e52015193e2e61",
+    "crf": 16
   },
-  "mark-trace": "40da7b3036f73789",
+  "luma-matte-dissolve": {
+    "hash": "e7034bf8590df790",
+    "crf": 22
+  },
+  "mark-trace": {
+    "hash": "ed54fa9eb3d90e54",
+    "crf": 16
+  },
   "marker-highlight": {
-    "crf": 16,
-    "hash": "b4bb11ca94b344dd"
+    "hash": "199d34c427ed2353",
+    "crf": 16
   },
   "marquee-along-path": {
-    "crf": 19,
-    "hash": "fa8a3b0a71d6c28e"
+    "hash": "6bf69ce0c45e8804",
+    "crf": 19
   },
   "mask-rise": {
-    "crf": 19,
-    "hash": "9a1506273082c964"
+    "hash": "1727a8a2419f35c2",
+    "crf": 19
   },
-  "match-cut": "29629fca01cd16ca",
+  "match-cut": {
+    "hash": "d4fcde5cbe4a0e7d",
+    "crf": 16
+  },
   "media-between-text": {
-    "hash": "6c58a4698d4356c2",
+    "hash": "47b01ce35f8df9e1",
     "crf": 16
   },
   "model-picker": {
-    "crf": 16,
-    "hash": "c6c6b1317d3cc96b"
+    "hash": "c5fefb9cf1f62641",
+    "crf": 16
   },
   "model-picker-dark": {
-    "crf": 16,
-    "hash": "000476851563d07b"
+    "hash": "9975e694da05f490",
+    "crf": 16
   },
   "notification-pop": {
-    "crf": 16,
-    "hash": "35ca9350345cbaa2"
+    "hash": "6b449ad80bf1f0fb",
+    "crf": 16
   },
   "notification-pop-dark": {
-    "crf": 16,
-    "hash": "ede45854e8254026"
+    "hash": "58d0c6047690251b",
+    "crf": 16
   },
-  "outline-fill": "134c2011694613d0",
-  "overwhelm-collapse": "685c4e650e521a6a",
+  "outline-fill": {
+    "hash": "a60ad4404ad1325d",
+    "crf": 16
+  },
+  "overwhelm-collapse": {
+    "hash": "c29c88c66fdf549f",
+    "crf": 19
+  },
   "pan-stations": {
-    "crf": 19,
-    "hash": "4c17fd3817938bea"
+    "hash": "ec4110bc959d541e",
+    "crf": 19
   },
   "panel-live-sync": {
-    "crf": 16,
-    "hash": "4982de8f7f2392df"
+    "hash": "99be7128950588b3",
+    "crf": 16
   },
-  "parallax-dive": "3f207b53b9e49411",
+  "parallax-dive": {
+    "hash": "3a39de63aac28d84",
+    "crf": 19
+  },
   "photo-particles": {
-    "crf": 31,
-    "hash": "813a41a29074d220"
+    "hash": "822762b89a1983a5",
+    "crf": 31
   },
   "pixelate-svg-filter": {
-    "crf": 16,
-    "hash": "f56f4037a5f1a9fe"
+    "hash": "1b0b0bc275c1b603",
+    "crf": 16
   },
   "progress-timeline": {
-    "crf": 16,
-    "hash": "8c9603f0d4c79ba7"
+    "hash": "e5d5294f7997708e",
+    "crf": 16
   },
   "pull-back-reveal": {
-    "crf": 19,
-    "hash": "e19a0378752a1848"
+    "hash": "76495b20e20debe5",
+    "crf": 19
   },
-  "push-blur": "86861c8174474541",
-  "rack-focus": {
-    "crf": 19,
-    "hash": "74ee438f6331fb82"
-  },
-  "scale-punch": "ff7ee08696b8742b",
-  "shadow-handoff": {
-    "hash": "a6084b36c8b90e07",
+  "push-blur": {
+    "hash": "212fb60ce71b42a1",
     "crf": 16
   },
-  "shape-morph-wipe": "c4deb691d54050e5",
-  "shape-trace-morph": "0ba8ebc18736a75f",
+  "rack-focus": {
+    "hash": "ea777777040a2bc4",
+    "crf": 19
+  },
+  "scale-punch": {
+    "hash": "599b8a41efbe612a",
+    "crf": 16
+  },
+  "shadow-handoff": {
+    "hash": "20399e0d238a2d7b",
+    "crf": 16
+  },
+  "shape-morph-wipe": {
+    "hash": "635207cc5ff42c91",
+    "crf": 16
+  },
+  "shape-trace-morph": {
+    "hash": "f97ef7bccafd6d51",
+    "crf": 16
+  },
   "simple-marquee": {
-    "crf": 19,
-    "hash": "1fed411c09a45220"
+    "hash": "50169d01948adb1c",
+    "crf": 19
   },
   "skeleton-reveal": {
-    "crf": 16,
-    "hash": "c22116ba3dcb5138"
-  },
-  "skeleton-reveal-dark": {
-    "crf": 16,
-    "hash": "c924e3adb29b94b5"
-  },
-  "slice-shift": "fc360f7f7ce43185",
-  "smear-stretch": "0c7af89f662af603",
-  "speed-ramp-freeze": {
-    "crf": 16,
-    "hash": "e5e4468fccbf805e"
-  },
-  "spin-rotation": {
-    "hash": "41054b660cc6e7e5",
+    "hash": "7342a2c9a0c29cdd",
     "crf": 16
   },
-  "spin-transition": "01e1497b95c0bf73",
+  "skeleton-reveal-dark": {
+    "hash": "e352370a73a72e41",
+    "crf": 16
+  },
+  "slice-shift": {
+    "hash": "a6357261f4eaf5c8",
+    "crf": 16
+  },
+  "smear-stretch": {
+    "hash": "804eaee575237e5b",
+    "crf": 16
+  },
+  "speed-ramp-freeze": {
+    "hash": "f117e593b228ea82",
+    "crf": 16
+  },
+  "spin-rotation": {
+    "hash": "99fdf63b8d028415",
+    "crf": 16
+  },
+  "spin-transition": {
+    "hash": "8f6c0a91ca351a38",
+    "crf": 16
+  },
   "split-reveal": {
     "crf": 16,
     "hash": "db8456d841d74b2c"
@@ -305,62 +428,119 @@
     "hash": "c9a1d025d60f5e1f"
   },
   "stack-cover": {
-    "crf": 16,
-    "hash": "c315220e342631f6"
-  },
-  "strikethrough-replace": "a22cb6f50a8464de",
-  "success-check": {
-    "crf": 16,
-    "hash": "c2e318b285ba4c12"
-  },
-  "swipe-continues": "c9753ad1f8e619e6",
-  "terminal-run": {
-    "crf": 16,
-    "hash": "6c097e5c1092e049"
-  },
-  "terminal-run-dark": {
-    "crf": 16,
-    "hash": "e9bee7d43f44569e"
-  },
-  "text-as-mask": "5d5b5b4d597e2bbb",
-  "text-on-path": "6721decf01c96760",
-  "text-scramble-decode": "de80ae89b2b3fb58",
-  "thanks-sweep": "b6db9b42c8b4865a",
-  "thumbnail-grid": "f10b8a80f7ef8e9f",
-  "ticker-takeover": "3aaa49c81c5f95c6",
-  "toggle-horizon": {
-    "hash": "3bc86c18111983c7",
+    "hash": "11e2c7608219fcb0",
     "crf": 16
   },
-  "tracking-collapse": "a8b14fb028f7100a",
-  "type-fill-transition": "f8e6fe238d96d736",
-  "type-match-cut": "0d5225fad29ae4d9",
-  "ui-focus-zoom": "14bad7b0327cc715",
+  "strikethrough-replace": {
+    "hash": "8f39aeab1b7fe6a2",
+    "crf": 16
+  },
+  "success-check": {
+    "hash": "4f1444a766becaaf",
+    "crf": 16
+  },
+  "swipe-continues": {
+    "hash": "d7ef7e18e87115d3",
+    "crf": 16
+  },
+  "terminal-run": {
+    "hash": "15cf2d9d261c39dc",
+    "crf": 16
+  },
+  "terminal-run-dark": {
+    "hash": "627b89f28b012ec9",
+    "crf": 16
+  },
+  "text-as-mask": {
+    "hash": "cd510bf3d82fb07e",
+    "crf": 16
+  },
+  "text-on-path": {
+    "hash": "9a27af435c747ffb",
+    "crf": 16
+  },
+  "text-scramble-decode": {
+    "hash": "5e72291b8edee61b",
+    "crf": 16
+  },
+  "thanks-sweep": {
+    "hash": "789d518134aaafcd",
+    "crf": 16
+  },
+  "thumbnail-grid": {
+    "hash": "aeda38be99671867",
+    "crf": 16
+  },
+  "ticker-takeover": {
+    "hash": "4d8597f9a1f16c14",
+    "crf": 16
+  },
+  "toggle-horizon": {
+    "hash": "5d634f1e2a0575c7",
+    "crf": 16
+  },
+  "tracking-collapse": {
+    "hash": "f4b489ddac282424",
+    "crf": 16
+  },
+  "type-fill-transition": {
+    "hash": "b60d365873274db9",
+    "crf": 16
+  },
+  "type-match-cut": {
+    "hash": "74a90dd12208a856",
+    "crf": 16
+  },
+  "ui-focus-zoom": {
+    "hash": "071e5a41e58a2f86",
+    "crf": 16
+  },
   "ui-strip-away": {
-    "crf": 16,
-    "hash": "b63f9918a0ef8ed8"
+    "hash": "32cbc47d8b01014e",
+    "crf": 16
   },
-  "underline-draw": "c5446434c92c569d",
+  "underline-draw": {
+    "hash": "6e0f9d49cb5922ec",
+    "crf": 16
+  },
   "underline-road": {
-    "crf": 16,
-    "hash": "beb5d7bffc89bbd0"
+    "hash": "632fcd22e1784ab3",
+    "crf": 16
   },
-  "variable-weight-wave": "8d12e67e33a49acb",
-  "vertical-cut-reveal": "5675f78cdb871fe0",
-  "weight-morph": "b97c9334ac24c8d2",
-  "whip-pan": "0cb424c3211c41ba",
+  "variable-weight-wave": {
+    "hash": "98fa313aeab5a7a1",
+    "crf": 16
+  },
+  "vertical-cut-reveal": {
+    "hash": "79ac347a10669706",
+    "crf": 16
+  },
+  "weight-morph": {
+    "hash": "6f784dacd60212f2",
+    "crf": 16
+  },
+  "whip-pan": {
+    "hash": "fb65799193555e18",
+    "crf": 16
+  },
   "word-portal": {
-    "crf": 16,
-    "hash": "6912ecfd21b0b68d"
+    "hash": "72fe8235a2a75229",
+    "crf": 16
   },
   "word-swap-slot": {
     "crf": 16,
     "hash": "4a2a838ebf7442f7"
   },
-  "word-sweep": "89d1be5d62067e40",
-  "wordmark-cascade": "0d7690cba0e05067",
+  "word-sweep": {
+    "hash": "d57436074af5e53e",
+    "crf": 16
+  },
+  "wordmark-cascade": {
+    "hash": "a67be905ea84c9ef",
+    "crf": 16
+  },
   "zoom-through": {
-    "crf": 16,
-    "hash": "7f751e9e93ca9551"
+    "hash": "819006f0975d4b62",
+    "crf": 16
   }
 }
