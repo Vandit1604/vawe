@@ -1,5 +1,8 @@
 {
-  "agent-progress": "0229836c91d62f54",
+  "agent-progress": {
+    "hash": "f71b8d8c77c5bb21",
+    "crf": 16
+  },
   "ai-stream-response": {
     "hash": "8aac4e3c990d8ec4",
     "crf": 16
