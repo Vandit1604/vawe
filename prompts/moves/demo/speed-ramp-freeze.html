@@ -1,61 +1,80 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="chrome">
+<html data-aspect="16:9" data-look="editorial" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1.5">
+<meta name="duration" content="4.8">
 <title>move: speed ramp freeze</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["static-window@3.3-4.4", "world-held@0.0-4.8"], "_why": {"static-window@3.3-4.4": "the ball rests on the floor for 1.1 s after its last bounce, as a real ball does", "world-held@0.0-4.8": "one ball on one floor holds 4.8 s: it falls from 0.0 s, freezes at 1.0 s, bounces until 3.3 s and leaves at 4.4 s"}}</script>
 <style>
-  body { display: block; position: relative; overflow: hidden; }
-  .world { position: absolute; inset: 0; transform-origin: 50% 78%; }
-  .floor { position: absolute; left: 20vw; right: 20vw; top: 78vh; height: 2px; background: var(--ink); opacity: 0.9; }
-  .shadow { position: absolute; left: 50%; top: 78vh; width: calc(var(--u) * 20); height: calc(var(--u) * 2.4); margin: calc(var(--u) * -1.2) 0 0 calc(var(--u) * -10); border-radius: 50%; background: #000; }
-  .ring { position: absolute; left: 50%; top: 78vh; width: calc(var(--u) * 14); height: calc(var(--u) * 14); margin: calc(var(--u) * -7) 0 0 calc(var(--u) * -7); border-radius: 50%; border: calc(var(--u) * 0.7) solid var(--ink); opacity: 0; }
-  .ball { position: absolute; left: 50%; top: 78vh; width: calc(var(--u) * 18); height: calc(var(--u) * 18); margin: calc(var(--u) * -18) 0 0 calc(var(--u) * -9); border-radius: 50%; transform-origin: 50% 100%;
-    background: radial-gradient(circle at 34% 30%, #55b2ff 0%, var(--accent) 46%, #0561bd 100%); box-shadow: inset 0 calc(var(--u) * -0.8) calc(var(--u) * 1.6) rgba(0, 0, 0, 0.25); }
+  body { display: block; position: relative; overflow: hidden; --floor: 68vh; --contact: 84vh; --d: calc(var(--u) * 26); }
+  .world { position: absolute; inset: 0; transform-origin: 50% 84%; }
+  .floor { position: absolute; left: 0; right: 0; top: var(--floor); bottom: 0; background: linear-gradient(180deg, #e6dfcf 0%, #ece6d8 45%, #f1ece0 100%); box-shadow: 0 -1px 0 var(--line); }
+  .shadow { position: absolute; left: 50%; top: var(--contact); width: calc(var(--d) * 1.5); height: calc(var(--d) * 0.22); margin: calc(var(--d) * -0.09) 0 0 calc(var(--d) * -0.75); border-radius: 50%; background: radial-gradient(closest-side, rgb(54 36 18 / 0.5), rgb(54 36 18 / 0.18) 60%, transparent 100%); }
+  .ball { position: absolute; left: 50%; top: var(--contact); width: var(--d); height: var(--d); margin: calc(var(--d) * -1) 0 0 calc(var(--d) * -0.5); border-radius: 50%; transform-origin: 50% 100%;
+          background: radial-gradient(circle at 36% 28%, color-mix(in srgb, var(--accent) 86%, #fff) 0%, var(--accent) 52%, color-mix(in srgb, var(--accent) 80%, #000) 100%); }
 </style>
 </head>
 <body>
-<div class="world">
+<div class="world" id="world">
   <div class="floor"></div>
-  <div class="shadow"></div>
-  <div class="ring"></div>
-  <div class="ball" id="ballfx"></div>
+  <div class="shadow" id="shadow"></div>
+  <div class="ball" id="ball"></div>
 </div>
 <svg width="0" height="0" style="position:absolute"><filter id="vb" x="-20%" width="140%" y="-60%" height="220%"><feGaussianBlur id="vbs" stdDeviation="0 0"/></filter></svg>
 <script type="module">
 import '/core/engine/page-api.js';
 import { easeFn } from '/core/motion/presets.js';
+import { leave } from '/prompts/moves/demo/assets/stage.js';
 const H = innerHeight, u = H / 100, q = (s) => document.querySelector(s);
-const land = easeFn('landSoft'), settle = easeFn('settle'), smooth = (x) => settle(Math.min(1, Math.max(0, x)));
+const land = easeFn('land'), launch = easeFn('launch'), settle = easeFn('settle');
+const clamp = (x) => Math.min(1, Math.max(0, x)), smooth = (x) => settle(clamp(x));
 // the time remap: speed s(t) is 1, ramps to 0.03 (a near freeze, never dead) over 0.4 s, holds 0.25 s, then snaps to 3.5 and settles back to 1
 const T = { ramp: 0.35, rampLen: 0.4, hold: 0.75, snap: 1.0 }, FREEZE = 0.03;
 const speed = (t) => t < T.hold ? 1 - (1 - FREEZE) * smooth((t - T.ramp) / T.rampLen) : t < T.snap ? FREEZE : 1 + 2.5 * Math.exp(-(t - T.snap) / 0.1);
 const DT = 1 / 240, tau = [0];
-for (let i = 1; i <= 2 * 240; i++) tau.push(tau[i - 1] + speed(i * DT) * DT);
+for (let i = 1; i <= 5 * 240; i++) tau.push(tau[i - 1] + speed(i * DT) * DT);
 const tauAt = (t) => { const x = Math.max(0, t) / DT, i = Math.min(tau.length - 2, Math.floor(x)); return tau[i] + (tau[i + 1] - tau[i]) * (x - i); };
-const HIT = tauAt(T.snap), TOUCH = HIT - 0.06, DROP = 80 * u, RISE = 56 * u, LIFT = 1.1;   // story time: TOUCH the ball meets the floor, HIT the deepest squash (the frozen frame)
+const HIT = tauAt(T.snap), TOUCH = HIT - 0.06, DROP = 112 * u;   // story time: TOUCH the ball meets the floor, HIT the deepest squash (the frozen frame)
+// the bounces after the hit: rise on land, fall on launch; h is the height as a share of the first, up and down in story seconds, amp the squash on landing
+const BOUNCES = [{ h: 1, up: 0.9, down: 0.55, amp: 0.6 }, { h: 0.3, up: 0.38, down: 0.3, amp: 0.3 }, { h: 0.08, up: 0.2, down: 0.16, amp: 0.12 }];
+const RISE = 56 * u;
+const lands = BOUNCES.reduce((a, b) => [...a, a[a.length - 1] + b.up + b.down], [0]);   // story seconds after HIT at which the ball lands again
+const heightAt = (c) => {
+  let c0 = 0;
+  for (const b of BOUNCES) {
+    if (c < c0 + b.up) return RISE * b.h * land((c - c0) / b.up);
+    if (c < c0 + b.up + b.down) return RISE * b.h * (1 - launch((c - c0 - b.up) / b.down));
+    c0 += b.up + b.down;
+  }
+  return 0;
+};
+const squashAt = (c) => {
+  if (c < 0) return smooth((c + (HIT - TOUCH)) / (HIT - TOUCH));
+  if (c < 0.1) return 1 - 1.25 * smooth(c / 0.1);
+  if (c < 0.3) return -0.25 * (1 - smooth((c - 0.1) / 0.2));
+  let s = 0;
+  BOUNCES.forEach((b, i) => { const dt = c - lands[i + 1]; s += dt < -0.05 ? 0 : dt < 0 ? b.amp * smooth((dt + 0.05) / 0.05) : dt < 0.12 ? b.amp * (1 - smooth(dt / 0.12)) : 0; });
+  return s;
+};
 const state = (t) => {
   const p = tauAt(t), c = p - HIT;
-  const y = p < TOUCH ? -DROP * (1 - (p / TOUCH) ** 2) : c < 0 ? 0 : -RISE * land(Math.min(1, c / LIFT));
-  const sq = c < 0 ? smooth((p - TOUCH) / (HIT - TOUCH)) : c < 0.1 ? 1 - 1.25 * smooth(c / 0.1) : -0.25 * (1 - smooth((c - 0.1) / 0.2));
-  return { y, sq, c };
+  const y = p < TOUCH ? -DROP * (1 - launch(p / TOUCH)) : -heightAt(Math.max(0, c));
+  return { y, sq: squashAt(c), c };
 };
-const ball = q('.ball'), shadow = q('.shadow'), ring = q('.ring'), world = q('.world'), blur = document.getElementById('vbs');
+const ball = q('#ball'), shadow = q('#shadow'), world = q('#world'), blur = document.getElementById('vbs');
 ball.style.filter = 'url(#vb)';
 vawe.onFrame((t) => {
   const s = state(t), prev = state(t - 1 / 120), next = state(t + 1 / 120);
-  ball.style.transform = `translateY(${s.y.toFixed(2)}px) scale(${(1 + 0.32 * s.sq).toFixed(4)}, ${(1 - 0.36 * s.sq).toFixed(4)})`;
+  ball.style.transform = `translateY(${s.y.toFixed(2)}px) scale(${(1 + 0.3 * s.sq).toFixed(4)}, ${(1 - 0.34 * s.sq).toFixed(4)})`;
   const dy = Math.abs(next.y - prev.y) / 2;                       // px per frame at 60 fps
   blur.setAttribute('stdDeviation', `0 ${Math.min(26, dy * 0.3).toFixed(2)}`);
   const h = Math.min(1, Math.abs(s.y) / (60 * u));
-  shadow.style.opacity = (0.5 * (1 - h)).toFixed(3);
-  shadow.style.transform = `scaleX(${(1 - 0.5 * h + 0.25 * Math.max(0, s.sq)).toFixed(3)})`;
-  const r = Math.max(0, s.c + 0.05);                              // the ring starts a hair before contact and runs on story time
-  ring.style.opacity = s.c > -0.05 ? Math.max(0, 0.9 - r * 4.2).toFixed(3) : 0;
-  ring.style.transform = `scale(${(0.9 + r * 13).toFixed(3)}, ${(0.25 + r * 3.2).toFixed(3)})`;
-  world.style.transform = `scale(${(1 + 0.06 * Math.min(1, Math.max(0, 1 - speed(t)))).toFixed(4)})`;
+  shadow.style.opacity = (1 - h).toFixed(3);
+  shadow.style.transform = `scaleX(${(1 - 0.45 * h + 0.2 * Math.max(0, s.sq)).toFixed(3)})`;
+  world.style.scale = (1 + 0.05 * clamp(1 - speed(t))).toFixed(4);
 });
+leave(world, 4800);
 </script>
 </body>
 </html>
