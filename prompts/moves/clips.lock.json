@@ -1,6 +1,6 @@
 {
   "agent-progress": {
-    "hash": "f71b8d8c77c5bb21",
+    "hash": "bee27b73b9110581",
     "crf": 16
   },
   "ai-stream-response": {
@@ -40,7 +40,7 @@
     "crf": 16
   },
   "camera-moves": {
-    "hash": "8a45f914138af95c",
+    "hash": "be348beb505529c0",
     "crf": 19
   },
   "caption-editorial": "8c33b06b8a9bc540",
@@ -53,12 +53,12 @@
     "crf": 16
   },
   "caret-door": {
-    "hash": "7ea0f58247022be2",
+    "hash": "b3941806f45f29ef",
     "crf": 16
   },
   "caret-follow": "3d1cefff47fe2cb6",
   "caret-typing": {
-    "hash": "3625441590553b87",
+    "hash": "34c1e4a3ea4688d1",
     "crf": 16
   },
   "chain-beats": "a9f87ec35d03f3bb",
@@ -135,7 +135,7 @@
     "crf": 16
   },
   "glow-record": {
-    "hash": "c8a085f6cc9d91a8",
+    "hash": "f436496318fec97a",
     "crf": 16
   },
   "gooey-filter": {
@@ -156,7 +156,7 @@
   },
   "grid-tile-flip": "3d14a6f0c0b503c8",
   "halftone-field": {
-    "hash": "56d26e3bcaf100d0",
+    "hash": "15e490e1b28a6a1b",
     "crf": 19
   },
   "hand-drawn-notes": "695c4e34bd4ff383",
@@ -265,7 +265,7 @@
   },
   "scale-punch": "ff7ee08696b8742b",
   "shadow-handoff": {
-    "hash": "e7f78b1011bac0cc",
+    "hash": "14f157b61a169916",
     "crf": 16
   },
   "shape-morph-wipe": "c4deb691d54050e5",
@@ -289,7 +289,7 @@
     "crf": 16
   },
   "spin-rotation": {
-    "hash": "c94c0f9b5cf9f925",
+    "hash": "41054b660cc6e7e5",
     "crf": 16
   },
   "spin-transition": "01e1497b95c0bf73",
