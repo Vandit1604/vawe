@@ -1,68 +1,66 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="dusk">
+<html data-aspect="16:9" data-look="product" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="3.4">
-<meta name="blank" content="0-0.2">
+<meta name="duration" content="5">
 <title>move: caption karaoke</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["static-window@0.0-0.3", "world-held@0.0-5.0"], "_why": {"static-window@0.0-0.3": "the video frame holds before the first word is spoken", "world-held@0.0-5.0": "one video shot with its captions: the photograph is the footage and the captions are the content"}}</script>
 <style>
-  .cap { position: relative; width: 78vw; font: 700 calc(var(--u) * 9.2)/1.5 var(--sans); letter-spacing: -0.02em; color: var(--muted); text-wrap: balance; }
-  .w { display: inline-block; }
-  /* the pill sits under the words: z-index -1 inside the stacking context of .cap */
-  .pill-bg { position: absolute; left: 0; top: 0; z-index: -1; height: 0; width: 0; border-radius: var(--r3);
-             background: var(--hover); box-shadow: inset 0 0 0 var(--w-hair) color-mix(in srgb, var(--accent) 55%, transparent); }
-  .cap { isolation: isolate; }
+  body { position: relative; display: block; background: var(--ground); }
+  .footage { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .caps { position: absolute; left: 0; right: 0; top: calc(var(--vh) * 0.62); text-align: center; font: 900 calc(var(--u) * 11.5)/1.1 'Archivo', var(--sans); font-stretch: 100%; text-transform: uppercase; letter-spacing: 0.01em; color: #fff; }
+  .page { position: absolute; left: 0; right: 0; top: 0; visibility: hidden; }
+  .line { display: block; white-space: nowrap; }
+  .w { display: inline-block; margin: 0 0.18em; -webkit-text-stroke: calc(var(--u) * 1.8) #000; paint-order: stroke fill; stroke-linejoin: round; text-shadow: 0 calc(var(--u) * 0.5) calc(var(--u) * 1) rgba(0, 0, 0, 0.55); }
+  .w.on { color: #ffe500; }
 </style>
 </head>
 <body>
-<p class="cap" id="cap"><span class="pill-bg" id="pill"></span>Captions that follow the voice, one word at a time</p>
+<img class="footage" id="foot" src="/prompts/moves/demo/assets/photos/harbour.jpg" alt="">
+<div class="caps" id="caps"></div>
 <script type="module">
-import { EASE } from '/core/motion/presets.js';
-import { enter, leave } from '/core/motion/presets.js';
+import '/core/engine/page-api.js';
+import { show } from '/prompts/moves/demo/assets/stage.js';
 
-const END = 3.4;
-// [seconds the word starts, word index]
-const SPOKEN = [[0.3, 0], [0.7, 1], [0.95, 2], [1.2, 3], [1.4, 4], [1.85, 5], [2.05, 6], [2.3, 7], [2.45, 8], [2.6, 9]];
-const GLIDE = 0.14, PAD_X = 0.16, PAD_Y = 0.06;
-
-const cap = document.getElementById('cap'), pill = document.getElementById('pill');
-const words = cap.lastChild.textContent.split(' ');
-cap.lastChild.remove();
-words.forEach((t, i) => { cap.insertAdjacentHTML('beforeend', `<span class="w">${t}</span>${i < words.length - 1 ? ' ' : ''}`); });
-const spans = [...cap.querySelectorAll('.w')];
-const css = getComputedStyle(document.documentElement);
-const MUTED = css.getPropertyValue('--muted').trim(), INK = css.getPropertyValue('--ink').trim();
-await document.fonts.ready;
-
-const box = (el) => {
-  const px = parseFloat(getComputedStyle(el).fontSize) * PAD_X, py = parseFloat(getComputedStyle(el).fontSize) * PAD_Y;
-  return { x: el.offsetLeft - px, y: el.offsetTop - py, w: el.offsetWidth + 2 * px, h: el.offsetHeight + 2 * py };
-};
-const at = (b) => ({ transform: `translate(${b.x}px, ${b.y}px)`, width: `${b.w}px`, height: `${b.h}px` });
-
-enter(cap, { at: 0.05, band: 'professional', from: '0 0.4em' });
-leave(cap, { end: END });
-
-const frames = [{ offset: 0, ...at(box(spans[0])), easing: 'linear' }];
-SPOKEN.forEach(([t, i], n) => {
-  if (n === 0) return;
-  frames.push({ offset: t / END, ...at(box(spans[SPOKEN[n - 1][1]])), easing: EASE.land });
-  frames.push({ offset: (t + GLIDE) / END, ...at(box(spans[i])), easing: 'linear' });
+// pages of captions: [start second, end second, [[word, second it is spoken], ...] per line]
+const PAGES = [
+  [0.4, 2.2, [[['Captions', 0.4], ['that', 0.95]], [['follow', 1.2], ['the', 1.55], ['voice', 1.7]]]],
+  [2.4, 4.6, [[['one', 2.4], ['word', 2.75]], [['at', 3.2], ['a', 3.45], ['time', 3.65]]]],
+];
+const WORD_TAIL = 0.45;
+const caps = document.getElementById('caps');
+const words = [];
+PAGES.forEach(([from, to, lines]) => {
+  const page = document.createElement('div');
+  page.className = 'page';
+  lines.forEach((line) => {
+    const row = document.createElement('span');
+    row.className = 'line';
+    line.forEach(([text, at]) => {
+      const w = document.createElement('span');
+      w.className = 'w';
+      w.textContent = text;
+      row.append(w);
+      words.push({ w, at, to });
+    });
+    page.append(row);
+  });
+  caps.append(page);
+  show(page, from * 1000, to * 1000);
 });
-frames.push({ offset: 1, ...at(box(spans[SPOKEN.at(-1)[1]])) });
-pill.animate(frames, { duration: END * 1000, fill: 'both', easing: 'linear' });
-pill.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 150, duration: 150, fill: 'both' });
 
-SPOKEN.forEach(([t, i], n) => {
-  const next = SPOKEN[n + 1]?.[0];
-  const lead = 0.04, rise = 0.1, dur = next ? next - t + lead + 0.12 : 0.3;
-  const up = { color: INK, translate: '0 -0.05em' }, down = { color: MUTED, translate: '0 0' };
-  const keys = next
-    ? [{ offset: 0, ...down, easing: EASE.land }, { offset: (lead + rise) / dur, ...up, easing: 'linear' }, { offset: (next - t + lead) / dur, ...up, easing: EASE.land }, { offset: 1, ...down }]
-    : [{ offset: 0, ...down, easing: EASE.land }, { offset: 1, ...up }];
-  spans[i].animate(keys, { delay: (t - lead) * 1000, duration: dur * 1000, easing: 'linear', fill: 'both' });
+// the active word is solid yellow while it is spoken and white again at the next word: a hard step, no glide
+vawe.onFrame((t) => {
+  words.forEach(({ w, at }, i) => {
+    const next = words[i + 1];
+    const end = next && next.at - at < WORD_TAIL * 2 ? next.at : at + WORD_TAIL;
+    w.classList.toggle('on', t >= at && t < end);
+  });
 });
+
+// the footage is a held shot with a slow push
+document.getElementById('foot').animate([{ scale: 1 }, { scale: 1.03 }], { duration: 5000, easing: 'linear', fill: 'both' });
 </script>
 </body>
 </html>
