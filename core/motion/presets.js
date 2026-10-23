@@ -21,6 +21,8 @@ const ORDER = Object.keys(BANDS);
 // The median followed move in 135 library scenes (taste/rules/speed-bands.md).
 const EYE_SPEED = BAND.eye_speed_px_per_s;
 const LEAVE_SHARE = LIMITS['exits-shorter'].preset_leave_share;
+const EXIT_MAX = LIMITS['exits-shorter'].exit_share_max;
+const LEAVE_TO = '0 -0.3em';
 const GAP = LIMITS.stagger;
 const STAGGER = { gap: GAP.gap_default_s, min: GAP.gap_min_s, max: GAP.gap_max_s, total: GAP.total_max_s, jitter: 0.25 };
 
@@ -106,8 +108,31 @@ export function windUpTranslate(from, share) {
   return `${push(x)} ${push(y)}`;
 }
 
-/** Pure: the keyframes and timing enter() hands to el.animate. */
-export function enterSpecs({ at = 0, from = '0 0.5em', scale = 0.96, blur = 0, anticipate = 0, ease = signed('ease', 'land'), ...rest } = {}) {
+// vary: true or a seed. Each element draws once from its key (id or index), so every render repeats.
+const VARY = { duration: [0.9, 1.1], delay: [0.03, 0.08], rise: [0.85, 1.15], swapChance: 0.25 };
+const SWAPS = { land: 'landSoft', landSoft: 'land' };
+const keyNumber = (key) => [...String(key)].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0, 2166136261);
+const within = ([lo, hi], u) => lo + (hi - lo) * u;
+
+/** Pure: the factors one element's `vary` draws: { duration, delay (s), rise, swap }. */
+export function varyOf(vary, key = 0) {
+  const rand = rng((vary === true ? 1 : Number(vary)) * 7919 + keyNumber(key));
+  return { duration: within(VARY.duration, rand()), delay: within(VARY.delay, rand()), rise: within(VARY.rise, rand()), swap: rand() < VARY.swapChance };
+}
+
+const ENTER_FROM = '0 0.5em';
+
+function varied({ at = 0, from = ENTER_FROM, ease = signed('ease', 'land'), ...rest }, v) {
+  const swapped = v.swap && SWAPS[ease] ? SWAPS[ease] : ease;
+  return { ...rest, at: at + v.delay, from: windUpTranslate(from, v.rise - 1), ease: swapped, duration: durationOf(rest) * v.duration };
+}
+
+/** Pure: the keyframes and timing enter() hands to el.animate. vary (true or a seed) with key (the element's id or index) shifts the duration, delay, rise and, between land and landSoft, the ease. */
+export function enterSpecs({ vary = false, key, ...opts } = {}) {
+  return plainEnterSpecs(vary ? varied(opts, varyOf(vary, key)) : opts);
+}
+
+function plainEnterSpecs({ at = 0, from = ENTER_FROM, scale = 0.96, blur = 0, anticipate = 0, ease = signed('ease', 'land'), ...rest } = {}) {
   const d = durationOf(rest);
   if (anticipate && !(anticipate > 0 && anticipate <= WIND_MAX)) throw new Error(`presets: anticipate is a share of the travel from 0 to ${WIND_MAX}, got ${anticipate}`);
   if (anticipate && lengthsOf(from).every(isZero)) throw new Error('presets: anticipate needs a from offset to move away from first');
@@ -126,13 +151,28 @@ export function enterSpecs({ at = 0, from = '0 0.5em', scale = 0.96, blur = 0, a
   ];
 }
 
-/** Arrive fast, land soft: opts { at, band | duration, from (a CSS translate), scale, blur (px), ease (an EASE name), anticipate (0 to 0.2: first move that share of the travel away from rest) }. */
+// A copied product surface is uniform: vary does nothing on the product look or inside data-chrome.
+const uniform = (el) => Boolean(el.closest?.('[data-chrome]')) || el.ownerDocument?.documentElement?.getAttribute('data-look') === 'product';
+const keyOf = (el) => el.id || [...(el.parentElement?.children ?? [])].indexOf(el);
+const varyFor = (el, opts = {}) => (opts.vary && !uniform(el) ? { key: keyOf(el), ...opts } : { ...opts, vary: false });
+
+/** Arrive fast, land soft: opts { at, band | duration, from (a CSS translate), scale, blur (px), ease (an EASE name), anticipate (0 to 0.2: first move that share of the travel away from rest), vary (true or a seed) }. */
 export function enter(el, opts) {
-  return enterSpecs(opts).map(({ keyframes, timing }) => el.animate(keyframes, timing));
+  return enterSpecs(varyFor(el, opts)).map(({ keyframes, timing }) => el.animate(keyframes, timing));
 }
 
 /** Pure: an exit about 0.6 of `entrance` seconds, accelerating. Ends at `end` when given, else starts at `at`. */
-export function leaveSpecs({ at, end, entrance, to = '0 -0.3em', blur = 0, ease = 'launch', ...rest } = {}) {
+export function leaveSpecs({ vary = false, key, ...opts } = {}) {
+  return plainLeaveSpecs(vary ? variedLeave(opts, varyOf(vary, key)) : opts);
+}
+
+// The exit keeps its share of the entrance: a longer draw is clamped to exits-shorter.exit_share_max.
+function variedLeave({ at, end, entrance, to = LEAVE_TO, ...rest }, v) {
+  const came = entrance ?? durationOf(rest);
+  return { ...rest, end, entrance: came * Math.min(v.duration, EXIT_MAX / LEAVE_SHARE), to: windUpTranslate(to, v.rise - 1), at: end == null ? (at ?? 0) + v.delay : at };
+}
+
+function plainLeaveSpecs({ at, end, entrance, to = LEAVE_TO, blur = 0, ease = 'launch', ...rest } = {}) {
   const d = +(LEAVE_SHARE * (entrance ?? durationOf(rest))).toFixed(3);
   const start = end != null ? end - d : at ?? 0;
   const from = { translate: '0 0', opacity: 1 }, gone = { translate: to, opacity: 0 };
@@ -148,7 +188,7 @@ export function leaveSpecs({ at, end, entrance, to = '0 -0.3em', blur = 0, ease 
 export function leave(el, opts = {}) {
   const came = (el.getAnimations ? el.getAnimations() : []).find((a) => a.id === 'enter');
   const entrance = opts.entrance ?? (came ? came.effect.getTiming().duration / 1000 : undefined);
-  return leaveSpecs({ ...opts, entrance }).map(({ keyframes, timing }) => el.animate(keyframes, timing));
+  return leaveSpecs({ ...varyFor(el, opts), entrance }).map(({ keyframes, timing }) => el.animate(keyframes, timing));
 }
 
 /** Pure: the start second of each of n items. Gaps sit in 30 to 80 ms, seeded jitter, and the run fits 0.5 s. */
@@ -172,7 +212,7 @@ const springs = (nudgeEvery, i, ease) => (nudgeEvery > 0 && (i + 1) % nudgeEvery
 /** enter() on each element in order, on staggerTimes. opts: enter's, plus gap, seed and nudgeEvery (every nth element lands on EASE.nudge). */
 export function stagger(els, { nudgeEvery = 0, ...opts } = {}) {
   const list = [...els];
-  return staggerTimes(list.length, opts).flatMap((at, i) => enter(list[i], { ...opts, at, ease: springs(nudgeEvery, i, opts.ease) }));
+  return staggerTimes(list.length, opts).flatMap((at, i) => enter(list[i], { key: i, ...opts, at, ease: springs(nudgeEvery, i, opts.ease) }));
 }
 
 /** Pure: when the secondary starts and which band it speaks in. It starts `overlap` of the lead's move before the lead lands. */

@@ -49,6 +49,9 @@ jitter, the whole run fitted inside 0.5 s, so no two land on one frame.
 stagger(document.querySelectorAll('.facts li'), { at: 2.0, band: 'energy', from: '0.6em 0' });
 ```
 
+`vary: true | seed` on `enter`, `leave` and `stagger` (off by default) shifts each element by its id or index: duration x0.9 to 1.1, delay +30 to 80 ms, rise x0.85 to 1.15, and land or landSoft swap on some entrances.
+Every render repeats; exits stay under 0.6 of the entrance; it does nothing on `data-look="product"` or inside `[data-chrome]`. Use it on repeated like elements.
+
 `layer(main, secondary, { at, band, overlap = 0.3, secondary: {...enter} })`: the lead enters, and
 the secondary (one element or a list) starts `overlap` of the lead's move before it lands, one band
 slower.
