@@ -1,9 +1,9 @@
-// Five advice lines on how the moves of a scene differ, from the motion records (rules entrance-origin, named-eases, follow-through and arrival-rhythm):
-// entrances all from one direction, too many eases in a scene, two layers that move in lockstep, an element whose properties all stop on one frame,
+// Six advice lines on how the moves of a scene differ, from the motion records (rules entrance-origin, named-eases, follow-through and arrival-rhythm):
+// entrances all from one direction, too many eases in a scene, two layers that move in lockstep, a run of like elements with one treatment, an element whose properties all stop on one frame,
 // and entrances that never overlap. Pure. Each number is read
 // from taste/build/limits.json; a scene is a run of entrances with no gap over scene-budget.scene_gap_s between two of them.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
-import { CUT, moves, entering, measured, easeName, moveDirection, byTarget } from './motion-records.mjs';
+import { CUT, moves, entering, measured, easeName, moveDirection, translateXY, byTarget } from './motion-records.mjs';
 
 const s2 = (x) => x.toFixed(2);
 const own = (records) => records.filter((r) => !r.decorative && r.duration > CUT);
@@ -80,6 +80,27 @@ export function lockstep(records, { tol = LIMITS['named-eases'].lockstep_tol_s, 
       fix: 'offset the second layer by 60 to 100 ms, or give it a different duration' }));
 }
 
+const RUN_MIN = 5;
+const SAME_MS = 0.02;
+const SAME_RISE = 0.1;
+const rise = (r) => Math.hypot(...translateXY(r.kf?.translate?.[0] ?? '0 0'));
+const sameRise = (a, b) => Math.abs(rise(a) - rise(b)) <= SAME_RISE * Math.max(rise(a), rise(b));
+const sameTreatment = (a, b) => easeName(a) === easeName(b) && Math.abs(a.duration - b.duration) <= SAME_MS + 1e-9 && moveDirection(a.from) === moveDirection(b.from) && sameRise(a, b);
+
+/** Runs of consecutive entrances of like elements (one data-role, or one tag and class list) with one treatment: the same named ease, length within 20 ms, rise direction, rise within 10 percent. Product surfaces are skipped (rule named-eases). */
+export function repeatRun(records) {
+  const ins = [...new Map(own(records).filter((r) => moves(r) && entering(r) && measured(r) && r.kind && !r.uniform && easeName(r)).sort((a, b) => a.delay - b.delay).map((r) => [r.target, r])).values()];
+  const groups = Map.groupBy(ins, (r) => r.kind);
+  const runs = [...groups.values()].flatMap((rs) => rs.reduce((acc, r) => {
+    const run = acc.at(-1);
+    if (run && sameTreatment(run[0], r)) run.push(r); else acc.push([r]);
+    return acc;
+  }, []));
+  return runs.filter((run) => run.length >= RUN_MIN).map((run) => ({ code: 'repeat-run', rule: 'named-eases', at: run[0].delay,
+    what: `${run.length} ${run[0].kind} entrances from ${s2(run[0].delay)} s repeat one treatment (${easeName(run[0])}, ${Math.round(run[0].duration * 1000)} ms, ${WHERE[moveDirection(run[0].from)] ?? 'no rise'}), first ${run[0].label}`,
+    fix: 'vary one of ease, length, direction or entrance between them (enter(el, { vary: 1 }))' }));
+}
+
 const TRAIL = LIMITS['follow-through'];
 const OVERLAP = LIMITS['arrival-rhythm'];
 
@@ -112,4 +133,4 @@ export function noOverlap(records, { chainMin = OVERLAP.chain_min, gap = LIMITS.
     fix: 'start each move while the last still settles, at 60 to 70 percent of it: layer(main, secondary) from core/motion/presets.js' }));
 }
 
-export const motionVariety = (records) => [...entranceDirection(records), ...easeCount(records), ...lockstep(records), ...followThrough(records), ...noOverlap(records)];
+export const motionVariety = (records) => [...entranceDirection(records), ...easeCount(records), ...lockstep(records), ...repeatRun(records), ...followThrough(records), ...noOverlap(records)];

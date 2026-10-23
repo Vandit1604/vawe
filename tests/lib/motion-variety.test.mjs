@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { scenesOf, entranceDirection, easeCount, lockstep, followThrough, noOverlap, motionVariety } from '../../harness/lib/motion-variety.mjs';
-import { motionLint } from '../../harness/lib/motion-lint.mjs';
+import { scenesOf, entranceDirection, easeCount, lockstep, repeatRun, followThrough, noOverlap, motionVariety } from '../../harness/lib/motion-variety.mjs';
+import { motionLint, unwaived } from '../../harness/lib/motion-lint.mjs';
 import { EASE } from '../../core/motion/presets.js';
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 
@@ -71,6 +71,29 @@ test('noOverlap: three entrances that each start after the last landed fire; an 
   assert.equal(noOverlap(chain([0, 0.28, 0.56])).length, 0, 'each starts at 70 percent of the last');
   assert.equal(noOverlap(chain([0, 1.5, 3])).length, 0);
   assert.equal(noOverlap(chain([0, 0.4])).length, 0);
+});
+
+const caption = (i, over = {}) => rec({ target: i, label: `p "cap ${i}"`, delay: i * 0.6, duration: 0.26, from: '0 1.4', kf: { translate: ['0 1.4', '0 0'] }, kind: 'p.cap', uniform: false, ...over });
+const captions = (n, over = () => ({})) => Array.from({ length: n }, (_, i) => caption(i, over(i)));
+
+test('repeatRun: five identical captions fire once; varied ones, a short run and a product page do not', () => {
+  const [f] = repeatRun(captions(5));
+  assert.deepEqual([f.code, f.rule, f.at], ['repeat-run', 'named-eases', 0]);
+  assert.match(f.what, /5 p\.cap entrances from 0\.00 s repeat one treatment \(land, 260 ms, below\), first p "cap 0"/);
+  assert.match(f.fix, /vary one of ease, length, direction or entrance between them \(enter\(el, \{ vary: 1 \}\)\)/);
+  assert.equal(repeatRun(captions(5, (i) => ({ duration: 0.26 + i * 0.03 }))).length, 0, 'lengths differ by more than 20 ms');
+  assert.equal(repeatRun(captions(5, (i) => ({ easing: EASE[i % 2 ? 'landSoft' : 'land'] }))).length, 0);
+  assert.equal(repeatRun(captions(5, (i) => ({ kf: { translate: [`0 ${1.4 + i * 0.5}`, '0 0'] } }))).length, 0, 'rise differs by more than 10 percent');
+  assert.equal(repeatRun(captions(5, (i) => (i === 2 ? { from: 'translate(24px, 0px)' } : {}))).length, 0, 'a side entrance breaks the run');
+  assert.equal(repeatRun(captions(4)).length, 0);
+  assert.equal(repeatRun(captions(5, () => ({ uniform: true }))).length, 0, 'rows of a product page are uniform');
+});
+
+test('repeatRun: only like elements form a run, and a page waiver covers it', () => {
+  assert.equal(repeatRun(captions(6, (i) => ({ kind: i % 2 ? 'p.cap' : 'li.row' }))).length, 0);
+  const [f] = motionLint({ records: captions(5), scripted: false }).filter((x) => x.code === 'repeat-run');
+  assert.equal(unwaived([f], {}).length, 1);
+  assert.equal(unwaived([f], { allow: ['repeat-run'], _why: { 'repeat-run': 'five captions at 0.00 s read as one list, each 260 ms' } }).length, 0);
 });
 
 test('motionVariety carries follow-through and no-overlap', () => {

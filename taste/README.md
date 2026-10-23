@@ -92,7 +92,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [exits-shorter](rules/exits-shorter.md): An exit is a launch: it runs shorter than its entrance and accelerates. Check: exit-length.
 - [follow-through](rules/follow-through.md): A trailing property finishes after the main one: scale after position, a shadow after its card. Check: follow-through.
 - [live-hold](rules/live-hold.md): A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. Check: static-window, sheet-tiles, dead-stop.
-- [named-eases](rules/named-eases.md): Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. Check: linear-move, default-ease, ease-count, lockstep.
+- [named-eases](rules/named-eases.md): Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. Check: linear-move, default-ease, ease-count, lockstep, repeat-run.
 - [one-hero-motion](rules/one-hero-motion.md): One element owns the motion in a beat; the rest support quietly. Check: staging.
 - [overshoot](rules/overshoot.md): Overshoot is a claim about mass. Check: judge, overshoot-share.
 - [real-physics](rules/real-physics.md): Real physics, not an imitation: a spring or an exponential as sampled keyframes or linear() with 8 or more stops, and a named effect that looks like its real-world thing. Check: judge.

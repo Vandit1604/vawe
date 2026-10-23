@@ -18,7 +18,7 @@ export const PRINT_STEPS = { explore: 'explore', frames: 'frames', storyboard: '
 export const CHECK_IDS = ['judge', 'none', 'world-held', 'static-window', 'sheet-tiles', 'text-cap-height', 'text-contrast', 'read-hold',
   'exit-length', 'group-landing', 'linear-move', 'default-ease', 'seam-repeat', 'one-band', 'dead-stop', 'sound-peak', 'sound-loudness',
   'attractors', 'range', 'no-emdash', 'type-sizes', 'font-families', 'display-tracking', 'left-edges', 'text-margin', 'accent-flood',
-  'entrance-direction', 'ease-count', 'lockstep', 'pure-black-white', 'template-chrome', 'coloured-word',
+  'entrance-direction', 'ease-count', 'lockstep', 'repeat-run', 'pure-black-white', 'template-chrome', 'coloured-word',
   'follow-through', 'no-overlap', 'staging', 'anticipation', 'duration-size', 'speed-ceiling', 'spectacle-weak', 'overshoot-share', 'text-breathing', 'text-lingers', 'living-ground', 'ground-hue', 'cut-off-beat', 'constant-camera'];
 
 const REQUIRED = ['id', 'step', 'principle', 'limit', 'range', 'break-when', 'instead', 'check', 'judge', 'prevents', 'status', 'scored', 'numbers'];

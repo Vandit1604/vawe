@@ -39,6 +39,17 @@ export function motionRecord(a, k, area) {
     from: String((kfs[0] && (kfs[0].translate || kfs[0].transform || kfs[0].clipPath)) || ''), kf, stops,
     fullFrame: box.width * box.height >= 0.6 * area, area: Math.round(box.width * box.height),
     decorative: Boolean(el.closest(DECORATIVE)),
+    ...likeness(el),
+  };
+}
+
+// kind groups like elements (a data-role, else the tag and class list); uniform marks a copied product surface. Bundled into the page with motionRecord.
+export function likeness(el) {
+  const role = el.getAttribute('data-role');
+  const classes = [...el.classList].sort().join('.');
+  return {
+    kind: role ? `role ${role}` : `${el.tagName.toLowerCase()}${classes ? `.${classes}` : ''}`,
+    uniform: Boolean(el.closest('[data-chrome]')) || document.documentElement.getAttribute('data-look') === 'product',
   };
 }
 
@@ -54,7 +65,7 @@ export function collectMotion() {
   return { records, scripted: typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length > 0 };
 }
 
-const COLLECTOR = `const DECORATIVE = ${JSON.stringify(DECORATIVE)};\n${[motionRecord, collectMotion].map((fn) => fn.toString()).join('\n')}`;
+const COLLECTOR = `const DECORATIVE = ${JSON.stringify(DECORATIVE)};\n${[likeness, motionRecord, collectMotion].map((fn) => fn.toString()).join('\n')}`;
 
 /** { records, scripted } from a loaded page. Call it before any seek past the start: a finished fill-none animation drops out of getAnimations. */
 export function runMotionCollector(page) {
