@@ -1,114 +1,156 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="dusk">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2">
+<meta name="duration" content="6">
+<meta name="variants" content="dark">
 <title>move: skeleton reveal</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.1-5.6", "world-held@0.0-6.0"], "_why": {"text-unreadable-hold": "the loaded dashboard holds 2.0 s after its last region arrives at 3.7 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, so the loaded page holds 1.9 s, short of the 5.4 s the check asks", "static-window@4.1-5.6": "dashboard, 1.5 s from 4.1 s: a loaded page holds still as the product does, and only the online counter ticks", "world-held@0.0-6.0": "one dashboard holds 6.0 s: the skeleton sweeps from 0.3 s, the regions load from 2.9 s and the window leaves at 5.6 s"}}</script>
 <style>
-  .card { width: calc(var(--u) * 138); padding: calc(var(--u) * 5.4) calc(var(--u) * 6); display: flex; flex-direction: column; gap: calc(var(--u) * 5); box-shadow: 0 0 0 calc(var(--u) * 0.2) var(--edge); }
+  html[data-look="product"] { --bar-c: #1f6f68; --sk: color-mix(in srgb, var(--ink) 8%, var(--surface)); --sk-light: color-mix(in srgb, var(--surface) 60%, transparent); }
+  html[data-look="product"][data-theme="dark"] { --bar-c: #4fb3aa; }
+  .page { display: flex; flex-direction: column; font-family: var(--sans); color: var(--ink); }
+  .icon { stroke-width: 1.8; }
+  .top { flex: none; display: flex; align-items: center; gap: calc(var(--u) * 1.6); height: calc(var(--u) * 4.6); padding: 0 calc(var(--u) * 2); background: var(--raised); box-shadow: 0 1px 0 var(--line); font: 600 calc(var(--u) * 1.9)/1 var(--sans); }
+  .top .store { display: flex; align-items: center; gap: calc(var(--u) * 1); }
+  .top .mark { width: calc(var(--u) * 2.8); height: calc(var(--u) * 2.8); border-radius: calc(var(--u) * 0.7); background: var(--bar-c); color: #fff; display: grid; place-items: center; font: 700 calc(var(--u) * 1.8)/1 var(--sans); }
+  .top .search { margin: 0 auto; display: flex; align-items: center; gap: calc(var(--u) * 0.8); width: calc(var(--u) * 40); height: calc(var(--u) * 3.1); padding: 0 calc(var(--u) * 1.2); border-radius: calc(var(--u) * 0.8); background: var(--surface); box-shadow: 0 0 0 1px var(--line); color: var(--faint); font-weight: 400; }
+  .top .icon { width: calc(var(--u) * 1.8); height: calc(var(--u) * 1.8); }
+  .top .av { width: calc(var(--u) * 3); height: calc(var(--u) * 3); border-radius: 50%; background: var(--hover); }
+  .shell { flex: 1; min-height: 0; display: grid; grid-template-columns: calc(var(--u) * 22) 1fr; }
+  nav { padding: calc(var(--u) * 2) calc(var(--u) * 1.4); display: flex; flex-direction: column; gap: calc(var(--u) * 0.4); background: var(--raised); box-shadow: 1px 0 0 var(--line); font: 500 calc(var(--u) * 2.1)/1 var(--sans); color: var(--muted); }
+  nav span { display: flex; align-items: center; gap: calc(var(--u) * 1.1); padding: calc(var(--u) * 1.15) calc(var(--u) * 1.2); border-radius: calc(var(--u) * 0.8); }
+  nav span.on { background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--line); }
+  nav .icon { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  main { min-width: 0; padding: calc(var(--u) * 2.4) calc(var(--u) * 3) 0; display: flex; flex-direction: column; gap: calc(var(--u) * 2); }
   .reg { display: grid; }
-  .reg > * { grid-area: 1 / 1; }
-  .sk-layer { display: flex; }
-  .sk { position: relative; overflow: hidden; flex: none; border-radius: calc(var(--u) * 0.6); background: var(--hover); }
-  .sk .band { position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--u) * 26); background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.85) 50%, transparent); }
+  .reg > * { grid-area: 1 / 1; min-width: 0; }
+  .sk { display: block; flex: none; position: relative; overflow: hidden; border-radius: calc(var(--u) * 0.6); background: var(--sk); }
+  .sk .band { position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--u) * 24); background: linear-gradient(100deg, transparent, var(--sk-light) 50%, transparent); }
   .round { border-radius: 50%; }
-  .pill.up { color: var(--accent); background: transparent; box-shadow: inset 0 0 0 1px var(--accent); }
+  .w { width: calc(var(--u) * var(--w)); height: calc(var(--u) * var(--h)); }
 
-  .head .real, .head .sk-layer { align-items: center; gap: var(--s3); }
-  .head .real { display: flex; }
-  .avatar { --size: calc(var(--u) * 11); }
-  .avatar.store { border-radius: var(--r-chip); background: var(--ink); color: var(--surface); box-shadow: none; }
-  .avatar.store .logo-mark { width: calc(var(--u) * 6); height: calc(var(--u) * 6); }
-  .name { font: 700 var(--t-head)/1.1 var(--sans); letter-spacing: -0.025em; }
-  .sub { margin-top: calc(var(--u) * 0.8); font: 500 var(--t-small)/1.2 var(--sans); color: var(--muted); }
+  .hd .real { display: flex; align-items: flex-end; gap: calc(var(--u) * 2); }
+  .hd h1 { margin: 0; font: 600 calc(var(--u) * 3.6)/1.1 var(--sans); letter-spacing: -0.025em; }
+  .hd .sub { margin-top: calc(var(--u) * 0.8); font: 400 calc(var(--u) * 2)/1.2 var(--sans); color: var(--muted); }
   .grow { flex: 1; }
-  .pill { font-size: var(--t-small); padding: calc(var(--u) * 1.4) calc(var(--u) * 2.4); }
+  .live { display: flex; align-items: center; gap: calc(var(--u) * 0.8); font: 500 calc(var(--u) * 2)/1 var(--sans); color: var(--muted); }
+  .live i { width: calc(var(--u) * 1); height: calc(var(--u) * 1); border-radius: 50%; background: #2fa25a; }
+  .live b { color: var(--ink); font-weight: 600; }
+  .hd .sk-layer { display: flex; align-items: flex-end; gap: calc(var(--u) * 2); }
 
-  .stats .real, .stats .sk-layer { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); }
-  .stat { border-top: 1px solid var(--edge); padding-top: var(--s2); }
-  .stat .label { font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
-  .stat .val { margin-top: var(--s1); font: 700 calc(var(--u) * 9)/1.05 var(--sans); letter-spacing: -0.04em; }
-  .sk-stat { padding-top: var(--s2); border-top: 1px solid transparent; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 2); }
+  .card { border-radius: calc(var(--u) * 1.1); background: var(--surface); box-shadow: 0 0 0 1px var(--line); padding: calc(var(--u) * 2); }
+  .stat .label { font: 500 calc(var(--u) * 2)/1 var(--sans); color: var(--muted); }
+  .stat .val { margin-top: calc(var(--u) * 1.4); font: 600 calc(var(--u) * 5)/1 var(--sans); letter-spacing: -0.03em; }
+  .stat .delta { margin-top: calc(var(--u) * 1.2); font: 500 calc(var(--u) * 1.8)/1 var(--sans); color: var(--muted); }
+  .stat .sk-layer { display: flex; flex-direction: column; }
 
-  .low { display: grid; grid-template-columns: 1.15fr 1fr; gap: calc(var(--u) * 6); }
-  .chart .real { display: flex; flex-direction: column; }
-  .chart .label { font: 600 var(--t-small)/1 var(--sans); }
-  .bars { display: flex; align-items: flex-end; gap: calc(var(--u) * 1.6); height: calc(var(--u) * 21); margin-top: var(--s2); }
-  .bar { flex: 1; transform-origin: 50% 100%; background: var(--ink); }
-  .bar:last-child { background: var(--accent); }
-  .chart .sk-layer { flex-direction: column; }
-  .list .real { display: flex; flex-direction: column; }
-  .row { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 9); font: 500 var(--t-small)/1.15 var(--sans); border-bottom: 1px solid var(--line); }
-  .row .avatar { --size: calc(var(--u) * 5.4); font-size: calc(var(--u) * 2); }
+  .low { display: grid; grid-template-columns: 1.25fr 1fr; gap: calc(var(--u) * 2); }
+  .card .label { font: 600 calc(var(--u) * 2.1)/1 var(--sans); }
+  .bars { display: flex; align-items: flex-end; gap: calc(var(--u) * 1.4); height: calc(var(--u) * 20); margin-top: calc(var(--u) * 2); border-bottom: 1px solid var(--line); }
+  .bk { flex: 1; border-radius: calc(var(--u) * 0.5) calc(var(--u) * 0.5) 0 0; background: var(--bar-c); transform-origin: 50% 100%; }
+  .days { display: flex; gap: calc(var(--u) * 1.4); margin-top: calc(var(--u) * 1); font: 400 calc(var(--u) * 1.7)/1 var(--sans); color: var(--muted); }
+  .days span { flex: 1; text-align: center; }
+  .chart .sk-layer { display: flex; flex-direction: column; }
+  .skbars { display: flex; align-items: flex-end; gap: calc(var(--u) * 1.4); height: calc(var(--u) * 20); margin-top: calc(var(--u) * 2); border-bottom: 1px solid transparent; }
+  .skbars .sk { flex: 1; border-radius: calc(var(--u) * 0.5) calc(var(--u) * 0.5) 0 0; }
+  .row { display: flex; align-items: center; gap: calc(var(--u) * 1.4); height: calc(var(--u) * 7.4); font: 500 calc(var(--u) * 2)/1.15 var(--sans); box-shadow: 0 1px 0 var(--line); }
+  .row:last-child { box-shadow: none; }
+  .row .face { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); border-radius: 50%; overflow: hidden; flex: none; }
+  .row .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .row .who { flex: 1; }
-  .row .who span { display: block; color: var(--muted); font-size: calc(var(--u) * 3); }
+  .row .who span { display: block; margin-top: calc(var(--u) * 0.5); color: var(--muted); font-size: calc(var(--u) * 1.7); }
   .row b { font-weight: 600; }
-  .list .sk-layer { flex-direction: column; }
-  .sk-row { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 9); }
+  .list .sk-layer { display: flex; flex-direction: column; }
+  .skrow { display: flex; align-items: center; gap: calc(var(--u) * 1.4); height: calc(var(--u) * 7.4); }
+  .skrow .col { flex: 1; display: grid; gap: calc(var(--u) * 0.9); }
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="reg head">
-    <div class="real"><div class="avatar store" data-logo="tidewell"></div><div><div class="name">Tidewell Goods</div><div class="sub">Ceramics and linen &middot; Portland, OR</div></div><div class="grow"></div><div class="pill up">Live</div></div>
-    <div class="sk-layer" style="align-items:center;gap:var(--s3)"><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*11);border-radius:var(--r-chip)"></i><div><i class="sk" style="display:block;width:calc(var(--u)*34);height:calc(var(--u)*5.2)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*1.6);width:calc(var(--u)*46);height:calc(var(--u)*3)"></i></div><div class="grow"></div><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*6);border-radius:999px"></i></div>
-  </div>
-  <div class="reg stats">
-    <div class="real">
-      <div class="stat"><div class="label">Orders today</div><div class="val">142</div></div>
-      <div class="stat"><div class="label">Revenue</div><div class="val">$9,418</div></div>
-      <div class="stat"><div class="label">Conversion</div><div class="val">3.6%</div></div>
-    </div>
-    <div class="sk-layer">
-      <div class="sk-stat"><i class="sk" style="display:block;width:calc(var(--u)*20);height:calc(var(--u)*3)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*2);width:calc(var(--u)*30);height:calc(var(--u)*7.4)"></i></div>
-      <div class="sk-stat"><i class="sk" style="display:block;width:calc(var(--u)*16);height:calc(var(--u)*3)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*2);width:calc(var(--u)*34);height:calc(var(--u)*7.4)"></i></div>
-      <div class="sk-stat"><i class="sk" style="display:block;width:calc(var(--u)*18);height:calc(var(--u)*3)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*2);width:calc(var(--u)*26);height:calc(var(--u)*7.4)"></i></div>
-    </div>
-  </div>
-  <div class="low">
-    <div class="reg chart">
-      <div class="real"><div class="label">Sales this week</div><div class="bars"><i class="bar" style="height:38%"></i><i class="bar" style="height:52%"></i><i class="bar" style="height:44%"></i><i class="bar" style="height:68%"></i><i class="bar" style="height:60%"></i><i class="bar" style="height:82%"></i><i class="bar" style="height:100%"></i></div></div>
-      <div class="sk-layer"><div style="width:100%"><i class="sk" style="display:block;width:calc(var(--u)*26);height:calc(var(--u)*3)"></i><div style="display:flex;align-items:flex-end;gap:calc(var(--u)*1.6);height:calc(var(--u)*21);margin-top:var(--s2)"><i class="sk" style="flex:1;height:38%"></i><i class="sk" style="flex:1;height:52%"></i><i class="sk" style="flex:1;height:44%"></i><i class="sk" style="flex:1;height:68%"></i><i class="sk" style="flex:1;height:60%"></i><i class="sk" style="flex:1;height:82%"></i><i class="sk" style="flex:1;height:100%"></i></div></div></div>
-    </div>
-    <div class="reg list">
-      <div class="real">
-        <div class="row"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg" alt=""></div><div class="who">Maren Holt<span>#4821</span></div><b>$84.00</b></div>
-        <div class="row"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg" alt=""></div><div class="who">Dev Ortiz<span>#4820</span></div><b>$212.50</b></div>
-        <div class="row"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg" alt=""></div><div class="who">Lin Park<span>#4819</span></div><b>$46.00</b></div>
-      </div>
-      <div class="sk-layer">
-        <div class="sk-row"><i class="sk round" style="width:calc(var(--u)*5.4);height:calc(var(--u)*5.4)"></i><div style="flex:1"><i class="sk" style="display:block;width:calc(var(--u)*20);height:calc(var(--u)*3)"></i></div><i class="sk" style="width:calc(var(--u)*9);height:calc(var(--u)*3)"></i></div>
-        <div class="sk-row"><i class="sk round" style="width:calc(var(--u)*5.4);height:calc(var(--u)*5.4)"></i><div style="flex:1"><i class="sk" style="display:block;width:calc(var(--u)*16);height:calc(var(--u)*3)"></i></div><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*3)"></i></div>
-        <div class="sk-row"><i class="sk round" style="width:calc(var(--u)*5.4);height:calc(var(--u)*5.4)"></i><div style="flex:1"><i class="sk" style="display:block;width:calc(var(--u)*18);height:calc(var(--u)*3)"></i></div><i class="sk" style="width:calc(var(--u)*8);height:calc(var(--u)*3)"></i></div>
-      </div>
+<div class="win">
+  <div class="strip" data-chrome><span class="lights"><i></i><i></i><i></i></span>
+    <span class="tab"><i class="fav"></i><span>Home &middot; Tidewell Goods</span><svg class="icon x" data-i="x"></svg></span>
+    <svg class="icon newtab" data-i="plus"></svg></div>
+  <div class="bar" data-chrome><svg class="icon" data-i="back"></svg><svg class="icon" data-i="fwd"></svg><svg class="icon" data-i="reload"></svg>
+    <span class="omni"><svg class="icon" data-i="tune"></svg><span>admin.tidewell.example/home</span></span><i class="avatar-dot"></i><svg class="icon" data-i="dots-v"></svg></div>
+  <div class="page">
+    <div class="top" data-chrome><div class="store"><span class="mark">T</span>Tidewell Goods</div><span class="search"><svg class="icon" data-i="search"></svg>Search orders, products</span><svg class="icon" data-i="bell"></svg><i class="av"></i></div>
+    <div class="shell">
+      <nav data-chrome><span class="on"><svg class="icon" data-i="home"></svg>Home</span><span><svg class="icon" data-i="box"></svg>Orders</span><span><svg class="icon" data-i="tag"></svg>Products</span><span><svg class="icon" data-i="user"></svg>Customers</span><span><svg class="icon" data-i="chart"></svg>Analytics</span></nav>
+      <main>
+        <div class="reg hd">
+          <div class="real"><div><h1>Good morning, Maren</h1><div class="sub">Here is how Tidewell is doing today.</div></div><div class="grow"></div><div class="live"><i></i><span><b class="online">34</b> online now</span></div></div>
+          <div class="sk-layer"><div><i class="sk w" style="--w:50;--h:3.6"></i><i class="sk w" style="--w:44;--h:2;margin-top:calc(var(--u)*1.2)"></i></div><div class="grow"></div><i class="sk w" style="--w:20;--h:2"></i></div>
+        </div>
+        <div class="stats">
+          <div class="reg card stat"><div class="real"><div class="label">Orders today</div><div class="val">142</div><div class="delta">12% up on yesterday</div></div><div class="sk-layer"><i class="sk w" style="--w:16;--h:2"></i><i class="sk w" style="--w:26;--h:5;margin-top:calc(var(--u)*1.4)"></i><i class="sk w" style="--w:24;--h:1.8;margin-top:calc(var(--u)*1.2)"></i></div></div>
+          <div class="reg card stat"><div class="real"><div class="label">Sales</div><div class="val">$9,418</div><div class="delta">8.4% up on yesterday</div></div><div class="sk-layer"><i class="sk w" style="--w:10;--h:2"></i><i class="sk w" style="--w:32;--h:5;margin-top:calc(var(--u)*1.4)"></i><i class="sk w" style="--w:26;--h:1.8;margin-top:calc(var(--u)*1.2)"></i></div></div>
+          <div class="reg card stat"><div class="real"><div class="label">Conversion</div><div class="val">3.6%</div><div class="delta">0.4 points down</div></div><div class="sk-layer"><i class="sk w" style="--w:18;--h:2"></i><i class="sk w" style="--w:22;--h:5;margin-top:calc(var(--u)*1.4)"></i><i class="sk w" style="--w:22;--h:1.8;margin-top:calc(var(--u)*1.2)"></i></div></div>
+        </div>
+        <div class="low">
+          <div class="reg card chart">
+            <div class="real"><div class="label">Sales this week</div><div class="bars"><i class="bk" style="height:38%"></i><i class="bk" style="height:52%"></i><i class="bk" style="height:44%"></i><i class="bk" style="height:68%"></i><i class="bk" style="height:60%"></i><i class="bk" style="height:82%"></i><i class="bk" style="height:100%"></i></div><div class="days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>
+            <div class="sk-layer"><i class="sk w" style="--w:28;--h:2.1"></i><div class="skbars"><i class="sk" style="height:38%"></i><i class="sk" style="height:52%"></i><i class="sk" style="height:44%"></i><i class="sk" style="height:68%"></i><i class="sk" style="height:60%"></i><i class="sk" style="height:82%"></i><i class="sk" style="height:100%"></i></div></div>
+          </div>
+          <div class="reg card list">
+            <div class="real"><div class="label" style="margin-bottom:calc(var(--u)*0.6)">Recent orders</div>
+              <div class="row"><span class="face"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg" alt=""></span><div class="who">Maren Holt<span>#4821</span></div><b>$84.00</b></div>
+              <div class="row"><span class="face"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg" alt=""></span><div class="who">Dev Ortiz<span>#4820</span></div><b>$212.50</b></div>
+              <div class="row"><span class="face"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg" alt=""></span><div class="who">Lin Park<span>#4819</span></div><b>$46.00</b></div>
+            </div>
+            <div class="sk-layer"><i class="sk w" style="--w:24;--h:2.1;margin-bottom:calc(var(--u)*0.6)"></i>
+              <div class="skrow"><i class="sk round w" style="--w:4.4;--h:4.4"></i><div class="col"><i class="sk w" style="--w:20;--h:1.9"></i><i class="sk w" style="--w:10;--h:1.5"></i></div><i class="sk w" style="--w:9;--h:1.9"></i></div>
+              <div class="skrow"><i class="sk round w" style="--w:4.4;--h:4.4"></i><div class="col"><i class="sk w" style="--w:16;--h:1.9"></i><i class="sk w" style="--w:10;--h:1.5"></i></div><i class="sk w" style="--w:11;--h:1.9"></i></div>
+              <div class="skrow"><i class="sk round w" style="--w:4.4;--h:4.4"></i><div class="col"><i class="sk w" style="--w:18;--h:1.9"></i><i class="sk w" style="--w:10;--h:1.5"></i></div><i class="sk w" style="--w:8;--h:1.9"></i></div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   </div>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
-import '/prompts/moves/demo/assets/logos.js';
-import { EASE } from '/core/motion/presets.js';
+import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
 const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
-const card = q('.card'), cardBox = card.getBoundingClientRect();
+const END = 6000, SWEEP_MS = 1400;
+const ICONS = {
+  x: '<path d="M6 6l12 12M18 6L6 18"/>', plus: '<path d="M12 5v14M5 12h14"/>', back: '<path d="M19 12H5M11 6l-6 6 6 6"/>', fwd: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  reload: '<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/>', tune: '<path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/>',
+  'dots-v': '<path d="M12 5v.01M12 12v.01M12 19v.01"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>', bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5h4"/>',
+  home: '<path d="M4 11l8-6.5 8 6.5M6 10v9h12v-9"/>', box: '<path d="M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8"/>', tag: '<path d="M4 4h8l8 8-8 8-8-8z"/><circle cx="8.5" cy="8.5" r="1"/>',
+  user: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1-3.5 4-5 7-5s6 1.5 7 5"/>', chart: '<path d="M5 19V9M12 19V5M19 19v-7"/>',
+};
+for (const el of all('[data-i]')) { el.setAttribute('viewBox', '0 0 24 24'); el.innerHTML = ICONS[el.dataset.i]; }
 
-// one band crosses the whole card: each block plays the same sweep shifted by its own left edge, so the blocks read as one light
+// the shell is real from the start; one light crosses the whole page: each block plays the same sweep shifted by its own left edge
+const win = q('.win'), page = q('main').getBoundingClientRect();
 all('.sk').forEach((sk) => {
   const band = Object.assign(document.createElement('i'), { className: 'band' });
   sk.append(band);
-  const left = sk.getBoundingClientRect().left - cardBox.left, w = band.getBoundingClientRect().width;
-  band.animate([{ translate: `${-w - left}px 0` }, { translate: `${cardBox.width - left}px 0` }], { duration: 850, iterations: 2, easing: 'linear', fill: 'both' });
+  const left = sk.getBoundingClientRect().left - page.left, w = band.getBoundingClientRect().width;
+  band.animate([{ translate: `${-w - left}px 0` }, { translate: `${page.width - left}px 0` }], { duration: SWEEP_MS, delay: 300, iterations: 3, easing: 'linear', fill: 'both' });
 });
 
-// regions resolve one after another, 200 ms apart; the skeleton leaves faster than the content arrives
-const at = { '.head': 600, '.stats': 800, '.chart': 1000, '.list': 1200 };
+// each region loads on its own: the skeleton is replaced and the real content fades in, with no rise and no blur
+const at = { '.hd': 2900, '.stats': 3150, '.chart': 3400, '.list': 3650 };
 Object.entries(at).forEach(([sel, t]) => {
-  const reg = q(sel), real = reg.querySelector('.real'), sk = reg.querySelector('.sk-layer');
-  real.animate([{ opacity: 0, translate: '0 1.4vh', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 480, delay: t, easing: EASE.land, fill: 'both' });
-  sk.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: t, easing: EASE.launch, fill: 'both' });
+  const targets = sel === '.stats' ? all('.stat') : [q(sel)];
+  targets.forEach((r) => {
+    r.querySelector('.real').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, delay: t, easing: 'ease-out', fill: 'both' });
+    r.querySelector('.sk-layer').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, delay: t, easing: 'linear', fill: 'both' });
+  });
 });
-all('.bar').forEach((b, i) => b.animate([{ scale: '1 0.55' }, { scale: '1 1' }], { duration: 600, delay: 1000 + i * 45, easing: EASE.land, fill: 'both', composite: 'replace' }));
-card.animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: EASE.glide, fill: 'both' });
+// a chart draws on load: each bar grows from the axis
+all('.bk').forEach((b, i) => b.animate([{ scale: '1 0' }, { scale: '1 1' }], { duration: 600, delay: 3400 + i * 40, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'both' }));
+// the online counter is the one live number after the load
+const online = q('.online');
+vawe.onFrame((s) => { online.textContent = s >= 5.0 ? '36' : s >= 4.4 ? '35' : '34'; });
+
+arrive(win, 100, { ms: 220, from: '0.8vh' });
+leave(win, END);
 </script>
 </body>
 </html>
