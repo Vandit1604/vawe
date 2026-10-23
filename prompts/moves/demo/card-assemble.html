@@ -1,58 +1,99 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="chrome">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1.9">
-<meta name="blank" content="0-0.05">
+<meta name="duration" content="5.5">
 <title>move: card assemble</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  .card { width: calc(var(--u) * 150); padding: calc(var(--u) * 5.6) calc(var(--u) * 6.4) calc(var(--u) * 6.4); opacity: 0; }
-  .top { display: flex; align-items: center; justify-content: space-between; }
-  .who { display: flex; align-items: center; gap: var(--s3); }
-  .avatar { --size: calc(var(--u) * 12); background: var(--ink); color: var(--surface); box-shadow: none; }
-  .avatar .logo-mark { width: 52%; height: 52%; }
-  .name { font: 700 var(--t-head)/1.1 var(--sans); letter-spacing: -0.02em; }
-  .sub { margin-top: var(--s1); font: 500 var(--t-body)/1.2 var(--sans); color: var(--muted); }
-  .amount { font: 800 calc(var(--u) * 10.6)/1 var(--sans); letter-spacing: -0.045em; }
-  .rule { margin: calc(var(--u) * 4.8) 0 var(--s1); transform-origin: 0 50%; }
-  .item { display: flex; justify-content: space-between; padding: calc(var(--u) * 2.6) 0; font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); }
-  .item b { font-weight: 600; color: var(--ink); }
-  .pay { margin-top: var(--s3); padding: calc(var(--u) * 3.2) calc(var(--u) * 5.4); font-size: var(--t-lead); }
-  .pay .icon { width: calc(var(--u) * 5); height: calc(var(--u) * 5); stroke: var(--on-accent); stroke-width: 2; }
+  .iv { position: absolute; inset: 0; display: grid; grid-template-columns: 45fr 55fr; }
+  .iv-l { display: flex; flex-direction: column; padding: calc(var(--u) * 5) calc(var(--u) * 5.5) calc(var(--u) * 4); background: var(--raised); }
+  .iv-r { display: flex; flex-direction: column; justify-content: center; gap: calc(var(--u) * 2.6); padding: calc(var(--u) * 5) calc(var(--u) * 7); background: var(--surface); box-shadow: -1px 0 0 var(--line); }
+  .iv-brand { display: flex; align-items: center; gap: calc(var(--u) * 1.6); font: 600 calc(var(--u) * 2.8)/1 var(--sans); }
+  .iv-mark { display: grid; place-items: center; width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); border-radius: calc(var(--u) * 1.3); background: var(--ink); color: #fff; font: 700 calc(var(--u) * 2.8)/1 var(--sans); }
+  .iv-lbl { margin-top: calc(var(--u) * 5); font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
+  .iv-amt { margin-top: calc(var(--u) * 1); font: 600 calc(var(--u) * 9.6)/1 var(--sans); letter-spacing: -0.035em; }
+  .iv-due { margin-top: calc(var(--u) * 1.6); font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
+  .iv-items { margin-top: calc(var(--u) * 4.4); }
+  .iv-item { display: flex; justify-content: space-between; align-items: baseline; padding: calc(var(--u) * 1.5) 0; font: 500 calc(var(--u) * 2.4)/1.2 var(--sans); }
+  .iv-item small { display: block; margin-top: calc(var(--u) * 0.5); font-size: calc(var(--u) * 2.1); color: var(--muted); }
+  .iv-item b { font-weight: 500; }
+  .iv-rule { height: 1px; margin: calc(var(--u) * 1.4) 0; background: var(--bar); transform-origin: 0 50%; }
+  .iv-tot { display: flex; justify-content: space-between; padding: calc(var(--u) * 0.9) 0; font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
+  .iv-tot.due { color: var(--ink); font-weight: 600; }
+  .iv-h { font: 600 calc(var(--u) * 3.2)/1 var(--sans); letter-spacing: -0.01em; }
+  .iv-f label { display: block; margin-bottom: calc(var(--u) * 0.9); font: 500 calc(var(--u) * 2.2)/1 var(--sans); color: var(--muted); }
+  .iv-in { display: flex; align-items: center; height: calc(var(--u) * 5.8); padding: 0 calc(var(--u) * 1.6); border-radius: calc(var(--u) * 1); box-shadow: 0 0 0 1px var(--bar); font: 400 calc(var(--u) * 2.5)/1 var(--sans); white-space: nowrap; }
+  .iv-in .ph { color: var(--faint); }
+  .iv-in.focus { box-shadow: 0 0 0 1.5px var(--ink); }
+  .iv-cur { width: 1.5px; height: calc(var(--u) * 3); margin-left: 1px; background: var(--ink); }
+  .iv-row { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 1.6); margin-top: calc(var(--u) * 1.6); }
+  .iv-pay { display: grid; place-items: center; height: calc(var(--u) * 6.8); border-radius: calc(var(--u) * 1.1); background: var(--ink); color: #fff; font: 600 calc(var(--u) * 2.7)/1 var(--sans); }
   .part { opacity: 0; }
 </style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.9-5.1", "world-held@0.0-5.5"], "_why": {"text-unreadable-hold": "the invoice holds 1.2 s after the pay button lands at 2.5 s while the email types to 3.9 s, in a 5.5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.1 s, 0.4 s before the 5.5 s end, so the finished page holds 1.2 s, short of the 5.4 s the check asks", "static-window@3.9-5.1": "invoice page at 4.5 s: the page holds still as a real invoice does and only the caret in the email field blinks every 0.5 s", "world-held@0.0-5.5": "one invoice page holds 5.5 s: the parts assemble from 0.45 s to 2.5 s, the email types to 3.9 s and the window leaves at 5.1 s"}}</script>
 </head>
 <body>
-<div class="card">
-  <div class="top">
-    <div class="who"><div class="avatar part" data-from="-14vh 0" data-logo="fernbank"></div><div class="part" data-from="-12vh 0"><div class="name">Fernbank Studio</div><div class="sub">Invoice 2041, due Oct 14</div></div></div>
-    <div class="amount part" data-from="14vh 0">$4,280</div>
-  </div>
-  <div class="rule divider part" data-from="0 0"></div>
-  <div class="item part" data-from="0 9vh"><span>Launch film, three aspects</span><b>$2,880</b></div>
-  <div class="item part" data-from="0 9vh"><span>Sound design and mix</span><b>$1,400</b></div>
-  <div class="pay btn primary part" data-from="0 12vh"><span>Pay invoice</span><svg class="icon" viewBox="0 0 24 24"><path class="arrow" d="M4 12 H19 M13 6 L19 12 L13 18"/></svg></div>
+<div class="win">
+  <div class="strip" data-chrome><span class="lights"><i></i><i></i><i></i></span>
+    <span class="tab"><i class="fav"></i><span>Invoice 2041 from Fernbank Studio</span><svg class="icon x" data-i="x"></svg></span>
+    <svg class="icon newtab" data-i="plus"></svg></div>
+  <div class="bar" data-chrome><svg class="icon" data-i="back"></svg><svg class="icon" data-i="fwd"></svg><svg class="icon" data-i="reload"></svg>
+    <span class="omni"><svg class="icon" data-i="lock"></svg><span>pay.fernbank.studio/i/2041</span></span><i class="avatar-dot"></i><svg class="icon" data-i="dots-v"></svg></div>
+  <div class="page"><div class="iv">
+    <div class="iv-l">
+      <div class="iv-brand part" data-from="-14vh 0"><span class="iv-mark">F</span>Fernbank Studio</div>
+      <div class="iv-lbl part" data-from="-14vh 0">Pay invoice 2041</div>
+      <div class="iv-amt part" data-from="-14vh 0">$4,280.00</div>
+      <div class="iv-due part" data-from="-14vh 0">Due October 14, 2026</div>
+      <div class="iv-items">
+        <div class="iv-item part" data-from="0 9vh"><div>Launch film, three aspects<small>Qty 1</small></div><b>$2,880.00</b></div>
+        <div class="iv-item part" data-from="0 9vh"><div>Sound design and mix<small>Qty 1</small></div><b>$1,400.00</b></div>
+        <div class="iv-rule part" data-from="0 0"></div>
+        <div class="iv-tot part" data-from="0 9vh"><span>Subtotal</span><span>$4,280.00</span></div>
+        <div class="iv-tot due part" data-from="0 9vh"><span>Amount due</span><span>$4,280.00</span></div>
+      </div>
+    </div>
+    <div class="iv-r">
+      <div class="iv-h part" data-from="14vh 0">Pay with card</div>
+      <div class="iv-f part" data-from="14vh 0"><label>Email</label><div class="iv-in focus"><span id="mail"></span><i class="iv-cur" id="cur"></i></div></div>
+      <div class="iv-f part" data-from="14vh 0"><label>Card information</label><div class="iv-in"><span class="ph">1234 1234 1234 1234</span></div><div class="iv-row"><div class="iv-in"><span class="ph">MM / YY</span></div><div class="iv-in"><span class="ph">CVC</span></div></div></div>
+      <div class="iv-f part" data-from="14vh 0"><label>Name on card</label><div class="iv-in"><span class="ph">Full name</span></div></div>
+      <div class="iv-pay part" data-from="0 12vh" id="pay">Pay $4,280.00</div>
+    </div>
+  </div></div>
 </div>
 <script type="module">
-import '/prompts/moves/demo/assets/logos.js';
+import '/core/engine/page-api.js';
 import { EASE } from '/core/motion/presets.js';
-const q = (s) => document.querySelector(s);
-const card = q('.card');
-// the shell lands first, so the parts have something to arrive onto
-card.animate([{ scale: 0.96, translate: '0 3vh' }, { scale: 1, translate: '0 0' }], { duration: 650, easing: EASE.land, fill: 'both' });
-card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
-// each part travels in from the side its slot is on, 80 ms after the last; the rule draws instead of moving
-[...document.querySelectorAll('.part')].forEach((el, i) => {
-  const at = 350 + i * 80;
-  if (el.classList.contains('rule')) {
+import { leave, arrive, typeTimes, typedCount } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const END = 5500, FIRST_AT = 450, GAP = 110, MAIL = 'sam@northwind.co', TYPE_AT = 2700;
+const ICONS = {
+  x: '<path d="M6 6l12 12M18 6L6 18"/>', plus: '<path d="M12 5v14M5 12h14"/>', back: '<path d="M19 12H5M11 6l-6 6 6 6"/>', fwd: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  reload: '<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/>', 'dots-v': '<path d="M12 5v.01M12 12v.01M12 19v.01"/>', lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+};
+for (const el of all('[data-i]')) { el.setAttribute('viewBox', '0 0 24 24'); el.innerHTML = ICONS[el.dataset.i]; }
+
+arrive(q('.win'), 100, { ms: 220, from: '0.8vh' });
+// each part travels in from the side its slot is on, 110 ms after the last; the rule draws instead of moving; the pay button lands last on a pop
+all('.part').forEach((el, i) => {
+  const at = FIRST_AT + i * GAP;
+  if (el.classList.contains('iv-rule')) {
     el.animate([{ opacity: 1, scale: '0 1' }, { opacity: 1, scale: '1 1' }], { duration: 600, delay: at, easing: EASE.land, fill: 'both' });
     return;
   }
   el.animate([{ opacity: 0, translate: el.dataset.from, filter: 'blur(6px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }],
-    { duration: 900, delay: at, easing: el.classList.contains('pay') ? EASE.pop : EASE.land, fill: 'both' });
+    { duration: 900, delay: at, easing: el.id === 'pay' ? EASE.pop : EASE.land, fill: 'both' });
 });
-q('.arrow').animate([{ translate: '0 0' }, { translate: '4px 0', offset: 0.4 }, { translate: '0 0' }], { duration: 400, delay: 1520, easing: EASE.land, fill: 'both' });
+
+const times = typeTimes(MAIL, TYPE_AT);
+vawe.onFrame((s) => {
+  const ms = s * 1000;
+  q('#mail').textContent = MAIL.slice(0, typedCount(times, ms));
+  q('#cur').style.visibility = ms < TYPE_AT || Math.floor(ms / 500) % 2 === 0 || ms - times.filter((t) => t <= ms).pop() < 500 ? 'visible' : 'hidden';
+});
+leave(q('.win'), END);
 </script>
 </body>
 </html>

@@ -36,7 +36,10 @@
   "camera-moves": "787dc4ee64d2521f",
   "caption-editorial": "8c33b06b8a9bc540",
   "caption-karaoke": "09479dc9a731b495",
-  "card-assemble": "7afcdc2bd423ab9a",
+  "card-assemble": {
+    "hash": "7f571e33135e82ef",
+    "crf": 16
+  },
   "caret-door": {
     "hash": "7ea0f58247022be2",
     "crf": 16
