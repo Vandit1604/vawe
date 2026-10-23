@@ -1,40 +1,73 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="field">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2">
-<meta name="blank" content="0-0.05">
+<meta name="duration" content="5.6">
+<meta name="variants" content="dark">
 <title>move: notification pop</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@0.5-1.3", "static-window@1.6-4.3", "world-held@0.0-5.6", "tile-run@0.9-4.4"], "_why": {"text-unreadable-hold": "the banner reads for 3.2 s from 1.3 s to 4.5 s in a 5.6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the phone leaves at 5.2 s and the banner at 4.4 s, so the banner holds 3.1 s, short of the 5.4 s the check asks", "static-window@0.5-1.3": "phone, 0.8 s from 0.5 s: the home screen holds still before the banner drops at 0.9 s, as a real one does", "static-window@1.6-4.3": "phone, 2.7 s from 1.6 s: a settled banner holds still while it is read, as the real one does, and nothing else on the home screen moves", "world-held@0.0-5.6": "one phone holds 5.6 s: the banner drops at 0.9 s, is read, and swipes away at 4.4 s", "tile-run@0.9-4.4": "12 near-identical app icons hold 3.5 s from 0.9 s: a home screen does not change while a banner shows, and each icon is under 1% of the frame"}}</script>
 <style>
-  .note { display: flex; align-items: center; gap: var(--s3); width: calc(var(--u) * 150); padding: calc(var(--u) * 2.8); padding-right: var(--s4); border-radius: calc(var(--u) * 4.8); transform-origin: 50% 0; opacity: 0; }
-  .note .chip { --size: calc(var(--u) * 13); border-radius: calc(var(--u) * 2); }
-  .note .icon { width: calc(var(--u) * 7); height: calc(var(--u) * 7); stroke: var(--on-accent); stroke-width: 2; }
-  .text { flex: 1; min-width: 0; }
-  .title { font: 650 var(--t-lead)/1.15 var(--sans); letter-spacing: -0.015em; }
-  .sub { margin-top: calc(var(--u) * 0.7); font: 500 var(--t-body)/1.25 var(--sans); color: var(--muted); }
-  .thumb { flex: none; width: calc(var(--u) * 21); aspect-ratio: 16 / 9; height: auto; border-radius: calc(var(--u) * 2); }
-  .when { align-self: flex-start; padding-top: var(--s1); font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
+  :root { --pw: calc(var(--u) * 92); --bz: calc(var(--u) * 1.3); --pt: calc((var(--pw) - var(--bz) * 2) / 393); }
+  html[data-look="product"] { --mat: rgba(246, 246, 246, 0.74); --mat-ink: #000; --mat-sub: rgba(60, 60, 67, 0.62); }
+  html[data-look="product"][data-theme="dark"] { --mat: rgba(40, 40, 42, 0.72); --mat-ink: #fff; --mat-sub: rgba(235, 235, 245, 0.62); }
+  body { display: block; }
+  .phone { position: absolute; left: 50%; top: calc(var(--u) * 4); width: var(--pw); height: calc(var(--pw) * 2.2); margin-left: calc(var(--pw) / -2); border-radius: calc(var(--pt) * 62); background: #0b0b0c; padding: var(--bz); box-shadow: var(--win-shadow), 0 0 0 calc(var(--u) * 0.28) #3b3b3e; }
+  .screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: calc(var(--pt) * 55); background: #222; font-family: var(--sans); }
+  .wall { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  html[data-theme="dark"] .wall { filter: brightness(0.62); }
+  .island { position: absolute; left: 50%; top: calc(var(--pt) * 11); width: calc(var(--pt) * 124); height: calc(var(--pt) * 36); margin-left: calc(var(--pt) * -62); border-radius: 999px; background: #000; }
+  .status { position: absolute; left: 0; right: 0; top: calc(var(--pt) * 18); display: flex; justify-content: space-between; padding: 0 calc(var(--pt) * 38) 0 calc(var(--pt) * 46); color: #fff; font: 600 calc(var(--pt) * 17)/1 var(--sans); }
+  .status .sys { display: flex; align-items: center; gap: calc(var(--pt) * 6); }
+  .status svg { height: calc(var(--pt) * 13); fill: #fff; }
+  .grid { position: absolute; left: calc(var(--pt) * 27); right: calc(var(--pt) * 27); top: calc(var(--pt) * 140); display: grid; grid-template-columns: repeat(4, calc(var(--pt) * 62)); justify-content: space-between; row-gap: calc(var(--pt) * 24); }
+  .app { display: flex; flex-direction: column; align-items: center; gap: calc(var(--pt) * 6); color: #fff; font: 500 calc(var(--pt) * 11.5)/1 var(--sans); text-shadow: 0 0 calc(var(--pt) * 3) rgba(0, 0, 0, 0.35); }
+  .ico { width: calc(var(--pt) * 62); height: calc(var(--pt) * 62); border-radius: calc(var(--pt) * 14); display: grid; place-items: center; }
+  .ico svg { width: 62%; height: 62%; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .banner { position: absolute; left: calc(var(--pt) * 12); right: calc(var(--pt) * 12); top: calc(var(--pt) * 56); display: flex; align-items: flex-start; gap: calc(var(--pt) * 12); padding: calc(var(--pt) * 14) calc(var(--pt) * 16); border-radius: calc(var(--pt) * 26); background: var(--mat); backdrop-filter: blur(calc(var(--pt) * 30)) saturate(1.8); box-shadow: 0 calc(var(--pt) * 6) calc(var(--pt) * 22) rgba(0, 0, 0, 0.2); color: var(--mat-ink); translate: 0 -200%; }
+  .banner .ico { flex: none; width: calc(var(--pt) * 38); height: calc(var(--pt) * 38); border-radius: calc(var(--pt) * 9); background: #1f6f68; }
+  .banner .ico svg { fill: #fff; stroke: none; width: 50%; height: 50%; }
+  .banner .txt { flex: 1; min-width: 0; }
+  .banner .row { display: flex; align-items: baseline; gap: calc(var(--pt) * 8); }
+  .banner b { flex: 1; font: 600 calc(var(--pt) * 15)/1.25 var(--sans); }
+  .banner .when { font: 400 calc(var(--pt) * 13)/1 var(--sans); color: var(--mat-sub); }
+  .banner p { margin: calc(var(--pt) * 1) 0 0; font: 400 calc(var(--pt) * 15)/1.27 var(--sans); }
+  .banner .grab { position: absolute; left: 50%; bottom: calc(var(--pt) * 5); width: calc(var(--pt) * 36); height: calc(var(--pt) * 5); margin-left: calc(var(--pt) * -18); border-radius: 999px; background: var(--mat-sub); opacity: 0.45; }
 </style>
 </head>
 <body>
-<div class="note card">
-  <div class="chip accent-fill app"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-  <div class="text"><div class="title">Render finished</div><div class="sub">meadow-launch.mp4, 12.4 s at 60 fps</div></div>
-  <img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""><div class="when">now</div>
-</div>
+<div class="phone"><div class="screen">
+  <img class="wall" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt="">
+  <div class="island"></div>
+  <div class="status" data-chrome><span>9:41</span><span class="sys"><svg viewBox="0 0 18 13"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5.5" width="3" height="7.5" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="13" rx="1"/></svg><svg viewBox="0 0 26 13"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" fill="none" stroke="#fff" opacity="0.5"/><rect x="2" y="2" width="19" height="9" rx="2.2"/><rect x="24" y="4.5" width="1.6" height="4" rx="0.8" opacity="0.5"/></svg></span></div>
+  <div class="grid" id="grid" data-chrome></div>
+  <div class="banner" id="banner"><div class="ico"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></div><div class="txt"><div class="row"><b>Render finished</b><span class="when">now</span></div><p>meadow-launch.mp4 is ready: 12.4 s at 60 fps, 48 MB.</p></div><i class="grab"></i></div>
+</div></div>
 <script type="module">
-import { EASE } from '/core/motion/presets.js';
+import '/core/engine/page-api.js';
+import { track } from '/core/motion/springs.js';
+import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
+const END = 5600, IN_AT = 900, OUT_AT = 4400, OUT_MS = 320, K = 300, D = 26;
 const q = (s) => document.querySelector(s);
-const note = q('.note');
-// the banner drops from above the frame and dips just past its slot before it settles; the width closes from 92 percent, so it lands as an object, not a slide
-note.animate([{ translate: '0 -62vh', scale: '0.92 0.96' }, { translate: '0 0', scale: '1 1' }], { duration: 700, easing: EASE.pop, fill: 'both' });
-note.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
-// contents follow the shell: the icon pops first, the text resolves 80 ms after it
-q('.app').animate([{ scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 520, delay: 200, easing: EASE.pop, fill: 'both' });
-[['.text', 280], ['.when', 340]].forEach(([s, at]) => q(s).animate([{ translate: '0 1.4vh', opacity: 0, filter: 'blur(4px)' }, { translate: '0 0', opacity: 1, filter: 'blur(0px)' }], { duration: 420, delay: at, easing: EASE.land, fill: 'both' }));
-// the exit is shorter than the entrance and accelerates: 260 ms, cubic in, and it ends on the last frame
-note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity: 0 }], { duration: 260, delay: 1740, easing: EASE.launch, fill: 'forwards' });
+
+// twelve generic apps: a flat colour with one white glyph each
+const APPS = [
+  ['Notes', '#e6b422', '<path d="M6 8h12M6 12h12M6 16h8"/>'], ['Clock', '#1c1c1e', '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>'], ['Weather', '#3a86e0', '<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6L7 7M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/>'], ['Files', '#2f7bd9', '<path d="M4 7h6l2 2h8v9H4z"/>'],
+  ['Camera', '#5b5b60', '<rect x="4" y="8" width="16" height="11" rx="2.5"/><circle cx="12" cy="13.5" r="3"/><path d="M9 8l1-2h4l1 2"/>'], ['Music', '#d6404f', '<path d="M9 17V6l9-2v11"/><circle cx="7" cy="17" r="2"/><circle cx="16" cy="15" r="2"/>'], ['Maps', '#3da35d', '<path d="M5 18c4-2 2-8 7-8s3-5 7-5"/><circle cx="5" cy="18" r="1.5"/><circle cx="19" cy="5" r="1.5"/>'], ['Books', '#e8822a', '<path d="M5 6c3-1 5-1 7 1 2-2 4-2 7-1v12c-3-1-5-1-7 1-2-2-4-2-7-1z"/><path d="M12 7v12"/>'],
+  ['Calendar', '#f2f2f4', '<path stroke="#d6404f" d="M5 9h14"/><path stroke="#1c1c1e" d="M9 14h6M12 12v4"/>'], ['Inbox', '#2f7bd9', '<rect x="4" y="6" width="16" height="12" rx="2.5"/><path d="M4.5 8l7.5 5.5L19.5 8"/>'], ['Fitness', '#1c1c1e', '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3.5" stroke="#8fd14f"/>'], ['Settings', '#8a8a90', '<circle cx="12" cy="12" r="3"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3M6.3 6.3l2 2M15.7 15.7l2 2M6.3 17.7l2-2M15.7 8.3l2-2"/>'],
+];
+q('#grid').innerHTML = APPS.map(([n, c, g]) => `<div class="app"><div class="ico" style="background:${c}"><svg viewBox="0 0 24 24">${g}</svg></div>${n}</div>`).join('');
+
+// the banner drops from above the screen on the system spring (a small settle) and swipes up when it times out: the exit is shorter and accelerates
+const banner = q('#banner');
+vawe.onFrame((t) => {
+  const exit = Math.min(1, Math.max(0, (t * 1000 - OUT_AT) / OUT_MS));
+  const drop = exit > 0 ? 200 * exit ** 3 : 200 * (1 - track(t, [[0, 0], [IN_AT / 1000, 1]], K, D));
+  banner.style.translate = `0 ${-drop.toFixed(3)}%`;
+});
+
+arrive(q('.phone'), 100, { ms: 220, from: '0.8vh' });
+leave(q('.phone'), END);
 </script>
 </body>
 </html>
