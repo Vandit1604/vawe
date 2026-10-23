@@ -53,11 +53,11 @@
   "counter-dive": "e024f8e2e274b570",
   "crash-zoom": "73309ce2bfdb045b",
   "css-box": {
-    "hash": "0157925e53f4be05",
+    "hash": "6147b544f6359554",
     "crf": 19
   },
   "css-box-dark": {
-    "hash": "0a36e7ff6fe979d3",
+    "hash": "5f17696edea782b7",
     "crf": 19
   },
   "cta-morph-press": "20ab535ec0db79e8",
@@ -160,7 +160,14 @@
     "hash": "000476851563d07b",
     "crf": 16
   },
-  "notification-pop": "c9a1abe7e12d490a",
+  "notification-pop": {
+    "hash": "872dc0794d098116",
+    "crf": 16
+  },
+  "notification-pop-dark": {
+    "hash": "6e2cf1693ee4eb66",
+    "crf": 16
+  },
   "outline-fill": "134c2011694613d0",
   "overwhelm-collapse": "685c4e650e521a6a",
   "pan-stations": {
@@ -198,7 +205,14 @@
     "hash": "79675a7b286ff88e",
     "crf": 16
   },
-  "skeleton-reveal": "7a8637ce9901f147",
+  "skeleton-reveal": {
+    "hash": "82baaf472a28e164",
+    "crf": 16
+  },
+  "skeleton-reveal-dark": {
+    "hash": "b30aaa1685e5e77a",
+    "crf": 16
+  },
   "slice-shift": "fc360f7f7ce43185",
   "smear-stretch": "0c7af89f662af603",
   "speed-ramp-freeze": "b5a5fb0493df054e",
