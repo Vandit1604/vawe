@@ -21,3 +21,4 @@ Sound: none; a soft tick at the tap is the only cue a film needs.
 - The page behind scales to 94 percent, moves down 1.6 u, rounds to 2.4 u and dims by 30 percent on the same curve. The ground around it is black, as on the device.
 - The name field has focus: the text types in whole steps and the caret blinks every 0.5 s.
 - A tap on Cancel at 3.8 s dismisses the sheet in 0.44 s on a faster spring of the same kind. The clip ends on the page from frame 0.
+- Common mistake: a sheet that scales or fades in from the middle, or a page that does not move behind it. The sheet rises from the bottom edge and the page behind it shrinks, rounds and dims on the same curve.
