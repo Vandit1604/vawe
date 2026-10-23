@@ -2,11 +2,11 @@
 <html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="5">
+<meta name="duration" content="4.2">
 <meta name="variants" content="dark">
 <title>move: device tilt stage</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
-<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.0", "static-window@3.0-4.6"], "_why": {"text-unreadable-hold": "the laptop holds 2.0 s after the camera settles at 2.7 s in a 5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the laptop leaves at 4.6 s, so the settled shot holds 1.9 s, short of the 5.4 s the check asks", "world-held@0.0-5.0": "one laptop shot holds 5.0 s: the camera turns from 0.2 s to 2.7 s, the render bar fills to the end and the laptop leaves at 4.6 s", "static-window@3.0-4.6": "laptop, 1.6 s from 3.0 s: a laptop on a desk holds still, only the render bar on its screen moves"}}</script>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-4.2", "static-window@2.2-3.8"], "_why": {"text-unreadable-hold": "the laptop holds 1.6 s after the camera settles at 2.2 s in a 4.2 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the laptop leaves at 3.8 s, so the settled shot holds 1.6 s, short of the 5.4 s the check asks", "world-held@0.0-4.2": "one laptop shot holds 4.2 s: the camera turns from 0.2 s to 2.2 s, the render bar fills to the end and the laptop leaves at 3.8 s", "static-window@2.2-3.8": "laptop, 1.6 s from 2.2 s: a laptop on a desk holds still, only the render bar on its screen moves"}}</script>
 <style>
   :root { --alu: #d4d6da; --alu-edge: #b9bcc1; --alu-front: #a9acb2; --alu-back: #c7c9ce; --key: #17181b; --bezel: #09090a; --lw: calc(var(--u) * 110); --lh: calc(var(--u) * 69); --dd: calc(var(--u) * 77); --lt: calc(var(--u) * 1.6); --dt: calc(var(--u) * 3.2); }
   html[data-theme="dark"] { --alu: #b8babf; --alu-edge: #9fa2a8; --alu-front: #8d9096; --alu-back: #aaacb1; }
@@ -86,8 +86,8 @@ import { easeFn } from '/core/motion/presets.js';
 import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
 const S = easeFn('settle'), clamp = (u) => Math.min(1, Math.max(0, u));
 const lerp = (a, b, u) => a + (b - a) * u;
-const END = 5000, T0 = 0.2, DUR = 2.5;
-const from = { y: 10, rx: -58, ry: -36, s: 0.56 }, to = { y: 3, rx: -19, ry: -9, s: 0.76 };
+const END = 4200, T0 = 0.2, DUR = 2.0;
+const from = { y: 18, rx: -58, ry: -36, s: 0.86 }, to = { y: 15, rx: -19, ry: -9, s: 1.06 };
 const cam = document.getElementById('cam');
 
 // ANSI rows as key widths in units; every row adds up to 15
@@ -106,7 +106,7 @@ vawe.onFrame((t) => {
   cam.style.setProperty('--rx', lerp(from.rx, to.rx, u).toFixed(3));
   cam.style.setProperty('--ry', lerp(from.ry, to.ry, u).toFixed(3));
   cam.style.setProperty('--s', lerp(from.s, to.s, u).toFixed(4));
-  const p = 0.52 + 0.4 * clamp(t / 4.6);
+  const p = 0.52 + 0.4 * clamp(t / 3.8);
   document.querySelector('.bar b').style.transform = `scaleX(${p.toFixed(4)})`;
   document.querySelector('.pct').textContent = `${Math.round(p * 100)}%`;
 });
