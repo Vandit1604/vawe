@@ -1,0 +1,26 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<title>Storyboard lockstep</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; overflow: clip; }
+  .box { position: absolute; top: 40%; width: 18%; height: 20%; background: #fc3; }
+</style>
+</head>
+<body>
+<section data-world="one">
+<div class="box" id="a" style="left: 10%"></div>
+<div class="box" id="b" style="left: 40%"></div>
+<div class="box" id="c" style="left: 70%"></div>
+</section>
+<script>
+for (const id of ['a', 'b', 'c']) {
+  document.getElementById(id).animate(
+    [{ transform: 'translateY(120px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+    { duration: 800, delay: 400, easing: 'ease', fill: 'both' });
+}
+</script>
+</body>
+</html>
