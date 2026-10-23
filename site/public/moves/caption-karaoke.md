@@ -1,46 +1,35 @@
 # Caption karaoke
 
 **Use when** a spoken line runs as captions and the eye must follow the voice: the word being said
-lifts to full ink and one soft pill glides from word to word on the speech timing. The line never
-re-wraps and no word moves except the small lift. Clip: [caption-karaoke.mp4](caption-karaoke.mp4).
+turns solid yellow on its own spoken second, and the rest of the page stays white. The page never
+re-wraps and no word moves. Clip: [caption-karaoke.mp4](caption-karaoke.mp4) (4.4 s).
 Demo: [demo/caption-karaoke.html](demo/caption-karaoke.html).
 
 ```js
-// [seconds the word starts, word index]: the speech timing, one table, edited in place
-const SPOKEN = [[0.3, 0], [0.7, 1], [0.95, 2], [1.2, 3] /* ... */];
-const box = (el) => ({ x: el.offsetLeft - pad, y: el.offsetTop - padY, w: el.offsetWidth + 2 * pad, h: el.offsetHeight + 2 * padY });
-const frames = [{ offset: 0, ...at(box(spans[0])), easing: 'linear' }];
-SPOKEN.forEach(([t, i], n) => {
-  if (n === 0) return;
-  frames.push({ offset: t / END, ...at(box(spans[SPOKEN[n - 1][1]])), easing: EASE.land });   // hold, then glide
-  frames.push({ offset: (t + 0.14) / END, ...at(box(spans[i])), easing: 'linear' });
-});
-pill.animate(frames, { duration: END * 1000, fill: 'both', easing: 'linear' });
-// each word: muted -> ink with a 0.05em lift on its second, back to muted when the next word starts
-spans[i].animate([{ color: MUTED, translate: '0 0', easing: EASE.land }, { offset: .., color: INK, translate: '0 -0.05em' }, ...], { delay: (t - 0.04) * 1000, duration, fill: 'both' });
-// enter(cap, ...) and leave(cap, { end }) from core/motion/presets.js
+// pages of captions: [start s, end s, [[word, second it is spoken], ...] per line]: one table, edited in place
+const PAGES = [[0.4, 2.3, [[['Captions', 0.4], ['that', 0.95]], [['follow', 1.2], ['the', 1.55], ['voice', 1.7]]]], /* ... */];
+show(page, from * 1000, to * 1000);                       // a page appears and goes on one frame
+// the active word is yellow from its second to the next word (or 0.45 s): a hard colour step
+vawe.onFrame((t) => words.forEach(({ w, at }) => w.classList.toggle('on', t >= at && t < end(at))));
 ```
 
 ```css
-.cap { position: relative; isolation: isolate; color: var(--muted); }
-.w { display: inline-block; }
-.pill-bg { position: absolute; left: 0; top: 0; z-index: -1; border-radius: var(--r3); background: var(--hover); }
+.caps { font: 900 11.5u Archivo; text-transform: uppercase; text-align: center; color: #fff; }
+.w { -webkit-text-stroke: 1.8u #000; paint-order: stroke fill; }
+.w.on { color: #ffe500; }
 ```
 
-Sound: none; the voice is the sound. Cue a tick at each SPOKEN time only if the captions run without a voice.
+Sound: none; the voice is the sound.
 
-## The numbers that make it look expensive
+## How it looks and moves
 
-- The pill takes 0.14 s to glide and then holds. On an expo-out curve it arrives in the first third, so it is already under the word when the word lifts.
-- Muted text is the rest state (4.5:1 or more on the ground), full ink is the current word. The pill is a tint of the surface ladder, not an accent block, so the text keeps its contrast.
-- The pill is 0.16em wider than the word on each side, so it never covers the space and a neighbour.
-- Position with `offsetLeft` and `offsetTop`, not `getBoundingClientRect`: the caption itself is mid-entrance and scaled, and the offsets ignore transforms.
-- Wait for `document.fonts.ready` before measuring, or the pill lands where the fallback font put the words.
+- The clip copies a short-video caption: a heavy uppercase sans, centred in the lower third of the shot, white with a thick black stroke and a soft shadow so it reads on any footage.
+- A page holds 2 lines and 3 to 5 words. The next page replaces it on one frame.
+- The active word is solid yellow (#ffe500). It switches on one frame, with no glide, pill or lift, as these captions do.
+- The footage is a real photograph with a slow 3 percent push on the glide ease (`EASE.glide`, 4.4 s). The pages run back to back from 0.4 s to 4.1 s with no gap, and the clip ends 0.3 s after the last page. Frame 0 and the last frame show the footage without captions.
+- The caption is 11.5 percent of the frame height, so it reads at once.
 
 ## The common mistake
 
-Moving the pill by a per-word `setTimeout` or by a `[left, width]` tween that restarts per word. Both
-drift off the speech. One keyframe list on one animation, with offsets from the `SPOKEN` table, keeps
-the pill in step with the seek.
-
-Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
+Timing each word with a `setTimeout`, or tweening a highlight per word. Both drift from the speech. Keep one
+table of spoken seconds and derive the state from `t`.

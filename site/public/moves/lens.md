@@ -148,6 +148,25 @@ These faked one effect per element and never matched a camera:
   sharp text on the far side. Use `tiltX`, `tiltY` and `zoom`.
 - `mix-blend-mode` colour layers as a palette: use `palette`.
 
+## Views and movements (product shot)
+
+`core/surfaces/lens-views.js` holds the presets of a product shot as data and pure helpers, so a page names a view instead of writing angles. Angles are degrees as CSS
+reads them; `lensPose(pose)` gives `tiltX`, `tiltY`, `roll`, `zoom`. The numbers come from a measured study of a product-shot tool (its four perspective presets, and its screen movement
+ranges with its clamp of 25 degrees on rotateX and rotateY); the source is recorded at the top of the file.
+
+```js
+import { view, viewScaled, lensPose, moveBetween, backdropFor, shadowFor } from '/core/surfaces/lens-views.js';
+const orbit = moveBetween('soft-orbit', 3, { scale: 0.6 });   // { from, to } poses, seeded, x and y clamped to 25 degrees
+const away = viewScaled('reverse-isometric', 0.5);            // 10 and 22.5 degrees
+const backdrop = backdropFor(pageEdgeRgb);                    // the page's edge colour, a little lighter on a dark page
+const cue = shadowFor(backdrop, pageEdgeRgb);                 // layers, rim light and reflection that read on that backdrop
+```
+
+- Views: `flat`, `side-angle`, `isometric`, `top-diagonal`, `reverse-isometric`. Movements: `soft-orbit`, `side-drift`, `focus-push`, `focus-pull`, `diagonal-rise`, `angle-settle`, `close-orbit`, `wide-sweep`, `isometric-glide`, `isometric-reveal`. The same name and seed give the same move.
+- `shadowFor`: a light backdrop (luminance 0.18 or more) gets the plain soft shadow. A dark one swallows it, so it gets layers of alpha 0.7 and 0.85, a rim light on the page edge (alpha 0.3) and a faint reflection (alpha 0.07). Draw them in the page; lens does not. Before you pick a backdrop, make 3 options and compare them in one `vawe sheet`.
+- Keep text readable: reading poses stay within 10 degrees, a start within about 15. Put the lens `dof.focus` on what the viewer must read (a function of t) and push `zoom` and `aim` to it; keep `dof.blur` near 0.45 so only the far edge softens.
+- A real screen keeps the real-surface rule: the plane and the camera move, the page moves only as it does.
+
 ## Never lose the screen
 
 A tilted plane can swing its border into the frame or turn away from the target. `edge: 'extend'` (the

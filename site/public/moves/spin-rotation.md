@@ -1,40 +1,28 @@
 # Spin rotation
 
-**Use when** a loading screen hands over to the loaded one and the spinner is on screen: the spinner
-keeps turning, the arc's leading edge sweeps round like a radar hand and uncovers the next screen
-behind it, and the camera rolls with the turn and comes back to level as the new screen settles. One angle
-runs the move: the spinner, the reveal and the roll all read from it. Clip: [spin-rotation.mp4](spin-rotation.mp4).
-Demo: [demo/spin-rotation.html](demo/spin-rotation.html). Not [spin-transition](spin-transition.md), which
-rolls the whole frame 90 degrees across a cut and needs no spinner.
+**Use when** a loading state turns into the loaded state and the spinner should carry over: the ring that was waiting
+becomes the status mark of the result. Clip: [spin-rotation.mp4](spin-rotation.mp4). Demo:
+[demo/spin-rotation.html](demo/spin-rotation.html).
+
+Look: a browser window on the flat neutral ground. First a centred ring spinner (a grey track and a green arc, rounded ends) with a muted
+"Loading workspace" line. Then the page: a header with a green check circle, "Workspace ready", a green pill, a sync note and three grey stat tiles.
+
+How it moves: the arc turns at one speed (330 degrees a second) from 0.4 s. At 1.6 s the turn brakes to a stop in 0.7 s on `EASE.land` while the arc
+grows to a full circle on the same ease. The ring then flies to the header mark spot and shrinks to its size in 0.55 s on `EASE.land`, in the same green. A check draws inside it in 0.35 s. The header and the stat tiles fade in with a 1 vh rise, 70 ms apart: the tiles from 2.35 s, the note at 2.6 s and the title at 2.65 s, so the page is never empty and the ring never crosses the text. The window arrives and leaves
+on `arrive` and `leave`. Only the circle turns; the check never rotates.
 
 ```js
-import { easeFn } from '../../core/motion/presets.js';
-const land = easeFn('land');
-const OMEGA = 330, T0 = 0.5, T_C = 1.7, D2 = 0.8;                  // deg/s, sweep starts, brake starts, brake length
-const ROLL = { at: 0.9, dur: 1.5, deg: 7 };                        // one roll out and back to level, the way the spinner turns
-const smooth = (k) => k * k * (3 - 2 * k);
-const head = (t) => (t < T_C ? OMEGA * t : OMEGA * T_C + (OMEGA * D2 / 4.8) * land(clamp((t - T_C) / D2)));   // land starts at 4.8 x its average: 330
-const roll = (t) => ROLL.deg * Math.sin(Math.PI * smooth(clamp((t - ROLL.at) / ROLL.dur)));   // 0 at both ends, zero speed at both
-const own = (t) => head(t) - roll(t);                              // screen angle of the arc = own + roll, so it never jumps
-// world.style.transform = `rotate(${roll(t)}deg)`; ring.style.transform = `rotate(${own(t)}deg)`
-// B's plane is clipped to the wedge from own(T0) to own(t): polygon(centre, points on a circle of radius 3 W)
+const head = (t) => (t < BRAKE_AT ? OMEGA * Math.max(0, t - SPIN_AT)                     // constant speed
+  : OMEGA * (BRAKE_AT - SPIN_AT) + (OMEGA * BRAKE_S / 4.8) * land(clamp((t - BRAKE_AT) / BRAKE_S)));   // land starts at 4.8 times the average speed
+spin.style.transform = `rotate(${head(t)}deg)`;                                           // the circle group only
+arc.style.strokeDasharray = `${C * (0.25 + 0.75 * land(clamp((t - BRAKE_AT) / 0.7)))} ${C}`;   // the arc closes as it brakes
+ring.style.transform = `translate(${dx * p}px, ${dy * p}px) scale(${1 - (1 - S1) * p})`;      // p = land over 0.55 s from 2.3 s
+check.style.strokeDashoffset = String(60 * (1 - land(clamp((t - 2.7) / 0.35))));
 ```
 
-Sound: none; the turn is the cue, and the settled screen takes its own entrance sound.
+Sound: pluck when the check lands, at 3.05 s (default gain).
 
-The angle that matters is the arc's angle on screen. It is `own + roll`, and the roll starts and ends at zero
-speed, so the sum has the same speed before and after the roll begins (330 degrees a second); then
-`EASE.land` brakes it from that same speed (its first frame moves at 4.8 times its average, so the
-brake covers `OMEGA * D2 / 4.8` = 55 degrees). The wedge starts at the arc's leading edge at `T0` and
-needs 360 degrees, so it closes while the spinner is still at full speed, 1.1 s later; the braking
-turn is only the ring settling, never a slow reveal. The ring then flies to the header and becomes its
-mark: one shared element, no fade.
-
-Roll 5 to 8 degrees, clockwise with the spinner, then back to level; a screen that holds at 14 degrees
-reads as a mistake. Give the new screen a light ground and a light card, so the wedge edge against the
-dark loader is clear, and keep the middle of the card free for the ring until it flies to the mark: the ring
-then closes to a full circle. Both planes are larger than the frame (`inset: -50%`), so the roll never shows a corner. A
-sweep needs motion blur or the hard edge strobes at 5.5 degrees a frame: stack 8 copies of the world at
-shutter times, as in [spin-transition](spin-transition.md), and show one copy when nothing moves.
+Common mistake: a wipe or a clock sweep that reveals the next page. It is a stock transition and ignores the ring. Brake the spin into
+the shape of the next state, and end on a real success mark.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

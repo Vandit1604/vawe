@@ -33,9 +33,7 @@
  "looks": [
   "vawe",
   "brutal",
-  "chrome",
   "daylight",
-  "dusk",
   "editorial",
   "field",
   "paper",
@@ -338,7 +336,7 @@
    "name": "caret-typing",
    "title": "Caret typing",
    "group": "reveal-a-title",
-   "look": "terminal",
+   "look": "product",
    "jobs": [
     "type-a-command-prompt-or-name"
    ],
@@ -346,7 +344,7 @@
    "clip": "https://vawe.dev/moves/caret-typing.mp4",
    "md": "https://vawe.dev/moves/caret-typing.md",
    "page": "https://vawe.dev/video-components/caret-typing",
-   "duration": 1
+   "duration": 5
   },
   {
    "name": "letter-stagger",
@@ -380,21 +378,24 @@
    "name": "flap-resolve",
    "title": "Split-flap resolve",
    "group": "reveal-a-title",
-   "look": "chrome",
+   "look": "product",
    "jobs": [
     "decide-a-name-or-number-on-screen"
    ],
    "use": "a name or number is decided: each letter is a tile that flips through seeded glyphs on a hinge and locks left to right",
    "clip": "https://vawe.dev/moves/flap-resolve.mp4",
+   "variants": {
+    "dark": "https://vawe.dev/moves/flap-resolve-dark.mp4"
+   },
    "md": "https://vawe.dev/moves/flap-resolve.md",
    "page": "https://vawe.dev/video-components/flap-resolve",
-   "duration": 1.4
+   "duration": 6
   },
   {
    "name": "word-swap-slot",
    "title": "Word swap slot",
    "group": "reveal-a-title",
-   "look": "dusk",
+   "look": "paper",
    "jobs": [
     "decide-a-name-or-number-on-screen"
    ],
@@ -464,7 +465,7 @@
    "name": "grid-stagger-wave",
    "title": "Grid stagger wave",
    "group": "reveal-a-title",
-   "look": "field",
+   "look": "product",
    "jobs": [
     "make-many-things-read-as-one-gesture"
    ],
@@ -472,7 +473,7 @@
    "clip": "https://vawe.dev/moves/grid-stagger-wave.mp4",
    "md": "https://vawe.dev/moves/grid-stagger-wave.md",
    "page": "https://vawe.dev/video-components/grid-stagger-wave",
-   "duration": 1.6
+   "duration": 4.2
   },
   {
    "name": "text-scramble-decode",
@@ -548,7 +549,7 @@
    "name": "echo-trail",
    "title": "Echo trail",
    "group": "reveal-a-title",
-   "look": "dusk",
+   "look": "paper",
    "jobs": [
     "hit-one-detail-on-a-beat"
    ],
@@ -562,7 +563,7 @@
    "name": "caption-karaoke",
    "title": "Caption karaoke",
    "group": "reveal-a-title",
-   "look": "dusk",
+   "look": "product",
    "jobs": [
     "run-a-spoken-line-as-captions"
    ],
@@ -570,7 +571,7 @@
    "clip": "https://vawe.dev/moves/caption-karaoke.mp4",
    "md": "https://vawe.dev/moves/caption-karaoke.md",
    "page": "https://vawe.dev/video-components/caption-karaoke",
-   "duration": 3.4
+   "duration": 4.4
   },
   {
    "name": "caption-editorial",
@@ -646,7 +647,7 @@
    "name": "letter-3d-swap",
    "title": "Letter 3D swap",
    "group": "reveal-a-title",
-   "look": "swiss",
+   "look": "editorial",
    "jobs": [
     "turn-each-character-over-as-a-small-cube"
    ],
@@ -654,7 +655,7 @@
    "clip": "https://vawe.dev/moves/letter-3d-swap.mp4",
    "md": "https://vawe.dev/moves/letter-3d-swap.md",
    "page": "https://vawe.dev/video-components/letter-3d-swap",
-   "duration": 1.8
+   "duration": 5
   },
   {
    "name": "cut-on-motion",
@@ -759,7 +760,7 @@
    "name": "stack-cover",
    "title": "Stack cover",
    "group": "change-between-shots",
-   "look": "chrome",
+   "look": "product",
    "jobs": [
     "change-between-shots-soft"
    ],
@@ -767,13 +768,13 @@
    "clip": "https://vawe.dev/moves/stack-cover.mp4",
    "md": "https://vawe.dev/moves/stack-cover.md",
    "page": "https://vawe.dev/video-components/stack-cover",
-   "duration": 1.6
+   "duration": 5
   },
   {
    "name": "split-reveal",
    "title": "Split reveal",
    "group": "change-between-shots",
-   "look": "dusk",
+   "look": "daylight",
    "jobs": [
     "change-between-shots-soft"
    ],
@@ -844,7 +845,7 @@
    "name": "speed-ramp-freeze",
    "title": "Speed ramp freeze",
    "group": "change-between-shots",
-   "look": "chrome",
+   "look": "editorial",
    "jobs": [
     "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
    ],
@@ -852,7 +853,7 @@
    "clip": "https://vawe.dev/moves/speed-ramp-freeze.mp4",
    "md": "https://vawe.dev/moves/speed-ramp-freeze.md",
    "page": "https://vawe.dev/video-components/speed-ramp-freeze",
-   "duration": 1.5
+   "duration": 4.8
   },
   {
    "name": "speed-ramp",
@@ -900,7 +901,7 @@
    "name": "luma-matte-dissolve",
    "title": "Luma matte dissolve",
    "group": "change-between-shots",
-   "look": "dusk",
+   "look": "product",
    "jobs": [
     "change-between-shots-soft"
    ],
@@ -908,7 +909,7 @@
    "clip": "https://vawe.dev/moves/luma-matte-dissolve.mp4",
    "md": "https://vawe.dev/moves/luma-matte-dissolve.md",
    "page": "https://vawe.dev/video-components/luma-matte-dissolve",
-   "duration": 1.5
+   "duration": 4.2
   },
   {
    "name": "smear-stretch",
@@ -984,7 +985,7 @@
    "name": "spin-rotation",
    "title": "Spin rotation",
    "group": "change-between-shots",
-   "look": "vawe",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -992,7 +993,7 @@
    "clip": "https://vawe.dev/moves/spin-rotation.mp4",
    "md": "https://vawe.dev/moves/spin-rotation.md",
    "page": "https://vawe.dev/video-components/spin-rotation",
-   "duration": 3.2
+   "duration": 4.6
   },
   {
    "name": "counter-dive",
@@ -1054,7 +1055,7 @@
    "name": "cursor-spotlight",
    "title": "Cursor spotlight",
    "group": "change-between-shots",
-   "look": "daylight",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -1062,13 +1063,13 @@
    "clip": "https://vawe.dev/moves/cursor-spotlight.mp4",
    "md": "https://vawe.dev/moves/cursor-spotlight.md",
    "page": "https://vawe.dev/video-components/cursor-spotlight",
-   "duration": 3.6
+   "duration": 6
   },
   {
    "name": "toggle-horizon",
    "title": "Toggle horizon",
    "group": "change-between-shots",
-   "look": "dusk",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -1076,7 +1077,7 @@
    "clip": "https://vawe.dev/moves/toggle-horizon.mp4",
    "md": "https://vawe.dev/moves/toggle-horizon.md",
    "page": "https://vawe.dev/video-components/toggle-horizon",
-   "duration": 3.8
+   "duration": 4.6
   },
   {
    "name": "progress-timeline",
@@ -1096,7 +1097,7 @@
    "name": "avatar-world",
    "title": "Avatar world",
    "group": "change-between-shots",
-   "look": "daylight",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -1104,13 +1105,13 @@
    "clip": "https://vawe.dev/moves/avatar-world.mp4",
    "md": "https://vawe.dev/moves/avatar-world.md",
    "page": "https://vawe.dev/video-components/avatar-world",
-   "duration": 3.8
+   "duration": 4.4
   },
   {
    "name": "glow-record",
    "title": "Glow record",
    "group": "change-between-shots",
-   "look": "vawe",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -1118,7 +1119,7 @@
    "clip": "https://vawe.dev/moves/glow-record.mp4",
    "md": "https://vawe.dev/moves/glow-record.md",
    "page": "https://vawe.dev/video-components/glow-record",
-   "duration": 3.8
+   "duration": 6
   },
   {
    "name": "highlight-sweep",
@@ -1138,7 +1139,7 @@
    "name": "shadow-handoff",
    "title": "Shadow handoff",
    "group": "change-between-shots",
-   "look": "daylight",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -1146,7 +1147,7 @@
    "clip": "https://vawe.dev/moves/shadow-handoff.mp4",
    "md": "https://vawe.dev/moves/shadow-handoff.md",
    "page": "https://vawe.dev/video-components/shadow-handoff",
-   "duration": 3.8
+   "duration": 5
   },
   {
    "name": "word-portal",
@@ -1166,7 +1167,7 @@
    "name": "underline-road",
    "title": "Underline road",
    "group": "change-between-shots",
-   "look": "paper",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -1174,13 +1175,13 @@
    "clip": "https://vawe.dev/moves/underline-road.mp4",
    "md": "https://vawe.dev/moves/underline-road.md",
    "page": "https://vawe.dev/video-components/underline-road",
-   "duration": 3.9
+   "duration": 5
   },
   {
    "name": "caret-door",
    "title": "Caret door",
    "group": "change-between-shots",
-   "look": "terminal",
+   "look": "product",
    "jobs": [
     "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
    ],
@@ -1188,7 +1189,7 @@
    "clip": "https://vawe.dev/moves/caret-door.mp4",
    "md": "https://vawe.dev/moves/caret-door.md",
    "page": "https://vawe.dev/video-components/caret-door",
-   "duration": 3.6
+   "duration": 6
   },
   {
    "name": "word-sweep",
@@ -1222,7 +1223,7 @@
    "name": "marker-highlight",
    "title": "Marker highlight",
    "group": "point-the-eye",
-   "look": "paper",
+   "look": "product",
    "jobs": [
     "point-at-one-word-in-a-held-line"
    ],
@@ -1230,7 +1231,7 @@
    "clip": "https://vawe.dev/moves/marker-highlight.mp4",
    "md": "https://vawe.dev/moves/marker-highlight.md",
    "page": "https://vawe.dev/video-components/marker-highlight",
-   "duration": 1.4
+   "duration": 4.2
   },
   {
    "name": "underline-draw",
@@ -1264,7 +1265,7 @@
    "name": "spotlight-dim",
    "title": "Spotlight dim",
    "group": "point-the-eye",
-   "look": "dusk",
+   "look": "paper",
    "jobs": [
     "point-at-one-part-of-a-ui"
    ],
@@ -1349,7 +1350,7 @@
    "name": "exposure-flash",
    "title": "Exposure flash",
    "group": "move-the-camera",
-   "look": "terminal",
+   "look": "product",
    "jobs": [
     "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
    ],
@@ -1357,7 +1358,7 @@
    "clip": "https://vawe.dev/moves/exposure-flash.mp4",
    "md": "https://vawe.dev/moves/exposure-flash.md",
    "page": "https://vawe.dev/video-components/exposure-flash",
-   "duration": 2
+   "duration": 4.5
   },
   {
    "name": "lens",
@@ -1377,7 +1378,7 @@
    "name": "camera-moves",
    "title": "Camera moves",
    "group": "move-the-camera",
-   "look": "swiss",
+   "look": "product",
    "jobs": [
     "lean-the-camera-toward-a-subject",
     "move-the-camera-over-a-whole-world-push-pull-whip"
@@ -1386,7 +1387,7 @@
    "clip": "https://vawe.dev/moves/camera-moves.mp4",
    "md": "https://vawe.dev/moves/camera-moves.md",
    "page": "https://vawe.dev/video-components/camera-moves",
-   "duration": 2
+   "duration": 6
   },
   {
    "name": "depth-resolve",
@@ -1449,7 +1450,7 @@
    "name": "rack-focus",
    "title": "Rack focus",
    "group": "move-the-camera",
-   "look": "dusk",
+   "look": "product",
    "jobs": [
     "lean-the-camera-toward-a-subject"
    ],
@@ -1457,7 +1458,7 @@
    "clip": "https://vawe.dev/moves/rack-focus.mp4",
    "md": "https://vawe.dev/moves/rack-focus.md",
    "page": "https://vawe.dev/video-components/rack-focus",
-   "duration": 1.4
+   "duration": 4.5
   },
   {
    "name": "drift-hold",
@@ -1477,7 +1478,7 @@
    "name": "gradient-mesh-field",
    "title": "Gradient mesh field",
    "group": "move-the-camera",
-   "look": "signal",
+   "look": "editorial",
    "jobs": [
     "hold-a-line-still-to-read-with-a-ground-option-behind-it-the-hold-itself-keeps-a-part-moving-rule-live-hold",
     "give-a-held-frame-a-living-ground"
@@ -1486,7 +1487,7 @@
    "clip": "https://vawe.dev/moves/gradient-mesh-field.mp4",
    "md": "https://vawe.dev/moves/gradient-mesh-field.md",
    "page": "https://vawe.dev/video-components/gradient-mesh-field",
-   "duration": 3
+   "duration": 5
   },
   {
    "name": "pan-stations",
@@ -1577,7 +1578,7 @@
    "name": "calm-lockup",
    "title": "Calm lockup",
    "group": "end-a-film",
-   "look": "dusk",
+   "look": "editorial",
    "jobs": [
     "end-quietly"
    ],
@@ -1585,7 +1586,7 @@
    "clip": "https://vawe.dev/moves/calm-lockup.mp4",
    "md": "https://vawe.dev/moves/calm-lockup.md",
    "page": "https://vawe.dev/video-components/calm-lockup",
-   "duration": 2
+   "duration": 5
   },
   {
    "name": "cta-pop",
@@ -1633,7 +1634,7 @@
    "name": "logo-wall",
    "title": "Logo wall",
    "group": "end-a-film",
-   "look": "daylight",
+   "look": "product",
    "jobs": [
     "prove-it-with-customers"
    ],
@@ -1641,13 +1642,13 @@
    "clip": "https://vawe.dev/moves/logo-wall.mp4",
    "md": "https://vawe.dev/moves/logo-wall.md",
    "page": "https://vawe.dev/video-components/logo-wall",
-   "duration": 2
+   "duration": 4
   },
   {
    "name": "cta-morph-press",
    "title": "CTA morph press",
    "group": "end-a-film",
-   "look": "chrome",
+   "look": "product",
    "jobs": [
     "end-on-an-action"
    ],
@@ -1655,13 +1656,13 @@
    "clip": "https://vawe.dev/moves/cta-morph-press.mp4",
    "md": "https://vawe.dev/moves/cta-morph-press.md",
    "page": "https://vawe.dev/video-components/cta-morph-press",
-   "duration": 4
+   "duration": 5.5
   },
   {
    "name": "clip-expand",
    "title": "Clip expand from a point",
    "group": "product-moments",
-   "look": "dusk",
+   "look": "product",
    "jobs": [
     "show-a-real-ui-arriving"
    ],
@@ -1669,7 +1670,7 @@
    "clip": "https://vawe.dev/moves/clip-expand.mp4",
    "md": "https://vawe.dev/moves/clip-expand.md",
    "page": "https://vawe.dev/video-components/clip-expand",
-   "duration": 1
+   "duration": 5.5
   },
   {
    "name": "cursor-click",
@@ -1703,7 +1704,7 @@
    "name": "card-assemble",
    "title": "Card assemble",
    "group": "product-moments",
-   "look": "chrome",
+   "look": "product",
    "jobs": [
     "show-a-real-ui-arriving"
    ],
@@ -1711,21 +1712,24 @@
    "clip": "https://vawe.dev/moves/card-assemble.mp4",
    "md": "https://vawe.dev/moves/card-assemble.md",
    "page": "https://vawe.dev/video-components/card-assemble",
-   "duration": 1.9
+   "duration": 5.5
   },
   {
    "name": "notification-pop",
    "title": "Notification pop",
    "group": "product-moments",
-   "look": "field",
+   "look": "product",
    "jobs": [
     "show-a-click-doing-its-job"
    ],
    "use": "a banner drops in on the overshoot curve, icon then text, holds a second and leaves faster than it came",
    "clip": "https://vawe.dev/moves/notification-pop.mp4",
+   "variants": {
+    "dark": "https://vawe.dev/moves/notification-pop-dark.mp4"
+   },
    "md": "https://vawe.dev/moves/notification-pop.md",
    "page": "https://vawe.dev/video-components/notification-pop",
-   "duration": 2
+   "duration": 5.6
   },
   {
    "name": "chart-build",
@@ -1762,15 +1766,18 @@
    "name": "skeleton-reveal",
    "title": "Skeleton reveal",
    "group": "product-moments",
-   "look": "dusk",
+   "look": "product",
    "jobs": [
     "show-a-real-ui-arriving"
    ],
    "use": "grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart; use once per film",
    "clip": "https://vawe.dev/moves/skeleton-reveal.mp4",
+   "variants": {
+    "dark": "https://vawe.dev/moves/skeleton-reveal-dark.mp4"
+   },
    "md": "https://vawe.dev/moves/skeleton-reveal.md",
    "page": "https://vawe.dev/video-components/skeleton-reveal",
-   "duration": 2
+   "duration": 6
   },
   {
    "name": "ai-stream-response",
@@ -1835,15 +1842,18 @@
    "name": "device-tilt-stage",
    "title": "Device tilt stage",
    "group": "product-moments",
-   "look": "chrome",
+   "look": "product",
    "jobs": [
     "show-a-real-ui-arriving"
    ],
    "use": "the product as an object: the UI on a CSS 3D laptop that rises from a steep top-down angle, turns and settles on a spring, the glass reflection sliding with the lid's angle",
    "clip": "https://vawe.dev/moves/device-tilt-stage.mp4",
+   "variants": {
+    "dark": "https://vawe.dev/moves/device-tilt-stage-dark.mp4"
+   },
    "md": "https://vawe.dev/moves/device-tilt-stage.md",
    "page": "https://vawe.dev/video-components/device-tilt-stage",
-   "duration": 2
+   "duration": 4.2
   },
   {
    "name": "command-palette-summon",
@@ -1877,7 +1887,7 @@
    "name": "agent-progress",
    "title": "Agent progress",
    "group": "product-moments",
-   "look": "daylight",
+   "look": "product",
    "jobs": [
     "show-an-ai-agent-doing-several-steps"
    ],
@@ -1885,7 +1895,7 @@
    "clip": "https://vawe.dev/moves/agent-progress.mp4",
    "md": "https://vawe.dev/moves/agent-progress.md",
    "page": "https://vawe.dev/video-components/agent-progress",
-   "duration": 3.2
+   "duration": 6
   },
   {
    "name": "panel-live-sync",
@@ -1987,7 +1997,7 @@
    "name": "grain-field",
    "title": "Grain field",
    "group": "grounds",
-   "look": "paper",
+   "look": "editorial",
    "jobs": [
     "give-a-held-frame-a-living-ground"
    ],
@@ -1995,13 +2005,13 @@
    "clip": "https://vawe.dev/moves/grain-field.mp4",
    "md": "https://vawe.dev/moves/grain-field.md",
    "page": "https://vawe.dev/video-components/grain-field",
-   "duration": 4
+   "duration": 5
   },
   {
    "name": "halftone-field",
    "title": "Halftone field",
    "group": "grounds",
-   "look": "chrome",
+   "look": "editorial",
    "jobs": [
     "give-a-held-frame-a-living-ground"
    ],
@@ -2029,7 +2039,7 @@
    "name": "dot-grid-wave",
    "title": "Dot grid wave",
    "group": "grounds",
-   "look": "daylight",
+   "look": "product",
    "jobs": [
     "give-a-held-frame-a-living-ground"
    ],
@@ -2037,13 +2047,13 @@
    "clip": "https://vawe.dev/moves/dot-grid-wave.mp4",
    "md": "https://vawe.dev/moves/dot-grid-wave.md",
    "page": "https://vawe.dev/video-components/dot-grid-wave",
-   "duration": 4
+   "duration": 5
   },
   {
    "name": "light-pool",
    "title": "Light pool",
    "group": "grounds",
-   "look": "vawe",
+   "look": "editorial",
    "jobs": [
     "give-a-held-frame-a-living-ground"
    ],
@@ -2051,7 +2061,7 @@
    "clip": "https://vawe.dev/moves/light-pool.mp4",
    "md": "https://vawe.dev/moves/light-pool.md",
    "page": "https://vawe.dev/video-components/light-pool",
-   "duration": 4
+   "duration": 4.5
   },
   {
    "name": "marquee-along-path",
@@ -2071,7 +2081,7 @@
    "name": "simple-marquee",
    "title": "Simple marquee",
    "group": "grounds",
-   "look": "vawe",
+   "look": "product",
    "jobs": [
     "ride-tiles-along-a-curve-or-slide-rows-of-them"
    ],
@@ -2079,7 +2089,7 @@
    "clip": "https://vawe.dev/moves/simple-marquee.mp4",
    "md": "https://vawe.dev/moves/simple-marquee.md",
    "page": "https://vawe.dev/video-components/simple-marquee",
-   "duration": 4
+   "duration": 4.4
   },
   {
    "name": "circling-elements",
@@ -2099,15 +2109,18 @@
    "name": "css-box",
    "title": "CSS box",
    "group": "grounds",
-   "look": "vawe",
+   "look": "product",
    "jobs": [
     "turn-a-cube-to-show-another-face"
    ],
    "use": "a 200 px cube of bold type turns to another face on a stiff overdamped spring (stiffness 100, damping 30, no overshoot) under perspective 600",
    "clip": "https://vawe.dev/moves/css-box.mp4",
+   "variants": {
+    "dark": "https://vawe.dev/moves/css-box-dark.mp4"
+   },
    "md": "https://vawe.dev/moves/css-box.md",
    "page": "https://vawe.dev/video-components/css-box",
-   "duration": 4.6
+   "duration": 5.6
   },
   {
    "name": "pixelate-svg-filter",
@@ -2141,7 +2154,7 @@
    "name": "media-between-text",
    "title": "Media between text",
    "group": "grounds",
-   "look": "vawe",
+   "look": "editorial",
    "jobs": [
     "open-a-picture-inside-a-line-of-type"
    ],
@@ -2149,7 +2162,7 @@
    "clip": "https://vawe.dev/moves/media-between-text.mp4",
    "md": "https://vawe.dev/moves/media-between-text.md",
    "page": "https://vawe.dev/video-components/media-between-text",
-   "duration": 4.2
+   "duration": 4.4
   }
  ]
 }

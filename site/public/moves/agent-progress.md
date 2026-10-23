@@ -1,47 +1,35 @@
 # Agent progress
 
-**Use when** the feature is an AI agent doing several steps for the viewer: it reads, traces, patches and
-tests, and the proof is visible labour. A card springs in, four rows rise 70 ms apart, an arc turns beside a
-status line that swaps whole states, and the rows flip from numbered outlines to solid check circles one
-by one while the bar advances. The film ends mid-list, with the last row still turning, so the work reads
-as ongoing. No prompt is typed and no cursor is needed. Clip: [agent-progress.mp4](agent-progress.mp4).
-Demo: [demo/agent-progress.html](demo/agent-progress.html).
-
-```css
-.badge { position: relative; width: 6.4vh; height: 6.4vh; }
-.badge > * { position: absolute; inset: 0; }
-.done { border-radius: 50%; background: var(--done); opacity: 0; scale: 0.4; }   /* the solid circle, hidden until its check */
-.done path { stroke-dasharray: 24; stroke-dashoffset: 24; }                     /* the tick draws on one dash */
-.lab i { position: absolute; inset: 54% 0 auto; height: 0.35vh; background: var(--muted); transform: scaleX(0); transform-origin: 0 50%; }
-```
+**Use when** the feature is an AI agent doing several steps for the viewer, and the proof is visible
+work. The clip copies an agent session in a terminal window: a todo list of four items, a status
+line with a spinner, a verb, the elapsed time and a token count, and a tool call below the list. The
+items close one by one, 0.8 s apart. The last item stays open, so the work reads as ongoing. Clip:
+[agent-progress.mp4](agent-progress.mp4). Demo: [demo/agent-progress.html](demo/agent-progress.html).
 
 ```js
-import { EASE } from '../../core/motion/presets.js';
-const at = { rows: 420, checks: [1250, 1800, 2350], swaps: [420, 1250, 2000] };   // ms
-rows.forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: EASE.landSoft, fill: 'both' }));
-spin.animate([{ rotate: '0deg' }, { rotate: '900deg' }], { duration: 3200, easing: 'linear', fill: 'both' });   // finite, never infinite
-// a slot swaps whole states: the old one leaves in 120 ms, the next rises in 260 ms
-slot.forEach((el, i) => {
-  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: at.swaps[i], easing: EASE.landSoft, fill: 'both' });
-  if (at.swaps[i + 1]) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 160, delay: at.swaps[i + 1] - 160, easing: EASE.launch, fill: 'forwards' });
+import { show, runDot } from '../../prompts/moves/demo/assets/stage.js';
+const DONE = [1700, 2500, 3300], STARTS = [700, ...DONE];   // ms: item n is active from STARTS[n]
+show(todo, 700);                                             // the list prints in one frame
+rows.forEach((row, n) => {
+  const [open, active, done] = row.querySelectorAll('.slot > span');   // three states stacked in one grid cell
+  show(open, null, STARTS[n]);
+  show(active, STARTS[n], DONE[n]);                          // the active item is bold
+  if (DONE[n]) show(done, DONE[n]);                          // a closed item is struck and grey
 });
-// a check lands: outline out, circle pops with overshoot, tick draws, label strikes and dims
-at.checks.forEach((k, i) => {
-  num[i].animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 160, delay: k, easing: EASE.launch, fill: 'forwards' });
-  done[i].animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: EASE.pop, fill: 'forwards' });
-  tick[i].animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: EASE.landSoft, fill: 'forwards' });
-  strike[i].animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: EASE.landSoft, fill: 'forwards' });
+verbs.forEach((v, n) => show(v, n ? STARTS[n] : null, STARTS[n + 1]));   // the status verb swaps whole
+runDot(bashDot, 3500, 6000);                                 // the tool call dot blinks while it runs
+vawe.onFrame((s) => {                                        // the spinner turns in 30 degree steps, 120 ms each
+  spin.style.rotate = `${Math.floor((s * 1000 - 700) / 120) * 30}deg`;
 });
 ```
 
-Sound: pluck at 1.25 s into the move, when the first check lands (default gain); no tick per check.
+Sound: pluck at 1.7 s when the first item closes (default gain); no tick per item.
 
-The state change is the point: the viewer watches rows turn from a number into a result. Give the
-checks uneven gaps (550 ms here, then 550) and start them after the last row has arrived, so arrival and
-work never overlap. The status line and the counter swap whole states, never a crossfade of two half
-visible words. The bar advances in the same frames as the check, on the same curve. Keep the last row
-unchecked: a full list ends the work and the eye stops, an unfinished one keeps it. Use one working accent
-for the machine (arc, bar) and a second colour only for done; strike and dim the label to `--muted`, never
-to `--faint`, so it still reads.
+A terminal prints text, it does not ease it, so every state is one frame: the item flips from open to
+bold to struck, the verb changes, the star steps. Start each close after the item became active, with
+uneven spacing if the real task has it. Keep the last item open: a full list stops the eye.
+
+Common mistake: a card with rings, ticks and a progress bar. An agent session has none of them. Copy
+the plain list and the status line.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

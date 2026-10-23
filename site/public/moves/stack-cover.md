@@ -1,29 +1,24 @@
 # Stack cover
 
-**Use when** the next shot is a new panel that should feel like a sheet laid over the last one. The
-sheet slides in from the side; the old shot moves a quarter as far, shrinks a little and dims, so the
-two sit at different depths. The detail that sells it is the shadow: it is cast by the sheet's leading
-edge and grows wider and darker as the overlap grows. Clip: [stack-cover.mp4](stack-cover.mp4). Demo:
-[demo/stack-cover.html](demo/stack-cover.html).
+**Use when** a new panel must lie over the screen you are on: a form, a composer, a detail. The sheet rises from the bottom edge. The page behind scales back a little, rounds its corners and dims, so the two sit at different depths. Clip: [stack-cover.mp4](stack-cover.mp4) (5 s). Demo: [demo/stack-cover.html](demo/stack-cover.html).
 
 ```js
-import { EASE, easeFn } from '../../core/motion/presets.js';
-const W = innerWidth;
-const opt = { duration: 1000, delay: 200, easing: EASE.land, fill: 'both' };
-sheet.animate([{ translate: `${W}px 0` }, { translate: '0 0' }], opt);
-old.animate([{ translate: '0 0', scale: 1 }, { translate: `${-W * 0.24}px 0`, scale: 0.96 }], opt);
-dim.animate([{ opacity: 0 }, { opacity: 0.4 }], opt);                       // #14103a over the old shot
-cast.animate([{ opacity: 0.25, scale: '0.35 1' }, { opacity: 1, scale: '1 1' }], opt);   // right:100% of the sheet, transform-origin: right
-copy.animate([{ translate: '9vw 0' }, { translate: '0 0' }], { ...opt, duration: 1100 }); // lags the sheet
-// blur only the sheet body (not the cast): stdDeviation = 0.25 x one frame's travel, x only, set in vawe.onFrame as in push-blur
+import { springDuration, springLinear } from '../../core/motion/springs.js';
+const SHEET = { duration: springDuration(313, 35.4) * 1000, easing: springLinear(313, 35.4) };   // the system sheet: a critically damped spring, no overshoot
+sheet.animate([{ translate: `0 ${H}px` }, { translate: '0 0' }], { ...SHEET, delay: 1150, fill: 'both' });
+page.animate([{ scale: 1, translate: '0 0', borderRadius: '0px' }, { scale: 0.94, translate: `0 ${1.6 * u}px`, borderRadius: `${2.4 * u}px` }], { ...SHEET, delay: 1150, fill: 'both' });
+dim.animate([{ opacity: 0 }, { opacity: 0.3 }], { ...SHEET, delay: 1150, fill: 'both' });
+// dismiss: the same three, reversed, in 440 ms, with fill 'forwards' so the first set keeps its start state
 ```
 
-Sound: none; a soft cut stays soft.
+Sound: none; a soft tick at the tap is the only cue a film needs.
 
-The `cast` is a 34 vw wide gradient that falls off in 5 stops (0.34 to 0 alpha), not a `box-shadow`: a
-box-shadow cannot grow with progress. Keep it outside the blurred element or the blur turns it to bands.
-Make the sheet 4.4 percent wider than the frame and start it that far left, so its rounded leading
-corners are off screen once it lands. The old shot must move about a quarter as far: equal speeds read
-as a slide, not a stack. Let the copy lag the sheet by 9 vw so the sheet is a surface with things on it.
+## How it looks and moves
 
-Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
+- The clip copies an iPad screen in its light style: a status bar, a blue "+" and "Edit", a large "Renders" title, an inset grouped list (thumbnails, name, size, status, chevron) on the system grey. The content is our own.
+- A grey touch dot shows the tap on "+" at 1.0 s, as in a screen recording. The sheet starts 0.15 s later.
+- The sheet is 64 percent of the width and rises from the bottom edge in 0.52 s on a critically damped spring (the system sheet does not overshoot). It has rounded top corners (2.4 u), a grabber, a bar (Cancel, title, Add) and an inset grouped form. It does not spring or overshoot.
+- The page behind scales to 94 percent, moves down 1.6 u, rounds to 2.4 u and dims by 30 percent on the same curve. The ground around it is black, as on the device.
+- The name field has focus: the text types in whole steps and the caret blinks every 0.5 s.
+- A tap on Cancel at 3.8 s dismisses the sheet in 0.44 s on a faster spring of the same kind. The clip ends on the page from frame 0.
+- Common mistake: a sheet that scales or fades in from the middle, or a page that does not move behind it. The sheet rises from the bottom edge and the page behind it shrinks, rounds and dims on the same curve.

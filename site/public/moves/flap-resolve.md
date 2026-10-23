@@ -1,55 +1,39 @@
 # Split-flap resolve
 
 **Use when** a name, a number or a status is decided on screen: a departure board, a counter, a
-model name locking in. Each character sits on its own tile and flips like a Solari board: the top
-half falls on the hinge, the bottom half of the next glyph swings up, and the tile lands on the real
-letter, left to right. Font: Archivo 800. Clip: [flap-resolve.mp4](flap-resolve.mp4). Demo:
-[demo/flap-resolve.html](demo/flap-resolve.html).
-
-## Four layers per tile
-
-1. Static top: the next glyph, top half only, revealed behind the falling flap.
-2. Static bottom: the old glyph, bottom half, until the rising flap covers it.
-3. Falling top flap: the old glyph, top half, `rotateX(0deg)` to `rotateX(-90deg)` on the hinge
-   (`transform-origin: 50% 100%`).
-4. Rising bottom flap: the next glyph, bottom half, `rotateX(90deg)` to `rotateX(0deg)` on the same
-   hinge line (`transform-origin: 50% 0`).
-
-Every half is the same glyph in a box half a tile tall with `overflow: hidden`. The glyph box is
-twice that height, and the bottom half moves it up by `top: -100%`. The glyph is never cut sideways.
+status locking in. A copy of a real split-flap board: five rows (time, destination, gate) in a dark
+frame, each character on its own matte slat with a light condensed letter and a split line across
+the middle. Every slat turns through its drum in order (blank, then A to Z, or 0 to 9) and stops on
+the real character, so a far letter takes longer than a near one and the rows settle one after the
+other. Clip: [flap-resolve.mp4](flap-resolve.mp4) (6 s, light; `flap-resolve-dark.mp4` is the dark
+theme). Demo: [demo/flap-resolve.html](demo/flap-resolve.html).
 
 ```js
-const on = (el, keys, delay, duration, easing) => el.animate(keys, { delay, duration, easing, fill: 'forwards' });
-// per tile, per flip k at time `at`, flip = 68 ms, mid = 34 ms
-on(top, [{ opacity: 1 }, { opacity: 1 }], at, flip);
-on(fall, [{ opacity: 1, transform: 'rotateX(0deg)' }, { opacity: 1, transform: 'rotateX(-90deg)', offset: 0.999 },
-          { opacity: 0, transform: 'rotateX(-90deg)' }], at, mid, EASE.launch);
-on(fall.lastChild, [{ opacity: 0 }, { opacity: 0.6 }], at, mid, EASE.launch);   // shade darkens toward 90
-on(rise, [{ opacity: 1, transform: 'rotateX(90deg)' }, { opacity: 1, transform: 'rotateX(0deg)' }],
-   at + mid, mid, EASE.land);
-on(rise.lastChild, [{ opacity: 0.6 }, { opacity: 0 }], at + mid, mid, EASE.land);
+// every tile is a pure function of t: one leg is { at, from, to } on its drum
+const k = (ms - leg.at) / 70;               // 70 ms for each flap
+const steps = (leg.to - leg.from + drum.length) % drum.length;
+// k < steps: flap number n = floor(k) is falling, p = k - n
+const angle = 180 * p * p;                  // gravity: it speeds up and stops on the next slat
+flap.style.transform = `rotateX(${-angle}deg)`;
+// front face: the old top half; back face: the next bottom half
 ```
 
-Sound: pluck at 0.80 s after the first flip, when the last tile locks (default gain); no tick per flip.
+Sound: none. The clip is silent.
 
-## The numbers that make it look real
+## How it looks and moves
 
-- `perspective: 3em` on the tile (the tile is 0.72em by 1.1em). Wider values look flat.
-- 68 ms per flip: 34 ms fall, 34 ms rise. Six flips per tile, tiles start 68 ms apart, so the word
-  resolves left to right in about 0.8 s.
-- The fall eases in (`EASE.launch`, gravity), the rise eases out and snaps shut
-  (`EASE.land`).
-- A black shade layer inside each flap goes to 0.6 opacity at 90 degrees, so the moving flap darkens
-  as it turns edge-on.
-- A 0.016em split line above all layers, and a 0.07em gap between tiles.
-- Chars come from `rng(11)` in springs.js, never `Math.random`, and never equal the last glyph or
-  the final one, so every flip changes the tile.
+- The frame is near black with a rounded rim and a darker plate. The slats are dark matte grey, the
+  letters warm white in Big Shoulders 700. Axle pins show at both ends of each split line.
+- The top half of the old letter falls over the hinge. Its back face carries the bottom half of the
+  next letter and lands on the lower slat. The upper slat shows the next letter behind it.
+- The falling flap darkens as it turns away from the light. The slats under it take a soft shadow.
+- No spring and no overshoot: the flap stops on the next slat.
+- Rows start 170 ms apart and columns 45 ms apart. The destination letters are the long drums, so
+  `ATHENS` and `DUBLIN` settle last (about 3.4 s).
+- At 4.0 s one gate (B7) turns on to B9 and the board holds. Only the window has an entrance and an
+  exit.
 
 ## The common mistake
 
-Rotating the whole glyph (or a whole tile) is a card flip, not a split flap. It fails three ways:
-the glyph turns as one piece instead of two halves, no `perspective` means `rotateX` only squashes
-the flap, and no shade means the turning flap has no light. Build the four layers, clip each half,
-and animate the halves.
-
-Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
+Rotating the whole glyph is a card flip, not a split flap. Build two halves per tile, one flap with
+a front and a back face, and step the characters in drum order, never at random.

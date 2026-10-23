@@ -1,35 +1,42 @@
 # Notification pop
 
-**Use when** the product tells the user something finished: a render, a payment, a message. The
-banner drops in from above the frame on the overshoot curve and closes its width from 92 percent,
-so it lands as an object; the icon pops first and the text resolves 80 ms after it. It holds for
-about a second so the text can be read, then leaves faster than it came. Clip:
-[notification-pop.mp4](notification-pop.mp4). Demo: [demo/notification-pop.html](demo/notification-pop.html).
+**Use when** the product tells the user something finished: a render, a payment, a message. A copy
+of a real phone notification banner: a phone with a photo wallpaper and a home screen, and a banner
+with the app icon, a bold title, the time (`now`), a two-line body and the small grab handle. The
+banner is a translucent material over a blurred backdrop. It drops from above the screen on a
+spring with a small settle, is read for about three seconds, then swipes up and out. Clip:
+[notification-pop.mp4](notification-pop.mp4) (5.6 s, light; `notification-pop-dark.mp4` is the dark
+theme). Demo: [demo/notification-pop.html](demo/notification-pop.html).
 
-```html
-<div class="note card">
-  <div class="chip accent-fill app">...icon...</div>
-  <div class="text"><div class="title">Render finished</div><div class="sub">launch-film.mp4, 12.4 s at 60 fps</div></div>
-  <div class="when">now</div>
-</div>
-<style>.note { transform-origin: 50% 0; opacity: 0; }</style>
-<script type="module">
-import { EASE } from '../../core/motion/presets.js';
-note.animate([{ translate: '0 -62vh', scale: '0.92 0.96' }, { translate: '0 0', scale: '1 1' }], { duration: 700, easing: EASE.pop, fill: 'both' });
-note.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
-app.animate([{ scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 520, delay: 200, easing: EASE.pop, fill: 'both' });
-[[text, 280], [when, 340]].forEach(([el, at]) => el.animate([{ translate: '0 1.4vh', opacity: 0, filter: 'blur(4px)' }, { translate: '0 0', opacity: 1, filter: 'blur(0px)' }],
-  { duration: 420, delay: at, easing: EASE.land, fill: 'both' }));
-note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity: 0 }], { duration: 260, delay: 1740, easing: EASE.launch, fill: 'forwards' });
-</script>
+```js
+import { track } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
+// the system spring: stiffness 300, damping 26 (ratio 0.75, about 3 percent settle); the banner starts fully above the screen
+// the position is a pure function of t, set each frame (see the note below)
+const ms = t * 1000, clamp = (x) => Math.min(1, Math.max(0, x));
+const exit = clamp((ms - 4400) / 320);                      // the swipe out is shorter and accelerates: 320 ms, the launch ease
+const drop = exit > 0 ? 200 * easeFn('launch')(exit) : 200 * (1 - track(t, [[0, 0], [0.9, 1]], 300, 26));
+banner.style.translate = `0 ${-drop}%`;                      // percent of the banner's own height
 ```
 
-Sound: droplet at 0.20 s into the move, when the icon pops inside the banner (default gain).
+```css
+.banner { background: rgba(246, 246, 246, 0.74); backdrop-filter: blur(30pt) saturate(1.8); border-radius: 26pt; }   /* pt = screen width / 393 */
+```
 
-The overshoot curve dips the banner a few percent past its slot and back: that is the pop, and it
-is the only bouncy thing in the frame. The exit is 260 ms against a 700 ms entrance, cubic in,
-travelling upward the way it came, and it ends on the last frame, so the clip never ends on a
-still. Write the text the way the product would: a file name, a length, a rate. Never a message that
-only fills space. If the film keeps the banner on screen, replace the exit with a slow drift.
+Sound: droplet when the banner lands (about 0.2 s after it starts); nothing on the swipe.
 
-Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
+## How it looks and moves
+
+- Real proportions, in points of a 393 pt wide screen: banner inset 12 pt, top 56 pt (under the
+  Dynamic Island), radius 26 pt, padding 14 by 16 pt, icon 38 pt with a 9 pt radius, title 15 pt
+  semibold, body 15 pt, `now` 13 pt. The phone is 118 u wide (118 percent of the frame height) and
+  runs off the bottom of the frame, so the banner text reads at 4.4 u.
+- The screen is a wallpaper photo, a status bar, the Dynamic Island and twelve generic apps (flat
+  colour, one white glyph). Our own app icon, title and file name: no real app or brand.
+- Only the banner moves. The contents do not stagger: the real banner arrives as one object.
+- The phone fades in and out as clip framing.
+- The banner is driven by `vawe.onFrame`, not by a WAAPI animation: a `translate` animation on an element with `backdrop-filter` does not show in the rendered clip until it ends.
+
+Common mistake: a banner that scales or fades in with the same ease it leaves with. It drops on the spring and leaves on the launch ease, shorter than it came.
+
+Inter stands in for the system face.

@@ -1,43 +1,41 @@
 # Glow record
 
-**Use when** an alert turns into a live state: a notification leads to a recording, a call or a live stream. The red of a notification
-badge floods the frame from the badge, reaches the farthest corner in about 0.35 s, and then gathers back into one point: the red dot of
-the recording light in the next scene. The red is the handoff object. The swap of the scenes happens inside the full-frame red, so the
-viewer never sees it. Clip: [glow-record.mp4](glow-record.mp4). Demo: [demo/glow-record.html](demo/glow-record.html).
+**Use when** a film shows an idle tool turning into a live state: a screen recorder, a call, a live stream. The
+clip copies a screen recorder over a document. A dark recorder bar waits at the bottom left with a red dot
+and "Start recording". The cursor presses it. The bar goes, a round countdown (25 u wide, top right, clear of the text) shows 3, 2, 1 at the top right of the
+screen, and the bar returns as a recording pill: the red dot (now pulsing), a timer that counts and the stop
+button. The red dot is the object that carries the idea from "ready" to "live". There is no flood and no glow:
+the real UI is the effect. Clip: [glow-record.mp4](glow-record.mp4). Demo:
+[demo/glow-record.html](demo/glow-record.html).
 
 ```js
-const R_FULL = (FAR * 1.02) / (1 - FEATHER);                               // the opaque core must reach the farthest corner
-vawe.onFrame((t) => {
-  const e = land(clamp((t - 1.35) / 0.35)), g = land(clamp((t - T_GATHER) / 0.8));
-  const cx = lerp(SRC.x, DST.x, g), cy = lerp(SRC.y, DST.y, g);            // badge to recording light
-  const R = t < T_GATHER ? lerp(SRC.r, R_FULL, e) : lerp(R_FULL, DST.r, g);
-  const f = Math.max(R * 0.2, 0.25 * u);
-  const gel = (a) => `radial-gradient(circle at ${cx}px ${cy}px, rgba(255,31,51,${a}) ${Math.max(R - f, 0)}px, rgba(255,31,51,0) ${R}px)`;
-  flood.style.background = gel(1);                                         // mix-blend-mode: screen, adds the light
-  body.style.background = gel(0.7);                                        // normal blend, under the screen layer: hides the swap
-  host.style.filter = `brightness(${1 + 0.45 * lit})`;                     // the frame over-exposes under the light
-  shotA.style.visibility = t >= T_FULL ? 'hidden' : 'visible';
-  shotB.style.visibility = t >= T_FULL ? 'visible' : 'hidden';
+import { EASE, UI } from '../../core/motion/presets.js';
+const T = { bar: 600, press: 2000, hide: 2150, count: 2300, n2: 2900, n1: 3500, rec: 4300 };   // ms
+arrive(idle, T.bar, { ms: 220, from: '0.8vh' });                                              // the bar fades in with a small rise
+idle.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, delay: T.hide, easing: EASE.launch, fill: 'forwards' });
+cd.animate([{ opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1 }], { duration: 220, delay: T.count, easing: EASE.land, fill: 'both' });
+const roll = (el, inAt, outAt) => {                                                           // a numeral rolls up and out, the next rolls in
+  const { outMs, inMs, rise } = UI.roll;
+  if (inAt != null) el.animate([{ opacity: 0, translate: `0 ${rise}` }, { opacity: 1, translate: '0 0' }], { duration: inMs, delay: inAt + outMs, easing: EASE.land, fill: 'both' });
+  if (outAt != null) el.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: `0 -${rise}` }], { duration: outMs, delay: outAt, easing: EASE.launch, fill: 'forwards' });
+};
+roll(n3, null, T.n2); roll(n2, T.n2, T.n1); roll(n1, T.n1, null);
+arrive(rec, T.rec, { ms: 220, from: '0.8vh' });
+vawe.onFrame((s) => {
+  const run = Math.max(0, s * 1000 - T.rec);
+  tc.textContent = `00:0${Math.floor(run / 1000)}`;                                          // the timer ticks once a second
+  dot.style.opacity = 0.55 + 0.45 * (0.5 + 0.5 * Math.cos(2 * Math.PI * run / 1000));         // the dot pulses at 1 Hz between 55 and 100 percent
 });
 ```
 
-Sound: a short ping when the badge count rolls; one low swell that stops dead when the red is full; nothing on the gather.
+Sound: a click on the press at 2.0 s; one soft tick per numeral (default gain); nothing on the pill.
 
-- The light is the exposure-flash recipe with a red gel ([exposure-flash](exposure-flash.md)): the layer is `mix-blend-mode: screen`, so it
-  adds light to the screen, and the host takes `filter: brightness()` up to 1.45, so the UI over-exposes where the red lands. Do not paint
-  the glow with a `box-shadow` or a blurred copy of the badge. `core/surfaces/lens.js` bloom has 6 levels and a glow of a few hundred pixels at
-  most, so it cannot reach the far corner; use it for the small glow of the end dot when the page has a lens.
-- A screen layer alone leaves the old scene visible through the red, so the swap shows as a pink cut. A second layer of the same red at 70
-  percent in normal blend sits under it: the red stays saturated and the swap is a shift of 30 percent contrast, which does not read.
-- Timing: the badge count rolls 2 to 3 on `EASE.land` in 0.2 s; the badge swells to 1.35x in the 0.15 s before the flood (anticipation);
-  the flood reaches the farthest corner in 0.35 s on `EASE.land`; it holds 0.08 s; it gathers in 0.8 s on `EASE.land`. The flood is fast
-  because it is the exit of scene A. The gather decelerates into the recording light, which is the arrival.
-- The soft edge is 20 percent of the radius while the light is large, and it shrinks with the radius to 0.25 u, so the last frames of the gather are a crisp dot.
-- Speed: the centre moves from the badge to the dot on the same curve as the radius, so the red contracts toward the dot, not toward
-  the middle. The scene swap is at the first full-frame frame, before the hold; the viewer sees red on red.
-- The end dot is its own element, the same colour and size as the disc at the end of the gather and 0.05 s under it. It then pulses at 1 Hz
-  between 55 and 100 percent opacity, so the hold is alive; the timecode and the level bars run beside it.
-- What goes wrong: a flood slower than 0.5 s reads as a fade. A flood that stops before the corner leaves a wedge of A. A recording dot of
-  another size or red pops when the disc ends. Keep a full-frame red hold under 0.1 s: longer is a strobe.
+Draw the recorder as the real tool does: a dark pill, a red dot of about 4 units, a light label, and a solid fill
+with no blur behind it. The countdown is a dark disc with a white numeral, not a full-screen colour. The pill
+keeps its left edge and its red dot from the idle state to the live state, so the dot reads as the same thing.
+The page behind holds still, as a recorded page does, and the timer and the dot keep the hold alive.
+
+Common mistake: flooding the frame with red to mean "live". No recorder does that. The state change is the
+bar, the countdown and a pulsing dot.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

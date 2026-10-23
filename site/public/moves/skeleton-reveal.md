@@ -1,39 +1,38 @@
 # Skeleton reveal
 
-**Use when** a real UI should arrive without pop-in: grey blocks in the shape of the content
-shimmer under one moving light, then each region resolves into its real content, one after another.
-The viewer sees a product loading, then the product. Clip: [skeleton-reveal.mp4](skeleton-reveal.mp4).
-Demo: [demo/skeleton-reveal.html](demo/skeleton-reveal.html).
+**Use when** a real UI should arrive without pop-in. A copy of a real store dashboard loading in a
+browser window: the shell (top bar, side list) is already there, and the main area shows flat light
+grey blocks in the shape of the content under one faint moving light. Then each region loads and its
+real content fades in. Clip: [skeleton-reveal.mp4](skeleton-reveal.mp4) (6 s, light;
+`skeleton-reveal-dark.mp4` is the dark theme). Demo: [demo/skeleton-reveal.html](demo/skeleton-reveal.html).
 
 Use once per film: the moving light is a stock device (rule no-tells), never the idea.
 
-```html
-<div class="reg head"><div class="real">...avatar, name, status...</div><div class="sk-layer"><i class="sk round"></i>...</div></div>
-<script type="module">
-import { EASE } from '../../core/motion/presets.js';
-const card = document.querySelector('.card'), box = card.getBoundingClientRect();
-document.querySelectorAll('.sk').forEach((sk) => {
-  const band = Object.assign(document.createElement('i'), { className: 'band' });   // a 26vh wide light gradient
-  sk.append(band);
-  const left = sk.getBoundingClientRect().left - box.left, w = band.getBoundingClientRect().width;
-  band.animate([{ translate: `${-w - left}px 0` }, { translate: `${box.width - left}px 0` }], { duration: 850, iterations: 2, easing: 'linear', fill: 'both' });
-});
-Object.entries({ '.head': 600, '.stats': 800, '.chart': 1000, '.list': 1200 }).forEach(([sel, t]) => {
-  const reg = document.querySelector(sel);
-  reg.querySelector('.real').animate([{ opacity: 0, translate: '0 1.4vh', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 480, delay: t, easing: EASE.land, fill: 'both' });
-  reg.querySelector('.sk-layer').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: t, easing: EASE.launch, fill: 'both' });
-});
-</script>
+```js
+// one light crosses the page: each block plays the same sweep, shifted by its own left edge
+band.animate([{ translate: `${-w - left}px 0` }, { translate: `${page.width - left}px 0` }], { duration: 1400, delay: 300, iterations: 3, easing: 'linear', fill: 'both' });
+// a region loads: the skeleton goes in 120 ms and the real content fades in over 250 ms, with no rise and no blur
+real.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, delay: t, easing: 'ease-out', fill: 'both' });
+skeleton.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, delay: t, easing: 'linear', fill: 'both' });
 ```
 
-Sound: pluck at 0.60 s (the first region resolves) and at 1.20 s (the last region) into the move (default gain); nothing on the shimmer.
+The chart bars grow from the axis on `EASE.land` (600 ms, 40 ms apart): `b.animate([{ scale: '1 0' }, { scale: '1 1' }], { duration: 600, delay: 3400 + i * 40, easing: EASE.land, fill: 'both' })`.
 
-Each region is a one-cell grid holding the real content and its skeleton layer, so the two share
-one box and nothing shifts when they swap. The blocks match the content (a round one for an avatar,
-bars at the chart's own heights), which is what makes it read as this product loading. Each block
-plays the same sweep shifted by its own left edge, so the many blocks read as one light crossing
-the card; the shimmer is a constant-speed scan, so it is the one place `linear` is right. Regions
-resolve 200 ms apart, top to bottom; the skeleton leaves in 200 ms, the content arrives in 480 ms
-and clears its 5 px blur as it lands. A chart also gets a rise on its bars, the last bar in accent.
+Common mistake: a skeleton that does not match the loaded layout, so the page jumps when the content arrives. Draw each grey block where its real content lands.
 
-Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
+Sound: none. The clip is silent.
+
+## How it looks and moves
+
+- The blocks are flat paint: 8 percent of the ink colour on the card, no glass and no glow. The
+  light is a 24 u wide band at 60 percent of the surface colour, so it is faint.
+- The blocks have the layout of the final content: a round one for an avatar, bars at the chart's
+  own heights, three stat cards, three order rows. Each region is a one-cell grid holding the real
+  content and its skeleton, so nothing shifts when they swap.
+- The shell is real from the first frame, as in the product: a skeleton shows only where data is
+  still on its way.
+- Regions load 250 ms apart (header, stats, chart, orders). The chart draws its bars from the axis
+  on load. Nothing else animates.
+- After the load the page holds still but for the online counter, which ticks twice.
+
+Names, shop and numbers are our own (a ceramics shop dashboard).

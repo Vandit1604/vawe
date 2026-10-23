@@ -1,32 +1,30 @@
 # Grid stagger wave
 
-**Use when** a title should arrive with "many things" around it (integrations, features, customers):
-the title tile is there from frame 0, and a grid of tiles enters around it in a wave by distance
-from the title's centre, 70 ms per tile of distance. The detail that sells it is that the wave
-pushes: each tile starts pulled 30 percent of a tile toward the source and at 0.55 scale, and the
-front shoves it out to its cell with a pop. A delay by row or column reads as a typewriter; a delay
-by Euclidean distance reads as one ring spreading. Clip: [grid-stagger-wave.mp4](grid-stagger-wave.mp4).
-Demo: [demo/grid-stagger-wave.html](demo/grid-stagger-wave.html).
+**Use when** a title needs "many things" around it: integrations, apps, customers. Clip:
+[grid-stagger-wave.mp4](grid-stagger-wave.mp4). Demo: [demo/grid-stagger-wave.html](demo/grid-stagger-wave.html).
+
+Look: a white sheet on the flat neutral ground. Tiles are flat grey squares with one generic mark
+each (drawn in `demo/assets/logos.js`, never a real logo), even gaps, no bevel. The title block sits
+in the grid with a muted line under it.
+
+How it moves: the title is there first. The tiles enter in a ring that spreads from the title,
+70 ms for each tile of distance. Each tile starts 30 percent of a tile toward the title at 0.8
+scale and is pushed to its cell on `EASE.landSoft`. No overshoot: a real grid does not bounce.
+After the wave, a small green dot arrives on each tile in a second, faster ring (the app is
+connected). The sheet leaves on `leave`.
 
 ```js
-import { EASE } from '../../core/motion/presets.js';
-const src = { c: 2.5, r: 1.5 }, STEP = 70, T0 = 140;   // source in tile units (the title's centre); ms per tile of distance
-tiles.forEach((tile) => {                               // tile.c, tile.r: its column and row
-  const dx = tile.c - src.c, dy = tile.r - src.r, d = Math.hypot(dx, dy);
-  tile.el.animate([{ translate: `${(-dx / d) * 30}% ${(-dy / d) * 30}%`, scale: 0.55 }, { translate: '0 0', scale: 1 }],
-    { duration: 520, delay: T0 + d * STEP, easing: EASE.pop, fill: 'both' });
-  tile.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: T0 + d * STEP, easing: 'linear', fill: 'both' });
-});
-title.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 420, easing: EASE.land, fill: 'both' });
-grid.animate([{ scale: 1 }, { scale: 1.025 }], { duration: 1600, easing: EASE.glide, fill: 'both' });   // keeps the full grid alive
+import { EASE } from '/core/motion/presets.js';
+const src = { c: 1.5, r: 1.5 }, STEP = 70, T0 = 300, DOTS_AT = 2000;   // the title block's centre, in tile units
+const d = Math.hypot(tile.c - src.c, tile.r - src.r), dx = tile.c - src.c, dy = tile.r - src.r;
+tile.el.animate([{ translate: `${(-dx / d) * 30}% ${(-dy / d) * 30}%`, scale: 0.8, opacity: 0 }, { translate: '0 0', scale: 1, opacity: 1 }],
+  { duration: 600, delay: T0 + d * STEP, easing: EASE.landSoft, fill: 'both' });
+tile.dot.animate([{ opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1 }],
+  { duration: 240, delay: DOTS_AT + d * 40, easing: EASE.land, fill: 'both' });
 ```
 
-Sound: droplet at 0.14 s into the move, when the first tiles leave the title (default gain); no tick per tile.
+Sound: droplet at 0.3 s, when the first tiles leave the title (default gain); no tick per tile.
 
-70 ms per tile keeps the neighbours of one tile 30 to 80 ms apart (the stagger band) and puts the
-farthest corner, about 5.7 tiles out, at 0.54 s. Under 40 ms the wave lands as one block; over 100
-ms the far corner arrives after the viewer has read the title. The opacity runs 120 ms, far shorter
-than the move, so the tile is seen travelling. Put the source on the thing the viewer should read,
-off-centre; a wave from the frame centre points at nothing.
+Common mistake: a delay by row or column. It reads as a typewriter. Use the distance from the title, and put the source on the thing the viewer must read, off centre.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
