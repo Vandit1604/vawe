@@ -2,10 +2,10 @@
 <html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="5">
+<meta name="duration" content="4.4">
 <title>move: avatar world</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
-<script type="application/json" id="authoring">{"allow": ["static-window@2.1-4.9", "text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.0"], "_why": {"static-window@2.1-4.9": "the picture viewer holds still after it opens, as the product does; the pointer rests on it", "text-unreadable-hold": "the profile text is covered by the viewer from 2.0 s, as the real page is", "text-moves-before-hold": "the viewer opens at 1.75 s and the page behind it holds, as the product does", "world-held@0.0-5.0": "one profile page: a tap on the avatar opens its picture, no cut"}}</script>
+<script type="application/json" id="authoring">{"allow": ["static-window@0.5-3", "text-unreadable-hold", "text-moves-before-hold", "world-held@0.1-3.2"], "_why": {"static-window@0.5-3": "the profile page holds still from 0.5 s to 3.0 s, as the product does: only the pointer travels, the viewer opens at 1.8 s and closes at 3.05 s", "text-unreadable-hold": "the profile text reads for 1.7 s from 0.1 s before the viewer covers it at 1.8 s, and the check asks 5.4 s", "text-moves-before-hold": "the viewer opens at 1.8 s and the page behind it holds 1.7 s, short of the 5.4 s the check asks, as the product does", "world-held@0.1-3.2": "one profile page for 3.1 s: a press on the avatar opens its picture and a press on close returns, no cut"}}</script>
 <style>
   .page { background: #fff; display: flex; justify-content: center; }
   .col { position: relative; width: calc(var(--u) * 92); border-left: 1px solid var(--line); border-right: 1px solid var(--line); font-family: 'Inter', system-ui, sans-serif; color: var(--ink); }
@@ -70,7 +70,8 @@ import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
 const $ = (id) => document.getElementById(id);
 const art = $('art').content;
 $('av').append(art.cloneNode(true)); $('big').append(art.cloneNode(true));
-const W = innerWidth, H = innerHeight, END = 5000, T_TRAVEL = 700, D_TRAVEL = 900, T_PRESS = 1700, T_OPEN = 1800, D_OPEN = 300;
+const W = innerWidth, H = innerHeight, END = 4400, T_TRAVEL = 700, D_TRAVEL = 900, T_PRESS = 1700, T_OPEN = 1800, D_OPEN = 300;
+const T_AWAY = 2450, D_AWAY = 450, T_TAP = 2950, T_CLOSE = 3050, D_CLOSE = 240;
 
 arrive($('win'), 100, { ms: 220, from: '0.8vh' });
 // the first frame of the window is 0.8vh low: measure its layout without that offset
@@ -85,8 +86,16 @@ $('arrow').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 20
 // the picture viewer: the avatar's picture grows from the avatar to the middle of the page, no overshoot, the page dims behind it
 const keys = [{ opacity: 1, translate: `${dx}px ${dy}px`, scale: s0 }, { opacity: 1, translate: '0 0', scale: 1 }];
 $('big').animate(keys, { duration: D_OPEN, delay: T_OPEN, easing: EASE.land, fill: 'both' });
-$('dim').animate([{ opacity: 0 }, { opacity: 1 }], { duration: D_OPEN, delay: T_OPEN, easing: 'linear', fill: 'both' });
+$('dim').animate([{ opacity: 0 }, { opacity: 1 }], { duration: D_OPEN, delay: T_OPEN, easing: EASE.land, fill: 'both' });
 $('x').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, delay: T_OPEN + D_OPEN, fill: 'both' });
+
+// the pointer goes to the close button and presses; the picture shrinks back into the avatar and the page undims (an exit: shorter than the open, on the launch ease)
+const xr = $('x').getBoundingClientRect();
+$('cur').animate([{ translate: `${tx}px ${ty}px` }, { translate: `${xr.left + xr.width * 0.5}px ${xr.top + xr.height * 0.55}px` }], { duration: D_AWAY, delay: T_AWAY, easing: EASE.land, fill: 'forwards' });
+$('arrow').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 200, delay: T_TAP, fill: 'forwards' });
+$('big').animate([{ opacity: 1, translate: '0 0', scale: 1 }, { opacity: 1, translate: `${dx}px ${dy}px`, scale: s0, offset: 0.9 }, { opacity: 0, translate: `${dx}px ${dy}px`, scale: s0 }], { duration: D_CLOSE, delay: T_CLOSE, easing: EASE.launch, fill: 'forwards' });
+$('dim').animate([{ opacity: 1 }, { opacity: 0 }], { duration: D_CLOSE, delay: T_CLOSE, easing: EASE.launch, fill: 'forwards' });
+$('x').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, delay: T_CLOSE, fill: 'forwards' });
 leave($('win'), END);
 leave($('cur'), END);
 </script>
