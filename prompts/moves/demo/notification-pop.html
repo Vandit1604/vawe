@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@0.5-1.3", "static-window@1.6-4.3", "world-held@0.0-5.6", "tile-run@0.9-4.4"], "_why": {"text-unreadable-hold": "the banner reads for 3.2 s from 1.3 s to 4.5 s in a 5.6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the phone leaves at 5.2 s and the banner at 4.4 s, so the banner holds 3.1 s, short of the 5.4 s the check asks", "static-window@0.5-1.3": "phone, 0.8 s from 0.5 s: the home screen holds still before the banner drops at 0.9 s, as a real one does", "static-window@1.6-4.3": "phone, 2.7 s from 1.6 s: a settled banner holds still while it is read, as the real one does, and nothing else on the home screen moves", "world-held@0.0-5.6": "one phone holds 5.6 s: the banner drops at 0.9 s, is read, and swipes away at 4.4 s", "tile-run@0.9-4.4": "12 near-identical app icons hold 3.5 s from 0.9 s: a home screen does not change while a banner shows, and each icon is under 1% of the frame"}}</script>
 <style>
-  :root { --pw: calc(var(--u) * 92); --bz: calc(var(--u) * 1.3); --pt: calc((var(--pw) - var(--bz) * 2) / 393); }
+  :root { --pw: calc(var(--u) * 118); --bz: calc(var(--u) * 1.3); --pt: calc((var(--pw) - var(--bz) * 2) / 393); }
   html[data-look="product"] { --mat: rgba(246, 246, 246, 0.74); --mat-ink: #000; --mat-sub: rgba(60, 60, 67, 0.62); }
   html[data-look="product"][data-theme="dark"] { --mat: rgba(40, 40, 42, 0.72); --mat-ink: #fff; --mat-sub: rgba(235, 235, 245, 0.62); }
   body { display: block; }
@@ -46,9 +46,11 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import { track } from '/core/motion/springs.js';
+import { easeFn } from '/core/motion/presets.js';
 import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
 const END = 5600, IN_AT = 900, OUT_AT = 4400, OUT_MS = 320, K = 300, D = 26;
 const q = (s) => document.querySelector(s);
+const launch = easeFn('launch');
 
 // twelve generic apps: a flat colour with one white glyph each
 const APPS = [
@@ -58,11 +60,11 @@ const APPS = [
 ];
 q('#grid').innerHTML = APPS.map(([n, c, g]) => `<div class="app"><div class="ico" style="background:${c}"><svg viewBox="0 0 24 24">${g}</svg></div>${n}</div>`).join('');
 
-// the banner drops from above the screen on the system spring (a small settle) and swipes up when it times out: the exit is shorter and accelerates
+// the banner drops from above the screen on the system spring (a small settle) and swipes up when it times out: the exit is shorter and takes the launch ease
 const banner = q('#banner');
 vawe.onFrame((t) => {
   const exit = Math.min(1, Math.max(0, (t * 1000 - OUT_AT) / OUT_MS));
-  const drop = exit > 0 ? 200 * exit ** 3 : 200 * (1 - track(t, [[0, 0], [IN_AT / 1000, 1]], K, D));
+  const drop = exit > 0 ? 200 * launch(exit) : 200 * (1 - track(t, [[0, 0], [IN_AT / 1000, 1]], K, D));
   banner.style.translate = `0 ${-drop.toFixed(3)}%`;
 });
 
