@@ -76,7 +76,14 @@
   "echo-trail": "da2c07129b097fc2",
   "exit-fast": "bd616b7f7918efcb",
   "exposure-flash": "8e809b6b190df994",
-  "flap-resolve": "c7d1608dfc9deaa9",
+  "flap-resolve": {
+    "hash": "0b4086e0a91d6cd3",
+    "crf": 19
+  },
+  "flap-resolve-dark": {
+    "hash": "72063b1d2bada57c",
+    "crf": 16
+  },
   "glow-record": {
     "hash": "843bc9e4bdc745ef",
     "crf": 16
