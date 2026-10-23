@@ -1,66 +1,52 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="vawe">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="4">
+<meta name="duration" content="4.4">
 <title>move: simple marquee</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-4.4"], "_why": {"text-unreadable-hold": "the names drift past for 4.0 s by design, and the check asks 5.4 s", "text-moves-before-hold": "the stage leaves at 4.0 s, 0.4 s before the 4.4 s end, short of the 5.4 s the check asks", "world-held@0.0-4.4": "one marquee holds 4.4 s: the lanes arrive from 0.15 s and then drift at a constant speed, as a real marquee does"}}</script>
 <style>
-  @font-face { font-family: 'Fraunces'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Fraunces.woff2') format('woff2'); }
-  html, body { background: #000; }
-  body { display: block; position: relative; --p: calc(var(--vh) / 532); }
-  h1 { position: absolute; left: 0; right: 0; top: calc(var(--p) * 133); margin: 0; text-align: center; color: #fff;
-       font: 380 calc(var(--p) * 60) / 1 'Fraunces', serif; }
-  .rows { position: absolute; left: 0; right: 0; top: calc(var(--p) * 324); display: flex; flex-direction: column; gap: calc(var(--p) * 16); }
-  .row { display: flex; width: 100%; }
-  .copy { display: flex; flex-shrink: 0; }
-  .item { margin: 0 calc(var(--p) * 16); width: calc(var(--p) * 192); height: calc(var(--p) * 128); flex-shrink: 0; }
+  body { display: block; position: relative; }
+  .stage { position: absolute; inset: 0; }
+  h1 { position: absolute; left: 0; right: 0; top: calc(var(--u) * 9); margin: 0; text-align: center; font: 600 calc(var(--u) * 9.4)/1 var(--sans); letter-spacing: -0.04em; }
+  .lanes { position: absolute; left: 0; right: 0; top: calc(var(--u) * 33); display: flex; flex-direction: column; gap: calc(var(--u) * 3);
+           -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%); }
+  .lane { position: relative; height: calc(var(--u) * 19); overflow: hidden; }
+  .row { position: absolute; left: calc(var(--u) * -200); top: 0; height: 100%; display: flex; gap: calc(var(--u) * 3); width: max-content; }
+  .tag { flex: none; width: calc(var(--u) * 54); height: 100%; display: flex; align-items: center; gap: calc(var(--u) * 2.6); padding: 0 calc(var(--u) * 3); border-radius: calc(var(--u) * 3); background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 calc(var(--u) * 0.3) calc(var(--u) * 1) rgb(0 0 0 / 0.05); }
+  .tag .av { flex: none; width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%; display: grid; place-items: center; font: 600 calc(var(--u) * 4.4)/1 var(--sans); color: var(--ink); }
+  .tag b { display: block; font: 600 calc(var(--u) * 4.6)/1.15 var(--sans); letter-spacing: -0.02em; white-space: nowrap; }
+  .tag span { display: block; margin-top: calc(var(--u) * 0.8); font: 400 calc(var(--u) * 3.4)/1.2 var(--sans); color: var(--muted); white-space: nowrap; }
 </style>
 </head>
 <body>
-<h1>Weekly Finds</h1>
-<div class="rows" id="rows"></div>
+<div class="stage" id="stage">
+  <h1>Weekly Finds</h1>
+  <div class="lanes" id="lanes"></div>
+</div>
 <script type="module">
-import { rng } from '/core/motion/springs.js';
-
-const ROWS = [{ dir: 'left' }, { dir: 'right' }, { dir: 'left' }];
-const BASE_VELOCITY = 8;        // percent of one copy of the row per second
-const REPEAT = 4;
-const PER_ROW = 5;
-
-const rand = rng(11);
-const hue = () => Math.round(rand() * 360);
-const gradient = () => {
-  const blob = () => `radial-gradient(${40 + Math.round(rand() * 50)}% ${50 + Math.round(rand() * 50)}% at ${Math.round(rand() * 100)}% ${Math.round(rand() * 100)}%, hsl(${hue()} ${45 + Math.round(rand() * 35)}% ${48 + Math.round(rand() * 22)}%), transparent 85%)`;
-  return `${blob()}, ${blob()}, hsl(${hue()} 40% 22%)`;
-};
-
-const rowsEl = document.getElementById('rows');
-const bases = ROWS.map(({ dir }, r) => {
-  const row = document.createElement('div');
-  row.className = 'row';
-  const copies = Array.from({ length: REPEAT }, () => {
-    const copy = document.createElement('div');
-    copy.className = 'copy';
-    row.append(copy);
-    return copy;
-  });
-  for (let i = 0; i < PER_ROW; i++) {
-    const item = document.createElement('div');
-    item.className = 'item';
-    item.style.background = gradient();
-    copies.forEach((c, n) => c.append(n ? item.cloneNode(true) : item));
-  }
-  rowsEl.append(row);
-  return { copies, sign: dir === 'left' ? -1 : 1 };
+import '/core/engine/page-api.js';
+import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
+const PEOPLE = [['Ada Okafor', 'Design lead'], ['Mateo Ruiz', 'Motion'], ['Priya Nair', 'Brand'], ['Jonas Weber', 'Sound'], ['Mei Tanaka', 'Product'], ['Sam Adeyemi', 'Editor'], ['Lena Novak', 'Type'], ['Omar Haddad', 'Colour'], ['Ines Duarte', 'Layout'], ['Tobias Lund', 'Engineer']];
+const TINTS = ['#e8e4da', '#dfe5e8', '#e6dfe8', '#e2e8df', '#eadfd6'];
+const ROWS = [{ dir: -1, from: 0 }, { dir: 1, from: 3 }, { dir: -1, from: 6 }];
+const SPEED = 9;                                          // u a second: a marquee runs at one speed, so there is no ease
+const u = innerHeight / 100;
+const tag = ([n, r], i) => `<div class="tag"><i class="av" style="background:${TINTS[i % TINTS.length]}">${n[0]}</i><div><b>${n}</b><span>${r}</span></div></div>`;
+const lanes = document.getElementById('lanes');
+const rows = ROWS.map(({ from }, r) => {
+  const set = Array.from({ length: PEOPLE.length }, (_, i) => PEOPLE[(i + from) % PEOPLE.length]);
+  const lane = Object.assign(document.createElement('div'), { className: 'lane' });
+  lane.innerHTML = `<div class="row">${set.concat(set).map((p, i) => tag(p, i + r)).join('')}</div>`;
+  lanes.append(lane);
+  arrive(lane, 150 + r * 110, { ms: 300, from: '1.2vh' });
+  return lane.firstElementChild;
 });
-
-const wrap = (v) => ((v % -100) + -100) % -100;
-window.seek = (t) => bases.forEach(({ copies, sign }) => {
-  const x = wrap(sign * BASE_VELOCITY * t);
-  copies.forEach((c) => { c.style.transform = `translateX(${x}%)`; });
-});
+window.seek = (t) => rows.forEach((row, i) => { row.style.translate = `${ROWS[i].dir * SPEED * u * t}px 0`; });
 window.seek(0);
+arrive(document.querySelector('h1'), 80, { ms: 300, from: '1.2vh' });
+leave(document.getElementById('stage'), 4400);
 </script>
 </body>
 </html>
