@@ -24,8 +24,8 @@ const LOG_MAX_BYTES = 2 * 1024 * 1024;
 
 function openBrowserLog(final) {
   const file = browserLog(final);
-  const big = fs.existsSync(file) && fs.statSync(file).size > LOG_MAX_BYTES;
-  return fs.openSync(file, big ? 'w' : 'a');
+  if (fs.existsSync(file) && fs.statSync(file).size > LOG_MAX_BYTES) fs.renameSync(file, `${file}.1`);
+  return fs.openSync(file, 'a');
 }
 const idleMs = () => Number(process.env.VAWE_PREVIEW_IDLE_MS) || 10 * 60 * 1000;
 const checkEveryMs = () => Math.min(30000, idleMs() / 3);
@@ -65,10 +65,11 @@ function waitForState(final, timeoutMs) {
 async function connectShared(final) {
   let state = readState(final);
   if (!state || !pidAlive(state.pid)) {
-    try { const log = openBrowserLog(final);
-      spawn(process.execPath, [SELF, '--daemon', ...(final ? [] : ['--draft'])], { detached: true, stdio: ['ignore', log, log] }).unref();
-      fs.closeSync(log); }
-    catch { return null; }
+    try {
+      const log = openBrowserLog(final);
+      try { spawn(process.execPath, [SELF, '--daemon', ...(final ? [] : ['--draft'])], { detached: true, stdio: ['ignore', log, log] }).unref(); }
+      finally { fs.closeSync(log); }
+    } catch { return null; }
     state = await waitForState(final, 5000);
     if (!state) return null;
   }

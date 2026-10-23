@@ -55,10 +55,14 @@ const REACH_S = 0.5;
  */
 export function withTransitions(cuts, transitions) {
   const gap = (t, at) => Math.max(t.startT - at, at - t.endT, 0);
-  const taken = new Set();
-  return cuts.map((c) => {
-    const near = transitions.filter((t) => !taken.has(t) && gap(t, c.at) <= REACH_S).sort((a, b) => gap(a, c.at) - gap(b, c.at))[0];
-    if (near) taken.add(near);
+  const nearestCut = (t) => cuts.reduce((best, c, i) => (gap(t, c.at) < gap(t, cuts[best].at) ? i : best), 0);
+  const own = cuts.map(() => []);
+  for (const t of cuts.length ? transitions : []) {
+    const i = nearestCut(t);
+    if (gap(t, cuts[i].at) <= REACH_S) own[i].push(t);
+  }
+  return cuts.map((c, i) => {
+    const near = own[i].sort((a, b) => gap(a, c.at) - gap(b, c.at))[0];
     return near ? { ...c, start: near.startT, end: near.endT, kind: near.type } : { ...c, start: c.at, end: c.at, kind: null };
   });
 }
@@ -140,8 +144,8 @@ const DISSOLVES = new Set(['crossfade', 'dip']);
 export function transitionLine(c) {
   const span = round(c.end - c.start);
   if (!c.kind || c.kind === 'cut' || c.kind === 'match') return null;
-  if (DISSOLVES.has(c.kind)) return `a dissolve of ${span.toFixed(2)} s, from ${c.start.toFixed(2)} s (${c.kind}); the hold stops where it starts`;
-  return `a transition of ${span.toFixed(2)} s, from ${c.start.toFixed(2)} s (${c.kind}); the hold stops where it starts`;
+  if (DISSOLVES.has(c.kind)) return `a dissolve of ${span.toFixed(2)} s, from ${c.start.toFixed(2)} s (${c.kind}); the hold is measured up to its start`;
+  return `a transition of ${span.toFixed(2)} s, from ${c.start.toFixed(2)} s (${c.kind}); the hold is measured up to its start`;
 }
 
 export const PAUSE_S = 0.3;

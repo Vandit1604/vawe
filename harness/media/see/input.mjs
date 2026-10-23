@@ -8,7 +8,10 @@ import { videoTransitions } from './transitions.mjs';
 export async function resolveInput(input) {
   const found = await locate(input);
   const transitions = () => (found.refId ? refTransitions(refsDir(), found.refId) : videoTransitions(found.video));
-  return { ...found, holdCuts: async () => withTransitions(await found.cuts(), transitions()) };
+  const changes = () => {
+    try { return transitions(); } catch (e) { console.log(`note: no shot changes read (${e.message}); each hold is measured to the cut second`); return []; }
+  };
+  return { ...found, holdCuts: async () => withTransitions(await found.cuts(), changes()) };
 }
 
 async function locate(input) {

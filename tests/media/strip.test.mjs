@@ -206,3 +206,12 @@ test('a slow low-contrast dissolve is found as a crossfade and its energy stays 
   assert.ok(Math.abs(cutHolds(energy, [cut], FLOOR)[0].holdS - 2) < 0.15);
   assert.ok(holdBefore(energy, 2.8, FLOOR).holdS > 2.5);
 });
+
+test('withTransitions gives a shot change to its nearest cut, so a hard cut 0.4 s earlier cannot take it', () => {
+  const cuts = [{ at: 1.0, from: 'a', to: 'b' }, { at: 1.45, from: 'b', to: 'c' }];
+  const [a, b] = withTransitions(cuts, [{ startT: 1.4, endT: 1.5, type: 'wipe' }]);
+  assert.equal(a.kind, null);
+  assert.equal(a.start, 1.0);
+  assert.equal(b.kind, 'wipe');
+  assert.equal(b.start, 1.4);
+});

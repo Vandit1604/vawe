@@ -153,7 +153,7 @@ async function main(argv) {
     if (fix) console.error(`fix: ${fix}`);
     if (code !== 0 && causeOf(reason) === 'browser lost') {
       const { browserLog } = await import('../harness/media/preview-server.mjs');
-      console.error(`why the browser was lost: Chrome's own log, ${browserLog(true)} (a draft: ${browserLog(false)})`);
+      for (const log of [browserLog(true), browserLog(false)].filter((f) => fs.existsSync(f))) console.error(`Chrome log (why the browser was lost): ${log}`);
     }
   } catch (e) {
     code = e instanceof UsageError ? 2 : 1;
