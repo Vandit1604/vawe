@@ -71,7 +71,10 @@
     "hash": "ea0bf1b7f5e7c3db",
     "crf": 16
   },
-  "cta-morph-press": "20ab535ec0db79e8",
+  "cta-morph-press": {
+    "hash": "e6c484bc54a8ad74",
+    "crf": 16
+  },
   "cta-pop": "0b7874ee1eda7a8c",
   "cursor-click": "e09100c2c66b4407",
   "cursor-spotlight": {
