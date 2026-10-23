@@ -1,32 +1,35 @@
 # Caret typing
 
-**Use when** a command, a prompt or a name is typed in. The caret is the next flex item, so it moves
-with each character; when the typing ends the same caret becomes the next element (here the rule
-under the word), so nothing new enters. Monospace type makes `ch` exact. Clip:
+**Use when** a command, a prompt or a name is typed in. The clip copies a shell window: earlier
+commands above, a block caret that follows each typed character, and output that prints in whole
+rows. When the command runs, the caret moves to the next prompt line. Clip:
 [caret-typing.mp4](caret-typing.mp4). Demo: [demo/caret-typing.html](demo/caret-typing.html).
 
+```js
+import { typeTimes, typedCount, show } from '../../prompts/moves/demo/assets/stage.js';
+const times = typeTimes('vawe ship launch', 700);              // 30 ms a character, 70 ms more after a space, seeded jitter
+const lit = (ms, since) => ms - since < 500 || Math.floor((ms - since) / 500) % 2 === 0;   // solid after a key, then 1 Hz
+vawe.onFrame((s) => {
+  const ms = s * 1000;
+  typed.textContent = 'vawe ship launch'.slice(0, typedCount(times, ms));
+  const since = ms < 1900 ? times.filter((t) => t <= ms).pop() ?? 0 : 3300;   // 1900 ms: Enter, 3300 ms: the next prompt
+  c1.style.visibility = ms < 1900 && lit(ms, since) ? 'visible' : 'hidden';
+  c2.style.visibility = ms >= 3300 && lit(ms, since) ? 'visible' : 'hidden';
+});
+[[r1, 2100], [r2, 2420], [r3, 3200], [next, 3300]].forEach(([el, at]) => show(el, at));   // output rows print whole, never fade
+```
+
 ```css
-.type { display: inline-flex; align-items: center; font-family: ui-monospace, Menlo, monospace; }
-.text { overflow: hidden; white-space: nowrap; width: 0;
-        animation-name: type; animation-duration: 0.5s; animation-delay: var(--beat-1);
-        animation-timing-function: steps(9, end); animation-fill-mode: both; }   /* 9 = characters */
-.caret { position: relative; width: 0.08em; height: 1em; margin-left: 0.06em; background: var(--accent);
-         animation-name: spread, drop; animation-duration: 0.35s, 0.16s;
-         animation-delay: calc(var(--beat-1) + 0.55s), calc(var(--beat-1) + 0.55s);
-         animation-timing-function: var(--settle), var(--settle); animation-fill-mode: both, both; }
-@keyframes type { to { width: 9ch; } }
-@keyframes drop { to { height: 0.12em; top: 0.64em; } }               /* first: thin and below the letters */
-@keyframes spread { to { width: 9ch; translate: calc(-9ch - 0.06em) 0; } }
+.blk { display: inline-block; width: 0.6em; height: 1.2em; background: var(--ink); }   /* a block caret is one character wide */
 ```
 
-```html
-<div class="type"><span class="text">vawe ship</span><span class="caret"></span></div>
-<script type="module">
-import { EASE } from '../../core/motion/presets.js';
-document.documentElement.style.setProperty('--settle', EASE.land);
-</script>
-```
+Sound: pluck at the first key and at Enter (default gain); never one per character.
 
-Sound: pluck at --beat-1 (the first character) and at --beat-1 + 0.5 s (the last character) (default gain); never one per character.
+The text is a function of the time, so the seek shows the same frame every run. A terminal does
+not ease anything: the characters, the caret and the output rows appear in one frame each. Only the
+window enters and leaves.
+
+Common mistake: a thin bar caret that blinks from the start of the clip. A shell caret is a solid
+block, and it stays lit while keys arrive.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

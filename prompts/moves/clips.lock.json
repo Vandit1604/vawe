@@ -36,7 +36,10 @@
   "card-assemble": "7afcdc2bd423ab9a",
   "caret-door": "8c0a5dd7412b38c2",
   "caret-follow": "3d1cefff47fe2cb6",
-  "caret-typing": "ce632677f568f1f2",
+  "caret-typing": {
+    "hash": "3625441590553b87",
+    "crf": 16
+  },
   "chain-beats": "a9f87ec35d03f3bb",
   "chart-build": "0161845983894f1b",
   "circling-elements": {
