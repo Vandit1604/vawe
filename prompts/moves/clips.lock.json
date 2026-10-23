@@ -204,9 +204,12 @@
   "skeleton-reveal": "7a8637ce9901f147",
   "slice-shift": "fc360f7f7ce43185",
   "smear-stretch": "0c7af89f662af603",
-  "speed-ramp-freeze": "b5a5fb0493df054e",
+  "speed-ramp-freeze": {
+    "hash": "c812969c647389f5",
+    "crf": 16
+  },
   "spin-rotation": {
-    "hash": "604827020a71f91b",
+    "hash": "c94c0f9b5cf9f925",
     "crf": 16
   },
   "spin-transition": "01e1497b95c0bf73",
@@ -233,7 +236,10 @@
   "thanks-sweep": "b6db9b42c8b4865a",
   "thumbnail-grid": "f10b8a80f7ef8e9f",
   "ticker-takeover": "3aaa49c81c5f95c6",
-  "toggle-horizon": "938336b2be7b0f2d",
+  "toggle-horizon": {
+    "hash": "fb9754c83956e01c",
+    "crf": 16
+  },
   "tracking-collapse": "a8b14fb028f7100a",
   "type-fill-transition": "f8e6fe238d96d736",
   "type-match-cut": "0d5225fad29ae4d9",
