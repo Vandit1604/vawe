@@ -32,7 +32,10 @@
   },
   "blur-word-cascade": "accb93de1d3f9a7c",
   "bracket-callout": "2532f77f62259480",
-  "calm-lockup": "b4c23a1fa1d9d782",
+  "calm-lockup": {
+    "hash": "97060a98ec6d4322",
+    "crf": 16
+  },
   "camera-moves": {
     "hash": "8a45f914138af95c",
     "crf": 19
