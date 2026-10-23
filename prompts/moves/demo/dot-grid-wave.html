@@ -1,16 +1,16 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="daylight">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="4">
+<meta name="duration" content="5">
 <title>move: dot grid wave</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   body { display: block; position: relative; }
-  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 56vw; }
   svg.grid { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  .copy .title { margin: 0; font-size: calc(var(--u) * 14); line-height: 1.04; }
-  .copy .lead { margin: var(--s3) 0 0; max-width: 24em; color: var(--ink); text-wrap: pretty; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 58vw; }
+  .copy .title { margin: 0; font: 600 calc(var(--u) * 15)/1.02 var(--sans); letter-spacing: -0.045em; }
+  .copy .lead { margin: calc(var(--u) * 3.6) 0 0; max-width: 22em; font: 400 calc(var(--u) * 4.6)/1.3 var(--sans); color: var(--muted); text-wrap: pretty; }
 
   .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
   .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
@@ -20,16 +20,18 @@
        animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
   @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
 </style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.0"], "_why": {"text-unreadable-hold": "the copy holds 2.2 s after its last word lands at 2.4 s in a 5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the copy leaves at 4.6 s, 0.4 s before the 5 s end, so it holds 2.2 s, short of the 5.4 s the check asks", "world-held@0.0-5.0": "one title holds 5.0 s: the copy settles by 2.4 s, the second wave crosses the grid from 2.7 to 4.9 s and the copy leaves at 4.6 s"}}</script>
 </head>
 <body>
 <svg class="grid" id="grid" aria-hidden="true"></svg>
-<main class="copy">
+<main class="copy" id="copy">
   <h1 class="title"><span class="mask" style="--i:0"><span>A wave</span></span><span class="mask" style="--i:1"><span>in the grid.</span></span></h1>
-  <p class="lead" id="lead">A fine dot texture, until a soft wave passes through it.</p>
+  <p class="lead" id="lead">A fine dot texture, until a wave passes through it.</p>
 </main>
 <script type="module">
 import '/core/engine/page-api.js';
 import { EASE } from '/core/motion/presets.js';
+import { leave } from '/prompts/moves/demo/assets/stage.js';
 
 const root = document.documentElement;
 root.style.setProperty('--settle', EASE.land);
@@ -37,8 +39,8 @@ root.style.setProperty('--soft', EASE.land);
 const lead = document.getElementById('lead');
 lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
 
-// A grid of SVG dots. A plane wave sets each dot's radius and opacity from its place and the seek time: no state between frames.
-const PITCH = 0.021, BASE = 0.0011, SPEED = 1.7;       // pitch (22 px at 1080) and base radius (1.2 px) as shares of the frame height, wave rad/s
+// A grid of SVG dots. A band travels across it twice; each dot's radius and opacity come from its place and the seek time: no state between frames.
+const PITCH = 0.024, BASE = 0.0016, PEAK = 0.0036, PASSES = [0.5, 2.7], SPEED = 0.7, SIGMA = 0.15;   // shares of the frame height (pitch, radii); band start (s), width per second and half-width in frame widths
 const W = innerWidth, H = innerHeight;
 const svg = document.getElementById('grid');
 svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -50,18 +52,20 @@ for (let y = PITCH * H / 2; y < H; y += PITCH * H) {
     const c = document.createElementNS(NS, 'circle');
     c.setAttribute('cx', x.toFixed(1)); c.setAttribute('cy', y.toFixed(1));
     svg.append(c);
-    const zone = (1 - smooth(0.60 * W, 0.74 * W, x)) * (1 - smooth(0.30 * H, 0.40 * H, Math.abs(y - 0.5 * H)));   // the copy box
-    dots.push({ c, nx: x / H, ny: y / H, keep: 1 - 0.75 * zone });
+    const zone = (1 - smooth(0.58 * W, 0.7 * W, x)) * (1 - smooth(0.26 * H, 0.38 * H, Math.abs(y - 0.5 * H)));   // the copy box
+    dots.push({ c, s: (x * 0.94 + y * 0.34) / W, keep: 1 - 0.7 * zone });
   }
 }
 svg.style.fill = getComputedStyle(root).getPropertyValue('--ink');
 vawe.onFrame((t) => {
   for (const d of dots) {
-    const w = (0.5 + 0.5 * Math.sin(2.4 * (d.nx * 0.9 + d.ny * 0.45) - t * SPEED));
-    d.c.setAttribute('r', (BASE * H * (1 + 0.5 * w)).toFixed(2));
-    d.c.setAttribute('opacity', (d.keep * (0.10 + 0.42 * w)).toFixed(3));
+    let w = 0;
+    for (const t0 of PASSES) { const e = (d.s - (-0.35 + (t - t0) * SPEED)) / SIGMA; w = Math.max(w, Math.exp(-e * e)); }
+    d.c.setAttribute('r', (H * (BASE + (PEAK - BASE) * w)).toFixed(2));
+    d.c.setAttribute('opacity', (d.keep * (0.2 + 0.7 * w)).toFixed(3));
   }
 });
+leave(document.getElementById('copy'), 5000);
 </script>
 </body>
 </html>

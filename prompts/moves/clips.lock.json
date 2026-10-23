@@ -97,7 +97,10 @@
     "hash": "13f5a5b713810f88",
     "crf": 16
   },
-  "dot-grid-wave": "abbfb65ae6ec83c1",
+  "dot-grid-wave": {
+    "hash": "7771c766f491ccd6",
+    "crf": 19
+  },
   "drift-hold": "e10b3bfa4bfde279",
   "drop-and-land": "325a03e22d605331",
   "echo-trail": "da2c07129b097fc2",
