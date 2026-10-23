@@ -1,31 +1,39 @@
 #!/usr/bin/env node
 // The measured quality bar of the reference films: p10, median and p90 of the metrics the bar-check rules use.
-//   node harness/dev/bar-from-refs.mjs <measures.json> [--json]
-// Reads the file `bin/vawe see --spec` measurements are collected in (one entry per film with a `spec` block). Our own
-// films (group "ours") and films marked `out_of_scope` are left out. The numbers go into the rules' `numbers` by hand;
-// no check reads the measures file.
+//   node harness/dev/bar-from-refs.mjs --measures [--json]   (or a measures file in place of the flag)
+// Without a file, the measures are built from the registry in the refs folder (`bin/vawe refs list`): the spec.json that
+// `bin/vawe refs add` or `bin/vawe see <id> --spec` wrote for each film, through harness/lib/ref-measure/film-metrics.mjs.
+// A measures file (one entry per film with a `spec` block) still works. Films marked `out_of_scope` are left out.
+// The numbers go into the rules' `numbers` by hand; no check reads the measures.
 import fs from 'node:fs';
 import path from 'node:path';
 import { refsDir, readRegistry } from '../lib/refs.mjs';
+import { filmMetrics, quantile } from '../lib/ref-measure/film-metrics.mjs';
+
+export { quantile };
 
 export const METRICS = [
   { name: 'peak_speed_p90_fh_s', label: 'peak speed p90 (frame heights per second)', pick: (s) => s.peak_speed_p90_fh_s },
-  { name: 'overshoot_pct', label: 'arrivals that overshoot (%)', pick: (s) => s.overshoot_share * 100 },
-  { name: 'text_time_pct', label: 'film time with text on screen (%)', pick: (s) => s.text_time_share * 100 },
+  { name: 'peak_speed_p90_over_median', label: 'peak speed p90 over median, films with a median over 0.3 (ratio)', pick: (s) => (s.peak_speed_median_fh_s > 0.3 ? s.peak_speed_p90_fh_s / s.peak_speed_median_fh_s : NaN) },
+  { name: 'overshoot_pct', label: 'arrivals that overshoot (%)', pick: (s) => (s.overshoot_share == null ? NaN : s.overshoot_share * 100) },
+  { name: 'text_time_pct', label: 'film time with text on screen (%)', pick: (s) => (s.text_time_share == null ? NaN : s.text_time_share * 100) },
   { name: 'word_dwell_s_median', label: 'word held on screen, median (s)', pick: (s) => s.word_dwell_s_median },
 ];
 
-/** The q-quantile (0 to 1) of numbers by linear interpolation between ranks. Pure. */
-export function quantile(values, q) {
-  const xs = values.filter((v) => Number.isFinite(v)).sort((a, b) => a - b);
-  if (!xs.length) return null;
-  const at = (xs.length - 1) * q;
-  const lo = Math.floor(at);
-  const hi = Math.ceil(at);
-  return xs[lo] + (xs[hi] - xs[lo]) * (at - lo);
-}
-
 const round = (x) => (x === null ? null : Math.round(x * 1000) / 1000);
+
+/** { <id>: { id, title, group, out_of_scope, spec } } for each registered film that has a spec.json in `dir`; `spec` holds the film's bar numbers. */
+export function measuresOf(dir) {
+  const measures = {};
+  for (const r of readRegistry(dir) ?? []) {
+    if (!r.spec) continue;
+    try {
+      const spec = JSON.parse(fs.readFileSync(path.join(dir, r.spec), 'utf8'));
+      measures[r.id] = { id: r.id, title: r.title, group: r.type, out_of_scope: !r.inScope, spec: filmMetrics(spec) };
+    } catch (e) { console.error(`bar-from-refs: ${r.id}: ${e.message}`); }
+  }
+  return measures;
+}
 
 /** The films that set the bar: every entry with a spec block that is not ours and not out of scope. Pure. */
 export const referenceFilms = (measures) => Object.values(measures).filter((f) => f.spec && f.group !== 'ours' && !f.out_of_scope);
@@ -88,7 +96,7 @@ export const RANGE_KEYS = ['eye_jump_median_fh', 'eye_carried_pct', 'eye_moved_p
 export function rangeOf(shapeBar, filmBar, date) {
   const metrics = Object.fromEntries([...RANGE_KEYS.map((k) => [k, shapeBar[k]]), ['overshoot_pct', filmBar.overshoot_pct]]);
   return {
-    _source: `node harness/dev/bar-from-refs.mjs --range, ${date}: eye and ground from ${shapeBar.films} in-scope reference films (${shapeBar.cuts} cuts, bin/vawe see --spec); overshoot share from ${filmBar.overshoot_pct.n} films (measures.json); one value per film, then p10, median and p90`,
+    _source: `node harness/dev/bar-from-refs.mjs --range, ${date}: eye and ground from ${shapeBar.films} in-scope reference films (${shapeBar.cuts} cuts, bin/vawe see --spec); overshoot share from ${filmBar.overshoot_pct.n} films (spec.json of each film); one value per film, then p10, median and p90`,
     films: shapeBar.films, cuts: shapeBar.cuts, metrics,
   };
 }
@@ -105,7 +113,7 @@ function main() {
   const args = process.argv.slice(2), json = args.includes('--json'), all = args.includes('--all');
   const file = args.find((a) => !a.startsWith('--'));
   if (args.includes('--range')) {
-    const films = barOf(JSON.parse(fs.readFileSync(path.join(refsDir(), 'measures.json'), 'utf8')));
+    const films = barOf(measuresOf(refsDir()));
     console.log(JSON.stringify(rangeOf(shapeBarOf(readSpecs(refsDir())), films, new Date().toISOString().slice(0, 10)), null, 1));
     return;
   }
@@ -115,11 +123,11 @@ function main() {
     printBar(bar, SHAPE_METRICS, `reference films: ${bar.films}, shots ${bar.shots}, cuts ${bar.cuts} (${bar.motionCuts} between two motion points)${all ? ' (all with a spec)' : ' (in scope)'}`);
     return;
   }
-  if (!file) {
-    console.error('usage: node harness/dev/bar-from-refs.mjs <measures.json> [--json]\n       node harness/dev/bar-from-refs.mjs --refs [--all] [--json]   (eye and ground, from ~/.vawe/refs/spec)\n       node harness/dev/bar-from-refs.mjs --range > taste/build/ref-range.json   (the aggregates bin/vawe dev prints)');
+  if (!file && !args.includes('--measures')) {
+    console.error('usage: node harness/dev/bar-from-refs.mjs --measures [--json]   (from ~/.vawe/refs/refs.json and the spec.json of each film)\n       node harness/dev/bar-from-refs.mjs <measures.json> [--json]\n       node harness/dev/bar-from-refs.mjs --refs [--all] [--json]   (eye and ground, from ~/.vawe/refs/spec)\n       node harness/dev/bar-from-refs.mjs --range > taste/build/ref-range.json   (the aggregates bin/vawe dev prints)');
     process.exit(2);
   }
-  const bar = barOf(JSON.parse(fs.readFileSync(file, 'utf8')));
+  const bar = barOf(file ? JSON.parse(fs.readFileSync(file, 'utf8')) : measuresOf(refsDir()));
   if (json) { console.log(JSON.stringify(bar, null, 1)); return; }
   printBar(bar, METRICS, `reference films: ${bar.films}`);
 }
