@@ -125,11 +125,17 @@
     "hash": "e7736fbc50f75a32",
     "crf": 16
   },
-  "logo-wall": "5c98256e89f5351c",
+  "logo-wall": {
+    "hash": "3e872238a9a7f037",
+    "crf": 19
+  },
   "lower-third": "6c58bc4796a06fa9",
   "luma-matte-dissolve": "e4abecf11a55e65b",
   "mark-trace": "40da7b3036f73789",
-  "marker-highlight": "409fcf5b3a4f5b76",
+  "marker-highlight": {
+    "hash": "d3b692759c0c62dc",
+    "crf": 16
+  },
   "marquee-along-path": {
     "hash": "fa8a3b0a71d6c28e",
     "crf": 19
