@@ -1,6 +1,6 @@
 ---
 when: "you are about to write a text or panel entrance, a transition, an exit, a typing effect or an emphasis, and want the proven version instead of your first idea"
-answers: "the built moves as CSS and WAAPI snippets an agent copies, picked by job or by group, each with its `EASE` curve and a 1 s clip, and the ten demo looks"
+answers: "the built moves as CSS and WAAPI snippets an agent copies, picked by job or by group, each with its `EASE` curve and a 1 s clip, and the eight demo looks"
 group: reference
 ---
 
@@ -303,7 +303,7 @@ Where the numbers come from. Five product films in `~/.vawe/refs/measures.md` (n
 
 Sound today. A clip is silent. A film that uses a move cues the synth effect voices (`pluck`, `tick`, `tap`, `droplet`, `air`, `whoosh`, `shimmer`) on its actions, never as a bed; a recorded effect cut with `bin/vawe sound <file> --sfx` from a site in `resources/README.md` replaces a synth cue when one exists.
 
-## Looks: one design system, ten demo looks
+## Looks: one design system, eight demo looks
 
 `demo/demo.css` holds both. A demo sets `<html data-look="name">`; no class, size or timing changes.
 
@@ -315,12 +315,12 @@ Sound today. A clip is silent. A film that uses a move cues the synth effect voi
 - Radius steps `--r0`..`--r6` (0, 0.5, 1, 2, 3, 4.6, 6 u). A look picks `--r-chip` and `--r-card` from them.
 - Line weights: hair 1 px, rule 0.25 u, heavy 0.45 u. Depth: ring, stack, lift, hero. A look changes only the colour and which step it uses.
 - Colour roles: ground, surface, raised, hover (a visible ladder), ink, muted, accent, on-accent, plus the `--paper` pair for a cut.
-- Contrast: ink, muted, on-accent and paper text pass 4.5:1; accent as text passes 3:1 (large type only). `--faint` is for dots, rules and icons, never for text. `node prompts/moves/demo/contrast.mjs` checks all ten.
+- Contrast: ink, muted, on-accent and paper text pass 4.5:1; accent as text passes 3:1 (large type only). `--faint` is for dots, rules and icons, never for text. `node prompts/moves/demo/contrast.mjs` checks all eight.
 - `.chip` is a fixed square (`--size`, default 11 u) for an icon or a letter; a label that grows with its text is a pill of your own, not a `.chip`.
 - Stage: `<html data-stage data-look="soft|editorial" data-theme="light|dark">` adds the lit ground (four soft lights, a drifting pool, grain); `.glass` with an inner `.core` is the double-bezel frame for a UI. The two stage looks are combos from `prompts/skill-combos.md`: `soft` (Soft light) and `editorial` (Warm editorial), each light by default with a dark block. A look has a block for the theme it does not start in (vawe light, paper dark, daylight dark, terminal light, soft dark, editorial dark); the other six looks have one polarity and ignore `data-theme`.
 - Faces are in `generators/media/fonts.mjs` with a locked version (`harness/media/fonts.lock.json`).
 
-### The ten looks
+### The eight looks
 
 | look | character | use for |
 |---|---|---|
@@ -329,17 +329,15 @@ Sound today. A clip is silent. A film that uses a move cues the synth effect voi
 | terminal | charcoal green, one mono face, phosphor | typing, commands, streams, code |
 | swiss | off-white hairlines, red, tracked mono labels | type and data: charts, logo walls, callouts |
 | paper | cream, serif headline, brick orange, grain | quiet editorial type: titles, quotes, thanks |
-| dusk | indigo to plum, grain, amber, one italic word | calm lockups, blur, focus, spotlight |
 | brutal | acid yellow, black borders, hard shadow | hits on the beat: punch, cut, cascade |
 | signal | near-black, condensed capitals, mint, pills | loud headlines, flash cuts, slices, release notes |
 | field | one saturated green, lemon, tints | bold colour wipes, pops, sweeps |
-| chrome | periwinkle bevels, halftone, burnt orange | physical objects: plates, stacks, tilts, flaps |
 
 ### Variety rule (how a look is assigned)
 
 1. Within a group a look appears at most twice. Two exceptions: a group of more than 20 moves (Change between shots) lets one look take a third, and a move may borrow the nearest look when its pool is full.
 2. Adjacent moves in a group list differ.
-3. Product-UI moves take product looks (vawe, daylight, terminal, swiss). Type moves take editorial looks (paper, swiss, brutal, dusk, signal). Transitions take colour-led looks (field, chrome, brutal, signal) first.
-4. A physical move (plates, flaps, tilts) takes chrome; a typed stream takes terminal.
+3. Product-UI moves take product looks (vawe, daylight, terminal, swiss). Type moves take editorial looks (paper, swiss, brutal, signal). Transitions take colour-led looks (field, brutal, signal) first.
+4. A typed stream takes terminal.
 
 The assignment is the `data-look` on each `demo/*.html`. Shared assets live in `demo/assets/`: `logos.js` (sixteen invented brands, never a real company) and `photos/` (CC0 only, sources in `photos/credits.json`); reuse them before you draw a new one. `bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes in `clips.lock.json`).

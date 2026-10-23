@@ -272,25 +272,6 @@ html[data-look="daylight"] {
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* dusk: indigo to plum with 6 percent grain, one amber, one italic serif word (class .em). */
-html[data-look="dusk"] {
-  --ground: #120e2a; --surface: #1b1638; --raised: #262048; --hover: #312a5a;
-  --backdrop: radial-gradient(120vmax 90vmax at 18% 8%, #2a1d55 0%, rgba(42, 29, 85, 0) 60%), linear-gradient(165deg, #150f33 0%, #120e2a 55%, #1d0f2b 100%);
-  --ink: #f6f2ff; --muted: #b0a9d0; --faint: #7d76a3; --accent: #ffb547; --on-accent: #1c1230;
-  --line: rgba(246, 242, 255, 0.12); --edge: rgba(246, 242, 255, 0.09); --dot: #35305e; --bar: rgba(246, 242, 255, 0.28);
-  --dim: rgba(8, 5, 22, 0.8); --cursor: #fff; --cursor-edge: #120e2a;
-  --paper: #f3eefc; --paper-ink: #120e2a; --paper-muted: #5f5885; --star: #ffd9a0; --up-ink: #ffb547;
-  --sans: 'Manrope', sans-serif; --display: 'Manrope', sans-serif; --head-weight: 700; --head-track: -0.035em;
-  --em-face: 'Instrument Serif', serif; --em-style: italic;
-  --r-chip: var(--r3); --r-card: var(--r5);
-  --sh: 5 2 20; --sa: 3.8; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.07), var(--stack);
-  --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-html[data-look="dusk"]::after {
-  content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.06; mix-blend-mode: screen;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
-}
-
 /* brutal: acid yellow, thick black borders, hard offset shadow, a heavy wide grotesk, one blue. */
 html[data-look="brutal"] {
   --ground: #ffe600; --surface: #fff; --raised: #fff7a8; --hover: #fff;
@@ -334,23 +315,6 @@ html[data-look="signal"] {
   --r-chip: var(--r3); --r-card: var(--r6);
   --lift: 0 0 0 0 transparent; --shadow-hero: var(--ring); --img-edge: rgba(255, 255, 255, 0.14);
   --accent-edge: 0 0 0 0 transparent;
-}
-
-/* chrome: periwinkle metal, bevelled plates, one burnt orange, a halftone dot ground. The look for physical objects. */
-html[data-look="chrome"] {
-  --ground: #aab7dd; --surface: #eef1fa; --raised: #c8d1ea; --hover: #b9c4e3;
-  --ink: #141a3a; --muted: #2f3860; --faint: #5a6596; --accent: #b3360a; --on-accent: #fff;
-  --line: rgba(61, 79, 151, 0.6); --edge: rgba(61, 79, 151, 0.6); --dot: #8d9bcb; --bar: rgba(20, 26, 58, 0.3);
-  --dim: rgba(20, 26, 58, 0.78); --cursor: #141a3a; --cursor-edge: #eef1fa;
-  --paper: #141a3a; --paper-ink: #eef1fa; --paper-muted: #a9b4dc; --star: #b3360a; --up-ink: #8f2a06;
-  --sans: 'Archivo', sans-serif; --display: 'Archivo', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
-  --head-weight: 800; --head-track: -0.03em; --head-case: uppercase;
-  --r-chip: var(--r2); --r-card: var(--r3);
-  --ring: 0 0 0 var(--w-hair) #3d4f97;
-  --lift: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(20, 26, 58, 0.3), 0 calc(var(--u) * 0.4) 0 #3d4f97, 0 calc(var(--u) * 1.2) calc(var(--u) * 3) rgba(20, 26, 58, 0.25);
-  --shadow-hero: var(--ring), var(--lift); --img-edge: rgba(20, 26, 58, 0.25);
-  --backdrop: radial-gradient(circle, rgba(61, 79, 151, 0.2) 1px, transparent 1.6px) 0 0 / calc(var(--u) * 1.6) calc(var(--u) * 1.6) #aab7dd;
-  --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 /* soft: the Soft light combo (prompts/skill-combos.md). Near white with a warm cast, cool near-black ink, one coral accent, Geist, tinted diffused shadows; light carries the colour. */
@@ -490,5 +454,5 @@ html[data-look="product"] :is(.n, .add, .rem, .files, .cnt, .no, .o, .w, .gl b, 
 .win .avatar-dot { width: calc(var(--u) * 2); height: calc(var(--u) * 2); border-radius: 50%; background: var(--raised); box-shadow: 0 0 0 1px var(--chrome-ring); flex: none; }
 .win .page { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--surface); }
 
-/* the stage grain replaces a look's own (paper, dusk); it comes last so it wins the tie */
+/* the stage grain replaces a look's own (paper); it comes last so it wins the tie */
 html[data-stage]::after { content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: var(--grain); mix-blend-mode: var(--grain-blend); background-image: var(--grain-img); }
