@@ -49,7 +49,7 @@
     "crf": 16
   },
   "card-assemble": {
-    "hash": "7f571e33135e82ef",
+    "hash": "a251e7b7c1ed5731",
     "crf": 16
   },
   "caret-door": {
@@ -189,7 +189,7 @@
     "crf": 16
   },
   "logo-wall": {
-    "hash": "3e872238a9a7f037",
+    "hash": "9a2d79ec88c348b8",
     "crf": 19
   },
   "lower-third": "6c58bc4796a06fa9",
@@ -212,7 +212,7 @@
   },
   "match-cut": "29629fca01cd16ca",
   "media-between-text": {
-    "hash": "0b6dfc9e4ab370ab",
+    "hash": "6c58a4698d4356c2",
     "crf": 16
   },
   "model-picker": {
@@ -265,7 +265,7 @@
   },
   "scale-punch": "ff7ee08696b8742b",
   "shadow-handoff": {
-    "hash": "14f157b61a169916",
+    "hash": "a6084b36c8b90e07",
     "crf": 16
   },
   "shape-morph-wipe": "c4deb691d54050e5",
