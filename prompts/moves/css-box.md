@@ -22,12 +22,12 @@ Sound: none; or one soft knock as each face lands (about 0.5 s after the jump).
 
 ## How it looks and moves
 
-- Six faces in one `preserve-3d` block, each pushed out by half the edge (58 u, 58 percent of the
-  frame height). The camera looks down 17 degrees, so the top and two sides show.
+- Six faces in one `preserve-3d` block, each pushed out by half the edge (56 u, 56 percent of the
+  frame height, about 75 percent on screen with the perspective). The camera looks down 17 degrees, so the top and two sides show.
 - Faces are flat paint. The light comes from the upper left front, so the top is brightest and the
   right side darkest. A 0.16 u lighter line runs inside each edge. The shade is under the type, so
   the white stays white.
-- The shadow is a blurred square on the table that turns with the block.
+- The contact shadow is a soft radial pool on the table, 1.8 times the edge wide, darkest under the block (0.55 alpha in light, 0.85 in dark).
 - The block turns about its vertical axis only. Each jump is one quarter turn (half done in 0.2 s,
   still by 0.7 s). The order of the faces on screen is Build, Render, Edit, Ship.
 - Only the stage fades in and out. An opacity animation on the 3D block would flatten it.

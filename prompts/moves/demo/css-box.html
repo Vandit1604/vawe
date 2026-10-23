@@ -8,13 +8,13 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.6", "static-window@4.1-5.2"], "_why": {"text-unreadable-hold": "the block holds 1.1 s after its last turn settles at 4.1 s in a 5.6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the block leaves at 5.2 s, so the settled face holds 1.1 s, short of the 5.4 s the check asks", "world-held@0.0-5.6": "one block holds 5.6 s: it turns three times from 0.7 s and leaves at 5.2 s", "static-window@4.1-5.2": "block, 1.1 s from 4.1 s: a solid block on a table holds still after a turn, and nothing on it moves once it has settled"}}</script>
 <style>
-  :root { --cube: calc(var(--u) * 58); --paint: #2d52d6; --ink-face: #fff; }
+  :root { --cube: calc(var(--u) * 56); --paint: #2d52d6; --ink-face: #fff; }
   html[data-theme="dark"] { --paint: #3d63e0; }
   body { display: block; }
   .stage { position: absolute; inset: 0; perspective: calc(var(--u) * 300); }
-  .rig { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translateY(calc(var(--u) * 3)) rotateX(-17deg); }
+  .rig { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translateY(calc(var(--u) * 1)) rotateX(-17deg); }
   .spin { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; transform: rotateY(calc(var(--yaw) * 1deg)); }
-  .face { position: absolute; left: calc(var(--cube) / -2); top: calc(var(--cube) / -2); width: var(--cube); height: var(--cube); backface-visibility: hidden; background: var(--paint); color: var(--ink-face); padding: calc(var(--u) * 4.4); display: flex; flex-direction: column; justify-content: flex-end; box-shadow: inset 0 0 0 calc(var(--u) * 0.16) rgba(255, 255, 255, 0.22); }
+  .face { position: absolute; left: calc(var(--cube) / -2); top: calc(var(--cube) / -2); width: var(--cube); height: var(--cube); backface-visibility: hidden; background: var(--paint); color: var(--ink-face); padding: calc(var(--u) * 4.4); display: flex; flex-direction: column; justify-content: flex-end; box-shadow: inset 0 0 0 calc(var(--u) * 0.16) rgba(255, 255, 255, 0.34); }
   .face b { font: 700 calc(var(--u) * 10)/0.98 var(--head); letter-spacing: -0.035em; }
   .face span { margin-top: calc(var(--u) * 1.6); font: 500 calc(var(--u) * 2.9)/1.15 var(--mono); opacity: 0.82; }
   .face i { position: absolute; inset: 0; z-index: -1; background: #000; opacity: 0; pointer-events: none; }
@@ -23,8 +23,8 @@
   .f2 { transform: rotateY(180deg) translateZ(calc(var(--cube) / 2)); }
   .f3 { transform: rotateY(-90deg) translateZ(calc(var(--cube) / 2)); }
   .f4 { transform: rotateX(90deg) translateZ(calc(var(--cube) / 2)); }
-  .floor { position: absolute; left: calc(var(--cube) / -2); top: calc(var(--cube) / -2); width: var(--cube); height: var(--cube); transform: rotateX(90deg) translateZ(calc(var(--cube) / -2 - var(--u) * 0.1)); background: rgba(0, 0, 0, 0.16); box-shadow: 0 0 calc(var(--u) * 4) calc(var(--u) * 1.4) rgba(0, 0, 0, 0.2); }
-  html[data-theme="dark"] .floor { background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 calc(var(--u) * 4) calc(var(--u) * 1.4) rgba(0, 0, 0, 0.5); }
+  .floor { position: absolute; left: calc(var(--cube) * -0.9); top: calc(var(--cube) * -0.9); width: calc(var(--cube) * 1.8); height: calc(var(--cube) * 1.8); transform: rotateX(90deg) translateZ(calc(var(--cube) / -2 - var(--u) * 0.1)); background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55) 0, rgba(0, 0, 0, 0.5) 56%, rgba(0, 0, 0, 0.2) 74%, transparent 100%); }
+  html[data-theme="dark"] .floor { background: radial-gradient(closest-side, rgba(0, 0, 0, 0.85) 0, rgba(0, 0, 0, 0.8) 56%, rgba(0, 0, 0, 0.35) 74%, transparent 100%); }
 </style>
 </head>
 <body>
