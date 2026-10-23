@@ -1,31 +1,42 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="paper">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1.4">
+<meta name="duration" content="4.2">
 <title>move: marker highlight</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.0-3.9", "world-held@0.0-4.2"], "_why": {"text-unreadable-hold": "the text is on screen from 0.1 s and holds 3.8 s, and the check asks 5.4 s", "text-moves-before-hold": "the text leaves at 3.9 s, 0.3 s before the 4.2 s end, short of the 5.4 s the check asks", "static-window@3.0-3.9": "the marked page holds 0.9 s: a real highlighted page stays still once the pen is lifted", "world-held@0.0-4.2": "one page holds 4.2 s: the marker crosses it from 0.5 s to 2.9 s"}}</script>
 <style>
-  @property --p { syntax: '<number>'; inherits: false; initial-value: -12; }
-  body { place-items: center start; padding-left: 11vw; }
-  p { margin: 0; text-align: left; font: 700 calc(var(--u) * 10)/1.25 var(--sans); letter-spacing: -0.03em; }
-
-  .hl { position: relative; display: inline-block; white-space: nowrap; margin: 0 0.16em; }
-  /* one wipe box holds the bar and a dark copy of the text, so the colour flips exactly at the bar's edge */
-  .wipe { position: absolute; inset: 0; --e: 8;
-          clip-path: polygon(-50% -50%, calc(var(--p) * 1% + var(--e) * 1%) -50%, calc(var(--p) * 1%) 150%, -50% 150%);
-          animation-name: sweep; animation-duration: 0.55s; animation-delay: 0.3s;
-          animation-timing-function: var(--sweep); animation-fill-mode: both; }
-  .bar { position: absolute; inset: 0.14em -0.16em 0.02em; background: var(--accent); border-radius: 0.2em; transform: skewX(-7deg); }
-  .dark { position: absolute; inset: 0; color: var(--on-accent); }
-  @keyframes sweep { to { --p: 112; } }
+  body { display: block; position: relative; }
+  .doc { position: absolute; left: 12vw; right: 8vw; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; margin: 0; font: 600 calc(var(--u) * 8.2)/1.38 var(--sans); letter-spacing: -0.03em; color: var(--ink); }
+  .hl { position: relative; display: inline-block; white-space: nowrap; }
+  .wipe { position: absolute; inset: 0; mix-blend-mode: multiply; }
+  .bar { position: absolute; inset: 0.2em -0.1em 0.04em; background: #ffe14d; transform: rotate(-0.5deg);
+         clip-path: polygon(0.8% 14%, 2% 0%, 98.5% 4%, 100% 20%, 99% 55%, 100% 88%, 98% 100%, 3% 96%, 0% 70%, 1.2% 40%); }
+  .bar.b { inset: 0.12em -0.06em 0.3em; transform: rotate(0.4deg); background: #ffd93a; }
 </style>
 </head>
 <body>
-<p>Ship the <span class="hl">launch film<span class="wipe"><span class="bar"></span><span class="dark">launch film</span></span></span><br>before the meeting</p>
+<p class="doc" id="doc">
+  <span>Ship the <span class="hl">launch film<span class="wipe"><i class="bar"></i></span></span></span>
+  <span>before the Thursday meeting,</span>
+  <span>and keep the cut <span class="hl">under a minute<span class="wipe"><i class="bar"></i></span><span class="wipe"><i class="bar b"></i></span></span>.</span>
+</p>
 <script type="module">
 import { EASE } from '/core/motion/presets.js';
-document.documentElement.style.setProperty('--sweep', EASE.landSoft);
+import { leave, arrive } from '/prompts/moves/demo/assets/stage.js';
+arrive(document.getElementById('doc'), 100, { ms: 220, from: '0.8vh' });
+// the pen tip is a slanted edge that crosses the word; a pass can go either way
+const stroke = (wipe, atMs, ms, rtl = false) => {
+  const hide = rtl ? 'polygon(112% 0, 112% 0, 120% 100%, 112% 100%)' : 'polygon(-12% 0, -12% 0, -20% 100%, -12% 100%)';
+  const show = rtl ? 'polygon(-8% 0, 100% 0, 100% 100%, 0 100%)' : 'polygon(0 0, 108% 0, 100% 100%, 0 100%)';
+  wipe.animate([{ clipPath: hide }, { clipPath: show }], { duration: ms, delay: atMs, easing: EASE.settle, fill: 'both' });
+};
+const wipes = [...document.querySelectorAll('.wipe')];
+stroke(wipes[0], 500, 650);
+stroke(wipes[1], 1700, 650);
+stroke(wipes[2], 2300, 550, true);
+leave(document.getElementById('doc'), 4200);
 </script>
 </body>
 </html>

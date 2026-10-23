@@ -1,43 +1,69 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="dusk">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1.4">
+<meta name="duration" content="4.5">
 <title>move: rack focus</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@2.6-4.0", "world-held@0.0-4.5"], "_why": {"text-unreadable-hold": "each card is sharp for about 1.2 s and soft for the rest by design, and the check asks 5.4 s", "text-moves-before-hold": "the cards leave at 4.0 s, 0.5 s before the 4.5 s end, short of the 5.4 s the check asks", "static-window@2.6-4.0": "the lens holds its focus on the second card for 1.4 s: a camera that has pulled focus stays still", "world-held@0.0-4.5": "one table scene holds 4.5 s: the cards arrive at 0.15 s, focus moves at 1.2 s, the cards leave at 4.0 s"}}</script>
 <style>
-  body { display: block; position: relative; }
-  .far, .near { position: absolute; inset: 0; }
-  .lights i { position: absolute; width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); border-radius: 50%; background: var(--star); }
-  .card { position: absolute; left: 50vw; top: 28vh; width: 38vw; height: 44vh; padding: calc(var(--u) * 5); }
-  .card .k { display: flex; align-items: center; gap: var(--s2); font: 500 var(--t-body)/1 var(--mono); color: var(--muted); letter-spacing: -0.02em; }
-  .card .k img { width: calc(var(--u) * 9.6); height: calc(var(--u) * 5.4); border-radius: calc(var(--u) * 1); }
-  .card b { display: block; margin-top: calc(var(--u) * 4); font: 700 calc(var(--u) * 16)/0.9 var(--sans); letter-spacing: -0.055em; }
-  .card .pill { margin-top: calc(var(--u) * 4); }
-  .near h1 { position: absolute; left: 7vw; top: 38vh; margin: 0; font: 800 calc(var(--u) * 36)/1 var(--sans); letter-spacing: -0.06em; }
+  html, body { background: #1c1b19; }
+  body { display: block; }
 </style>
 </head>
 <body>
-<div class="far"><div class="lights"></div><div class="card"><div class="k"><img class="photo" src="/prompts/moves/demo/assets/photos/meadow.jpg">launch-16x9</div><b>41 s</b><span class="pill up">Shipped</span></div></div>
-<div class="near"><h1>Draft</h1></div>
 <script type="module">
-import { EASE } from '/core/motion/presets.js';
-import { rng } from '/core/motion/springs.js';
-const pull = EASE.settle;
-const far = document.querySelector('.far'), near = document.querySelector('.near'), lights = document.querySelector('.lights');
-const rand = rng(11);
-for (let i = 0; i < 16; i++) {
-  const dot = document.createElement('i');
-  dot.style.left = `${rand() * 96}vw`; dot.style.top = `${rand() * 90}vh`; dot.style.opacity = (0.35 + rand() * 0.6).toFixed(2);
-  lights.appendChild(dot);
+import '/core/engine/page-api.js';
+import { lens, canvasSource, OFF } from '/core/surfaces/lens.js';
+import { easeFn } from '/core/motion/presets.js';
+
+const W = 1920, H = 1080;
+const clamp = (x) => Math.min(1, Math.max(0, x));
+const land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch');
+const mk = () => Object.assign(document.createElement('canvas'), { width: W, height: H });
+const color = mk(), depth = mk(), cx = color.getContext('2d'), dx = depth.getContext('2d');
+
+const photo = new Image();
+photo.src = '/prompts/moves/demo/assets/photos/shore.jpg';
+await Promise.all([photo.decode(), document.fonts.load('600 220px Inter'), document.fonts.load('500 40px "Geist Mono"')]);
+
+// two cards at two depths over a photo that is always far: focus sits on one card and the other and the photo go soft
+const NEAR = 0.2, MID = 0.55, FAR = 0.95;
+const cards = [
+  { x: 150, y: 190, w: 700, h: 700, z: NEAR, at: 0.15, label: 'launch-16x9', word: 'Draft', note: 'v3, not reviewed', dot: '#8f8f8f', ink: '#1b1a17' },
+  { x: 1030, y: 290, w: 700, h: 560, z: MID, at: 0.3, label: 'launch-16x9', word: '41 s', note: 'Shipped', dot: '#1a7f4b', ink: '#1b1a17' },
+];
+const FOCUS = { at: 1.2, dur: 1.0 }, LEAVE_AT = 4.0;
+const rack = (t) => NEAR + (MID - NEAR) * settle(clamp((t - FOCUS.at) / FOCUS.dur));
+
+const rr = (c, x, y, w, h, r) => { c.beginPath(); c.roundRect(x, y, w, h, r); };
+function drawCard(c, k, a, dy, flat) {
+  c.save(); c.globalAlpha = a; c.translate(0, dy);
+  if (flat) { c.fillStyle = `rgb(${Math.round(k.z * 255)} 0 0)`; rr(c, k.x, k.y, k.w, k.h, 30); c.fill(); c.restore(); return; }
+  c.shadowColor = 'rgba(0, 0, 0, 0.38)'; c.shadowBlur = 60; c.shadowOffsetY = 26;
+  c.fillStyle = '#f7f5f0'; rr(c, k.x, k.y, k.w, k.h, 30); c.fill();
+  c.shadowColor = 'transparent';
+  c.fillStyle = '#6b6a65'; c.font = '500 38px "Geist Mono"'; c.fillText(k.label, k.x + 56, k.y + 96);
+  c.fillStyle = k.ink; c.font = '600 230px Inter'; c.fillText(k.word, k.x + 50, k.y + k.h / 2 + 80);
+  c.fillStyle = k.dot; c.beginPath(); c.arc(k.x + 70, k.y + k.h - 80, 14, 0, 7); c.fill();
+  c.fillStyle = '#3d3c38'; c.font = '500 40px Inter'; c.fillText(k.note, k.x + 100, k.y + k.h - 66);
+  c.restore();
 }
-const beat = { duration: 700, delay: 550, easing: pull, fill: 'both' };
-near.animate([{ filter: 'blur(0px)' }, { filter: 'blur(1.9vh)' }], beat);
-far.animate([{ filter: 'blur(1.9vh)' }, { filter: 'blur(0px)' }], beat);
-// focus breathing: the lens changes its field of view a little as focus moves, the far plane grows and the near one shrinks
-far.animate([{ scale: 1.015 }, { scale: 1 }], beat);
-near.animate([{ scale: 1 }, { scale: 0.985 }], beat);
-near.animate([{ opacity: 1 }, { opacity: 0.55 }], beat);
+function paint(t) {
+  const s = Math.max(W / photo.width, H / photo.height);
+  cx.drawImage(photo, (W - photo.width * s) / 2, (H - photo.height * s) / 2, photo.width * s, photo.height * s);
+  dx.fillStyle = `rgb(${Math.round(FAR * 255)} 0 0)`; dx.fillRect(0, 0, W, H);
+  for (const k of cards) {
+    const inn = land(clamp((t - k.at) / 0.4)), out = launch(clamp((t - LEAVE_AT) / 0.3));
+    const a = inn * (1 - out), dy = (1 - inn) * 14 - out * 14;
+    if (a <= 0) continue;
+    drawCard(cx, k, a, dy, false);
+    if (a > 0.5) drawCard(dx, k, 1, dy, true);
+  }
+}
+paint(0);
+const cam = lens(canvasSource(color, { depth }), { ...OFF, dof: { blur: 0.9, focus: rack, bokeh: 8 } });
+vawe.onFrame(async (t) => { paint(t); await cam.draw(t); });
 </script>
 </body>
 </html>

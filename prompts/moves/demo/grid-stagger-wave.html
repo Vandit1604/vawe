@@ -1,50 +1,53 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="field">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1.6">
+<meta name="duration" content="4.2">
 <title>move: grid stagger wave</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@2.4-3.8", "world-held@0.0-4.2"], "_why": {"text-unreadable-hold": "the title holds 3.6 s in a 4.2 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the sheet leaves at 3.8 s, so the finished grid holds 1.2 s after the status dots, short of the 5.4 s the check asks", "static-window@2.4-3.8": "the finished grid holds still as a real integrations section does; only the status dots arrive in a second wave", "world-held@0.0-4.2": "one integrations grid holds 4.2 s: the wave from 0.3 s, the status dots from 2.0 s, the leave at 3.8 s"}}</script>
 <style>
   body { display: block; }
-  .grid { position: absolute; inset: 0; padding: calc(var(--u) * 4); display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(4, 1fr); gap: calc(var(--u) * 2.2); }
-  .tile { display: grid; place-items: center; background: var(--surface); box-shadow: var(--ring), calc(var(--u) * 0.9) calc(var(--u) * 0.9) 0 #000; }
+  .sheet { position: absolute; inset: calc(var(--u) * 5); padding: calc(var(--u) * 4); border-radius: calc(var(--u) * 3); background: var(--surface); box-shadow: var(--win-shadow), 0 0 0 1px var(--line); display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(4, 1fr); gap: calc(var(--u) * 2.4); }
+  .tile { position: relative; display: grid; place-items: center; border-radius: calc(var(--u) * 2); background: var(--raised); box-shadow: inset 0 0 0 1px var(--line); }
   .tile .logo-mark { width: calc(var(--u) * 7.4); height: calc(var(--u) * 7.4); color: var(--ink); }
-  .title { grid-column: 2 / span 3; grid-row: 2 / span 2; place-items: end start; padding: var(--s3); background: var(--accent); color: var(--on-accent); box-shadow: var(--accent-edge), var(--lift); }
-  .title b { font: 800 calc(var(--u) * 8.2)/0.95 var(--sans); letter-spacing: -0.04em; }
+  .tile .live { position: absolute; right: calc(var(--u) * 1.6); top: calc(var(--u) * 1.6); width: calc(var(--u) * 1.5); height: calc(var(--u) * 1.5); border-radius: 50%; background: #1a7f4b; }
+  .lede { grid-column: 1 / span 3; grid-row: 2 / span 2; align-self: center; padding-left: calc(var(--u) * 1); }
+  .lede b { display: block; font: 600 calc(var(--u) * 8.4)/1.02 var(--sans); letter-spacing: -0.04em; }
+  .lede span { display: block; margin-top: var(--s3); font: 400 var(--t-lead)/1.25 var(--sans); color: var(--muted); }
 </style>
 </head>
 <body>
-<div class="grid">
-  <div class="tile title"><b>Plugs into<br>everything.</b></div>
+<div class="sheet" id="sheet">
+  <div class="lede"><b>Plugs into<br>everything.</b><span>One connection each. 14 apps live.</span></div>
 </div>
 <script type="module">
 import { EASE } from '/core/motion/presets.js';
+import { leave, arrive } from '/prompts/moves/demo/assets/stage.js';
 import { mark } from '/prompts/moves/demo/assets/logos.js';
-const grid = document.querySelector('.grid');
-const glyphs = ['kestrel', 'halcyon', 'parcel', 'fernbank', 'mosaic', 'lumen', 'northwind', 'orbital', 'quarry', 'tidewell', 'ardent', 'vantage', 'compass', 'aster'].map((name) => {
-  const t = document.createElement('template'); t.innerHTML = mark(name); return t.content.firstElementChild;
-});
-const COLS = 8, ROWS = 4, src = { c: 2.5, r: 1.5 };   // the wave starts at the title tile's centre, in tile units
-const inTitle = (c, r) => c >= 1 && c <= 3 && r >= 1 && r <= 2;
-const STEP = 70, T0 = 140;                                // ms per tile of distance: the wave front speed
+const sheet = document.getElementById('sheet');
+const names = ['kestrel', 'halcyon', 'parcel', 'fernbank', 'mosaic', 'lumen', 'northwind', 'orbital', 'quarry', 'tidewell', 'ardent', 'vantage', 'compass', 'aster'];
+const COLS = 8, ROWS = 4, src = { c: 1.5, r: 1.5 };   // the wave starts at the title block's centre, in tile units
+const STEP = 70, T0 = 300, DOTS_AT = 2000;           // ms per tile of distance: the wave front speed
 let n = 0;
 for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-  if (inTitle(c, r)) continue;
+  if (c <= 2 && (r === 1 || r === 2)) continue;
   const tile = document.createElement('div');
   tile.className = 'tile';
   tile.style.gridArea = `${r + 1} / ${c + 1}`;
-  tile.append(glyphs[(n++ * 3) % glyphs.length].cloneNode(true));
-  grid.append(tile);
+  tile.innerHTML = `${mark(names[(n++ * 5) % names.length])}<i class="live"></i>`;
+  sheet.append(tile);
   const dx = c - src.c, dy = r - src.r, d = Math.hypot(dx, dy);
+  const at = T0 + d * STEP;
   // each tile starts pulled 30 percent of a tile toward the source and is pushed out by the front
-  tile.animate([{ translate: `${(-dx / d) * 30}% ${(-dy / d) * 30}%`, scale: 0.55 }, { translate: '0 0', scale: 1 }],
-    { duration: 520, delay: T0 + d * STEP, easing: EASE.pop, fill: 'both' });
-  tile.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: T0 + d * STEP, easing: 'linear', fill: 'both' });
+  tile.animate([{ translate: `${(-dx / d) * 30}% ${(-dy / d) * 30}%`, scale: 0.8, opacity: 0 }, { translate: '0 0', scale: 1, opacity: 1 }],
+    { duration: 600, delay: at, easing: EASE.landSoft, fill: 'both' });
+  const dot = tile.querySelector('.live');
+  dot.animate([{ opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1 }], { duration: 240, delay: DOTS_AT + d * 40, easing: EASE.land, fill: 'both' });
 }
-const title = document.querySelector('.title');
-title.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 420, easing: EASE.land, fill: 'both' });
-grid.animate([{ scale: 1 }, { scale: 1.025 }], { duration: 1600, easing: EASE.glide, fill: 'both' });
+arrive(document.querySelector('.lede'), 100, { ms: 420, from: '1.2vh' });
+arrive(sheet, 0, { ms: 220, from: '0.8vh' });
+leave(sheet, 4200);
 </script>
 </body>
 </html>

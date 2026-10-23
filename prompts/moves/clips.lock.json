@@ -150,9 +150,15 @@
     "hash": "0d6cef454bf399da",
     "crf": 25
   },
-  "grid-stagger-wave": "c268dc724ff350a3",
+  "grid-stagger-wave": {
+    "hash": "a7e098f54d73a9c3",
+    "crf": 16
+  },
   "grid-tile-flip": "3d14a6f0c0b503c8",
-  "halftone-field": "298326898145482e",
+  "halftone-field": {
+    "hash": "56d26e3bcaf100d0",
+    "crf": 19
+  },
   "hand-drawn-notes": "695c4e34bd4ff383",
   "highlight-sweep": "0aa8f7c1e54ba3cc",
   "ink-warp": "64a415f1297c1add",
@@ -162,7 +168,10 @@
     "crf": 16
   },
   "lens": "74a5a14ff552c672",
-  "letter-3d-swap": "b2d624b7a8267a73",
+  "letter-3d-swap": {
+    "hash": "26d18a12965cc093",
+    "crf": 16
+  },
   "letter-stagger": "aa26493298ac3b34",
   "letter-swap": "1a03e5b29479bf16",
   "light-leak-transition": {
@@ -170,7 +179,7 @@
     "crf": 16
   },
   "light-pool": {
-    "hash": "84adf4fecd82e6df",
+    "hash": "244631c9301b23c9",
     "crf": 16
   },
   "liquid-displace": "658866f80a955089",
@@ -179,14 +188,20 @@
     "hash": "e7736fbc50f75a32",
     "crf": 16
   },
-  "logo-wall": "5c98256e89f5351c",
+  "logo-wall": {
+    "hash": "3e872238a9a7f037",
+    "crf": 19
+  },
   "lower-third": "6c58bc4796a06fa9",
   "luma-matte-dissolve": {
     "hash": "7c754c2b83bc54af",
     "crf": 22
   },
   "mark-trace": "40da7b3036f73789",
-  "marker-highlight": "409fcf5b3a4f5b76",
+  "marker-highlight": {
+    "hash": "b4bb11ca94b344dd",
+    "crf": 16
+  },
   "marquee-along-path": {
     "hash": "fa8a3b0a71d6c28e",
     "crf": 19
@@ -197,7 +212,7 @@
   },
   "match-cut": "29629fca01cd16ca",
   "media-between-text": {
-    "hash": "d17b0a55b8f18027",
+    "hash": "0b6dfc9e4ab370ab",
     "crf": 16
   },
   "model-picker": {
@@ -244,14 +259,20 @@
     "crf": 19
   },
   "push-blur": "86861c8174474541",
-  "rack-focus": "32c423f2923a413b",
+  "rack-focus": {
+    "hash": "74ee438f6331fb82",
+    "crf": 19
+  },
   "scale-punch": "ff7ee08696b8742b",
-  "shadow-handoff": "3564c4504a16d14a",
+  "shadow-handoff": {
+    "hash": "e7f78b1011bac0cc",
+    "crf": 16
+  },
   "shape-morph-wipe": "c4deb691d54050e5",
   "shape-trace-morph": "0ba8ebc18736a75f",
   "simple-marquee": {
-    "hash": "79675a7b286ff88e",
-    "crf": 16
+    "hash": "1fed411c09a45220",
+    "crf": 19
   },
   "skeleton-reveal": {
     "hash": "c22116ba3dcb5138",
@@ -263,9 +284,12 @@
   },
   "slice-shift": "fc360f7f7ce43185",
   "smear-stretch": "0c7af89f662af603",
-  "speed-ramp-freeze": "b5a5fb0493df054e",
+  "speed-ramp-freeze": {
+    "hash": "e5e4468fccbf805e",
+    "crf": 16
+  },
   "spin-rotation": {
-    "hash": "604827020a71f91b",
+    "hash": "c94c0f9b5cf9f925",
     "crf": 16
   },
   "spin-transition": "01e1497b95c0bf73",
@@ -295,7 +319,10 @@
   "thanks-sweep": "b6db9b42c8b4865a",
   "thumbnail-grid": "f10b8a80f7ef8e9f",
   "ticker-takeover": "3aaa49c81c5f95c6",
-  "toggle-horizon": "938336b2be7b0f2d",
+  "toggle-horizon": {
+    "hash": "fb9754c83956e01c",
+    "crf": 16
+  },
   "tracking-collapse": "a8b14fb028f7100a",
   "type-fill-transition": "f8e6fe238d96d736",
   "type-match-cut": "0d5225fad29ae4d9",

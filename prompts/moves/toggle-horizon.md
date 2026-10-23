@@ -1,43 +1,32 @@
 # Toggle horizon
 
-**Use when** a setting switches the whole product into a new state (dark mode, night, focus) and the next scene is a world with a
-horizon. A toggle switches on, its track stretches sideways past both frame edges and thins to a hairline, and that line is the horizon
-of the next scene. Scene A opens away from the line, up and down, and scene B is already behind it. No cut and no crossfade: the
-line is the seam and it never leaves the screen. Clip: [toggle-horizon.mp4](toggle-horizon.mp4). Demo: [demo/toggle-horizon.html](demo/toggle-horizon.html).
+**Use when** a setting switches the whole product into a new state: dark mode, focus, night. The clip shows a settings
+screen, one switch, and the screen restyling itself in place. Clip: [toggle-horizon.mp4](toggle-horizon.mp4). Demo:
+[demo/toggle-horizon.html](demo/toggle-horizon.html).
+
+Look: a phone screen (54 u wide, 94 u tall) on the flat neutral ground, in the style of a mobile settings list: a large title,
+rounded white groups, rows with a title and a muted line, and switches 8.6 by 5.2 u. A switch is a pill track and a white thumb with a
+soft shadow; when on, the track is green. A grey touch dot shows the finger. The six colours of the screen (page, group, ink, muted,
+line, switch off) are tokens registered as colours, so they animate.
+
+How it moves: the finger arrives from below on `EASE.land` and rests on Dark mode. On the press the thumb grows 22 percent wider, as a
+real switch does. 0.14 s later it travels to the right on a sampled spring (stiffness 380, damping 26) while the track turns green. The
+screen then changes all six tokens together in 0.35 s on `EASE.land`. A second tap, on Reduce motion at 2.8 s, flips that switch in the
+dark screen. The finger lifts and leaves, then the phone leaves on `leave`.
 
 ```js
-import { easeFn } from '../../core/motion/presets.js';
-import { spring } from '../../core/motion/springs.js';
-const land = easeFn('land'), swap = easeFn('swap'), launch = easeFn('launch');
-const LINE_Y = 0.58 * H;                                                   // the toggle sits on the horizon of scene B
-vawe.onFrame((t) => {
-  const on = spring(t - T.press - 0.02, 380, 26);                          // the knob after the press
-  const sk = clamp((t - 1.5) / 0.7);
-  const l = lerp(L0, -0.03 * W, land(sk)), r = lerp(R0, 1.03 * W, land(sk)), h = lerp(TH, 0.5 * u, swap(clamp(sk * 1.25)));
-  track.style.cssText = `left:${l}px; top:${LINE_Y - h / 2}px; width:${r - l}px; height:${h}px`;
-  const wk = launch(clamp((t - 2.0) / 0.65));                              // A leaves the line, accelerating
-  topHalf.style.clipPath = `inset(0 0 ${H - LINE_Y * (1 - wk)}px 0)`;
-  bottomHalf.style.clipPath = `inset(${LINE_Y + (H - LINE_Y) * wk}px 0 0 0)`;
-});
+import { spring } from '/core/motion/springs.js';
+const K = 380, D = 26, HOLD = 0.14;                              // thumb spring; seconds the finger holds before the thumb moves
+const on = spring(t - tap.at - HOLD, K, D);                       // 0 to 1, from vawe.onFrame
+th.style.translate = `${TRAVEL * on - (THUMB * 0.22 * stretch) * on}px 0`;
+th.style.width = `${THUMB * (1 + 0.22 * stretch)}px`;             // stretch: 1 while the finger holds, back to 0 as the thumb leaves
+screen.animate([LIGHT, DARK].map((p) => Object.fromEntries(Object.entries(p).map(([k, v]) => [`--s-${k}`, v]))),
+  { duration: 350, delay: (tap.at + HOLD + 0.05) * 1000, easing: EASE.land, fill: 'both' });
 ```
 
-Sound: one short tick on the press, a low swell on the stretch that ends when the line is thin; nothing on the wipe.
+Sound: tick at 1.0 s, on the press (default gain); a quieter tick at 2.8 s.
 
-- Scene A is two copies of the same layer, each clipped to its side of the line (`bottom.innerHTML = top.innerHTML`). One clipped
-  layer would cut the card in half and show the cut half. The toggle sits on the line, so the card spans both halves. The track grows
-  from the toggle's own left and right edges (the toggle sits right of centre in its row), and the row label fades out 0.1 s before the
-  track reaches it, so the line never runs through text.
-- The horizon is the track, in the accent colour: it stays at `LINE_Y` for the whole of scene B. Put the horizon of B (the sky edge, the
-  sea line) on the same y. A line that moves after the handoff is a second object.
-- Order: the knob switches first (spring k 380, d 26, about 0.3 s), 0.2 s of dwell, then the track stretches 0.7 s on `EASE.land`:
-  width to 105 percent of the frame, height 10 u to 0.5 u on `EASE.swap`, 1.25 times faster than the width, so the pill is long before it is thin.
-  The knob rides the right end and shrinks with the track height.
-- The wipe starts 0.5 s into the stretch, when the line is nearly full width: 0.65 s on `EASE.launch`, so the two halves accelerate away.
-  It overlaps the stretch, so the line never waits. The wipe is the exit of A: shorter and faster than the stretch plus the dwell.
-- The world arrives after the seam: the sun climbs from under the line 0.5 s after the wipe starts (1.1 s, `EASE.land`) with a warm halo,
-  a reflection lengthens under it, the caption rises 0.25 s later and holds, and two thin clouds drift. The sky ends in the horizon colour
-  at the line, so the amber line reads as the edge of the light. The camera does not move.
-- What goes wrong: a cursor that leaves slowly stays on screen over the new world, so send it off the frame. Stars and sun must be
-  in B only. A line thicker than 0.6 u reads as a bar, not a horizon.
+Common mistake: a new scene (a sunset, a glow) that replaces the screen. A real appearance switch restyles the same screen, so every row stays in
+its place and only the colours change. Never put a spring on the colours, and never move the layout.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

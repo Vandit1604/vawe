@@ -1,48 +1,46 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="chrome">
+<html data-aspect="16:9" data-look="editorial" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="4">
 <title>move: halftone field</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-4.0"], "_why": {"text-unreadable-hold": "the copy holds 2.8 s after its last word at 1.0 s, and the check asks 5.4 s", "text-moves-before-hold": "the copy leaves at 3.6 s, 0.4 s before the 4 s end, so it holds 2.6 s short of the 5.4 s the check asks", "world-held@0.0-4.0": "one halftone print holds 4.0 s: the type rises from 0.1 s, the key light turns once round the sphere"}}</script>
 <style>
   body { display: block; position: relative; }
-  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 56vw; }
-  .copy .title { margin: 0; font-size: calc(var(--u) * 13); line-height: 1.04; }
-  .copy .lead { margin: var(--s3) 0 0; max-width: 24em; color: var(--ink); text-wrap: pretty; }
-
+  .copy { position: absolute; left: 9vw; top: 0; bottom: 0; width: 52vw; display: flex; flex-direction: column; justify-content: center; }
+  .copy .title { margin: 0; font-size: calc(var(--u) * 12.5); line-height: 1.04; color: var(--ink); }
+  .copy .lead { margin: var(--s3) 0 0; max-width: 16em; color: var(--ink); font-weight: 400; text-wrap: pretty; }
   .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
   .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
   @keyframes rise { to { translate: 0 0; } }
-
-  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
-       animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
-  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
 </style>
 </head>
 <body>
-<main class="copy">
-  <h1 class="title"><span class="mask" style="--i:0"><span>A screen</span></span><span class="mask" style="--i:1"><span>that breathes.</span></span></h1>
-  <p class="lead" id="lead">A fine screen that thickens and thins, slowly, behind still type.</p>
+<main class="copy" id="copy">
+  <h1 class="title"><span class="mask" style="--i:0"><span>Light,</span></span><span class="mask" style="--i:1"><span>in dots.</span></span></h1>
+  <p class="lead">Dot size follows the shade of one lit sphere. The light turns; the dots stay.</p>
 </main>
 <script type="module">
 import '/core/engine/page-api.js';
 import { shaderField } from '/core/surfaces/shader-field.js';
 import { EASE } from '/core/motion/presets.js';
+import { leave, arrive } from '/prompts/moves/demo/assets/stage.js';
 
 const root = document.documentElement;
 root.style.setProperty('--settle', EASE.land);
-root.style.setProperty('--soft', EASE.land);
-const lead = document.getElementById('lead');
-lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
+const copy = document.getElementById('copy');
+arrive(copy.querySelector('.lead'), 700, { ms: 420, from: '1.2vh' });
+leave(copy, 4000);
 
 const tokens = getComputedStyle(root);
 const rgb = (name) => { const h = tokens.getPropertyValue(name).trim(); return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
 
-// A fine 45 degree dot screen in one neutral ink. Dot centres never move; the radius follows a slow density wave.
+// A 45 degree dot screen in one ink. Dot centres never move; each dot's area is the shade of one lit sphere, so the size ramp is the light.
 const frag = `
 uniform vec3 u_ground, u_ink;
-const float CELL = 0.020;                                    // pitch as a share of the frame height: 22 px at 1080
+const float CELL = 0.026;                                    // pitch as a share of the frame height: 28 px at 1080
+const float TURN = 6.2831853 / 4.0;                          // the light turns once round in the 4 s clip: the last frame matches the first
 void main() {
   float aspect = u_res.x / u_res.y;
   vec2 p = gl_FragCoord.xy / u_res.y;
@@ -51,13 +49,23 @@ void main() {
   vec2 f = fract(g) - 0.5;
   vec2 c = (id + 0.5) * CELL;
   vec2 cp = vec2(c.x - c.y, c.x + c.y) * 0.7071;
-  float wave = 0.5 + 0.5 * sin(2.2 * cp.x + 0.9 * cp.y - u_time * 1.6 + u_seed);
-  float keep = 1.0 - 0.6 * smoothstep(0.80 * aspect, 0.56 * aspect, cp.x);     // the copy sits left: thinner dots behind it
-  float radius = mix(0.05, 0.075, wave) * keep;                // 2.2 to 3.2 px across at 1080, a 1.5 times swing
+  vec2 sc = vec2(aspect * 0.84, 0.5);
+  float R = 0.40;
+  vec2 q = (cp - sc) / R;
+  float r2 = dot(q, q);
+  vec3 L = normalize(vec3(-0.55 + 0.22 * sin(u_time * TURN), 0.55 + 0.12 * cos(u_time * TURN), 0.62));
+  float cover = 0.012 + 0.08 * smoothstep(0.3, 1.0, cp.x / aspect);   // the paper: a faint screen that thickens to the right
+  if (r2 < 1.0) {
+    vec3 n = vec3(q, sqrt(1.0 - r2));
+    cover = 0.08 + 0.7 * (1.0 - clamp(dot(n, L), 0.0, 1.0));
+  } else {
+    float s = length((cp - sc - vec2(0.12, -0.16) * R * 1.6) / (R * 1.1));   // the shadow the sphere throws down and to the right
+    cover += 0.28 * (1.0 - smoothstep(0.7, 1.35, s));
+  }
+  float radius = sqrt(min(cover, 0.76) / 3.14159);
   float aa = 1.0 / (u_res.y * CELL);
   float dotMask = smoothstep(radius + aa, radius - aa, length(f));
-  vec3 ink = mix(u_ground, u_ink, (0.16 + 0.22 * wave) * keep);   // tone swings with the wave, 16 to 38 percent: texture at rest, a soft tide as it passes
-  gl_FragColor = vec4(mix(u_ground, ink, dotMask), 1.0);
+  gl_FragColor = vec4(mix(u_ground, u_ink, dotMask * 0.94), 1.0);
 }`;
 
 const field = shaderField(frag, { seed: 2, uniforms: { u_ground: rgb('--ground'), u_ink: rgb('--ink') } });

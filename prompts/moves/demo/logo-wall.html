@@ -1,66 +1,59 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="daylight">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2">
-<meta name="blank" content="0-0.05">
+<meta name="duration" content="4">
 <title>move: logo wall</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-4.0"], "_why": {"text-unreadable-hold": "the heading holds 3.0 s after it lands at 0.8 s, and the check asks 5.4 s", "text-moves-before-hold": "the wall leaves at 3.6 s, 0.4 s before the 4 s end, short of the 5.4 s the check asks", "world-held@0.0-4.0": "one logo wall holds 4.0 s: the rows arrive from 0.15 s and then drift at a constant speed, as a real wall does"}}</script>
 <style>
   body { display: block; position: relative; }
-  .lede { position: absolute; left: 6vw; top: calc(var(--u) * 9); font: 700 calc(var(--u) * 10.5)/1 var(--sans); letter-spacing: -0.045em; }
-  .lede span { display: block; overflow: hidden; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+  .stage { position: absolute; inset: 0; }
+  .lede { position: absolute; left: 0; right: 0; top: calc(var(--u) * 11); text-align: center; font: 600 calc(var(--u) * 9)/1.05 var(--sans); letter-spacing: -0.04em; }
+  .lede span { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
   .lede i { display: block; font-style: normal; }
-  .lede .n { color: var(--accent); }
-  .wall { position: absolute; left: 0; right: 0; top: calc(var(--u) * 42); border-top: 1px solid var(--ink); }
+  .lede .l1 { color: var(--muted); }
+  .wall { position: absolute; left: 0; right: 0; top: calc(var(--u) * 41); border-top: 1px solid var(--line);
+          -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%); }
   .lane { position: relative; height: calc(var(--u) * 17); border-bottom: 1px solid var(--line); overflow: hidden; }
-  .row { position: absolute; left: calc(var(--u) * -20); top: 0; height: 100%; width: max-content; display: flex; will-change: transform; }
-  .track { flex: none; display: flex; height: 100%; }
-  .logo { flex: none; width: calc(var(--u) * 38); height: 100%; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 1.6); border-right: 1px solid var(--line); color: var(--ink); }
-  .logo .logo-mark { width: calc(var(--u) * 5.8); height: calc(var(--u) * 5.8); }
-  .logo b { font-size: calc(var(--u) * 5.2); line-height: 1; white-space: nowrap; }
+  .row { position: absolute; left: calc(var(--u) * -300); top: 0; height: 100%; display: flex; width: max-content; }
+  .slot { flex: none; width: calc(var(--u) * 38); height: 100%; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 1.6); color: #86867f; }
+  .slot .logo-mark { width: calc(var(--u) * 5.8); height: calc(var(--u) * 5.8); }
 </style>
 </head>
 <body>
-<div class="lede"><span><i>Trusted by</i></span><span><i><em class="n" style="font-style:normal">4,200</em> teams.</i></span></div>
-<div class="wall" id="wall"></div>
+<div class="stage" id="stage">
+  <div class="lede"><span><i class="l1">Trusted by</i></span><span><i>4,200 teams.</i></span></div>
+  <div class="wall" id="wall"></div>
+</div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { EASE, easeFn } from '/core/motion/presets.js';
+import { easeFn } from '/core/motion/presets.js';
+import { EASE } from '/core/motion/presets.js';
+import { leave } from '/prompts/moves/demo/assets/stage.js';
 import { mark, wordmark } from '/prompts/moves/demo/assets/logos.js';
-const E = easeFn('land');
-const W = innerWidth, H = innerHeight, u = H / 100;
-// invented brands from the shared set; a wide or mono face sets smaller so every wordmark has one optical size
+const land = easeFn('landSoft');
+const H = innerHeight, u = H / 100;
+// invented brands from the shared set, all in one grey at one optical size; a wide or mono face sets smaller
 const brands = [['northwind', 1], ['halcyon', 1.08], ['fernbank', 0.66], ['kestrel', 0.88], ['orbital', 1], ['lumen', 1], ['quarry', 1], ['tidewell', 1.08], ['parcel', 0.82], ['mosaic', 1], ['ardent', 1], ['vantage', 1]];
-const logo = ([name, size]) => `<div class="logo">${mark(name)}${wordmark(name).replace('style="', `style="font-size:${(u * 5.2 * size).toFixed(1)}px;`)}</div>`;
+const slot = ([name, size]) => `<div class="slot">${mark(name)}${wordmark(name).replace('style="', `style="font-size:${(u * 5.2 * size).toFixed(1)}px;`)}</div>`;
 const wall = document.getElementById('wall');
 const rows = [0, 1, 2].map((r) => {
   const set = Array.from({ length: 12 }, (_, i) => brands[(i + r * 4) % 12]);
   const lane = Object.assign(document.createElement('div'), { className: 'lane' });
-  lane.innerHTML = `<div class="row"><div class="track">${set.concat(set).map(logo).join('')}</div></div>`;
+  lane.innerHTML = `<div class="row">${set.concat(set).map(slot).join('')}</div>`;
   wall.append(lane);
   return lane.firstElementChild;
 });
-const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-svg.setAttribute('width', 0); svg.setAttribute('height', 0); svg.style.position = 'absolute';
-svg.innerHTML = rows.map((_, i) => `<filter id="lb${i}" x="-10%" width="120%" y="0" height="100%"><feGaussianBlur id="lg${i}" stdDeviation="0 0"/></filter>`).join('');
-document.body.append(svg);
-const arrive = 1300, stagger = 110, run = 190 * u;      // px each row travels while it arrives
-const plan = rows.map((row, i) => {
-  const dir = i % 2 ? 1 : -1, delay = 150 + i * stagger;
-  row.style.filter = `url(#lb${i})`;
-  row.animate([{ translate: `${-dir * run}px 0` }, { translate: '0 0' }], { duration: arrive, delay, easing: EASE.land, fill: 'both' });
-  // after it lands the row never stops: a slow linear drift, so the last frame still moves
-  row.firstElementChild.animate([{ translate: '0 0' }, { translate: `${dir * 6 * u}px 0` }], { duration: 2000, easing: EASE.glide, fill: 'both' });
-  return { blur: document.getElementById(`lg${i}`), delay: delay / 1000, run };
-});
-vawe.onFrame((t) => plan.forEach((p) => {
-  const x = (t - p.delay) / (arrive / 1000), du = 1 / 240;
-  const slope = x > 0 && x < 1 ? (E(Math.min(1, x + du)) - E(x)) / du : 0;
-  p.blur.setAttribute('stdDeviation', `${(slope * p.run / (arrive / 1000) / 60 * 0.3).toFixed(2)} 0`);
+const ARRIVE = 1.3, STAGGER = 0.11, RUN = 150 * u, DRIFT = 4 * u;   // s; s between rows; px a row travels while it arrives; px a second after
+const clamp = (x) => Math.min(1, Math.max(0, x));
+vawe.onFrame((t) => rows.forEach((row, i) => {
+  const dir = i % 2 ? 1 : -1, k = clamp((t - 0.15 - i * STAGGER) / ARRIVE);
+  row.style.translate = `${dir * DRIFT * t - dir * RUN * (1 - land(k))}px 0`;
+  row.style.opacity = String(clamp(k * 3));
 }));
-const lede = [...document.querySelectorAll('.lede i')];
-lede.forEach((el, i) => el.animate([{ translate: '0 110%' }, { translate: '0 0' }], { duration: 640, delay: 80 + i * 90, easing: EASE.land, fill: 'both' }));
+[...document.querySelectorAll('.lede i')].forEach((el, i) => el.animate([{ translate: '0 110%' }, { translate: '0 0' }], { duration: 640, delay: 80 + i * 90, easing: EASE.land, fill: 'both' }));
+leave(document.getElementById('stage'), 4000);
 </script>
 </body>
 </html>

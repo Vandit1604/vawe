@@ -1,126 +1,97 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="dusk">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="3.8">
+<meta name="duration" content="4.6">
 <title>move: toggle horizon</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.6-4.2", "world-held@0.0-4.6"], "_why": {"text-unreadable-hold": "the settings page holds 3.9 s after it arrives, and the check asks 5.4 s", "text-moves-before-hold": "the phone leaves at 4.2 s, 0.4 s before the 4.6 s end, short of the 5.4 s the check asks", "static-window@3.6-4.2": "the dark settings page holds 0.6 s as a real screen does between taps", "world-held@0.0-4.6": "one settings screen holds 4.6 s: the first tap flips Dark mode at 1.0 s, the second tap flips Reduce motion at 2.8 s"}}</script>
 <style>
   body { display: block; position: relative; }
-  .shot { position: absolute; inset: 0; }
-  .b { z-index: 1; overflow: hidden; }
-  .b .ground { position: absolute; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #2a1546 0%, #140b2a 38%, #0b0719 100%); }
-  .glow { position: absolute; width: calc(var(--u) * 90); height: calc(var(--u) * 90); left: 50%; margin-left: calc(var(--u) * -45); border-radius: 50%; background: radial-gradient(circle, rgba(255, 181, 71, 0.5) 0%, rgba(255, 150, 90, 0.18) 38%, rgba(255, 150, 90, 0) 70%); }
-  .sun { position: absolute; left: 50%; width: calc(var(--u) * 26); height: calc(var(--u) * 26); margin-left: calc(var(--u) * -13); border-radius: 50%; background: linear-gradient(180deg, #ffd27a 0%, #ffb547 100%); }
-  .stars i { position: absolute; width: calc(var(--u) * 0.5); height: calc(var(--u) * 0.5); border-radius: 50%; background: #f6f2ff; }
-  .cloud { position: absolute; height: calc(var(--u) * 1.1); border-radius: 999px; background: rgba(255, 214, 190, 0.16); filter: blur(calc(var(--u) * 0.35)); }
-  .refl { position: absolute; left: 50%; height: calc(var(--u) * 0.5); border-radius: 999px; background: #ffb547; transform: translateX(-50%); }
-  .b .cap { position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 9); display: flex; justify-content: center; }
-  .b .cap .pill { gap: var(--s1); padding: calc(var(--u) * 1.6) calc(var(--u) * 3); font-size: var(--t-body); }
-  .b .cap svg { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .a { z-index: 2; }
-  .a .half { position: absolute; inset: 0; background: var(--backdrop); }
-  .a .card { position: absolute; left: 50%; top: calc(var(--u) * 24); width: calc(var(--u) * 104); height: calc(var(--u) * 54); margin-left: calc(var(--u) * -52); }
-  .a .card .eyebrow { position: absolute; left: var(--s5); top: calc(var(--u) * 6); }
-  .a .row { position: absolute; left: 0; right: 0; height: calc(var(--u) * 13); padding-inline: var(--s5); display: flex; align-items: center; justify-content: space-between; }
-  .a .row + .row { border-top: 1px solid var(--line); }
-  .a .row b { display: block; font: 600 var(--t-body)/1.15 var(--sans); }
-  .a .row span { display: block; margin-top: calc(var(--u) * 0.6); font: 500 var(--t-small)/1.2 var(--sans); color: var(--muted); }
-  .a .chip-val { padding: calc(var(--u) * 1.3) calc(var(--u) * 2.4); border-radius: var(--r-chip); background: var(--raised); box-shadow: var(--ring); font: 600 var(--t-small)/1 var(--sans); }
-  .a .tg { position: relative; width: calc(var(--u) * 15); height: calc(var(--u) * 8.4); border-radius: 999px; background: var(--raised); }
-  .a .tg::after { content: ''; position: absolute; left: calc(var(--u) * 1); top: calc(var(--u) * 1); width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); border-radius: 50%; background: #fff; box-shadow: 0 calc(var(--u) * 0.4) calc(var(--u) * 1) rgba(0, 0, 0, 0.35); }
-  .line { position: absolute; z-index: 6; background: var(--accent); border-radius: 999px; }
-  .knob { position: absolute; z-index: 7; border-radius: 50%; background: #fff; box-shadow: 0 calc(var(--u) * 0.4) calc(var(--u) * 1) rgba(0, 0, 0, 0.35); }
-  .cur { position: absolute; left: 0; top: 0; z-index: 10; }
-  .cursor { display: block; width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); overflow: visible; transform-origin: 0 0; }
-  .cursor path { fill: #fff; stroke: #120e2a; stroke-width: 1.4; stroke-linejoin: round; }
+  .phone { position: absolute; left: 50%; top: 50%; width: calc(var(--u) * 54); height: calc(var(--u) * 94); margin: calc(var(--u) * -47) 0 0 calc(var(--u) * -27); padding: calc(var(--u) * 0.9); border-radius: calc(var(--u) * 7); background: #151515; box-shadow: var(--win-shadow); }
+  .screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: calc(var(--u) * 6.2); background: var(--s-bg); color: var(--s-ink); font-family: var(--sans); }
+  .status { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 7); padding: calc(var(--u) * 1) calc(var(--u) * 5) 0; font: 600 calc(var(--u) * 3)/1 var(--sans); }
+  .batt { width: calc(var(--u) * 5); height: calc(var(--u) * 2.4); border-radius: calc(var(--u) * 0.7); box-shadow: inset 0 0 0 1.5px var(--s-ink); position: relative; }
+  .batt::after { content: ''; position: absolute; left: 2px; top: 2px; bottom: 2px; width: 70%; border-radius: 1px; background: var(--s-ink); }
+  h1 { margin: calc(var(--u) * 2.4) calc(var(--u) * 4) calc(var(--u) * 3); font: 700 calc(var(--u) * 7.4)/1 var(--sans); letter-spacing: -0.03em; }
+  .grp { margin: 0 calc(var(--u) * 3.2); border-radius: calc(var(--u) * 2.4); background: var(--s-group); overflow: hidden; }
+  .grp + .cap { margin: calc(var(--u) * 1.6) calc(var(--u) * 5) calc(var(--u) * 3.2); font: 400 calc(var(--u) * 2.6)/1.3 var(--sans); color: var(--s-muted); }
+  .row { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 11.4); padding: 0 calc(var(--u) * 3.6); }
+  .row + .row { box-shadow: inset 0 1px 0 var(--s-line); }
+  .row b { display: block; font: 500 calc(var(--u) * 3.6)/1.1 var(--sans); }
+  .row span.sub { display: block; margin-top: calc(var(--u) * 0.8); font: 400 calc(var(--u) * 2.7)/1.1 var(--sans); color: var(--s-muted); }
+  .row .val { font: 400 calc(var(--u) * 3.4)/1 var(--sans); color: var(--s-muted); }
+  .tg { position: relative; flex: none; width: calc(var(--u) * 8.6); height: calc(var(--u) * 5.2); border-radius: 999px; background: var(--s-off); }
+  .tg .on { position: absolute; inset: 0; border-radius: inherit; background: #30b455; opacity: 0; }
+  .tg .th { position: absolute; top: calc(var(--u) * 0.3); left: calc(var(--u) * 0.3); width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); border-radius: 999px; background: #fff; box-shadow: 0 calc(var(--u) * 0.3) calc(var(--u) * 0.9) rgb(0 0 0 / 0.28), 0 0 0 0.5px rgb(0 0 0 / 0.06); }
+  .touch { position: absolute; left: 0; top: 0; width: calc(var(--u) * 7); height: calc(var(--u) * 7); margin: calc(var(--u) * -3.5) 0 0 calc(var(--u) * -3.5); border-radius: 50%; background: rgb(120 120 128 / 0.35); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.25); }
 </style>
 </head>
 <body>
-<section class="shot b" id="b">
-  <div class="stars" id="stars"></div>
-  <div class="cloud" id="c1"></div><div class="cloud" id="c2"></div>
-  <div class="glow" id="glow"></div>
-  <div class="sun" id="sun"></div>
-  <div class="ground" id="ground"></div>
-  <div class="refl" id="r1"></div><div class="refl" id="r2"></div><div class="refl" id="r3"></div>
-  <div class="cap" id="cap"><div class="pill"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Dusk mode is on</div></div>
-</section>
-<section class="shot a">
-  <div class="half" id="top"><div class="card card">
-    <div class="eyebrow">Appearance</div>
-    <div class="row" style="top: calc(var(--u) * 14.5)"><div><b>Text size</b><span>Scales every screen</span></div><div class="chip-val">Medium</div></div>
-    <div class="row" style="top: calc(var(--u) * 27.5)"><div class="lbl"><b>Dusk mode</b><span>Dim the whole product after sunset</span></div><div class="tg" style="visibility: hidden"></div></div>
-    <div class="row" style="top: calc(var(--u) * 40.5)"><div><b>Reduce motion</b><span>Calmer transitions</span></div><div class="tg"></div></div>
-  </div></div>
-  <div class="half" id="bot"></div>
-</section>
-<div class="line" id="track"></div><div class="knob" id="knob"></div>
-<div class="cur" id="cur"><svg class="cursor" id="arrow" viewBox="0 0 24 24"><path transform="translate(-2 -2)" d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
+<div class="phone" id="phone"><div class="screen" id="screen">
+  <div class="status"><span>9:30</span><i class="batt"></i></div>
+  <h1>Display</h1>
+  <div class="grp">
+    <div class="row"><div><b>Dark mode</b><span class="sub">Dim every screen</span></div><div class="tg" id="tg1"><i class="on"></i><i class="th"></i></div></div>
+    <div class="row"><div><b>Automatic</b><span class="sub">Follow the sun</span></div><div class="tg"><i class="on"></i><i class="th"></i></div></div>
+  </div>
+  <div class="cap">Dark mode changes the colours of every page.</div>
+  <div class="grp">
+    <div class="row"><b>Text size</b><span class="val">Medium</span></div>
+    <div class="row"><b>Bold text</b><div class="tg"><i class="on"></i><i class="th"></i></div></div>
+    <div class="row"><b>Reduce motion</b><div class="tg" id="tg2"><i class="on"></i><i class="th"></i></div></div>
+  </div>
+</div></div>
+<div class="touch" id="touch"></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { easeFn } from '/core/motion/presets.js';
+import { EASE, easeFn } from '/core/motion/presets.js';
 import { spring } from '/core/motion/springs.js';
+import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s);
+const LIGHT = { bg: '#f2f2f7', group: '#ffffff', ink: '#0d0d0d', muted: '#6c6c70', line: 'rgba(60, 60, 67, 0.16)', off: '#e5e5ea' };
+const DARK = { bg: '#000000', group: '#1c1c1e', ink: '#ffffff', muted: '#98989f', line: 'rgba(84, 84, 88, 0.55)', off: '#39393d' };
+for (const k of Object.keys(LIGHT)) CSS.registerProperty({ name: `--s-${k}`, syntax: '<color>', inherits: true, initialValue: LIGHT[k] });
+
+// measure before anything moves
 const W = innerWidth, H = innerHeight, u = H / 100;
-const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, k) => p + (q - p) * k;
-const land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch'), swap = easeFn('swap');
-const $ = (id) => document.getElementById(id);
-const track = $('track'), knob = $('knob'), cur = $('cur'), arrow = $('arrow'), topHalf = $('top'), bot = $('bot');
-bot.innerHTML = topHalf.innerHTML;                                  // both halves hold the same scene, each clipped to its side of the line
-const lbls = [...document.querySelectorAll('.lbl')];
-const LINE_Y = 0.58 * H, CX = W / 2;
-const TW = 15 * u, TH = 8.4 * u, PAD = 1 * u, LINE_H = 0.5 * u;     // the toggle's track and the horizon it becomes
-const R0 = CX + 45 * u, L0 = R0 - TW, OVER = 0.03 * W;
-const T = { travel: [0.2, 0.95], press: 1.0, stretch: [1.5, 2.2], wipe: [2.0, 2.65], leave: 1.2 };
-$('b').style.background = `linear-gradient(180deg, #0c0824 0, #1d1245 ${LINE_Y * 0.45}px, #6a2f78 ${LINE_Y * 0.82}px, #ee8f5a ${LINE_Y}px)`;
-$('ground').style.top = `${LINE_Y}px`;
-const sun = $('sun'), SUN_D = 26 * u;
-const stars = $('stars');
-for (let i = 0; i < 28; i++) {
-  const s = document.createElement('i');
-  s.style.left = `${(i * 37 % 97) + 1.5}%`; s.style.top = `${((i * 53 % 50) / 100) * 0.9 * 58 + 2}%`; s.style.opacity = 0.35 + (i % 4) * 0.2;
-  stars.appendChild(s);
-}
-const P = { x: (L0 + R0) / 2 + TW * 0.1, y: LINE_Y + TH * 0.05 };    // the tip lands on the track
-const mix = (a, b, k) => `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], k))).join(',')})`;
+const centre = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+const THUMB = 4.6 * u, TRAVEL = (8.6 - 0.6 - 4.6) * u;
+const land = easeFn('land'), clamp = (x) => Math.min(1, Math.max(0, x));
+const taps = [{ tg: q('#tg1'), at: 1.0, theme: true }, { tg: q('#tg2'), at: 2.8, theme: false }];
+taps.forEach((t) => { t.c = centre(t.tg); });
+const K = 380, D = 26, HOLD = 0.14;                       // the thumb spring (stiffness, damping); seconds the finger holds before the switch
+const touch = q('#touch');
+const REST = [W * 0.72, H * 0.9];
+// the finger: arrives from below right, rests on each toggle in turn, lifts and leaves; it eases between stops
+const [c1, c2] = [taps[0].c, taps[1].c];
+const PATH = [[0.3, ...REST], [0.8, ...c1], [1.6, ...c1], [2.6, ...c2], [3.6, ...c2], [3.9, ...REST]];
+const finger = (t) => {
+  for (let i = PATH.length - 1; i > 0; i--) if (t >= PATH[i - 1][0]) { const [t0, x0, y0] = PATH[i - 1], [t1, x1, y1] = PATH[i]; const k = land(clamp((t - t0) / (t1 - t0))); return [x0 + (x1 - x0) * k, y0 + (y1 - y0) * k]; }
+  return REST;
+};
 vawe.onFrame((t) => {
-  const tr = clamp((t - T.travel[0]) / (T.travel[1] - T.travel[0]));
-  const lv = clamp((t - T.leave) / 0.3);
-  cur.style.transform = `translate(${lerp(0.9 * W, P.x, land(tr)) + 0.5 * W * launch(lv)}px, ${lerp(0.46 * H, P.y, settle(tr)) + 0.5 * H * launch(lv)}px)`;
-  const dip = Math.sin(Math.PI * clamp((t - T.press) / 0.22));
-  arrow.style.transform = `scale(${1 - 0.14 * dip})`;
-  // the switch: the knob rides a spring after the press, the track turns accent
-  const on = spring(t - T.press - 0.02, 380, 26);
-  const sk = clamp((t - T.stretch[0]) / (T.stretch[1] - T.stretch[0]));
-  const l = lerp(L0, -OVER, land(sk)), r = lerp(R0, W + OVER, land(sk)), h = lerp(TH, LINE_H, swap(clamp(sk * 1.25)));
-  const pad = PAD * (h / TH);
-  track.style.left = `${l}px`; track.style.width = `${r - l}px`;
-  track.style.top = `${LINE_Y - h / 2}px`; track.style.height = `${h}px`;
-  track.style.background = t < T.press ? 'var(--raised)' : mix([38, 32, 72], [255, 181, 71], clamp((t - T.press) / 0.2));
-  const d = Math.max(h - 2 * pad, 0);
-  const kx0 = L0 + PAD + (TW - 2 * PAD - (TH - 2 * PAD)) * on;
-  const kx = sk > 0 ? r - pad - d : kx0;                                // the knob rides the right end as the track stretches
-  knob.style.width = knob.style.height = `${d}px`;
-  knob.style.left = `${kx}px`; knob.style.top = `${LINE_Y - d / 2}px`;
-  lbls.forEach((el) => { el.style.opacity = 1 - land(clamp((t - 1.4) / 0.25)); });   // the row label leaves before the track runs through it
-  // the horizon opens the world from the line: A shrinks away from it in both directions
-  const wk = launch(clamp((t - T.wipe[0]) / (T.wipe[1] - T.wipe[0])));
-  topHalf.style.clipPath = `inset(0 0 ${H - LINE_Y * (1 - wk)}px 0)`;
-  bot.style.clipPath = `inset(${LINE_Y + (H - LINE_Y) * wk}px 0 0 0)`;
-  // the world: the sun climbs from under the line and its reflection lengthens
-  const su = land(clamp((t - 2.5) / 1.1));
-  const sunTop = LINE_Y - SUN_D * 0.55 * su;
-  sun.style.top = `${sunTop}px`;
-  $('glow').style.top = `${sunTop + SUN_D / 2 - 45 * u}px`; $('glow').style.opacity = su;
-  $('c1').style.top = `${LINE_Y - 9 * u}px`; $('c1').style.left = `${12 * u + 1.2 * u * t}px`; $('c1').style.width = `${34 * u}px`;
-  $('c2').style.top = `${LINE_Y - 4.5 * u}px`; $('c2').style.left = `${W - 52 * u - 0.9 * u * t}px`; $('c2').style.width = `${40 * u}px`;
-  $('r1').style.top = `${LINE_Y + 2.2 * u}px`; $('r1').style.width = `${(16 + 8 * su) * u}px`;
-  $('r2').style.top = `${LINE_Y + 4.4 * u}px`; $('r2').style.width = `${(10 + 6 * su) * u}px`;
-  $('r3').style.top = `${LINE_Y + 7 * u}px`; $('r3').style.width = `${(5 + 4 * su) * u}px`;
-  [1, 2, 3].forEach((n) => { $('r' + n).style.opacity = su * 0.7; });
-  const cp = land(clamp((t - 2.75) / 0.6));
-  $('cap').style.opacity = cp; $('cap').style.transform = `translateY(${(1 - cp) * 2 * u}px)`;
+  const [x, y] = finger(t);
+  touch.style.translate = `${x}px ${y}px`;
+  let press = 0, on = [0, 0];
+  taps.forEach((tp, i) => {
+    press = Math.max(press, clamp((t - (tp.at - 0.04)) / 0.08) * (1 - clamp((t - (tp.at + HOLD)) / 0.1)));
+    on[i] = spring(t - tp.at - HOLD, K, D);
+    const th = tp.tg.querySelector('.th'), tr = tp.tg.querySelector('.on');
+    const stretch = clamp((t - (tp.at - 0.04)) / 0.08) * (1 - clamp((t - (tp.at + HOLD)) / 0.12));
+    th.style.width = `${THUMB * (1 + 0.22 * stretch)}px`;
+    th.style.translate = `${TRAVEL * on[i] - (THUMB * 0.22 * stretch) * on[i]}px 0`;
+    tr.style.opacity = String(clamp((t - tp.at - HOLD) / 0.2));
+  });
+  touch.style.scale = String(1 - 0.18 * press);
 });
+
+// Dark mode is on: every token of the screen changes together, as a real appearance switch does
+q('#screen').animate([LIGHT, DARK].map((p) => Object.fromEntries(Object.entries(p).map(([k, v]) => [`--s-${k}`, v]))), { duration: 350, delay: (taps[0].at + HOLD + 0.05) * 1000, easing: EASE.land, fill: 'both' });
+touch.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 300, easing: EASE.land, fill: 'both' });
+touch.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, delay: 3600, easing: EASE.launch, fill: 'forwards' });
+arrive(q('#phone'), 100, { ms: 220, from: '0.8vh' });
+leave(q('#phone'), 4600);
 </script>
 </body>
 </html>

@@ -1,84 +1,108 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="daylight">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="3.8">
+<meta name="duration" content="5">
 <title>move: shadow handoff</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.4-4.7", "world-held@0.0-5.0"], "_why": {"text-unreadable-hold": "the report holds 4.5 s from its arrival at 0.3 s, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 4.7 s, 0.3 s before the 5 s end, short of the 5.4 s the check asks", "static-window@3.4-4.7": "the dark report holds 1.3 s with the tooltip open, as a real page does after a hover", "world-held@0.0-5.0": "one report page holds 5.0 s: the pointer picks Dark at 1.4 s, the page recolours in 0.32 s, the tooltip opens at 3.0 s"}}</script>
 <style>
-  :root { --night: #060914; }
-  body { display: block; }
-  .a-copy { position: absolute; left: 9vw; top: calc(var(--u) * 9); margin: 0; z-index: 1; }
-  .a-copy b { color: var(--ink); font-weight: 600; }
-  .shadow { position: absolute; z-index: 3; border-radius: var(--r-card); will-change: left, top, width, height, filter; }
-  .a-card { position: absolute; z-index: 4; left: 50vw; top: 50vh; width: 31vw; height: calc(var(--u) * 54); margin: calc(var(--u) * -27) 0 0 -15.5vw; will-change: translate, scale; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--ring); }
-  .a-card .num { font: 600 calc(var(--u) * 17)/1 var(--head); letter-spacing: -0.05em; }
-  .a-card .bars { display: flex; align-items: flex-end; gap: var(--s1); height: calc(var(--u) * 11); }
-  .a-card .bars i { flex: 1; border-radius: var(--r1); background: var(--raised); }
-  .a-card .bars i:last-child { background: var(--accent); }
-  .a-card .row { display: flex; justify-content: space-between; align-items: center; }
-
-  .b { position: absolute; inset: 0; z-index: 5; color: #eef2ff; --muted: #8e9ac0; --accent: #7b86ff; visibility: hidden; }
-  .b .mask { position: absolute; left: 47vw; padding-bottom: calc(var(--u) * 1.4); overflow: hidden; clip-path: inset(0 -20vw); }
-  .b h1 { margin: 0; font: 600 calc(var(--u) * 10.5)/1.12 var(--head); letter-spacing: var(--head-track); will-change: translate; }
-  .b h1 em { font-style: normal; color: var(--accent); }
-  .b .m1 { top: calc(var(--u) * 35); }
-  .b .m2 { top: calc(var(--u) * 47); }
-  .b .sub { position: absolute; left: 47.2vw; top: calc(var(--u) * 64); margin: 0; font: 500 var(--t-body)/1 var(--mono); color: var(--muted); }
+  body { display: block; position: relative; }
+  .app { position: absolute; inset: 0; padding: calc(var(--u) * 3.4) calc(var(--u) * 4); background: var(--a-bg); color: var(--a-ink); font-family: var(--sans); }
+  .top { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 6.4); }
+  .top h1 { margin: 0; font: 600 calc(var(--u) * 3.6)/1 var(--sans); letter-spacing: -0.03em; }
+  .seg { position: relative; display: flex; width: calc(var(--u) * 25); padding: calc(var(--u) * 0.4); border-radius: calc(var(--u) * 1.2); background: var(--a-seg); }
+  .seg .ind { position: absolute; left: calc(var(--u) * 0.4); top: calc(var(--u) * 0.4); bottom: calc(var(--u) * 0.4); width: calc(50% - var(--u) * 0.4); border-radius: calc(var(--u) * 0.9); background: var(--a-segon); box-shadow: 0 1px 2px rgb(0 0 0 / 0.14); }
+  .seg button { position: relative; flex: 1; justify-content: center; display: flex; align-items: center; gap: calc(var(--u) * 0.7); padding: calc(var(--u) * 1) calc(var(--u) * 1.9); border: 0; background: none; color: var(--a-ink); font: 500 calc(var(--u) * 2.6)/1 var(--sans); }
+  .seg svg { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .grid2 { display: grid; grid-template-columns: 1.7fr 1fr; gap: calc(var(--u) * 2.4); margin-top: calc(var(--u) * 2); height: calc(var(--u) * 58); }
+  .tile { padding: calc(var(--u) * 3); border-radius: calc(var(--u) * 2); background: var(--a-card); box-shadow: 0 0 0 1px var(--a-line); }
+  .tile .lbl { font: 500 calc(var(--u) * 2.6)/1 var(--sans); color: var(--a-muted); }
+  .main { display: flex; flex-direction: column; }
+  .main .row1 { display: flex; align-items: center; justify-content: space-between; }
+  .main .num { margin-top: calc(var(--u) * 2.2); display: flex; align-items: baseline; gap: calc(var(--u) * 1.6); font: 600 calc(var(--u) * 11)/1 var(--sans); letter-spacing: -0.04em; }
+  .main .num span { font: 500 calc(var(--u) * 2.8)/1 var(--sans); color: var(--a-muted); letter-spacing: 0; }
+  .up { padding: calc(var(--u) * 0.9) calc(var(--u) * 1.6); border-radius: 999px; background: var(--a-upbg); color: var(--a-up); font: 600 calc(var(--u) * 2.6)/1 var(--sans); }
+  .chart { margin-top: auto; display: flex; align-items: flex-end; gap: calc(var(--u) * 1.8); height: calc(var(--u) * 21); }
+  .chart .col { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: calc(var(--u) * 1); }
+  .chart .col i { display: block; width: 100%; border-radius: calc(var(--u) * 0.7); background: var(--a-bar); }
+  .chart .col b { font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--a-muted); }
+  .side { display: flex; flex-direction: column; gap: calc(var(--u) * 2.4); }
+  .side .tile { flex: 1; }
+  .side .v { margin-top: calc(var(--u) * 2); font: 600 calc(var(--u) * 7)/1 var(--sans); letter-spacing: -0.04em; }
+  .tip { position: absolute; left: 50%; bottom: calc(100% + var(--u) * 0.6); translate: -50% 0; padding: calc(var(--u) * 1.2) calc(var(--u) * 1.8); border-radius: calc(var(--u) * 1); background: var(--a-tipbg); color: var(--a-tipink); font: 500 calc(var(--u) * 2.6)/1.25 var(--sans); white-space: nowrap; text-align: center; }
+  .tip b { display: block; font: 600 calc(var(--u) * 2.8)/1.2 var(--sans); color: inherit; }
+  .ptr { position: absolute; inset: 0; pointer-events: none; }
+  .cur { position: absolute; left: 0; top: 0; width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); overflow: visible; }
+  .cur path { fill: #0d0d0d; stroke: #fff; stroke-width: 1.4; stroke-linejoin: round; }
 </style>
 </head>
 <body>
-<p class="a-copy eyebrow"><b>vawe</b>  weekly report</p>
-<div class="shadow" id="shadow"></div>
-<section class="card a-card" id="card">
-  <div class="row"><span class="eyebrow">This week</span><span class="pill up">+18%</span></div>
-  <div><div class="num">128</div><div class="body muted">films shipped</div></div>
-  <div class="bars"><i style="height:38%"></i><i style="height:52%"></i><i style="height:44%"></i><i style="height:70%"></i><i style="height:58%"></i><i style="height:100%"></i></div>
-</section>
-<section class="b" id="b">
-  <div class="mask m1"><h1 id="h1">Same numbers,</h1></div>
-  <div class="mask m2"><h1 id="h2">after <em>dark.</em></h1></div>
-  <p class="sub" id="bsub">02:14 UTC  3 renders queued</p>
-</section>
+<div class="win">
+  <div class="strip" data-chrome><span class="lights"><i></i><i></i><i></i></span><span class="tab"><i class="fav"></i>Weekly report</span></div>
+  <div class="bar" data-chrome><div class="omni">app.example.com/reports/week</div></div>
+  <div class="page">
+    <div class="app" id="app">
+      <div class="top"><h1>Weekly report</h1>
+        <div class="seg"><i class="ind" id="ind"></i>
+          <button id="bLight"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3 7 7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7"/></svg>Light</button>
+          <button id="bDark"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Dark</button>
+        </div></div>
+      <div class="grid2">
+        <div class="tile main"><div class="row1"><span class="lbl">Films shipped</span><span class="up">+18%</span></div>
+          <div class="num">128<span>this week</span></div>
+          <div class="chart" id="chart"></div></div>
+        <div class="side"><div class="tile"><div class="lbl">Median render</div><div class="v">41 s</div></div><div class="tile"><div class="lbl">In the queue</div><div class="v">3</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="ptr" id="ptr"><svg class="cur" id="cur" viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { easeFn } from '/core/motion/presets.js';
-const W = innerWidth, H = innerHeight, u = H / 100, clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, x) => p + (q - p) * x;
-const card = document.getElementById('card'), shadow = document.getElementById('shadow'), b = document.getElementById('b');
-const h1 = document.getElementById('h1'), h2 = document.getElementById('h2'), bsub = document.getElementById('bsub');
-const land = easeFn('land'), settle = easeFn('settle'), glide = easeFn('glide'), swap = easeFn('swap');
-const LIFT = { at: 0.6, dur: 0.8 }, SPREAD = { at: 0.85, dur: 1.15 }, DARK = { at: 1.4, dur: 0.8 }, MOVE = { at: 2.2, dur: 0.75 }, SHOW = 2.55;
-const cw = 0.31 * W, ch = 54 * u, cx = W / 2, cy = H / 2;
-const day = [15, 32, 51, 0.2], night = [6, 9, 20, 1];                 // the shadow ends as the colour of the night ground
-const mix = (p, q, x) => p.map((v, i) => lerp(v, q[i], x));
-const rgba = (c) => `rgba(${c.map((v, i) => (i < 3 ? Math.round(v) : v)).join(', ')})`;
-const cardDay = { '--surface': [255, 255, 255, 1], color: [15, 32, 51, 1], '--muted': [88, 104, 125, 1], '--raised': [233, 237, 245, 1], '--accent': [79, 61, 240, 1], '--up-ink': [79, 61, 240, 1], '--edge': [15, 32, 51, 0.08] };
-const cardNight = { '--surface': [17, 23, 44, 1], color: [238, 242, 255, 1], '--muted': [142, 154, 192, 1], '--raised': [34, 43, 78, 1], '--accent': [123, 134, 255, 1], '--up-ink': [170, 178, 255, 1], '--edge': [255, 255, 255, 0.09] };
-const X_END = -(0.5 - 0.09 - 0.155) * W;                               // the card ends on the left margin of scene B's copy column
+import { EASE, easeFn } from '/core/motion/presets.js';
+import { leave, arrive } from '/prompts/moves/demo/assets/stage.js';
+
+const q = (s) => document.querySelector(s);
+const LIGHT = { bg: '#f7f7f5', card: '#ffffff', ink: '#0d0d0d', muted: '#5d5d5d', line: 'rgba(13, 13, 13, 0.09)', seg: '#ebebe8', segon: '#ffffff', bar: '#dcdcd6', baron: '#0d0d0d', up: '#1a7f4b', upbg: '#e3f3ea', tipbg: '#0d0d0d', tipink: '#ffffff' };
+const DARK = { bg: '#101010', card: '#1a1a1a', ink: '#ececec', muted: '#a0a0a0', line: 'rgba(255, 255, 255, 0.1)', seg: '#262626', segon: '#3a3a3a', bar: '#34342f', baron: '#ececec', up: '#63d39a', upbg: '#16301f', tipbg: '#ececec', tipink: '#0d0d0d' };
+for (const k of Object.keys(LIGHT)) CSS.registerProperty({ name: `--a-${k}`, syntax: '<color>', inherits: true, initialValue: LIGHT[k] });
+
+// the week: seven columns, Friday carries the tooltip
+const DAYS = [['Mon', 44], ['Tue', 58], ['Wed', 52], ['Thu', 71], ['Fri', 100], ['Sat', 36], ['Sun', 28]];
+q('#chart').innerHTML = DAYS.map(([d, h], i) => `<div class="col${i === 4 ? ' hi' : ''}"><i style="height:${h * 0.78}%"></i><b>${d}</b>${i === 4 ? '<div class="tip" id="tip"><b>Fri</b>31 films</div>' : ''}</div>`).join('');
+
+// measure before any animation moves the window
+const W = innerWidth, H = innerHeight;
+const centre = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+const dark = centre(q('#bDark')), fri = centre(q('.col.hi i'));
+const seg = q('.seg').getBoundingClientRect(), ind = q('#ind'), indW = ind.getBoundingClientRect().width;
+
+const land = easeFn('land');
+const clamp = (x) => Math.min(1, Math.max(0, x));
+const PRESS = 1.4, SWITCH = 1.45, SWITCH_MS = 320, SLIDE_MS = 200;
+const PATH = [[0.2, W * 0.9, H * 0.86], [0.6, W * 0.62, H * 0.7], [1.0, dark[0], dark[1] + 4], [2.4, dark[0], dark[1] + 4], [3.0, fri[0], fri[1] - 8]];
+const where = (t) => {
+  for (let i = PATH.length - 1; i > 0; i--) if (t >= PATH[i - 1][0]) { const [t0, x0, y0] = PATH[i - 1], [t1, x1, y1] = PATH[i]; const k = land(clamp((t - t0) / (t1 - t0))); return [x0 + (x1 - x0) * k, y0 + (y1 - y0) * k]; }
+  return [PATH[0][1], PATH[0][2]];
+};
+const cur = q('#cur');
 vawe.onFrame((t) => {
-  const p = settle(clamp((t - LIFT.at) / LIFT.dur));                  // card height above the ground, 0 to 1
-  const g = glide(clamp((t - SPREAD.at) / SPREAD.dur));                // how far the shadow has spread over the frame
-  const n = swap(clamp((t - DARK.at) / DARK.dur)), m = glide(clamp((t - MOVE.at) / MOVE.dur));
-  card.style.translate = `${X_END * m}px ${-6 * u * p * (1 - m)}px`;
-  card.style.scale = String(1 + 0.04 * p * (1 - m));
-  for (const key in cardDay) {
-    const v = rgba(mix(cardDay[key], cardNight[key], n));
-    if (key === 'color') card.style.color = v; else card.style.setProperty(key, v);
-  }
-  // the shadow stays on the ground: it grows and softens as the card rises, then keeps growing until it is the whole frame
-  const w = lerp(cw * (1 + 0.1 * p), W * 1.7, g), h = lerp(ch * (1 + 0.3 * p), H * 1.7, g);
-  const dx = lerp(2 * u * p, 0, g), dy = lerp(1.6 * u + 9 * u * p, 0, g);   // a low light throws the shadow down and to the right
-  shadow.style.left = `${cx - w / 2 + dx}px`; shadow.style.top = `${cy - h / 2 + dy}px`;
-  shadow.style.width = `${w}px`; shadow.style.height = `${h}px`;
-  const [r, gr, bl, a] = mix(day, night, g);
-  shadow.style.background = `rgba(${r}, ${gr}, ${bl}, ${a})`;
-  shadow.style.filter = `blur(${lerp(1.2 * u + 3.4 * u * p, 9 * u, g)}px)`;
-  b.style.visibility = t < SHOW - 0.05 ? 'hidden' : 'visible';
-  const rise = (el, at, dur) => { el.style.translate = `0 ${(1 - land(clamp((t - at) / dur))) * 112}%`; };
-  rise(h1, SHOW, 0.8); rise(h2, SHOW + 0.12, 0.8);
-  const us = land(clamp((t - SHOW - 0.25) / 0.7));
-  bsub.style.translate = `0 ${(1 - us) * 2 * u}px`; bsub.style.opacity = String(clamp(us * 3));
+  const [x, y] = where(t);
+  const dip = Math.sin(Math.PI * clamp((t - PRESS) / 0.2));
+  cur.style.translate = `${x}px ${y}px`;
+  cur.style.scale = String(1 - 0.12 * dip);
 });
+
+// Dark is picked: the thumb slides one slot, then every colour token of the page changes together, as a real theme switch does
+ind.animate([{ translate: '0 0' }, { translate: `${indW + 0}px 0` }], { duration: SLIDE_MS, delay: PRESS * 1000, easing: EASE.landSoft, fill: 'both' });
+q('#app').animate([LIGHT, DARK].map((p) => Object.fromEntries(Object.entries(p).map(([k, v]) => [`--a-${k}`, v]))), { duration: SWITCH_MS, delay: SWITCH * 1000, easing: EASE.land, fill: 'both' });
+q('.col.hi i').animate([{ backgroundColor: 'var(--a-bar)' }, { backgroundColor: 'var(--a-baron)' }], { duration: 150, delay: 3000, easing: EASE.land, fill: 'both' });
+arrive(q('#tip'), 3000, { ms: 220, from: '0.8vh' });
+arrive(q('.win'), 100, { ms: 220, from: '0.8vh' });
+arrive(q('#ptr'), 100, { ms: 220, from: '0px' });
+leave(q('.win'), 5000);
+leave(q('#ptr'), 5000);
 </script>
 </body>
 </html>
