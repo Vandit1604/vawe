@@ -6,6 +6,15 @@
 <title>move: push in</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
+  .win .strip { height: calc(var(--u) * 5.8); font-size: calc(var(--u) * 3.2); }
+  .win .tab { height: calc(var(--u) * 4.8); width: calc(var(--u) * 34); gap: calc(var(--u) * 1.2); }
+  .win .tab .fav { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  .win .tab .x, .win .newtab { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  .win .lights i { width: calc(var(--u) * 1.5); height: calc(var(--u) * 1.5); }
+  .win .bar { height: calc(var(--u) * 6); gap: calc(var(--u) * 1.8); }
+  .win .bar .icon { width: calc(var(--u) * 2.6); height: calc(var(--u) * 2.6); }
+  .win .omni { height: calc(var(--u) * 4.4); font-size: calc(var(--u) * 3.2); }
+  .win .omni .icon { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
   body { display: block; position: relative; }
   .grid { position: absolute; inset: -6%; background-image: linear-gradient(rgba(13, 13, 13, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(13, 13, 13, 0.06) 1px, transparent 1px); background-size: calc(var(--u) * 6) calc(var(--u) * 6); }
   .world, .front { position: absolute; inset: 0; }
@@ -30,7 +39,7 @@
   .plot .gl span { position: absolute; left: 0; top: calc(var(--u) * -1.2); }
   .plot .b { position: relative; flex: 1; border-radius: calc(var(--u) * 0.5) calc(var(--u) * 0.5) 0 0; background: #cfcfcf; transform-origin: 50% 100%; }
   .tip { position: absolute; left: 0; top: 0; padding: calc(var(--u) * 1.4) calc(var(--u) * 2); border-radius: calc(var(--u) * 1.1); background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 calc(var(--u) * 1) calc(var(--u) * 3) rgb(0 0 0 / 0.12); white-space: nowrap; opacity: 0; }
-  .tip .d { font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
+  .tip .d { font: 500 calc(var(--u) * 3.7)/1 var(--sans); color: var(--muted); }
   .tip .n { margin-top: calc(var(--u) * 0.8); font: 600 calc(var(--u) * 4.2)/1 var(--sans); letter-spacing: -0.02em; }
 </style>
 <script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.8-5.6", "world-held@0.0-6.0"], "_why": {"text-unreadable-hold": "the dashboard holds 2.1 s after the push ends at 3.5 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, 0.4 s before the 6 s end, so the finished page holds 2.1 s, short of the 5.4 s the check asks", "static-window@4.8-5.6": "dashboard at 5.0 s: the camera holds and the hover tooltip stays on its bar until it steps to the next bar at 4.8 s", "world-held@0.0-6.0": "one dashboard holds 6.0 s: the bars draw from 0.5 s, the camera pushes 0.9 to 3.5 s and the window leaves at 5.6 s"}}</script>
