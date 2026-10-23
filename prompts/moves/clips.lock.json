@@ -53,15 +53,26 @@
   "counter-dive": "e024f8e2e274b570",
   "crash-zoom": "73309ce2bfdb045b",
   "css-box": {
-    "hash": "ea0bf1b7f5e7c3db",
-    "crf": 16
+    "hash": "0157925e53f4be05",
+    "crf": 19
+  },
+  "css-box-dark": {
+    "hash": "0a36e7ff6fe979d3",
+    "crf": 19
   },
   "cta-morph-press": "20ab535ec0db79e8",
   "cta-pop": "0b7874ee1eda7a8c",
   "cursor-click": "e09100c2c66b4407",
   "cursor-spotlight": "667a96cd1c8084e4",
   "cut-on-motion": "774b6457e35614e2",
-  "device-tilt-stage": "127cf2196cb5e86d",
+  "device-tilt-stage": {
+    "hash": "7d178c2de0aebc90",
+    "crf": 19
+  },
+  "device-tilt-stage-dark": {
+    "hash": "17161ee38e4287d0",
+    "crf": 19
+  },
   "diff-card": {
     "hash": "eaf2429d79b053cf",
     "crf": 16

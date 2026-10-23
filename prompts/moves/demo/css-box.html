@@ -1,54 +1,72 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="vawe">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="4.6">
-<meta name="blank" content="0-0.1">
+<meta name="duration" content="5.6">
+<meta name="variants" content="dark">
 <title>move: css box</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.6", "static-window@4.1-5.2"], "_why": {"text-unreadable-hold": "the block holds 1.1 s after its last turn settles at 4.1 s in a 5.6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the block leaves at 5.2 s, so the settled face holds 1.1 s, short of the 5.4 s the check asks", "world-held@0.0-5.6": "one block holds 5.6 s: it turns three times from 0.7 s and leaves at 5.2 s", "static-window@4.1-5.2": "a solid block on a table holds still after a turn: nothing on it moves once it has settled"}}</script>
 <style>
-  @font-face { font-family: 'Overused Grotesk'; font-weight: 300 900; font-display: block; src: url('/prompts/moves/demo/assets/fonts/OverusedGrotesk.woff2') format('woff2'); }
-  html, body { background: #0b0a09; }
-  body { display: block; position: relative; font-family: 'Overused Grotesk', sans-serif; }
-  /* the fancy demo box is 500 x 530 px: one scaled stage holds it */
-  .stage { position: absolute; left: 50%; top: 50%; width: 500px; height: 530px; translate: -50% -50%; display: flex; align-items: center; justify-content: center; }
-  .box { width: 200px; height: 200px; perspective: 600px; font-size: 30px; line-height: 36px; }
-  .cube { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
-  .face { position: absolute; backface-visibility: hidden; display: flex; flex-direction: column; width: 200px; height: 200px; padding: 8px; box-sizing: border-box; user-select: none; }
-  .face div { color: #0015ff; font-weight: 700; letter-spacing: 0.05em; }
-  .a { text-align: right; justify-content: flex-end; align-items: flex-end; }
-  .b { text-align: left; justify-content: flex-end; }
-  .c { align-items: flex-end; }
+  :root { --cube: calc(var(--u) * 58); --paint: #2d52d6; --ink-face: #fff; }
+  html[data-theme="dark"] { --paint: #3d63e0; }
+  body { display: block; }
+  .stage { position: absolute; inset: 0; perspective: calc(var(--u) * 300); }
+  .rig { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translateY(calc(var(--u) * 3)) rotateX(-17deg); }
+  .spin { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; transform: rotateY(calc(var(--yaw) * 1deg)); }
+  .face { position: absolute; left: calc(var(--cube) / -2); top: calc(var(--cube) / -2); width: var(--cube); height: var(--cube); backface-visibility: hidden; background: var(--paint); color: var(--ink-face); padding: calc(var(--u) * 4.4); display: flex; flex-direction: column; justify-content: flex-end; box-shadow: inset 0 0 0 calc(var(--u) * 0.16) rgba(255, 255, 255, 0.22); }
+  .face b { font: 700 calc(var(--u) * 10)/0.98 var(--head); letter-spacing: -0.035em; }
+  .face span { margin-top: calc(var(--u) * 1.6); font: 500 calc(var(--u) * 2.9)/1.15 var(--mono); opacity: 0.82; }
+  .face i { position: absolute; inset: 0; z-index: -1; background: #000; opacity: 0; pointer-events: none; }
+  .f0 { transform: translateZ(calc(var(--cube) / 2)); }
+  .f1 { transform: rotateY(90deg) translateZ(calc(var(--cube) / 2)); }
+  .f2 { transform: rotateY(180deg) translateZ(calc(var(--cube) / 2)); }
+  .f3 { transform: rotateY(-90deg) translateZ(calc(var(--cube) / 2)); }
+  .f4 { transform: rotateX(90deg) translateZ(calc(var(--cube) / 2)); }
+  .floor { position: absolute; left: calc(var(--cube) / -2); top: calc(var(--cube) / -2); width: var(--cube); height: var(--cube); transform: rotateX(90deg) translateZ(calc(var(--cube) / -2 - var(--u) * 0.1)); background: rgba(0, 0, 0, 0.16); box-shadow: 0 0 calc(var(--u) * 4) calc(var(--u) * 1.4) rgba(0, 0, 0, 0.2); }
+  html[data-theme="dark"] .floor { background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 calc(var(--u) * 4) calc(var(--u) * 1.4) rgba(0, 0, 0, 0.5); }
 </style>
 </head>
 <body>
-<div class="stage"><div class="box"><div class="cube" id="cube">
-  <div class="face a" style="transform: rotateY(0deg) translateZ(100px)"><div>YOU CAN</div><div>JUST</div><div>DO THINGS</div></div>
-  <div class="face b" style="transform: rotateY(180deg) translateZ(100px)"><div>MAKE THINGS</div><div>YOU WISH</div><div>EXISTED</div></div>
-  <div class="face b" style="transform: rotateY(90deg) translateZ(100px)"><div>MAKE THINGS</div><div>YOU WISH</div><div>EXISTED</div></div>
-  <div class="face c" style="transform: rotateY(-90deg) translateZ(100px)"><div>BREAK</div><div>THINGS</div><div>MOVE</div><div>FAST</div></div>
-  <div class="face a" style="transform: rotateX(90deg) translateZ(100px)"><div>YOU CAN</div><div>JUST</div><div>DO THINGS</div></div>
-  <div class="face c" style="transform: rotateX(-90deg) translateZ(100px)"><div>BREAK</div><div>THINGS</div><div>MOVE</div><div>FAST</div></div>
+<div class="stage"><div class="rig"><div class="spin" id="spin">
+  <div class="floor"></div>
+  <div class="face f0"><b>Build</b><span>one page in</span><i></i></div>
+  <div class="face f1"><b>Ship</b><span>when it passes</span><i></i></div>
+  <div class="face f2"><b>Edit</b><span>in place</span><i></i></div>
+  <div class="face f3"><b>Render</b><span>one film out</span><i></i></div>
+  <div class="face f4"><i></i></div>
 </div></div></div>
 <script type="module">
+import '/core/engine/page-api.js';
 import { track } from '/core/motion/springs.js';
+import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
+const STIFFNESS = 100, DAMPING = 30, END = 5600, REST = -28, PITCH = -17;
+// [second, degrees]: each key is one jump of the target, a quarter turn of the block
+const YAW = [[0, 0], [0.7, 90], [2.0, 180], [3.3, 270]];
+// face normals before the turn, and a light from the upper left front
+const NORMALS = [[0, 0, 1], [1, 0, 0], [0, 0, -1], [-1, 0, 0], [0, -1, 0]];
+const LIGHT = [-0.45, -0.8, 0.4];
+const len = Math.hypot(...LIGHT), L = LIGHT.map((c) => c / len);
+const rad = (d) => (d * Math.PI) / 180;
+const spin = document.getElementById('spin');
+const shades = [...document.querySelectorAll('.face i')];
 
-const STIFFNESS = 100;   // CSSBox default, motion useSpring with mass 1
-const DAMPING = 30;      // damping ratio 1.5: no overshoot
-const DEPTH = 200;
-// [second, degrees]: each key is one jump of the drag target. 90 is a drag of 180 px (delta / 2).
-const ROTATE_Y = [[0, 0], [0.6, 90]];
-const ROTATE_X = [[0, 0], [2.0, -90], [3.4, 0]];
+// the block turns on a stiff spring and stops without a bounce; each face is darker as its normal turns from the light
+vawe.onFrame((t) => {
+  const yaw = REST + track(t, YAW, STIFFNESS, DAMPING);
+  spin.style.setProperty('--yaw', yaw.toFixed(3));
+  const cy = Math.cos(rad(yaw)), sy = Math.sin(rad(yaw)), cp = Math.cos(rad(PITCH)), sp = Math.sin(rad(PITCH));
+  NORMALS.forEach(([x, y, z], i) => {
+    const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+    const y2 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
+    const lit = Math.max(0, x1 * L[0] + y2 * L[1] + z2 * L[2]);
+    shades[i].style.opacity = (0.5 * (1 - lit)).toFixed(3);
+  });
+});
 
-const S = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) / 530;   // the original demo box is 530 px tall
-document.querySelector('.stage').style.scale = String(S);
-const cube = document.getElementById('cube');
-window.seek = (t) => {
-  const x = track(t, ROTATE_X, STIFFNESS, DAMPING);
-  const y = track(t, ROTATE_Y, STIFFNESS, DAMPING);
-  cube.style.transform = `translateZ(-${DEPTH / 2}px) rotateX(${x}deg) rotateY(${y}deg)`;
-};
-window.seek(0);
+const stage = document.querySelector('.stage');
+arrive(stage, 100, { ms: 220, from: '0vh' });
+leave(stage, END, '0vh');
 </script>
 </body>
 </html>
