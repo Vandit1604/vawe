@@ -1,77 +1,120 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="chrome">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2">
+<meta name="duration" content="5">
+<meta name="variants" content="dark">
 <title>move: device tilt stage</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.0", "static-window@3.0-4.6"], "_why": {"text-unreadable-hold": "the laptop holds 2.0 s after the camera settles at 2.7 s in a 5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the laptop leaves at 4.6 s, so the settled shot holds 1.9 s, short of the 5.4 s the check asks", "world-held@0.0-5.0": "one laptop shot holds 5.0 s: the camera turns from 0.2 s to 2.7 s, the render bar fills to the end and the laptop leaves at 4.6 s", "static-window@3.0-4.6": "laptop, 1.6 s from 3.0 s: a laptop on a desk holds still, only the render bar on its screen moves"}}</script>
 <style>
+  :root { --alu: #d4d6da; --alu-edge: #b9bcc1; --alu-front: #a9acb2; --alu-back: #c7c9ce; --key: #17181b; --bezel: #09090a; --lw: calc(var(--u) * 110); --lh: calc(var(--u) * 69); --dd: calc(var(--u) * 77); --lt: calc(var(--u) * 1.6); --dt: calc(var(--u) * 3.2); }
+  html[data-theme="dark"] { --alu: #b8babf; --alu-edge: #9fa2a8; --alu-front: #8d9096; --alu-back: #aaacb1; }
   body { display: block; }
-  .stage { position: absolute; inset: 0; perspective: 150vh; perspective-origin: 50% 30%; }
-  .shadow { position: absolute; left: 50%; top: 78vh; width: 110vh; height: 9vh; margin-left: -55vh; border-radius: 50%; background: radial-gradient(closest-side, rgba(3, 1, 12, 0.7), rgba(3, 1, 12, 0)); }
-  .device { position: absolute; left: 50%; top: -5vh; width: 92vh; margin-left: -46vh; transform-style: preserve-3d; transform-origin: 50% 100%; }
-  .lid { position: relative; height: 58vh; padding: 1.6vh; border-radius: 2.2vh 2.2vh 0.6vh 0.6vh; background: #0b0917; box-shadow: inset 0 0 0 0.25vh #3a3456; transform-origin: 50% 100%; transform: rotateX(8deg); transform-style: preserve-3d; }
-  .screen { position: relative; height: 100%; overflow: hidden; border-radius: 1vh; background: var(--ground); display: grid; grid-template-columns: 17vh 1fr; }
-  .gloss { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(112deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.1) 47%, rgba(255, 255, 255, 0.03) 53%, rgba(255, 255, 255, 0) 60%) 0 0 / 300% 100% no-repeat; }
-  .base { position: absolute; left: -4vh; right: -4vh; top: 100%; height: 54vh; transform-origin: 50% 0; transform: rotateX(90deg); border-radius: 0 0 2.4vh 2.4vh; background: linear-gradient(180deg, #3b3560, #2a2547); box-shadow: inset 0 0 0 0.25vh #4a4470; }
-  .base .keys { position: absolute; left: 9vh; right: 9vh; top: 5vh; height: 28vh; border-radius: 1vh; background: repeating-linear-gradient(180deg, transparent 0 4.9vh, #2a2547 4.9vh 5.6vh), repeating-linear-gradient(90deg, #1a1630 0 5.2vh, #2a2547 5.2vh 5.9vh); }
-  .base .pad { position: absolute; left: 50%; width: 30vh; margin-left: -15vh; top: 36vh; height: 14vh; border-radius: 1.4vh; background: #332d55; box-shadow: inset 0 0 0 0.2vh #4a4470; }
-  nav { padding: 3vh 2vh; background: var(--surface); display: flex; flex-direction: column; gap: 1.6vh; }
-  nav .ws { display: flex; align-items: center; gap: 0.8vh; margin-bottom: 1.4vh; font: 700 2.4vh/1 var(--sans); letter-spacing: -0.02em; color: var(--ink); }
-  nav .ws .logo-mark { width: 3.6vh; height: 3.6vh; }
-  nav i { display: block; height: 2vh; border-radius: 1vh; background: var(--raised); }
-  nav i.on { background: color-mix(in srgb, var(--accent) 70%, transparent); width: 70%; }
-  main { padding: 3.4vh 3.6vh; display: flex; flex-direction: column; gap: 2.6vh; }
-  main h1 { margin: 0; font: 700 5vh/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); }
-  .row { display: flex; gap: 2vh; flex: 1; }
-  .tile { flex: 1; border-radius: 1.4vh; background: var(--surface); box-shadow: var(--ring); padding: 1.8vh; display: flex; flex-direction: column; justify-content: flex-end; font: 600 2.6vh/1 var(--mono); color: var(--muted); }
-  .tile .thumb { flex: 1; min-height: 0; margin-bottom: 1.6vh; border-radius: 0.8vh; }
-  .tile.hot { box-shadow: 0 0 0 0.3vh var(--accent); color: var(--ink); }
-  .bar { height: 1.2vh; border-radius: 1vh; background: var(--raised); overflow: hidden; }
-  .bar b { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; }
-  .meta { display: flex; justify-content: space-between; font: 600 2.6vh/1 var(--mono); color: var(--muted); }
+  .stage { position: absolute; inset: 0; perspective: calc(var(--u) * 480); perspective-origin: 50% 50%; }
+  .cam { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translateY(calc(var(--y) * var(--u))) rotateX(calc(var(--rx) * 1deg)) rotateY(calc(var(--ry) * 1deg)) scale(var(--s)); }
+  .laptop { position: absolute; left: calc(var(--lw) / -2); top: 0; transform-style: preserve-3d; transform: translate3d(0, calc(var(--u) * 17), calc(var(--u) * -19)); }
+  .p { position: absolute; transform-style: preserve-3d; }
+  .floor { left: 0; top: 0; width: var(--lw); height: var(--dd); transform-origin: 50% 0; transform: translateY(calc(var(--dt) + var(--u) * 0.2)) rotateX(90deg); background: rgba(0, 0, 0, 0.1); border-radius: calc(var(--u) * 3); box-shadow: 0 0 calc(var(--u) * 5) calc(var(--u) * 1.4) rgba(0, 0, 0, 0.22); }
+  .dtop { left: 0; top: 0; width: var(--lw); height: var(--dd); transform-origin: 50% 0; transform: rotateX(90deg); border-radius: 0 0 calc(var(--u) * 2.2) calc(var(--u) * 2.2); background: var(--alu); box-shadow: inset 0 0 0 calc(var(--u) * 0.12) rgba(255, 255, 255, 0.55); }
+  .dfront { left: 0; top: 0; width: var(--lw); height: var(--dt); transform: translateZ(var(--dd)); background: var(--alu-front); border-radius: 0 0 calc(var(--u) * 1.2) calc(var(--u) * 1.2); }
+  .dl { left: 0; top: 0; width: var(--dd); height: var(--dt); transform-origin: 0 50%; transform: rotateY(-90deg); background: var(--alu-edge); }
+  .dr { left: calc(var(--lw) - var(--dd)); top: 0; width: var(--dd); height: var(--dt); transform-origin: 100% 50%; transform: rotateY(90deg); background: var(--alu-edge); }
+  .hinge { left: calc(var(--u) * 6); top: calc(var(--u) * 0.6); width: calc(var(--lw) - var(--u) * 12); height: calc(var(--u) * 2.6); border-radius: calc(var(--u) * 1.3); background: #202124; }
+  .keys { left: calc(var(--u) * 7); top: calc(var(--u) * 7); width: calc(var(--u) * 96); display: grid; gap: calc(var(--u) * 0.8); }
+  .kr { display: flex; gap: calc(var(--u) * 0.8); height: calc(var(--u) * 5.4); }
+  .kr.fn { height: calc(var(--u) * 3.6); }
+  .k { flex: var(--w) 1 0; border-radius: calc(var(--u) * 0.7); background: var(--key); box-shadow: inset 0 calc(var(--u) * 0.15) 0 rgba(255, 255, 255, 0.08); }
+  .pad { left: calc(var(--u) * 34); top: calc(var(--u) * 47); width: calc(var(--u) * 42); height: calc(var(--u) * 27); border-radius: calc(var(--u) * 1.4); box-shadow: inset 0 0 0 calc(var(--u) * 0.14) rgba(0, 0, 0, 0.16), 0 0 0 calc(var(--u) * 0.1) rgba(255, 255, 255, 0.45); }
+  .lid { left: 0; top: calc(var(--lh) * -1); width: var(--lw); height: var(--lh); transform-origin: 50% 100%; transform: rotateX(15deg); }
+  .face { left: 0; top: 0; width: 100%; height: 100%; }
+  .screenface { background: var(--bezel); border-radius: calc(var(--u) * 1.8) calc(var(--u) * 1.8) calc(var(--u) * 0.4) calc(var(--u) * 0.4); padding: calc(var(--u) * 1.05) calc(var(--u) * 1.05) calc(var(--u) * 1.3); box-shadow: inset 0 0 0 calc(var(--u) * 0.14) #3a3b3f; }
+  .backface { transform: translateZ(calc(var(--lt) * -1)) rotateY(180deg); background: var(--alu-back); border-radius: calc(var(--u) * 1.8) calc(var(--u) * 1.8) calc(var(--u) * 0.4) calc(var(--u) * 0.4); }
+  .ltop { left: 0; top: 0; width: 100%; height: var(--lt); transform-origin: 50% 0; transform: rotateX(-90deg); background: var(--alu-edge); }
+  .ll { left: 0; top: 0; width: var(--lt); height: 100%; transform-origin: 0 50%; transform: rotateY(90deg); background: var(--alu-edge); }
+  .lr { right: 0; top: 0; width: var(--lt); height: 100%; transform-origin: 100% 50%; transform: rotateY(-90deg); background: var(--alu-edge); }
+  .screen { position: relative; height: 100%; overflow: hidden; border-radius: calc(var(--u) * 0.6); background: var(--surface); color: var(--ink); display: flex; flex-direction: column; }
+  .menubar { position: relative; flex: none; display: flex; align-items: center; gap: calc(var(--u) * 2.4); height: calc(var(--u) * 3); padding: 0 calc(var(--u) * 2); background: var(--raised); font: 500 calc(var(--u) * 1.7)/1 var(--sans); color: var(--ink); }
+  .menubar .r { margin-left: auto; color: var(--muted); }
+  .notch { position: absolute; left: 50%; top: 0; width: calc(var(--u) * 12.5); height: calc(var(--u) * 3); margin-left: calc(var(--u) * -6.25); border-radius: 0 0 calc(var(--u) * 1.3) calc(var(--u) * 1.3); background: var(--bezel); }
+  .app { flex: 1; min-height: 0; display: grid; grid-template-columns: calc(var(--u) * 23) 1fr; }
+  nav { padding: calc(var(--u) * 2.6) calc(var(--u) * 2); background: var(--raised); display: flex; flex-direction: column; gap: calc(var(--u) * 0.8); font: 500 calc(var(--u) * 2.5)/1 var(--sans); }
+  nav .ws { display: flex; align-items: center; gap: calc(var(--u) * 0.9); margin-bottom: calc(var(--u) * 1.8); font: 700 calc(var(--u) * 2.9)/1 var(--sans); letter-spacing: -0.02em; }
+  nav .ws .logo-mark { width: calc(var(--u) * 3.6); height: calc(var(--u) * 3.6); }
+  nav span { padding: calc(var(--u) * 1.2) calc(var(--u) * 1.3); border-radius: calc(var(--u) * 0.8); color: var(--muted); }
+  nav span.on { background: var(--hover); color: var(--ink); }
+  main { padding: calc(var(--u) * 3.2) calc(var(--u) * 3.6); display: flex; flex-direction: column; gap: calc(var(--u) * 2.4); min-width: 0; }
+  main h1 { margin: 0; font: 600 calc(var(--u) * 5)/1 var(--sans); letter-spacing: -0.03em; }
+  .row { display: flex; gap: calc(var(--u) * 2); flex: 1; min-height: 0; }
+  .tile { flex: var(--f, 1) 1 0; min-width: 0; border-radius: calc(var(--u) * 1.1); background: var(--surface); box-shadow: 0 0 0 1px var(--line); padding: calc(var(--u) * 1.2); display: flex; flex-direction: column; font: 500 calc(var(--u) * 2.3)/1 var(--mono); color: var(--muted); }
+  .tile .thumb { flex: 1; min-height: 0; margin-bottom: calc(var(--u) * 1.2); border-radius: calc(var(--u) * 0.7); }
+  .tile.hot { color: var(--ink); box-shadow: 0 0 0 calc(var(--u) * 0.22) var(--ink); }
+  .meta { display: flex; justify-content: space-between; font: 500 calc(var(--u) * 2.4)/1 var(--mono); color: var(--muted); }
+  .bar { height: calc(var(--u) * 1); border-radius: 999px; background: var(--raised); overflow: hidden; }
+  .bar b { display: block; height: 100%; width: 100%; background: var(--ink); transform-origin: 0 50%; }
 </style>
 </head>
 <body>
-<div class="stage">
-  <div class="shadow"></div>
-  <div class="device">
-    <div class="lid"><div class="screen">
-      <nav><span class="ws" data-logo="fernbank"></span><i class="on"></i><i></i><i style="width: 80%"></i><i style="width: 60%"></i></nav>
-      <main>
-        <h1>Launch film</h1>
-        <div class="row"><div class="tile hot"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg">16:9</div><div class="tile"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/shore.jpg">9:16</div><div class="tile"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/loft.jpg">1:1</div></div>
-        <div class="meta"><span>Rendering 3 aspects</span><span class="pct">72%</span></div>
-        <div class="bar"><b></b></div>
-      </main>
-      <div class="gloss"></div>
-    </div></div>
-    <div class="base"><div class="keys"></div><div class="pad"></div></div>
+<div class="stage"><div class="cam" id="cam"><div class="laptop">
+  <div class="p floor"></div>
+  <div class="p dtop">
+    <div class="p hinge"></div>
+    <div class="p keys" id="keys"></div>
+    <div class="p pad"></div>
   </div>
-</div>
+  <div class="p dfront"></div><div class="p dl"></div><div class="p dr"></div>
+  <div class="p lid">
+    <div class="p ltop"></div><div class="p ll"></div><div class="p lr"></div><div class="p face backface"></div>
+    <div class="p face screenface"><div class="screen">
+      <div class="menubar" data-chrome><b>vawe</b><span>File</span><span>Edit</span><span>View</span><span>Window</span><span class="r">Thu 9:41</span><i class="notch"></i></div>
+      <div class="app">
+        <nav><span class="ws" data-logo="fernbank"></span><span class="on">Films</span><span>Renders</span><span>Assets</span><span>Team</span></nav>
+        <main>
+          <h1>Launch film</h1>
+          <div class="row"><div class="tile hot" style="--f:1.78"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg">16:9</div><div class="tile" style="--f:0.6"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/shore.jpg">9:16</div><div class="tile"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/loft.jpg">1:1</div></div>
+          <div class="meta"><span>Rendering 3 aspects</span><span class="pct">52%</span></div>
+          <div class="bar"><b></b></div>
+        </main>
+      </div>
+    </div></div>
+  </div>
+</div></div></div>
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
 import { easeFn } from '/core/motion/presets.js';
+import { arrive, leave } from '/prompts/moves/demo/assets/stage.js';
 const S = easeFn('settle'), clamp = (u) => Math.min(1, Math.max(0, u));
-const device = document.querySelector('.device'), gloss = document.querySelector('.gloss');
-const shadow = document.querySelector('.shadow'), fill = document.querySelector('.bar b'), pct = document.querySelector('.pct');
-const t0 = 0.05, dur = 1.45;
-const from = { y: 30, rx: -62, ry: -38, rz: 5, s: 0.62 }, to = { y: 0, rx: -16, ry: -8, rz: 0, s: 0.74 };   // y in vh, angles in degrees
 const lerp = (a, b, u) => a + (b - a) * u;
-vawe.onFrame((t) => {
-  const u = S(clamp((t - t0) / dur));
-  const float = Math.sin(t * 2.4) * 0.5 * clamp((t - 1.2) / 0.4);   // a slow bob and turn once it has landed
-  const y = lerp(from.y, to.y, u) + float, rx = lerp(from.rx, to.rx, u), ry = lerp(from.ry, to.ry, u) + float * 1.2;
-  device.style.transform = `translateY(${y}vh) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${lerp(from.rz, to.rz, u)}deg) scale(${lerp(from.s, to.s, u)})`;
-  // the reflection slides across the glass as the lid turns: it is tied to the angle, not to time
-  gloss.style.backgroundPosition = `${(20 + (ry - from.ry) * 2.2).toFixed(2)}% 0`;
-  shadow.style.transform = `scale(${(0.7 + 0.3 * u).toFixed(3)}, ${(0.6 + 0.4 * u).toFixed(3)})`;
-  shadow.style.opacity = (0.4 + 0.6 * u).toFixed(3);
-  const p = 0.52 + 0.3 * clamp(t / 2);
-  fill.style.transform = `scaleX(${p.toFixed(4)})`;
-  pct.textContent = `${Math.round(p * 100)}%`;
+const END = 5000, T0 = 0.2, DUR = 2.5;
+const from = { y: 10, rx: -58, ry: -36, s: 0.56 }, to = { y: 3, rx: -19, ry: -9, s: 0.76 };
+const cam = document.getElementById('cam');
+
+// ANSI rows as key widths in units; every row adds up to 15
+const keys = document.getElementById('keys');
+const rows = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2], [1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5], [1.75, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.25], [2.25, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.75], [1.25, 1.25, 1.25, 1.25, 6.25, 1.25, 1.25, 1.25, 1.25]];
+rows.forEach((r, i) => {
+  const row = document.createElement('div'); row.className = i ? 'kr' : 'kr fn';
+  row.innerHTML = r.map((w) => `<i class="k" style="--w:${w}"></i>`).join('');
+  keys.append(row);
 });
+
+// the camera is the only thing that moves: a long ease from above the keyboard to a three-quarter view; the render bar on the screen runs on
+vawe.onFrame((t) => {
+  const u = S(clamp((t - T0) / DUR));
+  cam.style.setProperty('--y', lerp(from.y, to.y, u).toFixed(3));
+  cam.style.setProperty('--rx', lerp(from.rx, to.rx, u).toFixed(3));
+  cam.style.setProperty('--ry', lerp(from.ry, to.ry, u).toFixed(3));
+  cam.style.setProperty('--s', lerp(from.s, to.s, u).toFixed(4));
+  const p = 0.52 + 0.4 * clamp(t / 4.6);
+  document.querySelector('.bar b').style.transform = `scaleX(${p.toFixed(4)})`;
+  document.querySelector('.pct').textContent = `${Math.round(p * 100)}%`;
+});
+
+// the stage fades, not the 3D object: an opacity animation on a preserve-3d element flattens it
+const stage = document.querySelector('.stage');
+arrive(stage, 100, { ms: 220, from: '0vh' });
+leave(stage, END, '0vh');
 </script>
 </body>
 </html>
