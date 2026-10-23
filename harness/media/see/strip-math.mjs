@@ -55,8 +55,10 @@ const REACH_S = 0.5;
  */
 export function withTransitions(cuts, transitions) {
   const gap = (t, at) => Math.max(t.startT - at, at - t.endT, 0);
+  const taken = new Set();
   return cuts.map((c) => {
-    const near = transitions.filter((t) => gap(t, c.at) <= REACH_S).sort((a, b) => gap(a, c.at) - gap(b, c.at))[0];
+    const near = transitions.filter((t) => !taken.has(t) && gap(t, c.at) <= REACH_S).sort((a, b) => gap(a, c.at) - gap(b, c.at))[0];
+    if (near) taken.add(near);
     return near ? { ...c, start: near.startT, end: near.endT, kind: near.type } : { ...c, start: c.at, end: c.at, kind: null };
   });
 }

@@ -4,7 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { stripProblem, stripFpsProblem, stripWindow, worldCuts, shotCuts, motionRead, motionLines, energyLines, filmNameOf, holdBefore, holdLine, holdsSummary } from '../../harness/media/see/strip-math.mjs';
+import { stripProblem, stripFpsProblem, stripWindow, worldCuts, shotCuts, motionRead, motionLines, energyLines, filmNameOf, holdBefore, holdLine, holdsSummary, withTransitions, cutHolds, transitionLine } from '../../harness/media/see/strip-math.mjs';
+import { videoTransitions } from '../../harness/media/see/transitions.mjs';
+import { computeEnergy } from '../../harness/media/see/core.mjs';
 import { captureEtaMs, firstCapture } from '../../harness/lib/ship-status.mjs';
 import { compareProblem } from '../../harness/media/compare-frames.mjs';
 
@@ -152,4 +154,55 @@ test('holdBefore measures the still run before a cut, on whole samples, leaving 
   const [count, ref] = holdsSummary([{ holdS: 0.4 }, { holdS: 0 }, null]);
   assert.match(count, /^pauses: 1 of 2 measured cuts hold 0\.3 s or more/);
   assert.match(ref, /^for comparison, the shot cuts of 22 reference films/);
+});
+
+test('withTransitions: the cut takes the start and end of the shot change near it, none leaves it at its own time', () => {
+  const cuts = [{ at: 1.1, from: 'a', to: 'b' }, { at: 4, from: 'b', to: 'c' }];
+  const [fade, none] = withTransitions(cuts, [{ startT: 0.6, endT: 1.4, type: 'crossfade' }, { startT: 9, endT: 9, type: 'cut' }]);
+  assert.deepEqual([fade.start, fade.end, fade.kind, fade.from], [0.6, 1.4, 'crossfade', 'a']);
+  assert.deepEqual([none.start, none.end, none.kind], [4, 4, null]);
+});
+
+test('cutHolds: a world cut inside a crossfade holds up to where the fade starts, not up to the midpoint', () => {
+  const fadeEnergy = series(0, [0, 0, 0, 0, 0, 0, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0]);
+  const [mid] = [{ at: 0.9, from: 'a', to: 'b' }];
+  assert.equal(holdBefore(fadeEnergy, mid.at, FLOOR).holdS, 0.9);
+  const cuts = withTransitions([mid], [{ startT: 0.6, endT: 1.3, type: 'crossfade' }]);
+  assert.deepEqual(cutHolds(fadeEnergy, cuts, FLOOR), [{ holdS: 0.6, whole: true }]);
+});
+
+test('cutHolds: the hold after a cut starts at the end of its shot change', () => {
+  const energy = series(0, [9, 9, 9, 0, 0, 0, 0, 0, 9, 9]);
+  const cuts = withTransitions([{ at: 0.1, from: 'a', to: 'b' }, { at: 0.8, from: 'b', to: 'c' }], [{ startT: 0, endT: 0.3, type: 'wipe' }]);
+  assert.equal(cutHolds(energy, cuts, FLOOR)[1].holdS, 0.4);
+});
+
+test('transitionLine: a dissolve is named with its length, a hard cut says nothing', () => {
+  assert.match(transitionLine({ kind: 'crossfade', start: 2.03, end: 3.6 }), /^a dissolve of 1\.57 s, from 2\.03 s/);
+  assert.match(transitionLine({ kind: 'dip', start: 1, end: 1.5 }), /^a dissolve of 0\.50 s/);
+  assert.match(transitionLine({ kind: 'wipe', start: 1, end: 1.4 }), /^a transition of 0\.40 s, from 1\.00 s \(wipe\)/);
+  assert.equal(transitionLine({ kind: 'cut', start: 1, end: 1 }), null);
+  assert.equal(transitionLine({ kind: null, start: 1, end: 1 }), null);
+});
+
+test('a slow low-contrast dissolve is found as a crossfade and its energy stays under the floor, so the hold stops at its first frame', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'strip-dissolve-'));
+  const still = (src, name) => {
+    const f = path.join(dir, name);
+    execFileSync('ffmpeg', ['-v', 'error', '-f', 'lavfi', '-i', `${src}=size=160x90:rate=30`, '-frames:v', '1', f]);
+    return f;
+  };
+  const [a, b] = [still('testsrc', 'a.png'), still('testsrc2', 'b.png')];
+  const video = path.join(dir, 'dissolve.mp4');
+  const dim = 'eq=contrast=0.25:brightness=-0.1';
+  execFileSync('ffmpeg', ['-v', 'error', '-framerate', '30', '-loop', '1', '-t', '5', '-i', a, '-framerate', '30', '-loop', '1', '-t', '5', '-i', b,
+    '-filter_complex', `[0]${dim}[a];[1]${dim}[b];[a][b]xfade=transition=fade:duration=1.6:offset=2,format=yuv420p`, video]);
+  const [fade] = videoTransitions(video);
+  assert.equal(fade.type, 'crossfade');
+  assert.ok(Math.abs(fade.startT - 2) < 0.1 && Math.abs(fade.endT - 3.6) < 0.1, JSON.stringify(fade));
+  const energy = computeEnergy(video);
+  assert.ok(Math.max(...energy.filter((p) => p.t >= 2.1 && p.t < 3.5).map((p) => p.v)) < FLOOR);
+  const [cut] = withTransitions([{ at: 2.8, from: 'a', to: 'b' }], [fade]);
+  assert.ok(Math.abs(cutHolds(energy, [cut], FLOOR)[0].holdS - 2) < 0.15);
+  assert.ok(holdBefore(energy, 2.8, FLOOR).holdS > 2.5);
 });
