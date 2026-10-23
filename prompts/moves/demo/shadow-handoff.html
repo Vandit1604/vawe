@@ -7,6 +7,15 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.4-4.7", "world-held@0.0-5.0"], "_why": {"text-unreadable-hold": "the report holds 4.5 s from its arrival at 0.3 s, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 4.7 s, 0.3 s before the 5 s end, short of the 5.4 s the check asks", "static-window@3.4-4.7": "the dark report holds 1.3 s with the tooltip open, as a real page does after a hover", "world-held@0.0-5.0": "one report page holds 5.0 s: the pointer picks Dark at 1.4 s, the page recolours in 0.32 s, the tooltip opens at 3.0 s"}}</script>
 <style>
+  .win .strip { height: calc(var(--u) * 5.8); font-size: calc(var(--u) * 3.2); }
+  .win .tab { height: calc(var(--u) * 4.8); width: calc(var(--u) * 34); gap: calc(var(--u) * 1.2); }
+  .win .tab .fav { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  .win .tab .x, .win .newtab { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  .win .lights i { width: calc(var(--u) * 1.5); height: calc(var(--u) * 1.5); }
+  .win .bar { height: calc(var(--u) * 6); gap: calc(var(--u) * 1.8); }
+  .win .bar .icon { width: calc(var(--u) * 2.6); height: calc(var(--u) * 2.6); }
+  .win .omni { height: calc(var(--u) * 4.4); font-size: calc(var(--u) * 3.2); }
+  .win .omni .icon { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
   body { display: block; position: relative; }
   .app { position: absolute; inset: 0; padding: calc(var(--u) * 3.4) calc(var(--u) * 4); background: var(--a-bg); color: var(--a-ink); font-family: var(--sans); }
   .top { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 6.4); }
@@ -15,7 +24,7 @@
   .seg .ind { position: absolute; left: calc(var(--u) * 0.4); top: calc(var(--u) * 0.4); bottom: calc(var(--u) * 0.4); width: calc(50% - var(--u) * 0.4); border-radius: calc(var(--u) * 0.9); background: var(--a-segon); box-shadow: 0 1px 2px rgb(0 0 0 / 0.14); }
   .seg button { position: relative; flex: 1; justify-content: center; display: flex; align-items: center; gap: calc(var(--u) * 0.7); padding: calc(var(--u) * 1) calc(var(--u) * 1.9); border: 0; background: none; color: var(--a-ink); font: 500 calc(var(--u) * 2.6)/1 var(--sans); }
   .seg svg { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-  .grid2 { display: grid; grid-template-columns: 1.7fr 1fr; gap: calc(var(--u) * 2.4); margin-top: calc(var(--u) * 2); height: calc(var(--u) * 58); }
+  .grid2 { display: grid; grid-template-columns: 1.7fr 1fr; gap: calc(var(--u) * 2.4); margin-top: calc(var(--u) * 2); height: calc(var(--u) * 53); }
   .tile { padding: calc(var(--u) * 3); border-radius: calc(var(--u) * 2); background: var(--a-card); box-shadow: 0 0 0 1px var(--a-line); }
   .tile .lbl { font: 500 calc(var(--u) * 2.6)/1 var(--sans); color: var(--a-muted); }
   .main { display: flex; flex-direction: column; }
@@ -30,8 +39,8 @@
   .side { display: flex; flex-direction: column; gap: calc(var(--u) * 2.4); }
   .side .tile { flex: 1; }
   .side .v { margin-top: calc(var(--u) * 2); font: 600 calc(var(--u) * 7)/1 var(--sans); letter-spacing: -0.04em; }
-  .tip { position: absolute; left: 50%; bottom: calc(100% + var(--u) * 0.6); translate: -50% 0; padding: calc(var(--u) * 1.2) calc(var(--u) * 1.8); border-radius: calc(var(--u) * 1); background: var(--a-tipbg); color: var(--a-tipink); font: 500 calc(var(--u) * 2.6)/1.25 var(--sans); white-space: nowrap; text-align: center; }
-  .tip b { display: block; font: 600 calc(var(--u) * 2.8)/1.2 var(--sans); color: inherit; }
+  .tip { position: absolute; left: 50%; bottom: calc(100% + var(--u) * 0.6); translate: -50% 0; padding: calc(var(--u) * 1.2) calc(var(--u) * 1.8); border-radius: calc(var(--u) * 1); background: var(--a-tipbg); color: var(--a-tipink); font: 500 calc(var(--u) * 3.4)/1.25 var(--sans); white-space: nowrap; text-align: center; }
+  .tip b { display: block; font: 600 calc(var(--u) * 3.6)/1.2 var(--sans); color: inherit; }
   .ptr { position: absolute; inset: 0; pointer-events: none; }
   .cur { position: absolute; left: 0; top: 0; width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); overflow: visible; }
   .cur path { fill: #0d0d0d; stroke: #fff; stroke-width: 1.4; stroke-linejoin: round; }
