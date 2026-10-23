@@ -18,7 +18,10 @@
     "crf": 16
   },
   "aurora-drift": "a37862560dcfe716",
-  "avatar-world": "7c56ebb92c7103f3",
+  "avatar-world": {
+    "hash": "cb01360c87d54930",
+    "crf": 16
+  },
   "before-after-wipe": {
     "hash": "8d510978641313e2",
     "crf": 16
@@ -32,7 +35,10 @@
   "calm-lockup": "b4c23a1fa1d9d782",
   "camera-moves": "787dc4ee64d2521f",
   "caption-editorial": "8c33b06b8a9bc540",
-  "caption-karaoke": "09479dc9a731b495",
+  "caption-karaoke": {
+    "hash": "33ae09b4992383c2",
+    "crf": 16
+  },
   "card-assemble": "7afcdc2bd423ab9a",
   "caret-door": "8c0a5dd7412b38c2",
   "caret-follow": "3d1cefff47fe2cb6",
@@ -118,7 +124,10 @@
   },
   "logo-wall": "5c98256e89f5351c",
   "lower-third": "6c58bc4796a06fa9",
-  "luma-matte-dissolve": "e4abecf11a55e65b",
+  "luma-matte-dissolve": {
+    "hash": "358642260ffa4543",
+    "crf": 22
+  },
   "mark-trace": "40da7b3036f73789",
   "marker-highlight": "409fcf5b3a4f5b76",
   "marquee-along-path": {
@@ -191,7 +200,10 @@
   "spin-transition": "01e1497b95c0bf73",
   "split-reveal": "b6322f595f2990b5",
   "spotlight-dim": "834c2f65263162bf",
-  "stack-cover": "c21d0572269b000a",
+  "stack-cover": {
+    "hash": "324d3825915c0df8",
+    "crf": 16
+  },
   "strikethrough-replace": "a22cb6f50a8464de",
   "success-check": {
     "hash": "c2e318b285ba4c12",
@@ -222,7 +234,10 @@
     "crf": 16
   },
   "underline-draw": "c5446434c92c569d",
-  "underline-road": "96d3072f7e6ddecf",
+  "underline-road": {
+    "hash": "2b9c2d33cd8ce48c",
+    "crf": 16
+  },
   "variable-weight-wave": "8d12e67e33a49acb",
   "vertical-cut-reveal": "5675f78cdb871fe0",
   "weight-morph": "b97c9334ac24c8d2",
