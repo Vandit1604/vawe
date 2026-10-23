@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parsePage, applyEdits } from '../../studio/page-source.mjs';
 import { setCssTiming, setAnimateOption } from '../../studio/ui/page-edit.js';
-import { easeNameOf, easeSource, easeOptions, easeHint, NAMED } from '../../studio/ui/page-eases.js';
+import { easeNameOf, easeSource, easeOptions, easeHint, curveSamples, curveRange, curvePath, plotAt, loopProgress, NAMED } from '../../studio/ui/page-eases.js';
 import { EASE, EASE_VARS } from '../../core/motion/presets.js';
 
 const apply = (page, edits) => applyEdits(page, edits);
@@ -97,4 +97,49 @@ test('table: a table that holds ease names is written as the bare camelCase name
   const e = table.entries[1].value;
   const out = apply(page, [{ start: e.start, end: e.end, expect: e.text, text }]);
   assert.match(out, /\[1, "landSoft"\]/);
+});
+
+test('a live linear() with every position spelled out is still read as its named ease', () => {
+  for (const name of NAMED) {
+    const vals = EASE_VARS[name].slice(7, -1).split(',').map((s) => s.trim());
+    const spelled = `linear(${vals.map((v, i) => `${v.split(' ')[0]} ${((i / (vals.length - 1)) * 100).toFixed(3)}%`).join(', ')})`;
+    if (vals.some((v) => v.includes('%'))) continue;
+    assert.equal(easeNameOf(spelled), name);
+  }
+  assert.equal(easeNameOf('linear(0, 0.5, 1)'), null);
+});
+
+test('curveSamples runs the named ease from 0 to 1 in 61 points', () => {
+  for (const name of NAMED) {
+    const s = curveSamples(name);
+    assert.equal(s.length, 61);
+    assert.equal(s[0][0], 0);
+    assert.equal(s[60][0], 1);
+    assert.ok(Math.abs(s[0][1]) < 1e-6 && Math.abs(s[60][1] - 1) < 1e-6, name);
+  }
+});
+
+test('the curves show what the eases do: pop and nudge overshoot, land is front loaded, launch starts slow', () => {
+  const peak = (n) => Math.max(...curveSamples(n).map((p) => p[1]));
+  assert.ok(peak('pop') > 1.02 && peak('nudge') > 1.01);
+  assert.ok(peak('land') <= 1.0001);
+  assert.ok(curveSamples('land')[12][1] > 0.5);
+  assert.ok(curveSamples('launch')[12][1] < 0.2);
+});
+
+test('curveRange widens for an overshoot and the path stays inside the plot', () => {
+  assert.deepEqual(curveRange(curveSamples('land')), { lo: 0, hi: 1 });
+  assert.ok(curveRange(curveSamples('pop')).hi > 1);
+  const ys = curvePath(curveSamples('pop')).match(/[ML][\d.]+ ([\d.]+)/g).map((m) => Number(m.split(' ')[1]));
+  assert.ok(ys.every((y) => y >= 0 && y <= 30));
+  const [x0, y0] = plotAt(0, 0, { lo: 0, hi: 1 });
+  const [x1, y1] = plotAt(1, 1, { lo: 0, hi: 1 });
+  assert.ok(x1 > x0 && y1 < y0);
+});
+
+test('loopProgress runs over the element duration, then holds', () => {
+  assert.equal(loopProgress(0, 0.6), 0);
+  assert.ok(Math.abs(loopProgress(0.3, 0.6) - 0.5) < 1e-9);
+  assert.equal(loopProgress(0.8, 0.6), 1);
+  assert.equal(loopProgress(1.1, 0.6), 0);
 });

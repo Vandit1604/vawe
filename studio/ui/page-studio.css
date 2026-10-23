@@ -52,3 +52,19 @@
  #chatlog p{margin:0;padding:8px 10px;border-radius:8px;background:var(--panel-2);white-space:pre-wrap} #chatlog p.me{background:var(--accent-soft)}
  .chatactions{display:flex;gap:6px}
  #joblog{margin:0;flex:1;min-height:0;overflow:auto;font:11px/1.5 var(--mono);color:var(--ink-2);white-space:pre-wrap}
+
+ /* Ease menu: each named ease with its curve, a dot on the curve and a box on the track. */
+ .easemenu{display:flex;flex-direction:column;gap:6px}
+ .easebtn{justify-content:flex-start;font:12px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .easelist{list-style:none;margin:0;padding:4px;max-height:340px;overflow:auto;background:var(--field);border:1px solid var(--line-2);border-radius:8px;scrollbar-width:thin}
+ .easelist[hidden]{display:none}
+ .easelist li{display:flex;align-items:center;gap:10px;padding:4px 6px;border-radius:6px;cursor:pointer;color:var(--ink-2)}
+ .easelist li:hover,.easelist li:focus-visible{background:var(--raised);color:var(--ink);outline:none}
+ .easelist li:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+ .easelist li[aria-selected=true] b::after{content:" (current)";font-weight:400;color:var(--ink-3)}
+ .easelist .what{display:flex;flex-direction:column;min-width:0}
+ .easelist b{font:600 12px var(--mono)} .easelist small{font:11px var(--mono);color:var(--ink-3)}
+ .easelist svg{flex:none}
+ .easelist .curve{fill:none;stroke:var(--accent);stroke-width:1.6}
+ .easelist .track{stroke:var(--line-2);stroke-width:1}
+ .easelist .dot,.easelist .box{fill:var(--ink)}

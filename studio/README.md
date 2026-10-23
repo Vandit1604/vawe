@@ -26,6 +26,8 @@ studio/
   ui/
     page-studio.html  the markup
     page-studio.css   the styling
+    page-eases.js     the named eases: read from the page, written in the form each place takes, curve samples
+    page-ease-menu.js the ease picker: a curve per ease, hover or focus tries it in the preview, a click writes it
 ```
 
 A tunable is a literal in the page: a `[[f, v], ...]` table, a `@keyframes` stop, an

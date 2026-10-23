@@ -6,7 +6,9 @@ import { seekTo } from '/core/engine/page-seek.js';
 import { SPRINGS, springLinear, springDuration } from '/core/motion/springs.js';
 import { h } from './dom.js';
 import { buildRows } from './page-model.js';
-import { easeOptions, easeNameOf, easeSource, easeHue, NAMED } from './page-eases.js';
+import { EASE_VARS } from '/core/motion/presets.js';
+import { easeNameOf, easeSource, easeHue, loopProgress } from './page-eases.js';
+import { easeMenu, reducedMotion } from './page-ease-menu.js';
 import { cssToHex, fmt, quoteLike, setVar, setText } from './page-edit.js';
 
 const $ = (id) => document.getElementById(id);
@@ -103,7 +105,7 @@ function renderTimeline() {
 function barEl(row) {
   const ease = row.timing?.easing;
   const hue = ease?.name ? `;--hue:${easeHue(ease.name).toFixed(0)}` : '';
-  const label = ease ? (ease.name || 'not named') : '';
+  const label = ease ? (ease.name || (String(ease.value).startsWith('linear(') ? 'curve' : String(ease.value).replace(/['"]/g, ''))) : '';
   return h('i', { class: `bar${ease?.name ? ' ease' : ''}`, title: `ease: ${ease?.name || ease?.value}`, style: `left:${px(row.span[0])}px;width:${Math.max(2, (row.span[1] - row.span[0]) * S.pps)}px${hue}` }, label);
 }
 
@@ -190,28 +192,53 @@ function colorField(label, text, onchange, wrap = (s) => s) {
   return h('div', { class: 'fld' }, h('span', {}, label), h('div', { class: 'line' }, pick, box));
 }
 
-function easingField(timing) {
+// Try an ease before keeping it: set it on the live animation and play its window through the studio's own seek. Nothing is written.
+const trial = { saved: null, raf: 0 };
+
+function tryEase(row, name) {
+  const effect = row.animation?.effect;
+  if (!effect) return;
+  trial.saved ??= { effect, easing: effect.getTiming().easing, t: S.t };
+  if (S.playing) play();
+  effect.updateTiming({ easing: EASE_VARS[name] });
+  cancelAnimationFrame(trial.raf);
+  const [lo, hi] = row.span;
+  if (reducedMotion() || hi <= lo) { seek((lo + hi) / 2); return; }
+  const t0 = performance.now();
+  const tick = (now) => { seek(lo + loopProgress((now - t0) / 1000, hi - lo) * (hi - lo)); trial.raf = requestAnimationFrame(tick); };
+  trial.raf = requestAnimationFrame(tick);
+}
+
+function restoreEase() {
+  cancelAnimationFrame(trial.raf);
+  const saved = trial.saved;
+  trial.saved = null;
+  if (!saved) return;
+  saved.effect.updateTiming({ easing: saved.easing });
+  seek(saved.t);
+}
+
+function easingField(timing, row) {
   const cur = String(timing.easing.value || 'linear').trim();
   const springs = Object.entries(SPRINGS).map(([name, { k, d }]) => ({ name, k, d, css: springLinear(k, d) }));
   const spring = springs.find((s) => s.css === cur.replace(/^['"]|['"]$/g, ''));
-  const options = easeOptions(cur).filter((o) => !(spring && o.custom));
-  const option = (o) => h('option', { value: o.value, selected: o.selected }, o.label);
-  const sel = h('select', {},
-    ...options.filter((o) => o.custom).map(option),
-    h('optgroup', { label: 'named eases' }, ...options.filter((o) => !o.custom).map(option)),
-    h('optgroup', { label: 'springs' }, ...springs.map((s) => h('option', { value: `spring:${s.name}`, selected: s === spring }, `spring ${s.name}`))));
-  sel.addEventListener('change', () => {
-    const s = springs.find((x) => `spring:${x.name}` === sel.value);
-    if (s) return commit([...(timing.easing.set?.(s.css) || []), ...(timing.duration.set?.(springDuration(s.k, s.d)) || [])]);
-    if (NAMED.includes(sel.value)) commit(timing.easing.setNamed?.(sel.value));
+  const menu = easeMenu({
+    current: cur, durationS: row.span ? row.span[1] - row.span[0] : timing.duration.value,
+    onTry: (name) => tryEase(row, name), onRestore: restoreEase,
+    onPick: (name) => { restoreEase(); commit(timing.easing.setNamed?.(name)); },
   });
-  return h('label', { class: 'fld' }, h('span', {}, 'easing'), sel);
+  const sel = h('select', {}, spring ? null : h('option', { value: '', selected: true }, 'a spring instead'),
+    ...springs.map((s) => h('option', { value: s.name, selected: s === spring }, `spring ${s.name}`)));
+  sel.addEventListener('change', () => {
+    const s = springs.find((x) => x.name === sel.value);
+    if (s) commit([...(timing.easing.set?.(s.css) || []), ...(timing.duration.set?.(springDuration(s.k, s.d)) || [])]);
+  });
+  return h('div', { class: 'fld' }, h('span', {}, 'easing'), menu, sel);
 }
 
 function tableEaseField(key) {
-  const sel = h('select', {}, ...easeOptions(key.value.str).map((o) => h('option', { value: o.value, selected: o.selected }, o.label)));
-  sel.addEventListener('change', () => { if (NAMED.includes(sel.value)) commit(key.setValue(easeSource(sel.value, 'name', { lit: key.value }))); });
-  return h('label', { class: 'fld' }, h('span', {}, 'ease'), sel);
+  const menu = easeMenu({ current: key.value.str, durationS: 0.6, onPick: (name) => commit(key.setValue(easeSource(name, 'name', { lit: key.value }))) });
+  return h('div', { class: 'fld' }, h('span', {}, 'ease'), menu);
 }
 
 function renderInspector() {

@@ -77,7 +77,7 @@ function animationRows(win, data) {
     const timing = eff.getTiming();
     if (typeof timing.duration !== 'number' || !isFinite(timing.duration)) continue;
     const row = a.animationName ? cssAnimationRow(a, eff.target, timing, data) : waapiRow(eff, timing, data);
-    if (row) rows.push({ ...row, label: labelOf(eff.target) + (a.animationName ? ` · ${a.animationName}` : '') });
+    if (row) rows.push({ ...row, animation: a, label: labelOf(eff.target) + (a.animationName ? ` · ${a.animationName}` : '') });
   }
   return rows;
 }
