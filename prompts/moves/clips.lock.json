@@ -58,7 +58,10 @@
     "hash": "6dadf4c376df98e4",
     "crf": 16
   },
-  "clip-expand": "3ee9f8d90c7a35be",
+  "clip-expand": {
+    "hash": "e8cb84f85c10f585",
+    "crf": 16
+  },
   "color-block-wipe": "0b74913f4a01b0d6",
   "command-palette-summon": {
     "hash": "d2622496963d03c8",
