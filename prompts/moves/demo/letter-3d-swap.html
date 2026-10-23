@@ -1,83 +1,61 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="swiss">
+<html data-aspect="16:9" data-look="editorial" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1.8">
+<meta name="duration" content="5">
 <title>move: letter 3d swap</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@4.0-4.6", "world-held@0.0-5.0"], "_why": {"text-unreadable-hold": "each phrase holds 1.0 s or more between rolls in a 5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the line leaves at 4.6 s, 0.4 s before the 5 s end, short of the 5.4 s the check asks", "static-window@4.0-4.6": "the last phrase holds 0.6 s as a still row of blocks", "world-held@0.0-5.0": "one row of letter blocks holds 5.0 s: two rolls at 0.5 s and 2.3 s"}}</script>
 <style>
   body { display: block; position: relative; }
-  #t { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 82vw; font: 700 calc(var(--u) * 12)/1 var(--sans); letter-spacing: -0.03em; text-transform: lowercase; color: var(--ink); background: var(--ground); }
-  .l3 { display: flex; flex-wrap: wrap; position: relative; }
-  .l3-word { display: inline-flex; }
-  .l3-box { transform-style: preserve-3d; }
-  .l3-face { backface-visibility: hidden; height: 1lh; background: var(--ground); color: var(--ink); }
-  .l3-front { position: relative; }
-  .l3-second { position: absolute; top: 0; left: 0; }
-  .l3-space { white-space: pre; }
+  :root { --cube: calc(var(--u) * 24); --depth: calc(var(--u) * 24); }
+  .row { position: absolute; left: 0; right: 0; top: calc(50% - var(--cube) / 2); display: flex; justify-content: center; gap: calc(var(--u) * 0.9); }
+  .cell { position: relative; width: calc(var(--cube) * 0.6); height: var(--cube); perspective: calc(var(--cube) * 3.6); }
+  .cell.gap { width: calc(var(--cube) * 0.3); }
+  .block { position: absolute; inset: 0; transform-style: preserve-3d; transform: translateZ(calc(var(--depth) / -2)); }
+  .face { position: absolute; inset: 0; display: grid; place-items: center; backface-visibility: hidden; border-radius: calc(var(--u) * 1.2);
+          background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), inset 0 calc(var(--u) * 0.3) 0 rgba(255, 255, 255, 0.9);
+          font: 400 calc(var(--cube) * 0.78)/1 var(--sans); letter-spacing: -0.02em; }
+  .shade { position: absolute; inset: 0; border-radius: inherit; background: #1b1713; opacity: 0; }
+  .f1 .shade, .f2 .shade { opacity: 0.5; }
+  .f0 { transform: translateZ(calc(var(--depth) / 2)); }
+  .f1 { transform: rotateX(-90deg) translateZ(calc(var(--depth) / 2)); }
+  .f2 { transform: rotateX(-180deg) translateZ(calc(var(--depth) / 2)); }
 </style>
 </head>
 <body>
-<p id="t"></p>
+<div class="row" id="row"></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { motionSpringEasing } from '/core/motion/motion-spring.js';
-import { rng } from '/core/motion/springs.js';
+import { springLinear, springDuration } from '/core/motion/springs.js';
+import { leave, arrive } from '/prompts/moves/demo/assets/stage.js';
 
-const graphemes = (s) => Array.from(new Intl.Segmenter('en', { granularity: 'grapheme' }).segment(s), (x) => x.segment);
-const make = (cls, parent, text) => {
-  const e = document.createElement('span');
-  e.className = cls;
-  if (text !== undefined) e.textContent = text;
-  parent?.append(e);
-  return e;
-};
+const PHRASES = ['rough draft', 'final print', 'live today'];
+const K = 160, D = 25, STAGGER = 40, ROLLS = [500, 2300];   // spring stiffness and damping, ms between letters, ms each roll starts
+const pad = (s) => s.padStart(11, ' ');
+const row = document.getElementById('row');
+const spring = { duration: springDuration(K, D) * 1000, easing: springLinear(K, D), fill: 'forwards' };
+const shade = (face, from, to, at) => face.querySelector('.shade').animate([{ opacity: from }, { opacity: to }], { delay: at, duration: spring.duration, easing: springLinear(K, D), fill: 'forwards' });
 
-const SECOND_FACE = {
-  top: 'rotateX(-90deg) translateZ(0.5lh)',
-  right: 'rotateY(90deg) translateX(50%) rotateY(-90deg) translateX(-50%) rotateY(-90deg) translateX(50%)',
-  bottom: 'rotateX(90deg) translateZ(0.5lh)',
-  left: 'rotateY(90deg) translateX(50%) rotateY(-90deg) translateX(50%) rotateY(-90deg) translateX(50%)',
-};
-const ROTATE = { top: 'rotateX(90deg)', right: 'rotateY(90deg)', bottom: 'rotateX(-90deg)', left: 'rotateY(90deg)' };
-
-function letter3dSwap(el, text, { rotateDirection = 'right', stagger = 0.05, from = 'first', spring = { stiffness: 300, damping: 30 }, at = 0, seed = 1 } = {}) {
-  const vertical = rotateDirection === 'top' || rotateDirection === 'bottom';
-  const front = vertical ? 'translateZ(0.5lh)' : rotateDirection === 'left' ? 'rotateY(90deg) translateX(50%) rotateY(-90deg)' : 'rotateY(-90deg) translateX(50%) rotateY(90deg)';
-  const rand = rng(seed);
-  const words = text.split(' ').map(graphemes);
-  const total = words.reduce((n, w) => n + w.length, 0);
-  const delayOf = (i) => {
-    if (from === 'first') return i * stagger;
-    if (from === 'last') return (total - 1 - i) * stagger;
-    if (from === 'center') return Math.abs(Math.floor(total / 2) - i) * stagger;
-    if (from === 'random') return Math.abs(Math.floor(rand() * total) - i) * stagger;
-    return Math.abs(from - i) * stagger;
-  };
-  el.classList.add('l3');
-  el.replaceChildren();
-  const boxes = [];
-  words.forEach((chars, w) => {
-    const word = make('l3-word', el);
-    chars.forEach((ch) => {
-      const box = make('l3-box', word);
-      box.style.transform = vertical ? 'translateZ(-0.5lh)' : 'rotateY(90deg) translateX(50%) rotateY(-90deg)';
-      make('l3-face l3-front', box, ch).style.transform = front;
-      make('l3-face l3-second', box, ch).style.transform = SECOND_FACE[rotateDirection];
-      boxes.push(box);
-    });
-    if (w < words.length - 1) make('l3-space', word, ' ');
+const cells = [...pad(PHRASES[0])].map((_, i) => {
+  const cell = document.createElement('div');
+  cell.className = 'cell' + (pad(PHRASES[0])[i] === ' ' ? ' gap' : '');
+  cell.innerHTML = '<div class="block">' + PHRASES.map((p, n) => `<div class="face f${n}"><span>${pad(p)[i].trim()}</span><i class="shade"></i></div>`).join('') + '</div>';
+  row.append(cell);
+  return cell;
+});
+cells.forEach((cell, i) => {
+  const block = cell.querySelector('.block');
+  const faces = [...cell.querySelectorAll('.face')];
+  ROLLS.forEach((at, r) => {
+    const start = at + i * STAGGER;
+    block.animate([{ transform: `translateZ(calc(var(--depth) / -2)) rotateX(${90 * r}deg)` }, { transform: `translateZ(calc(var(--depth) / -2)) rotateX(${90 * (r + 1)}deg)` }], { delay: start, ...spring });
+    shade(faces[r], 0, 0.5, start);
+    shade(faces[r + 1], 0.5, 0, start);
   });
-  const delays = boxes.map((_, i) => delayOf(i));
-  const { duration, easing } = motionSpringEasing(spring);
-  const reset = (at + Math.max(...delays)) * 1000 + duration;
-  boxes.forEach((box, i) => {
-    box.animate([{ transform: box.style.transform }, { transform: ROTATE[rotateDirection] }], { delay: (at + delays[i]) * 1000, duration, easing, fill: 'both' });
-    box.animate([{ transform: 'rotateX(0deg) rotateY(0deg)' }], { delay: reset, duration: 0, fill: 'forwards' });
-  });
-}
-
-letter3dSwap(document.getElementById('t'), 'Set your mind to it', { rotateDirection: 'top', stagger: 0.03, spring: { stiffness: 160, damping: 25 }, at: 0.2 });
+});
+arrive(row, 100, { ms: 260, from: '0.8vh' });
+leave(row, 5000);
 </script>
 </body>
 </html>
