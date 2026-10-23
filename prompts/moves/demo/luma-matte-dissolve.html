@@ -2,10 +2,10 @@
 <html data-aspect="16:9" data-look="product" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="5">
+<meta name="duration" content="4.2">
 <title>move: luma matte dissolve</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
-<script type="application/json" id="authoring">{"allow": ["static-window@0.0-1.5", "static-window@3.0-4.9", "world-held@0.0-5.0"], "_why": {"static-window@0.0-1.5": "shot A is a held photograph: only its slow push moves, as a locked-off shot does", "static-window@3.0-4.9": "shot B is a held photograph after the matte ends", "world-held@0.0-5.0": "a luma matte joins two shots of one cut, and the picture is the content"}}</script>
+<script type="application/json" id="authoring">{"allow": ["static-window@0-1.1", "static-window@2.7-4.1", "world-held@0.0-2.2"], "_why": {"static-window@0-1.1": "shot A is a held photograph for 1.1 s before the matte opens at 0.9 s: only its slow push moves, as a locked-off shot does", "static-window@2.7-4.1": "shot B is a held photograph for 1.4 s after the matte ends at 2.9 s: only its slow push moves", "world-held@0.0-2.2": "a luma matte joins two shots of one cut, and the picture is the content"}}</script>
 <style>
   body { position: relative; display: block; background: var(--ground); }
   .shot { position: absolute; inset: 0; overflow: hidden; }
@@ -17,13 +17,18 @@
 <section class="shot b" id="b"><img src="/prompts/moves/demo/assets/photos/shore.jpg" alt=""></section>
 <svg width="0" height="0" style="position:absolute"><filter id="luma" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
   <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="L"/>
-  <feComponentTransfer in="L" result="M"><feFuncA id="ramp" type="linear" slope="8" intercept="-8"/></feComponentTransfer>
+  <feGaussianBlur in="L" stdDeviation="20" result="LB"/>
+  <feTurbulence type="fractalNoise" baseFrequency="0.004 0.006" numOctaves="3" seed="4" result="N0"/>
+  <feColorMatrix in="N0" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -0.8" result="N"/>
+  <feComposite in="LB" in2="N" operator="arithmetic" k1="0" k2="0.5" k3="0.5" k4="0" result="LM"/>
+  <feComponentTransfer in="LM" result="M"><feFuncA id="ramp" type="linear" slope="2.5" intercept="-2.5"/></feComponentTransfer>
   <feComposite in="SourceGraphic" in2="M" operator="in"/>
 </filter></svg>
 <script type="module">
 import '/core/engine/page-api.js';
-const S = 8, t0 = 1.6, dur = 1.4;                       // S: how many luminance steps the edge is soft over (1/S wide)
-const sweep = (u) => 1 - (1 - u) ** 1.7;
+import { EASE, easeFn } from '/core/motion/presets.js';
+const S = 2.5, t0 = 0.9, dur = 2.0;                       // S: how many luminance steps the edge is soft over (1/S wide)
+const sweep = easeFn('settle');
 const ramp = document.getElementById('ramp'), b = document.getElementById('b');
 b.style.filter = 'url(#luma)';
 // the threshold falls from above white (nothing shows) to below black (everything shows): the brightest pixels of shot B appear first
@@ -33,8 +38,8 @@ vawe.onFrame((t) => {
   ramp.setAttribute('intercept', (-S * th).toFixed(4));
 });
 // both shots are held takes with the same slow push, as footage from a locked-off camera drifts
-document.querySelector('.a img').animate([{ scale: 1.0 }, { scale: 1.035 }], { duration: 5000, easing: 'linear', fill: 'both' });
-b.querySelector('img').animate([{ scale: 1.0 }, { scale: 1.035 }], { duration: 5000, easing: 'linear', fill: 'both' });
+document.querySelector('.a img').animate([{ scale: 1.0 }, { scale: 1.035 }], { duration: 4200, easing: EASE.glide, fill: 'both' });
+b.querySelector('img').animate([{ scale: 1.05 }, { scale: 1.085 }], { duration: 4200, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>
