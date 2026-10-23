@@ -87,9 +87,15 @@
   },
   "gradient-mesh-field": "46bf6d819f633c3d",
   "grain-field": "bf8d3a52663969c8",
-  "grid-stagger-wave": "c268dc724ff350a3",
+  "grid-stagger-wave": {
+    "hash": "a7e098f54d73a9c3",
+    "crf": 16
+  },
   "grid-tile-flip": "3d14a6f0c0b503c8",
-  "halftone-field": "298326898145482e",
+  "halftone-field": {
+    "hash": "8acb63d38fd5b9bb",
+    "crf": 19
+  },
   "hand-drawn-notes": "695c4e34bd4ff383",
   "highlight-sweep": "0aa8f7c1e54ba3cc",
   "ink-warp": "64a415f1297c1add",
