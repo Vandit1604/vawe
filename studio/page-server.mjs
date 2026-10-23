@@ -26,7 +26,7 @@ const pageRel = path.relative(REPO_ROOT, pageFile).split(path.sep).join('/');
 if (pageRel.startsWith('..')) { console.error('the page must sit inside the repo'); process.exit(2); }
 const PORT = Number(process.env.PORT) || 8799;
 const UI = path.join(REPO_ROOT, 'studio/ui');
-const ASSETS = new Set(['page-studio.html', 'page-studio.css', 'page-studio.js', 'page-model.js', 'page-edit.js', 'page-eases.js', 'dom.js', 'page-ease-menu.js']);
+const ASSETS = new Set(['page-studio.html', 'studio.css', 'page-studio.css', 'page-studio.js', 'page-model.js', 'page-edit.js', 'page-eases.js', 'dom.js', 'page-ease-menu.js']);
 
 const undoStack = [];
 const send = (res, code, type, body) => { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' }); res.end(body); };
@@ -88,7 +88,7 @@ const routes = (req, res) => {
   const [url, query] = req.url.split('?');
   const q = new URLSearchParams(query || '');
   if (url === '/' || url === '/studio') {
-    send(res, 200, 'text/html', fs.readFileSync(path.join(UI, 'page-studio.html'), 'utf8').replace('{{TITLE}}', pageRel));
+    send(res, 200, 'text/html', fs.readFileSync(path.join(UI, 'page-studio.html'), 'utf8').replaceAll('{{TITLE}}', pageRel));
     return true;
   }
   if (url.startsWith('/studio/ui/') && ASSETS.has(url.slice('/studio/ui/'.length))) {
