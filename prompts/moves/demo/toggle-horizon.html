@@ -7,24 +7,23 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.6-4.2", "world-held@0.0-4.6"], "_why": {"text-unreadable-hold": "the settings page holds 3.9 s after it arrives, and the check asks 5.4 s", "text-moves-before-hold": "the phone leaves at 4.2 s, 0.4 s before the 4.6 s end, short of the 5.4 s the check asks", "static-window@3.6-4.2": "the dark settings page holds 0.6 s as a real screen does between taps", "world-held@0.0-4.6": "one settings screen holds 4.6 s: the first tap flips Dark mode at 1.0 s, the second tap flips Reduce motion at 2.8 s"}}</script>
 <style>
-  body { display: block; position: relative; }
-  .phone { position: absolute; left: 50%; top: 50%; width: calc(var(--u) * 54); height: calc(var(--u) * 94); margin: calc(var(--u) * -47) 0 0 calc(var(--u) * -27); padding: calc(var(--u) * 0.9); border-radius: calc(var(--u) * 7); background: #151515; box-shadow: var(--win-shadow); }
-  .screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: calc(var(--u) * 6.2); background: var(--s-bg); color: var(--s-ink); font-family: var(--sans); }
-  .status { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 7); padding: calc(var(--u) * 1) calc(var(--u) * 5) 0; font: 600 calc(var(--u) * 3)/1 var(--sans); }
-  .batt { width: calc(var(--u) * 5); height: calc(var(--u) * 2.4); border-radius: calc(var(--u) * 0.7); box-shadow: inset 0 0 0 1.5px var(--s-ink); position: relative; }
+  body { display: block; position: relative; --p: calc(var(--u) * 1.48); overflow: hidden; }
+  .phone { position: absolute; left: 50%; top: calc(var(--u) * 2); width: calc(var(--p) * 54); height: calc(var(--p) * 94); margin-left: calc(var(--p) * -27); padding: calc(var(--p) * 0.9); border-radius: calc(var(--p) * 7); background: #151515; box-shadow: var(--win-shadow); }
+  .screen { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: calc(var(--p) * 6.2); background: var(--s-bg); color: var(--s-ink); font-family: var(--sans); }
+  .status { display: flex; align-items: center; justify-content: space-between; height: calc(var(--p) * 7); padding: calc(var(--p) * 1) calc(var(--p) * 5) 0; font: 600 calc(var(--p) * 3)/1 var(--sans); }
+  .batt { width: calc(var(--p) * 5); height: calc(var(--p) * 2.4); border-radius: calc(var(--p) * 0.7); box-shadow: inset 0 0 0 1.5px var(--s-ink); position: relative; }
   .batt::after { content: ''; position: absolute; left: 2px; top: 2px; bottom: 2px; width: 70%; border-radius: 1px; background: var(--s-ink); }
-  h1 { margin: calc(var(--u) * 2.4) calc(var(--u) * 4) calc(var(--u) * 3); font: 700 calc(var(--u) * 7.4)/1 var(--sans); letter-spacing: -0.03em; }
-  .grp { margin: 0 calc(var(--u) * 3.2); border-radius: calc(var(--u) * 2.4); background: var(--s-group); overflow: hidden; }
-  .grp + .cap { margin: calc(var(--u) * 1.6) calc(var(--u) * 5) calc(var(--u) * 3.2); font: 400 calc(var(--u) * 2.6)/1.3 var(--sans); color: var(--s-muted); }
-  .row { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 11.4); padding: 0 calc(var(--u) * 3.6); }
+  h1 { margin: calc(var(--p) * 2.4) calc(var(--p) * 4) calc(var(--p) * 3); font: 700 calc(var(--p) * 7.4)/1 var(--sans); letter-spacing: -0.03em; }
+  .grp { margin: 0 calc(var(--p) * 3.2); border-radius: calc(var(--p) * 2.4); background: var(--s-group); overflow: hidden; }
+  .grp + .cap { margin: calc(var(--p) * 1.6) calc(var(--p) * 5) calc(var(--p) * 3.2); font: 400 calc(var(--p) * 2.6)/1.3 var(--sans); color: var(--s-muted); }
+  .row { display: flex; align-items: center; justify-content: space-between; height: calc(var(--p) * 11.4); padding: 0 calc(var(--p) * 3.6); }
   .row + .row { box-shadow: inset 0 1px 0 var(--s-line); }
-  .row b { display: block; font: 500 calc(var(--u) * 3.6)/1.1 var(--sans); }
-  .row span.sub { display: block; margin-top: calc(var(--u) * 0.8); font: 400 calc(var(--u) * 2.7)/1.1 var(--sans); color: var(--s-muted); }
-  .row .val { font: 400 calc(var(--u) * 3.4)/1 var(--sans); color: var(--s-muted); }
-  .tg { position: relative; flex: none; width: calc(var(--u) * 8.6); height: calc(var(--u) * 5.2); border-radius: 999px; background: var(--s-off); }
+  .row b { display: block; font: 500 calc(var(--p) * 3.6)/1.1 var(--sans); }
+  .row span.sub { display: block; margin-top: calc(var(--p) * 0.8); font: 400 calc(var(--p) * 2.7)/1.1 var(--sans); color: var(--s-muted); }
+  .row .val { font: 400 calc(var(--p) * 3.4)/1 var(--sans); color: var(--s-muted); }
+  .tg { position: relative; flex: none; width: calc(var(--p) * 8.6); height: calc(var(--p) * 5.2); border-radius: 999px; background: var(--s-off); }
   .tg .on { position: absolute; inset: 0; border-radius: inherit; background: #30b455; opacity: 0; }
-  .tg .th { position: absolute; top: calc(var(--u) * 0.3); left: calc(var(--u) * 0.3); width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); border-radius: 999px; background: #fff; box-shadow: 0 calc(var(--u) * 0.3) calc(var(--u) * 0.9) rgb(0 0 0 / 0.28), 0 0 0 0.5px rgb(0 0 0 / 0.06); }
-  .touch { position: absolute; left: 0; top: 0; width: calc(var(--u) * 7); height: calc(var(--u) * 7); margin: calc(var(--u) * -3.5) 0 0 calc(var(--u) * -3.5); border-radius: 50%; background: rgb(120 120 128 / 0.35); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.25); }
+  .tg .th { position: absolute; top: calc(var(--p) * 0.3); left: calc(var(--p) * 0.3); width: calc(var(--p) * 4.6); height: calc(var(--p) * 4.6); border-radius: 999px; background: #fff; box-shadow: 0 calc(var(--p) * 0.3) calc(var(--p) * 0.9) rgb(0 0 0 / 0.28), 0 0 0 0.5px rgb(0 0 0 / 0.06); }
 </style>
 </head>
 <body>
@@ -35,14 +34,11 @@
     <div class="row"><div><b>Dark mode</b><span class="sub">Dim every screen</span></div><div class="tg" id="tg1"><i class="on"></i><i class="th"></i></div></div>
     <div class="row"><div><b>Automatic</b><span class="sub">Follow the sun</span></div><div class="tg"><i class="on"></i><i class="th"></i></div></div>
   </div>
-  <div class="cap">Dark mode changes the colours of every page.</div>
   <div class="grp">
-    <div class="row"><b>Text size</b><span class="val">Medium</span></div>
     <div class="row"><b>Bold text</b><div class="tg"><i class="on"></i><i class="th"></i></div></div>
     <div class="row"><b>Reduce motion</b><div class="tg" id="tg2"><i class="on"></i><i class="th"></i></div></div>
   </div>
 </div></div>
-<div class="touch" id="touch"></div>
 <script type="module">
 import '/core/engine/page-api.js';
 import { EASE, easeFn } from '/core/motion/presets.js';
@@ -54,28 +50,14 @@ const DARK = { bg: '#000000', group: '#1c1c1e', ink: '#ffffff', muted: '#98989f'
 for (const k of Object.keys(LIGHT)) CSS.registerProperty({ name: `--s-${k}`, syntax: '<color>', inherits: true, initialValue: LIGHT[k] });
 
 // measure before anything moves
-const W = innerWidth, H = innerHeight, u = H / 100;
-const centre = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
-const THUMB = 4.6 * u, TRAVEL = (8.6 - 0.6 - 4.6) * u;
-const land = easeFn('land'), clamp = (x) => Math.min(1, Math.max(0, x));
+const u = innerHeight / 100;
+const clamp = (x) => Math.min(1, Math.max(0, x));
+const p = 1.48 * u, THUMB = 4.6 * p, TRAVEL = (8.6 - 0.6 - 4.6) * p;
 const taps = [{ tg: q('#tg1'), at: 1.0, theme: true }, { tg: q('#tg2'), at: 2.8, theme: false }];
-taps.forEach((t) => { t.c = centre(t.tg); });
-const K = 380, D = 26, HOLD = 0.14;                       // the thumb spring (stiffness, damping); seconds the finger holds before the switch
-const touch = q('#touch');
-const REST = [W * 0.72, H * 0.9];
-// the finger: arrives from below right, rests on each toggle in turn, lifts and leaves; it eases between stops
-const [c1, c2] = [taps[0].c, taps[1].c];
-const PATH = [[0.3, ...REST], [0.8, ...c1], [1.6, ...c1], [2.6, ...c2], [3.6, ...c2], [3.9, ...REST]];
-const finger = (t) => {
-  for (let i = PATH.length - 1; i > 0; i--) if (t >= PATH[i - 1][0]) { const [t0, x0, y0] = PATH[i - 1], [t1, x1, y1] = PATH[i]; const k = land(clamp((t - t0) / (t1 - t0))); return [x0 + (x1 - x0) * k, y0 + (y1 - y0) * k]; }
-  return REST;
-};
+const K = 380, D = 26, HOLD = 0.14;                       // the thumb spring (stiffness, damping); seconds before the switch
 vawe.onFrame((t) => {
-  const [x, y] = finger(t);
-  touch.style.translate = `${x}px ${y}px`;
-  let press = 0, on = [0, 0];
+  const on = [0, 0];
   taps.forEach((tp, i) => {
-    press = Math.max(press, clamp((t - (tp.at - 0.04)) / 0.08) * (1 - clamp((t - (tp.at + HOLD)) / 0.1)));
     on[i] = spring(t - tp.at - HOLD, K, D);
     const th = tp.tg.querySelector('.th'), tr = tp.tg.querySelector('.on');
     const stretch = clamp((t - (tp.at - 0.04)) / 0.08) * (1 - clamp((t - (tp.at + HOLD)) / 0.12));
@@ -83,13 +65,10 @@ vawe.onFrame((t) => {
     th.style.translate = `${TRAVEL * on[i] - (THUMB * 0.22 * stretch) * on[i]}px 0`;
     tr.style.opacity = String(clamp((t - tp.at - HOLD) / 0.2));
   });
-  touch.style.scale = String(1 - 0.18 * press);
 });
 
 // Dark mode is on: every token of the screen changes together, as a real appearance switch does
 q('#screen').animate([LIGHT, DARK].map((p) => Object.fromEntries(Object.entries(p).map(([k, v]) => [`--s-${k}`, v]))), { duration: 350, delay: (taps[0].at + HOLD + 0.05) * 1000, easing: EASE.land, fill: 'both' });
-touch.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 300, easing: EASE.land, fill: 'both' });
-touch.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, delay: 3600, easing: EASE.launch, fill: 'forwards' });
 arrive(q('#phone'), 100, { ms: 220, from: '0.8vh' });
 leave(q('#phone'), 4600);
 </script>

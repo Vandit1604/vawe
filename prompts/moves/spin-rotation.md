@@ -4,12 +4,11 @@
 becomes the status mark of the result. Clip: [spin-rotation.mp4](spin-rotation.mp4). Demo:
 [demo/spin-rotation.html](demo/spin-rotation.html).
 
-Look: a browser window on the flat neutral ground. First a centred ring spinner (a grey track and a black arc, rounded ends) with a muted
+Look: a browser window on the flat neutral ground. First a centred ring spinner (a grey track and a green arc, rounded ends) with a muted
 "Loading workspace" line. Then the page: a header with a green check circle, "Workspace ready", a green pill, a sync note and three grey stat tiles.
 
 How it moves: the arc turns at one speed (330 degrees a second) from 0.4 s. At 1.6 s the turn brakes to a stop in 0.7 s on `EASE.land` while the arc
-grows to a full circle on the same ease. The ring then flies to the header mark spot and shrinks to its size in 0.55 s on `EASE.land`, and its stroke turns
-green. A check draws inside it in 0.35 s. The header and the stat tiles fade in with a 1 vh rise, 70 ms apart. The window arrives and leaves
+grows to a full circle on the same ease. The ring then flies to the header mark spot and shrinks to its size in 0.55 s on `EASE.land`, in the same green. A check draws inside it in 0.35 s. The header and the stat tiles fade in with a 1 vh rise, 70 ms apart: the tiles from 2.35 s, the note at 2.6 s and the title at 2.65 s, so the page is never empty and the ring never crosses the text. The window arrives and leaves
 on `arrive` and `leave`. Only the circle turns; the check never rotates.
 
 ```js

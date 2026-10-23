@@ -6,16 +6,25 @@
 <title>move: card assemble</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
+  .win .strip { height: calc(var(--u) * 5.8); font-size: calc(var(--u) * 3.2); }
+  .win .tab { height: calc(var(--u) * 4.8); width: calc(var(--u) * 34); gap: calc(var(--u) * 1.2); }
+  .win .tab .fav { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  .win .tab .x, .win .newtab { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
+  .win .lights i { width: calc(var(--u) * 1.5); height: calc(var(--u) * 1.5); }
+  .win .bar { height: calc(var(--u) * 6); gap: calc(var(--u) * 1.8); }
+  .win .bar .icon { width: calc(var(--u) * 2.6); height: calc(var(--u) * 2.6); }
+  .win .omni { height: calc(var(--u) * 4.4); font-size: calc(var(--u) * 3.2); }
+  .win .omni .icon { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); }
   .iv { position: absolute; inset: 0; display: grid; grid-template-columns: 45fr 55fr; }
-  .iv-l { display: flex; flex-direction: column; padding: calc(var(--u) * 5) calc(var(--u) * 5.5) calc(var(--u) * 4); background: var(--raised); }
+  .iv-l { display: flex; flex-direction: column; padding: calc(var(--u) * 3.6) calc(var(--u) * 5.5) calc(var(--u) * 3); background: var(--raised); }
   .iv-r { display: flex; flex-direction: column; justify-content: center; gap: calc(var(--u) * 2.6); padding: calc(var(--u) * 5) calc(var(--u) * 7); background: var(--surface); box-shadow: -1px 0 0 var(--line); }
   .iv-brand { display: flex; align-items: center; gap: calc(var(--u) * 1.6); font: 600 calc(var(--u) * 2.8)/1 var(--sans); }
   .iv-mark { display: grid; place-items: center; width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); border-radius: calc(var(--u) * 1.3); background: var(--ink); color: #fff; font: 700 calc(var(--u) * 2.8)/1 var(--sans); }
-  .iv-lbl { margin-top: calc(var(--u) * 5); font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
+  .iv-lbl { margin-top: calc(var(--u) * 3); font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
   .iv-amt { margin-top: calc(var(--u) * 1); font: 600 calc(var(--u) * 9.6)/1 var(--sans); letter-spacing: -0.035em; }
   .iv-due { margin-top: calc(var(--u) * 1.6); font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
-  .iv-items { margin-top: calc(var(--u) * 4.4); }
-  .iv-item { display: flex; justify-content: space-between; align-items: baseline; padding: calc(var(--u) * 1.5) 0; font: 500 calc(var(--u) * 2.4)/1.2 var(--sans); }
+  .iv-items { margin-top: calc(var(--u) * 2.5); }
+  .iv-item { display: flex; justify-content: space-between; align-items: baseline; padding: calc(var(--u) * 1.1) 0; font: 500 calc(var(--u) * 2.4)/1.2 var(--sans); }
   .iv-item small { display: block; margin-top: calc(var(--u) * 0.5); font-size: calc(var(--u) * 2.1); color: var(--muted); }
   .iv-item b { font-weight: 500; }
   .iv-rule { height: 1px; margin: calc(var(--u) * 1.4) 0; background: var(--bar); transform-origin: 0 50%; }
@@ -36,7 +45,7 @@
 <body>
 <div class="win">
   <div class="strip" data-chrome><span class="lights"><i></i><i></i><i></i></span>
-    <span class="tab"><i class="fav"></i><span>Invoice 2041 from Fernbank Studio</span><svg class="icon x" data-i="x"></svg></span>
+    <span class="tab"><i class="fav"></i><span>Invoice 2041</span><svg class="icon x" data-i="x"></svg></span>
     <svg class="icon newtab" data-i="plus"></svg></div>
   <div class="bar" data-chrome><svg class="icon" data-i="back"></svg><svg class="icon" data-i="fwd"></svg><svg class="icon" data-i="reload"></svg>
     <span class="omni"><svg class="icon" data-i="lock"></svg><span>pay.fernbank.studio/i/2041</span></span><i class="avatar-dot"></i><svg class="icon" data-i="dots-v"></svg></div>

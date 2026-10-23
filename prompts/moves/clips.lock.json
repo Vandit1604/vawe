@@ -1,7 +1,7 @@
 {
   "agent-progress": {
-    "crf": 16,
-    "hash": "f71b8d8c77c5bb21"
+    "hash": "bee27b73b9110581",
+    "crf": 16
   },
   "ai-stream-response": {
     "crf": 16,
@@ -40,8 +40,8 @@
     "hash": "97060a98ec6d4322"
   },
   "camera-moves": {
-    "crf": 19,
-    "hash": "8a45f914138af95c"
+    "hash": "be348beb505529c0",
+    "crf": 19
   },
   "caption-editorial": "8c33b06b8a9bc540",
   "caption-karaoke": {
@@ -49,17 +49,17 @@
     "hash": "98256b9732e0543b"
   },
   "card-assemble": {
-    "crf": 16,
-    "hash": "7f571e33135e82ef"
+    "hash": "a251e7b7c1ed5731",
+    "crf": 16
   },
   "caret-door": {
-    "crf": 16,
-    "hash": "7ea0f58247022be2"
+    "hash": "b3941806f45f29ef",
+    "crf": 16
   },
   "caret-follow": "3d1cefff47fe2cb6",
   "caret-typing": {
-    "crf": 16,
-    "hash": "3625441590553b87"
+    "hash": "34c1e4a3ea4688d1",
+    "crf": 16
   },
   "chain-beats": "a9f87ec35d03f3bb",
   "chart-build": "0161845983894f1b",
@@ -126,8 +126,8 @@
   },
   "exit-fast": "bd616b7f7918efcb",
   "exposure-flash": {
-    "crf": 22,
-    "hash": "463c84393b11a656"
+    "hash": "cc8e4b17e19b2c94",
+    "crf": 22
   },
   "flap-resolve": {
     "crf": 19,
@@ -138,16 +138,16 @@
     "hash": "72063b1d2bada57c"
   },
   "glow-record": {
-    "crf": 16,
-    "hash": "c8a085f6cc9d91a8"
+    "hash": "f436496318fec97a",
+    "crf": 16
   },
   "gooey-filter": {
     "crf": 16,
     "hash": "6164f67333ca7570"
   },
   "gradient-mesh-field": {
-    "crf": 16,
-    "hash": "1b6889a075c64164"
+    "hash": "592793362b42c729",
+    "crf": 16
   },
   "grain-field": {
     "crf": 25,
@@ -159,8 +159,8 @@
   },
   "grid-tile-flip": "3d14a6f0c0b503c8",
   "halftone-field": {
-    "crf": 19,
-    "hash": "56d26e3bcaf100d0"
+    "hash": "15e490e1b28a6a1b",
+    "crf": 19
   },
   "hand-drawn-notes": "695c4e34bd4ff383",
   "highlight-sweep": "0aa8f7c1e54ba3cc",
@@ -192,8 +192,8 @@
     "hash": "e7736fbc50f75a32"
   },
   "logo-wall": {
-    "crf": 19,
-    "hash": "3e872238a9a7f037"
+    "hash": "9a2d79ec88c348b8",
+    "crf": 19
   },
   "lower-third": "6c58bc4796a06fa9",
   "luma-matte-dissolve": {
@@ -215,8 +215,8 @@
   },
   "match-cut": "29629fca01cd16ca",
   "media-between-text": {
-    "crf": 16,
-    "hash": "0b6dfc9e4ab370ab"
+    "hash": "6c58a4698d4356c2",
+    "crf": 16
   },
   "model-picker": {
     "crf": 16,
@@ -268,8 +268,8 @@
   },
   "scale-punch": "ff7ee08696b8742b",
   "shadow-handoff": {
-    "crf": 16,
-    "hash": "e7f78b1011bac0cc"
+    "hash": "a6084b36c8b90e07",
+    "crf": 16
   },
   "shape-morph-wipe": "c4deb691d54050e5",
   "shape-trace-morph": "0ba8ebc18736a75f",
@@ -292,8 +292,8 @@
     "hash": "e5e4468fccbf805e"
   },
   "spin-rotation": {
-    "crf": 16,
-    "hash": "c94c0f9b5cf9f925"
+    "hash": "41054b660cc6e7e5",
+    "crf": 16
   },
   "spin-transition": "01e1497b95c0bf73",
   "split-reveal": {
@@ -329,8 +329,8 @@
   "thumbnail-grid": "f10b8a80f7ef8e9f",
   "ticker-takeover": "3aaa49c81c5f95c6",
   "toggle-horizon": {
-    "crf": 16,
-    "hash": "fb9754c83956e01c"
+    "hash": "3bc86c18111983c7",
+    "crf": 16
   },
   "tracking-collapse": "a8b14fb028f7100a",
   "type-fill-transition": "f8e6fe238d96d736",

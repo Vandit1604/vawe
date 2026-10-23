@@ -17,7 +17,7 @@
           -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%); }
   .lane { position: relative; height: calc(var(--u) * 17); border-bottom: 1px solid var(--line); overflow: hidden; }
   .row { position: absolute; left: calc(var(--u) * -300); top: 0; height: 100%; display: flex; width: max-content; }
-  .slot { flex: none; width: calc(var(--u) * 38); height: 100%; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 1.6); color: #86867f; }
+  .slot { flex: none; width: calc(var(--u) * 42); height: 100%; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 1.6); color: #86867f; }
   .slot .logo-mark { width: calc(var(--u) * 5.8); height: calc(var(--u) * 5.8); }
 </style>
 </head>
@@ -35,7 +35,7 @@ import { mark, wordmark } from '/prompts/moves/demo/assets/logos.js';
 const land = easeFn('landSoft');
 const H = innerHeight, u = H / 100;
 // invented brands from the shared set, all in one grey at one optical size; a wide or mono face sets smaller
-const brands = [['northwind', 1], ['halcyon', 1.08], ['fernbank', 0.66], ['kestrel', 0.88], ['orbital', 1], ['lumen', 1], ['quarry', 1], ['tidewell', 1.08], ['parcel', 0.82], ['mosaic', 1], ['ardent', 1], ['vantage', 1]];
+const brands = [['northwind', 1], ['halcyon', 1.08], ['fernbank', 0.84], ['kestrel', 0.88], ['orbital', 1], ['lumen', 1], ['quarry', 1], ['tidewell', 1.08], ['parcel', 0.9], ['mosaic', 1], ['ardent', 1], ['vantage', 1]];
 const slot = ([name, size]) => `<div class="slot">${mark(name)}${wordmark(name).replace('style="', `style="font-size:${(u * 5.2 * size).toFixed(1)}px;`)}</div>`;
 const wall = document.getElementById('wall');
 const rows = [0, 1, 2].map((r) => {

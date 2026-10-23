@@ -20,7 +20,7 @@
        animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
   @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
 </style>
-<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.0"], "_why": {"text-unreadable-hold": "the copy holds 2.4 s after its last word lands at 2.2 s in a 5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the copy leaves at 4.6 s, 0.4 s before the 5 s end, so it holds 2.4 s, short of the 5.4 s the check asks", "world-held@0.0-5.0": "one title holds 5.0 s: the bands flow the whole clip, the terracotta band widens from 1.6 to 2.6 s and the copy leaves at 4.6 s"}}</script>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "world-held@0.0-5.0"], "_why": {"text-unreadable-hold": "the copy holds 2.4 s after its last word lands at 2.2 s in a 5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the copy leaves at 4.6 s, 0.4 s before the 5 s end, so it holds 2.4 s, short of the 5.4 s the check asks", "world-held@0.0-5.0": "one title holds 5.0 s: the bands flow the whole clip, the darker sand band widens from 1.6 to 2.6 s and the copy leaves at 4.6 s"}}</script>
 </head>
 <body>
 <canvas id="bands"></canvas>
@@ -51,7 +51,7 @@ const LAYERS = [   // top to bottom: base height, amplitude, waves across the fr
   { y: 0.10, a: 0.045, f: 1.0, p: 0.0, w: 1.1, c: '#eee6d6' },
   { y: 0.25, a: 0.050, f: 1.3, p: 1.7, w: 1.4, c: '#e4d8c1' },
   { y: 0.40, a: 0.045, f: 0.9, p: 3.1, w: 1.0, c: '#d6c4a6' },
-  { y: 0.52, a: 0.040, f: 1.2, p: 4.4, w: 1.3, c: '#b5532a', from: 0.62 },   // the one accent layer, a thin band that appears only on the right
+  { y: 0.52, a: 0.040, f: 1.2, p: 4.4, w: 1.3, c: '#a8855a' },   // the one darker sand band, thin, that widens once
   { y: 0.58, a: 0.040, f: 1.1, p: 5.6, w: 1.2, c: '#c4ab84' },
 ];
 const TILT = 0.2, THIN = 0.025, WIDE = 0.075, WIDEN_AT = 1.6, land = easeFn('land');
@@ -59,9 +59,8 @@ const clamp = (v) => Math.min(1, Math.max(0, v));
 const edge = (L, x, t, extra) => H * (L.y + extra + (x / W - 0.5) * TILT + L.a * Math.sin(2 * Math.PI * L.f * x / W + L.p + L.w * t));
 function fill(L, t, extra, bottomOf) {
   const g = ctx.createLinearGradient(0, 0, W, 0);   // flat ground on the left under the copy, full colour on the right
-  const s0 = L.from ?? 0.5, [r, gr, b] = hex(L.c), rgba = (a) => `rgba(${r},${gr},${b},${a})`;
-  if (L.from) { g.addColorStop(0, rgba(0)); g.addColorStop(s0, rgba(0)); g.addColorStop(s0 + (1 - s0) * 0.55, rgba(0.75)); g.addColorStop(1, rgba(1)); }   // the accent fades in as transparency, so it never paints ground over the layer under it
-  else { g.addColorStop(0, ground); g.addColorStop(s0, mix(ground, L.c, 0.2)); g.addColorStop(s0 + (1 - s0) * 0.55, mix(ground, L.c, 0.75)); g.addColorStop(1, L.c); }
+  const s0 = 0.5;
+  g.addColorStop(0, ground); g.addColorStop(s0, mix(ground, L.c, 0.2)); g.addColorStop(s0 + (1 - s0) * 0.55, mix(ground, L.c, 0.75)); g.addColorStop(1, L.c);
   ctx.beginPath(); ctx.moveTo(0, H);
   for (let x = 0; x <= W; x += 8) ctx.lineTo(x, edge(L, x, t, extra));
   ctx.lineTo(W, H); ctx.closePath();
