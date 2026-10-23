@@ -4,11 +4,11 @@
 The line stays one line and the picture opens inside it. Clip: [media-between-text.mp4](media-between-text.mp4). Demo:
 [demo/media-between-text.html](demo/media-between-text.html).
 
-Look: one line of light grotesque type, large, on warm bone paper. A rounded photo, 18 u tall (taller than the cap
+Look: one line of light grotesque type, large, on warm bone paper. A rounded photo, 28 u tall (2.8 times the type size of 10 u, so taller than the cap
 height), sits between two parentheses. A small dark pointer shows the cause: the picture opens while the pointer is over
 the line and closes when it leaves.
 
-How it moves: on enter the photo width goes from 0 to 22 u on a critically damped spring (stiffness 532.6, damping 46.15,
+How it moves: on enter the photo width goes from 0 to 34 u on a critically damped spring (stiffness 532.6, damping 46.15,
 no bounce, about 0.4 s). On leave it closes in 0.3 s on `EASE.land`. The text on both sides re-centres with it, so the line
 never wraps. The pointer travels between stops on `EASE.land`. The clip hovers twice.
 

@@ -9,9 +9,9 @@
 <style>
   body { display: block; position: relative; }
   .stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-  .line { display: flex; align-items: center; justify-content: center; font: 300 calc(var(--u) * 12.8)/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); white-space: pre; }
-  #media { width: 0; height: calc(var(--u) * 18); overflow: hidden; margin: 0 calc(var(--u) * 1); border-radius: calc(var(--u) * 1.2); }
-  #media img { display: block; width: calc(var(--u) * 22); height: 100%; object-fit: cover; object-position: 30% 55%; }
+  .line { display: flex; align-items: center; justify-content: center; font: 300 calc(var(--u) * 10)/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); white-space: pre; }
+  #media { width: 0; height: calc(var(--u) * 28); overflow: hidden; margin: 0 calc(var(--u) * 1); border-radius: calc(var(--u) * 1.2); }
+  #media img { display: block; width: calc(var(--u) * 34); height: 100%; object-fit: cover; object-position: 30% 55%; }
   .ptr { position: absolute; inset: 0; }
   .cur { position: absolute; left: 0; top: 0; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); overflow: visible; }
   .cur path { fill: var(--ink); stroke: var(--surface); stroke-width: 1.4; stroke-linejoin: round; }
@@ -31,7 +31,7 @@ const CLOSE_S = 0.3;
 const HOVERS = [[0.55, 1.95], [2.8, 3.75]];                // [second the pointer enters the line, second it leaves]
 const land = easeFn('land');
 const media = document.getElementById('media'), cur = document.getElementById('cur');
-const H = innerHeight, W = innerWidth, WIDTH = 22 * H / 100;
+const H = innerHeight, W = innerWidth, WIDTH = 34 * H / 100;
 // the pointer: [second, x, y] in shares of the frame; it eases between stops
 const PATH = [[0.1, 0.9, 0.82], [0.55, 0.52, 0.56], [1.95, 0.52, 0.56], [2.3, 0.64, 0.8], [2.45, 0.64, 0.8], [2.8, 0.5, 0.56], [3.75, 0.5, 0.56], [4.1, 0.9, 0.84]];
 const pointer = (t) => {
