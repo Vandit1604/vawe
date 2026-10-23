@@ -64,10 +64,13 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import { typeTimes, typedCount } from '/prompts/moves/demo/assets/stage.js';
+import { springDuration, springLinear } from '/core/motion/springs.js';
 const $ = (id) => document.getElementById(id);
 const H = innerHeight, u = H / 100;
-const T_TAP = 1000, T_PRESENT = 1150, D_PRESENT = 520, T_TYPE = 2200, T_CANCEL = 3800, T_DISMISS = 3900, D_DISMISS = 440;
-const IOS = 'cubic-bezier(0.32, 0.72, 0, 1)';                          // the system sheet curve: fast out, no overshoot
+const T_TAP = 1000, T_PRESENT = 1150, T_TYPE = 2200, T_CANCEL = 3800, T_DISMISS = 3900;
+// The system sheet moves on a critically damped spring: no overshoot, settled in 0.52 s up and 0.44 s down.
+const PRESENT = { k: 313, d: 35.4 }, DISMISS = { k: 437, d: 41.8 };
+const D_PRESENT = springDuration(PRESENT.k, PRESENT.d) * 1000;
 
 // touch points (a finger on a screen recording): the plus, then Cancel inside the open sheet
 const rect = (id) => $(id).getBoundingClientRect(), sheetFinal = { x: 0.18 * innerWidth, y: 7 * u };
@@ -82,15 +85,15 @@ const tap = (p, at) => {
 tap(plus, T_TAP); tap(cancel, T_CANCEL);
 
 // present: the sheet rises from the bottom edge; the page behind scales back, rounds its corners and dims, on one curve
-const rise = (from, to, delay, duration, fill) => ({ keys: [from, to], opt: { duration, delay, easing: IOS, fill } });
+const rise = (from, to, delay, { k, d }, fill) => ({ keys: [from, to], opt: { duration: springDuration(k, d) * 1000, delay, easing: springLinear(k, d), fill } });
 const run = (el, a) => el.animate(a.keys, a.opt);
-run($('sheet'), rise({ translate: `0 ${H}px` }, { translate: '0 0' }, T_PRESENT, D_PRESENT, 'both'));
-run($('sheet'), rise({ translate: '0 0' }, { translate: `0 ${H}px` }, T_DISMISS, D_DISMISS, 'forwards'));
+run($('sheet'), rise({ translate: `0 ${H}px` }, { translate: '0 0' }, T_PRESENT, PRESENT, 'both'));
+run($('sheet'), rise({ translate: '0 0' }, { translate: `0 ${H}px` }, T_DISMISS, DISMISS, 'forwards'));
 const back = { scale: 0.94, translate: `0 ${1.6 * u}px`, borderRadius: `${2.4 * u}px` }, front = { scale: 1, translate: '0 0', borderRadius: '0px' };
-run($('page'), rise(front, back, T_PRESENT, D_PRESENT, 'both'));
-run($('page'), rise(back, front, T_DISMISS, D_DISMISS, 'forwards'));
-run($('dim'), rise({ opacity: 0 }, { opacity: 0.3 }, T_PRESENT, D_PRESENT, 'both'));
-run($('dim'), rise({ opacity: 0.3 }, { opacity: 0 }, T_DISMISS, D_DISMISS, 'forwards'));
+run($('page'), rise(front, back, T_PRESENT, PRESENT, 'both'));
+run($('page'), rise(back, front, T_DISMISS, DISMISS, 'forwards'));
+run($('dim'), rise({ opacity: 0 }, { opacity: 0.3 }, T_PRESENT, PRESENT, 'both'));
+run($('dim'), rise({ opacity: 0.3 }, { opacity: 0 }, T_DISMISS, DISMISS, 'forwards'));
 
 // the name field is focused: the text types one character at a time and the caret blinks every 0.5 s
 const name = 'launch-4x5', times = typeTimes(name, T_TYPE);
