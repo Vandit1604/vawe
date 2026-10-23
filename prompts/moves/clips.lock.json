@@ -186,9 +186,15 @@
     "crf": 19
   },
   "push-blur": "86861c8174474541",
-  "rack-focus": "32c423f2923a413b",
+  "rack-focus": {
+    "hash": "74ee438f6331fb82",
+    "crf": 19
+  },
   "scale-punch": "ff7ee08696b8742b",
-  "shadow-handoff": "3564c4504a16d14a",
+  "shadow-handoff": {
+    "hash": "ab0b6cdc1851787b",
+    "crf": 16
+  },
   "shape-morph-wipe": "c4deb691d54050e5",
   "shape-trace-morph": "0ba8ebc18736a75f",
   "simple-marquee": {
