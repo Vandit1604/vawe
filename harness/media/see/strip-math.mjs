@@ -47,6 +47,20 @@ export function worldCuts(spans) {
 /** The cuts of a reference from its measured shots [{ start }]: one at the start of each shot after the first. Pure. */
 export const shotCuts = (shots) => shots.slice(1).map((s, i) => ({ at: round(s.start), from: `shot ${i + 1}`, to: `shot ${i + 2}` }));
 
+const REACH_S = 0.5;
+
+/**
+ * Each cut with the shot change it sits in: { ...cut, start, end, kind }. `transitions` are [{ startT, endT, type }] (harness/media/see/transitions.mjs
+ * for a video, the measured cuts of spec.json for a reference). The change nearest to the cut within REACH_S wins; a cut with none starts and ends at `at`. Pure.
+ */
+export function withTransitions(cuts, transitions) {
+  const gap = (t, at) => Math.max(t.startT - at, at - t.endT, 0);
+  return cuts.map((c) => {
+    const near = transitions.filter((t) => gap(t, c.at) <= REACH_S).sort((a, b) => gap(a, c.at) - gap(b, c.at))[0];
+    return near ? { ...c, start: near.startT, end: near.endT, kind: near.type } : { ...c, start: c.at, end: c.at, kind: null };
+  });
+}
+
 /**
  * What the energy series (one { t, v } per 0.1 s) says about the motion inside [from, to): where it starts, peaks and settles, and how many
  * separate bursts it has. Motion is energy above `floor` and above a tenth of the window's peak. A dip of under 0.2 s does not split a burst,
@@ -115,6 +129,19 @@ export function holdBefore(energy, at, floor, since = 0) {
   return { holdS: round(end - (moving ? moving.t + SAMPLE_S : start)), whole: !moving };
 }
 
+/** holdBefore for each cut of withTransitions: measured to the first changing frame of the cut, from the end of the cut before. Pure. */
+export const cutHolds = (energy, cuts, floor) => cuts.map((c, i) => holdBefore(energy, c.start, floor, i ? cuts[i - 1].end : 0));
+
+const DISSOLVES = new Set(['crossfade', 'dip']);
+
+/** The line on how the picture changes at one cut (from withTransitions), or null for a hard cut or a cut with no shot change found. Pure. */
+export function transitionLine(c) {
+  const span = round(c.end - c.start);
+  if (!c.kind || c.kind === 'cut' || c.kind === 'match') return null;
+  if (DISSOLVES.has(c.kind)) return `a dissolve of ${span.toFixed(2)} s, from ${c.start.toFixed(2)} s (${c.kind}); the hold stops where it starts`;
+  return `a transition of ${span.toFixed(2)} s, from ${c.start.toFixed(2)} s (${c.kind}); the hold stops where it starts`;
+}
+
 export const PAUSE_S = 0.3;
 // holdBefore over the shot cuts of the 22 reference films in ~/.vawe/refs (harness/dev/pause-bar.mjs prints it again).
 const REF_PAUSES = 'the shot cuts of 22 reference films: 5 films never pause, the median film pauses before 2 cuts in 10';
@@ -130,6 +157,6 @@ export function holdLine(h) {
 export function holdsSummary(holds) {
   const measured = holds.filter(Boolean);
   const paused = measured.filter((h) => h.holdS >= PAUSE_S).length;
-  return [`pauses: ${paused} of ${measured.length} measured cuts hold ${PAUSE_S} s or more under the motion floor (a slow fade or dissolve counts as still)`,
+  return [`pauses: ${paused} of ${measured.length} measured cuts hold ${PAUSE_S} s or more under the motion floor before the first changing frame of the cut (a dissolve is not a hold)`,
     `for comparison, ${REF_PAUSES}`];
 }

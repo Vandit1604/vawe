@@ -1,10 +1,17 @@
 import fs from 'node:fs';
-import { refsDir, refSharpVideo, refShots } from '../../lib/refs.mjs';
+import { refsDir, refSharpVideo, refShots, refTransitions } from '../../lib/refs.mjs';
 import { die } from './core.mjs';
-import { filmNameOf, shotCuts, worldCuts } from './strip-math.mjs';
+import { filmNameOf, shotCuts, withTransitions, worldCuts } from './strip-math.mjs';
+import { videoTransitions } from './transitions.mjs';
 
-/** { video, name, cuts } of an input: a page (its last draft), an mp4, or a reference id. `cuts()` returns the world changes or shots; it dies naming the command to run when they are not measured. */
+/** { video, name, cuts, holdCuts } of an input: a page (its last draft), an mp4, or a reference id. `cuts()` returns the world changes or shots; it dies naming the command to run when they are not measured. `holdCuts()` returns them with the start and end of the shot change each sits in (withTransitions). */
 export async function resolveInput(input) {
+  const found = await locate(input);
+  const transitions = () => (found.refId ? refTransitions(refsDir(), found.refId) : videoTransitions(found.video));
+  return { ...found, holdCuts: async () => withTransitions(await found.cuts(), transitions()) };
+}
+
+async function locate(input) {
   if (input.endsWith('.html')) {
     if (!fs.existsSync(input)) die(`no such page: ${input}`);
     const { defaultOut } = await import('../render-page.mjs');
@@ -18,7 +25,7 @@ export async function resolveInput(input) {
   }
   const video = refSharpVideo(refsDir(), input);
   if (!video) die(`${input} is not a file, a page or a reference film id (bin/vawe refs list)`);
-  return { video, name: input, cuts: () => refCuts(input) };
+  return { video, name: input, refId: input, cuts: () => refCuts(input) };
 }
 
 async function filmCuts(name, page) {

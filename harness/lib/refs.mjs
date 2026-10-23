@@ -192,6 +192,9 @@ const readSpec = (dir, id) => {
 /** The measured shots of film `id` as [{ start, end }] from spec/<id>/spec.json; empty before `vawe see --spec` ran. */
 export const refShots = (dir, id) => (readSpec(dir, id).shots ?? []).map((s) => ({ start: s.t0, end: s.t1 }));
 
+/** The shot changes of film `id` from spec/<id>/spec.json as [{ startT, endT, type, frames }], the shape of harness/media/see/transitions.mjs. */
+export const refTransitions = (dir, id) => (readSpec(dir, id).cuts ?? []).map((c) => ({ startT: c.transition.startT, endT: c.t, type: c.transition.type, frames: c.transition.frames }));
+
 /** The ground block (per shot and per cut) of film `id` from spec/<id>/spec.json, or null before `vawe see --spec` ran. */
 export const refGround = (dir, id) => readSpec(dir, id).ground ?? null;
 
