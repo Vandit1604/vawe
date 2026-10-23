@@ -1,44 +1,53 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="terminal">
+<html data-aspect="16:9" data-look="product" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2">
+<meta name="duration" content="4.5">
+<meta name="blank" content="1.35-1.45">
 <title>move: exposure flash</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   body { margin: 0; }
-  .root { position: fixed; inset: 0; background: #02030a; overflow: hidden; }
+  .root { position: fixed; inset: 0; background: #000; overflow: hidden; }
   #host { position: absolute; inset: 0; }
-  .shot { position: absolute; inset: 0; display: grid; align-content: center; justify-items: start; gap: var(--s3); padding: 0 var(--margin); visibility: hidden; }
+  .shot { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
   .shot[data-on] { visibility: visible; }
-  .num { font: 800 calc(var(--u) * 36) / 0.9 var(--mono); letter-spacing: -0.04em; }
-  .tag { font: 700 calc(var(--u) * 5) / 1 var(--mono); letter-spacing: 0.04em; }
-  #s0 { background: #08104a; color: #cfd8ff; }
-  #s1 { background: #0b2a14; color: #d8ffd0; }
-  #s2 { background: #2a0a2e; color: #ffd0f4; }
+  .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .cap { position: absolute; left: calc(var(--u) * 5); bottom: calc(var(--u) * 5); color: #fff; font: 600 calc(var(--u) * 4.4)/1 var(--sans); letter-spacing: -0.02em; text-shadow: 0 1px 12px rgb(0 0 0 / 0.45); }
+  .cap small { display: block; margin-top: calc(var(--u) * 1.2); font: 500 calc(var(--u) * 3)/1 var(--sans); opacity: 0.85; }
+  .tc { position: absolute; right: calc(var(--u) * 5); bottom: calc(var(--u) * 5); color: #fff; font: 500 calc(var(--u) * 3.2)/1 var(--mono); text-shadow: 0 1px 12px rgb(0 0 0 / 0.45); }
   #white { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
 </style>
+<script type="application/json" id="authoring">{"allow": ["static-window@3.3-4.5", "world-held@0.0-4.5", "text-unreadable-hold", "text-moves-before-hold"], "_why": {"static-window@3.3-4.5": "the last shot at 4.0 s: a photo with a 1.2 s slow push held after the second cut, and the timecode ticks every frame", "world-held@0.0-4.5": "a film cut: three shots of 1.4, 1.5 and 1.6 s, each with its own slow push, so no world holds for the whole clip", "text-unreadable-hold": "each caption holds 1.4 to 1.6 s, the length of its shot, and the check asks 5.4 s", "text-moves-before-hold": "the caption changes with the shot at each cut: a film cut, not a hold"}}</script>
 </head>
 <body>
 <div class="root">
   <div id="host">
-    <div class="shot" id="s0"><div class="tag">TRK 0631</div><div class="num">631</div></div>
-    <div class="shot" id="s1"><div class="tag">LOCK 494</div><div class="num">494</div></div>
-    <div class="shot" id="s2"><div class="tag">SIGNAL</div><div class="num">HELD</div></div>
+    <div class="shot" id="s0"><img src="/prompts/moves/demo/assets/photos/harbour.jpg" alt=""><div class="cap">Harbour<small>06:12</small></div></div>
+    <div class="shot" id="s1"><img src="/prompts/moves/demo/assets/photos/ridge.jpg" alt=""><div class="cap">Ridge<small>09:40</small></div></div>
+    <div class="shot" id="s2"><img src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""><div class="cap">Loft<small>13:05</small></div></div>
+    <div class="tc" id="tc">00:00:00:00</div>
   </div>
   <div id="white"></div>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import { EASE } from '/core/motion/presets.js';
 import { flashAt } from '/core/motion/exposure.js';
-const CUTS = [0.7, 1.3];   // 0.6 s apart: well under the three-flashes-a-second limit
+const CUTS = [1.4, 2.9];   // 1.5 s apart: well under the three-flashes-a-second limit
 const shots = [...document.querySelectorAll('.shot')];
-const host = document.getElementById('host'), white = document.getElementById('white');
+const host = document.getElementById('host'), white = document.getElementById('white'), tc = document.getElementById('tc');
+// each shot pushes in slowly until its cut, so the last frame before a flash is not a still
+[[0, 1400], [1400, 1500], [2900, 1600]].forEach(([at, len], i) => {
+  shots[i].querySelector('img').animate([{ scale: 1 }, { scale: 1.06 }], { duration: len + 100, delay: at, easing: EASE.glide, fill: 'both' });
+});
 vawe.onFrame((t) => {
   const { white: w, brightness, shot } = flashAt(t, CUTS);
   shots.forEach((s, i) => s.toggleAttribute('data-on', i === shot));
   host.style.filter = brightness === 1 ? 'none' : `brightness(${brightness.toFixed(3)})`;
   white.style.opacity = w.toFixed(3);
+  const f = Math.floor(t * 24);
+  tc.textContent = `00:00:${String(Math.floor(f / 24)).padStart(2, '0')}:${String(f % 24).padStart(2, '0')}`;
 });
 </script>
 </body>
