@@ -11,7 +11,7 @@ import { VERBS, stripChromeNoise, commitsBehind, staleNote } from '../harness/cl
 import { newFilm, newFilmLines, readDetails, questionsJson } from '../harness/cli/new.mjs';
 import { appendRun, readAllRuns, filmKeyOf } from '../harness/lib/runlog.mjs';
 import { pageDigest } from '../harness/lib/approval.mjs';
-import { verbEvent, footerLine, filmOfCall, imagesIn, reasonOf, readNotes } from '../harness/lib/verb-log.mjs';
+import { verbEvent, footerLine, filmOfCall, imagesIn, reasonOf, readNotes, causeOf } from '../harness/lib/verb-log.mjs';
 import { namedRef, refsDir } from '../harness/lib/refs.mjs';
 import { nextStep } from '../harness/live/stage-say.mjs';
 import { recentFailedShipLines } from '../harness/lib/ship-status.mjs';
@@ -151,6 +151,10 @@ async function main(argv) {
     if (code !== 0) reason = reasonOf({ code, signal: call.signal, stderr: call.stderr });
     const fix = code !== 0 && verb.fix ? verb.fix(reason, call.positional) : null;
     if (fix) console.error(`fix: ${fix}`);
+    if (code !== 0 && causeOf(reason) === 'browser lost') {
+      const { browserLog } = await import('../harness/media/preview-server.mjs');
+      console.error(`why the browser was lost: Chrome's own log, ${browserLog(true)} (a draft: ${browserLog(false)})`);
+    }
   } catch (e) {
     code = e instanceof UsageError ? 2 : 1;
     reason = e instanceof UsageError ? e.message : `exit 1: ${e.message}`;

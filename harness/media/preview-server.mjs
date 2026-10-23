@@ -18,6 +18,15 @@ import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, pageArgs, P
 const SELF = fileURLToPath(import.meta.url);
 // One daemon per checkout and capture mode (a draft and a final need different browser flags): a shared state file made a worktree render pages from another checkout's root.
 export const stateFile = (final) => scratch('preview-server', `${createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10)}${final ? '' : '-draft'}.json`);
+/** Chrome's own output and its disconnects, for a verb that lost the browser. */
+export const browserLog = (final) => stateFile(final).replace(/\.json$/, '.log');
+const LOG_MAX_BYTES = 2 * 1024 * 1024;
+
+function openBrowserLog(final) {
+  const file = browserLog(final);
+  const big = fs.existsSync(file) && fs.statSync(file).size > LOG_MAX_BYTES;
+  return fs.openSync(file, big ? 'w' : 'a');
+}
 const idleMs = () => Number(process.env.VAWE_PREVIEW_IDLE_MS) || 10 * 60 * 1000;
 const checkEveryMs = () => Math.min(30000, idleMs() / 3);
 
@@ -56,7 +65,9 @@ function waitForState(final, timeoutMs) {
 async function connectShared(final) {
   let state = readState(final);
   if (!state || !pidAlive(state.pid)) {
-    try { spawn(process.execPath, [SELF, '--daemon', ...(final ? [] : ['--draft'])], { detached: true, stdio: 'ignore' }).unref(); }
+    try { const log = openBrowserLog(final);
+      spawn(process.execPath, [SELF, '--daemon', ...(final ? [] : ['--draft'])], { detached: true, stdio: ['ignore', log, log] }).unref();
+      fs.closeSync(log); }
     catch { return null; }
     state = await waitForState(final, 5000);
     if (!state) return null;
@@ -151,7 +162,8 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
 async function daemonMain(final) {
   const { default: puppeteer } = await import('puppeteer');
   const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT });
-  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(final), protocolTimeout: PROTOCOL_TIMEOUT_MS }));
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(final), protocolTimeout: PROTOCOL_TIMEOUT_MS, dumpio: true }));
+  browser.on('disconnected', () => console.error(`${new Date().toISOString()} chrome disconnected (pid ${browser.process()?.pid ?? '?'})`));
   fs.writeFileSync(stateFile(final), JSON.stringify({ pid: process.pid, port, wsEndpoint: browser.wsEndpoint() }));
 
   const shutdown = async () => {
