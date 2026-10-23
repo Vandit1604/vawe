@@ -37,7 +37,10 @@
   "caption-editorial": "8c33b06b8a9bc540",
   "caption-karaoke": "09479dc9a731b495",
   "card-assemble": "7afcdc2bd423ab9a",
-  "caret-door": "8c0a5dd7412b38c2",
+  "caret-door": {
+    "hash": "7ea0f58247022be2",
+    "crf": 16
+  },
   "caret-follow": "3d1cefff47fe2cb6",
   "caret-typing": {
     "hash": "3625441590553b87",
