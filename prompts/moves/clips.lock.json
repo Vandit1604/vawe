@@ -74,7 +74,10 @@
   "cta-morph-press": "20ab535ec0db79e8",
   "cta-pop": "0b7874ee1eda7a8c",
   "cursor-click": "e09100c2c66b4407",
-  "cursor-spotlight": "667a96cd1c8084e4",
+  "cursor-spotlight": {
+    "hash": "65f1b80eff4ab6b5",
+    "crf": 16
+  },
   "cut-on-motion": "774b6457e35614e2",
   "device-tilt-stage": "127cf2196cb5e86d",
   "diff-card": {
