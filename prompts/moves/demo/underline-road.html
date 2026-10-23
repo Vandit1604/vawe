@@ -26,15 +26,17 @@
 <body>
 <svg id="map" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
 <div class="box dirs" id="dirs" data-chrome>
-  <div class="r"><i class="o"></i><span>14 Cedar Avenue</span></div>
+  <div class="r"><i class="o"></i><span>22 Mill Lane</span></div>
   <div class="r"><svg viewBox="0 0 24 32"><path d="M12 1C6 1 1.5 5.4 1.5 11c0 7.5 10.5 20 10.5 20s10.5-12.500 10.500-20C22.500 5.400 18 1 12 1z" fill="#ea4335"/><circle cx="12" cy="11" r="4" fill="#fff"/></svg><span>Linden Cafe</span></div>
 </div>
 <div class="box eta" id="eta"><div class="big">14<span>min</span></div><div class="sub"><b>3.2 km</b> via Pine Street, fastest route</div></div>
 <script type="module">
 import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
 import { arrive } from '/prompts/moves/demo/assets/stage.js';
 const NS = 'http://www.w3.org/2000/svg', map = document.getElementById('map');
-const clamp = (x) => Math.min(1, Math.max(0, x)), inOut = (x) => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2);
+const clamp = (x) => Math.min(1, Math.max(0, x));
+const settle = easeFn('settle'), land = easeFn('land');
 const add = (parent, tag, attrs, text) => { const e = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); if (text) e.textContent = text; parent.appendChild(e); return e; };
 
 // the street grid (viewBox units): the route runs on street centres
@@ -66,10 +68,10 @@ roads.forEach((r) => add(map, 'path', { d: r.d, fill: 'none', stroke: r.major ? 
 roads.forEach((r) => add(map, 'path', { d: r.d, fill: 'none', stroke: r.major ? '#fde293' : '#fff', 'stroke-width': r.major ? 34 : 22 }));
 // names
 const label = (text, x, y, rot = 0, size = 26, fill = '#5f6368') => add(map, 'text', { x, y, 'font-size': size, 'font-weight': 500, fill, 'text-anchor': 'middle', transform: `rotate(${rot} ${x} ${y})`, dy: '0.35em' }, text);
-label('Cedar Avenue', 760, HY[0]); label('Oak Street', 1290, HY[1]); label('Pine Street', 1280, HY[2], 0, 24); label('Mill Lane', 1050, HY[3]);
+label('Cedar Avenue', 760, HY[0]); label('Oak Street', 1290, HY[1]); label('Pine Street', 1280, HY[2], 0, 24); label('Mill Lane', 790, HY[3]);
 label('Cedar Avenue', 260, HY[0]); label('Oak Street', 520, HY[1]); label('Mill Lane', 250, HY[3]);
 label('3rd Street', VX[0], 520, -90); label('Elm Street', VX[1], 220, -90); label('Market Street', VX[2], 220, -90, 24);
-label('4th Street', VX[3], 600, -90); label('Willow Avenue', VX[4], 620, -90); label('Harbor Road', VX[5], 300, -90, 24);
+label('4th Street', VX[3], 600, -90); label('Willow Avenue', VX[4], 430, -90); label('Harbor Road', VX[5], 300, -90, 24);
 label('Linden Park', 1040, 420, 0, 26, "#188038"); label('Mill River', 560, 862, 0, 26, "#5b8fc9");
 
 // the route: origin dot, up Elm Street, along Pine Street, up 4th Street, along Oak Street to the cafe
@@ -96,14 +98,14 @@ add(body, 'circle', { cx: 0, cy: -58, r: 11, fill: '#fff' });
 const T_ORIGIN = 0.7, T_GO = 1.0, D_GO = 1.9, T_PIN = T_GO + D_GO, T_CARD = T_PIN + 0.3;
 arrive(document.getElementById('dirs'), 250, { ms: 220, from: '0.8vh' });
 vawe.onFrame((t) => {
-  const s = total * inOut(clamp((t - T_GO) / D_GO));
+  const s = total * settle(clamp((t - T_GO) / D_GO));
   [casing, line].forEach((p) => { p.style.strokeDashoffset = String(total - s); p.style.visibility = s < 1 ? 'hidden' : 'visible'; });
   origin.style.opacity = String(t < T_ORIGIN ? 0 : 1);
   halo.style.opacity = String(t < T_ORIGIN ? 0 : 0.28 * (1 - ((t - T_ORIGIN) % 1.6) / 1.6));
   halo.setAttribute('r', String(15 + 25 * (((t - T_ORIGIN) % 1.6) / 1.6)));
   const up = clamp((t - T_PIN) / 0.25);
   pin.style.opacity = String(up > 0 ? 1 : 0);
-  body.setAttribute('transform', `translate(0 ${-30 * (1 - up) ** 2})`);
+  body.setAttribute('transform', `translate(0 ${-30 * (1 - land(up))})`);
   pin.style.opacity = String(Math.min(1, up * 3));
 });
 arrive(document.getElementById('eta'), T_CARD * 1000, { ms: 220, from: '0.8vh' });
