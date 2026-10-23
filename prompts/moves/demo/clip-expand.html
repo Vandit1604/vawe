@@ -1,40 +1,129 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="dusk">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1">
+<meta name="duration" content="5.5">
 <title>move: clip expand from a point</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --x: 22%; --y: 74%; }
-  body { position: relative; display: block; }
-
-  .thumb { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; display: grid; place-items: center; width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%; background: var(--accent); }
-  .thumb .icon { width: calc(var(--u) * 5); height: calc(var(--u) * 5); margin-left: 0.5%; fill: var(--on-accent); stroke: var(--on-accent); stroke-width: 1.5; }
-
-  .panel { position: absolute; inset: 0; display: grid; align-content: center; justify-items: start; gap: var(--s3); padding-left: 14vw; background: var(--raised);
-           clip-path: circle(0% at var(--x) var(--y));
-           animation-name: expand; animation-duration: 0.8s; animation-delay: 0.15s;
-           animation-timing-function: var(--settle); animation-fill-mode: both; }
-  .panel .pill { background: var(--ground); font-size: var(--t-body); padding: calc(var(--u) * 1.2) calc(var(--u) * 2.4); }
-  .panel h1 { margin: 0; font: 700 calc(var(--u) * 12)/1.04 var(--sans); letter-spacing: -0.04em; }
-  .panel p { margin: 0; max-width: 38vw; font: 500 var(--t-lead)/1.25 var(--sans); color: var(--muted); text-wrap: balance; }
-  .panel .still { position: absolute; right: 7vw; top: 50%; translate: 0 -50%; width: 34vw; height: calc(var(--u) * 58); box-shadow: var(--shadow-hero); }
-  .panel .still span { position: absolute; left: var(--s3); bottom: var(--s3); padding: calc(var(--u) * 1) calc(var(--u) * 1.8); border-radius: 999px; background: rgba(8, 5, 22, 0.72); font: 600 var(--t-small)/1 var(--mono); color: #fff; }
-  @keyframes expand { to { clip-path: circle(140% at var(--x) var(--y)); } }
+  body { display: block; position: relative; }
+  #wrap, .pl { position: absolute; inset: 0; }
+  .cs { position: absolute; inset: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 2); padding: calc(var(--u) * 2.8) calc(var(--u) * 4.4); background: var(--raised); }
+  .cs-h { display: flex; align-items: baseline; gap: calc(var(--u) * 2); }
+  .cs-h b { font: 600 calc(var(--u) * 3.6)/1 var(--sans); letter-spacing: -0.02em; }
+  .cs-h span { font: 500 calc(var(--u) * 2.5)/1 var(--sans); color: var(--muted); }
+  .cs-main { display: grid; grid-template-columns: 52fr 48fr; gap: calc(var(--u) * 3); align-items: center; padding: calc(var(--u) * 2.4); border-radius: calc(var(--u) * 1.6); background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+  .thumb { position: relative; aspect-ratio: 16 / 9; border-radius: calc(var(--u) * 1.2); overflow: hidden; background: #000; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dot { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%; background: rgb(255 255 255 / 0.92); box-shadow: 0 calc(var(--u) * 0.6) calc(var(--u) * 2) rgb(0 0 0 / 0.25); }
+  .dot svg { width: 42%; height: 42%; margin-left: 8%; fill: #0d0d0d; }
+  .thumb .len { position: absolute; right: calc(var(--u) * 1.2); bottom: calc(var(--u) * 1.2); padding: calc(var(--u) * 0.6) calc(var(--u) * 1.1); border-radius: calc(var(--u) * 0.6); background: rgb(0 0 0 / 0.75); color: #fff; font: 500 calc(var(--u) * 2.2)/1 var(--sans); }
+  .cs-t small { font: 500 calc(var(--u) * 2.4)/1 var(--sans); color: var(--muted); }
+  .cs-t h2 { margin: calc(var(--u) * 1.2) 0 calc(var(--u) * 1.6); font: 600 calc(var(--u) * 5.2)/1.08 var(--sans); letter-spacing: -0.03em; }
+  .cs-t p { margin: 0; font: 400 calc(var(--u) * 2.5)/1.35 var(--sans); color: var(--muted); }
+  .cs-list { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 2.2); }
+  .li { display: flex; align-items: center; gap: calc(var(--u) * 2); padding: calc(var(--u) * 1.2); border-radius: calc(var(--u) * 1.4); background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+  .li .th { flex: none; width: calc(var(--u) * 12.4); aspect-ratio: 16 / 9; border-radius: calc(var(--u) * 0.9); overflow: hidden; }
+  .li .th img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .li b { display: block; font: 600 calc(var(--u) * 2.9)/1.1 var(--sans); }
+  .li span { display: block; margin-top: calc(var(--u) * 0.9); font: 500 calc(var(--u) * 2.3)/1 var(--sans); color: var(--muted); }
+  .pl { background: #000; clip-path: circle(0px at 50% 50%); }
+  .pl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pl .top, .pl .bot { position: absolute; left: 0; right: 0; color: #fff; }
+  .pl .top { top: 0; padding: calc(var(--u) * 4) calc(var(--u) * 4.6) calc(var(--u) * 9); background: linear-gradient(rgb(0 0 0 / 0.6), transparent); }
+  .pl .top b { display: block; font: 600 calc(var(--u) * 5)/1.1 var(--sans); letter-spacing: -0.02em; }
+  .pl .top span { display: block; margin-top: calc(var(--u) * 1.2); font: 500 calc(var(--u) * 2.8)/1 var(--sans); color: rgb(255 255 255 / 0.8); }
+  .pl .bot { bottom: 0; padding: calc(var(--u) * 10) calc(var(--u) * 4.6) calc(var(--u) * 3.6); background: linear-gradient(transparent, rgb(0 0 0 / 0.7)); }
+  .trk { position: relative; display: flex; gap: calc(var(--u) * 0.4); height: calc(var(--u) * 0.9); }
+  .trk i { position: relative; flex: 1; border-radius: 99px; background: rgb(255 255 255 / 0.3); overflow: hidden; }
+  .trk i:first-child { flex: 14; } .trk i:nth-child(2) { flex: 20; } .trk i:nth-child(3) { flex: 16; } .trk i:nth-child(4) { flex: 12; }
+  .trk i b { position: absolute; inset: 0; background: #fff; transform-origin: 0 50%; transform: scaleX(0); }
+  .trk .kn { position: absolute; top: 50%; width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); margin: calc(var(--u) * -1.1) 0 0 calc(var(--u) * -1.1); border-radius: 50%; background: #fff; }
+  .ctl { display: flex; align-items: center; gap: calc(var(--u) * 3); margin-top: calc(var(--u) * 2.4); font: 500 calc(var(--u) * 3)/1 var(--sans); }
+  .ctl svg { width: calc(var(--u) * 4.2); height: calc(var(--u) * 4.2); fill: #fff; }
+  .ctl .sp { flex: 1; }
+  .cur { position: absolute; left: 0; top: 0; z-index: 10; }
+  .cur svg { display: block; width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); overflow: visible; transform-origin: 0 0; }
+  .cur path { fill: var(--cursor); stroke: var(--cursor-edge); stroke-width: 1.4; stroke-linejoin: round; }
 </style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.4-5.1", "world-held@0.0-5.5"], "_why": {"text-unreadable-hold": "the player holds 2.2 s after the circle covers the frame at 2.9 s in a 5.5 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the player leaves at 5.1 s, 0.4 s before the 5.5 s end, so the player holds 2.2 s, short of the 5.4 s the check asks", "static-window@3.4-5.1": "player at 4.2 s: a paused-looking frame of a playing video holds the picture and only the scrubber and the time move", "world-held@0.0-5.5": "one lesson page then one player: the click opens it at 1.9 s, the circle grows to 2.9 s and the player leaves at 5.1 s"}}</script>
 </head>
 <body>
-<div class="thumb"><svg class="icon" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg></div>
-<div class="panel">
-  <span class="pill">Chapter 2 of 5</span>
-  <h1>From brief<br>to first cut</h1>
-  <p>Six stills, one draft, 41 seconds to render.</p>
-  <div class="still"><img class="photo" src="/prompts/moves/demo/assets/photos/harbour.jpg"><span>00:14 / 01:02</span></div>
+<div id="wrap">
+  <div class="win" id="win">
+    <div class="strip" data-chrome><span class="lights"><i></i><i></i><i></i></span>
+      <span class="tab"><i class="fav"></i><span>Make a film with vawe</span><svg class="icon x" data-i="x"></svg></span>
+      <svg class="icon newtab" data-i="plus"></svg></div>
+    <div class="bar" data-chrome><svg class="icon" data-i="back"></svg><svg class="icon" data-i="fwd"></svg><svg class="icon" data-i="reload"></svg>
+      <span class="omni"><svg class="icon" data-i="lock"></svg><span>learn.vawe.dev/course/make-a-film</span></span><i class="avatar-dot"></i><svg class="icon" data-i="dots-v"></svg></div>
+    <div class="page"><div class="cs">
+      <div class="cs-h"><b>Make a film with vawe</b><span>5 chapters, 1 h 12 min</span></div>
+      <div class="cs-main">
+        <div class="thumb"><img src="/prompts/moves/demo/assets/photos/harbour.jpg" alt=""><div class="dot" id="dot"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></svg></div><span class="len">1:02</span></div>
+        <div class="cs-t"><small>Chapter 2 of 5</small><h2>From brief to first cut</h2><p>Six stills, one draft, 41 seconds to render.</p></div>
+      </div>
+      <div class="cs-list">
+        <div class="li"><div class="th"><img src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""></div><div><b>Write the brief</b><span>Chapter 1, watched</span></div></div>
+        <div class="li"><div class="th"><img src="/prompts/moves/demo/assets/photos/ridge.jpg" alt=""></div><div><b>Draft and critique</b><span>Chapter 3, 11 min</span></div></div>
+        <div class="li"><div class="th"><img src="/prompts/moves/demo/assets/photos/desk.jpg" alt=""></div><div><b>Fix the weak seconds</b><span>Chapter 4, 12 min</span></div></div>
+        <div class="li"><div class="th"><img src="/prompts/moves/demo/assets/photos/shore.jpg" alt=""></div><div><b>Ship the film</b><span>Chapter 5, 9 min</span></div></div>
+      </div>
+    </div></div>
+  </div>
+  <div class="pl" id="pl"><img src="/prompts/moves/demo/assets/photos/harbour.jpg" alt="">
+    <div class="top" id="top"><b>From brief to first cut</b><span>Chapter 2 of 5</span></div>
+    <div class="bot" id="bot"><div class="trk" id="trk"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><span class="kn" id="kn"></span></div>
+      <div class="ctl"><svg viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg><svg viewBox="0 0 24 24"><path d="M4 9.5h4l5-4v13l-5-4H4z"/></svg><span id="tc">0:14 / 1:02</span><span class="sp"></span><span>CC</span><svg viewBox="0 0 24 24"><path d="M5 5h6v2H7v4H5zM13 5h6v6h-2V7h-4zM5 13h2v4h4v2H5zM17 13h2v6h-6v-2h4z"/></svg></div>
+    </div>
+  </div>
 </div>
+<div class="cur" id="cur"><svg id="arrow" viewBox="0 0 24 24"><path transform="translate(-2 -2)" d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
 <script type="module">
-import { EASE } from '/core/motion/presets.js';
-document.documentElement.style.setProperty('--settle', EASE.land);
+import '/core/engine/page-api.js';
+import { easeFn, EASE } from '/core/motion/presets.js';
+import { leave, arrive } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const ICONS = {
+  x: '<path d="M6 6l12 12M18 6L6 18"/>', plus: '<path d="M12 5v14M5 12h14"/>', back: '<path d="M19 12H5M11 6l-6 6 6 6"/>', fwd: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  reload: '<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/>', 'dots-v': '<path d="M12 5v.01M12 12v.01M12 19v.01"/>', lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+};
+for (const el of all('[data-i]')) { el.setAttribute('viewBox', '0 0 24 24'); el.innerHTML = ICONS[el.dataset.i]; }
+
+const W = innerWidth, H = innerHeight, u = H / 100, END = 5500;
+const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, r, k) => p + (r - p) * k;
+const land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch');
+const T = { travel: [0.7, 1.6], press: 1.9, grow: 2.0, growMs: 900, ui: 2.7, leave: 2.9 };
+
+arrive(q('#win'), 100, { ms: 220, from: '0.8vh' });
+
+// the point: the middle of the play dot, measured with the 0.8 vh rise of the arrival taken out
+const d = q('#dot').getBoundingClientRect();
+const P = { x: d.left + d.width / 2, y: d.top + d.height / 2 - 0.008 * H };
+const FAR = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(P.x - x, P.y - y)));
+q('#pl').animate([{ clipPath: `circle(${0.9 * u}px at ${P.x}px ${P.y}px)` }, { clipPath: `circle(${FAR + 2 * u}px at ${P.x}px ${P.y}px)` }], { duration: T.growMs, delay: T.grow * 1000, easing: EASE.settle, fill: 'both' });
+arrive(q('#top'), T.ui * 1000, { ms: 220, from: '0' });
+arrive(q('#bot'), T.ui * 1000, { ms: 220, from: '0' });
+
+const FROM = { x: 0.86 * W, y: 0.92 * H };
+const secs = [14, 20, 16, 12];   // chapter lengths in the scrubber, in seconds of the 62 s video
+vawe.onFrame((t) => {
+  const tr = clamp((t - T.travel[0]) / (T.travel[1] - T.travel[0]));
+  const x = lerp(FROM.x, P.x + 1.2 * u, land(tr)), y = lerp(FROM.y, P.y + 1.2 * u, land(tr));
+  const away = clamp((t - T.leave) / 0.25);
+  const cur = q('#cur');
+  cur.style.transform = `translate(${x}px, ${y}px)`;
+  cur.style.opacity = (1 - launch(away)).toFixed(3);
+  const dip = Math.sin(Math.PI * clamp((t - T.press) / 0.22));
+  q('#arrow').style.transform = `scale(${1 - 0.14 * dip})`;
+  q('#dot').style.scale = String(1 + 0.06 * land(clamp((t - T.travel[1] + 0.2) / 0.2)) - 0.1 * dip);
+  const play = 14 + Math.max(0, t - T.ui);   // the video plays from 0:14
+  q('#tc').textContent = `0:${String(Math.floor(play)).padStart(2, '0')} / 1:02`;
+  let left = play;
+  const total = 62, trk = q('#trk').getBoundingClientRect();
+  all('.trk i b').forEach((b, i) => { const f = clamp(left / secs[i]); b.style.transform = `scaleX(${f})`; left -= secs[i]; });
+  q('#kn').style.left = `${play / total * 100 * 1.0}%`;
+});
+leave(q('#wrap'), END);
 </script>
 </body>
 </html>

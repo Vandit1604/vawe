@@ -1,34 +1,63 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="terminal">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1">
+<meta name="duration" content="5">
 <title>move: caret typing</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<link rel="stylesheet" href="/prompts/moves/demo/assets/terminal.css">
 <style>
-  .line { display: flex; align-items: center; gap: 0.6em; font: 500 calc(var(--u) * 12)/1 var(--mono); letter-spacing: -0.02em; }
-  .prompt { color: var(--muted); }
-
-  /* the caret is the next flex item, so it moves with every character the text reveals */
-  .type { display: inline-flex; align-items: center; }
-  .text { overflow: hidden; white-space: nowrap; width: 0;
-          animation-name: type; animation-duration: 0.5s; animation-delay: 0.05s;
-          animation-timing-function: steps(9, end); animation-fill-mode: both; }
-  .caret { position: relative; width: 0.08em; height: 1em; margin-left: 0.06em; background: var(--accent);
-           animation-name: spread, drop; animation-duration: 0.35s, 0.16s; animation-delay: 0.6s, 0.6s;
-           animation-timing-function: var(--settle), var(--settle); animation-fill-mode: both, both; }
-  @keyframes type { to { width: 9ch; } }
-  /* the caret becomes the rule under the word: no new element enters, the one on screen changes job */
-  /* the drop is shorter than the spread: the bar is a thin rule below the baseline before it widens, so it never crosses the letters */
-  @keyframes drop { to { height: 0.12em; top: 0.64em; } }
-  @keyframes spread { to { width: 9ch; translate: calc(-9ch - 0.06em) 0; } }
+  .win.term .tbody { padding-top: calc(var(--u) * 2.6); font-size: calc(var(--u) * 4.2); line-height: 1.5; }
+  .sh .ln { display: flex; white-space: pre; }
+  .sh .ps { color: var(--muted); }
+  .sh .out { color: var(--muted); }
+  .sh .ok { color: var(--ok); }
+  .blk { display: inline-block; flex: none; width: 0.6em; height: 1.2em; margin-top: 0.15em; background: var(--ink); }
 </style>
+<script type="application/json" id="authoring">{"allow":["text-unreadable-hold","text-moves-before-hold","static-window@1.3-4.6","world-held@0.0-5.0","tile-run@0.2-4.6"],"_why":{"text-unreadable-hold":"the shell session holds 1.3 s after its last line at 3.3 s in a 5 s clip, and the check asks 5.4 s","text-moves-before-hold":"the window leaves at 4.6 s, 0.4 s before the 5 s end, so the finished session holds 1.3 s, short of the 5.4 s the check asks","static-window@1.3-4.6":"terminal at 3.6 s: a shell holds still between commands and only the caret blinks every 0.5 s; the output rows print at 2.1, 2.4 and 3.2 s","world-held@0.0-5.0":"one shell session holds 5.0 s: the command types from 0.7 s, the output prints from 2.1 s and the window leaves at 4.6 s","tile-run@0.2-4.6":"23 near-identical tiles at 2.6 s and 3.6 s: a terminal changes by whole text rows, each under 4% of the frame, and no row slides or fades"}}</script>
 </head>
 <body>
-<div class="line"><span class="prompt">$</span><div class="type"><span class="text">vawe ship</span><span class="caret"></span></div></div>
+<div class="win term">
+  <div class="tbar" data-chrome><span class="lights"><i></i><i></i><i></i></span><span class="ttl"><span>films: zsh</span></span></div>
+  <div class="tbody sh">
+    <div class="ln"><span class="ps">films % </span><span>ls</span></div>
+    <div class="ln out"><span>brief.md  kit  page.html</span></div>
+    <div class="ln"><span class="ps">films % </span><span>vawe frames launch</span></div>
+    <div class="ln out"><span>wrote 3 frames to out/launch</span></div>
+    <div class="ln" id="now"><span class="ps">films % </span><span id="typed"></span><i class="blk" id="c1"></i></div>
+    <div class="ln out" id="r1"><span>build 16:9  </span><span class="ok">done</span><span>  12.1 s</span></div>
+    <div class="ln out" id="r2"><span>build 9:16  </span><span class="ok">done</span><span>  11.8 s</span></div>
+    <div class="ln out" id="r3"><span>14 checks  </span><span class="ok">passed</span></div>
+    <div class="ln" id="next"><span class="ps">films % </span><i class="blk" id="c2"></i></div>
+  </div>
+</div>
 <script type="module">
-import { EASE } from '/core/motion/presets.js';
-document.documentElement.style.setProperty('--settle', EASE.land);
+import '/core/engine/page-api.js';
+import { leave, arrive, show, typeTimes, typedCount } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s);
+const END = 5000, TYPE_AT = 700, ENTER_AT = 1900, PROMPT = 'vawe ship launch', BLINK = 500;
+
+arrive(q('.win'), 100, { ms: 220, from: '0.8vh' });
+
+const times = typeTimes(PROMPT, TYPE_AT);
+const lastKey = times[times.length - 1];
+const typed = q('#typed'), c1 = q('#c1'), c2 = q('#c2');
+const NEXT_AT = 3300;
+// a caret stays solid for half a second after a key, then blinks; Enter hands it to the next prompt line
+const lit = (ms, since) => ms - since < BLINK || Math.floor((ms - since) / BLINK) % 2 === 0;
+vawe.onFrame((s) => {
+  const ms = s * 1000;
+  typed.textContent = PROMPT.slice(0, typedCount(times, ms));
+  const since = ms < ENTER_AT ? Math.max(times.filter((t) => t <= ms).pop() ?? 0, 0) : NEXT_AT;
+  c1.style.visibility = ms < ENTER_AT && lit(ms, since) ? 'visible' : 'hidden';
+  c2.style.visibility = ms >= NEXT_AT && lit(ms, since) ? 'visible' : 'hidden';
+});
+
+show(q('#r1'), ENTER_AT + 200);
+show(q('#r2'), ENTER_AT + 520);
+show(q('#r3'), ENTER_AT + 1300);
+show(q('#next'), NEXT_AT);
+leave(q('.win'), END);
 </script>
 </body>
 </html>

@@ -1,86 +1,83 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="daylight">
+<html data-aspect="16:9" data-look="product" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="3.2">
+<meta name="duration" content="6">
 <title>move: agent progress</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<link rel="stylesheet" href="/prompts/moves/demo/assets/terminal.css">
 <style>
-  :root { --done: #0d7a4a; }
-  .run { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: calc(var(--u) * 96); padding: 0; overflow: hidden; }
-  .top { display: flex; align-items: center; gap: var(--s3); height: calc(var(--u) * 14); padding: 0 var(--s4); }
-  .spin { width: calc(var(--u) * 6); height: calc(var(--u) * 6); color: var(--accent); flex: none; }
-  .spin .track { stroke: var(--dot); }
-  .status { position: relative; flex: 1; height: var(--t-lead); font: 600 var(--t-lead)/1 var(--sans); letter-spacing: -0.02em; }
-  .status span { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; }
-  .count { font: 500 var(--t-small)/1 var(--mono); color: var(--muted); position: relative; width: calc(var(--u) * 14); height: var(--t-small); }
-  .count span { position: absolute; right: 0; top: 0; opacity: 0; }
-  .bar { height: calc(var(--u) * 0.7); background: var(--dot); }
-  .bar i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0.04); }
-  ul { list-style: none; margin: 0; padding: var(--s2) var(--s3) var(--s3); }
-  .row { display: flex; align-items: center; gap: var(--s3); height: calc(var(--u) * 12.5); padding: 0 var(--s2); border-radius: var(--r-chip); }
-  .badge { position: relative; flex: none; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); }
-  .badge > * { position: absolute; inset: 0; }
-  .num { display: grid; place-items: center; border-radius: 50%; box-shadow: inset 0 0 0 calc(var(--u) * 0.35) var(--faint); font: 600 var(--t-small)/1 var(--mono); color: var(--muted); }
-  .live .num { box-shadow: none; }
-  .done { border-radius: 50%; background: var(--done); display: grid; place-items: center; opacity: 0; scale: 0.4; color: #fff; }
-  .done svg { width: 62%; height: 62%; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
-  .arc { width: 100%; height: 100%; fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
-  .arc .track { stroke: var(--dot); }
-  .live .num { font-size: calc(var(--u) * 3); }
-  .lab { position: relative; font: 600 var(--t-body)/1 var(--sans); letter-spacing: -0.015em; }
-  .lab i { position: absolute; left: 0; right: 0; top: 54%; height: calc(var(--u) * 0.35); background: var(--muted); transform-origin: 0 50%; transform: scaleX(0); }
-  .meta { margin-left: auto; font: 500 var(--t-small)/1 var(--mono); color: var(--muted); font-style: normal; }
+  .win.term .tbody { font-size: calc(var(--u) * 3.5); }
+  .win.term .foot { font-size: calc(var(--u) * 2.3); }
+  .win.term .welcome { margin-bottom: calc(var(--u) * 0.6); }
+  .todo .res { flex-direction: column; gap: 0; padding-left: calc(var(--u) * 0.4); }
+  .todo .res::before { display: none; }
+  .todo .rows { display: grid; margin-left: calc(var(--u) * 2.2); }
+  .todo .row { display: flex; align-items: center; gap: calc(var(--u) * 1.4); color: var(--ink); }
+  .todo .row .slot { margin-left: 0; }
+  .todo .row .slot > span { display: flex; align-items: center; gap: calc(var(--u) * 1.4); }
+  .todo .a { font-weight: 600; }
+  .todo .d { color: var(--muted); text-decoration: line-through; }
+  .bx { flex: none; width: 0.8em; height: 0.8em; border: 0.12em solid currentColor; border-radius: 0.12em; }
+  .bx.x { background: linear-gradient(45deg, transparent 44%, currentColor 44% 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, currentColor 44% 56%, transparent 56%); }
+  .todo .lead { gap: calc(var(--u) * 1); }
+  .todo .tl { display: flex; align-items: center; gap: calc(var(--u) * 1); }
+  .live .verb { display: inline-grid; }
+  .live .verb > * { grid-area: 1 / 1; white-space: nowrap; }
 </style>
+<script type="application/json" id="authoring">{"allow": ["text-unreadable-hold", "text-moves-before-hold", "static-window@3.5-5.6", "world-held@0.0-6.0", "tile-run@0.7-5.6"], "_why": {"text-unreadable-hold": "the list holds 2.3 s after the last check at 3.3 s in a 6 s clip, and the check asks 5.4 s", "text-moves-before-hold": "the window leaves at 5.6 s, 0.4 s before the 6 s end, so the unfinished list holds 2.3 s, short of the 5.4 s the check asks", "static-window@3.5-5.6": "terminal at 4.5 s: the fourth item stays open as the agent still works, and the spinner star turns every 0.12 s and the token count ticks", "world-held@0.0-6.0": "one agent session holds 6.0 s: the list prints at 0.7 s, an item closes at 1.7, 2.5 and 3.3 s and the window leaves at 5.6 s", "tile-run@0.7-5.6": "near-identical tiles at 4.5 s: a terminal changes by whole text rows, each under 4% of the frame, and no row slides or fades"}}</script>
 </head>
 <body>
-<div class="run card">
-  <div class="top">
-    <svg class="spin icon bold" viewBox="0 0 24 24"><circle class="track" cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
-    <div class="status"><span>Reading the repo</span><span>Running the tests</span><span>Writing the fix</span></div>
-    <div class="count"><span>0 of 4</span><span>1 of 4</span><span>2 of 4</span><span>3 of 4</span></div>
+<div class="win term">
+  <div class="tbar" data-chrome><span class="lights"><i></i><i></i><i></i></span><span class="ttl"><span>Fix queue reader</span></span></div>
+  <div class="tbody">
+    <div class="log">
+      <div class="welcome" data-chrome><div class="hd"><svg class="star" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></svg><b>Agent</b><span class="sub">· ~/code/queue</span></div></div>
+      <div class="you"><span class="gt" data-chrome>❯</span><span>Fix the failing queue test.</span></div>
+      <div class="step todo" id="todo">
+        <div class="hd"><i class="dot" style="background:var(--ink)"></i><b>Update Todos</b></div>
+        <div class="res"><div class="rows">
+          <div class="row" data-n="0"><span class="slot"><span class="o"><i class="bx"></i>Read the failing test</span><span class="a"><i class="bx"></i>Read the failing test</span><span class="d"><i class="bx x"></i>Read the failing test</span></span></div>
+          <div class="row" data-n="1"><span class="slot"><span class="o"><i class="bx"></i>Trace the null cursor</span><span class="a"><i class="bx"></i>Trace the null cursor</span><span class="d"><i class="bx x"></i>Trace the null cursor</span></span></div>
+          <div class="row" data-n="2"><span class="slot"><span class="o"><i class="bx"></i>Patch the queue reader</span><span class="a"><i class="bx"></i>Patch the queue reader</span><span class="d"><i class="bx x"></i>Patch the queue reader</span></span></div>
+          <div class="row" data-n="3"><span class="slot"><span class="o"><i class="bx"></i>Run the full suite</span><span class="a"><i class="bx"></i>Run the full suite</span><span class="d"><i class="bx x"></i>Run the full suite</span></span></div>
+        </div></div>
+      </div>
+      <div class="step bash"><div class="hd"><i class="dot"></i><span><b>Bash</b>(pnpm vitest run queue)</span></div><div class="res"><span>Running…</span></div></div>
+    </div>
+    <div class="live" data-chrome><svg class="spin" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></svg><span class="verb"><span>Reading the test…</span><span>Tracing the cursor…</span><span>Patching the reader…</span><span>Running the suite…</span></span><span class="meta"></span></div>
+    <div class="box"><span class="gt" data-chrome>❯</span><span class="field"><i class="cur"></i></span></div>
+    <div class="foot" data-chrome><span class="mode">accept edits on</span><span>(shift+tab to cycle)</span><span class="esc">· esc to interrupt</span></div>
   </div>
-  <div class="bar"><i></i></div>
-  <ul>
-    <li class="row"><span class="badge"><b class="num">1</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Read the failing test<i></i></span><em class="meta">3 files</em></li>
-    <li class="row"><span class="badge"><b class="num">2</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Trace the null cursor<i></i></span><em class="meta">14 files</em></li>
-    <li class="row"><span class="badge"><b class="num">3</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Patch the queue reader<i></i></span><em class="meta">2 edits</em></li>
-    <li class="row live"><span class="badge"><b class="num">4</b><svg class="arc" viewBox="0 0 24 24"><circle class="track" cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 1-9 9"/></svg></span><span class="lab">Run the full suite</span><em class="meta">312 tests</em></li>
-  </ul>
 </div>
 <script type="module">
-import { EASE } from '/core/motion/presets.js';
-const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
-const opt = { fill: 'both' };
-const at = { card: 80, rows: 420, checks: [1250, 1800, 2350], swaps: [420, 1250, 2000] };   // ms
+import '/core/engine/page-api.js';
+import { leave, arrive, show, runDot } from '/prompts/moves/demo/assets/stage.js';
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const END = 6000, LIST_AT = 700, DONE = [1700, 2500, 3300], BASH_AT = 3500, SPIN_MS = 120;
+const STARTS = [LIST_AT, ...DONE];   // item n is active from STARTS[n]; items 0 to 2 close at DONE[n], item 3 stays open
 
-q('.run').animate([{ translate: '-50% -46%', scale: 0.94, opacity: 0 }, { opacity: 1, offset: 0.3 }, { translate: '-50% -50%', scale: 1, opacity: 1 }], { duration: 560, delay: at.card, easing: EASE.pop, ...opt });
-qa('.row').forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: EASE.landSoft, ...opt }));
+arrive(q('.win'), 100, { ms: 220, from: '0.8vh' });
 
-// the machine works: both arcs turn for the whole clip and the bar advances with each check
-q('.spin').animate([{ rotate: '0deg' }, { rotate: '900deg' }], { duration: 3200, easing: 'linear', ...opt });
-q('.badge .arc').animate([{ rotate: '0deg' }, { rotate: '1080deg' }], { duration: 3200, easing: 'linear', ...opt });
-const steps = [0.04, 0.3, 0.55, 0.78];
-at.checks.forEach((k, i) => q('.bar i').animate([{ transform: `scaleX(${steps[i]})` }, { transform: `scaleX(${steps[i + 1]})` }], { duration: 420, delay: k, easing: EASE.land, fill: 'forwards' }));
-
-// a slot swaps whole states: the old one leaves in 120 ms, the new one rises in 260 ms
-const slot = (els, times) => els.forEach((el, i) => {
-  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: times[i], easing: EASE.landSoft, ...opt });
-  if (times[i + 1] !== undefined) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 160, delay: times[i + 1] - 160, easing: EASE.launch, fill: 'forwards' });
+show(q('.todo'), LIST_AT);
+all('.row').forEach((row, n) => {
+  const [o, a, d] = row.querySelectorAll('.slot > span');
+  show(o, null, STARTS[n]);
+  show(a, STARTS[n], DONE[n]);
+  if (DONE[n]) show(d, DONE[n]); else d.remove();
 });
-slot(qa('.status span'), at.swaps);
-slot(qa('.count span'), [at.rows, ...at.checks]);
+all('.verb > span').forEach((v, n) => show(v, n ? STARTS[n] : null, STARTS[n + 1]));
+show(q('.live'), LIST_AT);
+show(q('.esc'), LIST_AT);
+show(q('.bash'), BASH_AT);
+runDot(q('.bash .dot'), BASH_AT, END);
 
-// a check lands: the numbered outline flips to a solid circle, the tick draws, the label strikes and dims
-at.checks.forEach((k, i) => {
-  const row = qa('.row')[i], done = row.querySelector('.done'), lab = row.querySelector('.lab');
-  row.querySelector('.num').animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 160, delay: k, easing: EASE.launch, fill: 'forwards' });
-  done.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: EASE.pop, fill: 'forwards' });
-  done.querySelector('path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: EASE.landSoft, fill: 'forwards' });
-  lab.querySelector('i').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: EASE.landSoft, fill: 'forwards' });
-  lab.animate([{ color: 'var(--ink)' }, { color: 'var(--muted)' }], { duration: 300, delay: k + 60, easing: 'linear', fill: 'forwards' });
-});
-q('.row.live').animate([{ background: 'transparent' }, { background: 'var(--raised)' }], { duration: 240, delay: at.checks[2], easing: EASE.landSoft, ...opt });
+const count = (n) => (n < 1000 ? `${n}` : `${(n / 1000).toFixed(1)}k`);
+vawe.onFrame((s) => {
+  const ms = s * 1000, run = Math.max(0, ms - LIST_AT);
+  q('.spin').style.rotate = `${Math.floor(run / SPIN_MS) * 30}deg`;
+  q('.meta').textContent = `(${Math.floor(run / 1000)}s · ↓ ${count(Math.floor(run * 0.63 / 40) * 40)} tokens)`;});
+leave(q('.win'), END);
 </script>
 </body>
 </html>

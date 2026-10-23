@@ -1,45 +1,52 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="dusk">
+<html data-aspect="16:9" data-look="editorial">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2">
+<meta name="duration" content="5">
 <title>move: calm lockup</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   body { position: relative; }
-  .light { position: absolute; width: calc(var(--u) * 90); height: calc(var(--u) * 90); border-radius: 50%; }
-  .l1 { left: 4vw; top: calc(var(--u) * -22); background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent); }
-  .l2 { right: -2vw; bottom: calc(var(--u) * -34); background: radial-gradient(closest-side, color-mix(in srgb, var(--ink) 7%, transparent), transparent); }
-  .grain { position: absolute; inset: 0; opacity: 0.05; mix-blend-mode: screen;
-           background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
-
-  .lockup { position: relative; display: grid; justify-items: start; gap: var(--s3); }
-  .brand { display: flex; align-items: center; gap: var(--s3); font: 800 calc(var(--u) * 15)/1 var(--sans); letter-spacing: -0.045em; }
-  .mark { --size: calc(var(--u) * 14); border-radius: 26%; }
-  .mark .icon { width: 100%; height: 100%; stroke: var(--on-accent); stroke-width: 7; }
-  .brand span { padding-bottom: 0.06em; }
-  .line { margin: 0; font: 500 var(--t-head)/1.2 var(--sans); color: var(--muted); letter-spacing: -0.015em; }
+  .key { position: absolute; inset: 0; background: radial-gradient(ellipse 75% 60% at 50% 0%, rgb(255 255 255 / 0.6), transparent 72%); }
+  .lockup { position: relative; display: grid; justify-items: center; gap: calc(var(--u) * 5); }
+  .brand { display: flex; align-items: center; gap: calc(var(--u) * 4.4); }
+  .tile { position: relative; overflow: hidden; display: grid; place-items: center; width: calc(var(--u) * 27); height: calc(var(--u) * 27); border-radius: calc(var(--u) * 6.4); background: var(--ink);
+          box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16), 0 calc(var(--u) * 0.4) calc(var(--u) * 0.7) rgb(42 37 32 / 0.1), 0 calc(var(--u) * 1.4) calc(var(--u) * 2.4) rgb(42 37 32 / 0.14), 0 calc(var(--u) * 4) calc(var(--u) * 7) rgb(42 37 32 / 0.12); }
+  .tile svg { width: 92%; height: 92%; fill: none; stroke: var(--ground); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+  .sheen { position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.2), transparent); transform: skewX(-18deg); }
+  .word { font: 300 calc(var(--u) * 26)/1 var(--sans); letter-spacing: -0.05em; padding-bottom: 0.06em; }
+  .line { margin: 0; font: 400 calc(var(--u) * 6.4)/1.2 var(--sans); color: var(--muted); letter-spacing: -0.015em; }
+  .rule { width: calc(var(--u) * 22); height: 1px; background: var(--ink); opacity: 0.35; transform-origin: 0 50%; }
 </style>
+<script type="application/json" id="authoring">{"allow": ["static-window@2.9-4.6", "world-held@0.0-5.0"], "_why": {"static-window@2.9-4.6": "end card at 3.8 s: a quiet end card holds still on purpose after its last move lands at 2.9 s; a sheen crosses the tile at 2.6 to 3.8 s", "world-held@0.0-5.0": "one end card holds 5.0 s: the brand settles from 0.1 s, the mark draws to 1.9 s, the sheen crosses to 3.8 s and the lockup leaves at 4.6 s"}}</script>
 </head>
 <body>
-<div class="light l1"></div><div class="light l2"></div>
-<div class="lockup">
-  <div class="brand"><div class="chip accent-fill mark"><svg class="icon" viewBox="0 0 100 100"><path d="M22 32 L36 70 L50 44 L64 70 L78 32"/></svg></div><span>vawe</span></div>
-  <p class="line">One page in. One film out.</p>
+<div class="key"></div>
+<div class="lockup" id="lockup">
+  <div class="brand" id="brand">
+    <div class="tile"><svg viewBox="0 0 100 100"><path id="mark" d="M22 32 L36 70 L50 44 L64 70 L78 32"/></svg><i class="sheen" id="sheen"></i></div>
+    <span class="word">vawe</span>
+  </div>
+  <p class="line" id="line">One page in. One film out.</p>
+  <i class="rule" id="rule"></i>
 </div>
-<div class="grain"></div>
 <script type="module">
 import { EASE } from '/core/motion/presets.js';
+import { leave } from '/prompts/moves/demo/assets/stage.js';
 const q = (s) => document.querySelector(s);
-// gravity band: 1 s to settle, 2.2vh of travel, blur clears as it lands; the line follows the brand by 140 ms
-[['.brand', 60], ['.line', 200]].forEach(([sel, at]) => {
+const END = 5000;
+// gravity band: 1 s to settle, 2.2vh of travel, the blur clears as it lands; the line follows the brand by 140 ms
+[['#brand', 100], ['#line', 240]].forEach(([sel, at]) => {
   q(sel).animate([{ translate: '0 2.2vh', filter: 'blur(8px)' }, { translate: '0 0', filter: 'blur(0px)' }], { duration: 1000, delay: at, easing: EASE.land, fill: 'both' });
-  q(sel).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay: at, easing: 'linear', fill: 'both' });
+  q(sel).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay: at, easing: EASE.land, fill: 'both' });
 });
-// the world never stops: two lights drift and the settled lockup floats, all linear and slow
-q('.l1').animate([{ translate: '0 0' }, { translate: '14vw 9vh' }], { duration: 2000, easing: EASE.glide, fill: 'both' });
-q('.l2').animate([{ translate: '0 0' }, { translate: '-12vw -8vh' }], { duration: 2000, easing: EASE.glide, fill: 'both' });
-q('.lockup').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2000, easing: EASE.glide, fill: 'both' });
+// the mark draws itself on the tile and the rule under the line draws with it; then one sheen crosses the tile
+const mark = q('#mark'); const len = mark.getTotalLength();
+mark.style.strokeDasharray = len;
+mark.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 900, delay: 1000, easing: EASE.land, fill: 'both' });
+q('#rule').animate([{ scale: '0 1', opacity: 0.35 }, { scale: '1 1', opacity: 0.35 }], { duration: 800, delay: 1300, easing: EASE.land, fill: 'both' });
+q('#sheen').animate([{ translate: '0 0' }, { translate: '420% 0' }], { duration: 1200, delay: 2600, easing: EASE.glide, fill: 'both' });
+leave(q('#lockup'), END);
 </script>
 </body>
 </html>
