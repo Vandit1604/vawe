@@ -4,6 +4,7 @@
 // edit the iframe reloads and seeks to the same time.
 import { seekTo } from '/core/engine/page-seek.js';
 import { SPRINGS, springLinear, springDuration } from '/core/motion/springs.js';
+import { h } from './dom.js';
 import { buildRows } from './page-model.js';
 import { easeOptions, easeNameOf, easeSource, easeHue, NAMED } from './page-eases.js';
 import { cssToHex, fmt, quoteLike, setVar, setText } from './page-edit.js';
@@ -13,18 +14,6 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const GUTTER = 176;
 
 const S = { data: null, rows: [], fps: 30, duration: 6, aspect: '16:9', t: 0, pps: 100, sel: null, units: {}, playing: false, win: null, dragging: false, busy: false };
-
-function h(tag, attrs = {}, ...kids) {
-  const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === 'class') el.className = v;
-    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
-    else if (v === true) el.setAttribute(k, '');
-    else if (v !== false && v != null) el.setAttribute(k, v);
-  }
-  el.append(...kids.flat().filter((c) => c != null));
-  return el;
-}
 
 function say(msg, bad = false) { const el = $('say'); el.textContent = msg; el.classList.toggle('bad', bad); }
 const api = async (url, body) => {

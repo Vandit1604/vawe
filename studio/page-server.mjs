@@ -26,7 +26,7 @@ const pageRel = path.relative(REPO_ROOT, pageFile).split(path.sep).join('/');
 if (pageRel.startsWith('..')) { console.error('the page must sit inside the repo'); process.exit(2); }
 const PORT = Number(process.env.PORT) || 8799;
 const UI = path.join(REPO_ROOT, 'studio/ui');
-const ASSETS = new Set(['page-studio.html', 'page-studio.css', 'page-studio.js', 'page-model.js', 'page-edit.js', 'page-eases.js']);
+const ASSETS = new Set(['page-studio.html', 'page-studio.css', 'page-studio.js', 'page-model.js', 'page-edit.js', 'page-eases.js', 'dom.js', 'page-ease-menu.js']);
 
 const undoStack = [];
 const send = (res, code, type, body) => { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' }); res.end(body); };
