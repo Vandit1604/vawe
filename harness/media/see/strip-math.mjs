@@ -145,8 +145,8 @@ export function transitionLine(c) {
 }
 
 export const PAUSE_S = 0.3;
-// holdBefore over the shot cuts of the 22 reference films in ~/.vawe/refs (harness/dev/pause-bar.mjs prints it again).
-const REF_PAUSES = 'the shot cuts of 22 reference films: 5 films never pause, the median film pauses before 2 cuts in 10';
+// cutHolds over the shot cuts of the 22 reference films in ~/.vawe/refs, measured to the start of each shot change (harness/dev/pause-bar.mjs prints it again).
+const REF_PAUSES = 'the shot cuts of 22 reference films: 3 films never pause, the median film pauses before 3 cuts in 10';
 
 /** One line on the hold before one cut (`h` from holdBefore). Pure. */
 export function holdLine(h) {
