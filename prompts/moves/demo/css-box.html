@@ -12,17 +12,21 @@
   html[data-theme="dark"] { --paint: #3d63e0; }
   body { display: block; }
   .stage { position: absolute; inset: 0; perspective: calc(var(--u) * 300); }
-  .rig { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translateY(calc(var(--u) * 1)) rotateX(-17deg); }
+  .rig { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translateY(calc(var(--u) * -8)) rotateX(-17deg); }
   .spin { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; transform: rotateY(calc(var(--yaw) * 1deg)); }
-  .face { position: absolute; left: calc(var(--cube) / -2); top: calc(var(--cube) / -2); width: var(--cube); height: var(--cube); backface-visibility: hidden; background: var(--paint); color: var(--ink-face); padding: calc(var(--u) * 4.4); display: flex; flex-direction: column; justify-content: flex-end; box-shadow: inset 0 0 0 calc(var(--u) * 0.16) rgba(255, 255, 255, 0.34); }
-  .face b { font: 700 calc(var(--u) * 10)/0.98 var(--head); letter-spacing: -0.035em; }
-  .face span { margin-top: calc(var(--u) * 1.6); font: 500 calc(var(--u) * 2.9)/1.15 var(--mono); opacity: 0.82; }
+  .face { position: absolute; left: calc(var(--cube) / -2); top: calc(var(--cube) / -2); width: var(--cube); height: var(--cube); backface-visibility: hidden; background: linear-gradient(155deg, color-mix(in srgb, var(--paint) 84%, #fff) 0%, var(--paint) 46%, color-mix(in srgb, var(--paint) 80%, #000) 100%); color: var(--ink-face); padding: calc(var(--u) * 4.4); display: flex; flex-direction: column; justify-content: flex-end; box-shadow: inset 0 0 0 calc(var(--u) * 0.14) rgba(255, 255, 255, 0.26), inset calc(var(--u) * 0.2) calc(var(--u) * 0.2) 0 rgba(255, 255, 255, 0.3); }
+  .face b { font: 700 calc(var(--u) * 12.5)/0.98 var(--head); letter-spacing: -0.035em; }
+  .face span { margin-top: calc(var(--u) * 1.8); font: 500 calc(var(--u) * 3.1)/1.15 var(--mono); opacity: 0.82; }
   .face i { position: absolute; inset: 0; z-index: -1; background: #000; opacity: 0; pointer-events: none; }
   .f0 { transform: translateZ(calc(var(--cube) / 2)); }
   .f1 { transform: rotateY(90deg) translateZ(calc(var(--cube) / 2)); }
   .f2 { transform: rotateY(180deg) translateZ(calc(var(--cube) / 2)); }
   .f3 { transform: rotateY(-90deg) translateZ(calc(var(--cube) / 2)); }
   .f4 { transform: rotateX(90deg) translateZ(calc(var(--cube) / 2)); }
+  .mirror { transform: translateY(var(--cube)) scaleY(-1) rotateY(calc(var(--yaw) * 1deg)); }
+  .mirror .face { backface-visibility: visible; opacity: 0.13; box-shadow: none; mask-image: linear-gradient(to bottom, transparent 15%, #000 100%); }
+  .mirror .face b, .mirror .face span, .mirror .face i, .mirror .f4, .mirror .floor { display: none; }
+  html[data-theme="dark"] .mirror .face { opacity: 0.2; }
   .floor { position: absolute; left: calc(var(--cube) * -0.9); top: calc(var(--cube) * -0.9); width: calc(var(--cube) * 1.8); height: calc(var(--cube) * 1.8); transform: rotateX(90deg) translateZ(calc(var(--cube) / -2 - var(--u) * 0.1)); background: radial-gradient(closest-side, rgba(0, 0, 0, 0.55) 0, rgba(0, 0, 0, 0.5) 56%, rgba(0, 0, 0, 0.2) 74%, transparent 100%); }
   html[data-theme="dark"] .floor { background: radial-gradient(closest-side, rgba(0, 0, 0, 0.85) 0, rgba(0, 0, 0, 0.8) 56%, rgba(0, 0, 0, 0.35) 74%, transparent 100%); }
 </style>
@@ -50,11 +54,16 @@ const len = Math.hypot(...LIGHT), L = LIGHT.map((c) => c / len);
 const rad = (d) => (d * Math.PI) / 180;
 const spin = document.getElementById('spin');
 const shades = [...document.querySelectorAll('.face i')];
+const mirror = spin.cloneNode(true);
+mirror.removeAttribute('id');
+mirror.classList.add('mirror');
+spin.after(mirror);
 
 // the block turns on a stiff spring and stops without a bounce; each face is darker as its normal turns from the light
 vawe.onFrame((t) => {
   const yaw = REST + track(t, YAW, STIFFNESS, DAMPING);
   spin.style.setProperty('--yaw', yaw.toFixed(3));
+  mirror.style.setProperty('--yaw', yaw.toFixed(3));
   const cy = Math.cos(rad(yaw)), sy = Math.sin(rad(yaw)), cp = Math.cos(rad(PITCH)), sp = Math.sin(rad(PITCH));
   NORMALS.forEach(([x, y, z], i) => {
     const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
