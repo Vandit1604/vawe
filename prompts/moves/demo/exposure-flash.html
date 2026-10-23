@@ -13,9 +13,13 @@
   .shot { position: absolute; inset: 0; overflow: hidden; visibility: hidden; }
   .shot[data-on] { visibility: visible; }
   .shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .cap { position: absolute; left: calc(var(--u) * 5); bottom: calc(var(--u) * 5); color: #fff; font: 600 calc(var(--u) * 4.4)/1 var(--sans); letter-spacing: -0.02em; text-shadow: 0 1px 12px rgb(0 0 0 / 0.45); }
-  .cap small { display: block; margin-top: calc(var(--u) * 1.2); font: 500 calc(var(--u) * 3)/1 var(--sans); opacity: 0.85; }
-  .tc { position: absolute; right: calc(var(--u) * 5); bottom: calc(var(--u) * 5); color: #fff; font: 500 calc(var(--u) * 3.2)/1 var(--mono); text-shadow: 0 1px 12px rgb(0 0 0 / 0.45); }
+  .cap { position: absolute; left: calc(var(--u) * 5); top: calc(var(--u) * 5); color: #fff; font: 600 calc(var(--u) * 6)/1 var(--sans); letter-spacing: -0.02em; text-shadow: 0 1px 12px rgb(0 0 0 / 0.45); }
+  .cap small { display: block; margin-top: calc(var(--u) * 1.2); font: 500 calc(var(--u) * 4.2)/1 var(--sans); opacity: 0.9; }
+  .tc { position: absolute; left: calc(var(--u) * 5); top: calc(var(--u) * 19); color: #fff; font: 500 calc(var(--u) * 4.2)/1 var(--mono); text-shadow: 0 1px 12px rgb(0 0 0 / 0.45); }
+  .shot::before { content: ''; position: absolute; inset: 0 40% 55% 0; z-index: 1; background: radial-gradient(ellipse at 0 0, rgb(0 0 0 / 0.55), transparent 75%); }
+  .shot .cap { z-index: 2; }
+  #s2 img { object-position: 50% 0; transform: scaleX(-1); transform-origin: 50% 0; }
+  .tc { z-index: 2; }
   #white { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
 </style>
 <script type="application/json" id="authoring">{"allow": ["static-window@3.3-4.5", "world-held@0.0-4.5", "text-unreadable-hold", "text-moves-before-hold"], "_why": {"static-window@3.3-4.5": "the last shot at 4.0 s: a photo with a 1.2 s slow push held after the second cut, and the timecode ticks every frame", "world-held@0.0-4.5": "a film cut: three shots of 1.4, 1.5 and 1.6 s, each with its own slow push, so no world holds for the whole clip", "text-unreadable-hold": "each caption holds 1.4 to 1.6 s, the length of its shot, and the check asks 5.4 s", "text-moves-before-hold": "the caption changes with the shot at each cut: a film cut, not a hold"}}</script>
