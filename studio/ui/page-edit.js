@@ -34,10 +34,10 @@ export function setCssTiming(rule, field, value) {
 
 export const setAnimateOffset = (kf, offset) => (kf.offset ? [replace(kf.offset, fmt(offset))] : [insert(kf.insertAt, ` offset: ${fmt(offset)},`)]);
 
-// field: 'duration' | 'delay' | 'easing'. value: milliseconds, or the easing text.
-export function setAnimateOption(anim, field, value) {
+// field: 'duration' | 'delay' | 'easing'. value: milliseconds, or the easing text; `code` writes an easing as source as it is (EASE.land).
+export function setAnimateOption(anim, field, value, code = false) {
   const o = anim.options;
-  const text = field === 'easing' ? quoted(o.easing || { text: "'" }, value) : fmt(value, 1);
+  const text = field === 'easing' ? (code ? value : quoted(o.easing || { text: "'" }, value)) : fmt(value, 1);
   if (o[field]) return [replace(o[field], text)];
   if (o.insertAt != null) return [insert(o.insertAt, ` ${field}: ${text},`)];
   return null;

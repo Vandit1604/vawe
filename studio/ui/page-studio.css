@@ -30,6 +30,8 @@
    font:11.5px/34px var(--mono);color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-right:1px solid var(--line)}
  .row .name.sel{color:var(--ink)}
  .row .bar{position:absolute;top:9px;height:16px;border-radius:4px;background:var(--accent-soft);pointer-events:none}
+ .row .bar.ease{background:hsl(var(--hue) 55% 45% / .45)}
+ .row .bar{overflow:hidden;white-space:nowrap;font:10px/16px var(--mono);color:var(--ink-2);padding-left:5px;box-sizing:border-box}
  .row[data-kind=table] .bar{background:rgba(166,125,255,.16)}
  .key{position:absolute;top:10px;width:14px;height:14px;margin-left:-7px;transform:rotate(45deg) scale(.78);border-radius:2px;background:var(--accent);cursor:ew-resize;touch-action:none}
  .row[data-kind=table] .key{background:var(--c-text)} .row[data-kind=sound] .key{background:var(--c-sound);border-radius:50%;transform:none;width:12px;height:12px;margin-left:-6px;top:11px}

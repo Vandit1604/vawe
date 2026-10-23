@@ -5,15 +5,12 @@
 import { seekTo } from '/core/engine/page-seek.js';
 import { SPRINGS, springLinear, springDuration } from '/core/motion/springs.js';
 import { buildRows } from './page-model.js';
+import { easeOptions, easeNameOf, easeSource, easeHue, NAMED } from './page-eases.js';
 import { cssToHex, fmt, quoteLike, setVar, setText } from './page-edit.js';
 
 const $ = (id) => document.getElementById(id);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const GUTTER = 176;
-const EASINGS = [
-  ['linear', 'linear'], ['ease', 'ease'], ['ease-in', 'ease-in'], ['ease-out', 'ease-out'], ['ease-in-out', 'ease-in-out'],
-  ['expo out', 'cubic-bezier(0.16, 1, 0.3, 1)'], ['quart out', 'cubic-bezier(0.25, 1, 0.5, 1)'], ['quart in-out', 'cubic-bezier(0.76, 0, 0.24, 1)'],
-];
 
 const S = { data: null, rows: [], fps: 30, duration: 6, aspect: '16:9', t: 0, pps: 100, sel: null, units: {}, playing: false, win: null, dragging: false, busy: false };
 
@@ -108,10 +105,17 @@ function renderTimeline() {
     const sel = S.sel?.row === row.id;
     return h('div', { class: 'row', 'data-kind': row.kind, style: `width:${width}px`, title: row.source },
       h('span', { class: `name${sel ? ' sel' : ''}`, onclick: () => selectKey(row.id, null) }, row.label),
-      row.span ? h('i', { class: 'bar', style: `left:${px(row.span[0])}px;width:${Math.max(2, (row.span[1] - row.span[0]) * S.pps)}px` }) : null,
+      row.span ? barEl(row) : null,
       row.keys.map((k, i) => keyEl(row, k, i)));
   }));
   paintPlayhead();
+}
+
+function barEl(row) {
+  const ease = row.timing?.easing;
+  const hue = ease?.name ? `;--hue:${easeHue(ease.name).toFixed(0)}` : '';
+  const label = ease ? (ease.name || 'not named') : '';
+  return h('i', { class: `bar${ease?.name ? ' ease' : ''}`, title: `ease: ${ease?.name || ease?.value}`, style: `left:${px(row.span[0])}px;width:${Math.max(2, (row.span[1] - row.span[0]) * S.pps)}px${hue}` }, label);
 }
 
 function keyEl(row, key, i) {
@@ -197,18 +201,28 @@ function colorField(label, text, onchange, wrap = (s) => s) {
   return h('div', { class: 'fld' }, h('span', {}, label), h('div', { class: 'line' }, pick, box));
 }
 
-function easingField(timing, row) {
+function easingField(timing) {
   const cur = String(timing.easing.value || 'linear').trim();
-  const presets = [...EASINGS, ...Object.entries(SPRINGS).map(([n, { k, d }]) => [`spring ${n}`, springLinear(k, d), { k, d }])];
-  const sel = h('select', {}, ...presets.map(([name, css]) => h('option', { value: css, selected: css === cur }, name)),
-    presets.some(([, css]) => css === cur) ? null : h('option', { value: cur, selected: true }, 'custom'));
+  const springs = Object.entries(SPRINGS).map(([name, { k, d }]) => ({ name, k, d, css: springLinear(k, d) }));
+  const spring = springs.find((s) => s.css === cur.replace(/^['"]|['"]$/g, ''));
+  const options = easeOptions(cur).filter((o) => !(spring && o.custom));
+  const option = (o) => h('option', { value: o.value, selected: o.selected }, o.label);
+  const sel = h('select', {},
+    ...options.filter((o) => o.custom).map(option),
+    h('optgroup', { label: 'named eases' }, ...options.filter((o) => !o.custom).map(option)),
+    h('optgroup', { label: 'springs' }, ...springs.map((s) => h('option', { value: `spring:${s.name}`, selected: s === spring }, `spring ${s.name}`))));
   sel.addEventListener('change', () => {
-    const preset = presets.find(([, css]) => css === sel.value);
-    const edits = timing.easing.set?.(sel.value);
-    const dur = preset?.[2] ? timing.duration.set?.(springDuration(preset[2].k, preset[2].d)) : null;
-    commit([...(edits || []), ...(dur || [])]);
+    const s = springs.find((x) => `spring:${x.name}` === sel.value);
+    if (s) return commit([...(timing.easing.set?.(s.css) || []), ...(timing.duration.set?.(springDuration(s.k, s.d)) || [])]);
+    if (NAMED.includes(sel.value)) commit(timing.easing.setNamed?.(sel.value));
   });
   return h('label', { class: 'fld' }, h('span', {}, 'easing'), sel);
+}
+
+function tableEaseField(key) {
+  const sel = h('select', {}, ...easeOptions(key.value.str).map((o) => h('option', { value: o.value, selected: o.selected }, o.label)));
+  sel.addEventListener('change', () => { if (NAMED.includes(sel.value)) commit(key.setValue(easeSource(sel.value, 'name', { lit: key.value }))); });
+  return h('label', { class: 'fld' }, h('span', {}, 'ease'), sel);
 }
 
 function renderInspector() {
@@ -232,6 +246,7 @@ function renderInspector() {
       const v = key.value;
       if (v.kind === 'number') parts.push(numField('value', v.num, (n) => commit(key.setValue(fmt(n)))));
       else if (v.kind === 'color') parts.push(colorField('value', v.text, (t) => commit(key.setValue(t)), (t) => quoteLike(v, t)));
+      else if (v.kind === 'string' && easeNameOf(v.str)) parts.push(tableEaseField(key));
       else parts.push(textField('value (source text)', v.text, (t) => commit(key.setValue(t))));
     }
     for (const d of key.decls || []) {

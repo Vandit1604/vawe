@@ -4,9 +4,13 @@
 //
 // A key is {t (seconds), label, move(t) -> edits|null, value?}. A row's `timing` holds duration, delay and
 // easing, each {value, set(v) -> edits|null}. A null `move` or `set` means the page computes that number.
+import { easeNameOf, easeSource } from './page-eases.js';
 import { moveTableKey, moveCssStop, moveCue, moveSpectacle, setCssTiming, setAnimateOffset, setAnimateOption, setTableValue } from './page-edit.js';
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+// The easing of a row: its source text, the named ease that text stands for, and how to write another one.
+const easingOf = (value, set, setNamed, easeLocal) => ({ value, name: easeNameOf(value, easeLocal ?? 'EASE'), set, setNamed });
 
 function labelOf(el) {
   if (el.id) return `#${el.id}`;
@@ -32,7 +36,8 @@ function cssAnimationRow(a, el, timing, data) {
     timing: {
       duration: { value: dur, set: timingSet('duration') },
       delay: { value: delay, set: timingSet('delay') },
-      easing: { value: rule?.easing?.text ?? timing.easing, set: timingSet('easing') },
+      easing: easingOf(rule?.easing?.text ?? timing.easing, timingSet('easing'),
+        rule ? (name) => setCssTiming(rule, 'easing', easeSource(name, 'css')) : null),
     },
   };
 }
@@ -58,7 +63,8 @@ function waapiRow(eff, timing, data) {
     timing: {
       duration: { value: dur, set: setOpt('duration', true) },
       delay: { value: delay, set: setOpt('delay', true) },
-      easing: { value: timing.easing, set: setOpt('easing', false) },
+      easing: easingOf(call?.options.easing?.text ?? timing.easing, setOpt('easing', false),
+        call ? (name) => setAnimateOption(call, 'easing', easeSource(name, 'animate', { easeLocal: data.easeImport }), true) : null, data.easeImport),
     },
   };
 }

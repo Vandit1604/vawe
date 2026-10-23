@@ -8,6 +8,7 @@
 //   animRules `animation` / `animation-duration|delay|timing-function` declarations that name a @keyframes
 //   animates  element.animate([...keyframes], {duration, delay, easing}) calls in a <script>
 //   vars      :root custom properties
+//   easeImport the local name a script gives the EASE it imports (or null)
 //   audio     <audio data-at> cues, and <meta name="spectacle">
 //   texts     text nodes of body elements
 // Every value is {text, start, end} in offsets of the whole file.
@@ -288,7 +289,10 @@ function scanScript(script, src, out) {
   if (!ast) return;
   out.errors = out.errors.filter((e) => !e.startsWith(`script at ${script.start}:`));
   walk(ast, (node, parent) => {
-    if (node.type === 'ArrayExpression') {
+    if (node.type === 'ImportDeclaration') {
+      const spec = node.specifiers.find((x) => x.type === 'ImportSpecifier' && x.imported.name === 'EASE');
+      if (spec) out.easeImport = spec.local.name;
+    } else if (node.type === 'ArrayExpression') {
       const t = tableOf(node, parent, src, script.start, code);
       if (t) out.tables.push(t);
     } else if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression' && node.callee.property.name === 'animate') {
@@ -302,7 +306,7 @@ const metaOf = (tags, name) => tags.find((t) => t.tag === 'meta' && t.attrs.name
 
 export function parsePage(src) {
   const html = scanHtml(src);
-  const out = { tables: [], keyframes: [], animRules: [], animates: [], vars: [], audio: [], texts: [], meta: {}, errors: [] };
+  const out = { tables: [], keyframes: [], animRules: [], animates: [], vars: [], audio: [], texts: [], meta: {}, easeImport: null, errors: [] };
   const rules = { rules: [], keyframes: out.keyframes };
   for (const st of html.styles) scanCss(st.text, st.start, rules);
   out.animRules = animRulesOf(rules.rules, out.keyframes);
