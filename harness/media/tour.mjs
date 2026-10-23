@@ -27,7 +27,9 @@ function seekLive(t) {
   window.__pageClock.set(t);
   const seen = window.__tourSeen || (window.__tourSeen = new Map());
   for (const a of document.getAnimations()) {
-    if (!seen.has(a)) seen.set(a, a.effect.getComputedTiming().endTime === Infinity ? t : t - (a.currentTime || 0) / 1000);
+    if (seen.has(a) || !a.effect) continue;
+    const t0 = a.effect.getComputedTiming().endTime === Infinity ? t : t - (a.currentTime || 0) / 1000;
+    if (Number.isFinite(t0)) seen.set(a, t0);
   }
   for (const [a, t0] of seen) {
     if (a.playState === 'idle' || (a.effect && a.effect.target && !a.effect.target.isConnected)) seen.delete(a);
