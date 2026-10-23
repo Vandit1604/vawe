@@ -8,7 +8,7 @@ The dot area follows the shade of one lit sphere at the right, so the size ramp 
 light. The sphere throws a soft shadow down and right. Dots stay on their cells; only their size changes. Type sits left,
 where the dots are tiny.
 
-How it moves: the headline rises out of a mask on `EASE.land` and the lead fades up. The key light turns once round
+How it moves: the headline rises out of a mask on `EASE.land` and the lead fades up, held to the left 55 percent so it never crosses the sphere. The key light turns once round
 over the clip, so the shade slides over the sphere and the last frame matches the first. The copy leaves on `leave`.
 
 ```glsl
