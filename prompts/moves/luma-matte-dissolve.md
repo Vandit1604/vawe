@@ -4,8 +4,7 @@
 midtones follow and its dark ground fills in last, so a lit subject grows out of the previous shot
 along its own contours. The matte is not a shape: it is the next shot's luminance, thresholded by a
 value that falls from above white to below black. The detail that sells it is that the edge is the
-picture: a lamp starts as a white point and widens along its own falloff, and the headline (white)
-is up before the ground (near black). Clip: [luma-matte-dissolve.mp4](luma-matte-dissolve.mp4).
+picture: a bright sky opens along its own cloud line, and the dark frame around it comes last. Clip: [luma-matte-dissolve.mp4](luma-matte-dissolve.mp4).
 Demo: [demo/luma-matte-dissolve.html](demo/luma-matte-dissolve.html).
 
 ```html
@@ -17,9 +16,9 @@ Demo: [demo/luma-matte-dissolve.html](demo/luma-matte-dissolve.html).
 ```
 
 ```js
-const S = 8, t0 = 0.3, dur = 1.0;                       // S: the edge is 1/S of the luminance range wide
+const S = 8, t0 = 1.6, dur = 1.4;                       // S: the edge is 1/S of the luminance range wide
 const sweep = (u) => 1 - (1 - u) ** 1.7;
-shotB.style.filter = 'url(#luma)';                      // shot A sits under it and dims to 0.55 and 0.96x
+shotB.style.filter = 'url(#luma)';                      // shot A sits under it, unchanged
 vawe.onFrame((t) => {
   const u = Math.min(1, Math.max(0, (t - t0) / dur)), th = 1 + 1 / S - (1 + 2 / S + 0.02) * sweep(u);
   ramp.setAttribute('intercept', (-S * th).toFixed(4));   // alpha = S x (luminance - th): visible where the pixel is brighter than th
@@ -36,4 +35,4 @@ curve a power near 1.7 and not an exponential: the dark ground holds most of the
 that idles at the end leaves them undecided for too long. Read the filter in sRGB
 (`color-interpolation-filters`), or the linear-light luminance shifts every threshold.
 
-Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
+The clip (5 s, silent) shows two real photographs, as an editor cuts them. A misty mountain path (shot A) dissolves into a seaside shelter at dusk (shot B). The sky of B is its brightest part, so a box of sunset sky opens first in the mist, then the sea, then the grass. The dark timber frame fills in last. The clip draws no shape, glow or orb: the picture is the matte. Both shots fill the frame and push in 3.5 percent over 5 s, like footage from a locked-off camera. The matte runs from 1.6 s to 3.0 s; both shots hold before and after. Photo credits are in `demo/assets/photos/credits.json`.
