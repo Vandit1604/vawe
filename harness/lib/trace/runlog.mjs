@@ -11,7 +11,7 @@ export function readRunLog(film, { cwd, session }) {
     if (!fs.existsSync(file)) continue;
     return fs.readFileSync(file, 'utf8').split('\n').filter(Boolean).flatMap((line) => {
       try { return [JSON.parse(line)]; } catch { return []; }
-    }).filter((r) => (r.cmd === 'verb' || r.cmd === 'dev') && r.session === session);
+    }).filter((r) => (r.cmd === 'verb' || r.cmd === 'dev' || r.cmd === 'judge') && r.session === session);
   }
   return [];
 }

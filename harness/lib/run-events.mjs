@@ -21,9 +21,11 @@ export const devEvent = ({ tier, wallS, captureS, checks, cache, rows, signature
 /** A `vawe dev` that failed or was killed: `reason` is the first error line or the signal; no checks ran. */
 export const devFailedEvent = ({ reason, wallS }) => ({ cmd: 'dev', failed: true, reason, wallS: tenths(wallS) });
 
+const scoreTotal = (scores) => { const v = Object.values(scores ?? {}).filter(Number.isFinite); return v.length > 1 ? v.reduce((a, b) => a + b, 0) : null; };
+
 /** A judge run: `stage` is stills, draft, final, manual or struct; `ledger` is mergeLedger counts; `bar` is the side-by-side answers as [{ ref, dial, winner }] (judge-bar.mjs barEvent); `findings` is { notes: [{ rule, t, verdict }], waivers: [{ code, earned }], sameness, template } (judge-findings.mjs findingsEvent). `pageHash` is the digest of the page a fresh judge read (the ship gate reads it). */
 export const judgeEvent = ({ stage, verdict, scores = null, anchor = null, bar = null, ledger = null, seconds = null, findings = null, pageHash = null }) => ({
-  cmd: 'judge', stage, verdict, scores,
+  cmd: 'judge', stage, verdict, scores, total: scoreTotal(scores),
   ...(pageHash ? { pageHash } : {}),
   anchorYes: anchor ? anchor.filter((a) => a.yes).length : null,
   anchorTotal: anchor ? anchor.length : null,

@@ -35,7 +35,7 @@ export function normalize(r) {
     at: e.at, cmd: e.cmd, agent: agentName(e.agent), model: e.model ?? null,
     seconds: e.cmd === 'verb' ? e.durationS ?? null : e.wallS ?? e.renderS ?? e.seconds ?? null,
     green: e.acceptance?.green ?? null, measured: e.acceptance?.measured ?? null,
-    stage: e.stage ?? null, verdict: e.verdict ?? null, scores: e.scores ?? null, total: sum(e.scores),
+    stage: e.stage ?? null, verdict: e.verdict ?? null, scores: e.scores ?? null, total: e.total ?? sum(e.scores),
     fired: Array.isArray(e.rules_fired) ? e.rules_fired.map((f) => f.id) : null,
     signature: e.signature && typeof e.signature === 'object' && !e.signature.offered ? e.signature : null,
     notes: Array.isArray(e.notes) ? e.notes : null, waivers: Array.isArray(e.waivers) ? e.waivers : null,

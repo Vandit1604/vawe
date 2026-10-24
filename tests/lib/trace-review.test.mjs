@@ -351,6 +351,22 @@ test('aggregate: studyFirst needs a refs verb, and AGENTS.md is not a guide doc'
   assert.equal(row('digestBeforePage').count, 1);
 });
 
+test('the judge row carries a total, and each round shows the last judge score logged in it', async () => {
+  const { judgeEvent } = await import('../../harness/lib/run-events.mjs');
+  assert.equal(judgeEvent({ stage: 'draft', verdict: 'FIX', scores: { colour: 7, type: 6 } }).total, 13);
+  assert.equal(judgeEvent({ stage: 'draft', verdict: 'FIX' }).total, null);
+  const fold = await foldOf([
+    textRow(0, 'build'), callRow(2, 'a', 'bin/vawe dev films/f/page.html'), resultRow(30, 'a', 'vawe: dev ok in 9.0s'),
+    textRow(100, 'The coordinator sent a message: fix the grey'), usageRow(101, 'm1', 1),
+  ]);
+  const judge = (sec, total, verdict) => ({ cmd: 'judge', stage: 'draft', at: stamp(sec), total, scores: { colour: total }, verdict });
+  const runs = [judge(40, 50, 'FIX'), judge(60, 55, 'FIX'), judge(150, 71, 'PASS')];
+  const a = analyze(fold, 'x.jsonl', () => runs);
+  assert.deepEqual(a.rounds.map((r) => r.judge?.total ?? null), [55, 71]);
+  assert.match(agentMarkdown(a), /\| 71 PASS \|/);
+  assert.deepEqual(analyze(fold, 'x.jsonl').rounds.map((r) => r.judge), [null, null]);
+});
+
 test('classesOf takes the leading tag, else the keyword table, else other', () => {
   assert.deepEqual(classesOf('[class: process] the ugly grey look'), ['process']);
   assert.deepEqual(classesOf('The coordinator sent a message while you were working: [class: taste] fix'), ['taste']);

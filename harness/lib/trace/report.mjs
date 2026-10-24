@@ -52,8 +52,8 @@ function notesTable(notes) {
 const M = (n) => (n / 1e6).toFixed(2);
 
 function roundsTable(rounds) {
-  return table(['round', 'start-end min', 'wall', 'active', 'calls', 'renders', 'cache write M', 'cache read M', 'note'],
-    rounds.map((r) => [r.index, `${r.startMin}-${r.endMin}`, r.wallMin, r.activeMin, r.calls, `${r.renders} (${r.renderSecs}s)`, M(r.cacheWrite), M(r.cacheRead), `${r.note.slice(0, 90).replace(/\|/g, '/')}`]));
+  return table(['round', 'start-end min', 'wall', 'active', 'calls', 'renders', 'cache write M', 'cache read M', 'judge', 'note'],
+    rounds.map((r) => [r.index, `${r.startMin}-${r.endMin}`, r.wallMin, r.activeMin, r.calls, `${r.renders} (${r.renderSecs}s)`, M(r.cacheWrite), M(r.cacheRead), r.judge ? `${r.judge.total} ${r.judge.verdict ?? ''}`.trim() : '-', `${r.note.slice(0, 90).replace(/\|/g, '/')}`]));
 }
 
 function adviceLine({ drafts, items, waived, waivedEntries }) {
