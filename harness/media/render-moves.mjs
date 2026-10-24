@@ -273,7 +273,7 @@ async function main() {
   process.exit(failed.length ? 1 : 0);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href) {
   main().catch((e) => {
     console.error(`vawe moves: ${e.message}`);
     process.exit(1);

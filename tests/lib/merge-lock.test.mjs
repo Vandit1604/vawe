@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mergeLock } from '../../harness/dev/merge-lock.mjs';
 import { ensureHooks, gitAt } from '../../harness/lib/git-hooks.mjs';
 
@@ -25,6 +25,21 @@ test('the driver reads %O %A %B, writes %A with indent 2 and exits 0', () => {
   const [o, a, b] = [write('O', { x: entry('x0') }), write('A', { x: entry('x1') }), write('B', { x: entry('x0'), y: entry('y1') })];
   execFileSync(process.execPath, [DRIVER, o, a, b]);
   assert.equal(fs.readFileSync(a, 'utf8'), `${JSON.stringify({ x: entry('x1'), y: entry('y1') }, null, 2)}\n`);
+});
+
+test('the driver runs from a path with a space and exits 1 with one line on malformed JSON', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'merge lock '));
+  const copy = path.join(dir, 'merge-lock.mjs');
+  fs.copyFileSync(DRIVER, copy);
+  const [o, a, b] = ['O', 'A', 'B'].map((n) => path.join(dir, n));
+  fs.writeFileSync(o, '{}'); fs.writeFileSync(a, '{"x":1}'); fs.writeFileSync(b, '{oops');
+  const r = spawnSync(process.execPath, [copy, o, a, b], { encoding: 'utf8' });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr.trim(), /^merge-lock: .*B is not valid JSON.*$/);
+  assert.equal(r.stderr.trim().split('\n').length, 1);
+  fs.writeFileSync(b, '{"y":2}');
+  assert.equal(spawnSync(process.execPath, [copy, o, a, b]).status, 0);
+  assert.deepEqual(JSON.parse(fs.readFileSync(a, 'utf8')), { x: 1, y: 2 });
 });
 
 test('git merges two branches that each render a different clip, with no conflict', () => {
