@@ -3,8 +3,20 @@ import { spawnSync } from 'node:child_process';
 
 export const HOOKS_DIR = '.githooks';
 
+export const LOCK_DRIVER = 'node harness/dev/merge-lock.mjs %O %A %B';
+
+/** Registers the merge driver .gitattributes names for clips.lock.json. A driver someone set is kept. */
+function ensureMergeDriver(git) {
+  try { if (git(['config', '--get', 'merge.vawe-lock.driver']).trim()) return; } catch (e) { if (e.status !== 1) return; }
+  try {
+    git(['config', 'merge.vawe-lock.name', 'vawe clips.lock.json: merge the keys']);
+    git(['config', 'merge.vawe-lock.driver', LOCK_DRIVER]);
+  } catch { /* not a git checkout */ }
+}
+
 /** The line to print after setting hooksPath, or '' when nothing changed. A hooksPath someone set on purpose is never replaced. */
 export function ensureHooks(git) {
+  ensureMergeDriver(git);
   let current;
   try { current = git(['config', '--get', 'core.hooksPath']).trim(); } catch (e) {
     if (e.status !== 1) return '';
