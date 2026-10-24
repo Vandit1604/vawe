@@ -207,6 +207,13 @@ function fitBudget(name) {
   return chosen.crf;
 }
 
+/** Writes the 12-frame contact sheet of a rendered clip with the sheet verb's own code and returns its path. */
+export function writeClipSheet(name, out = path.join(ROOT, 'out', 'moves', `${name}-sheet.png`)) {
+  const r = spawnSync(process.execPath, ['harness/media/sheet.mjs', path.join(MOVES, `${name}.mp4`), '--out', out], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status !== 0) throw new Error(`the sheet of ${name} failed: ${(r.stderr || r.stdout).trim()}`);
+  return out;
+}
+
 async function renderAll(clips) {
   const queue = [...clips], results = [];
   const lane = async () => {
@@ -251,6 +258,10 @@ async function main() {
   const done = results.filter((r) => r.code === 0);
   if (done.length) await recordClips(Object.fromEntries(done.map((r) => [r.id, { hash: sourceHash(r.clip.name, r.clip.theme), crf: r.crf }])));
   console.log(`${results.length - failed.length} of ${results.length} clips rendered to prompts/moves/`);
+  if (only && done.some((r) => r.id === only)) {
+    console.log(`  sheet    ${path.relative(ROOT, writeClipSheet(only))}`);
+    console.log('next: Read the sheet at full size');
+  }
   process.exit(failed.length ? 1 : 0);
 }
 

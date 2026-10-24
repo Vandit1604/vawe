@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { recordClips, clipsOf, sourceHash, assertOwnAssets, demoProblems, assertDemo } from '../../harness/media/render-moves.mjs';
+import { recordClips, clipsOf, sourceHash, assertOwnAssets, demoProblems, assertDemo, writeClipSheet } from '../../harness/media/render-moves.mjs';
 import { ensureFonts, fontFilesIn } from '../../harness/lib/ensure-fonts.mjs';
 import { filmKeyOf } from '../../harness/lib/runlog.mjs';
 import { filmOfCall } from '../../harness/lib/verb-log.mjs';
@@ -103,6 +103,13 @@ test('demoProblems: a cubic-bezier or a power ease is named with the job table f
   demoIn(moves, 'js', '<script>const outCubic = (t) => 1 - (1 - t) ** 3;\nfunction easeIn(t) {\n  return Math.pow(t, 2);\n}\nel.animate(k, { easing: p ** 2 });</script>');
   assert.equal(demoProblems('js', moves).length, 3);
   assert.throws(() => assertDemo('js', moves), /hand-written ease/);
+});
+
+test('writeClipSheet: a committed clip gives a png contact sheet through sheet.mjs', () => {
+  const out = path.join(tmp(), 'agent-progress-sheet.png');
+  assert.equal(writeClipSheet('agent-progress', out), out);
+  assert.equal(fs.readFileSync(out).subarray(1, 4).toString(), 'PNG');
+  assert.throws(() => writeClipSheet('no-such-clip', out), /the sheet of no-such-clip failed/);
 });
 
 test('demoProblems: a demo that sets a property demo.css already sets on a class, or redeclares a custom property of it, is named', () => {

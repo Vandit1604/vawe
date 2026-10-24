@@ -444,7 +444,7 @@ export const VERBS = [
     name: 'moves', summary: 'render the stale prompts/moves/demo/<move>.html clips to prompts/moves/<move>.mp4 (1280 px, 60 fps) in parallel; a clip is stale when its demo, demo.css or a core/ import changed; a demo with a variants meta also renders <move>-<theme>.mp4',
     positional: [],
     flags: [
-      { name: 'only', type: 'string', help: 'render one move by name, for example weight-morph, even when current' },
+      { name: 'only', type: 'string', help: 'render one move by name, for example weight-morph, even when current; also writes a 12-frame contact sheet to out/moves/<move>-sheet.png' },
       { name: 'all', type: 'bool', help: 'render every clip, stale or not' },
     ],
     example: 'vawe moves --only weight-morph',
