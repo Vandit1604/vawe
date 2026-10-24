@@ -46,6 +46,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { scratch } from '../lib/scratch.mjs';
+import { drewNothingHint, missingFontsLine } from '../lib/ensure-fonts.mjs';
 import { BLANK_RETRY_WAIT_MS, isBlankShot, shouldRetake } from '../lib/blank-shot.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, awaitReady, installPageReady, installPageFrame } from '../../core/engine/page-seek.js';
@@ -654,9 +655,10 @@ export class InvariantError extends Error {
 const BLANK_RANGE_MAX = 6;
 const BLANK_PROBE_WIDTH = 480;
 
-async function fontProblems(page) {
+async function fontProblems(page, pagePath) {
   const bad = await page.evaluate(() => [...new Set([...document.fonts].filter((f) => f.status === 'error').map((f) => f.family))]);
-  return bad.map((family) => `font ${family} failed to load: fix its src or remove the @font-face`);
+  const missing = bad.length ? missingFontsLine(REPO_ROOT, pagePath) : '';
+  return bad.map((family) => `font ${family} failed to load: fix its src or remove the @font-face${missing ? `; ${missing}` : ''}`);
 }
 
 // Reads the page's <audio> specs once, before the capture: the tab that read them can be gone by the time the mux needs them
@@ -713,11 +715,12 @@ const secs = (t) => String(+t.toFixed(2));
 // An entrance from opacity 0, or an exit to the ground, leaves a few empty frames at the ends; that is motion, not a bug.
 const EDGE_BLANK_SEC = 0.25;
 
-export function frameProblems(blank, { frames, fps, from, declared }) {
+export function frameProblems(blank, { frames, fps, from, declared, hint = '' }) {
   const problems = [];
   if (blank.length !== frames) problems.push(`the encode has ${blank.length} frame(s), expected ${frames} (round(duration x fps))`);
   const half = 0.5 / fps;
   const declaredAt = (i) => { const t = from + i / fps; return declared.some(([a, b]) => t >= a - half && t <= b + half); };
+  if (blank.length && blank.every((b, i) => b && !declaredAt(i))) return [...problems, `every frame is one flat colour: the page drew nothing${hint ? `; ${hint}` : ''}`];
   for (let i = 0; i < blank.length; i++) {
     if (!blank[i] || declaredAt(i)) continue;
     let j = i;
@@ -813,7 +816,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       throw e;
     }
     const audioRead = await readAudio(page, pagePath);
-    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page), ...audioRead.problems, ...await assertProblems(page)];
+    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page, pagePath), ...audioRead.problems, ...await assertProblems(page)];
     if (early.length) throw new InvariantError(early);
 
     const totalDur = await page.evaluate(() => {
@@ -874,7 +877,8 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (!fs.existsSync(tmpOut) || fs.statSync(tmpOut).size === 0) {
       throw new RenderError(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
-    const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
+    const flat = probeFrames(tmpOut);
+    const late = frameProblems(flat, { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')), hint: flat.length && flat.every(Boolean) ? drewNothingHint(REPO_ROOT, pagePath) : '' });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
     if (broken.length) { fs.rmSync(tmpOut, { force: true }); fs.rmSync(tmpDir, { recursive: true, force: true }); throw new InvariantError(broken); }
