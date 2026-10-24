@@ -46,6 +46,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { scratch } from '../lib/scratch.mjs';
+import { drewNothingHint, missingFontsLine } from '../lib/ensure-fonts.mjs';
 import { BLANK_RETRY_WAIT_MS, isBlankShot, shouldRetake } from '../lib/blank-shot.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, awaitReady, installPageReady, installPageFrame } from '../../core/engine/page-seek.js';
@@ -512,7 +513,7 @@ const seekThenKey = async (ms) => { await window.__pageSeek(ms / 1000); return w
 
 // A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
 // A slice that finished writes slice-<lo>.done in tmpDir; a later render into the same tmpDir skips it and calls onResumed.
-async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, stallFloorMs, fault, onResumed, final }) {
+async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, stallFloorMs, fault, onResumed, final, sliceFrames }) {
   const format = frameFormat(final);
   const marker = ([lo]) => path.join(tmpDir, `slice-${lo}.done`);
   const resume = {
@@ -552,7 +553,16 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
       onSubframe(i, reused);
     }
     return k;
-  }, { fps, from, stallMs, stallFloorMs, fault, resume, final, sliceFrames: sliceFramesFor(frames, workers, final) });
+  }, { fps, from, stallMs, stallFloorMs, fault, resume, final, sliceFrames });
+}
+
+// A draft's slice size follows the worker count, which follows how busy the machine is: a kept frames dir keeps the size its first run chose, so a resume finds the same slices.
+function pinnedSliceFrames(dir, wanted) {
+  const file = path.join(dir, 'slice-frames');
+  const kept = Number(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : 0);
+  if (kept > 0) return kept;
+  fs.writeFileSync(file, String(wanted));
+  return wanted;
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -654,9 +664,10 @@ export class InvariantError extends Error {
 const BLANK_RANGE_MAX = 6;
 const BLANK_PROBE_WIDTH = 480;
 
-async function fontProblems(page) {
+async function fontProblems(page, pagePath) {
   const bad = await page.evaluate(() => [...new Set([...document.fonts].filter((f) => f.status === 'error').map((f) => f.family))]);
-  return bad.map((family) => `font ${family} failed to load: fix its src or remove the @font-face`);
+  const missing = bad.length ? missingFontsLine(REPO_ROOT, pagePath) : '';
+  return bad.map((family) => `font ${family} failed to load: fix its src or remove the @font-face${missing ? `; ${missing}` : ''}`);
 }
 
 // Reads the page's <audio> specs once, before the capture: the tab that read them can be gone by the time the mux needs them
@@ -695,29 +706,36 @@ export function parseBlankRanges(html) {
   return raw.split(',').map((r) => r.trim().match(/^([\d.]+)\s*-\s*([\d.]+)$/)).filter(Boolean).map((m) => [Number(m[1]), Number(m[2])]);
 }
 
-// One ffmpeg pass over the encode: per frame, whether its luma and chroma are near-uniform.
-export function probeFrames(file) {
+// One ffmpeg pass over the encode: per frame, whether its luma and chroma are near-uniform, and its mean [Y, U, V].
+export function probeStats(file) {
   const r = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-vf', `scale=${BLANK_PROBE_WIDTH}:-2:flags=area,signalstats,metadata=print:file=-`, '-f', 'null', '-'],
     { encoding: 'utf8', maxBuffer: 1024 * 1024 * 256 });
   const stats = [];
   for (const line of (r.stdout || '').split('\n')) {
     if (line.startsWith('frame:')) stats.push({});
-    const m = line.match(/^lavfi\.signalstats\.([YUV](?:MIN|MAX))=(\d+)/);
+    const m = line.match(/^lavfi\.signalstats\.([YUV](?:MIN|MAX|AVG))=([\d.]+)/);
     if (m && stats.length) stats[stats.length - 1][m[1]] = Number(m[2]);
   }
-  return stats.map((f) => Math.max(f.YMAX - f.YMIN, f.UMAX - f.UMIN, f.VMAX - f.VMIN) <= BLANK_RANGE_MAX);
+  return stats.map((f) => ({ flat: Math.max(f.YMAX - f.YMIN, f.UMAX - f.UMIN, f.VMAX - f.VMIN) <= BLANK_RANGE_MAX, avg: [f.YAVG, f.UAVG, f.VAVG] }));
 }
+
+export const probeFrames = (file) => probeStats(file).map((s) => s.flat);
+
+/** Whether every frame is flat and all of them are one colour: a page that drew nothing, not a film of colour blocks. Pure. */
+export const oneFlatColour = (stats) => stats.length > 0 && stats.every((s) => s.flat)
+  && [0, 1, 2].every((k) => Math.max(...stats.map((s) => s.avg[k])) - Math.min(...stats.map((s) => s.avg[k])) <= BLANK_RANGE_MAX);
 
 const secs = (t) => String(+t.toFixed(2));
 
 // An entrance from opacity 0, or an exit to the ground, leaves a few empty frames at the ends; that is motion, not a bug.
 const EDGE_BLANK_SEC = 0.25;
 
-export function frameProblems(blank, { frames, fps, from, declared }) {
+export function frameProblems(blank, { frames, fps, from, declared, hint = '', oneColour = true }) {
   const problems = [];
   if (blank.length !== frames) problems.push(`the encode has ${blank.length} frame(s), expected ${frames} (round(duration x fps))`);
   const half = 0.5 / fps;
   const declaredAt = (i) => { const t = from + i / fps; return declared.some(([a, b]) => t >= a - half && t <= b + half); };
+  if (oneColour && blank.length && blank.every((b, i) => b && !declaredAt(i))) return [...problems, `every frame is one flat colour: the page drew nothing${hint ? `; ${hint}` : ''}`];
   for (let i = 0; i < blank.length; i++) {
     if (!blank[i] || declaredAt(i)) continue;
     let j = i;
@@ -813,7 +831,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       throw e;
     }
     const audioRead = await readAudio(page, pagePath);
-    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page), ...audioRead.problems, ...await assertProblems(page)];
+    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page, pagePath), ...audioRead.problems, ...await assertProblems(page)];
     if (early.length) throw new InvariantError(early);
 
     const totalDur = await page.evaluate(() => {
@@ -830,11 +848,12 @@ export async function renderPage(pagePath, outPath, opts = {}) {
 
     const workers = opts.workers || defaultWorkers(process.env, () => slot.others > 0);
     const tPre = Date.now();
-    const draftVariant = final ? null : `jpeg-${sliceFramesFor(frames, workers, false)}`;
+    const draftVariant = final ? null : 'jpeg';
     const key = renderKey({ pagePath, frame, frames, fps, from, blur, draftVariant });
     const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs: opts.stallMs, final }, key) : Array(frames).fill(1);
     const tmpDir = `${outPath}.frames-${key}`;
     fs.mkdirSync(tmpDir, { recursive: true });
+    const sliceFrames = pinnedSliceFrames(tmpDir, sliceFramesFor(frames, workers, final));
     const subframeStart = new Array(frames + 1);
     subframeStart[0] = 0;
     for (let i = 0; i < frames; i++) subframeStart[i + 1] = subframeStart[i] + kArr[i];
@@ -852,7 +871,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const onResumed = ([lo, hi]) => { resumed++; doneSub += subframeStart[hi] - subframeStart[lo]; };
     let restarted;
     try {
-      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, stallFloorMs: opts.stallFloorMs, fault: opts.sliceFault, onResumed, final });
+      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, stallFloorMs: opts.stallFloorMs, fault: opts.sliceFault, onResumed, final, sliceFrames });
     } catch (e) {
       throw Object.assign(e, { progress: doneSub / totalSub, framesDir: tmpDir });
     } finally {
@@ -874,7 +893,9 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (!fs.existsSync(tmpOut) || fs.statSync(tmpOut).size === 0) {
       throw new RenderError(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
-    const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
+    const stats = probeStats(tmpOut);
+    const oneColour = oneFlatColour(stats);
+    const late = frameProblems(stats.map((s) => s.flat), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')), oneColour, hint: oneColour ? drewNothingHint(REPO_ROOT, pagePath) : '' });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
     if (broken.length) { fs.rmSync(tmpOut, { force: true }); fs.rmSync(tmpDir, { recursive: true, force: true }); throw new InvariantError(broken); }
