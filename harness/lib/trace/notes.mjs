@@ -1,10 +1,10 @@
 export const NOTE_CLASSES = ['taste', 'readability', 'motion', 'process', 'engine'];
 
 const KEYWORDS = [
-  ['engine', /\b(bug|crash\w*|render\w*)\b/i],
+  ['engine', /\b(bug|crash\w*|render (?:crash\w*|fail\w*)|slow render)\b/i],
   ['readability', /\b(crisp\w*|blur\w*|small\w*|read(?:s|able|ability|ing)?|text size)\b/i],
   ['motion', /\b(fast\w*|slow(?!\s+render)\w*|eas(?:e|es|ed|ing)|overshoot\w*|cuts?|timing)\b/i],
-  ['taste', /\b(gr[ae]y\w*|ugly|premium|generic|looks?)\b/i],
+  ['taste', /\b(gr[ae]y\w*|ugly|premium|generic|looks? (?:bad|ugly|cheap|flat|off|wrong|generic))\b/i],
   ['process', /\b(skills?|plans?|research\w*|review\w*)\b/i],
 ];
 

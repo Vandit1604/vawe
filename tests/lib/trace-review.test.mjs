@@ -370,6 +370,8 @@ test('the judge row carries a total, and each round shows the last judge score l
 test('classesOf takes the leading tag, else the keyword table, else other', () => {
   assert.deepEqual(classesOf('[class: process] the ugly grey look'), ['process']);
   assert.deepEqual(classesOf('The coordinator sent a message while you were working: [class: taste] fix'), ['taste']);
+  assert.deepEqual(classesOf('release the increase of render time, it looks good'), ['other']);
+  assert.deepEqual(classesOf('a render crash on the cut'), ['engine', 'motion']);
   assert.deepEqual(classesOf('[class: nonsense] the text is blurry'), ['readability']);
   assert.deepEqual(classesOf('this looks generic and grey'), ['taste']);
   assert.deepEqual(classesOf('the cut is too fast, ease it'), ['motion']);
