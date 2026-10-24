@@ -12,6 +12,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { resolveFrame, readPageMeta } from './render-page.mjs';
 import { ensureFonts, fontFilesIn } from '../lib/ensure-fonts.mjs';
+import { JOBS } from '../../core/motion/ease-jobs.js';
 import { chooseCrf, RENDER_CRF, CLIP_BUDGET_BYTES } from '../lib/clip-budget.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -57,6 +58,35 @@ export function assertOwnAssets(name, moves = MOVES) {
     if (file === 'credits.json' || fs.existsSync(path.join(moves, 'demo', ref))) continue;
     throw new Error(`${name}: prompts/moves/demo/${ref} is missing. It is not committed; prompts/moves/demo/assets/${name}/credits.json says where to get it.`);
   }
+}
+
+const POWER = /\*\*\s*[\d.]+|Math\.pow\(/;
+const EASE_WORD = /ease|easing|curve|cubic|quart|quint/i;
+const EASE_FIX = JOBS.map((j) => `${j.job.toLowerCase()}: easeFn('${j.ease}')`).join('; ');
+
+/** The lines of a demo that hand-write an ease: a cubic-bezier( string, or a power expression on an ease or curve (a line naming one, or inside a function named like one). */
+function handWrittenEases(html) {
+  const found = [];
+  let inEaseFn = false;
+  html.split('\n').forEach((line, i) => {
+    const decl = line.match(/function\s+(\w+)|(?:const|let)\s+(\w+)\s*=\s*(?:\([^)]*\)|\w+)\s*=>/);
+    if (decl && EASE_WORD.test(decl[1] || decl[2])) inEaseFn = /\{\s*$/.test(line) || 'once';
+    if (/cubic-bezier\(/.test(line) || (POWER.test(line) && (inEaseFn || EASE_WORD.test(line)))) found.push(`line ${i + 1}: ${line.trim().slice(0, 80)}`);
+    if (inEaseFn === 'once' || /^\s*\};?\s*$/.test(line)) inEaseFn = false;
+  });
+  return found;
+}
+
+/** What a demo does that the framework already owns: a hand-written ease, with the job table's fix. */
+export function demoProblems(name, moves = MOVES) {
+  const html = fs.readFileSync(demoPath(name, moves), 'utf8');
+  return handWrittenEases(html).map((at) => `${name}: hand-written ease at ${at}. Use easeFn from core/motion, by job (${EASE_FIX})`);
+}
+
+/** Throws when the demo has any problem from demoProblems. */
+export function assertDemo(name, moves = MOVES) {
+  const problems = demoProblems(name, moves);
+  if (problems.length) throw new Error(problems.join('\n'));
 }
 
 /** Hash of the clip size and rate, the theme variant, the demo page, demo.css, the demo's own asset files and every core/ file the page imports. */
@@ -187,7 +217,7 @@ async function main() {
     return;
   }
   fetchMissingFonts(names);
-  for (const name of names) assertOwnAssets(name);
+  for (const name of names) { assertOwnAssets(name); assertDemo(name); }
   const results = await renderAll(clips);
   const failed = results.filter((r) => r.code !== 0);
   const done = results.filter((r) => r.code === 0);

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { recordClips, clipsOf, sourceHash, assertOwnAssets } from '../../harness/media/render-moves.mjs';
+import { recordClips, clipsOf, sourceHash, assertOwnAssets, demoProblems, assertDemo } from '../../harness/media/render-moves.mjs';
 import { ensureFonts, fontFilesIn } from '../../harness/lib/ensure-fonts.mjs';
 import { filmKeyOf } from '../../harness/lib/runlog.mjs';
 import { filmOfCall } from '../../harness/lib/verb-log.mjs';
@@ -92,4 +92,15 @@ test('assertOwnAssets: a missing footage file is named with the credits.json tha
   fs.mkdirSync(path.join(moves, 'demo', 'assets', 'walk'), { recursive: true });
   fs.writeFileSync(path.join(moves, 'demo', 'assets', 'walk', 'a.source.mp4'), 'x');
   assert.doesNotThrow(() => assertOwnAssets('walk', moves));
+});
+
+test('demoProblems: a cubic-bezier or a power ease is named with the job table fix; sin dips, bezier paths and geometry pass', () => {
+  const moves = tmp();
+  demoIn(moves, 'good', '<style>a{transition:opacity 1s}</style><script>const dip = (s) => 1 - 0.1 * Math.sin(Math.PI * s);\nconst bez = (s) => (1 - s) ** 2 * 3 + s * s;\nconst r = Math.pow(x, 2) + y ** 2;</script>');
+  assert.deepEqual(demoProblems('good', moves), []);
+  demoIn(moves, 'css', '<style>.a{animation:k 1s cubic-bezier(0.2, 0, 0, 1)}</style>');
+  assert.match(demoProblems('css', moves)[0], /css: hand-written ease at line 1.*exit: easeFn\('launch'\)/);
+  demoIn(moves, 'js', '<script>const outCubic = (t) => 1 - (1 - t) ** 3;\nfunction easeIn(t) {\n  return Math.pow(t, 2);\n}\nel.animate(k, { easing: p ** 2 });</script>');
+  assert.equal(demoProblems('js', moves).length, 3);
+  assert.throws(() => assertDemo('js', moves), /hand-written ease/);
 });
