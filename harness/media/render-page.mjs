@@ -513,7 +513,7 @@ const seekThenKey = async (ms) => { await window.__pageSeek(ms / 1000); return w
 
 // A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
 // A slice that finished writes slice-<lo>.done in tmpDir; a later render into the same tmpDir skips it and calls onResumed.
-async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, stallFloorMs, fault, onResumed, final }) {
+async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, stallFloorMs, fault, onResumed, final, sliceFrames }) {
   const format = frameFormat(final);
   const marker = ([lo]) => path.join(tmpDir, `slice-${lo}.done`);
   const resume = {
@@ -553,7 +553,16 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
       onSubframe(i, reused);
     }
     return k;
-  }, { fps, from, stallMs, stallFloorMs, fault, resume, final, sliceFrames: sliceFramesFor(frames, workers, final) });
+  }, { fps, from, stallMs, stallFloorMs, fault, resume, final, sliceFrames });
+}
+
+// A draft's slice size follows the worker count, which follows how busy the machine is: a kept frames dir keeps the size its first run chose, so a resume finds the same slices.
+function pinnedSliceFrames(dir, wanted) {
+  const file = path.join(dir, 'slice-frames');
+  const kept = Number(fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : 0);
+  if (kept > 0) return kept;
+  fs.writeFileSync(file, String(wanted));
+  return wanted;
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -833,11 +842,12 @@ export async function renderPage(pagePath, outPath, opts = {}) {
 
     const workers = opts.workers || defaultWorkers(process.env, () => slot.others > 0);
     const tPre = Date.now();
-    const draftVariant = final ? null : `jpeg-${sliceFramesFor(frames, workers, false)}`;
+    const draftVariant = final ? null : 'jpeg';
     const key = renderKey({ pagePath, frame, frames, fps, from, blur, draftVariant });
     const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs: opts.stallMs, final }, key) : Array(frames).fill(1);
     const tmpDir = `${outPath}.frames-${key}`;
     fs.mkdirSync(tmpDir, { recursive: true });
+    const sliceFrames = pinnedSliceFrames(tmpDir, sliceFramesFor(frames, workers, final));
     const subframeStart = new Array(frames + 1);
     subframeStart[0] = 0;
     for (let i = 0; i < frames; i++) subframeStart[i + 1] = subframeStart[i] + kArr[i];
@@ -855,7 +865,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const onResumed = ([lo, hi]) => { resumed++; doneSub += subframeStart[hi] - subframeStart[lo]; };
     let restarted;
     try {
-      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, stallFloorMs: opts.stallFloorMs, fault: opts.sliceFault, onResumed, final });
+      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, stallFloorMs: opts.stallFloorMs, fault: opts.sliceFault, onResumed, final, sliceFrames });
     } catch (e) {
       throw Object.assign(e, { progress: doneSub / totalSub, framesDir: tmpDir });
     } finally {
