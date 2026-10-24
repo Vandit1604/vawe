@@ -20,6 +20,13 @@ test('a draft whose frames are all one colour fails and names the font generator
   assert.match(r.stderr, /^error: every frame is one flat colour: the page drew nothing; fonts missing from assets\/fonts \(gone-not-generated\.woff2\): run `node generators\/media\/fonts\.mjs`/m);
 });
 
+test('the flat-colour line ends with the blank meta; a --from/--to sub-range draft does not refuse', () => {
+  const r = run('harness/media/render-page.mjs', [PAGE, tmp('whole.mp4')]);
+  assert.match(r.stderr, /declare it with <meta name="blank" content="0-[\d.]+">\s*$/m);
+  const sub = run('harness/media/render-page.mjs', [PAGE, tmp('sub.mp4'), '--from', '0', '--dur', '0.3']);
+  assert.doesNotMatch(sub.stderr, /one flat colour/);
+});
+
 test('a face the page uses that is missing from the checkout names the font generator too', () => {
   const r = run('harness/media/render-page.mjs', ['tests/fixtures/flat/used-font.html', tmp('used.mp4')]);
   assert.equal(r.status, 2, r.stdout + r.stderr);

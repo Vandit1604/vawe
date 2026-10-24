@@ -735,7 +735,7 @@ export function frameProblems(blank, { frames, fps, from, declared, hint = '', o
   if (blank.length !== frames) problems.push(`the encode has ${blank.length} frame(s), expected ${frames} (round(duration x fps))`);
   const half = 0.5 / fps;
   const declaredAt = (i) => { const t = from + i / fps; return declared.some(([a, b]) => t >= a - half && t <= b + half); };
-  if (oneColour && blank.length && blank.every((b, i) => b && !declaredAt(i))) return [...problems, `every frame is one flat colour: the page drew nothing${hint ? `; ${hint}` : ''}`];
+  if (oneColour && blank.length && blank.every((b, i) => b && !declaredAt(i))) return [...problems, `every frame is one flat colour: the page drew nothing${hint ? `; ${hint}` : ''}; if intended, declare it with <meta name="blank" content="${secs(from)}-${secs(from + frames / fps)}">`];
   for (let i = 0; i < blank.length; i++) {
     if (!blank[i] || declaredAt(i)) continue;
     let j = i;
@@ -894,7 +894,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       throw new RenderError(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
     const stats = probeStats(tmpOut);
-    const oneColour = oneFlatColour(stats);
+    const oneColour = oneFlatColour(stats) && from === 0 && durArg == null;
     const late = frameProblems(stats.map((s) => s.flat), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')), oneColour, hint: oneColour ? drewNothingHint(REPO_ROOT, pagePath) : '' });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
