@@ -60,7 +60,9 @@ async function pageTiles(pagePath, at, withWorlds, dir) {
       await opened.page.screenshot({ path: png });
       shots.push({ t, png, world: withWorlds ? worldAt(spans, t) : null });
     }
-    if (shots.length > 1 && oneFlatColour(shots.map((s) => probeStats(s.png)[0]))) throw new Error(`every tile is one flat colour: the page drew nothing; ${drewNothingHint(REPO_ROOT, pagePath)}`);
+    const tiles = shots.map((s) => probeStats(s.png)[0]);
+    if (tiles.some((t) => !t)) throw new Error('a tile has no frame stats: ffmpeg did not read its screenshot');
+    if (shots.length > 1 && oneFlatColour(tiles)) throw new Error(`every tile is one flat colour: the page drew nothing; ${drewNothingHint(REPO_ROOT, pagePath)}`);
     return { shots, size: { w: frame.width, h: frame.height } };
   } finally {
     await opened.close();
