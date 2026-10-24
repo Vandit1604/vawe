@@ -31,5 +31,4 @@ export function missingFontsLine(root, pagePath) {
   return missing.length ? `fonts missing from assets/fonts (${missing.join(', ')}): run \`node generators/media/fonts.mjs\`` : '';
 }
 
-/** Why a page drew nothing. */
 export const drewNothingHint = (root, pagePath) => missingFontsLine(root, pagePath) || 'check that every font, image and script the page loads exists (a 404 draws nothing)';
