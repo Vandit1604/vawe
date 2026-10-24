@@ -99,16 +99,20 @@ function redefinedNames(html, moves) {
   const own = definedNames([...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n'));
   const shared = demoCssNames(moves);
   const shadowed = [...own.classes].map(([cls, set]) => [cls, [...set].filter((p) => shared.classes.get(cls)?.has(p))]).filter(([, ps]) => ps.length);
-  return [...[...own.props].filter((p) => shared.props.has(p)), ...shadowed.map(([cls, ps]) => `${cls} (${ps.join(', ')})`)];
+  return { props: [...own.props].filter((p) => shared.props.has(p)), classes: shadowed.map(([cls, ps]) => `${cls} (${ps.join(', ')})`) };
 }
 
-/** What a demo does that the framework already owns: a hand-written ease (with the job table's fix), or a demo.css name defined again. */
+/** What makes a demo refuse to render: a hand-written ease, with the job table's fix. */
 export function demoProblems(name, moves = MOVES) {
   const html = fs.readFileSync(demoPath(name, moves), 'utf8');
-  return [
-    ...handWrittenEases(html).map((at) => `${name}: hand-written ease at ${at}. Use easeFn from core/motion, by job (${EASE_FIX})`),
-    ...redefinedNames(html, moves).map((n) => `${name}: ${n} is already set by demo.css. Use the shared one, or give the demo's own class or property another name.`),
-  ];
+  return handWrittenEases(html).map((at) => `${name}: hand-written ease at ${at}. Use easeFn from core/motion, by job (${EASE_FIX})`);
+}
+
+/** One advice line for a demo that shadows demo.css (custom properties first), or none. It never refuses. */
+export function demoWarnings(name, moves = MOVES) {
+  const { props, classes } = redefinedNames(fs.readFileSync(demoPath(name, moves), 'utf8'), moves);
+  const parts = [props.length ? `custom properties ${props.join(', ')}` : '', classes.length ? `class rules ${classes.join('; ')}` : ''].filter(Boolean);
+  return parts.length ? [`${name}: shadows demo.css: ${parts.join(' and ')}. Rename it to a demo-local name if the change is not on purpose.`] : [];
 }
 
 /** Throws when the demo has any problem from demoProblems. */
@@ -252,7 +256,7 @@ async function main() {
     return;
   }
   fetchMissingFonts(names);
-  for (const name of names) { assertOwnAssets(name); assertDemo(name); }
+  for (const name of names) { assertOwnAssets(name); assertDemo(name); demoWarnings(name).forEach((w) => console.log(`  warn     ${w}`)); }
   const results = await renderAll(clips);
   const failed = results.filter((r) => r.code !== 0);
   const done = results.filter((r) => r.code === 0);
