@@ -11,6 +11,7 @@ import { analyze } from '../../harness/lib/trace/analyze.mjs';
 import { stageOrder } from '../../harness/lib/trace/stages.mjs';
 import { selectAgents } from '../../harness/lib/trace/select.mjs';
 import { aggregate, compareAt } from '../../harness/lib/trace/aggregate.mjs';
+import { classesOf } from '../../harness/lib/trace/notes.mjs';
 import { aggregateMarkdown, agentMarkdown, compareMarkdown } from '../../harness/lib/trace/report.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -348,4 +349,43 @@ test('aggregate: studyFirst needs a refs verb, and AGENTS.md is not a guide doc'
   assert.equal(row('studyFirst').count, 1);
   assert.equal(row('docBeforePage').count, 1);
   assert.equal(row('digestBeforePage').count, 1);
+});
+
+test('the judge row carries a total, and each round shows the last judge score logged in it', async () => {
+  const { judgeEvent } = await import('../../harness/lib/run-events.mjs');
+  assert.equal(judgeEvent({ stage: 'draft', verdict: 'FIX', scores: { colour: 7, type: 6 } }).total, 13);
+  assert.equal(judgeEvent({ stage: 'draft', verdict: 'FIX' }).total, null);
+  const fold = await foldOf([
+    textRow(0, 'build'), callRow(2, 'a', 'bin/vawe dev films/f/page.html'), resultRow(30, 'a', 'vawe: dev ok in 9.0s'),
+    textRow(100, 'The coordinator sent a message: fix the grey'), usageRow(101, 'm1', 1),
+  ]);
+  const judge = (sec, total, verdict) => ({ cmd: 'judge', stage: 'draft', at: stamp(sec), total, scores: { colour: total }, verdict });
+  const runs = [judge(40, 50, 'FIX'), judge(60, 55, 'FIX'), judge(150, 71, 'PASS')];
+  const a = analyze(fold, 'x.jsonl', () => runs);
+  assert.deepEqual(a.rounds.map((r) => r.judge?.total ?? null), [55, 71]);
+  assert.match(agentMarkdown(a), /\| 71 PASS \|/);
+  assert.deepEqual(analyze(fold, 'x.jsonl').rounds.map((r) => r.judge), [null, null]);
+});
+
+test('classesOf takes the leading tag, else the keyword table, else other', () => {
+  assert.deepEqual(classesOf('[class: process] the ugly grey look'), ['process']);
+  assert.deepEqual(classesOf('The coordinator sent a message while you were working: [class: taste] fix'), ['taste']);
+  assert.deepEqual(classesOf('[class: nonsense] the text is blurry'), ['readability']);
+  assert.deepEqual(classesOf('this looks generic and grey'), ['taste']);
+  assert.deepEqual(classesOf('the cut is too fast, ease it'), ['motion']);
+  assert.deepEqual(classesOf('render crashed, a bug'), ['engine']);
+  assert.deepEqual(classesOf('slow render again'), ['engine']);
+  assert.deepEqual(classesOf('ok thanks'), ['other']);
+  assert.deepEqual(classesOf('the grey is ugly and the text is blurry'), ['readability', 'taste']);
+});
+
+test('owner notes skip the first request, and the aggregate marks classes repeated across agents', async () => {
+  const mk = async (notes, file) => analyze(await foldOf([textRow(0, 'build'), ...notes.flatMap((n, i) => [usageRow(10 + i * 100, `m${i}`, 1), textRow(50 + i * 100, n)])]), file);
+  const a = await mk(['The coordinator sent a message: it looks grey', 'The coordinator sent a message: cut is too fast'], 'a.jsonl');
+  const b = await mk(['The coordinator sent a message: [class: taste] ugly'], 'b.jsonl');
+  assert.deepEqual(a.ownerNotes.map((n) => [n.round, n.classes]), [[2, ['taste']], [3, ['motion']]]);
+  const agg = aggregate([a, b]);
+  assert.deepEqual(agg.notes.map((n) => [n.class, n.count, n.agents, n.repeats]), [['taste', 2, 2, true], ['motion', 1, 1, false]]);
+  assert.match(aggregateMarkdown(agg), /\| taste \| 2 \| 2 \| yes \|/);
+  assert.match(agentMarkdown(a), /owner notes, taste 1:/);
 });

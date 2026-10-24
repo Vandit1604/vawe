@@ -4,6 +4,7 @@ import { adviceOutcomes } from './advice.mjs';
 import { roundsOf } from './rounds.mjs';
 import { stallsOf } from './stalls.mjs';
 import { stageFirstUse, stageOrder } from './stages.mjs';
+import { ownerNotes } from './notes.mjs';
 
 const BIG_RESULT = 8000;
 const WAIT_TOOLS = new Set(['Monitor', 'TaskOutput']);
@@ -136,13 +137,15 @@ export function analyze(fold, file, readRuns = () => []) {
   const { calls, meta } = fold;
   const startMs = meta.startMs ?? 0;
   const runLog = filmsOf(calls).flatMap((film) => readRuns(film, meta));
-  const events = verbEvents(calls, startMs, runLog);
+  const judges = runLog.filter((r) => r.cmd === 'judge');
+  const events = verbEvents(calls, startMs, runLog.filter((r) => r.cmd !== 'judge'));
   const writes = calls.flatMap((c) => c.writes.map((w) => ({ ...w, ms: c.ms })));
   const pageMs = writes.find((w) => w.what === 'page')?.ms ?? null;
   const devMs = calls.find((c) => c.verbs.some((v) => v.verb === 'dev' && !v.help))?.ms ?? null;
   const wrotePage = pageMs !== null || calls.some((c) => c.newFilm);
   const failures = failureList(calls);
   const first = stageFirstUse(calls, events, startMs);
+  const rounds = roundsOf(fold, events, judges);
   return {
     file, kind: file.includes('/subagents/') ? 'sub' : 'main',
     session: meta.session ?? null, agent: meta.agent ?? null, label: calls.find((c) => c.label)?.label ?? null,
@@ -159,7 +162,8 @@ export function analyze(fold, file, readRuns = () => []) {
     docs: docReads(calls, startMs, pageMs, devMs),
     banSeen: banSeen(calls),
     failures: { total: failures.length, byClass: count(failures, (f) => f.cls), hookErrors: fold.hookErrors, list: failures.slice(0, 20) },
-    rounds: roundsOf(fold, events),
+    rounds,
+    ownerNotes: ownerNotes(rounds),
     stalls: stallsOf(fold),
     advice: adviceOutcomes(calls, fold.notes, runLog),
     cost: costOf(calls, events),

@@ -1,4 +1,5 @@
 import { VERBS } from '../../cli/verbs.mjs';
+import { noteAggregate } from './notes.mjs';
 
 const used = (a, stage) => stage in a.stages.first;
 const before = (a, x, y) => used(a, x) && (!used(a, y) || a.stages.first[x] < a.stages.first[y]);
@@ -98,7 +99,7 @@ export function aggregate(agents) {
     nextLines: next.length, nextFollowed: rate(next, 'followed'), nextIgnored: rate(next, 'ignored'),
     hints: hints.length, hintsFollowed: rate(hints, 'followed'), hintsIgnored: rate(hints, 'ignored'),
   };
-  return { n: agents.length, rows, numbers, routing, verbUse: verbUse(agents) };
+  return { n: agents.length, rows, numbers, routing, verbUse: verbUse(agents), notes: noteAggregate(agents) };
 }
 
 /** Before and after a cutoff (ms): the aggregate of the agents that started on each side. Pure. */

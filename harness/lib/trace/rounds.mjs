@@ -20,8 +20,14 @@ function sumUsage(fold, from, to) {
   return { cacheWrite, cacheRead };
 }
 
+/** The last judge score logged in a round: { total, scores, stage, verdict }, or null. Pure. */
+function judgeIn(judges, from, next) {
+  const last = judges.filter((j) => j.total != null && Date.parse(j.at) >= from && Date.parse(j.at) < next).at(-1);
+  return last ? { total: last.total, scores: last.scores, stage: last.stage, verdict: last.verdict } : null;
+}
+
 /** One entry per round: a round starts at the first request or at a user text row after it. Pure over a fold and its verb events. */
-export function roundsOf(fold, events) {
+export function roundsOf(fold, events, judges = []) {
   if (fold.meta.startMs === undefined) return [];
   const { calls } = fold;
   return boundsOf(fold).map(({ note, from, to, next }, index) => {
@@ -33,6 +39,7 @@ export function roundsOf(fold, events) {
       startMin: minutes(from - fold.meta.startMs), endMin: minutes(to - fold.meta.startMs),
       wallMin: minutes(to - from), activeMin: minutes(Math.min(activeMs, to - from)),
       calls: mine.length, renders: renders.length, renderSecs: Math.round(renders.reduce((t, e) => t + (e.secs ?? e.callSecs), 0)),
+      judge: judgeIn(judges, from, next),
       ...sumUsage(fold, from, to),
     };
   });
