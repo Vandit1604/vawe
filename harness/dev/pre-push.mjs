@@ -10,6 +10,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { planChecks, e2eKey, renderEntries } from '../lib/pre-push-plan.mjs';
+import { operationInProgress } from '../lib/git-operation.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const E2E_GREEN = path.join(ROOT, 'quality/runs/e2e/green-key.json');
@@ -88,6 +89,8 @@ function main(argv) {
   for (const c of checks) console.log(`pre-push: run ${c} (${reasons[c]})`);
   for (const c of ['site', 'unit', 'e2e'].filter((c) => !checks.includes(c))) console.log(`pre-push: skip ${c} (no changed file can affect it)`);
   if (dryRun) return 0;
+  const pending = operationInProgress(path.resolve(ROOT, git(['rev-parse', '--git-dir']).stdout.trim()));
+  if (pending) { console.error(pending); return 1; }
   if (!guards()) return 1;
   for (const c of checks) if (!STEPS[c]()) { console.error(`pre-push blocked: ${c} failed. Fix it, or push with --no-verify when you know better.`); return 1; }
   return 0;
