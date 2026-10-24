@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { frameProblems } from '../../harness/media/render-page.mjs';
+import { frameProblems, oneFlatColour } from '../../harness/media/render-page.mjs';
 
 const PAGE = 'tests/fixtures/flat/missing-font.html';
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-flat-'));
@@ -30,6 +30,13 @@ test('a sheet whose tiles are all one colour fails the same way', () => {
   const r = run('harness/media/sheet.mjs', [PAGE, '--out', tmp('sheet.png')]);
   assert.equal(r.status, 2, r.stdout + r.stderr);
   assert.match(r.stderr, /^error: every tile is one flat colour: the page drew nothing; fonts missing from assets\/fonts/m);
+});
+
+test('flat frames of different colours are a film of colour blocks, not a page that drew nothing', () => {
+  const flat = (y) => ({ flat: true, avg: [y, 128, 128] });
+  assert.equal(oneFlatColour([flat(250), flat(250), flat(251)]), true);
+  assert.equal(oneFlatColour([flat(250), flat(180)]), false);
+  assert.equal(oneFlatColour([flat(250), { flat: false, avg: [250, 128, 128] }]), false);
 });
 
 test('a declared blank film is not refused, and a half-flat film only advises', () => {

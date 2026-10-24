@@ -40,7 +40,7 @@ export function storyboardSeconds(spans, dur) {
 }
 
 async function pageTiles(pagePath, at, withWorlds, dir) {
-  const { openPage, seekAll, resolveFrame, settle, readPageMeta, probeFrames } = await import('./render-page.mjs');
+  const { openPage, seekAll, resolveFrame, settle, readPageMeta, probeStats, oneFlatColour } = await import('./render-page.mjs');
   const dur = Number(readPageMeta(pagePath, 'duration'));
   if (!(dur > 0)) die(`${pagePath} has no <meta name="duration">`);
   const frame = resolveFrame(pagePath);
@@ -60,7 +60,7 @@ async function pageTiles(pagePath, at, withWorlds, dir) {
       await opened.page.screenshot({ path: png });
       shots.push({ t, png, world: withWorlds ? worldAt(spans, t) : null });
     }
-    if (shots.length && shots.every((s) => probeFrames(s.png)[0])) throw new Error(`every tile is one flat colour: the page drew nothing; ${drewNothingHint(REPO_ROOT, pagePath)}`);
+    if (shots.length > 1 && oneFlatColour(shots.map((s) => probeStats(s.png)[0]))) throw new Error(`every tile is one flat colour: the page drew nothing; ${drewNothingHint(REPO_ROOT, pagePath)}`);
     return { shots, size: { w: frame.width, h: frame.height } };
   } finally {
     await opened.close();
