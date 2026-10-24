@@ -148,6 +148,9 @@ so cost grows with steps times calls: a six-step agent used 106 M input tokens a
 one-step agent 3 to 4 M and 3 to 7 minutes. Split a plan into one agent per step, in parallel where
 the files do not overlap.
 
+Review a sample of each batch: 3 of 10 items at random, plus every item that a check flagged. Use
+`bin/vawe e2e` and the checks as the gate. If one sampled item fails, review the whole batch.
+
 ```
 RULES (read first):
 1. Create and change files with the Write and Edit tools only. No `cat > file <<EOF`, no python or
