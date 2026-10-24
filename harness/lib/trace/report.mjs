@@ -1,3 +1,5 @@
+import { notesByClass } from './notes.mjs';
+
 const cell = (r) => (r.of ? `${r.count}/${r.of} (${r.pct}%)` : '-');
 const table = (head, rows) => [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows.map((r) => `| ${r.join(' | ')} |`)].join('\n');
 const list = (items) => items.join(', ') || 'none';
@@ -19,7 +21,7 @@ export function aggregateMarkdown(agg, title = 'Aggregate') {
   return [`## ${title} (${agg.n} agents)`, '',
     table(['what', 'agents'], agg.rows.map((r) => [r.label, cell(r)])), '',
     table(['number', 'mean', 'median'], agg.numbers.map((n) => [n.label, n.mean, n.median])), '',
-    `Routing: ${routingLine(agg.routing)}.`, '', verbUseLines(agg.verbUse)].join('\n');
+    `Routing: ${routingLine(agg.routing)}.`, '', verbUseLines(agg.verbUse), ...notesTable(agg.notes ?? [])].join('\n');
 }
 
 /** Before and after a cutoff, side by side. Pure. */
@@ -34,6 +36,17 @@ export function compareMarkdown({ before, after }, cutoffText) {
     table(['what', 'before', 'after', 'change'], rows), '',
     table(['number (mean)', 'before', 'after', 'change'], nums), '',
     `Routing before: ${routingLine(before.routing)}.`, `Routing after: ${routingLine(after.routing)}.`].join('\n');
+}
+
+const clip = (t, n) => t.slice(0, n).replace(/\|/g, '/');
+
+function notesLines(a) {
+  return notesByClass(a.ownerNotes ?? []).flatMap((g) => [`owner notes, ${g.class} ${g.notes.length}:`, ...g.notes.map((n) => `  - round ${n.round}: ${clip(n.text, 120)}`)]);
+}
+
+function notesTable(notes) {
+  if (!notes.length) return [];
+  return ['', table(['note class', 'notes', 'agents', 'repeats across agents'], notes.map((c) => [c.class, c.count, c.agents, c.repeats ? 'yes' : 'no']))];
 }
 
 const M = (n) => (n / 1e6).toFixed(2);
@@ -72,7 +85,7 @@ export function agentMarkdown(a) {
     `cost: ${a.cost.calls} calls, ${a.cost.repeats} repeats, ${a.cost.bigResults} big results (${a.cost.bigChars} chars), wait ${a.cost.waitSecs}s, render ${a.cost.renderSecs}s${a.cost.unloggedRenderSecs ? ` (+${a.cost.unloggedRenderSecs}s in render calls with no run-log record)` : ''}, slot wait ${a.cost.slotWaitSecs}s`,
     `rule breaks: ${list(Object.entries(a.breaks).filter(([, v]) => v).map(([k]) => k))}`,
   ];
-  lines.push(stallsLine(a.stalls), adviceLine(a.advice), '', roundsTable(a.rounds));
+  lines.push(stallsLine(a.stalls), adviceLine(a.advice), ...notesLines(a), '', roundsTable(a.rounds));
   for (const f of a.failures.list.slice(0, 5)) lines.push(`  - ${f.cls}: ${f.call} :: ${f.why}`);
   for (const r of a.cost.topRepeats.slice(0, 3)) lines.push(`  - ${r.times}x ${r.call}`);
   return lines.join('\n');
