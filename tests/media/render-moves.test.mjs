@@ -104,3 +104,13 @@ test('demoProblems: a cubic-bezier or a power ease is named with the job table f
   assert.equal(demoProblems('js', moves).length, 3);
   assert.throws(() => assertDemo('js', moves), /hand-written ease/);
 });
+
+test('demoProblems: a demo that sets a property demo.css already sets on a class, or redeclares a custom property of it, is named', () => {
+  const moves = tmp();
+  demoIn(moves, 'x', '<style>.card { position: absolute; padding: 1px; } .own { padding: 2px; } .card .in { color: red; } :root { --accent: red; --mine: 1; }</style>');
+  fs.writeFileSync(path.join(moves, 'demo', 'demo.css'), ':root { --accent: blue; } .card { padding: 4px; color: blue; } :is(.own, .b) { padding: 1px; }');
+  const problems = demoProblems('x', moves);
+  assert.equal(problems.length, 2);
+  assert.match(problems.join('\n'), /--accent is already set by demo\.css/);
+  assert.match(problems.join('\n'), /\.card \(padding\) is already set by demo\.css/);
+});

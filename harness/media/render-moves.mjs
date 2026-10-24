@@ -77,10 +77,38 @@ function handWrittenEases(html) {
   return found;
 }
 
-/** What a demo does that the framework already owns: a hand-written ease, with the job table's fix. */
+/** The custom properties a css text declares, and for each class it styles alone (a rule whose selector is just `.name`) the properties it sets. */
+function definedNames(css) {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/:(?:is|where|not)\([^)]*\)/g, '');
+  const props = new Set([...clean.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));
+  const classes = new Map();
+  for (const [, selectors, body] of clean.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const set = (cls) => classes.set(cls, new Set([...(classes.get(cls) || []), ...[...body.matchAll(/(?:^|;)\s*([a-z-]+)\s*:/g)].map((m) => m[1])]));
+    selectors.split(',').map((s) => s.trim()).filter((s) => /^\.[\w-]+$/.test(s)).forEach(set);
+  }
+  return { props, classes };
+}
+
+const sharedNames = new Map();
+const demoCssNames = (moves) => {
+  if (!sharedNames.has(moves)) sharedNames.set(moves, definedNames(fs.readFileSync(path.join(moves, 'demo', 'demo.css'), 'utf8')));
+  return sharedNames.get(moves);
+};
+
+function redefinedNames(html, moves) {
+  const own = definedNames([...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n'));
+  const shared = demoCssNames(moves);
+  const shadowed = [...own.classes].map(([cls, set]) => [cls, [...set].filter((p) => shared.classes.get(cls)?.has(p))]).filter(([, ps]) => ps.length);
+  return [...[...own.props].filter((p) => shared.props.has(p)), ...shadowed.map(([cls, ps]) => `${cls} (${ps.join(', ')})`)];
+}
+
+/** What a demo does that the framework already owns: a hand-written ease (with the job table's fix), or a demo.css name defined again. */
 export function demoProblems(name, moves = MOVES) {
   const html = fs.readFileSync(demoPath(name, moves), 'utf8');
-  return handWrittenEases(html).map((at) => `${name}: hand-written ease at ${at}. Use easeFn from core/motion, by job (${EASE_FIX})`);
+  return [
+    ...handWrittenEases(html).map((at) => `${name}: hand-written ease at ${at}. Use easeFn from core/motion, by job (${EASE_FIX})`),
+    ...redefinedNames(html, moves).map((n) => `${name}: ${n} is already set by demo.css. Use the shared one, or give the demo's own class or property another name.`),
+  ];
 }
 
 /** Throws when the demo has any problem from demoProblems. */
