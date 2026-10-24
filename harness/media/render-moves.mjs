@@ -9,10 +9,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolveFrame, readPageMeta } from './render-page.mjs';
 import { ensureFonts, fontFilesIn } from '../lib/ensure-fonts.mjs';
 import { JOBS } from '../../core/motion/ease-jobs.js';
+import { pageAuthoring } from '../lib/motion-stamp.mjs';
+import { isWaived, waiverHint } from '../lib/waivers.mjs';
 import { chooseCrf, RENDER_CRF, CLIP_BUDGET_BYTES } from '../lib/clip-budget.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -61,7 +63,7 @@ export function assertOwnAssets(name, moves = MOVES) {
 }
 
 const POWER = /\*\*\s*[\d.]+|Math\.pow\(/;
-const EASE_WORD = /ease|easing|curve|cubic|quart|quint/i;
+const EASE_WORD = /\b(?:[Ee]ase\w*|EASE\w*|[Ee]asing|[Cc]urve|CURVE|[Cc]ubic|[Qq]uart|[Qq]uint)\b|(?<=[a-z0-9_])(?:Ease|Curve|Cubic|Quart|Quint)/;
 const EASE_FIX = JOBS.map((j) => `${j.job.toLowerCase()}: easeFn('${j.ease}')`).join('; ');
 
 /** The lines of a demo that hand-write an ease: a cubic-bezier( string, or a power expression on an ease or curve (a line naming one, or inside a function named like one). */
@@ -104,8 +106,9 @@ function redefinedNames(html, moves) {
 
 /** What makes a demo refuse to render: a hand-written ease, with the job table's fix. */
 export function demoProblems(name, moves = MOVES) {
-  const html = fs.readFileSync(demoPath(name, moves), 'utf8');
-  return handWrittenEases(html).map((at) => `${name}: hand-written ease at ${at}. Use easeFn from core/motion, by job (${EASE_FIX})`);
+  const file = demoPath(name, moves);
+  if (isWaived(pageAuthoring(file), 'hand-written-ease')) return [];
+  return handWrittenEases(fs.readFileSync(file, 'utf8')).map((at) => `${name}: hand-written ease at ${at}. Use easeFn from core/motion, by job (${EASE_FIX}); ${waiverHint('hand-written-ease')} for a faithful copy of a real product's curve`);
 }
 
 /** One advice line for a demo that shadows demo.css (custom properties first), or none. It never refuses. */
@@ -256,7 +259,8 @@ async function main() {
     return;
   }
   fetchMissingFonts(names);
-  for (const name of names) { assertOwnAssets(name); assertDemo(name); demoWarnings(name).forEach((w) => console.log(`  warn     ${w}`)); }
+  for (const name of names) { assertOwnAssets(name); assertDemo(name); }
+  if (only) demoWarnings(only).forEach((w) => console.log(`  warn     ${w}`));
   const results = await renderAll(clips);
   const failed = results.filter((r) => r.code !== 0);
   const done = results.filter((r) => r.code === 0);
@@ -269,7 +273,7 @@ async function main() {
   process.exit(failed.length ? 1 : 0);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((e) => {
     console.error(`vawe moves: ${e.message}`);
     process.exit(1);

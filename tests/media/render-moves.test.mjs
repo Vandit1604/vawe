@@ -105,6 +105,18 @@ test('demoProblems: a cubic-bezier or a power ease is named with the job table f
   assert.throws(() => assertDemo('js', moves), /hand-written ease/);
 });
 
+test('demoProblems: increase, decrease and release are not ease words; a vetted hand-written-ease waiver passes a demo', () => {
+  const moves = tmp();
+  demoIn(moves, 'words', '<script>function increase(n) {\n  return n ** 2;\n}\nconst release = (n) => n ** 2;</script>');
+  assert.deepEqual(demoProblems('words', moves), []);
+  const curve = '<style>.a{animation:k 1s cubic-bezier(0.2, 0, 0, 1)}</style>';
+  const authoring = (why) => `<script type="application/json" id="authoring">{"allow":["hand-written-ease"],"_why":{"hand-written-ease":"${why}"}}</script>`;
+  demoIn(moves, 'kept', curve + authoring('copy of the real product curve, measured 0.32 s at 0.5 s'));
+  assert.deepEqual(demoProblems('kept', moves), []);
+  demoIn(moves, 'lazy', curve + authoring('intentional'));
+  assert.match(demoProblems('lazy', moves)[0], /hand-written ease.*"allow": \["hand-written-ease"\]/);
+});
+
 test('writeClipSheet: a committed clip gives a png contact sheet through sheet.mjs', () => {
   const out = path.join(tmp(), 'agent-progress-sheet.png');
   assert.equal(writeClipSheet('agent-progress', out), out);
