@@ -13,4 +13,18 @@ export const DEV_VERBS = [
       ? { script: 'harness/dev/worktree-prune.mjs', args: v.yes ? ['--yes'] : [] }
       : { script: 'harness/dev/worktree-status.mjs', args: [] }),
   },
+  {
+    name: 'bots',
+    summary: 'read the site bot log (BOT_LOG_DIR of vawe.dev): hits, pages, 404s, markdown share, verified IPs and AI referrals per bot',
+    positional: [{ name: 'log', required: true, help: 'a log directory (bots-YYYY-MM-DD.jsonl files) or one file' }],
+    flags: [
+      { name: 'days', type: 'number', help: 'only the last n days' },
+      { name: 'offline', type: 'bool', help: 'use the cached vendor IP lists only' },
+    ],
+    example: 'vawe-dev bots ./bots --days 7',
+    build: (v, positional = []) => ({
+      script: 'harness/dev/bots.mjs',
+      args: [...positional, ...(v.days !== undefined ? ['--days', String(v.days)] : []), ...(v.offline ? ['--offline'] : [])],
+    }),
+  },
 ];

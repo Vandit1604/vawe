@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-import { LEGACY_REDIRECTS } from "./lib/redirects.mjs";
+import { ALIAS_HOST_REDIRECT, LEGACY_REDIRECTS } from "./lib/redirects.mjs";
 
 // The docs are a separate Next app (docs-site/) pinned to Next 16 + fumadocs 16, while this site
 // is on Next 15. Rather than force a framework upgrade on one of them so they can share a codebase,
@@ -40,6 +40,7 @@ const nextConfig = {
         destination: "https://vawe.dev/:path*",
         permanent: true,
       },
+      ALIAS_HOST_REDIRECT,
       ...LEGACY_REDIRECTS,
       // THE FEATURES FOLD: eight feature detail pages became three sections on /features itself.
       // Wildcarded, because the slugs were content and a new one must not 404 either. The route's
