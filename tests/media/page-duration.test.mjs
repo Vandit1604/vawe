@@ -86,8 +86,8 @@ test('an endless animation does not set the end', async () => {
   });
 });
 
-test('a page driven by window.seek alone cannot be auto: it must state a number', async () => {
-  await withPage('auto', 'window.seek = (t) => { document.getElementById("t").style.opacity = String(Math.min(1, t)); };', async (file) => {
+test('a page with no animation at all cannot be auto: it must state a number', async () => {
+  await withPage('auto', '', async (file) => {
     await assert.rejects(resolveLength(file), /duration is auto but no animation ends.*state a number/);
   });
 });

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { metaOf } from '../lib/page-meta.mjs';
 import { HOLD_RULE, lineNeed } from '../lib/read-hold.mjs';
+import { pageDigest } from '../lib/approval.mjs';
 
 // A draft renders at 30 fps and a final at 60: a length on the 1/30 s grid is a whole number of frames in both.
 const GRID_FPS = 30;
@@ -24,12 +25,13 @@ export function autoLength({ endS, lastWorldWords }) {
   return { seconds, endS, holdS };
 }
 
-// Runs in the page: the end of the last finite animation, and the word count of each text leaf in the last world.
+// Runs in the page: the end of the last finite animation, whether a frame hook or window.seek can add motion later, and the word count of each text leaf in the last world.
 function readPageEnd() {
   const { endS, infinite } = window.vawe.animationEnd();
   const world = [...document.querySelectorAll('[data-world]')].at(-1);
   const leaves = world ? [...world.querySelectorAll('*')].filter((el) => !el.closest('[aria-hidden="true"]') && !el.children.length && el.textContent.trim()) : [];
-  return { endS, infinite, lastWorldWords: leaves.map((el) => el.textContent.split(/\s+/).filter(Boolean).length) };
+  const late = typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length > 0;
+  return { endS, infinite, late, lastWorldWords: leaves.map((el) => el.textContent.split(/\s+/).filter(Boolean).length) };
 }
 
 /**
@@ -41,6 +43,9 @@ export async function lengthOfOpenPage(page, pagePath) {
   if (typeof stated === 'number') return { seconds: stated || 0, auto: false };
   const read = await page.evaluate(readPageEnd);
   if (stated === null) return { seconds: read.endS, auto: false };
+  if (read.late) {
+    throw new DurationError(`${pagePath}: auto needs every animation to exist at load; state a number in <meta name="duration" content="seconds">`);
+  }
   if (!(read.endS > 0)) {
     throw new DurationError(`${pagePath}: duration is auto but no animation ends (a page driven by window.seek alone has no end to find): state a number in <meta name="duration" content="seconds">`);
   }
@@ -49,26 +54,30 @@ export async function lengthOfOpenPage(page, pagePath) {
 
 const found = new Map();
 
-/** The length of a page as an object, see lengthOfOpenPage. A stated number needs no browser; an auto page is measured once per file version. */
-export async function resolveLength(pagePath) {
+/**
+ * The length of a page as an object, see lengthOfOpenPage. A stated number needs no browser. An auto page is measured at `frame` (the aspect
+ * the render uses, default the page's own), once per version of the page and the files it references; a render passes the number on in frame.duration.
+ */
+export async function resolveLength(pagePath, frame = null) {
   const file = path.resolve(pagePath);
   const stated = statedLength(fs.readFileSync(file, 'utf8'));
   if (typeof stated === 'number') return { seconds: stated || 0, auto: false };
-  const stat = fs.statSync(file);
-  const key = `${file}:${stat.mtimeMs}:${stat.size}`;
-  if (!found.has(key)) found.set(key, measure(file));
+  const { resolveFrame } = await import('./render-page.mjs');
+  const at = resolveFrame(file, { aspect: frame?.aspect });
+  const key = `${file}:${pageDigest(file)}:${at.width}x${at.height}`;
+  if (!found.has(key)) found.set(key, measure(file, at));
   return found.get(key);
 }
 
 /** The length the engine hands an auto page as window.vawe.duration, so animations sized to the film span it; undefined for a page that states a number. */
-export async function autoDuration(pagePath) {
+export async function autoDuration(pagePath, frame = null) {
   if (statedLength(fs.readFileSync(pagePath, 'utf8')) !== 'auto') return undefined;
-  return (await resolveLength(pagePath)).seconds;
+  return (await resolveLength(pagePath, frame)).seconds;
 }
 
-async function measure(file) {
-  const { openPage, gotoLoaded, settle, resolveFrame } = await import('./render-page.mjs');
-  const { page, url, close } = await openPage(file, resolveFrame(file, {}), { final: false, measure: true });
+async function measure(file, frame) {
+  const { openPage, gotoLoaded, settle } = await import('./render-page.mjs');
+  const { page, url, close } = await openPage(file, frame, { final: false, measure: true });
   try {
     await gotoLoaded(page, url, file);
     await settle(page);

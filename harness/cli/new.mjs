@@ -67,7 +67,7 @@ const STARTER_TEMPLATE = `<!doctype html>
 import { enter, keys, layer, leave, stagger, EASE } from '../../core/motion/presets.js';
 const root = document.documentElement;
 const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
-const end = window.vawe.duration;
+const end = window.vawe?.duration ?? parseFloat(document.querySelector('meta[name="duration"]').content);
 const $ = (s) => document.querySelector(s);
 const worlds = [...document.querySelectorAll('[data-world]')];
 // each ground blob drifts by [x, y] fractions of the frame while its world shows; a world with no words also blooms them

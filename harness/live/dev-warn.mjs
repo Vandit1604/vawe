@@ -47,6 +47,11 @@ export function readPlanState(pagePath, root = ROOT, opened = null) {
 }
 
 /** The opened page's plan, or null with one line on stderr when the page cannot be read: the render that follows names the real error. */
+/** The note for a page whose length is auto: the brief's length check needs a number and waits for the render, which finds it. [] for a page that states one. */
+export function lengthNote(html) {
+  return statedLength(html) === 'auto' ? ['length: auto (the dev render finds it; the brief length check waits for that number)'] : [];
+}
+
 async function readPage(page) {
   try { return await readPlan(path.resolve(page)); } catch (e) {
     console.error(`plan: the page was not read before the render: ${String(e.message).split('\n')[0]}`);
@@ -56,7 +61,7 @@ async function readPage(page) {
 
 const [page] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (page && !isClipDemo(page) && import.meta.url === `file://${process.argv[1]}`) {
-  const lines = planStatusLines(readPlanState(page, ROOT, await readPage(page)));
+  const lines = [...lengthNote(fs.readFileSync(page, 'utf8')), ...planStatusLines(readPlanState(page, ROOT, await readPage(page)))];
   if (lines.length) console.log(`${lines.join('\n')}\n`);
   process.exit(0);
 }

@@ -200,7 +200,7 @@ export async function openPage(pagePath, frame, { warm = false, final = true, la
   await cdp.send('Animation.enable');
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
   opened.cdp = cdp;
-  const duration = measure ? undefined : await autoDuration(pagePath);
+  const duration = measure ? undefined : frame.duration ?? await autoDuration(pagePath, frame);
   await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify({ ...frame, eases: EASE_VARS, duration })});(${installPageReady})();window.__pageFonts = ${awaitFonts};window.__pageReady = ${awaitReady};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
 }
@@ -818,7 +818,9 @@ async function muxPageAudio(read, pagePath, { video, out, duration, explicit, fa
 export async function renderPage(pagePath, outPath, opts = {}) {
   const { fps = 30, blur = 1, durArg = null, from = 0, progress = false, final = false } = opts;
   if (!fs.existsSync(pagePath)) throw new RenderError(`no such file: ${pagePath}`);
-  const frame = resolveFrame(pagePath, opts);
+  const canvas = resolveFrame(pagePath, opts);
+  const length = await resolveLength(pagePath, canvas).catch((e) => { throw e instanceof DurationError ? new RenderError(e.message) : e; });
+  const frame = length.auto ? { ...canvas, duration: length.seconds } : canvas;
   const wantAudio = opts.audio ?? (from === 0 && durArg == null);
   if (opts.audio && from > 0) throw new RenderError('--audio needs a render from 0: the mix has no offset');
   const phases = createPhaseTimer();
@@ -828,7 +830,6 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   removeStaleFrames(path.dirname(path.resolve(outPath)));
   const { page, url, close, chrome } = await phases.time('chrome', () => openPage(pagePath, frame, { final }));
   const scriptErrors = watchPageErrors(page);
-  let length;
   try {
     const audioRead = await phases.time('load', async () => {
       await gotoLoaded(page, url, pagePath);
@@ -837,7 +838,6 @@ export async function renderPage(pagePath, outPath, opts = {}) {
         if (/^(font (still loading|failed)|page not ready)/.test(msg)) throw new InvariantError([msg]);
         throw e;
       }
-      length = await resolveLength(pagePath).catch((e) => { throw e instanceof DurationError ? new RenderError(e.message) : e; });
       const read = await readAudio(page, pagePath, length.seconds);
       const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page, pagePath), ...read.problems, ...await assertProblems(page)];
       if (early.length) throw new InvariantError(early);

@@ -17,7 +17,8 @@ import { installPageClock } from '../core/engine/page-clock.js';
 import { installPageFrame, installPageReady, awaitReady } from '../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../core/layout/aspects.js';
 import { EASE_VARS } from '../core/motion/presets.js';
-import { parsePage, applyEdits } from './page-source.mjs';
+import { parsePage } from './page-source.mjs';
+import { saveEdits } from './save-edits.mjs';
 import { chatRoutes } from './chat.mjs';
 
 const pageArg = process.env.PAGE || process.argv[2];
@@ -48,7 +49,7 @@ const pageModel = async () => {
 
 // The page itself, with the clock and frame facts installed before its first script, as render-page.mjs does.
 async function framedPage(aspect) {
-  const length = await resolveLength(pageFile);
+  const length = await resolveLength(pageFile, { aspect });
   const [width, height] = aspectDims(aspect);
   const boot = `<script>(${installPageClock})();(${installPageFrame})(${JSON.stringify({ aspect, width, height, eases: EASE_VARS, duration: length.auto ? length.seconds : undefined })});(${installPageReady})();window.__pageReady = ${awaitReady};</script>`;
   const html = fs.readFileSync(pageFile, 'utf8');
@@ -109,10 +110,7 @@ const routes = (req, res) => {
     readBody(req, async (body, err) => {
       if (!body || !Array.isArray(body.edits)) return sendJson(res, 400, { ok: false, error: err ? String(err.message) : 'no edits' });
       try {
-        const src = fs.readFileSync(pageFile, 'utf8');
-        const out = applyEdits(src, body.edits);
-        if (out !== src) { undoStack.push(src); fs.writeFileSync(pageFile, out); }
-        sendJson(res, 200, { ok: true, ...await pageModel() });
+        sendJson(res, 200, { ok: true, ...await saveEdits(pageFile, body.edits, undoStack, pageModel) });
       } catch (e) { sendJson(res, 409, { ok: false, error: String(e.message) }); }
     });
     return true;

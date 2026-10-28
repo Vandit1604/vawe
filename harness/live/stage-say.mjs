@@ -133,7 +133,8 @@ export function nextStep(page, root = process.cwd()) {
     return { name, stage: 'states', next: SAY.states(name, rel), why: 'DESIGN.md is newer than the page; the states come before the frames and the motion' };
   }
   if (early && hasWorlds(page)) return { name, stage: 'states', next: SAY.frames(name, rel), why: 'the frames come before the motion' };
-  const stale = !draft && !final && brief ? briefLengthLine(brief, Number(statedLength(read(page)))) : null;
+  const stated = statedLength(read(page));
+  const stale = !draft && !final && brief && typeof stated === 'number' ? briefLengthLine(brief, stated) : null;
   if (stale) {
     return { name, stage: 'board', next: `bring Length, Board and Spec in films/${name}/brief.md to the page, then bin/vawe storyboard ${rel}`, why: `${stale}; a plan for another film length is stale` };
   }
