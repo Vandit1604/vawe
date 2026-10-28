@@ -25,21 +25,18 @@ function parseArgs(argv) {
   return out;
 }
 
-function encode(shots, holds, frame, fps, outFile) {
-  const tmp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'vawe-animatic-'));
-  try {
-    const ext = frameFormat(true).ext;
-    let n = 0;
-    shots.forEach((s, i) => { for (let k = 0; k < holds[i].frames; k++) fs.copyFileSync(s.png, path.join(tmp, `f${String(n++).padStart(6, '0')}.${ext}`)); });
-    const starts = Array.from({ length: n + 1 }, (_, i) => i);
-    fs.mkdirSync(path.dirname(outFile), { recursive: true });
-    const r = ffmpegEncode(tmp, fps, Array(n).fill(1), starts, outFile, { final: true, size: [frame.outWidth, frame.outHeight] });
-    if (r.status !== 0 || !fs.existsSync(outFile)) die(`ffmpeg encode failed (exit ${r.status}): ${(r.stderr || '').trim().slice(0, 600)}`);
-    return n;
-  } finally {
-    fs.rmSync(tmp, { recursive: true, force: true });
-  }
+function encode(tmp, shots, holds, frame, fps, outFile) {
+  const ext = frameFormat(true).ext;
+  let n = 0;
+  shots.forEach((s, i) => { for (let k = 0; k < holds[i].frames; k++) fs.linkSync(s.png, path.join(tmp, `f${String(n++).padStart(6, '0')}.${ext}`)); });
+  const starts = Array.from({ length: n + 1 }, (_, i) => i);
+  fs.mkdirSync(path.dirname(outFile), { recursive: true });
+  const r = ffmpegEncode(tmp, fps, Array(n).fill(1), starts, outFile, { final: true, size: [frame.outWidth, frame.outHeight] });
+  if (r.status !== 0 || !fs.existsSync(outFile)) die(`ffmpeg encode failed (exit ${r.status}): ${(r.stderr || '').trim().slice(0, 600)}`);
+  return n;
 }
+
+const holdLine = (h) => `  ${h.id}  ${h.frames === 0 ? 'under one frame' : `${h.hold.toFixed(2)} s`}`;
 
 async function main(argv) {
   const t0 = Date.now();
@@ -48,27 +45,29 @@ async function main(argv) {
   if (!fs.existsSync(args.page)) die(`no such page: ${args.page}`);
   const abs = path.resolve(args.page);
   const film = path.basename(path.dirname(abs));
-  const stills = path.resolve('out', `${film}-frames`);
-  fs.mkdirSync(stills, { recursive: true });
+  const tmp = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'vawe-animatic-'));
   const frame = resolveFrame(abs, {});
   const opened = await openPage(abs, frame, { warm: true });
-  let shots;
+  let shots, frames, holds, duration, outFile;
   try {
     if (!opened.reused) {
       await opened.page.goto(opened.url, { waitUntil: 'load' });
       await settle(opened.page);
       await opened.markWarm?.();
     }
-    shots = await shootWorlds(opened, abs, stills, { ids: [], suffix: '', zoom: false });
+    shots = await shootWorlds(opened, abs, tmp, { ids: [], suffix: '', zoom: false, layout: false });
   } finally {
     await opened.close();
   }
-  const duration = await resolveDuration(abs);
-  const holds = animaticHolds(shots, cutSpans(shots, duration), args.fps);
-  const kept = shots.filter((_, i) => holds[i].frames > 0);
-  const outFile = path.resolve(args.out || path.join('out', `${film}-animatic.mp4`));
-  const frames = encode(kept, holds.filter((h) => h.frames > 0), frame, args.fps, outFile);
-  console.log([`animatic: ${outFile}`, ...holds.map((h) => `  ${h.id}  ${h.hold.toFixed(2)} s`), `total: ${(frames / args.fps).toFixed(2)} s at ${args.fps} fps (page ${duration} s)`, `time: ${((Date.now() - t0) / 1000).toFixed(1)} s`].join('\n'));
+  try {
+    duration = await resolveDuration(abs);
+    holds = animaticHolds(shots, cutSpans(shots, duration), args.fps);
+    outFile = path.resolve(args.out || path.join('out', `${film}-animatic.mp4`));
+    frames = encode(tmp, shots.filter((_, i) => holds[i].frames > 0), holds.filter((h) => h.frames > 0), frame, args.fps, outFile);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+  console.log([`animatic: ${outFile}`, ...holds.map(holdLine), `total: ${(frames / args.fps).toFixed(2)} s at ${args.fps} fps (page ${duration} s)`, `time: ${((Date.now() - t0) / 1000).toFixed(1)} s`].join('\n'));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main(process.argv.slice(2)).catch((e) => die(e.stack || String(e)));
