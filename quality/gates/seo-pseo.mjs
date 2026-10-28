@@ -13,8 +13,10 @@
 //      under 2 MB (Googlebot reads the first 2 MB; AI crawlers run no JavaScript)
 //
 // WHY. Template pages get deindexed unless each has a unique data point and 2 or more hand-written pages
-// link to it; a hub that is only a card grid gets no pages indexed. Source: the pSEO research in the
-// 2026-10-29 site notes. The thresholds below are those numbers, not measured on this site.
+// link to it (https://www.reddit.com/r/bigseo/comments/1t0xwsy). A hub that is only a card grid got 0 of 15
+// pages indexed (https://arnjen.com/blog/programmatic-seo-225-pages-google-indexed-18-percent). AI crawlers
+// do not run JavaScript (https://vercel.com/blog/the-rise-of-the-ai-crawler). The thresholds below are
+// those numbers, not measured on this site.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +31,9 @@ const argv = process.argv.slice(2);
 const flag = (name) => argv.includes(name);
 const base = (argv[argv.indexOf('--base') + 1] && argv.includes('--base') ? argv[argv.indexOf('--base') + 1] : 'http://localhost:3187').replace(/\/$/, '');
 
+// MIN_INBOUND is the 2 hand-written links from https://www.reddit.com/r/bigseo/comments/1t0xwsy.
+// MIN_HUB_PROSE_WORDS is a judgement for "more than a card grid" (https://arnjen.com/blog/programmatic-seo-225-pages-google-indexed-18-percent), not a measured number.
+// MIN_COPY_SHARE is a judgement: AI crawlers read only the server HTML (https://vercel.com/blog/the-rise-of-the-ai-crawler).
 const MIN_INBOUND = 2;
 const MIN_HUB_PROSE_WORDS = 40;
 const MIN_COPY_SHARE = 0.8;

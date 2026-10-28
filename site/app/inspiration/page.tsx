@@ -27,7 +27,7 @@ export default function Inspiration() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLdScript(inspirationSchema({ name: "Motion video inspiration", description: INSPIRATION_DESCRIPTION, count: 48 }))}
+        dangerouslySetInnerHTML={jsonLdScript(inspirationSchema({ name: "Motion video inspiration", description: INSPIRATION_DESCRIPTION, count: INSPIRATION_PAGE }))}
       />
       <div className="wrap">
         <main id="content" className="in" tabIndex={-1}>
