@@ -27,14 +27,14 @@ export function imagesIn(text) {
 
 /** Why a call failed, in one line: the last meaningful stderr line, else the exit code or signal. */
 export function reasonOf({ code, signal, stderr = '' }) {
-  const line = String(stderr).split('\n').map((l) => l.trim()).filter((l) => l && !/^at /.test(l)).at(-1);
+  const line = String(stderr).split('\n').map((l) => l.trim()).filter((l) => l && !/^at /.test(l) && !/^Node\.js v\d/.test(l)).at(-1);
   const how = signal ? `killed by ${signal}` : `exit ${code}`;
   return line ? `${how}: ${line.slice(0, MAX_REASON)}` : how;
 }
 
 const CAUSES = [
   [/render slot|Navigation timeout/i, 'render slot or navigation timeout'],
-  [/detached Frame|Target closed|shared browser|lost its page/i, 'browser lost'],
+  [/detached Frame|Target closed|shared browser|lost its page|Protocol error \([^)]*\): (Target|Session|Connection) closed|protocolTimeout/i, 'browser lost'],
   [/killed by|exit 137/i, 'killed'],
   [/no such|missing|usage|unknown verb|not a valid|needs --/i, 'bad arguments'],
 ];

@@ -1,5 +1,6 @@
 // Pure parts of `vawe strip`: the window around a moment, the cuts of a film, and when the motion in a window starts and settles.
 // No I/O and no heavy imports: harness/cli/verbs.mjs loads this file to check the arguments.
+import { atProblem } from './at-problem.mjs';
 
 export const STRIP_SPAN = 1;
 export const STRIP_FPS = 8;
@@ -13,7 +14,7 @@ const round = (n) => +n.toFixed(3);
 export function stripProblem({ at, cuts, span, fps }) {
   if (cuts && at !== undefined) return 'give --at <s> or --cuts, not both';
   if (!cuts && at === undefined) return 'missing --at <s> (the moment to look at) or --cuts (one strip per world change or shot cut)';
-  if (!cuts && !(Number.isFinite(Number(at)) && Number(at) >= 0)) return `--at is not a number of seconds: "${at}"`;
+  if (!cuts && atProblem(at)) return atProblem(at);
   if (!(span > 0)) return '--span must be more than 0 seconds';
   if (!(fps > 0)) return '--fps must be more than 0 (0.5 is one frame every 2 s)';
   return null;

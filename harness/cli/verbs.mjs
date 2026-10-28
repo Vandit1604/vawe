@@ -4,10 +4,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { UsageError } from './parse.mjs';
+import { causeOf } from '../lib/verb-log.mjs';
 import { compareProblem, CUTS } from '../media/compare-frames.mjs';
 import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
 import { stillProblem } from '../media/see/still-math.mjs';
+import { atProblem } from '../media/see/at-problem.mjs';
 import { parseTargets, shotProblem } from '../media/shot-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
@@ -45,6 +47,11 @@ export const testSteps = () => [{ node: ['--test', ...testFiles('tests').filter(
 const pageName = (page) => {
   const base = path.basename(page, '.html');
   return base === 'page' ? path.basename(path.dirname(path.resolve(page))) : base;
+};
+export const devFix = (reason, [page]) => {
+  if (/render slot|Navigation timeout/i.test(reason)) return `bin/vawe wait ${page}`;
+  if (causeOf(reason) === 'browser lost') return `the browser died mid-render: find the heavy second with bin/vawe dev ${page} --from 0 --to 4, then the next 4 s; a page with large images, canvas or WebGL work per frame crashes it`;
+  return `bin/vawe frames ${page}`;
 };
 const devNext = (v, [page]) => {
   if (isClipDemo(page)) return nextStep(path.resolve(page), ROOT).next;
@@ -110,6 +117,8 @@ export const VERBS = [
       { name: 'fps', type: 'number', default: 'the video rate', help: 'with --spec: frame rate for the tables' },
       { name: 'elements', type: 'number', default: 6, help: 'with --spec: moving elements to track' },
       { name: 'fast', type: 'bool', help: 'with --spec: half the analysis width and OCR samples, for iteration' },
+      { name: 'probe', type: 'bool', help: 'a page only, nothing else is read: print the box, opacity, transform, filter and animation progress of every element matching --sel at --at; use it instead of a throwaway page.evaluate script' },
+      { name: 'sel', type: 'string', help: 'with --probe: the CSS selector of the elements to read' },
       { name: 'sync-brief', type: 'bool', help: 'a page only, nothing else is read: write the times the last draft measured into the brief\'s Words and Objects tables (after you retimed on purpose)' },
     ],
     example: 'vawe see out/my-launch.mp4   |   vawe see films/my-launch/page.html --vs <ref-id>   |   vawe see <ref-id> --at 2.4   |   vawe see refs/ad.mp4 --spec',
@@ -120,6 +129,14 @@ export const VERBS = [
         if (!film.endsWith('.mp4')) throw new UsageError('--spec measures a reference mp4: usage: vawe see <ref.mp4> --spec');
         return [{ script: 'harness/media/ref-spec.mjs', args: [film, ...opt('--out', v.out), ...opt('--fps', v.fps), ...opt('--elements', v.elements), ...(v['no-ocr'] ? [] : ['--ocr']), ...(v.fast ? ['--fast'] : []), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
       }
+      if (v.sel && !v.probe) throw new UsageError('--sel needs --probe');
+      if (v.probe) {
+        if (!film.endsWith('.html')) throw new UsageError('--probe reads a page: usage: vawe see <page> --probe --sel <css> --at <s>');
+        if (!v.sel) throw new UsageError('--probe needs --sel <css>, the elements to read: vawe see <page> --probe --sel ".card" --at 2.4');
+        const problem = atProblem(v.at ?? '0');
+        if (problem) throw new UsageError(problem);
+        return [{ script: 'harness/media/see.mjs', args: [film, '--probe', '--sel', v.sel, ...opt('--at', v.at)] }];
+      }
       if (v['sync-brief']) {
         if (!film.endsWith('.html')) throw new UsageError('--sync-brief reads a page: usage: vawe see <page> --sync-brief');
         return [{ script: 'harness/media/spec-sync.mjs', args: [film] }];
@@ -128,7 +145,7 @@ export const VERBS = [
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/see/one.mjs', args: [film, ...opt('--vs', v.vs), ...opt('--at', v.at), ...opt('--at-b', v['at-b']), ...opt('--from', v.from), ...opt('--to', v.to), ...opt('--draft', v.draft), ...opt('--out', v.out), ...(v['no-ocr'] ? ['--no-ocr'] : []), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
     },
-    next: (v, [film]) => (v.spec ? 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild' : v['sync-brief'] ? `bin/vawe dev ${film}; the changed cells end in *` : v.vs ? 'Read see.md, then every image path in it at full size, each with the numbers under it; act on the advice lines (each names the page literal), then vawe see again' : 'Read see.md, then every image path in it at full size, each with the numbers under it; vawe see <film> --vs <ref id> puts a reference beside it'),
+    next: (v, [film]) => (v.probe ? 'compare the numbers with the move you meant; vawe strip <page> --at <s> shows the frames through that second' : v.spec ? 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild' : v['sync-brief'] ? `bin/vawe dev ${film}; the changed cells end in *` : v.vs ? 'Read see.md, then every image path in it at full size, each with the numbers under it; act on the advice lines (each names the page literal), then vawe see again' : 'Read see.md, then every image path in it at full size, each with the numbers under it; vawe see <film> --vs <ref id> puts a reference beside it'),
   },
   {
     tier: 'core',
@@ -197,7 +214,7 @@ export const VERBS = [
       { script: 'harness/live/dev-end.mjs', args: [page] },
     ],
     next: devNext,
-    fix: (reason, [page]) => (/render slot|Navigation timeout/i.test(reason) ? `bin/vawe wait ${page}` : `bin/vawe frames ${page}`),
+    fix: devFix,
   },
   {
     tier: 'core',
@@ -228,7 +245,7 @@ export const VERBS = [
   },
   {
     tier: 'core',
-    name: 'wait', summary: 'use when a draft, clip or final render is running: waits for it and prints its result line; exit 1 when it failed',
+    name: 'wait', summary: 'use when a draft, clip or final render is running, instead of sleep, ps or an until loop: waits for it and prints its result line; exit 1 when it failed',
     positional: [{ name: 'page|film', required: true, help: 'films/<name>/page.html, or the film name; a call returns after about 3.5 minutes with a STILL RUNNING line and a progress line a minute: call it again' }],
     flags: [],
     example: 'vawe wait films/my-launch/page.html   |   vawe wait my-launch',

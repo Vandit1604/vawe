@@ -76,7 +76,8 @@ async function connectShared(final) {
   }
   try {
     const { default: puppeteer } = await import('puppeteer');
-    const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint, protocolTimeout: PROTOCOL_TIMEOUT_MS });
+    // Puppeteer's default viewport (800x600) is applied to every page a client attaches to, including another process's tab.
+    const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint, protocolTimeout: PROTOCOL_TIMEOUT_MS, defaultViewport: null });
     touch(final);
     return { browser, port: state.port, started };
   } catch { return null; }
@@ -187,7 +188,24 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
   return { page, url, persistent: false, chrome: 'launched', close: async () => { await closePage(); closeServer(); } };
 }
 
+/** Whether this process is the one daemon of its state file: clients that find no state all start a daemon at once, and only the first may stay. */
+function claimDaemon(final) {
+  const lock = `${stateFile(final)}.lock`;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { fs.writeFileSync(lock, String(process.pid), { flag: 'wx' }); return lock; } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      let holder;
+      try { holder = Number(fs.readFileSync(lock, 'utf8')); } catch (r) { if (r.code === 'ENOENT') continue; throw r; }
+      if (holder !== process.pid && pidAlive(holder)) return null;
+      fs.rmSync(lock, { force: true });
+    }
+  }
+  return null;
+}
+
 async function daemonMain(final) {
+  const lock = claimDaemon(final);
+  if (!lock) return process.exit(0);
   const { default: puppeteer } = await import('puppeteer');
   const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT });
   const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(final), protocolTimeout: PROTOCOL_TIMEOUT_MS, dumpio: true }));
@@ -198,10 +216,12 @@ async function daemonMain(final) {
     clearInterval(idleTimer);
     try { await browser.close(); } catch { /* already gone */ }
     closeServer();
-    try { fs.rmSync(stateFile(final), { force: true }); } catch { /* a fresher daemon may have replaced it */ }
+    if (readState(final)?.pid === process.pid) fs.rmSync(stateFile(final), { force: true });
+    try { if (Number(fs.readFileSync(lock, 'utf8')) === process.pid) fs.rmSync(lock, { force: true }); } catch { /* the lock is gone already */ }
     process.exit(0);
   };
   const idleTimer = setInterval(() => {
+    if (readState(final)?.pid !== process.pid) return shutdown();
     let mtime = 0;
     try { mtime = fs.statSync(stateFile(final)).mtimeMs; } catch { return shutdown(); }
     if (shouldExit({ touchedMs: mtime, nowMs: Date.now(), idleMs: idleMs(), rootExists: fs.existsSync(REPO_ROOT) })) shutdown();

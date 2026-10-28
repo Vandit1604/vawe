@@ -1,6 +1,7 @@
 // Pure parts of `vawe still`. No I/O and no heavy imports: harness/cli/verbs.mjs loads this file to check the arguments.
 import path from 'node:path';
 import { isUrl } from '../../lib/url.mjs';
+import { atProblem } from './at-problem.mjs';
 
 const USAGE = 'usage: bin/vawe still <page|mp4> --at <s> [--out file.png]';
 
@@ -8,8 +9,7 @@ const USAGE = 'usage: bin/vawe still <page|mp4> --at <s> [--out file.png]';
 export function stillProblem({ source, at }) {
   if (!source) return `missing <page|mp4>; ${USAGE}`;
   if (at === undefined) return `missing --at <s>, the second to write; ${USAGE}`;
-  if (!(at !== '' && Number.isFinite(Number(at)) && Number(at) >= 0)) return `--at is not a number of seconds: "${at}"`;
-  return null;
+  return atProblem(at);
 }
 
 /** The default PNG path: out/still/<film>-<seconds>s.png. Pure. */

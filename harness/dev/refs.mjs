@@ -80,7 +80,7 @@ function add() {
   const noMeasure = process.argv.includes('--no-measure');
   const plan = addPlan({ noMeasure });
   const type = flag('--type') ?? (noMeasure ? null : undefined);
-  if (type !== null && !TYPES.includes(type)) die(`--type is ${TYPES.join(' or ')}; only --no-measure may leave it out`);
+  if (type !== null && !TYPES.includes(type)) die(`--type is ${TYPES.join(' or ')}${type === undefined ? '' : `, not "${type}"`}; add it, for example: vawe refs add ${source ?? '<mp4-or-url>'} --type ${TYPES[0]} (or pass --no-measure to leave the type out)`);
   if (!source) die('usage: vawe refs add <mp4-or-url> --type product|brand [--title t] [--no-measure]');
   fs.mkdirSync(dir, { recursive: true });
   const got = /^https?:\/\//.test(source) ? download(source) : fromFile(source);
