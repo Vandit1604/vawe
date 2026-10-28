@@ -3,9 +3,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { spawn } from 'node:child_process';
 import puppeteer from 'puppeteer';
 import { shouldExit, stateFile } from '../../harness/media/preview-server.mjs';
+
+// Its own daemon: the 1.5 s idle limit must not meet another test file's daemon on the shared state file.
+const JOB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-idle-abandoned-'));
+process.env.CLAUDE_JOB_DIR = JOB_DIR;
+test.after(() => fs.rmSync(JOB_DIR, { recursive: true, force: true }));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };

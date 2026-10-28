@@ -12,6 +12,10 @@ import { openPreview } from '../../harness/media/preview-server.mjs';
 
 const PAGE = 'tests/fixtures/pages/idle-daemon-audio.html';
 process.env.VAWE_PREVIEW_IDLE_MS = '1500';
+// Its own daemon: the 1.5 s idle limit must not meet another test file's daemon on the shared state file.
+const JOB_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-idle-live-'));
+process.env.CLAUDE_JOB_DIR = JOB_DIR;
+test.after(() => fs.rmSync(JOB_DIR, { recursive: true, force: true }));
 
 test('an open tab keeps the preview daemon alive past its idle limit', async () => {
   const held = await openPreview(PAGE, { final: true });
