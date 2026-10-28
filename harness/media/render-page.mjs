@@ -75,7 +75,7 @@ import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
-import { lengthOfOpenPage, DurationError, statedLength, lockPageLength } from './page-duration.mjs';
+import { resolveLength, autoDuration, DurationError, statedLength, lockPageLength } from './page-duration.mjs';
 import { lengthLines } from '../lib/length-line.mjs';
 import { boardChecks, boardFilled, spectacleOf, lockedSpectacle, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
@@ -187,7 +187,7 @@ export async function gotoLoaded(page, url, pagePath = url) {
   }
 }
 
-export async function openPage(pagePath, frame, { warm = false, final = true, lane = null } = {}) {
+export async function openPage(pagePath, frame, { warm = false, final = true, lane = null, measure = false } = {}) {
   const opened = lane ? await openLanePage(lane, pagePath, frame) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm });
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
@@ -200,7 +200,8 @@ export async function openPage(pagePath, frame, { warm = false, final = true, la
   await cdp.send('Animation.enable');
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
   opened.cdp = cdp;
-  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify({ ...frame, eases: EASE_VARS })});(${installPageReady})();window.__pageFonts = ${awaitFonts};window.__pageReady = ${awaitReady};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
+  const duration = measure ? undefined : await autoDuration(pagePath);
+  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify({ ...frame, eases: EASE_VARS, duration })});(${installPageReady})();window.__pageFonts = ${awaitFonts};window.__pageReady = ${awaitReady};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
 }
 
@@ -836,7 +837,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
         if (/^(font (still loading|failed)|page not ready)/.test(msg)) throw new InvariantError([msg]);
         throw e;
       }
-      length = await lengthOfOpenPage(page, pagePath).catch((e) => { throw e instanceof DurationError ? new RenderError(e.message) : e; });
+      length = await resolveLength(pagePath).catch((e) => { throw e instanceof DurationError ? new RenderError(e.message) : e; });
       const read = await readAudio(page, pagePath, length.seconds);
       const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page, pagePath), ...read.problems, ...await assertProblems(page)];
       if (early.length) throw new InvariantError(early);

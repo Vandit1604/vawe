@@ -18,7 +18,17 @@ const withPage = async (meta, body, fn) => {
   try { return await fn(file); } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 };
 
-const move = "document.getElementById('t').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 2000, delay: 1000, fill: 'both' });";
+async function animationEndsInRender(file) {
+  const { openPage, gotoLoaded, settle, resolveFrame } = await import('../../harness/media/render-page.mjs');
+  const { page, url, close } = await openPage(file, resolveFrame(file, {}), { final: false });
+  try {
+    await gotoLoaded(page, url, file);
+    await settle(page);
+    return await page.evaluate(() => document.getAnimations().map((a) => a.effect.getComputedTiming().endTime).sort((a, b) => a - b));
+  } finally { await close(); }
+}
+
+const move ="document.getElementById('t').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 2000, delay: 1000, fill: 'both' });";
 
 test('autoLength adds the larger of the floor hold and the read time, on the 1/30 s grid', () => {
   assert.deepEqual(autoLength({ endS: 5.2, lastWorldWords: [1] }), { seconds: 6.4, endS: 5.2, holdS: 1.2 });
@@ -50,6 +60,16 @@ test('an auto page ends at its last animation plus the hold, the same every time
     assert.equal(first.endS, 3);
     assert.equal(first.seconds, 4.2);
     assert.equal(await resolveDuration(file), 4.2);
+  });
+});
+
+test('an animation sized from window.vawe.duration does not set the end, and spans the resolved length in the render', async () => {
+  const ground = "document.body.animate([{ opacity: 0.5 }, { opacity: 1 }], { duration: window.vawe.duration * 1000, fill: 'both' });";
+  await withPage('auto', move + ground, async (file) => {
+    const found = await resolveLength(file);
+    assert.equal(found.endS, 3);
+    assert.equal(found.seconds, 4.2);
+    assert.deepEqual(await animationEndsInRender(file), [3000, 4200]);
   });
 });
 

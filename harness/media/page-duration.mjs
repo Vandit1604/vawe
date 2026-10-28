@@ -60,9 +60,15 @@ export async function resolveLength(pagePath) {
   return found.get(key);
 }
 
+/** The length the engine hands an auto page as window.vawe.duration, so animations sized to the film span it; undefined for a page that states a number. */
+export async function autoDuration(pagePath) {
+  if (statedLength(fs.readFileSync(pagePath, 'utf8')) !== 'auto') return undefined;
+  return (await resolveLength(pagePath)).seconds;
+}
+
 async function measure(file) {
   const { openPage, gotoLoaded, settle, resolveFrame } = await import('./render-page.mjs');
-  const { page, url, close } = await openPage(file, resolveFrame(file, {}), { final: false });
+  const { page, url, close } = await openPage(file, resolveFrame(file, {}), { final: false, measure: true });
   try {
     await gotoLoaded(page, url, file);
     await settle(page);
