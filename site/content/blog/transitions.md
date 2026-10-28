@@ -80,7 +80,7 @@ A single event is a choice: one crossfade for a time jump is not a tell. We set 
 
 ## 7. Copy a continuous-take video component when the story allows one
 
-Ten handoff video components in the library carry one shared element from scene A to scene B, with no cut and no crossfade. They are highlight sweep, shadow handoff, word portal, underline road, caret door, swipe-continues, drop-and-land, spin-rotation, counter-dive and thumbnail-grid. Each has a clip and a page under [/video-components](/video-components).
+Ten handoff video components in the library carry one shared element from scene A to scene B, with no cut and no crossfade. They are [highlight sweep](/video-components/highlight-sweep), [shadow handoff](/video-components/shadow-handoff), [word portal](/video-components/word-portal), [underline road](/video-components/underline-road), [caret door](/video-components/caret-door), [swipe-continues](/video-components/swipe-continues), [drop-and-land](/video-components/drop-and-land), [spin-rotation](/video-components/spin-rotation), [counter-dive](/video-components/counter-dive) and [thumbnail-grid](/video-components/thumbnail-grid). Each has a clip and a page under [/video-components](/video-components).
 
 <figure>
 <video src="/blog/transitions/swipe-continues.mp4" poster="/blog/transitions/swipe-continues.hd.webp" muted loop playsinline controls></video>
@@ -130,7 +130,7 @@ We group them into twelve handoff families, such as graphic match, action match,
 Cuts that carry nothing across. The common tells are a crossfade on every cut, equal shot lengths, the same entrance for every element and scenes with one thing in them.
 
 **What is a match cut?**
-A cut where a shape, a colour or an action continues from the first shot into the second, so the eye does not reset. In our list it is the graphic match and the action match.
+A cut where a shape, a colour or an action continues from the first shot into the second, so the eye does not reset. In our list it is the graphic match and the action match. The [match-cut video component](/video-components/match-cut) is one shape that crosses a scene change at the same place, size and angle.
 
 **How many flashes per second are safe?**
 The WCAG limit is three flashes in any one second. Our exposure-flash helper stops at three.

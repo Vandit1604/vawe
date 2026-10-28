@@ -1,4 +1,5 @@
 /* ===== /video-components · the index ======================================================== */
+.mv-intro{color:var(--muted);margin-top:var(--sp-2);max-width:var(--measure)}
 .mv-links{display:flex;gap:var(--sp-2);margin-top:var(--sp-4)}
 .mv-links a{display:inline-flex;align-items:center;gap:var(--sp-2);min-height:var(--hit);padding:0 var(--sp-3);border-radius:var(--r-ctl);
   font:500 var(--fs-code)/var(--lh-ui) var(--font-mono),monospace;color:var(--muted);box-shadow:var(--ring);

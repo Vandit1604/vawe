@@ -30,6 +30,7 @@ export const INSPIRATION_DESCRIPTION =
   "Motion videos made with Claude and other AI, from posts on X. Each one credits its creator, links the post and gives a prompt to recreate it with vawe.";
 
 export const INSPIRATION_PATH = "/inspiration";
+export const INSPIRATION_PAGE = 48;
 export const PROMPTS_PATH = "/inspiration/prompts.json";
 
 export const titleOf = (p: Pick<InspirationPost, "title">) => p.title || "Post text not available";

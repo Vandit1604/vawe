@@ -50,6 +50,7 @@ export const LOOKS = data.looks as string[];
 export const JOBS = (data.jobs as Job[]).map((j) => ({ ...j, label: smart(j.label) }));
 export const MOVES_TITLE = `${MOVES.length} CSS video components for AI-agent video | vawe`;
 export const MOVES_DESCRIPTION = `${MOVES.length} proven motion video components, each a clip and the markdown an agent copies: when to use it, the CSS and Web Animations snippet, the notes and the sound cue.`;
+export const MOVES_INTRO = `Each video component is one markdown file with the CSS and Web Animations snippet, notes on when to use it and a sound note; ${MOVES.filter((m) => m.clipHash).length} of the ${MOVES.length} have a short clip. They are sorted into ${GROUPS.length} groups, from revealing a title to ending a film, and the filters below narrow them by look or by job.`;
 export const FEATURED = data.featured as string[];
 
 // The gallery order: by category, then the order within it. Card numbers and prev/next follow it.

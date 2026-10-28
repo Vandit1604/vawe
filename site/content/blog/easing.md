@@ -278,16 +278,16 @@ Peak speed is the top speed of the curve compared with a straight line over the 
 
 | Name | Job | Peak speed | Overshoot |
 | --- | --- | --- | --- |
-| `land` | entrance: fast start, long soft stop | 4.8x | none |
-| `landSoft` | entrance under 0.4 s | 2.81x | none |
-| `settle` | heavy object that starts and ends at rest | 2.5x | none |
-| `swap` | replace one thing with another | 4x | none |
-| `glide` | slow drift, such as a camera push | 1.47x | none |
-| `carry` | a move that runs into a cut or the next key | 4.79x | none |
-| `leave` | exit that settles | 1.95x | none |
-| `launch` | exit that accelerates, capped at the cut | 3x | none |
-| `pop` | arrival that overshoots its mark | 4.79x | 15.3% |
-| `nudge` | the same shape as `pop`, less of it | 4.79x | 6.34% |
+| [`land`](/easing/land) | entrance: fast start, long soft stop | 4.8x | none |
+| [`landSoft`](/easing/land-soft) | entrance under 0.4 s | 2.81x | none |
+| [`settle`](/easing/settle) | heavy object that starts and ends at rest | 2.5x | none |
+| [`swap`](/easing/swap) | replace one thing with another | 4x | none |
+| [`glide`](/easing/glide) | slow drift, such as a camera push | 1.47x | none |
+| [`carry`](/easing/carry) | a move that runs into a cut or the next key | 4.79x | none |
+| [`leave`](/easing/leave) | exit that settles | 1.95x | none |
+| [`launch`](/easing/launch) | exit that accelerates, capped at the cut | 3x | none |
+| [`pop`](/easing/pop) | arrival that overshoots its mark | 4.79x | 15.3% |
+| [`nudge`](/easing/nudge) | the same shape as `pop`, less of it | 4.79x | 6.34% |
 
 ![Progress curves for land, landSoft, launch, leave and pop plotted on one chart.](/blog/easing/curves.webp "The five curves that matter most. Peak speed is relative to a straight line.")
 

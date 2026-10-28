@@ -150,6 +150,7 @@ export const RESOURCES = {
   } as Meta,
   crumb: { current: "Resources" } as Crumb,
   h1: "Resources for motion graphics by code",
-  lede: (count: number) => `Easing curves, video components, files for AI agents, guides and comparisons: ${count} links in six groups.`,
+  lede: (count: number) =>
+    `Easing curves, video components, files for AI agents, guides and comparisons: ${count} links in six groups. The easing page holds ${EASES.length} curves, and the video components library holds ${MOVES.length} components, each with the CSS and one markdown file to copy, and ${MOVES.filter((m) => m.clipHash).length} of them with a short clip. The agent files are plain text that a model can fetch without a browser.`,
   tocLabel: "Groups",
 };

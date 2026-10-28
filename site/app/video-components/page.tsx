@@ -1,7 +1,7 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import { GROUPS, JOBS, LOOKS, MOVES, MOVES_DESCRIPTION, MOVES_TITLE, NUMBERED, clip, toCard } from "../../lib/moves";
+import { GROUPS, JOBS, LOOKS, MOVES, MOVES_DESCRIPTION, MOVES_INTRO, MOVES_TITLE, NUMBERED, clip, toCard } from "../../lib/moves";
 import { jsonLdScript } from "../../lib/schema";
 import { movesItemListSchema } from "../../lib/schema-content";
 import { MovesGallery } from "./MovesGallery";
@@ -27,6 +27,7 @@ export default function Moves() {
       <main className="wrap" id="content" tabIndex={-1}>
         <section className="ls ls-top mv">
           <h1>Video components.</h1>
+          <p className="mv-intro">{MOVES_INTRO}</p>
           <p className="mv-links">
             <a href="/moves/index.json"><MiscSvg name="json" size={14} />index.json</a>
             <a href="/easing"><MiscSvg name="curve" size={14} />Easing</a>

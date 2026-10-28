@@ -13,7 +13,7 @@ A film is `films/<name>/page.html` plus its own assets folder. Every path in the
 - Time is the seek. Use CSS `@keyframes` or `element.animate()` (the renderer sets `currentTime`), or `window.seek(t)` in seconds that paints frame `t` as a pure function of `t`. Use both if you like.
 - No timers, no state between frames, no unseeded random. See [Determinism](/docs/determinism).
 - The renderer sets `<html data-aspect="16:9">`, and `--vw` and `--vh` (pixel lengths) on `:root`, and `window.vawe`, before your scripts run.
-- It also sets each named ease as `--ease-<name>` on `:root` (`--ease-land`, `--ease-launch`, `--ease-glide`), so plain CSS writes `animation: rise 0.6s var(--ease-land) both`. See [Aspect ratios](/docs/aspect-ratios).
+- It also sets each named ease as `--ease-<name>` on `:root` ([`--ease-land`](/easing/land), [`--ease-launch`](/easing/launch), [`--ease-glide`](/easing/glide)), so plain CSS writes `animation: rise 0.6s var(--ease-land) both`. See [Aspect ratios](/docs/aspect-ratios).
 - Audio is `<audio>` tags, mixed offline. See [Audio](/docs/audio).
 - Every tunable number is a literal in the page: a `[[f, v]]` table, a keyframe stop or a `:root` custom property. `bin/vawe studio <page>` edits these literals in place.
 - `<meta name="message">` holds the one thing to remember. `<meta name="spectacle">` holds the second of the one big moment. Put quiet before it. Keep one focal point per frame.
