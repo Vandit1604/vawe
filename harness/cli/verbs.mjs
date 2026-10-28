@@ -162,6 +162,18 @@ export const VERBS = [
       : nextStep(path.resolve(page), ROOT).next),
   },
   {
+    tier: 'more',
+    name: 'animatic', summary: 'use when you check the timing of a film before you animate it: the key frame of each world held for its planned span, hard cuts, silent, in a few seconds',
+    positional: [PAGE],
+    flags: [
+      { name: 'fps', type: 'number', default: 10, help: 'frame rate of the animatic' },
+      { name: 'out', type: 'path', default: 'out/<name>-animatic.mp4', help: 'output file' },
+    ],
+    example: 'vawe animatic films/my-launch/page.html   |   vawe animatic films/my-launch/page.html --fps 5',
+    build: (v, [page]) => [{ script: 'harness/media/animatic.mjs', args: [page, ...opt('--fps', v.fps), ...opt('--out', v.out)] }],
+    next: () => 'Watch the mp4: each world holds for its planned time; retime the world starts in the page, then bin/vawe dev',
+  },
+  {
     tier: 'core',
     name: 'dev', summary: 'draft render: half size, 30 fps, with sound (the audio tags of the page mixed; a --from/--to window stays silent); also writes a key-frame sheet PNG next to it',
     positional: [PAGE],

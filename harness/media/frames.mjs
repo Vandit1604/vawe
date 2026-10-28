@@ -46,7 +46,7 @@ async function shootFullSize(page, out) {
 }
 
 /** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fullPng, fired }] (fullPng only with `zoom`) in page order. */
-async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
+export async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
   const dur = await resolveDuration(pagePath);
   const anims = await readWorldAnimations(opened.page);
   const found = await sampleWorlds(opened.page, dur, (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms));
