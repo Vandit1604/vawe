@@ -8,13 +8,16 @@
 <meta name="spectacle" content="{{spectacle}}">
 <meta name="signature" content="{{signature}}">
 <title>{{title}}</title>
-<script type="application/json" id="authoring">{"allow": ["static-window@0-{{b2}}", "static-window@{{b2}}-{{b3}}", "static-window@{{b3}}-{{b4}}", "static-window@{{b4}}-{{length}}", "tile-run@0-{{b3}}", "tile-run@{{b3}}-{{b4}}"], "_why": {
+<script type="application/json" id="authoring">{"allow": ["static-window@0-{{b2}}", "static-window@{{b2}}-{{b3}}", "static-window@{{b3}}-{{b4}}", "static-window@{{b4}}-{{length}}", "tile-run@0-{{b3}}", "tile-run@{{b3}}-{{b4}}", "world-held@0-{{b3}}", "world-held@{{b3}}-{{length}}", "text-lingers@0-{{b3}}"], "_why": {
   "static-window@0-{{b2}}": "world s1, 0-{{b2}} s: the problem is held for its read time",
   "static-window@{{b2}}-{{b3}}": "world s2, {{b2}}-{{b3}} s: the token runs the steps inside this hold",
   "static-window@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the result is held for its read time",
   "static-window@{{b4}}-{{length}}": "world s4, {{b4}}-{{length}} s: the wordless closing image rests the eye",
   "tile-run@0-{{b3}}": "worlds s1 and s2, 0-{{b3}} s: the problem is held for its read time and the token runs the steps",
-  "tile-run@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the result is held for its read time"}}</script>
+  "tile-run@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the result is held for its read time",
+  "world-held@0-{{b3}}": "worlds s1 and s2, 0-{{b3}} s: each holds the stand-in text for its read time and carries its own motion",
+  "world-held@{{b3}}-{{length}}": "worlds s3 and s4, {{b3}}-{{length}} s: each holds its result for the stand-in read time",
+  "text-lingers@0-{{b3}}": "world s2, {{b2}}-{{b3}} s: the steps stay on screen while the token runs them"}}</script>
 <!-- a story: s1 the problem, s2 the mechanism (a token runs the steps), s3 the result (the gap closes), s4 the end with no words (the spectacle: the mark lands big).
   The mark is the thread: it rides over every cut and ends as the closing image. Replace the three steps with the real mechanism, the numbers with the real ones,
   the square with the brand mark, the grey with the palette and the face with the brand's; keep the order. -->
@@ -32,7 +35,8 @@
   .node { flex: none; padding: calc(var(--unit) * 0.02) calc(var(--unit) * 0.03); border: calc(var(--unit) * 0.008) solid currentColor; border-radius: calc(var(--unit) * 0.04); font-size: calc(var(--unit) * 0.09); font-weight: 600; letter-spacing: -0.01em; }
   .link { flex: 1; height: calc(var(--unit) * 0.008); background: currentColor; transform-origin: left; }
   .token { position: absolute; left: 0; top: 50%; width: calc(var(--unit) * 0.05); height: calc(var(--unit) * 0.05); margin-top: calc(var(--unit) * -0.025); border-radius: 50%; background: currentColor; }
-  h2 { font-size: calc(var(--unit) * 0.16); font-weight: 700; line-height: 0.9; }
+  h2 { font-size: calc(var(--unit) * 0.13); font-weight: 700; line-height: 0.9; }
+  .result { gap: calc(var(--unit) * 0.015); }
   .gap { display: grid; gap: calc(var(--unit) * 0.01); width: calc(var(--unit) * 1.5); font-size: calc(var(--unit) * 0.09); font-weight: 600; letter-spacing: -0.01em; }
   .gap i { display: block; height: calc(var(--unit) * 0.04); margin-bottom: calc(var(--unit) * 0.01); background: currentColor; transform-origin: left; }
   .gap .before i { width: 100%; opacity: 0.4; }
@@ -80,7 +84,7 @@ stagger(nodes, { at: step, band: 'professional', from: '2em 0', nudgeEvery: 2 })
 $$('.link').forEach((link, k) => link.animate([{ scale: '0 1' }, { scale: '1 1' }], { delay: (step + 0.3 + k * 0.2) * 1000, duration: 500, easing: EASE.land, fill: 'both' }));
 const left = (el) => el.getBoundingClientRect().left;
 const [HOP, REST] = [0.6, 0.6];
-const run = nodes.slice(1).map((node) => left(node) - left(nodes[0]));
+const run = nodes.slice(1).map((node) => left(node) - left(nodes[0]) - $('.token').offsetWidth);
 enter($('.token'), { at: step + 0.9, band: 'energy', from: '0 0', scale: 0.4 });
 keys($('.token'), 'translate', [[step + 1.2, '0 0'], ...run.flatMap((x, k) => [[step + 1.2 + k * (HOP + REST) + HOP, x + 'px 0', { in: 'hang' }], [step + 1.2 + (k + 1) * (HOP + REST), x + 'px 0']])]);
 nodes.slice(1).forEach((node, k) => node.animate([{ scale: '1' }, { scale: '1.12' }, { scale: '1' }], { delay: (step + 1.2 + k * (HOP + REST) + HOP) * 1000, duration: 400, easing: EASE.nudge, fill: 'both' }));
@@ -91,7 +95,7 @@ layer($('h2'), $('.result .line'), { at: result, band: 'professional', from: '0 
 stagger($$('.gap > div'), { at: result + 0.5, band: 'professional', from: '3em 0', nudgeEvery: 1 });
 
 // s4 the end, with no words: the mark lands big and turns to rest (the spectacle)
-$('.thread').animate([{ scale: '1' }, { scale: '2' }], { delay: (beat(4) + 0.27) * 1000, duration: 650, easing: EASE.pop, fill: 'forwards' });
+$('.thread').animate([{ scale: '1' }, { scale: '3' }], { delay: (beat(4) + 0.27) * 1000, duration: 500, easing: EASE.pop, fill: 'forwards' });
 </script>
 </head>
 <body>

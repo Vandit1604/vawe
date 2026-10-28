@@ -8,14 +8,17 @@
 <meta name="spectacle" content="{{spectacle}}">
 <meta name="signature" content="{{signature}}">
 <title>{{title}}</title>
-<script type="application/json" id="authoring">{"allow": ["static-window@0-{{b2}}", "static-window@{{b2}}-{{b3}}", "static-window@{{b3}}-{{b4}}", "static-window@{{b4}}-{{length}}", "tile-run@0-{{b2}}", "tile-run@{{b2}}-{{b3}}", "tile-run@{{b3}}-{{b4}}"], "_why": {
+<script type="application/json" id="authoring">{"allow": ["static-window@0-{{b2}}", "static-window@{{b2}}-{{b3}}", "static-window@{{b3}}-{{b4}}", "static-window@{{b4}}-{{length}}", "tile-run@0-{{b2}}", "tile-run@{{b2}}-{{b3}}", "tile-run@{{b3}}-{{b4}}", "world-held@0-{{b3}}", "world-held@{{b3}}-{{length}}", "text-lingers@0-{{b2}}"], "_why": {
   "static-window@0-{{b2}}": "world s1, 0-{{b2}} s: the hook is held for its read time",
   "static-window@{{b2}}-{{b3}}": "world s2, {{b2}}-{{b3}} s: the meter fills and the punch-in lands inside this hold",
   "static-window@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the wordless graph rests the eye",
   "static-window@{{b4}}-{{length}}": "world s4, {{b4}}-{{length}} s: the end card is held for its read time",
   "tile-run@0-{{b2}}": "world s1, 0-{{b2}} s: the hook is held for its read time",
   "tile-run@{{b2}}-{{b3}}": "world s2, {{b2}}-{{b3}} s: the meter fills and the punch-in lands inside this hold",
-  "tile-run@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the wordless graph rests the eye"}}</script>
+  "tile-run@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the wordless graph rests the eye",
+  "world-held@0-{{b3}}": "worlds s1 and s2, 0-{{b3}} s: each holds the stand-in text for its read time and carries its own motion",
+  "world-held@{{b3}}-{{length}}": "worlds s3 and s4, {{b3}}-{{length}} s: each holds its result for the stand-in read time",
+  "text-lingers@0-{{b2}}": "world s1, 0-{{b2}} s: the stand-in line stays with the hook, replaced by the real line"}}</script>
 <!-- a brand launch: s1 hook, s2 the product working (statuses change on screen), s3 proof (no words: the graph carries it), s4 the end card with the brand (the spectacle: the mark lands on it).
   The mark is the thread: it rides over every cut and ends as the end card's mark. Replace the stand-in rows with the product's real screen and
   numbers, the square with the brand mark, the grey with the palette and the face with the brand's; keep the order. -->
@@ -110,9 +113,9 @@ layer($('.card h1'), $('.card .line'), { at: card + 0.05, band: 'professional', 
   <div class="panel" data-ui>
     <header>Shipments</header>
     <ul>
-      <li>Order <code>4821</code><span class="status"><span>Delayed</span><span>Rerouted</span></span></li>
-      <li>Order <code>4822</code><span class="status"><span>Packed</span><span>Shipped</span></span></li>
-      <li>Order <code>4823</code><span class="status"><span>Queued</span><span>Packed</span></span></li>
+      <li><span>Order <code>4821</code></span><span class="status"><span>Delayed</span><span>Rerouted</span></span></li>
+      <li><span>Order <code>4822</code></span><span class="status"><span>Packed</span><span>Shipped</span></span></li>
+      <li><span>Order <code>4823</code></span><span class="status"><span>Queued</span><span>Packed</span></span></li>
     </ul>
     <div class="meter"><i></i></div>
   </div>

@@ -34,8 +34,8 @@ const WORDS = [
 // spectacle second as fractions of the length. Every other type takes the general starter.
 export const STARTERS = {
   sting: { file: 'sting', beats: [0, 0.3, 0.7], spectacle: 0.36 },
-  'brand launch': { file: 'brand-launch', beats: [0, 0.21, 0.6, 0.78], spectacle: 0.81 },
-  'story or explainer': { file: 'story', beats: [0, 0.23, 0.52, 0.81], spectacle: 0.84 },
+  'brand launch': { file: 'brand-launch', beats: [0, 0.21, 0.6, 0.78], spectacle: 0.775 },
+  'story or explainer': { file: 'story', beats: [0, 0.23, 0.52, 0.81], spectacle: 0.82 },
 };
 
 /** The STARTERS key for a routed film, or undefined: an unmatched request and a sting past STING_MAX_S (the invented-product fallback) take the general starter. */
