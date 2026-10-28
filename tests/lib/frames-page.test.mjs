@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { framesPage, worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../../harness/lib/frames-page.mjs';
+import { worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../../harness/lib/frames-page.mjs';
 import { stillCandidates } from '../../harness/media/world-sample.mjs';
 
 test('parseFramesArgs reads the page, --full and --world as a comma list or repeated', () => {
@@ -23,15 +23,6 @@ test('stillCandidates starts at the middle of the span and stays inside it', () 
   assert.ok(c.every((t) => t > 2 && t < 6));
   assert.equal(stillCandidates({ id: 'a', start: 2, end: 6 }, [{ world: 'a', id: 'enter', start: 2, end: 2.5 }])[0], 2.55);
   assert.deepEqual(stillCandidates({ start: null, end: null }), [0]);
-});
-
-test('frames.html has one figure per world with the id under the image and relative paths', () => {
-  const html = framesPage({ title: 'a & b', worlds: [{ id: 's1', src: '../../out/f-frames/s1.png' }, { id: 's2', src: '../../out/f-frames/s2.png' }] });
-  assert.equal([...html.matchAll(/<figure>/g)].length, 2);
-  assert.match(html, /<img src="\.\.\/\.\.\/out\/f-frames\/s2\.png" alt="s2"><figcaption>s2<\/figcaption>/);
-  assert.match(html, /<title>a &amp; b: key frames<\/title>/);
-  assert.match(html, /repeat\(2, /);
-  assert.doesNotMatch(html, /src="\//);
 });
 
 test('stillCandidates puts the still after the world entrances end, and ignores exits, texture and the span end', () => {
