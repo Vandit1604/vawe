@@ -9,11 +9,12 @@ import { isUrl } from '../harness/lib/url.mjs';
 import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cli/parse.mjs';
 import { VERBS, stripChromeNoise, commitsBehind, staleNote } from '../harness/cli/verbs.mjs';
 import { newFilm, newFilmLines, readDetails, questionsJson } from '../harness/cli/new.mjs';
-import { appendRun, readAllRuns, filmKeyOf } from '../harness/lib/runlog.mjs';
+import { appendRun, readAllRuns, readRuns, filmKeyOf } from '../harness/lib/runlog.mjs';
 import { pageDigest } from '../harness/lib/approval.mjs';
-import { verbEvent, footerLine, filmOfCall, imagesIn, reasonOf, readNotes, causeOf } from '../harness/lib/verb-log.mjs';
+import { verbEvent, footerLine, filmOfCall, imagesIn, reasonOf, readNotes, causeOf, refusalOf, UNFILED } from '../harness/lib/verb-log.mjs';
 import { namedRef, refsDir } from '../harness/lib/refs.mjs';
-import { nextStep } from '../harness/live/stage-say.mjs';
+import { nextStep, recentPage } from '../harness/live/stage-say.mjs';
+import { verbStage } from '../harness/lib/trace/stages.mjs';
 import { recentFailedShipLines } from '../harness/lib/ship-status.mjs';
 import { newEvent } from '../harness/lib/run-events.mjs';
 import { doctorHintFromFile } from '../harness/lib/doctor-hint.mjs';
@@ -55,7 +56,6 @@ async function execute(verb, rest, call) {
   const { values, positional } = parseArgs(verb, rest);
   call.positional = [...positional, ...(values.page ? [values.page] : [])];
   requireFiles(verb, values, positional);
-  call.stage = stageOf(positional);
   const named = verb.defaultRef && !values.ref && !values.alone ? namedRef({ dir: refsDir(), briefText: briefOf(verb.defaultRef(values, positional)) }) : null;
   if (named) {
     values.ref = named.file;
@@ -100,31 +100,39 @@ function orNone(read, none) {
   }
 }
 
-function stageOf(positional) {
-  const page = positional.find((p) => p.endsWith('.html'));
-  return page ? orNone(() => nextStep(path.resolve(ROOT, page), ROOT).stage, null) : null;
-}
-
 function briefOf(input) {
   const page = input && String(input).endsWith('.html') ? input : input && filmKeyOf(input) ? path.join('films', filmKeyOf(input), 'page.html') : null;
   return page ? orNone(() => fs.readFileSync(path.resolve(ROOT, path.dirname(page), 'brief.md'), 'utf8'), '') : '';
 }
 
-function pageHashOf(verb, call, code) {
-  const page = call.positional.find((p) => p.endsWith('.html'));
-  return verb.name === 'critique' && code === 0 && page ? orNone(() => pageDigest(path.resolve(ROOT, page)), null) : null;
+/** The film a call concerns and its page: the page or mp4 it names, else the page film git sees as edited last (a remote still names none). */
+function filmOfRun(verbName, call, rest) {
+  const named = filmOfCall(verbName, call.positional, rest);
+  const given = call.positional.find((p) => p.endsWith('.html'));
+  const page = given ? path.resolve(ROOT, given)
+    : named !== UNFILED ? path.join(ROOT, 'films', named, 'page.html') : recentPage(ROOT);
+  return { film: named === UNFILED && page ? filmKeyOf(page) : named, page };
+}
+
+function stageOf(verbName, rest, film, page) {
+  const used = Object.fromEntries(readRuns(film, ROOT).filter((r) => r.cmd === 'verb' && r.exitCode === 0).map((r) => [r.verb, true]));
+  return verbStage({ verb: verbName, args: rest.join(' ') }, used) ?? (page ? orNone(() => nextStep(page, ROOT).stage, null) : null);
 }
 
 function record(verb, rest, call, code, reason, endMs) {
-  const event = verbEvent({ verb: verb.name, args: rest, stage: call.stage, startMs: call.startMs, endMs, exitCode: code, reason, slotWaitS: readNotes(call.notes).slotWaitS ?? null, images: imagesIn(call.stdout), pageHash: pageHashOf(verb, call, code) });
+  const { film, page } = filmOfRun(verb.name, call, rest);
+  const pageHash = page ? orNone(() => pageDigest(page), null) : null;
+  const event = verbEvent({ verb: verb.name, args: rest, stage: stageOf(verb.name, rest, film, page), startMs: call.startMs, endMs, exitCode: code, reason, slotWaitS: readNotes(call.notes).slotWaitS ?? null, images: imagesIn(call.stdout), pageHash, help: call.help, usage: call.usage, refused: refusalOf(call.stderr) });
   try {
-    appendRun(filmOfCall(verb.name, call.positional, rest), event, { root: ROOT });
+    appendRun(film, event, { root: ROOT });
   } catch (e) {
     console.error(`vawe: could not write the run log: ${e.message}`);
   }
 }
 
-const quietFooter = (rest) => rest.includes('--json') || rest.includes('--questions-json');
+const bareCall = () => ({ startMs: Date.now(), positional: [], stdout: '', stderr: '', signal: null, notes: '', help: false, usage: false });
+
+const quietFooter =(rest) => rest.includes('--json') || rest.includes('--questions-json');
 
 async function main(argv) {
   const [name, ...rest] = argv;
@@ -138,12 +146,16 @@ async function main(argv) {
     const message = `unknown verb ${name}; valid: ${VERBS.map((v) => v.name).join(' ')}${guess ? `; did you mean ${guess}?` : ''}${stale ? `; ${stale}` : ''}`;
     console.error(`vawe: ${message}`);
     console.log(footerLine({ verb: name, code: 2, reason: `unknown verb ${name}`, seconds: 0 }));
+    record({ name }, rest, { ...bareCall(), usage: true }, 2, `unknown verb ${name}`, Date.now());
     process.exitCode = 2;
     return;
   }
-  if (rest.includes('--help') || rest.includes('-h')) return console.log(verbHelp(verb));
+  if (rest.includes('--help') || rest.includes('-h')) {
+    record(verb, rest, { ...bareCall(), help: true }, 0, null, Date.now());
+    return console.log(verbHelp(verb));
+  }
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-verb-'));
-  const call = { startMs: Date.now(), positional: [], stage: null, stdout: '', stderr: '', signal: null, notes: path.join(dir, 'notes.jsonl') };
+  const call = { ...bareCall(), notes: path.join(dir, 'notes.jsonl') };
   let code = 0;
   let reason = null;
   try {
@@ -156,6 +168,7 @@ async function main(argv) {
       for (const log of [browserLog(true), browserLog(false)].filter((f) => fs.existsSync(f))) console.error(`Chrome log (why the browser was lost): ${log}`);
     }
   } catch (e) {
+    call.usage = e instanceof UsageError;
     code = e instanceof UsageError ? 2 : 1;
     reason = e instanceof UsageError ? e.message : `exit 1: ${e.message}`;
     console.error(e instanceof UsageError ? `vawe: ${e.message}` : e.stack);

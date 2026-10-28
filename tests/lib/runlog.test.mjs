@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { appendRun, readRuns, readAllRuns, agentId, namedAgent } from '../../harness/lib/runlog.mjs';
 import { newEvent, devEvent, judgeEvent, shipEvent } from '../../harness/lib/run-events.mjs';
 import { selfRecordCheck } from '../../harness/lib/judge-self-record.mjs';
@@ -54,7 +55,8 @@ test('appendRun stamps the common fields; VAWE_AGENT and VAWE_MODEL are read fro
     assert.equal(line.agent, 'judge-x');
     assert.equal(line.model, 'sonnet');
     assert.equal(line.session, 'abcdef123456');
-    assert.equal(typeof line.dirty, 'boolean');
+    assert.equal(typeof line.trackedDirty, 'boolean');
+    assert.ok(!('dirty' in line));
     assert.ok(Date.parse(line.at) > 0);
     assert.equal(readRuns('demo').length, 1);
     assert.ok(!('content' in line) && !('craftLive' in line) && !('sceneLive' in line) && !('knowledge' in line));
@@ -62,12 +64,40 @@ test('appendRun stamps the common fields; VAWE_AGENT and VAWE_MODEL are read fro
 });
 
 test('without VAWE_AGENT the agent is the session plus one tag per process; the model is null', () => {
-  inTempDir({ VAWE_AGENT: null, VAWE_MODEL: null, CLAUDE_CODE_SESSION_ID: 'abcdef123456' }, () => {
+  inTempDir({ VAWE_AGENT: null, VAWE_MODEL: null, CLAUDE_CODE_SUBAGENT_MODEL: null, CLAUDE_CODE_SESSION_ID: 'abcdef123456' }, () => {
     assert.match(agentId(), /^abcdef12#[0-9a-f]{4}$/);
     assert.equal(agentId(), agentId());
     assert.equal(namedAgent(agentId()), null);
     assert.equal(appendRun('demo', { cmd: 'dev' }).model, null);
   });
+});
+
+test('without VAWE_MODEL the model is the Claude Code subagent model, else null', () => {
+  inTempDir({ VAWE_AGENT: null, VAWE_MODEL: null, CLAUDE_CODE_SUBAGENT_MODEL: 'haiku' }, () => {
+    assert.equal(appendRun('demo', { cmd: 'dev' }).model, 'haiku');
+  });
+  inTempDir({ VAWE_AGENT: null, VAWE_MODEL: 'opus', CLAUDE_CODE_SUBAGENT_MODEL: 'haiku' }, () => {
+    assert.equal(appendRun('demo', { cmd: 'dev' }).model, 'opus');
+  });
+});
+
+test('the untagged agent id is stable across calls of one session and differs between sessions', () => {
+  const env = { CLAUDE_CODE_SESSION_ID: 'abcdef123456', CLAUDE_PID: '41' };
+  assert.equal(agentId(env), agentId({ ...env }));
+  assert.notEqual(agentId(env), agentId({ ...env, CLAUDE_PID: '42' }));
+});
+
+test('trackedDirty ignores untracked files and flags a tracked edit', () => {
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-runlog-git-'));
+  const run = (...args) => execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
+  run('init', '-q');
+  fs.writeFileSync(path.join(repo, 'a.txt'), 'one');
+  run('add', 'a.txt');
+  run('-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'init');
+  fs.writeFileSync(path.join(repo, 'untracked.txt'), 'x');
+  assert.equal(appendRun('demo', { cmd: 'dev' }, { root: repo }).trackedDirty, false);
+  fs.writeFileSync(path.join(repo, 'a.txt'), 'two');
+  assert.equal(appendRun('demo', { cmd: 'dev' }, { root: repo }).trackedDirty, true);
 });
 
 test('selfRecordCheck: the same named agent in the same session is refused, a fresh named judge is not', () => {

@@ -4,7 +4,8 @@ const OPTIONAL = new Set(['judge', 'fix', 'approve', 'ship']);
 const STUDY_VERBS = new Set(['refs', 'see', 'sheet', 'compare', 'look', 'looks', 'spec', 'strip', 'onion', 'velocity']);
 const MOTION_VERBS = new Set(['onion', 'velocity']);
 
-function verbStage({ verb, args }, seen) {
+/** The loop stage a verb call belongs to, or null when its verb names none. `seen` holds the stages already used. The run log and the trace review both call this. */
+export function verbStage({ verb, args }, seen) {
   if (verb === 'dev') return (seen.critique || seen.judge) && /--(from|to)\b/.test(args) ? 'fix' : 'dev';
   if (verb === 'ship') return /--(status|wait)\b/.test(args) ? null : 'ship';
   if (verb === 'critique' || verb === 'judge') return verb;
