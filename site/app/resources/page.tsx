@@ -1,157 +1,20 @@
-import { readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
-import { Header, REPO_URL } from "../components/Header";
+import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { GithubMark, Icon, type IconName } from "../components/Icon";
-import { MatTile, type MatDetail, type MatTone } from "../components/MatTile";
+import { GithubMark, Icon } from "../components/Icon";
+import { MatTile } from "../components/MatTile";
 import { pageMetadata } from "../components/seo";
 import { PageTop, Toc } from "../components/Xp";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
-import { EASES } from "../../lib/easing";
-import { MOVES } from "../../lib/moves";
-import { INSPIRATION, INSPIRATION_PATH } from "../../lib/inspiration";
-import { allPosts } from "../../lib/blog";
-import { agentGuide, llmsFull } from "../../lib/agent-guide";
-import { llmsText } from "../../lib/llms";
-import { RIVALS } from "../vs/data";
+import { RESOURCES, type Item } from "../../lib/content/resources";
 import "../components/study.css";
 import "../components/intent.css";
 import "./resources.css";
 
 export const revalidate = 3600;
 
-export const metadata = pageMetadata({
-  title: "Motion graphics resources: CSS easing, video components and AI agent video | vawe",
-  description: `${EASES.length} CSS easing functions, ${MOVES.length} video components with clips, the files an AI agent reads to make a video, guides, and comparisons with Remotion, HyperFrames, Motion Canvas and Lottie.`,
-  path: "/resources",
-});
+export const metadata = pageMetadata({ ...RESOURCES.meta, path: RESOURCES.path });
 
-type Tile = { word: string; tone: MatTone; detail: MatDetail; shift?: -1 | 0 | 1; flip?: boolean };
-type Item = { href: string; title: string; line: string; icon: IconName | "github"; meta?: string; code?: boolean; external?: boolean; tile?: Tile };
-type Group = { id: string; title: string; lead?: string; tile?: Tile; items: Item[] };
-
-const NBSP = "\u00a0";
-const kb = (bytes: number) => `${(bytes / 1000).toFixed(1)}${NBSP}kB`;
-const publicSize = (file: string) => kb(statSync(join(process.cwd(), "public", file)).size);
-
-function skillLines(name: string) {
-  try {
-    const text = readFileSync(join(process.cwd(), "..", "skills", name, "SKILL.md"), "utf8");
-    return `${text.trimEnd().split("\n").length}${NBSP}lines`;
-  } catch {
-    return undefined;
-  }
-}
-
-const skill = (name: string, line: string): Item => ({
-  href: `${REPO_URL}/blob/main/skills/${name}/SKILL.md`,
-  title: name,
-  line,
-  icon: "skill",
-  meta: skillLines(name),
-  code: true,
-  external: true,
-});
-
-const GROUPS: Group[] = [
-  {
-    id: "tools",
-    title: "Tools",
-    items: [
-      {
-        href: "/easing",
-        title: "Easing curves",
-        line: `${EASES.length} easing functions: preview, compare, copy a CSS cubic-bezier or linear().`,
-        icon: "curve",
-        meta: `${EASES.length}${NBSP}curves`,
-        tile: { word: "Easing", tone: "mat", detail: "easing" },
-      },
-      {
-        href: "/video-components",
-        title: "The video components library",
-        line: `${MOVES.length} video components. Each has a short clip, the CSS and one markdown file to copy.`,
-        icon: "play",
-        meta: `${MOVES.length}${NBSP}video components`,
-        tile: { word: "Components", tone: "ochre", detail: "moves", shift: 1, flip: true },
-      },
-      {
-        href: INSPIRATION_PATH,
-        title: "Motion video inspiration",
-        line: "Motion videos made with AI, from posts on X, each with the command to use it as a reference.",
-        icon: "play",
-        meta: `${INSPIRATION.length}${NBSP}videos`,
-        tile: { word: "Films", tone: "cobalt", detail: "films", shift: -1 },
-      },
-      {
-        href: "/features",
-        title: "Features",
-        line: "What the engine decides for you, in three groups: agent experience, taste and speed.",
-        icon: "list",
-        meta: "page",
-        tile: { word: "Features", tone: "oxblood", detail: "features", flip: true },
-      },
-    ],
-  },
-  {
-    id: "agents",
-    title: "For agents",
-    lead: "Plain files an AI agent can fetch without a browser.",
-    tile: { word: "Agents", tone: "graphite", detail: "agents", shift: -1 },
-    items: [
-      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and video component.", icon: "file", meta: kb(Buffer.byteLength(llmsText())), code: true },
-      { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the video components in one text file.", icon: "file", meta: kb(Buffer.byteLength(llmsFull())), code: true },
-      { href: "/ai-agents.md", title: "/ai-agents.md", line: "How an agent writes and renders a film, as Markdown.", icon: "markdown", meta: kb(Buffer.byteLength(agentGuide())), code: true },
-      { href: "/moves/index.json", title: "/moves/index.json", line: "Every video component with its group, look, jobs, duration and file, to filter by script.", icon: "json", meta: publicSize("moves/index.json"), code: true },
-      { href: "/ai-agents", title: "How an agent installs vawe", line: "Clone the repo, run bin/vawe doctor, then write one HTML page.", icon: "terminal", meta: "guide" },
-    ],
-  },
-  {
-    id: "skills",
-    title: "Agent skills",
-    lead: "Five SKILL.md files in the skills/ folder of the GitHub repo.",
-    tile: { word: "Skills", tone: "accent", detail: "skills", flip: true },
-    items: [
-      skill("vawe-brief", "Ask for the missing facts, then write the film’s brief."),
-      skill("vawe-page", "Write page.html: audio tags, springs and the usual first-draft mistakes."),
-      skill("vawe-transitions", "Plan what carries over at every cut."),
-      skill("vawe-critique", "Review a rendered film in a fresh session."),
-      skill("vawe-reference", "Match a reference film, line by line."),
-    ],
-  },
-  {
-    id: "learn",
-    title: "Learn",
-    tile: { word: "Learn", tone: "cobalt", detail: "learn", shift: 1 },
-    items: [
-      { href: "/docs", title: "Docs", line: "Quickstart, the page contract, the CLI and troubleshooting.", icon: "book", meta: "docs" },
-      { href: "/docs/recipes", title: "Recipes", line: "Chains of video components for common short films, with the traps at each seam.", icon: "list", meta: "recipes" },
-      { href: "/determinism", title: "Determinism", line: "Why the same page gives the same frames, and how a test proves it.", icon: "book", meta: "essay" },
-      { href: "/when-determinism-matters", title: "When determinism matters", line: "When byte-identical output decides the engine, and when it does not.", icon: "book", meta: "essay" },
-      { href: "/launch-video", title: "Launch videos", line: "A product launch film built from captured UI, one message per beat.", icon: "play", meta: "guide" },
-      { href: "/blog", title: "Blog", line: "Notes on what broke, what we measured and what changed.", icon: "pen", meta: `${allPosts().length}${NBSP}posts` },
-    ],
-  },
-  {
-    id: "compare",
-    title: "Compare",
-    tile: { word: "Compare", tone: "oxblood", detail: "compare", shift: -1, flip: true },
-    items: [
-      { href: "/remotion-alternatives", title: "Remotion alternatives", line: "A hosted JSON API or a self-hosted engine, and what each license requires.", icon: "compare", meta: "alternatives" },
-      { href: "/hyperframes-alternatives", title: "HyperFrames alternatives", line: "The closest peer: both compose from HTML and make time deterministic differently.", icon: "compare", meta: "alternatives" },
-      ...RIVALS.map((r): Item => ({ href: `/vs/${r.slug}`, title: `vawe vs ${r.name}`, line: `${r.metaTitle.split(": ")[1].replace(/^./, (c) => c.toUpperCase())}.`, icon: "compare", meta: "comparison" })),
-    ],
-  },
-  {
-    id: "project",
-    title: "Project",
-    tile: { word: "Project", tone: "mat", detail: "project", shift: 1, flip: true },
-    items: [
-      { href: "/problems", title: "Hard problems", line: "Thirteen problems in agent-made video: seven solved with numbers, six open.", icon: "alert", meta: "problems" },
-      { href: "/roadmap", title: "Roadmap", line: "What is in work now, next and later.", icon: "map", meta: "now, next, later" },
-      { href: REPO_URL, title: "GitHub", line: "The source, Apache 2.0, and the issue tracker.", icon: "github", meta: "Apache-2.0", external: true },
-    ],
-  },
-];
+const { groups: GROUPS } = RESOURCES;
 
 function RowIcon({ name }: { name: Item["icon"] }) {
   return <span className="rs-ico">{name === "github" ? <GithubMark size={16} /> : <Icon name={name} size={16} />}</span>;
@@ -203,15 +66,15 @@ export default function Resources() {
       <Header active="resources" />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: "Resources", url: "/resources" }]))}
+        dangerouslySetInnerHTML={jsonLdScript(breadcrumbSchema([{ name: "vawe", url: "/" }, { name: RESOURCES.crumb.current, url: RESOURCES.path }]))}
       />
       <div className="wrap">
         <main id="content" className="ipage xp" tabIndex={-1}>
           <section className="phead">
-            <PageTop current="Resources" />
-            <h1>Resources for motion graphics by code</h1>
-            <p>Easing curves, video components, files for AI agents, guides and comparisons: {COUNT} links in six groups.</p>
-            <Toc items={GROUPS.map((g) => ({ href: `#${g.id}`, label: g.title }))} label="Groups" />
+            <PageTop current={RESOURCES.crumb.current} />
+            <h1>{RESOURCES.h1}</h1>
+            <p>{RESOURCES.lede(COUNT)}</p>
+            <Toc items={GROUPS.map((g) => ({ href: `#${g.id}`, label: g.title }))} label={RESOURCES.tocLabel} />
           </section>
 
           {GROUPS.map((g) => (
@@ -246,7 +109,7 @@ export default function Resources() {
           ))}
         </main>
       </div>
-      <Footer active="/resources" />
+      <Footer active={RESOURCES.path} />
     </div>
   );
 }

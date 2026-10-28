@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Header, REPO_URL } from "./components/Header";
+import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { Clip } from "./components/Clip";
 import { LandingMotion } from "./components/LandingMotion";
 import { organizationSchema, websiteSchema, softwareApplicationSchema, softwareSourceCodeSchema, jsonLdScript } from "../lib/schema";
 import { faqSchema } from "../lib/schema-content";
 import { FAQ } from "../lib/faq";
-import { MOVES, clip, moveByName } from "../lib/moves";
+import { clip, moveByName } from "../lib/moves";
+import { HOME } from "../lib/content/home";
 import "./landing.css";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -20,33 +21,8 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 type Film = { webm: string; mp4: string; poster: string };
 
 const example = (id: string): Film => ({ webm: `/examples/${id}.webm`, mp4: `/examples/${id}.mp4`, poster: `/examples/${id}.webp` });
-const HERO = example("tracking-hud");
-
-const CHAPTERS = [
-  {
-    id: "c1",
-    tag: "01 / The problem",
-    title: "A motion video takes an editor and a week.",
-    text: "Timelines, keyframes, private project files. Nothing an agent can read, and nothing you can diff.",
-    film: example("retro-remix"),
-  },
-  {
-    id: "c2",
-    tag: "02 / The page · CINDRE, one page.html",
-    title: "So write a page.",
-    text: "HTML, CSS, Web Animations, SVG, canvas or three.js. Nothing private to learn.",
-    film: example("cindre"),
-  },
-  {
-    id: "c3",
-    tag: "03 / The result · showcase, 14\u00a0s",
-    title: "One mp4. Every canvas.",
-    text: "16:9, 9:16, 1:1, 4:5 and 4:3 from the same page. Audio mixed offline.",
-    film: example("showcase"),
-  },
-];
-
-const SHOWN_MOVES = ["text-on-path", "letter-stagger", "panel-live-sync", "integration-hub", "outline-fill", "iris-wipe"];
+const { hero, chapters, how, moves, end } = HOME;
+const HERO = example(hero.film);
 
 export default function Home() {
   return (
@@ -60,7 +36,7 @@ export default function Home() {
       <Header overlay />
       <main className="lp" id="content" tabIndex={-1}>
         <nav className="lp-rail" aria-label="Chapters">
-          {CHAPTERS.map((c) => (
+          {chapters.map((c) => (
             <a key={c.id} href={`#${c.id}`} aria-label={`Chapter ${c.tag.replace(" / ", ": ")}`} />
           ))}
         </nav>
@@ -70,23 +46,23 @@ export default function Home() {
             <Clip className="lp-film" webm={HERO.webm} src={HERO.mp4} poster={HERO.poster} decorative />
             <div className="lp-hero-copy">
               <h1 className="lp-display">
-                <span className="mono lp-hero-brand">vawe · HTML to video for developers and AI agents</span>
-                One page in.<br />One film out.
+                <span className="mono lp-hero-brand">{hero.brand}</span>
+                {hero.h1[0]}<br />{hero.h1[1]}
               </h1>
-              <p className="lp-lede">Write one HTML page. vawe renders it to an mp4. You write the page, or an agent does.</p>
+              <p className="lp-lede">{hero.lede}</p>
               <div className="lp-row">
-                <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
-                <Link className="btn lp-btn-line" href="/video-components">See the video components</Link>
+                <a className="btn btn-primary" href={hero.primary.href}>{hero.primary.label}</a>
+                <Link className="btn lp-btn-line" href={hero.secondary.href}>{hero.secondary.label}</Link>
               </div>
             </div>
           </div>
         </section>
 
-        {CHAPTERS.map((c) => (
+        {chapters.map((c) => (
           <section className="lp-ch" id={c.id} key={c.id} aria-labelledby={`${c.id}-h`}>
             <div className="lp-stage">
               <div className="lp-pane lp-frame">
-                <Clip className="lp-film" webm={c.film.webm} src={c.film.mp4} poster={c.film.poster} decorative />
+                <Clip className="lp-film" webm={example(c.film).webm} src={example(c.film).mp4} poster={example(c.film).poster} decorative />
                 <p className="lp-tag mono">{c.tag}</p>
                 <div className="lp-cap">
                   <h2 id={`${c.id}-h`}>{c.title}</h2>
@@ -99,33 +75,31 @@ export default function Home() {
 
         <section className="lp-how lp-gridlines" id="how" aria-labelledby="how-h">
           <div className="lp-rv">
-            <h2 id="how-h">A film is one page.</h2>
-            <pre className="lp-code" tabIndex={0} aria-label="A complete film page">
-              <i>{"<!doctype html>\n<html data-aspect=\"16:9\">\n"}</i>
-              <b>{"<meta"}</b>{" name=\"duration\" content=\"3\""}<b>{">"}</b>{"\n"}
-              <b>{"<meta"}</b>{" name=\"message\" content=\"One page. One film.\""}<b>{">"}</b>{"\n"}
-              <b>{"<style>"}</b>{"\n  body { margin: 0; display: grid; place-items: center start;\n         height: 100vh; padding-left: 8vw; background: #000; }\n  h1 { font: 800 9vh/1 system-ui; color: #fff;\n       animation: rise 0.7s var(--ease-land) 0.3s both; }\n  @keyframes rise {\n    from { translate: 0 6vh; clip-path: inset(0 0 100% 0); }\n    to   { translate: 0 0;   clip-path: inset(0 0 0 0); }\n  }\n"}<b>{"</style>"}</b>{"\n"}
-              <b>{"<h1>"}</b>{"One page. One film."}<b>{"</h1>"}</b>
+            <h2 id="how-h">{how.title}</h2>
+            <pre className="lp-code" tabIndex={0} aria-label={how.codeLabel}>
+              {how.code.map((c, i) =>
+                c.kind === "dim" ? <i key={i}>{c.text}</i> : c.kind === "tag" ? <b key={i}>{c.text}</b> : c.text,
+              )}
             </pre>
-            <p className="mono lp-code-note">films/hello/page.html</p>
+            <p className="mono lp-code-note">{how.codeFile}</p>
           </div>
           <div className="lp-side lp-rv">
-            <p>Open it in a browser and it plays. Hand it to vawe and it seeks the page to each frame, so frame 412 is the same on every run. A change to the motion is a diff you can read before it ships.</p>
+            <p>{how.side}</p>
             <div>
-              <div className="lp-cmd"><span>$</span>bin/vawe new hello<em>a valid starter</em></div>
-              <div className="lp-cmd"><span>$</span>bin/vawe dev films/hello/page.html<em>draft, 30&nbsp;fps</em></div>
-              <div className="lp-cmd"><span>$</span>bin/vawe ship films/hello/page.html<em>final, 60&nbsp;fps</em></div>
+              {how.commands.map((c) => (
+                <div className="lp-cmd" key={c.cmd}><span>$</span>{c.cmd}<em>{c.note}</em></div>
+              ))}
             </div>
-            <a className="btn lp-btn-line" href={REPO_URL}>Read the page contract</a>
+            <a className="btn lp-btn-line" href={how.contract.href}>{how.contract.label}</a>
           </div>
         </section>
 
         <div className="lp-moves-head" id="moves">
-          <h2>{MOVES.length} video components to copy.</h2>
-          <Link className="btn lp-btn-line" href="/video-components">See every video component</Link>
+          <h2>{moves.title}</h2>
+          <Link className="btn lp-btn-line" href={moves.all.href}>{moves.all.label}</Link>
         </div>
         <section className="lp-grid" aria-label="Video component clips">
-          {SHOWN_MOVES.map((name) => {
+          {moves.shown.map((name) => {
             const m = moveByName(name);
             if (!m) return null;
             const f = clip(m);
@@ -139,7 +113,7 @@ export default function Home() {
         </section>
 
         <section className="lp-faq" id="faq" aria-labelledby="faq-h">
-          <h2 id="faq-h" className="lp-rv">Questions.</h2>
+          <h2 id="faq-h" className="lp-rv">{HOME.faqTitle}</h2>
           <div className="lp-faq-list lp-rv">
             {FAQ.map((item, i) => (
               <details key={item.q} open={i === 0}>
@@ -153,14 +127,15 @@ export default function Home() {
         </section>
 
         <section className="lp-end lp-gridlines" aria-labelledby="end-h">
-          <h2 id="end-h" className="lp-rv">Write the page.</h2>
+          <h2 id="end-h" className="lp-rv">{end.title}</h2>
           <div className="lp-row lp-rv">
-            <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
-            <a className="btn lp-btn-line" href="/docs">Read the docs</a>
+            <a className="btn btn-primary" href={end.primary.href}>{end.primary.label}</a>
+            <a className="btn lp-btn-line" href={end.docs.href}>{end.docs.label}</a>
           </div>
           <div className="lp-install lp-rv">
-            <div className="lp-cmd"><span>$</span>npm install<em>Node 22+, ffmpeg</em></div>
-            <div className="lp-cmd"><span>$</span>bin/vawe doctor<em>checks each tool</em></div>
+            {end.install.map((c) => (
+              <div className="lp-cmd" key={c.cmd}><span>$</span>{c.cmd}<em>{c.note}</em></div>
+            ))}
           </div>
         </section>
       </main>
