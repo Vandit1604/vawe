@@ -4,13 +4,14 @@
 // Settings: matcher "Bash", command "node harness/live/verb-hint.mjs" (run from the repo root).
 import fs from 'node:fs';
 import { scratch } from '../lib/scratch.mjs';
+import { POLL } from '../lib/shell-match.mjs';
 
 const HINT_EVERY_MS = 30 * 60 * 1000;
 
 export const RULES = [
   { id: 'shot', test: /puppeteer|--screenshot=|playwright/, say: 'bin/vawe shot <route|url|page.html> --w 1440,390 [--full] takes site and page screenshots at several widths (lazy images loaded, the dev server started and stopped for you, page errors and sideways overflow reported); do not write a screenshot script' },
   { id: 'links', test: /curl\b[^\n]*(%\{http_code\}|-w\b|-I\b)/, say: 'bin/vawe check links [--base https://vawe.dev] crawls the site and lists broken links, redirects and dead #anchors with the page that links to each; for one page, bin/vawe shot <route>' },
-  { id: 'wait', test: /(until|while)\b[^\n]*(render-page|\.mp4|-draft|\.runs\.jsonl|vawe: (dev|ship))|ps (aux|-ax)[^\n]*render-page|sleep\s+\d+[^\n]*(draft|render|\.mp4)/, say: 'bin/vawe wait <page> waits for any draft, clip or final and prints one progress line a minute; do not poll with sleep or ps' },
+  { id: 'wait', test: POLL, say: 'bin/vawe wait <page|film> (for example bin/vawe wait films/my-launch/page.html, or bin/vawe wait my-launch) waits for a running draft, clip or final render and prints its result line; it returns after about 3.5 minutes with a STILL RUNNING line and a progress line a minute, so call it again; do not poll a render with sleep or ps' },
   { id: 'sheet', test: /ffmpeg\b[^\n]*(tile=|xstack|hstack|vstack|select='?not\(mod)/, say: 'bin/vawe sheet <page|mp4> --at s,s,s makes a labelled sheet of seconds; bin/vawe strip <page|mp4> --at s shows one moment; bin/vawe sheet <page|mp4> --ref <ref.mp4> puts a reference beside your frames' },
   { id: 'still', test: /ffmpeg\b[^\n]*-ss\s+[\d.$]+[^\n]*(-frames:v|-vframes)\s+1/, say: 'bin/vawe still <page|mp4> --at s writes one exact full-size frame (a page renders at its final size)' },
 ];

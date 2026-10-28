@@ -8,6 +8,7 @@
 //          --main         with --project, read the main sessions too (default: sub-agent transcripts only)
 //          --compare X    the aggregate table before and after X (date or commit sha), to measure a change
 //          --aggregate-only   skip the per-agent reports
+//          --handmade     instead of the reports: the 15 most repeated hand-made commands (raw ffmpeg, Python or node -e image code, throwaway scripts), each with the verb that covers it
 //          --json         every field as JSON, for other scripts
 // Verb footers (ok, FAILED, seconds) exist in transcripts from 2026-10-09; earlier verb calls have no exit status.
 // Transcripts are streamed line by line. Commands and results are redacted (keys, tokens, long opaque strings).
@@ -19,16 +20,28 @@ import { readRunLog } from '../lib/trace/runlog.mjs';
 import { analyze } from '../lib/trace/analyze.mjs';
 import { selectAgents } from '../lib/trace/select.mjs';
 import { aggregate, compareAt } from '../lib/trace/aggregate.mjs';
+import { handmadeShapes, rankShapes, coveringVerb } from '../lib/trace/handmade.mjs';
+import { brief } from '../lib/trace/redact.mjs';
 import { agentMarkdown, aggregateMarkdown, compareMarkdown } from '../lib/trace/report.mjs';
 
 const OPTIONS = {
   project: { type: 'string' }, since: { type: 'string' }, agent: { type: 'string' }, compare: { type: 'string' },
-  films: { type: 'boolean' }, main: { type: 'boolean' }, json: { type: 'boolean' }, 'aggregate-only': { type: 'boolean' },
+  films: { type: 'boolean' }, main: { type: 'boolean' }, json: { type: 'boolean' }, 'aggregate-only': { type: 'boolean' }, handmade: { type: 'boolean' },
 };
 
 async function review(file) {
   return analyze(await foldRows(rowsOf(file)), file, (film, meta) => readRunLog(film, { cwd: meta.cwd, session: meta.session }));
 }
+
+const TOP_SHAPES = 15;
+
+async function handmadeEvents(file, keep) {
+  const fold = await foldRows(rowsOf(file));
+  const agent = analyze(fold, file);
+  return keep(agent) ? handmadeShapes(fold.calls, { session: agent.session, films: agent.films }) : [];
+}
+
+const shapeLine = (r) => `${r.count}x  ${brief(r.shape, 120)}  films: ${r.films.join(',') || '-'}  ${coveringVerb(r.sample) ?? 'no verb'}`;
 
 // The verb table imports harness/lib/findings.mjs, which sends process.stdout to stderr under --json: write to fd 1 directly.
 const print = (text) => fs.createWriteStream(null, { fd: 1 }).end(`${text}\n`);
@@ -41,6 +54,19 @@ async function main() {
   }
   const sinceMs = cutoffMs(values.since);
   const files = transcriptFiles({ inputs: positionals, project: values.project, sinceMs, main: values.main });
+  if (values.handmade) {
+    if (values.compare) {
+      console.error('trace-review: --handmade does not take --compare');
+      process.exit(2);
+    }
+    const keep = (a) => selectAgents([a], { films: values.films, agent: values.agent, sinceMs }).length > 0;
+    const events = [];
+    for (const file of files) events.push(...await handmadeEvents(file, keep));
+    const top = rankShapes(events).slice(0, TOP_SHAPES);
+    if (values.json) print(JSON.stringify(top.map((r) => ({ ...r, verb: coveringVerb(r.sample) })), null, 1));
+    else print(top.length ? top.map(shapeLine).join('\n') : 'no hand-made commands found');
+    return;
+  }
   const all = [];
   for (const file of files) all.push(await review(file));
   const agents = selectAgents(all, { films: values.films, agent: values.agent, sinceMs });

@@ -65,8 +65,8 @@ test('footers, next lines, docs and film writes are read from calls', () => {
 
 test('rawTools applies the verb-hint rules, and the raw extras only without a verb', () => {
   assert.deepEqual(rawTools('ffmpeg -ss 3 -i a.mp4 -frames:v 1 f.png', false), ['hint:still', 'ffmpeg']);
-  assert.deepEqual(rawTools('sleep 5 && curl x', false), ['sleep', 'curl']);
-  assert.deepEqual(rawTools('bin/vawe dev p && sleep 5', true), []);
+  assert.deepEqual(rawTools('sleep 5 && curl x', false), ['hint:wait', 'sleep', 'curl']);
+  assert.deepEqual(rawTools('bin/vawe dev p && sleep 5', true), ['hint:wait']);
 });
 
 test('rowsOf streams rows and skips a cut-off last line', async () => {
@@ -98,7 +98,7 @@ test('analyze counts routing, raw tools, docs, failures, cost and rule breaks', 
   assert.deepEqual(a.routing.nextCounts, { ignored: 2 });
   assert.deepEqual(a.routing.hintCounts, { followed: 1 });
   assert.equal(a.routing.hints[0].id, 'still');
-  assert.deepEqual(a.raw, { 'hint:still': 1, ffmpeg: 1, sleep: 1, curl: 1 });
+  assert.deepEqual(a.raw, { 'hint:still': 1, ffmpeg: 1, 'hint:wait': 1, sleep: 1, curl: 1 });
   assert.deepEqual(a.docs.map((d) => [d.doc, d.beforePage, d.beforeDev]), [['AGENTS.md', true, true]]);
   assert.deepEqual(a.failures.byClass, { vawe: 2, glob: 1, hook: 1 });
   assert.equal(a.cost.calls, 13);

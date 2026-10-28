@@ -18,6 +18,17 @@ test('a sleep loop on a render points at vawe wait', () => {
   assert.equal(id('ps aux | grep render-page | wc -l'), 'wait');
 });
 
+test('every polling shape points at vawe wait, with the real arguments in the hint', () => {
+  for (const cmd of ['sleep 5', 'sleep 1; echo waiting', 'until [ -s out/x.log ]; do sleep 2; done', 'ps aux | grep -i node | grep -v grep', 'pgrep -f render-page', 'until grep -q done f && ! pgrep -f x; do sleep 3; done']) assert.equal(id(cmd), 'wait', cmd);
+  assert.match(hintFor('sleep 5').say, /bin\/vawe wait <page\|film>/);
+});
+
+test('a sleep that is not a poll gets no wait advice', () => {
+  assert.equal(id("cat > tests/x.test.mjs <<'EOF'\nawait new Promise((r) => setTimeout(r, 5));\nsleep 5\nEOF"), null);
+  assert.equal(id('echo "sleep 5 then retry"'), null);
+  assert.equal(id('grep -rn "pgrep" harness/'), null);
+});
+
 test('an ffmpeg contact sheet and an ffmpeg frame grab point at sheet and still', () => {
   assert.equal(id('ffmpeg -i out/a.mp4 -vf "select=\'not(mod(n\\,30))\',scale=640:-1,tile=4x3" -frames:v 1 s.png'), 'sheet');
   assert.equal(id('ffmpeg -v error -y -ss 1.8 -i out/a.mp4 -frames:v 1 f.png'), 'still');
