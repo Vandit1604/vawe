@@ -10,7 +10,7 @@ export type FaqItem = { q: string; a: Para };
 const factItem = (id: string): FaqItem => {
   const f = FACTS.find((x) => x.id === id);
   if (!f) throw new Error(`unknown fact ${id}`);
-  return { q: f.q, a: f.a };
+  return { q: f.q, a: f.faqOpen ? [f.faqOpen, ...f.a] : f.a };
 };
 
 export const FAQ: FaqItem[] = [

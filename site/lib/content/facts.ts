@@ -1,6 +1,6 @@
 import type { Para } from "./types";
 
-export type Fact = { id: string; lead: string; q: string; a: Para };
+export type Fact = { id: string; lead: string; q: string; a: Para; faqOpen?: string };
 
 // The one source of the product facts. The about page lists them under "Quick facts" and the home FAQ
 // answers them (and its FAQPage JSON-LD), so the two cannot differ.
@@ -8,6 +8,7 @@ export const FACTS: Fact[] = [
   {
     id: "free",
     lead: "Free.",
+    faqOpen: "Yes. ",
     q: "Is vawe free?",
     a: ["vawe is free and open source under Apache-2.0, for any purpose including commercial use. There is no paid tier."],
   },
