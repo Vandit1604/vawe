@@ -12,12 +12,12 @@ import { stillArgs, stillPath, stillProblem } from './see/still-math.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 
-async function pageStill(pagePath, at, out) {
+export async function pageStill(pagePath, at, out, { final = true } = {}) {
   const dur = Number(readPageMeta(pagePath, 'duration'));
   if (!(dur > 0)) die(`${pagePath} has no <meta name="duration">`);
   const last = clampToLastFrame(at, dur, Number(readPageMeta(pagePath, 'fps')) || 30);
   const frame = resolveFrame(pagePath, { final: true });
-  const opened = await openPage(pagePath, frame, { warm: true });
+  const opened = await openPage(pagePath, frame, { warm: true, final });
   try {
     if (!opened.reused) {
       await opened.page.goto(opened.url, { waitUntil: 'load' });
