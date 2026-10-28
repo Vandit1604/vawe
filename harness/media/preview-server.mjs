@@ -84,7 +84,7 @@ async function connectShared(final) {
 
 // A page's `../../core/...` imports and assets resolve against its own checkout, so serve from that
 // checkout's top level; only a page in no repo is served from its own folder.
-function pageRoot(abs) {
+export function pageRoot(abs) {
   const dir = path.dirname(abs);
   try {
     return execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || dir;

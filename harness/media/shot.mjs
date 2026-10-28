@@ -7,14 +7,31 @@
 // --tour drives a scripted cursor through the page and writes an mp4 of it, every frame at its exact second (harness/media/tour.mjs, steps in tour-math.mjs).
 import fs from 'node:fs';
 import path from 'node:path';
-import { launchPage, serveRepo, REPO_ROOT } from '../lib/render-harness.mjs';
+import { launchPage, serveRepo } from '../lib/render-harness.mjs';
+import { pageRoot } from './preview-server.mjs';
 import { withSite } from '../lib/site-server.mjs';
-import { DEFAULT_BASE, DEFAULT_WIDTHS, parseTargets, parseWidths, resolveTarget, shotName, shotProblem, viewportHeight } from './shot-math.mjs';
+import { DEFAULT_BASE, DEFAULT_WIDTHS, navigationProblem, parseTargets, parseWidths, resolveTarget, shotName, shotProblem, viewportHeight } from './shot-math.mjs';
 import { parseTour, tourSize } from './tour-math.mjs';
 import { captureTour, encodeTour, tourTmpDir } from './tour.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const NAV_TIMEOUT_MS = 120000;
+
+class ShotError extends Error {}
+
+async function gotoChecked(page, url) {
+  const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: NAV_TIMEOUT_MS }).catch((e) => { throw new ShotError(`${url} did not load: ${String(e.message).split('\n')[0]}`); });
+  const problem = navigationProblem({ url, status: response?.status() ?? 200, finalUrl: page.url() });
+  if (problem) throw new ShotError(problem);
+}
+
+/** A static server over the checkout the html file lives in (its own folder when it is in none): { url, close }. */
+async function serveFile(file) {
+  const abs = path.resolve(file);
+  const root = pageRoot(abs);
+  const { port, close } = await serveRepo({ root });
+  return { url: `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}`, close };
+}
 
 async function loadLazy(page) {
   await page.evaluate(async () => {
@@ -41,7 +58,7 @@ async function shoot({ url, name, width, full, outDir }) {
   page.on('response', (r) => { if (r.status() >= 400) problems.failed++; });
   page.on('requestfailed', () => { problems.failed++; });
   try {
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: NAV_TIMEOUT_MS });
+    await gotoChecked(page, url);
     await loadLazy(page);
     const { height, overflow } = await page.evaluate(() => ({ height: document.documentElement.scrollHeight, overflow: document.documentElement.scrollWidth - innerWidth }));
     const file = path.join(outDir, name);
@@ -61,7 +78,7 @@ async function tour({ url, file, width, fps, scale, out }) {
   const { page, close } = await launchPage({ ...tourSize(width), scale });
   const tmpDir = tourTmpDir();
   try {
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: NAV_TIMEOUT_MS });
+    await gotoChecked(page, url);
     await loadLazy(page);
     const frames = await captureTour(page, plan, { fps, tmpDir, width });
     encodeTour(tmpDir, frames, fps, out);
@@ -77,8 +94,8 @@ async function tourMain({ targets, base, flag }) {
   const width = flag('--w') ? parseWidths(flag('--w'))[0] : 1440;
   const given = flag('--out') || 'out/shot';
   const out = path.resolve(given.endsWith('.mp4') ? given : path.join(given, shotName(targets[0], width).replace(/\.png$/, '-tour.mp4')));
-  const files = t.kind === 'file' ? await serveRepo({ root: REPO_ROOT }) : null;
-  const url = files ? `http://127.0.0.1:${files.port}/${path.relative(REPO_ROOT, path.resolve(t.file))}` : t.url;
+  const files = t.kind === 'file' ? await serveFile(t.file) : null;
+  const url = files ? files.url : t.url;
   const run = () => tour({ url, file: flag('--tour'), width, fps: Number(flag('--fps') || 60), scale: Number(flag('--scale') || 1), out });
   try {
     await (!files && url.startsWith(base) ? withSite(base, run) : run());
@@ -102,18 +119,21 @@ async function main(argv) {
 
   const resolved = targets.map((t) => ({ t, ...resolveTarget(t, base) }));
   const needsSite = resolved.some((r) => r.kind === 'url' && r.url.startsWith(base));
-  const files = resolved.some((r) => r.kind === 'file') ? await serveRepo({ root: REPO_ROOT }) : null;
   const shootAll = async () => {
     for (const r of resolved) {
-      const url = r.kind === 'file' ? `http://127.0.0.1:${files.port}/${path.relative(REPO_ROOT, path.resolve(r.file))}` : r.url;
-      for (const width of widths) await shoot({ url, name: shotName(r.t, width), width, full, outDir });
+      const files = r.kind === 'file' ? await serveFile(r.file) : null;
+      try {
+        for (const width of widths) await shoot({ url: files ? files.url : r.url, name: shotName(r.t, width), width, full, outDir });
+      } finally {
+        files?.close();
+      }
     }
   };
-  try {
-    await (needsSite ? withSite(base, shootAll) : shootAll());
-  } finally {
-    files?.close();
-  }
+  await (needsSite ? withSite(base, shootAll) : shootAll());
 }
 
-main(process.argv.slice(2)).catch((e) => die(e.stack || String(e)));
+main(process.argv.slice(2)).catch((e) => {
+  if (!(e instanceof ShotError)) die(e.stack || String(e));
+  console.error(`vawe: shot failed: ${e.message}`);
+  process.exit(1);
+});

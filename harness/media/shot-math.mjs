@@ -44,3 +44,10 @@ export function shotName(target, width) {
 
 /** A phone width gets a phone-height viewport. Pure. */
 export const viewportHeight = (width) => (width <= 500 ? 844 : 900);
+
+/** Why a navigation did not load the page asked for, or null: an HTTP error status, or Chrome's own error page. Pure. */
+export function navigationProblem({ url, status, finalUrl }) {
+  if (status >= 400) return `${url} answered HTTP ${status}`;
+  if (finalUrl.startsWith('chrome-error:')) return `Chrome showed an error page for ${url}`;
+  return null;
+}
