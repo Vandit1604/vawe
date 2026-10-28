@@ -23,11 +23,13 @@ test('reasonOf keeps the last stderr line, or says exit code or signal', () => {
   assert.equal(reasonOf({ code: 1, stderr: 'a\n  at x (y)\nTimeoutError: Navigation timeout\n' }), 'exit 1: TimeoutError: Navigation timeout');
   assert.equal(reasonOf({ code: 1, signal: 'SIGKILL', stderr: '' }), 'killed by SIGKILL');
   assert.equal(reasonOf({ code: 137 }), 'exit 137');
+  assert.equal(reasonOf({ code: 1, stderr: 'Error: bad input\n    at x (y)\n\nNode.js v25.2.0\n' }), 'exit 1: Error: bad input');
 });
 
 test('causeOf groups the known failures and keeps unknown ones apart without their numbers', () => {
   assert.equal(causeOf('exit 1: TimeoutError: Navigation timeout of 30000 ms'), 'render slot or navigation timeout');
   assert.equal(causeOf('exit 1: detached Frame'), 'browser lost');
+  assert.equal(causeOf("exit 1: ProtocolError: Runtime.callFunctionOn timed out. Increase the 'protocolTimeout' setting"), 'browser lost');
   assert.equal(causeOf('killed by SIGKILL'), 'killed');
   assert.equal(causeOf('exit 1: slice 3 failed'), 'slice # failed');
 });
