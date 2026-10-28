@@ -22,7 +22,7 @@ The rules are [sound-level](../rules/sound-level.md), [sound-voices](../rules/so
 hum or chord, and no constant texture. Sound is small sound effects on actions, like UI button sounds
 (clicks, taps, pops, short whooshes, a success chime), placed on the frame of the action. Prefer real
 recorded effects in the film's `assets/` folder (the user's own, or the sites in `resources/README.md`
-such as soundeffect-lab or Kenney); the short synth voices below are the fallback. A music track is
+such as soundeffect-lab or Kenney); with none that fits, no cue; the short synth voices below are used only when you choose one. A music track is
 used only when the user provides one (`<audio loop src=...>`). A page that writes `data-synth="bed"`
 is refused: "synth beds are banned: use a real music file (<audio loop src=...>) or no bed".
 
@@ -63,7 +63,7 @@ Audio is `<audio>` tags in the page, never played live, mixed offline by `harnes
 
 ## The 12 voices (`CUES` in `core/audio/kit.mjs`)
 
-The fallback when no recorded effect fits. All synthesized from parameters, seeded and deterministic: no files, no licence, nothing to 404.
+Used only when you choose one: with no recorded effect that fits, the default is no cue. All synthesized from parameters, seeded and deterministic: no files, no licence, nothing to 404.
 Every kept voice has zero noise layers. Ten noise-based UI cues were cut after a listening pass because
 filtered white noise reads as cheap.
 
@@ -150,7 +150,7 @@ Mostly craft doctrine, not measurement. Do not cite it as science.
 Music is the one asset class with automated global enforcement. A wrong image gets a takedown if someone
 notices. A wrong track gets a Content ID claim on upload.
 
-- A recorded effect needs its source and licence noted like a track. The synth voices need none, but they are the fallback, not the aim.
+- A recorded effect needs its source and licence noted like a track. The synth voices need none, but a recorded effect comes first and no cue is the default.
 - Only CC0 and CC BY are safe from Creative Commons. CC BY needs the credit kept in the description.
 - Never use CC ND: syncing music to moving image is always Adapted Material in the licence text
   itself, so no ND track can go in any film. CC NC is unsafe for client or paid work.

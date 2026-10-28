@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { UsageError } from './parse.mjs';
 import { ensureFonts } from '../lib/ensure-fonts.mjs';
-import { pickTemplate, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES } from './route.mjs';
+import { pickTemplate, routeLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
@@ -435,10 +435,10 @@ export function askLines(name, request, from, open) {
 }
 
 function chooseTemplate(root, { from, request, name, title, length }) {
-  if (from) return { template: path.resolve(from), route: null };
+  if (from) return { template: path.resolve(from), route: null, length: path.basename(from) === 'beat-sheet.md' ? routeLength({ request, name, title, length }) : undefined };
   const route = pickTemplate({ request, name, title, length }, readRouting(root));
   const recipe = pickRecipe({ request, name, title, length }, readRecipes(root));
-  return { template: path.join(root, route.template), route: recipe ? { ...route, recipe } : route };
+  return { template: path.join(root, route.template), route: recipe ? { ...route, recipe } : route, length: route.length };
 }
 
 // The starter's face goes into the film's own assets folder: a film carries its files.
@@ -490,10 +490,10 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const answered = answeredDetails({ request, given: details, length, aspect });
   const open = unansweredDetails(answered);
   if (!defaults && open.some((d) => d.required)) return { asked: open, request, from };
-  const { template, route } = chooseTemplate(root, { from, request, name, title, length });
+  const { template, route, length: routedLength } = chooseTemplate(root, { from, request, name, title, length });
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
-  length ??= route?.length ?? formatFrom(questions.find((q) => /^length$/i.test(q.key))?.default).length;
+  length ??= routedLength ?? formatFrom(questions.find((q) => /^length$/i.test(q.key))?.default).length;
   const face = starterFace(name);
   copyFace(root, dir, face);
   const given = Object.fromEntries(Object.entries({ length, aspect, title }).filter(([, v]) => v !== undefined));

@@ -111,4 +111,11 @@ test('a request with no length takes its route default', () => {
   assert.equal(pickTemplate({ request: 'a logo reveal for the vawe wordmark' }, table).length, 5);
   assert.equal(pickTemplate({ request: 'launch video for https://acme.com' }, table).length, 20);
   assert.equal(pickTemplate({ request: 'recreate this reference' }, table).length, undefined);
+  assert.equal(pickTemplate({ request: 'a 6 s logo reveal', length: 6 }, table).length, 5);
+});
+
+test('an unmatched request is not a sting: it takes 15 s', () => {
+  const hit = pickTemplate({ request: 'a video about our team' }, table);
+  assert.equal(hit.known, false);
+  assert.equal(hit.length, 15);
 });

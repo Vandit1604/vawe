@@ -12,6 +12,8 @@ const LONG_MIN_S = 60;
 
 // Seconds a type takes when the request names no length, inside its ROUTING.md "Typical lengths" range.
 // A type absent here (reference rebuild, music video) takes the default of its template's Length question.
+// A request no word or length routed is not a sting: it takes the old 15 s.
+const UNMATCHED_LENGTH_S = 15;
 export const DEFAULT_LENGTH_S = { sting: 5, showreel: 15, 'brand launch': 20, 'UI morph': 14, 'story or explainer': 30, 'app or game capture': 30, 'long form': 90 };
 
 // A brand launch films a real site with real captures: it needs a URL, and an invented product has none.
@@ -87,23 +89,31 @@ function typeFor(text, length) {
   for (const [type, re] of WORDS.slice(1)) {
     const m = re.exec(text);
     if (!m) continue;
-    if (type === 'brand launch' && INVENTED_WORDS.test(text) && !URL_WORDS.test(text)) return { type: FALLBACK, why: 'the product is invented and has no URL to capture, so the beat sheet, with the launch chain for the beats' };
+    if (type === 'brand launch' && INVENTED_WORDS.test(text) && !URL_WORDS.test(text)) return { type: FALLBACK, length: UNMATCHED_LENGTH_S, why: 'the product is invented and has no URL to capture, so the beat sheet, with the launch chain for the beats' };
     return { type, why: `the request says "${m[0]}"` };
   }
   return null;
 }
 
+function route({ request = '', name = '', title = '', length: asked } = {}) {
+  const text = [request, name.replace(/-/g, ' '), title].join(' ').toLowerCase();
+  const hit = typeFor(text, asked);
+  if (!hit) return { known: false, type: FALLBACK, why: 'no word or length named a film type, so the motion-graphic row', length: UNMATCHED_LENGTH_S };
+  return { known: true, ...hit, length: hit.length ?? DEFAULT_LENGTH_S[hit.type] };
+}
+
+/** The default seconds for a request, as `pickTemplate` gives them but without the ROUTING.md table. */
+export const routeLength = (details) => route(details).length;
+
 /**
- * The template for a request: { template, type, why, known, length }, `length` being the type's default seconds or undefined. `known` is false when no word or length
+ * The template for a request: { template, type, why, known, length }, `length` being the default seconds (undefined for a type that takes its template's). `known` is false when no word or length
  * matched and the motion-graphic row (a sting) was taken. Throws when ROUTING.md lacks the row.
  */
-export function pickTemplate({ request = '', name = '', title = '', length } = {}, table) {
-  const text = [request, name.replace(/-/g, ' '), title].join(' ').toLowerCase();
-  const hit = typeFor(text, length);
-  const { type, why } = hit || { type: FALLBACK, why: 'no word or length named a film type, so the motion-graphic row' };
+export function pickTemplate(details = {}, table) {
+  const { known, type, why, length } = route(details);
   const template = table[type];
   if (!template) throw new Error(`${ROUTING} has no "${type}" row; rows: ${Object.keys(table).join(', ')}`);
-  return { template, type, why, known: Boolean(hit), length: DEFAULT_LENGTH_S[type] };
+  return { template, type, why, known, length };
 }
 
 /** The routing table read from the repo at `root`. */
