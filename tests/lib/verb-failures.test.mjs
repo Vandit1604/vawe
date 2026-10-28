@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { devFix } from '../../harness/cli/verbs.mjs';
+import { devFix, VERBS } from '../../harness/cli/verbs.mjs';
 import { stripProblem } from '../../harness/media/see/strip-math.mjs';
 
 const ROOT = path.join(import.meta.dirname, '../..');
@@ -24,6 +24,14 @@ test('refs add without a type shows the command to run', () => {
   const r = spawnSync(process.execPath, [path.join(ROOT, 'harness/dev/refs.mjs'), 'add', 'ref.mp4'], { encoding: 'utf8' });
   assert.equal(r.status, 1);
   assert.match(r.stderr, /--type is product or brand; add it, for example: vawe refs add ref\.mp4 --type product/);
+});
+
+test('see --probe reaches the element probe of see.mjs and names what it lacks', () => {
+  const see = VERBS.find((v) => v.name === 'see');
+  assert.deepEqual(see.build({ probe: true, sel: '.card', at: '2.4' }, ['p.html'])[0].args, ['p.html', '--probe', '--sel', '.card', '--at', '2.4']);
+  assert.throws(() => see.build({ probe: true, at: '2' }, ['p.html']), /--probe needs --sel/);
+  assert.throws(() => see.build({ sel: '.a' }, ['p.html']), /--sel needs --probe/);
+  assert.throws(() => see.build({ probe: true, sel: '.a' }, ['a.mp4']), /--probe reads a page/);
 });
 
 test('stripProblem: an --at list points at vawe sheet', () => {
