@@ -1,0 +1,9 @@
+  .world:nth-child(odd) { background: var(--ground); color: var(--ink);
+    --glow-1: color-mix(in srgb, var(--ground), white 45%); --glow-2: color-mix(in srgb, var(--ground), white 25%); --glow-3: color-mix(in srgb, var(--ground), var(--ink) 22%); }
+  .world:nth-child(even) { background: var(--ink); color: var(--ground);
+    --glow-1: color-mix(in srgb, var(--ink), var(--ground) 70%); --glow-2: color-mix(in srgb, var(--ink), var(--ground) 45%); --glow-3: color-mix(in srgb, var(--ink), black 40%); }
+  .ground { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .ground i { position: absolute; width: calc(var(--vh) * 0.95); height: calc(var(--vh) * 0.95); border-radius: 50%; }
+  .ground i:nth-child(1) { right: -5%; top: -30%; background: radial-gradient(closest-side, var(--glow-1), transparent); }
+  .ground i:nth-child(2) { right: 15%; bottom: -35%; background: radial-gradient(closest-side, var(--glow-2), transparent); }
+  .ground i:nth-child(3) { left: 38%; top: 20%; background: radial-gradient(closest-side, var(--glow-3), transparent); }

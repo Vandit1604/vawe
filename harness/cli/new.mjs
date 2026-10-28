@@ -1,4 +1,4 @@
-// `vawe new <name>`: writes films/<name>/page.html (a valid starter), films/<name>/directions.html
+// `vawe new <name>`: writes films/<name>/page.html (the starter of the film type, harness/cli/starters/), films/<name>/directions.html
 // (three key frames side by side) and films/<name>/brief.md. brief.md takes the template's question
 // bank with every default filled in and marked unanswered, then the measured-brief sections in the order of
 // prompts/ANATOMY.md (harness/lib/measured-brief.mjs), a Taken from table (the references' frames, filled before
@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { UsageError } from './parse.mjs';
 import { ensureFonts } from '../lib/ensure-fonts.mjs';
-import { pickTemplate, beatSheetLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES } from './route.mjs';
+import { pickTemplate, beatSheetLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES, STARTERS, starterType } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
@@ -45,15 +45,7 @@ const STARTER_TEMPLATE = `<!doctype html>
   html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
   .world { position: absolute; inset: 0; isolation: isolate; box-sizing: border-box; display: grid; align-content: end; gap: calc(var(--vh) * 0.03);
            padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); font-family: "{{family}}", sans-serif; }
-  .world:nth-child(odd) { background: var(--ground); color: var(--ink);
-    --glow-1: color-mix(in srgb, var(--ground), white 45%); --glow-2: color-mix(in srgb, var(--ground), white 25%); --glow-3: color-mix(in srgb, var(--ground), var(--ink) 22%); }
-  .world:nth-child(even) { background: var(--ink); color: var(--ground);
-    --glow-1: color-mix(in srgb, var(--ink), var(--ground) 70%); --glow-2: color-mix(in srgb, var(--ink), var(--ground) 45%); --glow-3: color-mix(in srgb, var(--ink), black 40%); }
-  .ground { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
-  .ground i { position: absolute; width: calc(var(--vh) * 0.95); height: calc(var(--vh) * 0.95); border-radius: 50%; }
-  .ground i:nth-child(1) { right: -5%; top: -30%; background: radial-gradient(closest-side, var(--glow-1), transparent); }
-  .ground i:nth-child(2) { right: 15%; bottom: -35%; background: radial-gradient(closest-side, var(--glow-2), transparent); }
-  .ground i:nth-child(3) { left: 38%; top: 20%; background: radial-gradient(closest-side, var(--glow-3), transparent); }
+{{groundCss}}
   h1 { margin: 0; font-size: calc(var(--vh) * 0.14); font-weight: 700; line-height: 1; }
   .line { margin: 0; font-size: calc(var(--vh) * 0.09); }
   .facts { margin: 0; padding: 0; list-style: none; font-size: calc(var(--vh) * 0.09); font-weight: 600; line-height: 1.15; }
@@ -222,13 +214,31 @@ function worldsHtml(beats, title) {
 </main>`, ...rest].join('\n');
 }
 
-export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 'Say the one thing', face = starterFace() }) {
-  const beats = starterBeats(length, [title, STARTER_LINE]);
-  return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
-    .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family).replaceAll('{{ground}}', PLACEHOLDER.ground).replaceAll('{{ink}}', PLACEHOLDER.ink)
-    .replaceAll('{{signature}}', DIALS.map((d) => `${d}=`).join('; '))
-    .replaceAll('{{beats}}', beatVars(beats)).replaceAll('{{worlds}}', worldsHtml(beats, title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
-    .replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
+const STARTERS_DIR = path.join(import.meta.dirname, 'starters');
+const readStarterFile = (name) => fs.readFileSync(path.join(STARTERS_DIR, name), 'utf8');
+
+const fill = (template, values) => template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
+  if (!(key in values)) throw new Error(`starter: no value for {{${key}}}`);
+  return values[key];
+});
+
+/** The worlds of a film type's starter: [{ id, start, end, wordless }], the starts being the STARTERS fractions of the length. */
+export function typeBeats(type, length) {
+  const starts = STARTERS[type].beats.map((f) => +(length * f).toFixed(2));
+  return starts.map((start, i) => ({ id: `s${i + 1}`, start, end: starts[i + 1] ?? length, wordless: false }));
+}
+
+/** The starter for a film type listed in STARTERS, else the general one. */
+export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 'Say the one thing', face = starterFace(), type }) {
+  const own = STARTERS[type];
+  const safe = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const beats = own ? typeBeats(type, length) : starterBeats(length, [title, STARTER_LINE]);
+  return fill(own ? readStarterFile(`${own.file}.html`) : STARTER_TEMPLATE, {
+    length, aspect, title: safe, font: face.font, family: face.family, ground: PLACEHOLDER.ground, ink: PLACEHOLDER.ink,
+    signature: DIALS.map((d) => `${d}=`).join('; '), beats: beatVars(beats), groundCss: readStarterFile('ground.css').trimEnd(),
+    worlds: own ? beats.map((b) => `<div class="world" data-world="${b.id}">${GROUND}</div>`).join('\n') : worldsHtml(beats, safe),
+    spectacle: own ? +(length * own.spectacle).toFixed(2) : '', wordFit: +(0.64 / (0.52 * title.length)).toFixed(3),
+  });
 }
 
 export const STARTER = starterPage({});
@@ -500,10 +510,11 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const questions = parseQuestions(markdown);
   length ??= routedLength;
   const pageLength = length ?? templateLength(questions);
+  const type = starterType(route, pageLength);
   const face = starterFace(name);
   copyFace(root, dir, face);
   const given = Object.fromEntries(Object.entries({ length: pageLength, aspect, title }).filter(([, v]) => v !== undefined));
-  fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ ...given, face }));
+  fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ ...given, face, type }));
   fs.writeFileSync(path.join(dir, 'directions.html'), directionsPage(given));
   const answers = {};
   if (request !== undefined) answers.request = request;
@@ -511,7 +522,7 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   if (aspect !== undefined) answers.aspect = aspect;
   if (title !== undefined) answers.title = title;
   const sections = parseSections(markdown);
-  const measured = measuredSections({ name, request, title, length: pageLength, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
+  const measured = measuredSections({ name, request, title, length: pageLength, beats: type && typeBeats(type, pageLength), face, reference: sections.some((s) => s.name === 'swap'), details, answered });
   const variety = varietyFor(recentFromDisk(root, name), namesBrandKit([request, title, ...Object.values(details)].join(' ')));
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe, variety));
   return { variety, page: `films/${name}/page.html`, route, title, ranges: dialRanges(), guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length: pageLength, answered: [...answered] };

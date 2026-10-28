@@ -151,8 +151,7 @@ function lookLines({ face }, guess) {
   ].join('\n');
 }
 
-function specText({ title, length }) {
-  const beats = starterBeats(length, [title, STARTER_LINE]);
+function specText({ title, length, beats = starterBeats(length, [title, STARTER_LINE]) }) {
   return [
     '### Shots',
     table(['id', 'start s', 'end s', 'the viewer notices', 'move in', 'move out', 'camera', 'ground'],
@@ -195,10 +194,10 @@ const deliverText = (name) => `- out/${name}.mp4 from \`bin/vawe ship\`.
  * The skeleton's sections as text, and the names of the fields that hold a guess.
  * `swap` is present only for a reference film.
  */
-export function measuredSections({ name, request, title = DEFAULT_TITLE, length = DEFAULT_LENGTH, face, reference = false, details = {}, answered = new Set() }) {
+export function measuredSections({ name, request, title = DEFAULT_TITLE, length = DEFAULT_LENGTH, beats, face, reference = false, details = {}, answered = new Set() }) {
   const guesses = [];
   const guess = (key, value) => { guesses.push(key); return `${value} ${GUESS}`; };
-  const input = { request, title, length, face, details, answered };
+  const input = { request, title, length, beats, face, details, answered };
   const sections = {
     task: taskLines(input, guess),
     look: lookLines(input, guess),

@@ -1,0 +1,177 @@
+<!doctype html>
+<html data-aspect="{{aspect}}">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="{{length}}">
+<meta name="aspect" content="{{aspect}}">
+<meta name="message" content="one thing to remember">
+<meta name="spectacle" content="{{spectacle}}">
+<meta name="signature" content="{{signature}}">
+<title>{{title}}</title>
+<!-- a brand launch: s1 hook, s2 the product working (statuses change on screen), s3 a second moment (a rule switches on), s4 the number, s5 and s6 proof (no words: the bars and the line carry it), s7 the end card with the brand (the spectacle: the mark lands on it).
+  The mark is the thread: it rides over every cut and ends as the end card's mark. Replace the stand-in rows with the product's real screen and
+  numbers, the square with the brand mark, the grey with the palette and the face with the brand's; keep the order. -->
+<style>
+  @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
+  :root { --ground: {{ground}} /* unchosen: palette dial */; --ink: {{ink}} /* unchosen: palette dial */; --unit: min(var(--vh), calc(var(--vw) * 0.56)); {{beats}} }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; font-family: "{{family}}", sans-serif; }
+  .world { position: absolute; inset: 0; isolation: isolate; box-sizing: border-box; display: grid; align-content: center; justify-items: start; gap: calc(var(--unit) * 0.04);
+           padding: 0 calc(var(--vw) * 0.08); }
+{{groundCss}}
+  h1, p { margin: 0; letter-spacing: -0.03em; }
+  h1 { font-size: calc(var(--unit) * 0.14); font-weight: 700; line-height: 1; }
+  .line { font-size: calc(var(--unit) * 0.09); font-weight: 500; }
+  .panel { width: calc(var(--unit) * 1.1); padding: calc(var(--unit) * 0.04); border-radius: calc(var(--unit) * 0.03); font-size: calc(var(--unit) * 0.06); letter-spacing: 0;
+           background: color-mix(in srgb, var(--ground), white 10%); color: var(--ink); box-shadow: 0 calc(var(--unit) * 0.03) calc(var(--unit) * 0.08) rgb(0 0 0 / 0.3); }
+  .panel header { font-weight: 700; margin-bottom: 0.4em; }
+  .panel ul { margin: 0; padding: 0; list-style: none; }
+  .panel li { display: flex; justify-content: space-between; align-items: center; padding: 0.35em 0; border-top: 1px solid color-mix(in srgb, var(--ink), transparent 80%); }
+  .panel code { font-family: inherit; font-variant-numeric: tabular-nums; font-size: 0.8em; }
+  .status { position: relative; display: inline-grid; justify-items: end; font-weight: 600; }
+  .status span + span { position: absolute; right: 0; }
+  .meter { height: 0.25em; margin-top: 0.6em; background: color-mix(in srgb, var(--ink), transparent 85%); }
+  .meter i { display: block; height: 100%; background: var(--ink); transform-origin: left; }
+  .switch { position: relative; width: 2.2em; height: 1.2em; border-radius: 0.6em; background: color-mix(in srgb, var(--ink), transparent 80%); }
+  .switch i { position: absolute; left: 0.15em; top: 0.15em; width: 0.9em; height: 0.9em; border-radius: 50%; background: var(--ink); }
+  .big { display: grid; }
+  .big span { grid-area: 1 / 1; }
+  .big { font-size: calc(var(--unit) * 0.4); letter-spacing: -0.05em; }
+  .graph { width: calc(var(--vw) * 0.84); height: auto; overflow: visible; }
+  .graph polyline { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .graph polygon { fill: currentColor; opacity: 0.25; }
+  .bars { display: flex; align-items: end; gap: calc(var(--unit) * 0.03); height: calc(var(--unit) * 0.5); }
+  .bars i { width: calc(var(--unit) * 0.14); background: currentColor; }
+  .card { padding-top: calc(var(--unit) * 0.3); }
+  .thread { position: absolute; left: 0; top: 0; width: calc(var(--unit) * 0.14); height: calc(var(--unit) * 0.14); color: var(--ink); }
+</style>
+<script type="module">
+import { enter, layer, stagger, keys, EASE } from '../../core/motion/presets.js';
+const root = document.documentElement;
+const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
+const meta = (name) => parseFloat(document.querySelector('meta[name="' + name + '"]').content);
+const end = meta('duration');
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const worlds = [...$$('[data-world]')];
+const cutTo = (el, visibility, at, fill) => el.animate([{ visibility: visibility === 'visible' ? 'hidden' : 'visible' }, { visibility }], { delay: at * 1000, duration: 1, fill });
+// each ground blob drifts by [x, y] fractions of the frame while its world shows
+const DRIFT = [[-0.2, 0.1], [0.18, -0.2], [0.14, -0.16]];
+// the cut frame already carries the first thing moving: a blank frame there fails the draft check
+// a second and a length inside world i, as shares of that world
+const span = worlds.map((_, i) => [i ? beat(i + 1) - 0.03 : 0, i + 1 === worlds.length ? end : beat(i + 2) - 0.03]);
+const when = (i, share) => span[i][0] + share * (span[i][1] - span[i][0]);
+const over = (i, share) => share * (span[i][1] - span[i][0]);
+worlds.forEach((world, i) => {
+  const [from, to] = span[i];
+  if (i) cutTo(world, 'visible', from, 'both');
+  if (i + 1 < worlds.length) cutTo(world, 'hidden', to, 'forwards');
+  world.querySelectorAll('.ground i').forEach((blob, k) => blob.animate([{ translate: '0 0' }, { translate: 'calc(var(--vw) * ' + DRIFT[k][0] + ') calc(var(--vh) * ' + DRIFT[k][1] + ')' }], { delay: (from + 0.35) * 1000, duration: (to - from - 0.35) * 1000, easing: EASE.glide, fill: 'both' }));
+});
+
+// the thread sits above the grounds, so its ink flips with them: even worlds are --ink
+worlds.slice(1).forEach((_, k) => $('.thread').animate([{ color: k % 2 ? 'var(--ink)' : 'var(--ground)' }], { delay: span[k + 1][0] * 1000, duration: 1, fill: 'forwards' }));
+// one place per world, [x, y] as fractions of the frame; the mark winds up, leaves its place 0.23 s before each cut and lands in the next 0.27 s after it
+const PLACE = [[0.78, 0.22], [0.86, 0.14], [0.84, 0.8], [0.8, 0.2], [0.8, 0.62], [0.86, 0.1], [0.08, 0.26]];
+const at = (k, back = 0, next = PLACE[Math.min(k + 1, PLACE.length - 1)]) => 'calc(var(--vw) * ' + (PLACE[k][0] - back * (next[0] - PLACE[k][0])) + ') calc(var(--vh) * ' + (PLACE[k][1] - back * (next[1] - PLACE[k][1])) + ')';
+const carry = worlds.slice(1).flatMap((_, k) => [[span[k][1] - 0.4, at(k)], [span[k][1] - 0.23, at(k, 0.06), 'fling'], [span[k][1] + 0.27, at(k + 1), 'hang']]);
+enter($('.thread'), { at: 0.8, band: 'energy', from: '0 0', scale: 0.4, ease: 'pop' });
+keys($('.thread'), 'translate', [[0, at(0)], ...carry, [end, at(worlds.length - 1)]]);
+$('.thread').animate([{ rotate: '0deg' }, { rotate: '90deg' }], { delay: (beat(7) + 0.5) * 1000, duration: (end - beat(7) - 0.5) * 1000, easing: EASE.glide, fill: 'both' });
+
+// s1 hook: rises from below
+layer($('h1'), $('.hook .line'), { at: 0.05, band: 'professional', blur: 10, from: '0 0.4em', secondary: { blur: 6 } });
+
+// s2 the product working: the panel slides in from the right and its rows follow; the meter fills slowly and the statuses change together
+const [ui] = span[1];
+enter($('.shipments'), { at: ui, band: 'professional', from: '3em 0', ease: 'nudge' });
+stagger($$('.shipments header, .shipments li'), { at: when(1, 0.17), band: 'professional', from: '0 0.6em' });
+$('.meter i').animate([{ scale: '0.15 1' }, { scale: '1 1' }], { delay: when(1, 0.3) * 1000, duration: over(1, 0.57) * 1000, easing: EASE.glide, fill: 'both' });
+const flip = when(1, 0.55);
+$$('.status > :first-child').forEach((old, k) => old.animate([{ opacity: 1 }, { opacity: 0 }], { delay: (flip + k * 0.08) * 1000, duration: 150, easing: EASE.land, fill: 'both' }));
+stagger($$('.status > :last-child'), { at: flip + 0.2, band: 'energy', from: '0 0.4em' });
+// the punch-in lands as the statuses change, and the view settles back near the end of the world
+const punch = (at, to) => $('.shipments').animate([{ scale: to[0] }, { scale: to[1] }], { delay: at * 1000, duration: over(1, 0.17) * 1000, easing: EASE.land, fill: 'both' });
+punch(flip, [1, 1.12]);
+punch(when(1, 0.78), [1.12, 1]);
+
+// s3 a second moment: the rules card slides in from the left, its rows follow and each switch flips on with a spring
+enter($('.rules'), { at: span[2][0], band: 'professional', from: '-3em 0', ease: 'nudge' });
+stagger($$('.rules header, .rules li'), { at: when(2, 0.17), band: 'professional', from: '-1.5em 0' });
+$$('.switch i').forEach((knob, k) => knob.animate([{ translate: '0 0' }, { translate: '1em 0' }], { delay: when(2, 0.43 + k * 0.22) * 1000, duration: over(2, 0.2) * 1000, easing: EASE.pop, fill: 'both' }));
+
+const rulesPunch = (at, to) => $('.rules').animate([{ scale: to[0] }, { scale: to[1] }], { delay: at * 1000, duration: over(2, 0.22) * 1000, easing: EASE.land, fill: 'both' });
+rulesPunch(when(2, 0.43), [1, 1.14]);
+rulesPunch(when(2, 0.72), [1.14, 1]);
+
+// s4 the number: it drops in from above and its line rises under it
+const [count] = span[3];
+enter($('.count .big'), { at: count, band: 'professional', from: '0 -0.5em' });
+enter($('.count .line'), { at: when(3, 0.23), band: 'professional', from: '0 0.4em', ease: 'nudge' });
+const figures = [...$$('.big span')];
+figures.forEach((figure, k) => {
+  figure.animate([{ opacity: 0 }, { opacity: 1 }], { delay: when(3, k * 0.27) * 1000, duration: 1, fill: 'both' });
+  if (k + 1 < figures.length) figure.animate([{ opacity: 1 }, { opacity: 0 }], { delay: when(3, (k + 1) * 0.27) * 1000, duration: 1, fill: 'forwards' });
+});
+
+// s5 proof, with no words: the bars rise from below
+$$('.bars i').forEach((bar, k) => enter(bar, { at: when(4, k * 0.13), duration: over(4, 0.2), from: '0 6em' }));
+$('.bars i:last-child').animate([{ scale: '1' }, { scale: '1.12 1.04' }, { scale: '1' }], { delay: when(4, 0.55) * 1000, duration: over(4, 0.3) * 1000, easing: EASE.pop, fill: 'both' });
+
+// s6 proof, with no words: the line and the area under it are drawn from left to right
+$('.graph').animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% -10% -10% 0)' }], { delay: when(5, 0.1) * 1000, duration: over(5, 0.75) * 1000, easing: EASE.glide, fill: 'both' });
+
+// s7 end card: the mark lands, the name and one line arrive with it (the spectacle: the mark lands)
+const [card] = span[6];
+enter($('.card h1'), { at: card + 0.05, band: 'professional', from: '0 0.4em' });
+enter($('.card .line'), { at: when(6, 0.55), band: 'professional', from: '0 0.4em', ease: 'nudge' });
+</script>
+</head>
+<body>
+<main class="world hook" data-world="s1">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <h1>{{title}}</h1>
+  <p class="line">why it matters</p>
+</main>
+<section class="world" data-world="s2">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="panel shipments" data-ui>
+    <header>Shipments</header>
+    <ul>
+      <li><span>Order <code>4821</code></span><span class="status"><span>Delayed</span><span>Rerouted</span></span></li>
+      <li><span>Order <code>4822</code></span><span class="status"><span>Packed</span><span>Shipped</span></span></li>
+      <li><span>Order <code>4823</code></span><span class="status"><span>Queued</span><span>Packed</span></span></li>
+    </ul>
+    <div class="meter"><i></i></div>
+  </div>
+</section>
+<section class="world" data-world="s3">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="panel rules" data-ui>
+    <header>Rules</header>
+    <ul>
+      <li><span>Reroute late orders</span><span class="switch"><i></i></span></li>
+      <li><span>Notify the team</span><span class="switch"><i></i></span></li>
+    </ul>
+  </div>
+</section>
+<section class="world count" data-world="s4">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <h1 class="big"><span>1x</span><span>2x</span><span>3x</span></h1>
+  <p class="line">faster than before</p>
+</section>
+<section class="world" data-world="s5">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="bars"><i style="height: 30%"></i><i style="height: 55%"></i><i style="height: 100%"></i></div>
+</section>
+<section class="world" data-world="s6">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <svg class="graph" viewBox="0 0 100 40"><polygon points="0,40 0,36 25,28 50,31 75,14 100,4 100,40"/><polyline points="0,36 25,28 50,31 75,14 100,4"/></svg>
+</section>
+<section class="world card" data-world="s7">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <h1>Brand name</h1>
+  <p class="line">name.example</p>
+</section>
+<svg class="thread" viewBox="0 0 100 100" role="img" aria-label="mark"><rect x="20" y="20" width="60" height="60" rx="14" fill="currentColor"/></svg>
+</body>
+</html>
