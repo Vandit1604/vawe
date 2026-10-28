@@ -35,8 +35,16 @@ async function seekToShown(page, span, anims) {
   return times[0];
 }
 
-/** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fired }] in page order. */
-async function shootWorlds(opened, pagePath, stills, { ids, suffix }) {
+/** Screenshots the page at its own size (scale 1) and puts the viewport back; the layout does not change, only the pixels. */
+async function shootFullSize(page, out) {
+  const view = page.viewport();
+  await page.setViewport({ ...view, deviceScaleFactor: 1 });
+  try { await page.screenshot({ path: out }); } finally { await page.setViewport(view); }
+  return out;
+}
+
+/** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fullPng, fired }] (fullPng only with `zoom`) in page order. */
+async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
   const dur = Number(readPageMeta(pagePath, 'duration'));
   const anims = await readWorldAnimations(opened.page);
   const found = await sampleWorlds(opened.page, dur, (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms));
@@ -51,10 +59,11 @@ async function shootWorlds(opened, pagePath, stills, { ids, suffix }) {
     const at = await seekToShown(opened.page, span, anims);
     const png = path.join(stills, `${span.id}${suffix}.png`);
     await opened.page.screenshot({ path: png });
+    const fullPng = zoom ? await shootFullSize(opened.page, path.join(stills, `${span.id}-full.png`)) : undefined;
     const layout = await sampleLayout(opened.page, [at], noSeek);
     await style.evaluate((el) => el.remove());
     const found = unwaived(layoutLint(layout, { named }), authoring);
-    shots.push({ id: span.id, start: span.start, end: span.end, at, png, fired: firedRules(found, [], []) });
+    shots.push({ id: span.id, start: span.start, end: span.end, at, png, fullPng, fired: firedRules(found, [], []) });
   }
   return shots;
 }
@@ -78,7 +87,7 @@ async function main(argv) {
       await settle(opened.page);
       await opened.markWarm?.();
     }
-    shots = await shootWorlds(opened, abs, stills, { ids, suffix: full ? '-full' : '' });
+    shots = await shootWorlds(opened, abs, stills, { ids, suffix: full ? '-full' : '', zoom: !full && !ids.length });
   } finally {
     await opened.close();
   }
@@ -95,7 +104,7 @@ async function main(argv) {
   const html = path.join(path.dirname(abs), 'frames.html');
   const cuts = cutSpans(shots, Number(readPageMeta(abs, 'duration')));
   await writeArtboardSheet({ title: `${film}: key frames`, aspect: readPageMeta(abs, 'aspect') || '16:9', htmlPath: html, png: sheet,
-    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png })) });
+    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png, fullPng: s.fullPng })) });
   console.log([`frames: ${head}`, `  sheet  ${sheet}`, `  page   ${html}`, ...paths, ...rules, done()].join('\n'));
 }
 
