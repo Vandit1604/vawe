@@ -113,16 +113,33 @@ export const WARM_HASH = '#vawe-warm';
 
 // A warm tab is one this function left open on a page url ending in WARM_HASH, marked with
 // window.__warmSig. A tab whose signature is stale reloads; the oldest tabs past WARM_TABS close.
+// A process owns the tab it holds in window.__warmOwner (its pid): nothing else reuses or closes it until
+// the owner releases it or dies. Two processes on one browser closed each other's tab mid-read.
+// A tab with no __warmSig is still loading and belongs to nobody yet.
 // Never browser.pages(): it attaches a page (and puppeteer's 800x600 default viewport) to every tab,
 // including another process's render tab mid-capture, which then shoots frames laid out at the wrong size.
+async function claimWarm(page) {
+  try {
+    const owner = await page.evaluate(() => window.__warmOwner ?? null);
+    if (owner && pidAlive(owner)) return false;
+    return await page.evaluate((old, pid) => {
+      if (window.__warmSig === undefined || (window.__warmOwner ?? null) !== old) return false;
+      window.__warmOwner = pid;
+      return true;
+    }, owner, process.pid);
+  } catch { return false; }
+}
+
 export async function takeWarmPage(browser, url, sig) {
   const tabs = browser.targets().filter((t) => t.type() === 'page' && t.url().endsWith(WARM_HASH));
   const warm = (await Promise.all(tabs.map((t) => t.page().catch(() => null)))).filter(Boolean);
-  for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (p.url() !== url) await p.close().catch(() => {});
-  const found = warm.find((p) => !p.isClosed() && p.url() === url);
-  const reused = Boolean(found) && (await found.evaluate(() => window.__warmSig)) === sig;
-  if (found && !reused) await found.close().catch(() => {});
-  return { page: reused ? found : await browser.newPage(), reused };
+  for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (p.url() !== url && await claimWarm(p)) await p.close().catch(() => {});
+  for (const p of warm.filter((w) => !w.isClosed() && w.url() === url)) {
+    if (!(await claimWarm(p))) continue;
+    if ((await p.evaluate(() => window.__warmSig).catch(() => null)) === sig) return { page: p, reused: true };
+    await p.close().catch(() => {});
+  }
+  return { page: await browser.newPage(), reused: false };
 }
 
 /**
@@ -146,7 +163,16 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
       const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
       await page.setViewport({ width, height, deviceScaleFactor: scale });
       const release = holdAlive(final);
-      if (warm) return { page, url, persistent: true, chrome: shared.started ? 'launched' : 'reused', reused, markWarm: () => page.evaluate((v) => { window.__warmSig = v; }, sig), close: async () => { release(); shared.browser.disconnect(); } };
+      if (warm) {
+        let marked = reused;
+        const markWarm = async () => { await page.evaluate((v, pid) => { window.__warmSig = v; window.__warmOwner = pid; }, sig, process.pid); marked = true; };
+        const close = async () => {
+          release();
+          await (marked ? page.evaluate(() => { window.__warmOwner = null; }) : page.close()).catch(() => {});
+          shared.browser.disconnect();
+        };
+        return { page, url, persistent: true, chrome: shared.started ? 'launched' : 'reused', reused, markWarm, close };
+      }
       // `disconnect()`, never `close()`: this call's own CDP connection to the shared browser, not the
       // browser itself. Closing only the page and never disconnecting left the connection's open socket
       // holding the process alive well past the render finishing (a real hang this file was measured

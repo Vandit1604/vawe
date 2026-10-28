@@ -1,7 +1,7 @@
 // harness/dev/e2e.mjs: `vawe e2e`. The page tests plus a half-size draft render of every page film and
 // fixture page, in parallel, each checked for a non-empty mp4 of the right duration. It never stops at
 // the first failure: one run reports on everything. Leaves quality/runs/e2e/<timestamp>/report.{json,md}
-// and quality/runs/e2e/latest.json.
+// and quality/runs/e2e/latest.json; only the newest KEEP_RUNS run directories stay.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -9,6 +9,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { ensurePageFonts } from '../lib/ensure-fonts.mjs';
 import { resolveDuration } from '../media/page-duration.mjs';
+import { pruneRuns } from '../lib/e2e-runs.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RUNS_DIR = path.join(repoRoot, 'quality', 'runs', 'e2e');
@@ -19,6 +20,7 @@ fs.mkdirSync(path.join(runDir, 'renders'), { recursive: true });
 const PAGE_TESTS = ['tests/media/render-page-determinism.test.mjs', 'tests/media/render-page-draft-layout.test.mjs', 'tests/media/page-audio.test.mjs'];
 const CONCURRENCY = Math.max(2, Math.min(4, Math.floor(os.cpus().length / 2)));
 const DURATION_SLACK_S = 0.15;
+const KEEP_RUNS = 5;
 
 const listDir = (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }) : []);
 
@@ -117,6 +119,8 @@ fs.writeFileSync(path.join(runDir, 'report.md'), [
   '',
   ...results.filter((r) => r.log).map((r) => `## ${r.name}\n\n\`\`\`\n${r.log}\n\`\`\`\n`),
 ].join('\n'));
+
+pruneRuns(RUNS_DIR, KEEP_RUNS);
 
 for (const r of results) console.log(`${r.pass ? '✓' : '✗'} ${r.name} (${(r.ms / 1000).toFixed(1)}s)${r.detail ? `: ${r.detail}` : ''}`);
 console.log(`\n${pass ? '✓' : '✗'} e2e ${pass ? 'passed' : 'FAILED'} in ${report.seconds}s`);

@@ -544,6 +544,7 @@ export const VERBS = [
       { name: 'out', type: 'path', default: 'out/<film>-storyboard.html', help: 'the HTML path; the images go in a folder of the same name without .html' },
       { name: 'text', type: 'bool', help: 'no HTML and no render: the worlds, the cut rhythm, the spectacle and every audio cue as text' },
       { name: 'json', type: 'bool', help: 'with --text: print the same data as JSON' },
+      { name: 'all', type: 'bool', help: 'print every plan advice line; the default prints one count line (the board holds them all)' },
     ],
     example: 'vawe storyboard films/examples/colour-sting/page.html   |   vawe storyboard out/my-launch-draft.mp4   |   vawe storyboard films/my-launch/page.html --text',
     build: (v, [input]) => {
@@ -552,9 +553,9 @@ export const VERBS = [
         return [{ script: 'harness/media/timeline.mjs', args: [input, ...(v.json ? ['--json'] : [])] }];
       }
       if (v.json) throw new UsageError('--json needs --text');
-      return [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out)] }];
+      return [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out), ...(v.all ? ['--all'] : [])] }];
     },
-    next: (v, [input]) => (v.text ? `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${input} --waveform to check each sound on its event` : 'fix the lines under "from the docs" or keep them on purpose; open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields'),
+    next: (v, [input]) => (v.text ? `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${input} --waveform to check each sound on its event` : `read the plan advice (bin/vawe storyboard ${input} --all, or the board) and fix it or keep it on purpose; open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields`),
   },
   {
     tier: 'maintainer',
