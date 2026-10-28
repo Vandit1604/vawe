@@ -88,6 +88,7 @@ function sourcePage(source, pageFlag) {
 async function main(argv) {
   const flag = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
   const valued = new Set(['--page', '--out']);
+  const showAll = argv.includes('--all');
   const source = argv.find((a, i) => !a.startsWith('--') && !valued.has(argv[i - 1]));
   if (!source) die('missing <page|mp4>; usage: bin/vawe storyboard <page|draft mp4> [--page page.html] [--out file.html]');
   if (!fs.existsSync(source)) die(`no such file: ${source}`);
@@ -109,13 +110,16 @@ async function main(argv) {
       read: { ...read, spectacle: lockedSpectacle(brief, spectacleOf(text)), signature: metaOf(text, 'signature'), message: readPageMeta(abs, 'message') },
     });
     const plan = await readPlanFindings(opened.page, abs, duration);
-    board.plan = [...planLines(plan.findings, ROOT), ...plan.advice];
+    const docLines = planLines(plan.findings, ROOT);
+    board.plan = [...docLines, ...plan.advice];
     const images = source.endsWith('.html') ? await shootShots(opened.page, board.shots, dir) : mp4Frames(source, board.shots, dir);
     for (const shot of board.shots) shot.ground = groundOfImage(path.join(dir, images[shot.id])) ?? shot.ground;
     const relative = Object.fromEntries(Object.entries(images).map(([id, f]) => [id, `${path.basename(dir)}/${f}`]));
     fs.writeFileSync(html, storyboardHtml(board, { images: relative, fontCss: fontFaceCss() }));
-    console.log(board.plan.length ? [`from the docs and the page, before any render (${board.plan.length}; advice, the page keeps what it does on purpose):`, ...board.plan.map((l) => `  ${l}`)].join('\n') : 'from the docs: no finding');
     console.log(`✓ ${html}: ${board.shots.length} shots, ${board.cues.length} cues${board.hasBrief ? '' : ', no brief.md'}; images in ${dir}`);
+    if (!board.plan.length) console.log('from the docs: no finding');
+    else if (showAll) console.log([`from the docs and the page, before any render (${board.plan.length}; advice, the page keeps what it does on purpose):`, ...board.plan.map((l) => `  ${l}`)].join('\n'));
+    else console.log(`advice: ${docLines.length} from the docs, ${plan.advice.length} from the page (the page keeps what it does on purpose); all of it is on the board, or run with --all`);
   } catch (e) {
     die(e.stack || String(e));
   } finally {
