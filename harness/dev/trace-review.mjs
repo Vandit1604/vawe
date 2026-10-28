@@ -55,10 +55,16 @@ async function main() {
   const sinceMs = cutoffMs(values.since);
   const files = transcriptFiles({ inputs: positionals, project: values.project, sinceMs, main: values.main });
   if (values.handmade) {
+    if (values.compare) {
+      console.error('trace-review: --handmade does not take --compare');
+      process.exit(2);
+    }
     const keep = (a) => selectAgents([a], { films: values.films, agent: values.agent, sinceMs }).length > 0;
     const events = [];
     for (const file of files) events.push(...await handmadeEvents(file, keep));
-    print(rankShapes(events).slice(0, TOP_SHAPES).map(shapeLine).join('\n'));
+    const top = rankShapes(events).slice(0, TOP_SHAPES);
+    if (values.json) print(JSON.stringify(top.map((r) => ({ ...r, verb: coveringVerb(r.sample) })), null, 1));
+    else print(top.length ? top.map(shapeLine).join('\n') : 'no hand-made commands found');
     return;
   }
   const all = [];

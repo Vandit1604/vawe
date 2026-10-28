@@ -8,6 +8,7 @@ const VAWE_DIR = /(?:^|\/)(?:films|harness|core|studio|tests|scripts|site)\//;
 const FILM = /films\/([a-z0-9][\w-]*)\//;
 const SHAPE_TOKENS = 14;
 const LEADING = /^\s*(?:cd\s+\S+\s*(?:&&|;)\s*|(?:[A-Z_][A-Z0-9_]*=\S*\s+)+|rtk\s+)+/;
+const POLLING = /^\s*until\b|\bsleep\s+\S|\bpgrep\b|\bps\s+(?:aux|-[a-zA-Z]+)/;
 const VERB_BY_RULE = { links: 'check links' };
 
 const writeShape = (file) => `write ${file.split('/').pop().replace(/\d+/g, 'N')}`;
@@ -48,9 +49,9 @@ export function rankShapes(events) {
     .sort((a, b) => b.count - a.count || a.shape.localeCompare(b.shape));
 }
 
-/** The vawe verb that already does what a command does by hand (a verb-hint rule matches it), or null. Pure. */
+/** The vawe verb that already does what a command does by hand (a verb-hint rule matches it, or it polls for a job), or null. Pure. */
 export function coveringVerb(cmd) {
   const rule = RULES.find((r) => r.test.test(cmd));
-  const name = rule ? (VERB_BY_RULE[rule.id] ?? rule.id) : null;
+  const name = rule ? (VERB_BY_RULE[rule.id] ?? rule.id) : POLLING.test(cmd) ? 'wait' : null;
   return name && VERBS.some((v) => v.name === name.split(' ')[0]) ? name : null;
 }

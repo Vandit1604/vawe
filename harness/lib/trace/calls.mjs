@@ -18,13 +18,16 @@ const PYTHON = /\bpython3?\b/;
 const PY_PATH_VAR = /\b(\w+)\s*=\s*(['"])(films\/[^'"]+)\2/g;
 const PY_WRITE_TARGET = /open\(\s*(?:(['"])(films\/[^'"]+)\1|(\w+))\s*,\s*['"][wa]b?['"]|(?:Path\(\s*(['"])(films\/[^'"]+)\4\s*\)|\b(\w+))\.write_text\(/g;
 const PY_EDIT = /\.replace\(|open\([^)]*['"][wa]b?['"]|\.write_text\(/;
-const atCommand = (name) => new RegExp(`(?:^|[\\n;&|(\`]\\s*|\\$\\()(?:[A-Z_]+=\\S+\\s+)*(?:\\S*/)?${name}\\s`);
+const atCommand = (name, after = '\\s') => new RegExp(`(?:^|[\\n;&|(\`]\\s*(?:!\\s*)?|\\$\\(|\\b(?:do|then|else)\\s+)(?:[A-Z_]+=\\S+\\s+)*(?:\\S*/)?${name}${after}`);
+
+const PY_AT_COMMAND = atCommand('python3?', '\\b');
+const NODE_EVAL = atCommand('node', '\\s+(?:-e|--eval|-p)\\b');
 
 const HAND_TOOLS = {
   pyEdit: (cmd) => PYTHON.test(cmd) && PY_EDIT.test(cmd),
   pyEditNoAssert: (cmd) => PYTHON.test(cmd) && PY_EDIT.test(cmd) && !/\bassert\b/.test(cmd),
-  pil: (cmd) => PYTHON.test(cmd) && /\b(?:PIL|numpy|cv2)\b/.test(cmd),
-  nodeEval: (cmd) => /\bnode\s+(?:-e|--eval|-p)\b/.test(withoutHeredocs(cmd)),
+  pil: (cmd) => PY_AT_COMMAND.test(bare(cmd)) && /\b(?:PIL|numpy|cv2)\b/.test(cmd),
+  nodeEval: (cmd) => NODE_EVAL.test(bare(cmd)),
   sedInPlace: (cmd) => /\bsed\s+(?:-[a-zA-Z]*i|--in-place)/.test(withoutHeredocs(cmd)),
   pkill: (cmd) => /\b(?:pkill|killall)\b|\bkill\s+-9\b|\bxargs\s+kill\b/.test(withoutHeredocs(cmd)),
 };
@@ -33,9 +36,9 @@ export const RAW_TOOLS = {
   ffmpeg: atCommand('ffmpeg'),
   ffprobe: atCommand('ffprobe'),
   browser: /puppeteer|playwright|--headless|--screenshot/i,
-  sleep: /\bsleep\s+\d/,
-  psPoll: /\b(?:ps\s+(?:aux|-[a-zA-Z]+)|pgrep)\b/,
-  curl: /\bcurl\b/,
+  sleep: atCommand('sleep', '\\s+\\d'),
+  psPoll: atCommand('(?:ps\\s+(?:aux|-[a-zA-Z]+)|pgrep)', '\\b'),
+  curl: atCommand('curl', '\\b'),
 };
 
 export const BLOCKED = /^[✗!]? ?pre-(?:commit|push) blocked|hook (?:error|blocked)|blocked by (?:a |the )?hook|too complex to verify|Refusing to run|^make: \*\*\* \[[a-z-]+\] Error/im;
@@ -52,6 +55,9 @@ export const textOf = (content) => (typeof content === 'string' ? content
 
 const withoutHeredocs = (cmd) => String(cmd).replace(HEREDOC_BODY, '$3');
 
+/** The command without heredoc bodies and quoted strings, so a tool named inside a grep pattern or a message does not count. Pure. */
+const bare = (cmd) => withoutHeredocs(cmd).replace(/"(?:[^"\\]|\\.)*"|'[^']*'/g, 'Q');
+
 /** The vawe verbs a shell command calls, in order, as { verb, args }. Pure. */
 export function commandVerbs(cmd) {
   const found = [];
@@ -67,7 +73,7 @@ export function commandVerbs(cmd) {
 /** The raw tools a command uses: every verb-hint rule that matches, the hand-rolled edit tools always, and the raw extras when the command calls no vawe verb. Pure. */
 export function rawTools(cmd, hasVerb) {
   const ids = RULES.filter((r) => r.test.test(cmd)).map((r) => `hint:${r.id}`);
-  if (!hasVerb) ids.push(...Object.entries(RAW_TOOLS).filter(([, re]) => re.test(withoutHeredocs(cmd))).map(([id]) => id));
+  if (!hasVerb) ids.push(...Object.entries(RAW_TOOLS).filter(([, re]) => re.test(bare(cmd))).map(([id]) => id));
   ids.push(...Object.entries(HAND_TOOLS).filter(([, test]) => test(cmd)).map(([id]) => id));
   return ids;
 }

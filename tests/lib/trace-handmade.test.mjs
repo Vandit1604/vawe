@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { rawTools } from '../../harness/lib/trace/calls.mjs';
 import { handmadeShapes, normaliseShape, rankShapes, coveringVerb } from '../../harness/lib/trace/handmade.mjs';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const bash = (cmd, raw) => ({ name: 'Bash', cmd, raw });
 const write = (file) => ({ name: 'Write', cmd: file, raw: [] });
@@ -44,4 +50,27 @@ test('coveringVerb names an existing verb, or null', () => {
   assert.equal(coveringVerb('ffmpeg -ss 1.2 -i a.mp4 -frames:v 1 x.png'), 'still');
   assert.equal(coveringVerb('ffmpeg -i a.mp4 -vf tile=4x4 s.png'), 'sheet');
   assert.equal(coveringVerb('ffmpeg -i a.mp4 -c:v libx264 b.mp4'), null);
+});
+
+test('rawTools matches a tool at command position, not inside a grep pattern or a quoted string', () => {
+  assert.deepEqual(rawTools('ps aux | grep "node -e" | cut -c1-80', false), ['psPoll']);
+  assert.deepEqual(rawTools('echo "sleep 5; curl x"', false), []);
+  assert.deepEqual(rawTools('grep -n "python3 PIL" notes.md', false), []);
+  assert.deepEqual(rawTools('until [ -s f ]; do sleep 2; done', false), ['sleep']);
+  assert.deepEqual(rawTools('python3 -c "from PIL import Image"', false), ['pil']);
+  assert.deepEqual(rawTools("node -e 'x'", false), ['nodeEval']);
+});
+
+test('coveringVerb maps polling loops to wait', () => {
+  for (const cmd of ['sleep 5', 'until grep -q done log; do sleep 2; done', 'ps aux | grep render | wc -l', 'pgrep -f render']) assert.equal(coveringVerb(cmd), 'wait', cmd);
+});
+
+test('--handmade: an empty result says so, --json prints JSON, --compare is a usage error', () => {
+  const run = (...args) => spawnSync('node', ['harness/dev/trace-review.mjs', ...args], { cwd: root, encoding: 'utf8' });
+  const file = 'tests/fixtures/trace/proj/sess-1.jsonl';
+  assert.match(run('--handmade', file).stdout, /no hand-made commands found/);
+  assert.ok(Array.isArray(JSON.parse(run('--handmade', '--json', file).stdout)));
+  const cmp = run('--handmade', '--compare', '2026-01-01', file);
+  assert.equal(cmp.status, 2);
+  assert.match(cmp.stderr, /--handmade does not take --compare/);
 });
