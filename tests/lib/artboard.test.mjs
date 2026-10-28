@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { artboardColumns, artboardLayout, artboardCaption, artboardHtml } from '../../harness/lib/artboard.mjs';
+import { artboardColumns, cutSpans, artboardLayout, artboardCaption, artboardHtml } from '../../harness/lib/artboard.mjs';
 
 const near = (a, b) => assert.ok(Math.abs(a - b) <= 1, `${a} vs ${b}`);
 const overlap = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
@@ -65,4 +65,18 @@ test('html: a label per frame outside the image, relative paths, click to open w
   assert.match(html, /ArrowRight/);
   assert.doesNotMatch(html, /src="\//);
   assert.doesNotMatch(html, /monospace/);
+});
+
+test('cutSpans tile 0 to the duration with no overlap, whatever the page order', () => {
+  const spans = [{ start: 1.0, end: 2.8 }, { start: 0.2, end: 2.0 }, { start: 2.8, end: 5 }];
+  const cuts = cutSpans(spans, 5);
+  assert.deepEqual(cuts, [[1, 2.8], [0, 1], [2.8, 5]]);
+  const sorted = [...cuts].sort((a, b) => a[0] - b[0]);
+  assert.equal(sorted[0][0], 0);
+  assert.equal(sorted.at(-1)[1], 5);
+  sorted.slice(1).forEach((c, i) => assert.equal(c[0], sorted[i][1]));
+});
+
+test('cutSpans leaves a world with no span blank', () => {
+  assert.deepEqual(cutSpans([{ start: null }, { start: 0 }], 3)[0].every(Number.isNaN), true);
 });

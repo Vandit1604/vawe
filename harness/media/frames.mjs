@@ -10,7 +10,7 @@ import path from 'node:path';
 import { openPage, seekAll, settle, resolveFrame, readPageMeta } from './render-page.mjs';
 import { sampleWorlds, stillCandidates, worldShowsNow, readWorldAnimations } from './world-sample.mjs';
 import { sampleLayout } from './draft-check.mjs';
-import { artboardCaption } from '../lib/artboard.mjs';
+import { artboardCaption, cutSpans } from '../lib/artboard.mjs';
 import { writeArtboardSheet } from './artboard-sheet.mjs';
 import { layoutLint, namedText } from '../lib/layout-lint.mjs';
 import { readBrief } from '../lib/brief-tables.mjs';
@@ -93,8 +93,9 @@ async function main(argv) {
   }
   const sheet = path.resolve('out', `${film}-frames.png`);
   const html = path.join(path.dirname(abs), 'frames.html');
+  const cuts = cutSpans(shots, Number(readPageMeta(abs, 'duration')));
   await writeArtboardSheet({ title: `${film}: key frames`, aspect: readPageMeta(abs, 'aspect') || '16:9', htmlPath: html, png: sheet,
-    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, s.start, s.end), png: s.png })) });
+    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png })) });
   console.log([`frames: ${head}`, `  sheet  ${sheet}`, `  page   ${html}`, ...paths, ...rules, done()].join('\n'));
 }
 

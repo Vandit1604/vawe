@@ -52,6 +52,14 @@ export function artboardLayout({ count, aspect = '16:9', width = ARTBOARD.width,
   return { width: cols * frameW + (cols + 1) * gap, height: gap + rows * pitch, cols, gap, fontSize, items };
 }
 
+/** The cut span [start, end] of each world, in the order given: from its start to the next world's start (the last to `duration`, the earliest from 0), so the spans tile 0 to `duration`. Pure. */
+export function cutSpans(spans, duration) {
+  const timed = spans.map((s, i) => ({ i, start: s.start })).filter((s) => Number.isFinite(s.start)).sort((a, b) => a.start - b.start);
+  const out = spans.map(() => [NaN, NaN]);
+  timed.forEach((s, k) => { out[s.i] = [k === 0 ? 0 : s.start, k + 1 < timed.length ? timed[k + 1].start : duration]; });
+  return out;
+}
+
 /** The left and right text of a label line: "01  hook" and "0.0 to 4.0 s". Pure. */
 export const artboardCaption = (index, name, start, end) => ({
   left: `${String(index + 1).padStart(2, '0')}  ${name}`.trimEnd(),
