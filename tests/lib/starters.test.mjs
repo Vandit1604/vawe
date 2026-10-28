@@ -44,10 +44,21 @@ test('a request routes to the starter of its film type', () => {
   assert.deepEqual(worldIds(sting.page), ['s1', 's2', 's3']);
   const launch = newIn('zz-b', { request: 'an 11 s launch film for https://acme.example', title: 'Ship faster' });
   assert.match(launch.page, /data-ui/);
-  assert.deepEqual(worldIds(launch.page), ['s1', 's2', 's3', 's4']);
+  assert.deepEqual(worldIds(launch.page), ['s1', 's2', 's3', 's4', 's5', 's6', 's7']);
   const story = newIn('zz-c', { request: 'an 11 s explainer: how a refund works', title: 'Refund fast' });
   assert.match(story.page, /class="flow"/);
-  assert.deepEqual(worldIds(story.page), ['s1', 's2', 's3', 's4']);
+  assert.deepEqual(worldIds(story.page), ['s1', 's2', 's3', 's4', 's5', 's6', 's7']);
+});
+
+test('a request that names no length gets the length of the type starter', () => {
+  const launch = newIn('zz-i', { request: 'a launch film for https://acme.example', title: 'Ship faster' });
+  assert.match(launch.page, new RegExp(`<meta name="duration" content="${STARTERS['brand launch'].length}">`));
+  const story = newIn('zz-j', { request: 'an explainer: how a refund works', title: 'Refund fast' });
+  assert.match(story.page, new RegExp(`<meta name="duration" content="${STARTERS['story or explainer'].length}">`));
+});
+
+test('a starter page declares no waiver', () => {
+  for (const type of TYPES) assert.doesNotMatch(starterPage({ type, length: STARTERS[type].length ?? 5, title: 'Acme' }), /id="authoring"/, type);
 });
 
 test('another film type, and a film made with --from, keep the general starter', () => {
@@ -65,7 +76,7 @@ test('the brief Shots table has one row per world of the type starter', () => {
   const { page, brief } = newIn('zz-f', { request: 'an 11 s launch film for https://acme.example', title: 'Ship faster' });
   const shots = brief.split('### Shots')[1].split('### Words')[0].split('\n').filter((l) => /^\| s\d /.test(l));
   assert.deepEqual(shots.map((l) => l.split('|')[1].trim()), worldIds(page));
-  assert.match(shots[1], /^\| s2 \| 2\.31 \| 6\.6 \|/);
+  assert.match(shots[1], /^\| s2 \| 1\.58 \| 3\.64 \|/);
 });
 
 for (const type of TYPES) {

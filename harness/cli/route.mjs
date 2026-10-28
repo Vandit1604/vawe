@@ -31,11 +31,12 @@ const WORDS = [
 ];
 
 // The page `vawe new` starts from, by film type: a file in harness/cli/starters/, the start of each world and the
-// spectacle second as fractions of the length. Every other type takes the general starter.
+// spectacle second as fractions of the length, and the length a request that names none gets (no world holds past the world-turns limit at it).
+// Every other type takes the general starter.
 export const STARTERS = {
   sting: { file: 'sting', beats: [0, 0.3, 0.7], spectacle: 0.36 },
-  'brand launch': { file: 'brand-launch', beats: [0, 0.21, 0.6, 0.78], spectacle: 0.775 },
-  'story or explainer': { file: 'story', beats: [0, 0.23, 0.52, 0.81], spectacle: 0.82 },
+  'brand launch': { file: 'brand-launch', length: 16, beats: [0, 0.14375, 0.33125, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.856 },
+  'story or explainer': { file: 'story', length: 16, beats: [0, 0.14375, 0.30625, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.885 },
 };
 
 /** The STARTERS key for a routed film, or undefined: an unmatched request and a sting past STING_MAX_S (the invented-product fallback) take the general starter. */

@@ -509,7 +509,7 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
   length ??= routedLength;
-  const pageLength = length ?? templateLength(questions);
+  const pageLength = length ?? STARTERS[starterType(route)]?.length ?? templateLength(questions);
   const type = starterType(route, pageLength);
   const face = starterFace(name);
   copyFace(root, dir, face);
