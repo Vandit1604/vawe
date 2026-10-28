@@ -188,7 +188,23 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
   return { page, url, persistent: false, chrome: 'launched', close: async () => { await closePage(); closeServer(); } };
 }
 
+/** Whether this process is the one daemon of its state file: clients that find no state all start a daemon at once, and only the first may stay. */
+function claimDaemon(final) {
+  const lock = `${stateFile(final)}.lock`;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try { fs.writeFileSync(lock, String(process.pid), { flag: 'wx' }); return lock; } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      const holder = Number(fs.readFileSync(lock, 'utf8'));
+      if (holder !== process.pid && pidAlive(holder)) return null;
+      fs.rmSync(lock, { force: true });
+    }
+  }
+  return null;
+}
+
 async function daemonMain(final) {
+  const lock = claimDaemon(final);
+  if (!lock) return process.exit(0);
   const { default: puppeteer } = await import('puppeteer');
   const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT });
   const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(final), protocolTimeout: PROTOCOL_TIMEOUT_MS, dumpio: true }));
@@ -199,7 +215,7 @@ async function daemonMain(final) {
     clearInterval(idleTimer);
     try { await browser.close(); } catch { /* already gone */ }
     closeServer();
-    try { fs.rmSync(stateFile(final), { force: true }); } catch { /* a fresher daemon may have replaced it */ }
+    try { fs.rmSync(stateFile(final), { force: true }); fs.rmSync(lock, { force: true }); } catch { /* a fresher daemon may have replaced it */ }
     process.exit(0);
   };
   const idleTimer = setInterval(() => {
