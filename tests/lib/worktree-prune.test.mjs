@@ -19,7 +19,7 @@ function fixture(fn) {
     git(dir, 'clone', '-q', origin, main);
     git(main, 'config', 'user.email', 't@t'); git(main, 'config', 'user.name', 't');
     fs.writeFileSync(path.join(main, 'f.txt'), '1');
-    fs.writeFileSync(path.join(main, '.gitignore'), 'out/\nnode_modules\n');
+    fs.writeFileSync(path.join(main, '.gitignore'), 'out\nnode_modules\n.vawe-data\nassets/brands/\n');
     git(main, 'add', '.'); git(main, 'commit', '-qm', 'one'); git(main, 'push', '-q', 'origin', 'HEAD:main');
     const add = (name) => { git(main, 'worktree', 'add', '-q', '-b', name, path.join(dir, name)); return path.join(dir, name); };
     fn({ dir, main, add });
@@ -39,9 +39,9 @@ test('keepReason names the first reason a worktree stays and is empty for a remo
   assert.equal(keepReason({ ...fine, idleMs: 14 * 60000 }), 'active 14 min ago');
   assert.equal(keepReason({ ...fine, trackedEdits: true }), 'tracked edits');
   assert.equal(keepReason({ ...fine, untracked: true }), 'untracked files');
-  assert.equal(keepReason({ ...fine, ignored: ['node_modules/', 'site/node_modules'] }), '');
-  assert.equal(keepReason({ ...fine, ignored: ['out/', 'a/b.mp4', '.vawe-data/', 'assets/brands/', 'node_modules/'] }),
-    'ignored files would be deleted: out/, a/b.mp4, .vawe-data/ (4 in all)');
+  assert.equal(keepReason({ ...fine, ignored: [] }), '');
+  assert.equal(keepReason({ ...fine, ignored: ['out/a.mp4', 'a/b.mp4', 'c.png', 'd.png'] }),
+    'ignored files would be deleted: out/a.mp4, a/b.mp4, c.png (4 in all)');
 });
 
 test('parseWorktrees reads path, branch and lock', () => {
@@ -78,15 +78,52 @@ test('prune removes a merged clean worktree and keeps locked, dirty, untracked a
   });
 });
 
-test('a worktree holding ignored files stays, naming them; node_modules alone does not block', () => {
+test('ignored files block removal unless a link-shared symlink or a byte-identical copy of main', () => {
   fixture(({ main, add }) => {
+    fs.mkdirSync(path.join(main, 'node_modules')); fs.writeFileSync(path.join(main, 'node_modules', 'p.js'), 'x');
+    fs.mkdirSync(path.join(main, '.vawe-data'));
+    fs.mkdirSync(path.join(main, 'assets', 'brands'), { recursive: true });
+    fs.writeFileSync(path.join(main, 'assets', 'brands', 'logo.png'), 'same');
+    const brand = (wt, body) => {
+      fs.mkdirSync(path.join(wt, 'assets', 'brands'), { recursive: true });
+      fs.writeFileSync(path.join(wt, 'assets', 'brands', 'logo.png'), body);
+    };
+
     const renders = add('renders');
     fs.mkdirSync(path.join(renders, 'out')); fs.writeFileSync(path.join(renders, 'out', 'a.mp4'), 'x');
-    const deps = add('deps');
-    fs.mkdirSync(path.join(deps, 'node_modules')); fs.writeFileSync(path.join(deps, 'node_modules', 'p.js'), 'x');
+    const shared = add('shared');
+    fs.symlinkSync(path.join(main, 'node_modules'), path.join(shared, 'node_modules'));
+    fs.symlinkSync(path.join(main, '.vawe-data'), path.join(shared, '.vawe-data'));
+    brand(shared, 'same');
+    const realDir = add('realdir');
+    fs.mkdirSync(path.join(realDir, 'node_modules')); fs.writeFileSync(path.join(realDir, 'node_modules', 'p.js'), 'x');
+    const changed = add('changed'); brand(changed, 'edit1');
+    const sameSize = add('samesize'); brand(sameSize, 'sAme');
+    const strayLink = add('straylink'); fs.symlinkSync(main, path.join(strayLink, 'out'));
+
     const keep = Object.fromEntries(planPrune(main, LATER()).map((w) => [path.basename(w.path), w.keep]));
-    assert.equal(keep.renders, 'ignored files would be deleted: out/');
-    assert.equal(keep.deps, '');
+    assert.equal(keep.renders, 'ignored files would be deleted: out/a.mp4');
+    assert.equal(keep.shared, '');
+    assert.equal(keep.realdir, 'ignored files would be deleted: node_modules');
+    assert.equal(keep.changed, 'ignored files would be deleted: assets/brands/logo.png');
+    assert.equal(keep.samesize, 'ignored files would be deleted: assets/brands/logo.png');
+    assert.equal(keep.straylink, 'ignored files would be deleted: out');
+  });
+});
+
+test('removing a worktree leaves the main stores its symlinks point at', () => {
+  fixture(({ main, add }) => {
+    fs.mkdirSync(path.join(main, 'node_modules')); fs.writeFileSync(path.join(main, 'node_modules', 'p.js'), 'x');
+    fs.mkdirSync(path.join(main, '.vawe-data')); fs.writeFileSync(path.join(main, '.vawe-data', 's.json'), '{}');
+    const wt = add('linked');
+    fs.symlinkSync(path.join(main, 'node_modules'), path.join(wt, 'node_modules'));
+    fs.symlinkSync(path.join(main, '.vawe-data'), path.join(wt, '.vawe-data'));
+    const entry = planPrune(main, LATER()).find((w) => w.branch === 'linked');
+    assert.equal(entry.keep, '');
+    assert.equal(removeWorktree(main, entry), '');
+    assert.equal(fs.existsSync(wt), false);
+    assert.equal(fs.readFileSync(path.join(main, 'node_modules', 'p.js'), 'utf8'), 'x');
+    assert.equal(fs.readFileSync(path.join(main, '.vawe-data', 's.json'), 'utf8'), '{}');
   });
 });
 

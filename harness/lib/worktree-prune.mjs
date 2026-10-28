@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { worktreeActivity } from './worktree-landed.mjs';
 
 const ACTIVE_MS = 2 * 60 * 60 * 1000;
-const REBUILDABLE = /(^|\/)node_modules\/?$/;
+const LINK_SHARED = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dev', 'link-shared.sh');
 
 const run = (cwd, args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 1 << 28, stdio: ['ignore', 'pipe', 'pipe'] });
 const ok = (cwd, args) => { try { run(cwd, args); return true; } catch { return false; } };
@@ -21,7 +22,7 @@ export function keepReason(w) {
   if (w.idleMs < ACTIVE_MS) return `active ${minutes(w.idleMs)} ago`;
   if (w.trackedEdits) return 'tracked edits';
   if (w.untracked) return 'untracked files';
-  const ignored = (w.ignored || []).filter((f) => !REBUILDABLE.test(f));
+  const ignored = w.ignored || [];
   if (ignored.length) return `ignored files would be deleted: ${ignored.slice(0, 3).join(', ')}${ignored.length > 3 ? ` (${ignored.length} in all)` : ''}`;
   return '';
 }
@@ -34,13 +35,37 @@ export function parseWorktrees(porcelain) {
   }));
 }
 
-const inside = (cwd, dir) => cwd === dir || cwd.startsWith(dir + path.sep);
+/** The stores link-shared.sh links into a worktree, read from its `for d in ...` line. */
+export const linkedStores = () => /^for d in (.+); do$/m.exec(fs.readFileSync(LINK_SHARED, 'utf8'))[1].split(/\s+/);
+
+function sameFile(a, b) {
+  try {
+    const sa = fs.lstatSync(a);
+    const sb = fs.lstatSync(b);
+    return sa.isFile() && sb.isFile() && sa.size === sb.size && fs.readFileSync(a).equals(fs.readFileSync(b));
+  } catch { return false; }
+}
+
+/** The ignored files under `rel` in `wt` that deletion would lose: not a link-shared symlink, not a byte-identical copy in `main`. Never follows a symlink. */
+export function lostIgnored(wt, main, rel, stores = linkedStores()) {
+  const at = path.join(wt, rel);
+  const st = fs.lstatSync(at);
+  const bare = rel.replace(/\/$/, '');
+  if (st.isSymbolicLink()) return stores.includes(bare) ? [] : [bare];
+  if (st.isDirectory() && stores.includes(bare)) return [bare];
+  if (!st.isDirectory()) return sameFile(at, path.join(main, bare)) ? [] : [bare];
+  return fs.readdirSync(at).flatMap((name) => lostIgnored(wt, main, path.join(bare, name), stores));
+}
+
+const inside =(cwd, dir) => cwd === dir || cwd.startsWith(dir + path.sep);
 const real = (p) => { try { return fs.realpathSync(p); } catch { return p; } };
 
 /** One entry per worktree: its facts and `keep`, the reason it stays ('' when it can be removed). */
 export function planPrune(cwd, now = Date.now()) {
   const here = real(cwd);
-  return parseWorktrees(run(cwd, ['worktree', 'list', '--porcelain'])).map((w, i) => {
+  const trees = parseWorktrees(run(cwd, ['worktree', 'list', '--porcelain']));
+  const mainPath = trees[0].path;
+  return trees.map((w, i) => {
     const present = fs.existsSync(w.path);
     const status = present ? run(w.path, ['status', '--porcelain', '--ignored']).split('\n').filter(Boolean) : [];
     const facts = {
@@ -51,7 +76,7 @@ export function planPrune(cwd, now = Date.now()) {
       idleMs: present ? now - Math.max(worktreeActivity(w), fs.statSync(w.path).mtimeMs) : Infinity,
       untracked: status.some((l) => l.startsWith('??')),
       trackedEdits: status.some((l) => !/^(\?\?|!!)/.test(l)),
-      ignored: status.filter((l) => l.startsWith('!!')).map((l) => l.slice(3)),
+      ignored: i === 0 ? [] : status.filter((l) => l.startsWith('!!')).flatMap((l) => lostIgnored(w.path, mainPath, l.slice(3))),
     };
     return { ...facts, keep: keepReason(facts) };
   });
