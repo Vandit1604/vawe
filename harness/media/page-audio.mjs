@@ -22,6 +22,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { playableOf } from '../lib/audio-view.mjs';
+import { resolveDuration } from './page-duration.mjs';
 import { balanceLines } from '../lib/cue-balance.mjs';
 import { spectralChange, BED_RATE } from '../lib/bed-motion.mjs';
 import { decodeMono } from '../lib/audio-onsets.mjs';
@@ -62,12 +63,14 @@ function toFilePath(rawSrc, pageUrl, pagePath) {
 }
 
 /**
- * readPageAudio(page, { pagePath }?) -> { specs, loudness }  (loudness: the <meta name="loudness"> value, or null)
+ * readPageAudio(page, { pagePath, spans, duration }?) -> { specs, loudness, duration }  (loudness: the <meta name="loudness"> value, or null;
+ * duration: the film's seconds, by default the page's own, harness/media/page-duration.mjs)
  * `page` is a puppeteer Page on a loaded film. `pagePath` (the page's file) makes src resolution exact;
  * without it a src resolves against the repo root that the preview server serves.
  * spec: { src | synth, at, gain (dB), fadeIn, fadeOut, trim, trimEnd, duck (dB or null), role }
  */
-export async function readPageAudio(page, { pagePath, spans } = {}) {
+export async function readPageAudio(page, { pagePath, spans, duration } = {}) {
+  duration ??= pagePath ? await resolveDuration(pagePath) : NaN;
   const raw = await page.evaluate(() => {
     const num = (el, k, d) => { const v = parseFloat(el.dataset[k]); return Number.isFinite(v) ? v : d; };
     const tracks = [...document.querySelectorAll('audio')].map((el) => ({
@@ -77,8 +80,7 @@ export async function readPageAudio(page, { pagePath, spans } = {}) {
       trim: num(el, 'trim', 0), trimEnd: num(el, 'trimEnd', null), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
     }));
     const meta = parseFloat(document.querySelector('meta[name="loudness"]')?.content);
-    const duration = parseFloat(document.querySelector('meta[name="duration"]')?.content);
-    return { tracks, loudness: Number.isFinite(meta) ? meta : null, url: location.href, duration };
+    return { tracks, loudness: Number.isFinite(meta) ? meta : null, url: location.href };
   });
   const problems = [];
   const specs = raw.tracks.map(({ src, ...t }) => {
@@ -93,10 +95,10 @@ export async function readPageAudio(page, { pagePath, spans } = {}) {
     if (!fs.existsSync(file)) problems.push(`${where}: src="${src}" resolved to ${file}, which does not exist`);
     return { ...t, src: file, gain: t.gain ?? 0, gainSet: t.gain !== null, defaultGain: 0 };
   });
-  problems.push(...await startOnWorlds(page, specs, raw.duration, spans));
+  problems.push(...await startOnWorlds(page, specs, duration, spans));
   if (problems.length) throw new Error(problems.join('\n'), { cause: { problems } });
   for (const s of specs) s.role ||= 'sfx';
-  return { specs, loudness: raw.loudness, duration: raw.duration };
+  return { specs, loudness: raw.loudness, duration };
 }
 
 /** Moves each data-on="world:<id>" spec to the second world <id> first shows, plus its data-at. Returns the problems. Pure but for the `at` it sets. */

@@ -18,6 +18,7 @@ import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { unwaived } from '../lib/motion-lint.mjs';
 import { firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { framesPage, worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../lib/frames-page.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const hideOthers = (id) => `[data-world]:not([data-world="${id}"]) { display: none !important; }`;
@@ -42,7 +43,7 @@ async function seekToShown(page, span, anims) {
 
 /** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fired }] in page order. */
 async function shootWorlds(opened, pagePath, stills, { ids, suffix }) {
-  const dur = Number(readPageMeta(pagePath, 'duration'));
+  const dur = await resolveDuration(pagePath);
   const anims = await readWorldAnimations(opened.page);
   const found = await sampleWorlds(opened.page, dur, (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms));
   if (!found.length) die(`${pagePath} has no data-world element: give each beat one, for example <section data-world="s1">`);

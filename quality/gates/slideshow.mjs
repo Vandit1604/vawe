@@ -14,6 +14,7 @@ import { slideshowTells, NO_RECORDS_NOTE } from '../../harness/lib/slideshow.mjs
 import { worldRows } from '../../harness/lib/timeline.mjs';
 import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
 import { isWaived } from '../../harness/lib/waivers.mjs';
+import { resolveDuration } from '../../harness/media/page-duration.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FPS = 30;
@@ -34,7 +35,7 @@ async function measurePage() {
   try {
     await tab.goto(url, { waitUntil: 'load' });
     await settle(tab);
-    const dur = await tab.evaluate(() => Number(document.querySelector('meta[name="duration"]')?.content) || 0);
+    const dur = await resolveDuration(page);
     const { motion, probe } = await probePage(tab, dur, page, { checks: createChecks({ pagePath: page, mode: 'draft', cache: false }) });
     return { duration: dur, records: sightedRecords(motion), worlds: worldRows(probe.worlds ?? []) };
   } finally { await close(); }

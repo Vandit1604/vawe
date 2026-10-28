@@ -117,6 +117,19 @@ export function installPageFrame({ aspect, width, height, eases = {} }) {
     configurable: true,
     get() { const m = document.querySelector('meta[name="fps"]'); return m ? Number(m.content) : undefined; },
   });
+  // An infinite animation has no end, so it never sets the end of an auto page.
+  vawe.animationEnd = () => {
+    const ends = document.getAnimations().map((a) => a.effect?.getComputedTiming().endTime ?? 0);
+    return { endS: Math.max(0, ...ends.filter(Number.isFinite)) / 1000, infinite: ends.includes(Infinity) };
+  };
+  Object.defineProperty(vawe, 'duration', {
+    configurable: true,
+    get() {
+      const m = document.querySelector('meta[name="duration"]');
+      if (!m) return undefined;
+      return m.content.trim() === 'auto' ? vawe.animationEnd().endS : Number(m.content);
+    },
+  });
   const apply = () => {
     const root = document.documentElement;
     root.dataset.aspect = aspect;

@@ -14,7 +14,7 @@ import { clipMessage } from '../../quality/gates/page-check.mjs';
 import { frameMotion, startJumps, earlyStops, frozenInside, secondSsim, collateralChange, changedSpan, collectMoves, repeatedMove, FPS } from './motion-curve.mjs';
 import { coverage } from './coverage.mjs';
 import { probe } from './see-views.mjs';
-import { readPageMeta } from './render-page.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const RANK = { error: 0, warn: 1, info: 2 };
 const SHEET_ROWS = 6;
@@ -306,7 +306,7 @@ export async function review({ page, ref, final = false, text = false, out, judg
   const t0 = Date.now();
   const paths = draftPaths(page, final);
   const rendering = ensureRender(page, paths, final);
-  const metaDur = Number(readPageMeta(page, 'duration'));
+  const metaDur = await resolveDuration(page);
   if (!metaDur) await rendering;
   const dur = metaDur || probe(paths.video).dur;
   const work = scratch('review', paths.name);

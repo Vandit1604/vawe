@@ -8,6 +8,7 @@ import { bucketMean, die, probeVideo, ROOT, tileInGrids, timeRange, writeJsonAto
 import { ocrWords } from './ocr.mjs';
 import { runCompare } from './compare.mjs';
 import { seekPage } from './inspect.mjs';
+import { resolveDuration } from '../page-duration.mjs';
 
 
 // ── --dom: read a film's motion straight from the DOM, no video, no screenshot per sample ────────────
@@ -106,7 +107,6 @@ export async function sampleDomMotion(page, url, opts) {
   const { from: fromArg, to: toArg, fps: domFps, w, h, ids: idsArg } = opts;
   await page.goto(url, { waitUntil: 'load' });
   const info = await page.evaluate(() => {
-    const durMeta = document.querySelector('meta[name="duration"]');
     const anims = document.getAnimations();
     // Tag EVERY animation target with `data-see-track`, using its real id when it has one, a
     // synthetic `_N` otherwise: most animated elements on a real authored page (a per-letter span, a
@@ -122,12 +122,12 @@ export async function sampleDomMotion(page, url, opts) {
       const timing = a.effect.getComputedTiming();
       return Math.max(m, (timing.delay || 0) + (timing.duration || 0) * (timing.iterations || 1));
     }, 0);
-    return { durationS: durMeta ? Number(durMeta.content) : null, ids, maxEndMs, animCount: anims.length };
+    return { ids, maxEndMs, animCount: anims.length };
   });
   if (!info.animCount) die(`${url} has no document.getAnimations() (no element.animate() calls ran).`);
 
   const ids = idsArg || info.ids;
-  const to = toArg != null ? toArg : (info.durationS != null ? info.durationS : info.maxEndMs / 1000);
+  const to = toArg != null ? toArg : (opts.duration > 0 ? opts.duration : info.maxEndMs / 1000);
   if (!(to > fromArg)) die(`--dom: bad window ${fromArg}-${to}`);
 
   const times = timeRange(fromArg, to, 1 / domFps);
@@ -147,7 +147,7 @@ export async function runDom(htmlPath, outDirRoot, opts) {
   const { fps: domFps, w, h } = opts;
   const { page, url, close } = await openPreview(htmlPath, { width: w, height: h });
   try {
-    const { ids, from, to, curve, events } = await sampleDomMotion(page, url, opts);
+    const { ids, from, to, curve, events } = await sampleDomMotion(page, url, { ...opts, duration: await resolveDuration(htmlPath) });
 
     const outDir = path.join(outDirRoot, 'dom');
     fs.rmSync(outDir, { recursive: true, force: true });

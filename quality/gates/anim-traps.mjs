@@ -36,6 +36,7 @@ import { gateFindings } from '../../harness/lib/findings.mjs';
 import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
 import { isWaived } from '../../harness/lib/waivers.mjs';
 import { runMotionCollector, motionLint, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
+import { resolveDuration } from '../../harness/media/page-duration.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -215,9 +216,8 @@ async function checkPage(absFile) {
   const { page, url, close } = await openPreview(absFile, { width: 1920, height: 1080 });
   try {
     await page.goto(url, { waitUntil: 'load' });
-    const durMs = await page.evaluate(() => {
-      const meta = document.querySelector('meta[name="duration"]');
-      if (meta) return Number(meta.content) * 1000;
+    const seconds = await resolveDuration(absFile);
+    const durMs = seconds > 0 ? seconds * 1000 : await page.evaluate(() => {
       return document.getAnimations().reduce((m, a) => {
         const t = a.effect.getComputedTiming();
         return Math.max(m, (t.delay || 0) + (t.duration || 0) * (t.iterations === Infinity ? 1 : (t.iterations || 1)));

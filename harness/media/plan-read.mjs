@@ -3,13 +3,14 @@
 // no video, no render.
 //   const { findings, advice } = await readPlanFindings(page, absPagePath, duration);   (an opened, loaded and settled page)
 //   const { findings, advice } = await readPlan(absPagePath);                          (opens and closes the page)
-import { openPage, probePage, readPageMeta, resolveFrame, settle, probeAdvice } from './render-page.mjs';
+import { openPage, probePage, resolveFrame, settle, probeAdvice } from './render-page.mjs';
 import { createChecks } from '../lib/check-runner.mjs';
 import { readBrief, parseBriefTables, dropGuesses } from '../lib/brief-tables.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { planFindings } from '../lib/plan-findings.mjs';
 import { heldWorlds } from '../lib/worlds.mjs';
 import { NOTE_LINES } from '../lib/draft-check.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 // contrast is the one probe that takes screenshots (3.2 s of a 4.1 s probe on a 10 s page); the plan reads no pixels.
 const withoutContrast = (checks) => ({ ...checks, run: (check, fn, settings) => (check === 'contrast' ? null : checks.run(check, fn, settings)) });
@@ -42,7 +43,7 @@ export async function readPlan(pagePath) {
   const opened = await openPage(pagePath, resolveFrame(pagePath), { warm: true, final: false });
   try {
     await loadOpened(opened);
-    return await readPlanFindings(opened.page, pagePath, Number(readPageMeta(pagePath, 'duration')));
+    return await readPlanFindings(opened.page, pagePath, await resolveDuration(pagePath));
   } finally {
     await opened.close();
   }

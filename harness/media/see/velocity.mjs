@@ -3,11 +3,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { sampleBoxTracks } from '../../lib/box-track.mjs';
-import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
+import { openPage, resolveFrame } from '../render-page.mjs';
 import { die } from './core.mjs';
 import { stripWindow } from './strip-math.mjs';
 import { GRAPH_H, GRAPH_W, LINE_COLOURS, velocitySvg } from './velocity-graph.mjs';
 import { analyseTrack, moveScore, sampleTimes, summaryLines, topMovers, VELOCITY_SPAN, velocityProblem, visiblePoints } from './velocity-math.mjs';
+import { resolveDuration } from '../page-duration.mjs';
 
 const TAG = 'data-velocity-pick';
 
@@ -37,7 +38,7 @@ export async function readVelocity(page, opts, from, to) {
 /** Runs `vawe strip --velocity`: samples the page at 120 a second across `opts.span` seconds around `opts.at`, writes the graph, prints its path and the summary. */
 export async function runVelocity(pagePath, opts) {
   if (!fs.existsSync(pagePath)) die(`no such page: ${pagePath}`);
-  const dur = Number(readPageMeta(pagePath, 'duration')) || Infinity;
+  const dur = await resolveDuration(pagePath) || Infinity;
   const { from, to } = stripWindow(opts.at, opts.span, dur);
   const frame = resolveFrame(pagePath, {});
   const { page, url, close } = await openPage(pagePath, frame, { final: false });

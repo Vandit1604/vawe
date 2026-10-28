@@ -10,6 +10,7 @@ import { createChecks } from '../lib/check-runner.mjs';
 import { motionLint, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
 import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { readBrief } from '../lib/brief-tables.mjs';
+import { resolveDuration } from '../media/page-duration.mjs';
 
 const SKIPPED = new Set(['contrast', 'spec', 'objects']);
 
@@ -25,7 +26,7 @@ async function sweepOne(pagePath) {
   try {
     await page.goto(url, { waitUntil: 'load' });
     await settle(page);
-    const dur = await page.evaluate(() => Number(document.querySelector('meta[name="duration"]')?.content) || 0);
+    const dur = await resolveDuration(pagePath);
     const { motion, probe } = await probePage(page, dur, pagePath, { checks: lightChecks(pagePath) });
     const records = motion.boxes ? mergeRecords(motion.records, recordsFromBoxes(motion.boxes)) : motion.records;
     const motionFound = motionLint({ records, scripted: motion.scripted && !motion.boxes });

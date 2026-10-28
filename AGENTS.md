@@ -12,7 +12,7 @@ canvas, three.js); if natural code fails, report it as a framework bug.
 
 ## Hard rules
 
-- A film is `films/<name>/page.html` plus its own assets folder, relative paths only, with `<meta name="duration" content="12.4">` in seconds.
+- A film is `films/<name>/page.html` plus its own assets folder, relative paths only, with `<meta name="duration" content="12.4">` in seconds, or `content="auto"`: the last animation's end plus a hold (1.2 s or the last world's read time), `bin/vawe dev --lock-length` writes the number in, a page script reads `window.vawe.duration`, and a `window.seek`-only page must state a number.
 - Time is the seek, never the clock: CSS `@keyframes`, `element.animate()` or `window.seek(t)` as a pure function of t. No timers, no state between frames, no unseeded random: a virtual clock (`core/engine/page-clock.js`) owns them.
 - Lay out with `--vw`/`--vh` and `<html data-aspect>` for `16:9 9:16 1:1 4:5 4:3`. Never crop.
 - Each beat is one element with `data-world="<id>"` (lowercase, the brief's Shots ids). `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the one big moment.

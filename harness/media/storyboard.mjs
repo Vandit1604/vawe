@@ -20,6 +20,7 @@ import { storyboardOf } from '../lib/storyboard.mjs';
 import { readPlanFindings, loadOpened } from './plan-read.mjs';
 import { planLines } from '../lib/plan-findings.mjs';
 import { storyboardHtml } from '../lib/storyboard-html.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
@@ -92,7 +93,7 @@ async function main(argv) {
   if (!fs.existsSync(source)) die(`no such file: ${source}`);
   const abs = sourcePage(source, flag('--page'));
   if (!fs.existsSync(abs)) die(`no such page: ${abs}`);
-  const duration = Number(readPageMeta(abs, 'duration'));
+  const duration = await resolveDuration(abs);
   if (!(duration > 0)) die(`${abs} has no <meta name="duration">`);
   const film = filmKeyOf(abs);
   const html = path.resolve(flag('--out') ?? path.join('out', `${film}-storyboard.html`));

@@ -10,7 +10,7 @@ import { planFindings, planLines } from '../lib/plan-findings.mjs';
 import { attractorProblems } from '../lib/directions.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { ideasFilled } from '../lib/ideas.mjs';
-import { metaOf } from '../lib/page-meta.mjs';
+import { statedLength } from '../media/page-duration.mjs';
 import { readRuns } from '../lib/runlog.mjs';
 import { isClipDemo } from '../lib/clip-demo.mjs';
 import { nextStep } from './stage-say.mjs';
@@ -31,7 +31,7 @@ export function readPlanState(pagePath, root = ROOT, opened = null) {
   const html = read(abs) ?? '';
   const brief = read(path.join(path.dirname(abs), 'brief.md'));
   const frames = mtime(path.join(root, 'out', `${name}-frames.png`));
-  const found = opened?.findings ?? (brief === null ? [] : planFindings({ brief: readBrief(abs), duration: Number(metaOf(html, 'duration')), probe: null, worlds: worldIds(html), authoring: pageAuthoring(abs) }));
+  const found = opened?.findings ?? (brief === null ? [] : planFindings({ brief: readBrief(abs), duration: Number(statedLength(html)), probe: null, worlds: worldIds(html), authoring: pageAuthoring(abs) }));
   const covered = ideasFilled(brief ?? '') === false ? 'ideas-missing' : null;
   const findings = [...(brief === null ? [] : attractorProblems(brief)), ...planLines(found.filter((f) => f.code !== covered), root)];
   const step = nextStep(abs, root);

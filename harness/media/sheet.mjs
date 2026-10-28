@@ -14,6 +14,7 @@ import { REPO_ROOT } from '../lib/render-harness.mjs';
 import { drewNothingHint } from '../lib/ensure-fonts.mjs';
 import { parseAt } from './compare-frames.mjs';
 import { filmNameOf } from './see/strip-math.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const EVEN_TILES = 12;
@@ -40,8 +41,8 @@ export function storyboardSeconds(spans, dur) {
 }
 
 async function pageTiles(pagePath, at, withWorlds, dir) {
-  const { openPage, seekAll, resolveFrame, settle, readPageMeta, probeStats, oneFlatColour } = await import('./render-page.mjs');
-  const dur = Number(readPageMeta(pagePath, 'duration'));
+  const { openPage, seekAll, resolveFrame, settle, probeStats, oneFlatColour } = await import('./render-page.mjs');
+  const dur = await resolveDuration(pagePath);
   if (!(dur > 0)) die(`${pagePath} has no <meta name="duration">`);
   const frame = resolveFrame(pagePath);
   const opened = await openPage(pagePath, frame, { warm: true });

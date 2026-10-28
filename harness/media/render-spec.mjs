@@ -13,6 +13,7 @@ import path from 'node:path';
 import { summariseMove, r1, r3, median } from '../lib/move-fit.mjs';
 import { cssColor } from '../lib/color-delta.mjs';
 import { scratch } from '../lib/scratch.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const ACTIVE = 0.25;            // per-frame change (px, or 1 unit per 0.01 opacity) below which an element is still
 const SEG_GAP = 1;              // still frames allowed inside one move
@@ -118,7 +119,7 @@ function pageStatic() {
 // ── measure: seek every frame ───────────────────────────────────────────────────────────────────
 export async function measurePage(pagePath, { aspect, log = console.error } = {}) {
   const { readPageMeta, resolveFrame, openPage, settle } = await import('./render-page.mjs');
-  const dur = Number(readPageMeta(pagePath, 'duration'));
+  const dur = await resolveDuration(pagePath);
   if (!(dur > 0)) die(`${pagePath} has no <meta name="duration" content="seconds">`);
   const fps = Number(readPageMeta(pagePath, 'fps')) || 30;
   const frame = resolveFrame(pagePath, { aspect, final: true });
