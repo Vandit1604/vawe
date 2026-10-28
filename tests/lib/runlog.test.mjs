@@ -112,6 +112,15 @@ test('runs <film>: old records and new mix; no verb calls says so, the draft ser
   assert.deepEqual(filmLines('none', []), ['none: no runs logged']);
 });
 
+test('runs <film> lists each judge round with its verdict and total, and the owner approve or reject with its note', () => {
+  const owner = [{ at: '2026-09-30T11:00:00.000Z', cmd: 'approve', verdict: 'reject', note: 'type too small' }, { at: '2026-09-30T12:00:00.000Z', cmd: 'approve', verdict: 'approve', note: null }];
+  const text = filmLines('demo', [...NEW, ...owner]).join('\n');
+  assert.match(text, /judge 09-30 09:10 draft FIX total 23/);
+  assert.match(text, /judge 09-30 09:30 draft PASS total 27/);
+  assert.match(text, /owner reject 09-30 11:00: type too small/);
+  assert.match(text, /owner approve 09-30 12:00\n/);
+});
+
 const call = (over) => ({ at: '2026-10-09T20:00:00.000Z', cmd: 'verb', agent: 'hud', verb: 'dev', stage: 'draft', durationS: 30, exitCode: 0, error: null, slotWaitS: 0, images: [], tagged: true, ...over });
 
 test('runs <film>: time by stage and verb, slot wait, failures grouped by cause, untagged calls left out', () => {
