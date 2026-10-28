@@ -24,7 +24,7 @@
 </style>
 <script type="module">
 import { enter, EASE } from '../../core/motion/presets.js';
-await document.fonts.ready;
+await document.fonts.load('700 1em "{{family}}"');
 const root = document.documentElement;
 const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
 const end = parseFloat(document.querySelector('meta[name="duration"]').content);

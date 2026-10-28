@@ -1,5 +1,5 @@
 // The plan read before any render (harness/media/plan-read.mjs): a 4-card slideshow lists its tells from the page alone, and the `vawe new`
-// starter lists none, so a new film starts clean. The same holds for each film type's starter, apart from the note that names its declared holds.
+// starter lists none, so a new film starts clean. The same holds for each film type's starter, at the shortest length that routes to it and at its default.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -36,11 +36,11 @@ test('the starter of each film type lists no page ban before any render', async 
   fs.mkdirSync(path.join(dir, 'assets'), { recursive: true });
   try {
     fs.copyFileSync(path.join(ROOT, 'assets', 'fonts', face.font), path.join(dir, 'assets', face.font));
-    for (const [type, length] of [['sting', 5], ['brand launch', STARTERS['brand launch'].length], ['story or explainer', STARTERS['story or explainer'].length]]) {
+    for (const [type, length] of [['sting', 5], ['brand launch', STARTERS['brand launch'].min], ['brand launch', 16], ['story or explainer', STARTERS['story or explainer'].min]]) {
       assert.ok(type in STARTERS, type);
       fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ type, length, title: 'Northwind', face }));
       const { advice } = await readPlan(path.join(dir, 'page.html'));
-      assert.deepEqual(advice, [], type);
+      assert.deepEqual(advice, [], type + ' ' + length);
     }
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });

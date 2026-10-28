@@ -11,6 +11,8 @@ import { isStarterPage } from '../../harness/lib/frames-page.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const TYPES = Object.keys(STARTERS);
+// the shortest length that routes to the type starter (STARTERS min, else the sting length), and the default of its template
+const LENGTHS = { sting: [5], 'brand launch': [15, 16], 'story or explainer': [30] };
 const worldIds = (page) => [...page.matchAll(/data-world="([a-z0-9-]+)"/g)].map((m) => m[1]);
 
 function newIn(name, options) {
@@ -42,23 +44,31 @@ test('a request routes to the starter of its film type', () => {
   const sting = newIn('zz-a', { request: 'a 5 s logo reveal sting for Acme', title: 'Acme' });
   assert.match(sting.page, /the quiet beat/);
   assert.deepEqual(worldIds(sting.page), ['s1', 's2', 's3']);
-  const launch = newIn('zz-b', { request: 'an 11 s launch film for https://acme.example', title: 'Ship faster' });
+  const launch = newIn('zz-b', { request: 'a 16 s launch film for https://acme.example', title: 'Ship faster' });
   assert.match(launch.page, /data-ui/);
   assert.deepEqual(worldIds(launch.page), ['s1', 's2', 's3', 's4', 's5', 's6', 's7']);
-  const story = newIn('zz-c', { request: 'an 11 s explainer: how a refund works', title: 'Refund fast' });
+  const story = newIn('zz-c', { request: 'a 30 s explainer: how a refund works', title: 'Refund fast' });
   assert.match(story.page, /class="flow"/);
-  assert.deepEqual(worldIds(story.page), ['s1', 's2', 's3', 's4', 's5', 's6', 's7']);
+  assert.deepEqual(worldIds(story.page), Array.from({ length: 12 }, (_, i) => `s${i + 1}`));
 });
 
-test('a request that names no length gets the length of the type starter', () => {
-  const launch = newIn('zz-i', { request: 'a launch film for https://acme.example', title: 'Ship faster' });
-  assert.match(launch.page, new RegExp(`<meta name="duration" content="${STARTERS['brand launch'].length}">`));
-  const story = newIn('zz-j', { request: 'an explainer: how a refund works', title: 'Refund fast' });
-  assert.match(story.page, new RegExp(`<meta name="duration" content="${STARTERS['story or explainer'].length}">`));
+test('the template Length line is the one owner: the brief and the page say the same seconds', () => {
+  for (const [name, request] of [['zz-i', 'a launch film for https://acme.example'], ['zz-j', 'an explainer: how a refund works']]) {
+    const { page, brief } = newIn(name, { request, title: 'Refund fast' });
+    const line = brief.match(/^- (?:Platform|Length)[^:]*: .*?(\d+(?:\.\d+)?) s/m);
+    assert.ok(line, `${name}: no length line in the brief`);
+    assert.match(page, new RegExp(`<meta name="duration" content="${line[1]}">`), name);
+  }
+});
+
+test('a film shorter than the template Length takes the general starter', () => {
+  for (const [name, request] of [['zz-k', 'an 11 s launch film for https://acme.example'], ['zz-l', 'an 11 s explainer: how a refund works']]) {
+    assert.match(newIn(name, { request }).page, /<ul class="facts">/, name);
+  }
 });
 
 test('a starter page declares no waiver', () => {
-  for (const type of TYPES) assert.doesNotMatch(starterPage({ type, length: STARTERS[type].length ?? 5, title: 'Acme' }), /id="authoring"/, type);
+  for (const type of TYPES) assert.doesNotMatch(starterPage({ type, length: LENGTHS[type].at(-1), title: 'Acme' }), /id="authoring"/, type);
 });
 
 test('another film type, and a film made with --from, keep the general starter', () => {
@@ -73,14 +83,18 @@ test('another film type, and a film made with --from, keep the general starter',
 });
 
 test('the brief Shots table has one row per world of the type starter', () => {
-  const { page, brief } = newIn('zz-f', { request: 'an 11 s launch film for https://acme.example', title: 'Ship faster' });
+  const { page, brief } = newIn('zz-f', { request: 'a 16 s launch film for https://acme.example', title: 'Ship faster' });
   const shots = brief.split('### Shots')[1].split('### Words')[0].split('\n').filter((l) => /^\| s\d /.test(l));
   assert.deepEqual(shots.map((l) => l.split('|')[1].trim()), worldIds(page));
-  assert.match(shots[1], /^\| s2 \| 1\.58 \| 3\.64 \|/);
+  assert.match(shots[1], /^\| s2 \| 2\.3 \| 5\.3 \|/);
+});
+
+test('the shortest length of each type starter is the STARTERS min', () => {
+  for (const type of TYPES) assert.equal(LENGTHS[type][0], STARTERS[type].min ?? LENGTHS[type][0], type);
 });
 
 for (const type of TYPES) {
-  const length = { sting: 5, 'brand launch': 11, 'story or explainer': 10.5 }[type];
+  const length = LENGTHS[type].at(-1);
   const make = (extra = {}) => starterPage({ type, length, title: 'Acme', face: starterFace('zz-type'), ...extra });
 
   test(`${type}: a valid page under the contract`, () => {

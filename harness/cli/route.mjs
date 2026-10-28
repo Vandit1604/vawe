@@ -10,7 +10,8 @@ export const FALLBACK = 'sting';
 const STING_MAX_S = 10;
 const LONG_MIN_S = 60;
 
-// The beat-sheet template serves a sting and every unmatched request; each other template owns its length in its Length question.
+// The beat-sheet template serves a sting and every unmatched request; each other template owns its length in its Length question
+// (`vawe new` reads the default from it, also for the typed starters below).
 const STING_LENGTH_S = 5;
 const UNMATCHED_LENGTH_S = 15;
 
@@ -31,16 +32,16 @@ const WORDS = [
 ];
 
 // The page `vawe new` starts from, by film type: a file in harness/cli/starters/, the start of each world and the
-// spectacle second as fractions of the length, and the length a request that names none gets (no world holds past the world-turns limit at it).
-// Every other type takes the general starter.
+// spectacle second as fractions of the length, and `min`, the shortest length it fits (the low end of the template's Length line:
+// worlds shorter than that cannot hold their text). Every other type, and a shorter film, takes the general starter.
 export const STARTERS = {
   sting: { file: 'sting', beats: [0, 0.3, 0.7], spectacle: 0.36 },
-  'brand launch': { file: 'brand-launch', length: 16, beats: [0, 0.14375, 0.33125, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.856 },
-  'story or explainer': { file: 'story', length: 16, beats: [0, 0.14375, 0.30625, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.885 },
+  'brand launch': { file: 'brand-launch', min: 15, beats: [0, 0.14375, 0.33125, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.856 },
+  'story or explainer': { file: 'story', min: 30, beats: [0, 0.1, 0.1883, 0.2767, 0.4133, 0.491, 0.5577, 0.646, 0.7127, 0.7893, 0.856, 0.9227], spectacle: 0.936 },
 };
 
 /** The STARTERS key for a routed film, or undefined: an unmatched request and a sting past STING_MAX_S (the invented-product fallback) take the general starter. */
-export const starterType = (route, length) => (route?.known && route.type in STARTERS && !(route.type === 'sting' && length > STING_MAX_S) ? route.type : undefined);
+export const starterType = (route, length) => (route?.known && route.type in STARTERS && !(route.type === 'sting' && length > STING_MAX_S) && !(length < (STARTERS[route.type].min ?? 0)) ? route.type : undefined);
 
 // RECIPES.md "Complete videos": one chain per 20 to 30 s film, found by its heading number.
 export const RECIPES = 'prompts/moves/RECIPES.md';

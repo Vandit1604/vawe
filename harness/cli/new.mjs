@@ -237,7 +237,7 @@ export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 
     length, aspect, title: safe, font: face.font, family: face.family, ground: PLACEHOLDER.ground, ink: PLACEHOLDER.ink,
     signature: DIALS.map((d) => `${d}=`).join('; '), beats: beatVars(beats), groundCss: readStarterFile('ground.css').trimEnd(),
     worlds: own ? beats.map((b) => `<div class="world" data-world="${b.id}">${GROUND}</div>`).join('\n') : worldsHtml(beats, safe),
-    spectacle: own ? +(length * own.spectacle).toFixed(2) : '', wordFit: +(0.64 / (0.52 * title.length)).toFixed(3), b2: beats[1].start, b3: beats[2]?.start, b4: beats[3]?.start,
+    spectacle: own ? +(length * own.spectacle).toFixed(2) : '', wordFit: +(0.64 / (0.52 * title.length)).toFixed(3),
   });
 }
 
@@ -509,7 +509,7 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
   length ??= routedLength;
-  const pageLength = length ?? STARTERS[starterType(route)]?.length ?? templateLength(questions);
+  const pageLength = length ?? templateLength(questions);
   const type = starterType(route, pageLength);
   const face = starterFace(name);
   copyFace(root, dir, face);
