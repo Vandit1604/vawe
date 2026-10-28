@@ -163,7 +163,16 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
       const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
       await page.setViewport({ width, height, deviceScaleFactor: scale });
       const release = holdAlive(final);
-      if (warm) return { page, url, persistent: true, chrome: shared.started ? 'launched' : 'reused', reused, markWarm: () => page.evaluate((v, pid) => { window.__warmSig = v; window.__warmOwner = pid; }, sig, process.pid), close: async () => { release(); await page.evaluate(() => { window.__warmOwner = null; }).catch(() => {}); shared.browser.disconnect(); } };
+      if (warm) {
+        let marked = reused;
+        const markWarm = async () => { await page.evaluate((v, pid) => { window.__warmSig = v; window.__warmOwner = pid; }, sig, process.pid); marked = true; };
+        const close = async () => {
+          release();
+          await (marked ? page.evaluate(() => { window.__warmOwner = null; }) : page.close()).catch(() => {});
+          shared.browser.disconnect();
+        };
+        return { page, url, persistent: true, chrome: shared.started ? 'launched' : 'reused', reused, markWarm, close };
+      }
       // `disconnect()`, never `close()`: this call's own CDP connection to the shared browser, not the
       // browser itself. Closing only the page and never disconnecting left the connection's open socket
       // holding the process alive well past the render finishing (a real hang this file was measured

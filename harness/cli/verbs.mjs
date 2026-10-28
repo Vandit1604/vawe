@@ -543,7 +543,7 @@ export const VERBS = [
       if (v.json) throw new UsageError('--json needs --text');
       return [{ script: 'harness/media/storyboard.mjs', args: [input, ...opt('--page', v.page), ...opt('--out', v.out), ...(v.all ? ['--all'] : [])] }];
     },
-    next: (v, [input]) => (v.text ? `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${input} --waveform to check each sound on its event` : 'read the plan advice (bin/vawe storyboard <page> --all, or the board) and fix it or keep it on purpose; open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields'),
+    next: (v, [input]) => (v.text ? `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${input} --waveform to check each sound on its event` : `read the plan advice (bin/vawe storyboard ${input} --all, or the board) and fix it or keep it on purpose; open the HTML from disk to present or review the board; the Board and Motion pass in brief.md fill the move, handoff and note fields`),
   },
   {
     tier: 'maintainer',

@@ -44,3 +44,11 @@ test('a free tab with the same signature is reused, and one whose owner is dead 
   const deadOwner = await warmTab(browser, 'b', { owner: 2 ** 22 + 1 });
   assert.equal((await takeWarmPage(browser, url('b'), 'sig')).page, deadOwner);
 });
+
+test('closing a warm page that was never marked closes its tab, so no unclaimable tab is left', async () => {
+  const { openPreview } = await import('../../harness/media/preview-server.mjs');
+  const opened = await openPreview('tests/fixtures/pages/caret-hold.html', { warm: true, final: false });
+  const { page } = opened;
+  await opened.close();
+  assert.equal(page.isClosed(), true);
+});
