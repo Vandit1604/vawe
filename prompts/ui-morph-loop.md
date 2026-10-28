@@ -19,7 +19,7 @@ motion-from-code ecosystem (19,303 bookmarks at the time of the snapshot) has th
 ```
 <inputs>
 Ask me for: 8 to 12 UI states the shape becomes, black-and-white or one accent, a song at about 120
-BPM or "synth only", the canvas, and the UI sans. If I skip one, take the default from the Questions
+BPM or "no music", the canvas, and the UI sans. If I skip one, take the default from the Questions
 section and go on.
 </inputs>
 
@@ -73,7 +73,7 @@ Ask in this order; the first changes the film most. A skipped question takes its
 
 1. **States**: which 8 to 12 UI states does the shape become, in order? Default: button, loader, check, island, player, slider, toggle, tabs, chart, command palette, toast. Why: the film is only as good as the states; each one is one bar.
 2. **Accent**: black and white only, or one accent (hex)? Default: black and white on warm grey `#efece6`, no accent. Why: one accent per frame is the house rule; a second colour is a second focal point.
-3. **Music**: a song at about 120 BPM with its licence, or synth only? Default: synth only, on a 120 BPM grid. Why: the grid is the structure; a real song moves the drop.
+3. **Music**: a song at about 120 BPM with its licence, or no music? Default: no music, on a 120 BPM grid, a recorded effect where one fits. Why: the grid is the structure; a real song moves the drop.
 4. **Canvas**: 1:1, 16:9 or 9:16? Default: 1:1. Why: a morph reads best square, and the camera zoom fills the frame per state.
 5. **Type**: which UI sans? Default: Archivo (vawe's own). Why: one clean sans with tight tracking; a face with no brand reason is a banned default.
 

@@ -335,7 +335,7 @@ Pick each cut by the feeling it must give (taste/craft/selection.md). Plan its h
 |---|---|
 | [family] | [s1 to s2] |
 
-Sound is part of every film, subtle: small effects on actions, only on the cuts and actions that earn one, plus one for the spectacle. A real recorded effect first (the film's assets, or the sites in resources/README.md); a synth voice from \`bin/vawe sound\` is the fallback. No synth bed, pad or chord. A music track only from a file the user gives. Why and how: taste/craft/sound.md.
+Sound is part of every film, subtle: small effects on actions, only on the cuts and actions that earn one, plus one for the spectacle. A real recorded effect first (the film's assets, or the sites in resources/README.md); with none that fits, no cue; a synth voice from \`bin/vawe sound\` only when you choose one. No synth bed, pad or chord. A music track only from a file the user gives. Why and how: taste/craft/sound.md.
 
 Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lists it). Write a number only to move one cue on purpose: \`data-gain\` is absolute dB and replaces the default.
 
@@ -493,7 +493,7 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const { template, route } = chooseTemplate(root, { from, request, name, title, length });
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
-  length ??= formatFrom(questions.find((q) => /^length$/i.test(q.key))?.default).length;
+  length ??= route?.length ?? formatFrom(questions.find((q) => /^length$/i.test(q.key))?.default).length;
   const face = starterFace(name);
   copyFace(root, dir, face);
   const given = Object.fromEntries(Object.entries({ length, aspect, title }).filter(([, v]) => v !== undefined));

@@ -52,8 +52,8 @@ wordmark, with the world still moving to the last downbeat.
 3. Music: <audio src="song.mp3" data-at="0" data-gain="-3" data-fade-out="0.4">. It is never played
    live; the renderer mixes it offline as written.
 4. Cues: the song carries the hits, so the picture adds almost nothing. Real recorded effects
-   first (resources/README.md) on a few UI beats; a synth tick
-   (<audio data-synth="pluck" data-at="<beat>" data-gain="-8">) only as the fallback, and at most one "swell"
+   first (resources/README.md) on a few UI beats; no cue where none fits; a synth tick
+   (<audio data-synth="pluck" data-at="<beat>" data-gain="-8">) only when you choose one, and at most one "swell"
    (-6 dB) ending on the drop. Place each by its measured peak, 30 ms early. Name each beat once in
    CSS (--beat-3: 5.42s) and read it from every delay in that beat.
 5. Real footage, if any: extract clips to frame sequences with ffmpeg and swap <img src> per frame in

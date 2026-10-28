@@ -10,6 +10,10 @@ export const FALLBACK = 'sting';
 const STING_MAX_S = 10;
 const LONG_MIN_S = 60;
 
+// Seconds a type takes when the request names no length, inside its ROUTING.md "Typical lengths" range.
+// A type absent here (reference rebuild, music video) takes the default of its template's Length question.
+export const DEFAULT_LENGTH_S = { sting: 5, showreel: 15, 'brand launch': 20, 'UI morph': 14, 'story or explainer': 30, 'app or game capture': 30, 'long form': 90 };
+
 // A brand launch films a real site with real captures: it needs a URL, and an invented product has none.
 const URL_WORDS = /(https?:\/\/|\bwww\.|\b[a-z0-9-]+\.(?:com|io|ai|app|dev|co|net|org|so)\b)/;
 const INVENTED_WORDS = /\b(invented|fictional|fictitious|imaginary|made[- ]up|fake|hypothetical|placeholder)\b/;
@@ -90,7 +94,7 @@ function typeFor(text, length) {
 }
 
 /**
- * The template for a request: { template, type, why, known }. `known` is false when no word or length
+ * The template for a request: { template, type, why, known, length }, `length` being the type's default seconds or undefined. `known` is false when no word or length
  * matched and the motion-graphic row (a sting) was taken. Throws when ROUTING.md lacks the row.
  */
 export function pickTemplate({ request = '', name = '', title = '', length } = {}, table) {
@@ -99,7 +103,7 @@ export function pickTemplate({ request = '', name = '', title = '', length } = {
   const { type, why } = hit || { type: FALLBACK, why: 'no word or length named a film type, so the motion-graphic row' };
   const template = table[type];
   if (!template) throw new Error(`${ROUTING} has no "${type}" row; rows: ${Object.keys(table).join(', ')}`);
-  return { template, type, why, known: Boolean(hit) };
+  return { template, type, why, known: Boolean(hit), length: DEFAULT_LENGTH_S[type] };
 }
 
 /** The routing table read from the repo at `root`. */
