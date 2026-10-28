@@ -41,7 +41,7 @@ export function run(name, args = []) {
   const status = r.status ?? 1;
   if (!args.includes('--json')) {
     const failing = `${r.stdout || ''}${r.stderr || ''}`.split('\n').filter((l) => l.includes('✗'));
-    console.log(status === 0
+    (status === 0 ? console.log : console.error)(status === 0
       ? `✓ ${name}: passed`
       : `✗ ${name}: ${failing.length || 1} failed: ${(failing[0] || (r.error ? `could not run: ${r.error.message}` : `exited ${status}`)).trim()}`);
   }
