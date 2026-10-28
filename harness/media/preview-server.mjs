@@ -191,10 +191,11 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
 /** Whether this process is the one daemon of its state file: clients that find no state all start a daemon at once, and only the first may stay. */
 function claimDaemon(final) {
   const lock = `${stateFile(final)}.lock`;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     try { fs.writeFileSync(lock, String(process.pid), { flag: 'wx' }); return lock; } catch (e) {
       if (e.code !== 'EEXIST') throw e;
-      const holder = Number(fs.readFileSync(lock, 'utf8'));
+      let holder;
+      try { holder = Number(fs.readFileSync(lock, 'utf8')); } catch (r) { if (r.code === 'ENOENT') continue; throw r; }
       if (holder !== process.pid && pidAlive(holder)) return null;
       fs.rmSync(lock, { force: true });
     }
@@ -215,10 +216,12 @@ async function daemonMain(final) {
     clearInterval(idleTimer);
     try { await browser.close(); } catch { /* already gone */ }
     closeServer();
-    try { fs.rmSync(stateFile(final), { force: true }); fs.rmSync(lock, { force: true }); } catch { /* a fresher daemon may have replaced it */ }
+    if (readState(final)?.pid === process.pid) fs.rmSync(stateFile(final), { force: true });
+    try { if (Number(fs.readFileSync(lock, 'utf8')) === process.pid) fs.rmSync(lock, { force: true }); } catch { /* the lock is gone already */ }
     process.exit(0);
   };
   const idleTimer = setInterval(() => {
+    if (readState(final)?.pid !== process.pid) return shutdown();
     let mtime = 0;
     try { mtime = fs.statSync(stateFile(final)).mtimeMs; } catch { return shutdown(); }
     if (shouldExit({ touchedMs: mtime, nowMs: Date.now(), idleMs: idleMs(), rootExists: fs.existsSync(REPO_ROOT) })) shutdown();

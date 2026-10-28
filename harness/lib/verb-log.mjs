@@ -34,7 +34,7 @@ export function reasonOf({ code, signal, stderr = '' }) {
 
 const CAUSES = [
   [/render slot|Navigation timeout/i, 'render slot or navigation timeout'],
-  [/detached Frame|Target closed|shared browser|lost its page|Protocol error|protocolTimeout/i, 'browser lost'],
+  [/detached Frame|Target closed|shared browser|lost its page|Protocol error \([^)]*\): (Target|Session|Connection) closed|protocolTimeout/i, 'browser lost'],
   [/killed by|exit 137/i, 'killed'],
   [/no such|missing|usage|unknown verb|not a valid|needs --/i, 'bad arguments'],
 ];
