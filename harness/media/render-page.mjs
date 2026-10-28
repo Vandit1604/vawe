@@ -75,6 +75,8 @@ import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
+import { resolveLength, autoDuration, DurationError, statedLength, lockPageLength } from './page-duration.mjs';
+import { lengthLines } from '../lib/length-line.mjs';
 import { boardChecks, boardFilled, spectacleOf, lockedSpectacle, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
 import { ideasAdvice } from '../lib/ideas.mjs';
@@ -185,7 +187,7 @@ export async function gotoLoaded(page, url, pagePath = url) {
   }
 }
 
-export async function openPage(pagePath, frame, { warm = false, final = true, lane = null } = {}) {
+export async function openPage(pagePath, frame, { warm = false, final = true, lane = null, measure = false } = {}) {
   const opened = lane ? await openLanePage(lane, pagePath, frame) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm });
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
@@ -198,7 +200,8 @@ export async function openPage(pagePath, frame, { warm = false, final = true, la
   await cdp.send('Animation.enable');
   await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
   opened.cdp = cdp;
-  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify({ ...frame, eases: EASE_VARS })});(${installPageReady})();window.__pageFonts = ${awaitFonts};window.__pageReady = ${awaitReady};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
+  const duration = measure ? undefined : frame.duration ?? await autoDuration(pagePath, frame);
+  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify({ ...frame, eases: EASE_VARS, duration })});(${installPageReady})();window.__pageFonts = ${awaitFonts};window.__pageReady = ${awaitReady};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
 }
 
@@ -673,10 +676,10 @@ async function fontProblems(page, pagePath) {
 
 // Reads the page's <audio> specs once, before the capture: the tab that read them can be gone by the time the mux needs them
 // (a 49 min final failed with "detached Frame" at 19198/19200). Returns { read: null } for a page with no <audio>.
-async function readAudio(page, pagePath) {
+async function readAudio(page, pagePath, duration) {
   if (!(await page.evaluate(() => document.querySelector('audio') !== null))) return { read: null, problems: [] };
   const { readPageAudio } = await import('./page-audio.mjs');
-  try { return { read: await readPageAudio(page, { pagePath }), problems: [] }; } catch (e) { return { read: null, problems: String(e.message).split('\n') }; }
+  try { return { read: await readPageAudio(page, { pagePath, duration }), problems: [] }; } catch (e) { return { read: null, problems: String(e.message).split('\n') }; }
 }
 
 // Null when the page has no <audio> or sets <meta name="loudness"> (the delivery is then normalised, so
@@ -761,9 +764,9 @@ export function briefProblems(pagePath) {
   const line = (key) => { const v = answered(key); return v && !v.includes('[unanswered') ? v : null; };
   const wantLength = Number(line('length')?.match(/^([\d.]+)\s*s\b/)?.[1]);
   const wantAspect = line('aspect')?.match(/^\d+:\d+/)?.[0];
-  const haveLength = Number(readPageMeta(pagePath, 'duration'));
+  const haveLength = statedLength(fs.readFileSync(pagePath, 'utf8')) ?? 0;
   const haveAspect = readPageMeta(pagePath, 'aspect') || '16:9';
-  const lengthDrift = wantLength > 0 && haveLength !== wantLength;
+  const lengthDrift = wantLength > 0 && haveLength !== 'auto' && haveLength !== wantLength;
   const aspectDrift = wantAspect && haveAspect !== wantAspect;
   if (!lengthDrift && !aspectDrift) return [];
   return [`brief: ${wantLength > 0 ? wantLength : haveLength} s ${wantAspect || haveAspect}; page: ${haveLength} s ${haveAspect}`];
@@ -815,7 +818,9 @@ async function muxPageAudio(read, pagePath, { video, out, duration, explicit, fa
 export async function renderPage(pagePath, outPath, opts = {}) {
   const { fps = 30, blur = 1, durArg = null, from = 0, progress = false, final = false } = opts;
   if (!fs.existsSync(pagePath)) throw new RenderError(`no such file: ${pagePath}`);
-  const frame = resolveFrame(pagePath, opts);
+  const canvas = resolveFrame(pagePath, opts);
+  const length = await resolveLength(pagePath, canvas).catch((e) => { throw e instanceof DurationError ? new RenderError(e.message) : e; });
+  const frame = length.auto ? { ...canvas, duration: length.seconds } : canvas;
   const wantAudio = opts.audio ?? (from === 0 && durArg == null);
   if (opts.audio && from > 0) throw new RenderError('--audio needs a render from 0: the mix has no offset');
   const phases = createPhaseTimer();
@@ -833,21 +838,16 @@ export async function renderPage(pagePath, outPath, opts = {}) {
         if (/^(font (still loading|failed)|page not ready)/.test(msg)) throw new InvariantError([msg]);
         throw e;
       }
-      const read = await readAudio(page, pagePath);
+      const read = await readAudio(page, pagePath, length.seconds);
       const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page, pagePath), ...read.problems, ...await assertProblems(page)];
       if (early.length) throw new InvariantError(early);
       return read;
     });
 
-    const totalDur = await page.evaluate(() => {
-      const m = document.querySelector('meta[name="duration"]');
-      if (m) return Number(m.content);
-      return Math.max(0, ...document.getAnimations().map((a) => (a.effect.getComputedTiming().endTime || 0) / 1000));
-    });
-    const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
+    const dur = durArg != null ? durArg : Math.max(0, length.seconds - from);
     if (!(dur > 0)) throw new RenderError(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
-    const { motion = null, probe = null } = opts.checks ? await probePage(page, dur, pagePath, { checks: opts.checks, from, whole: from === 0 && durArg == null }) : {};
+    const { motion = null, probe = null } = opts.checks ? await probePage(page, dur, pagePath, { checks: opts.checks, from, whole: from === 0 && durArg == null, length: length.seconds }) : {};
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) throw new RenderError(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
@@ -923,7 +923,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       phases: { start: startS, slot: phases.seconds('slot'), chrome: phases.seconds('chrome'), load: phases.seconds('load'), prepass: prepassMs / 1000, capture: captureMs / 1000, verify: phases.seconds('verify'), encode: encodeMs / 1000, audio: phases.seconds('audio') },
       shape: { chrome, frames, reused: reusedFrames, fps, width: frame.outWidth, height: frame.outHeight, workers, slices: Math.ceil(frames / sliceFrames), durS: dur },
     };
-    const result = { frames, subframes: totalSub, reused: reusedFrames, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, advice, ...timing };
+    const result = { length, frames, subframes: totalSub, reused: reusedFrames, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, advice, ...timing };
     opts.onMaster?.(result);
     if (tmpWeb) {
       const webRes = ffmpegWebEncode(tmpDir, fps, kArr, subframeStart, tmpWeb);
@@ -1005,7 +1005,7 @@ function motionFindings(pagePath, motion) {
 
 const layoutFindings = (pagePath, probe) => unwaived(probeLayoutLint(probe, namedText(readPageMeta(pagePath, 'message'), readBrief(pagePath))), pageAuthoring(pagePath));
 
-const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: lockedSpectacle(readBrief(pagePath), spectacleOf(fs.readFileSync(pagePath, 'utf8'))), film: { dur: Number(readPageMeta(pagePath, 'duration')), worlds: probe.worlds }, camera: readDecls(pagePath).camera }), pageAuthoring(pagePath));
+const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: lockedSpectacle(readBrief(pagePath), spectacleOf(fs.readFileSync(pagePath, 'utf8'))), film: { dur: probe.length, worlds: probe.worlds }, camera: readDecls(pagePath).camera }), pageAuthoring(pagePath));
 
 const barAdvice = (pagePath, motion, probe) => barFindings(pagePath, motion, probe).flatMap((f) => [...lintLines([f]), waiverHint(f.code)]);
 
@@ -1025,7 +1025,7 @@ const seekLayout = (page) => (ms) => page.evaluate((t) => window.__pageSeek(t / 
  * gates each probe by tier and caches it; the default runs every tier with no cache. `from` is the film second the
  * samples start at, and `whole` is false for a window, where the brief's spec rows (film-long times) are not read.
  */
-export async function probePage(page, dur, pagePath, { checks: all = createChecks({ pagePath, mode: 'full', cache: false }), from = 0, whole = true } = {}) {
+export async function probePage(page, dur, pagePath, { checks: all = createChecks({ pagePath, mode: 'full', cache: false }), from = 0, whole = true, length = dur } = {}) {
   const window = { from, dur };
   const canvasFilm = await page.evaluate(canvasCoversFrame, CANVAS_SHARE);
   const checks = canvasFilm ? { ...all, run: (check, fn, settings) => (DOM_PICTURE_CHECKS.has(check) ? null : all.run(check, fn, settings)) } : all;
@@ -1043,7 +1043,7 @@ export async function probePage(page, dur, pagePath, { checks: all = createCheck
   const specKey = { tables, dur };
   const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
   const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
-  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, canvasFilm, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, lens, spec: spec && { ...spec, objects: objects ?? null } } };
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, length, canvasFilm, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, lens, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The cut-off-beat advice of a page with a music bed; [] for a window, a waiver with its reason, no bed, or a bed that cannot be read (advice must never stop a draft). */
@@ -1116,7 +1116,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const planAdvice = boardVerify(readBrief(pagePath), {
     cameraSpans: (motion.scripted && !motion.boxes) || motion.boxes?.canvas ? null : cameraSpans(motionRecords(motion)),
     arrivals: timedArrivals(motionRecords(motion), probe.speed?.arrivals ?? []),
-    cues: (level?.cues ?? []).filter((c) => c.role === 'sfx'), dur: Number(readPageMeta(pagePath, 'duration')),
+    cues: (level?.cues ?? []).filter((c) => c.role === 'sfx'), dur: probe.length,
   });
   const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...bedAdvice, ...planAdvice, ...page.lines];
   const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly, typing: typingSpans(probe.motionText ?? []) })) : null;
@@ -1250,7 +1250,8 @@ async function main() {
       if (final) reportFailedFinal(pagePath, e, argv.includes('--job'));
       process.exit(2);
     });
-    if (!final) console.log(masterLine(r));
+    if (!final) console.log([...lengthLines(r.length, pagePath), masterLine(r)].join('\n'));
+    if (argv.includes('--lock-length')) console.log(lockPageLength(pagePath, r.length));
     if (r.web) console.log(`  web copy: ${r.web} (${(fs.statSync(r.web).size / 1e6).toFixed(1)} MB; master ${(fs.statSync(outPath).size / 1e6).toFixed(1)} MB)`);
     if (!final) await printDraft(outPath, pagePath, r, { checks: opts.checks, taste: argv.includes('--taste'), next: flag('--next', null), opts, from });
     else {

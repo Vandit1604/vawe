@@ -4,11 +4,12 @@
 // Worlds come from the page's own seek (sampleWorlds), so it loads the page once and takes a second or two; no frame is rendered.
 import fs from 'node:fs';
 import path from 'node:path';
-import { openPage, settle, resolveFrame, readPageMeta } from './render-page.mjs';
+import { openPage, settle, resolveFrame } from './render-page.mjs';
 import { sampleWorlds } from './world-sample.mjs';
 import { readPageAudio } from './page-audio.mjs';
 import { spectacleOf } from '../lib/board.mjs';
 import { timelineOf, timelineLines } from '../lib/timeline.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 
@@ -16,7 +17,7 @@ const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 export async function readTimeline(pagePath) {
   const abs = path.resolve(pagePath);
   if (!fs.existsSync(abs)) die(`no such page: ${pagePath}`);
-  const duration = Number(readPageMeta(abs, 'duration'));
+  const duration = await resolveDuration(abs);
   if (!(duration > 0)) die(`${pagePath} has no <meta name="duration">`);
   const opened = await openPage(abs, resolveFrame(abs, { final: false }), { final: false });
   try {

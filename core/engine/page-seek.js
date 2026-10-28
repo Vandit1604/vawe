@@ -109,13 +109,27 @@ export async function awaitReady(timeoutMs = 10000) {
 }
 
 // Runs in the page before any page script: the frame facts a page lays out against. documentElement does not exist yet at this point, so its attributes wait for the parser.
-export function installPageFrame({ aspect, width, height, eases = {} }) {
+export function installPageFrame({ aspect, width, height, eases = {}, duration }) {
   const vawe = window.vawe || (window.vawe = {});
   Object.assign(vawe, { aspect, width, height });
   vawe.onFrame = (fn) => (window.__vaweFrameHooks || (window.__vaweFrameHooks = [])).push(fn);
   Object.defineProperty(vawe, 'fps', {
     configurable: true,
     get() { const m = document.querySelector('meta[name="fps"]'); return m ? Number(m.content) : undefined; },
+  });
+  // An auto page measured for its length gets 0, so an animation sized from vawe.duration has no end; the render passes the measured length.
+  // An infinite animation has no end, so it never sets the end of an auto page.
+  vawe.animationEnd = () => {
+    const ends = document.getAnimations().map((a) => a.effect?.getComputedTiming().endTime ?? 0);
+    return { endS: Math.max(0, ...ends.filter(Number.isFinite)) / 1000, infinite: ends.includes(Infinity) };
+  };
+  Object.defineProperty(vawe, 'duration', {
+    configurable: true,
+    get() {
+      const m = document.querySelector('meta[name="duration"]');
+      if (!m) return undefined;
+      return m.content.trim() === 'auto' ? duration ?? 0 : Number(m.content);
+    },
   });
   const apply = () => {
     const root = document.documentElement;

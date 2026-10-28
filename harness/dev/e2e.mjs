@@ -7,8 +7,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { readPageMeta } from '../media/render-page.mjs';
 import { ensurePageFonts } from '../lib/ensure-fonts.mjs';
+import { resolveDuration } from '../media/page-duration.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RUNS_DIR = path.join(repoRoot, 'quality', 'runs', 'e2e');
@@ -70,7 +70,7 @@ async function renderCheck(page) {
   if (r.exitCode !== 0) problems.push(`render exited ${r.exitCode}`);
   else if (!fs.existsSync(mp4) || fs.statSync(mp4).size === 0) problems.push('no mp4 or an empty mp4');
   else {
-    const want = Number(readPageMeta(path.join(repoRoot, page), 'duration'));
+    const want = await resolveDuration(path.join(repoRoot, page));
     const got = probeDuration(mp4);
     if (!(got > 0)) problems.push('mp4 has no readable duration');
     else if (Number.isFinite(want) && want > 0 && Math.abs(got - want) > DURATION_SLACK_S) problems.push(`duration ${got.toFixed(2)}s, page says ${want}s`);

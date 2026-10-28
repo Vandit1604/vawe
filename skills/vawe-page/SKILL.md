@@ -9,7 +9,7 @@ effort: medium
 A film is one HTML page; the renderer seeks it, screenshots every frame and mixes the audio offline.
 The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start with
 `bin/vawe new <name>`; this skill holds the code a first draft gets wrong. Taste pitfalls are in
-`taste/build/DIGEST.md`.
+`taste/build/DIGEST.md`. When the length comes out of the work, write `<meta name="duration" content="auto">` (the last move plus a hold), then `bin/vawe dev <page> --lock-length` fixes the number; a page driven by `window.seek` alone needs a number.
 
 This file is `skills/vawe-page/SKILL.md` in the repo. Use `bin/vawe` verbs, never raw ffmpeg or Chrome (`bin/vawe --help`).
 Order: (1) the brief, facts only. (2) Study the references (`bin/vawe refs frames`, Read `~/.vawe/refs/frames/<id>/*.png`

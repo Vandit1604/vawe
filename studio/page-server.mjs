@@ -12,11 +12,13 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { openFile } from '../harness/lib/open-file.mjs';
 import { serveRepo, REPO_ROOT } from '../harness/lib/render-harness.mjs';
+import { resolveLength } from '../harness/media/page-duration.mjs';
 import { installPageClock } from '../core/engine/page-clock.js';
 import { installPageFrame, installPageReady, awaitReady } from '../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../core/layout/aspects.js';
 import { EASE_VARS } from '../core/motion/presets.js';
-import { parsePage, applyEdits } from './page-source.mjs';
+import { parsePage } from './page-source.mjs';
+import { saveEdits } from './save-edits.mjs';
 import { chatRoutes } from './chat.mjs';
 
 const pageArg = process.env.PAGE || process.argv[2];
@@ -38,15 +40,18 @@ const readBody = (req, cb) => {
 };
 
 const revOf = () => { const s = fs.statSync(pageFile); return `${s.mtimeMs}:${s.size}`; };
-const pageModel = () => {
+const pageModel = async () => {
   const model = parsePage(fs.readFileSync(pageFile, 'utf8'));
+  const length = await resolveLength(pageFile);
+  if (length.auto) model.meta.duration = String(length.seconds);
   return { path: pageRel, rev: revOf(), undo: undoStack.length, aspect: model.meta.aspect || '16:9', aspects: ASPECTS, model };
 };
 
 // The page itself, with the clock and frame facts installed before its first script, as render-page.mjs does.
-function framedPage(aspect) {
+async function framedPage(aspect) {
+  const length = await resolveLength(pageFile, { aspect });
   const [width, height] = aspectDims(aspect);
-  const boot = `<script>(${installPageClock})();(${installPageFrame})(${JSON.stringify({ aspect, width, height, eases: EASE_VARS })});(${installPageReady})();window.__pageReady = ${awaitReady};</script>`;
+  const boot = `<script>(${installPageClock})();(${installPageFrame})(${JSON.stringify({ aspect, width, height, eases: EASE_VARS, duration: length.auto ? length.seconds : undefined })});(${installPageReady})();window.__pageReady = ${awaitReady};</script>`;
   const html = fs.readFileSync(pageFile, 'utf8');
   const at = html.match(/<head[^>]*>/i) || html.match(/<html[^>]*>/i) || html.match(/<!doctype[^>]*>/i);
   if (!at) return boot + html;
@@ -96,19 +101,16 @@ const routes = (req, res) => {
     send(res, 200, name.endsWith('.css') ? 'text/css' : name.endsWith('.html') ? 'text/html' : 'text/javascript', fs.readFileSync(path.join(UI, name)));
     return true;
   }
-  if (url === '/' + pageRel && q.has('aspect')) { send(res, 200, 'text/html', framedPage(q.get('aspect'))); return true; }
+  if (url === '/' + pageRel && q.has('aspect')) { framedPage(q.get('aspect')).then((html) => send(res, 200, 'text/html', html), (e) => send(res, 500, 'text/plain', String(e.message))); return true; }
   if (url === '/api/page') {
-    try { sendJson(res, 200, pageModel()); } catch (e) { sendJson(res, 500, { error: String(e.message) }); }
+    pageModel().then((m) => sendJson(res, 200, m), (e) => sendJson(res, 500, { error: String(e.message) }));
     return true;
   }
   if (req.method === 'POST' && url === '/api/edit') {
-    readBody(req, (body, err) => {
+    readBody(req, async (body, err) => {
       if (!body || !Array.isArray(body.edits)) return sendJson(res, 400, { ok: false, error: err ? String(err.message) : 'no edits' });
       try {
-        const src = fs.readFileSync(pageFile, 'utf8');
-        const out = applyEdits(src, body.edits);
-        if (out !== src) { undoStack.push(src); fs.writeFileSync(pageFile, out); }
-        sendJson(res, 200, { ok: true, ...pageModel() });
+        sendJson(res, 200, { ok: true, ...await saveEdits(pageFile, body.edits, undoStack, pageModel) });
       } catch (e) { sendJson(res, 409, { ok: false, error: String(e.message) }); }
     });
     return true;
@@ -116,7 +118,7 @@ const routes = (req, res) => {
   if (req.method === 'POST' && url === '/api/undo') {
     if (!undoStack.length) { sendJson(res, 200, { ok: false, error: 'nothing to undo' }); return true; }
     fs.writeFileSync(pageFile, undoStack.pop());
-    sendJson(res, 200, { ok: true, ...pageModel() });
+    pageModel().then((m) => sendJson(res, 200, { ok: true, ...m }), (e) => sendJson(res, 500, { ok: false, error: String(e.message) }));
     return true;
   }
   if (url === '/api/job') {

@@ -114,6 +114,26 @@ export function pickTemplate(details = {}, table) {
   return { template, type, why, known, length };
 }
 
+/** { film type: [min s, max s] } from the "Typical lengths:" sentence of ROUTING.md ("sting 3 to 8 s, story 30 s to 3 min"); a type with one number has no range. */
+export function typicalRanges(markdown) {
+  const sentence = /Typical lengths: ([^.]*)\./.exec(markdown)?.[1] ?? '';
+  const seconds = (n, unit) => Number(n) * (unit === 'min' ? 60 : 1);
+  const ranges = {};
+  for (const item of sentence.split(', ')) {
+    const m = /^(.+?) ([\d.]+)(?: (s|min))? to ([\d.]+) (s|min)$/.exec(item);
+    if (m) ranges[m[1]] = [seconds(m[2], m[3] ?? m[5]), seconds(m[4], m[5])];
+  }
+  return ranges;
+}
+
+/** The film type a request names and its typical range, { type, range }, or null when no word named a type or the type has no range. */
+export function typicalRangeFor(details, root) {
+  const { known, type } = pickTemplate({ request: details.request, name: details.name }, readRouting(root));
+  const ranges = typicalRanges(fs.readFileSync(path.join(root, ROUTING), 'utf8'));
+  const key = Object.keys(ranges).find((k) => type.startsWith(k));
+  return known && key ? { type: key, range: ranges[key] } : null;
+}
+
 /** The routing table read from the repo at `root`. */
 export function readRouting(root) {
   return routingTable(fs.readFileSync(path.join(root, ROUTING), 'utf8'));

@@ -13,7 +13,7 @@ import { renderMixCached } from '../page-audio.mjs';
 import { readTimeline } from '../timeline.mjs';
 import { hitKind, readSound } from '../../lib/sound-read.mjs';
 import { APPEAR_MIN_FRAMES, matchOf, pairEvents, shotEvents, soundsWithoutAction } from './events-math.mjs';
-import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
+import { openPage, resolveFrame } from '../render-page.mjs';
 import { labToHex } from '../../lib/ref-measure/colour.mjs';
 import { decodeGray, frameRgb } from './frame.mjs';
 import { edgesAt, lumaSeries, measureFilm } from './look.mjs';
@@ -23,6 +23,7 @@ import { burstsOfMoves, cameraWords, grainOf, layoutTilt, maskFlashes, separateF
 import { readVelocity } from './velocity.mjs';
 import { FIELD_FPS, FIELD_SECONDS, FIELD_W, readParticleField } from '../../lib/ref-measure/particle-field.mjs';
 import { stripWindow } from './strip-math.mjs';
+import { resolveDuration } from '../page-duration.mjs';
 
 const round = (n, d = 3) => (n == null ? null : +n.toFixed(d));
 const GRAIN_W = 960, GRAIN_H = 540;
@@ -113,7 +114,7 @@ async function pageVelocity(page, shots, log) {
     await tab.goto(url, { waitUntil: 'load' });
     for (const s of shots) {
       if (s.length < 0.15) continue;
-      const { from, to } = stripWindow((s.start + s.end) / 2, s.length, Number(readPageMeta(page, 'duration')) || s.end);
+      const { from, to } = stripWindow((s.start + s.end) / 2, s.length, await resolveDuration(page) || s.end);
       const got = await readVelocity(tab, {}, from, to);
       out.push({ shot: s.index, moves: got.rows.filter((r) => r.analysis.pos.moves).map((r) => ({ label: r.label.replace(/^\d+\.\s*/, ''), ...r.analysis.pos, px: Math.round(r.analysis.pos.peakSpeed * got.height) })) });
     }

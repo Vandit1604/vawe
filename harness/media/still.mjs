@@ -9,11 +9,12 @@ import { openPage, seekAll, resolveFrame, settle, readPageMeta } from './render-
 import { clampToLastFrame, probe } from './see-views.mjs';
 import { isUrl } from '../lib/url.mjs';
 import { stillArgs, stillPath, stillProblem } from './see/still-math.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 
 export async function pageStill(pagePath, at, out, { final = true } = {}) {
-  const dur = Number(readPageMeta(pagePath, 'duration'));
+  const dur = await resolveDuration(pagePath);
   if (!(dur > 0)) die(`${pagePath} has no <meta name="duration">`);
   const last = clampToLastFrame(at, dur, Number(readPageMeta(pagePath, 'fps')) || 30);
   const frame = resolveFrame(pagePath, { final: true });

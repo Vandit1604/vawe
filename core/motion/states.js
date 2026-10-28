@@ -326,7 +326,7 @@ const timingRules = () => {
  */
 export async function linkStates() {
   const worlds = [...document.querySelectorAll('[data-world]')];
-  const spans = cutTimes(worlds.map((w) => ({ id: w.dataset.world, at: w.dataset.at })), Number(document.querySelector('meta[name="duration"]')?.content));
+  const spans = cutTimes(worlds.map((w) => ({ id: w.dataset.world, at: w.dataset.at })), window.vawe?.duration ?? Number(document.querySelector('meta[name="duration"]')?.content));
   void document.body.offsetHeight;
   await (window.__pageFonts ? window.__pageFonts() : document.fonts.ready);
   const table = parseTimings(timingRules().map((r) => ({ selectorText: r.selectorText, style: r.style })));

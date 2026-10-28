@@ -19,6 +19,7 @@ import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { unwaived } from '../lib/motion-lint.mjs';
 import { firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../lib/frames-page.mjs';
+import { resolveDuration } from './page-duration.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const hideOthers = (id) => `[data-world]:not([data-world="${id}"]) { display: none !important; }`;
@@ -46,7 +47,7 @@ async function shootFullSize(page, out) {
 
 /** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fullPng, fired }] (fullPng only with `zoom`) in page order. */
 async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
-  const dur = Number(readPageMeta(pagePath, 'duration'));
+  const dur = await resolveDuration(pagePath);
   const anims = await readWorldAnimations(opened.page);
   const found = await sampleWorlds(opened.page, dur, (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms));
   if (!found.length) die(`${pagePath} has no data-world element: give each beat one, for example <section data-world="s1">`);
@@ -109,7 +110,7 @@ async function main(argv) {
   }
   const sheet = path.resolve('out', `${film}-frames.png`);
   const html = path.join(path.dirname(abs), 'frames.html');
-  const cuts = cutSpans(shots, Number(readPageMeta(abs, 'duration')));
+  const cuts = cutSpans(shots, await resolveDuration(abs));
   await writeArtboardSheet({ title: `${film}: key frames`, aspect: readPageMeta(abs, 'aspect') || '16:9', htmlPath: html, png: sheet,
     items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png, fullPng: zoomStill(s, fs.statSync(abs).mtimeMs) })) });
   console.log([`frames: ${head}`, `  sheet  ${sheet}`, `  page   ${html}`, ...paths, ...rules, done()].join('\n'));
