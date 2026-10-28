@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DEFAULT_LENGTH_S, pickTemplate, readRouting, pickRecipe, readRecipes } from '../../harness/cli/route.mjs';
-import { starterPage, starterFace } from '../../harness/cli/new.mjs';
+import { pickTemplate, readRouting, pickRecipe, readRecipes } from '../../harness/cli/route.mjs';
+import { starterPage, starterFace, parseQuestions, templateLength } from '../../harness/cli/new.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const table = readRouting(root);
@@ -88,29 +88,26 @@ test('the starter ground is three drifting blobs per world, derived from --groun
   assert.equal([...page.matchAll(/<ul class="facts">/g)].length, 4);
 });
 
-test('every route default length lies inside the ROUTING.md typical range for its type', () => {
+test('the template and beat-sheet default lengths lie inside the ROUTING.md typical ranges', () => {
   const line = fs.readFileSync(path.join(root, 'guides/ROUTING.md'), 'utf8').match(/Typical lengths: ([^\n]+)/)[1];
   const seconds = (phrase) => {
     const found = [...phrase.matchAll(/(\d+)(?:\s*(s|min))?/g)];
     const unit = found.at(-1)[2];
     return found.map((m) => Number(m[1]) * ((m[2] || unit) === 'min' ? 60 : 1));
   };
-  const range = { sting: [0, 10] };
   const words = { showreel: 'showreel', 'brand launch': 'brand launch', 'UI morph': 'UI morph', 'story or explainer': 'story', 'app or game capture': 'lab', 'long form': 'long form' };
   for (const [type, word] of Object.entries(words)) {
     const nums = seconds(line.match(new RegExp(`${word} ([^,]+)`))[1]);
-    range[type] = [nums[0], nums.at(-1)];
+    const length = templateLength(parseQuestions(fs.readFileSync(path.join(root, table[type]), 'utf8')));
+    assert.ok(length >= nums[0] && length <= nums.at(-1), `${type}: ${table[type]} defaults to ${length} s, outside ${nums[0]} to ${nums.at(-1)} s`);
   }
-  assert.deepEqual(Object.keys(DEFAULT_LENGTH_S).sort(), Object.keys(range).sort());
-  for (const [type, [lo, hi]] of Object.entries(range)) {
-    assert.ok(DEFAULT_LENGTH_S[type] >= lo && DEFAULT_LENGTH_S[type] <= hi, `${type} default ${DEFAULT_LENGTH_S[type]} s is outside ${lo} to ${hi} s`);
-  }
+  const sting = pickTemplate({ request: 'a logo reveal' }, table).length;
+  assert.ok(sting > 0 && sting < 10, `a sting defaults to ${sting} s`);
 });
 
-test('a request with no length takes its route default', () => {
+test('a sting takes 5 s; a type with its own template Length question takes none from the route', () => {
   assert.equal(pickTemplate({ request: 'a logo reveal for the vawe wordmark' }, table).length, 5);
-  assert.equal(pickTemplate({ request: 'launch video for https://acme.com' }, table).length, 20);
-  assert.equal(pickTemplate({ request: 'recreate this reference' }, table).length, undefined);
+  assert.equal(pickTemplate({ request: 'launch video for https://acme.com' }, table).length, undefined);
   assert.equal(pickTemplate({ request: 'a 6 s logo reveal', length: 6 }, table).length, 5);
 });
 

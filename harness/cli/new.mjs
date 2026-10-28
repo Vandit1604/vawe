@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { UsageError } from './parse.mjs';
 import { ensureFonts } from '../lib/ensure-fonts.mjs';
-import { pickTemplate, routeLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES } from './route.mjs';
+import { pickTemplate, beatSheetLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
@@ -407,6 +407,11 @@ function formatFrom(text = '') {
   return { length: s ? Number(s[1]) : undefined, aspect: a && (ASPECTS[a[1]] || /^\d+:\d+$/.test(a[1])) ? a[1] : undefined };
 }
 
+/** The seconds the template's Length (or Platform) question names as its default, or undefined. */
+export function templateLength(questions) {
+  return formatFrom(questions.find((q) => /length|platform/i.test(q.key))?.default).length;
+}
+
 function askedFormat(details, request) {
   const [format, ask] = [formatFrom(details.format), formatFrom(request)];
   return { length: format.length ?? ask.length, aspect: format.aspect ?? ask.aspect };
@@ -435,7 +440,7 @@ export function askLines(name, request, from, open) {
 }
 
 function chooseTemplate(root, { from, request, name, title, length }) {
-  if (from) return { template: path.resolve(from), route: null, length: path.basename(from) === 'beat-sheet.md' ? routeLength({ request, name, title, length }) : undefined };
+  if (from) return { template: path.resolve(from), route: null, length: path.basename(from) === 'beat-sheet.md' ? beatSheetLength({ request, name, title, length }) : undefined };
   const route = pickTemplate({ request, name, title, length }, readRouting(root));
   const recipe = pickRecipe({ request, name, title, length }, readRecipes(root));
   return { template: path.join(root, route.template), route: recipe ? { ...route, recipe } : route, length: route.length };
@@ -493,10 +498,11 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const { template, route, length: routedLength } = chooseTemplate(root, { from, request, name, title, length });
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
-  length ??= routedLength ?? formatFrom(questions.find((q) => /^length$/i.test(q.key))?.default).length;
+  length ??= routedLength;
+  const pageLength = length ?? templateLength(questions);
   const face = starterFace(name);
   copyFace(root, dir, face);
-  const given = Object.fromEntries(Object.entries({ length, aspect, title }).filter(([, v]) => v !== undefined));
+  const given = Object.fromEntries(Object.entries({ length: pageLength, aspect, title }).filter(([, v]) => v !== undefined));
   fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ ...given, face }));
   fs.writeFileSync(path.join(dir, 'directions.html'), directionsPage(given));
   const answers = {};
@@ -505,8 +511,8 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   if (aspect !== undefined) answers.aspect = aspect;
   if (title !== undefined) answers.title = title;
   const sections = parseSections(markdown);
-  const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
+  const measured = measuredSections({ name, request, title, length: pageLength, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
   const variety = varietyFor(recentFromDisk(root, name), namesBrandKit([request, title, ...Object.values(details)].join(' ')));
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe, variety));
-  return { variety, page: `films/${name}/page.html`, route, title, ranges: dialRanges(), guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length, answered: [...answered] };
+  return { variety, page: `films/${name}/page.html`, route, title, ranges: dialRanges(), guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length: pageLength, answered: [...answered] };
 }

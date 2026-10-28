@@ -10,11 +10,9 @@ export const FALLBACK = 'sting';
 const STING_MAX_S = 10;
 const LONG_MIN_S = 60;
 
-// Seconds a type takes when the request names no length, inside its ROUTING.md "Typical lengths" range.
-// A type absent here (reference rebuild, music video) takes the default of its template's Length question.
-// A request no word or length routed is not a sting: it takes the old 15 s.
+// The beat-sheet template serves a sting and every unmatched request; each other template owns its length in its Length question.
+const STING_LENGTH_S = 5;
 const UNMATCHED_LENGTH_S = 15;
-export const DEFAULT_LENGTH_S = { sting: 5, showreel: 15, 'brand launch': 20, 'UI morph': 14, 'story or explainer': 30, 'app or game capture': 30, 'long form': 90 };
 
 // A brand launch films a real site with real captures: it needs a URL, and an invented product has none.
 const URL_WORDS = /(https?:\/\/|\bwww\.|\b[a-z0-9-]+\.(?:com|io|ai|app|dev|co|net|org|so)\b)/;
@@ -99,14 +97,14 @@ function route({ request = '', name = '', title = '', length: asked } = {}) {
   const text = [request, name.replace(/-/g, ' '), title].join(' ').toLowerCase();
   const hit = typeFor(text, asked);
   if (!hit) return { known: false, type: FALLBACK, why: 'no word or length named a film type, so the motion-graphic row', length: UNMATCHED_LENGTH_S };
-  return { known: true, ...hit, length: hit.length ?? DEFAULT_LENGTH_S[hit.type] };
+  return { known: true, ...hit, length: hit.length ?? (hit.type === 'sting' ? STING_LENGTH_S : undefined) };
 }
 
-/** The default seconds for a request, as `pickTemplate` gives them but without the ROUTING.md table. */
-export const routeLength = (details) => route(details).length;
+/** The seconds the beat-sheet template takes for a request, without the ROUTING.md table. */
+export const beatSheetLength = (details) => route(details).length ?? UNMATCHED_LENGTH_S;
 
 /**
- * The template for a request: { template, type, why, known, length }, `length` being the default seconds (undefined for a type that takes its template's). `known` is false when no word or length
+ * The template for a request: { template, type, why, known, length }, `length` being the route's seconds, set only for a sting or an unmatched request. `known` is false when no word or length
  * matched and the motion-graphic row (a sting) was taken. Throws when ROUTING.md lacks the row.
  */
 export function pickTemplate(details = {}, table) {
