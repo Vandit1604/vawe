@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { liveWorktrees, landedStatus, dirtyFiles } from '../lib/worktree-landed.mjs';
+import { liveWorktrees, landedStatus, worktreeActivity } from '../lib/worktree-landed.mjs';
 import { readClaims } from '../lib/worktree-claims.mjs';
 
 const STALE_MINUTES = 30;
@@ -11,19 +10,6 @@ const git = (args, opts = {}) => {
   try { return execFileSync('git', args, { encoding: 'utf8', ...opts }).trim(); }
   catch { return ''; }
 };
-
-function newestMtime(dir, statusFiles) {
-  let best = 0;
-  for (const f of statusFiles) {
-    try { const t = fs.statSync(path.join(dir, f)).mtimeMs; if (t > best) best = t; } catch { /* raced or deleted, skip */ }
-  }
-  return best;
-}
-
-function lastCommitMs(dir) {
-  const ts = git(['log', '-1', '--format=%ct'], { cwd: dir });
-  return ts ? Number(ts) * 1000 : 0;
-}
 
 function fmtAge(ms) {
   if (!ms) return '(no activity found)';
@@ -44,7 +30,7 @@ const claims = readClaims();
 const rows = trees.map((t) => {
   const name = path.basename(t.path);
   const claim = claims[name] || null;
-  const activity = Math.max(lastCommitMs(t.path), newestMtime(t.path, dirtyFiles(t)));
+  const activity = worktreeActivity(t);
   const staleMins = activity ? (Date.now() - activity) / 60000 : Infinity;
   const { commits, stranded, capped } = landedStatus(root, t);
   return {

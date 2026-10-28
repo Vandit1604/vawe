@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { operationInProgress } from './git-operation.mjs';
 
 const FETCH_EVERY_MS = 10 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 15_000;
@@ -25,6 +26,9 @@ export function staleLine(behind, trackedEdits) {
     : `${lag}; run git rebase origin/main (it fast-forwards when you have no commits of your own; untracked files stay)`;
 }
 
+/** A checkout moves forward on its own only when it holds nothing of its own: behind, no commits, no tracked edits, no rebase or merge running. */
+export const canFastForward = ({ behind, ahead, trackedEdits, operation }) => behind > 0 && ahead === 0 && !trackedEdits && !operation;
+
 const readStamp = (file) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')).at ?? 0; } catch { return 0; } };
 
 function gitIn(root) {
@@ -47,6 +51,29 @@ export function staleCheckoutLine(root, { now = Date.now(), git = gitIn(root) } 
   } catch { /* offline: compare against the refs already here */ }
   const behind = commitsBehind(git, ['origin/main']);
   if (!behind) return '';
-  const edits = git(['status', '--porcelain', '--untracked-files=no']).trim().length > 0;
-  return staleLine(behind, edits);
+  const trackedEdits = git(['status', '--porcelain', '--untracked-files=no']).trim().length > 0;
+  const ahead = Number.parseInt(git(['rev-list', '--count', 'origin/main..HEAD']), 10) || 0;
+  const operation = operationInProgress(git(['rev-parse', '--absolute-git-dir']).trim());
+  const canMove = canFastForward({ behind, ahead, trackedEdits, operation });
+  const overwritten = canMove ? firstExistingAdd(root, git) : '';
+  if (overwritten) return `${staleLine(behind, trackedEdits)}; not moved: origin/main adds ${overwritten}, which exists here`;
+  if (canMove && fastForward(git)) {
+    return `this checkout moved forward ${behind} commit${behind === 1 ? '' : 's'} to origin/main`;
+  }
+  return staleLine(behind, trackedEdits);
+}
+
+/** The first file origin/main adds that already sits on disk (an ignored or untracked file a move would overwrite), or ''. */
+function firstExistingAdd(root, git) {
+  const added = git(['diff', '--name-only', '--diff-filter=A', 'HEAD', 'origin/main']).split('\n').filter(Boolean);
+  return added.find((f) => fs.existsSync(path.join(root, f))) || '';
+}
+
+function fastForward(git) {
+  let onBranch = true;
+  try { git(['symbolic-ref', '-q', 'HEAD']); } catch { onBranch = false; }
+  try {
+    git(onBranch ? ['merge', '--ff-only', 'origin/main'] : ['checkout', '--detach', 'origin/main']);
+    return true;
+  } catch { return false; }
 }
