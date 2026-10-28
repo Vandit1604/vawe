@@ -28,6 +28,7 @@ export const ABOUT = {
   lede: "vawe is an open source framework that renders one HTML page into a film.",
   toc: [
     { href: "#what", label: "What it is" },
+    { href: "#facts", label: "Quick facts" },
     { href: "#why", label: "Why" },
     { href: "#built", label: "How it is built" },
     { href: "#rules", label: "Rules" },
@@ -46,6 +47,21 @@ export const ABOUT = {
         ],
       ],
       filmCaption: "The showcase, a 14 s film. One page, rendered by vawe.",
+    },
+    {
+      id: "facts",
+      title: "Quick facts",
+      steps: [
+        { lead: "Free.", line: ["vawe is free and open source under Apache-2.0, for any purpose including commercial use."] },
+        {
+          lead: "Install.",
+          line: ["Clone ", { text: "the repository", href: REPO_URL }, ", then run ", { code: "npm install" }, " and ", { code: "bin/vawe doctor" }, ". There is no npm package."],
+        },
+        { lead: "No account.", line: ["There is no hosted API, no account and no per-render fee. vawe runs on your machine."] },
+        { lead: "Needs.", line: ["Node 22 or newer, git, ffmpeg and Chrome. The doctor command checks each tool."] },
+        { lead: "Output.", line: ["An H.264 mp4 in 16:9, 9:16, 1:1, 4:5 or 4:3, from one page."] },
+        { lead: "Limits.", line: ["vawe renders on one machine. Output can differ between hosts with a different GPU or Chrome version."] },
+      ],
     },
     {
       id: "why",
