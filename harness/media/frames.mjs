@@ -46,7 +46,7 @@ async function shootFullSize(page, out) {
 }
 
 /** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fullPng, fired }] (fullPng only with `zoom`) in page order. */
-async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
+export async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom, layout = true }) {
   const dur = await resolveDuration(pagePath);
   const anims = await readWorldAnimations(opened.page);
   const found = await sampleWorlds(opened.page, dur, (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms));
@@ -62,10 +62,13 @@ async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
     const png = path.join(stills, `${span.id}${suffix}.png`);
     await opened.page.screenshot({ path: png });
     const fullPng = zoom ? await shootFullSize(opened.page, path.join(stills, `${span.id}-full.png`)) : undefined;
-    const layout = await sampleLayout(opened.page, [at], noSeek);
+    let fired = [];
+    if (layout) {
+      const sampled = await sampleLayout(opened.page, [at], noSeek);
+      fired = firedRules(unwaived(layoutLint(sampled, { named }), authoring), [], []);
+    }
     await style.evaluate((el) => el.remove());
-    const found = unwaived(layoutLint(layout, { named }), authoring);
-    shots.push({ id: span.id, start: span.start, end: span.end, at, png, fullPng, fired: firedRules(found, [], []) });
+    shots.push({ id: span.id, start: span.start, end: span.end, at, png, fullPng, fired });
   }
   return shots;
 }
