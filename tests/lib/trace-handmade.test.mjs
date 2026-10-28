@@ -53,10 +53,10 @@ test('coveringVerb names an existing verb, or null', () => {
 });
 
 test('rawTools matches a tool at command position, not inside a grep pattern or a quoted string', () => {
-  assert.deepEqual(rawTools('ps aux | grep "node -e" | cut -c1-80', false), ['psPoll']);
+  assert.deepEqual(rawTools('ps aux | grep "node -e" | cut -c1-80', false), ['hint:wait', 'psPoll']);
   assert.deepEqual(rawTools('echo "sleep 5; curl x"', false), []);
   assert.deepEqual(rawTools('grep -n "python3 PIL" notes.md', false), []);
-  assert.deepEqual(rawTools('until [ -s f ]; do sleep 2; done', false), ['sleep']);
+  assert.deepEqual(rawTools('until [ -s f ]; do sleep 2; done', false), ['hint:wait', 'sleep']);
   assert.deepEqual(rawTools('python3 -c "from PIL import Image"', false), ['pil']);
   assert.deepEqual(rawTools("node -e 'x'", false), ['nodeEval']);
 });

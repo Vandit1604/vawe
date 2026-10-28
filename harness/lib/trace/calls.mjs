@@ -1,12 +1,12 @@
 import { VERBS } from '../../cli/verbs.mjs';
 import { RULES } from '../../live/verb-hint.mjs';
+import { PS_POLL, SLEEP, atCommand, bare, withoutHeredocs } from '../shell-match.mjs';
 
 const VERB_NAMES = new Set(VERBS.map((v) => v.name));
 const HELP = /(?:^|\s)(?:--help|-h)(?:\s|$)/;
 const SEGMENT = /&&|\|\||;|\n|\|/;
 const VERB_CALL = /^\s*(?:[A-Z_][A-Z0-9_]*=\S*\s+)*(?:(?:node|rtk)\s+)?(?:\S*\/)?vawe\s+([a-z0-9-]+)(.*)$/;
 const FOOTER = /^vawe: ([a-z0-9-]+) (ok|FAILED)(?: \((.*)\))? in ([\d.]+)s$/gm;
-const HEREDOC_BODY = /<<-?\s*(['"]?)(\w+)\1([^\n]*)(?:\n[\s\S]*?\n\s*\2(?=\n|$)|[\s\S]*$)/g;
 const NEXT_LINE = /^next: (.*)$/gm;
 const READER = /\b(cat|head|tail|sed|grep|rg|awk|less|bat)\b/;
 const DOC = /(?:^|[\s'"=/])(AGENTS\.md|taste\/build\/DIGEST\.md|taste\/rules\/[\w.-]+\.md|taste\/craft\/[\w.-]+\.md|guides\/[\w.-]+\.md|skills\/[\w-]+\/SKILL\.md|prompts\/moves\/[\w.-]+\.md)/g;
@@ -18,7 +18,6 @@ const PYTHON = /\bpython3?\b/;
 const PY_PATH_VAR = /\b(\w+)\s*=\s*(['"])(films\/[^'"]+)\2/g;
 const PY_WRITE_TARGET = /open\(\s*(?:(['"])(films\/[^'"]+)\1|(\w+))\s*,\s*['"][wa]b?['"]|(?:Path\(\s*(['"])(films\/[^'"]+)\4\s*\)|\b(\w+))\.write_text\(/g;
 const PY_EDIT = /\.replace\(|open\([^)]*['"][wa]b?['"]|\.write_text\(/;
-const atCommand = (name, after = '\\s') => new RegExp(`(?:^|[\\n;&|(\`]\\s*(?:!\\s*)?|\\$\\(|\\b(?:do|then|else)\\s+)(?:[A-Z_]+=\\S+\\s+)*(?:\\S*/)?${name}${after}`);
 
 const PY_AT_COMMAND = atCommand('python3?', '\\b');
 const NODE_EVAL = atCommand('node', '\\s+(?:-e|--eval|-p)\\b');
@@ -36,8 +35,8 @@ export const RAW_TOOLS = {
   ffmpeg: atCommand('ffmpeg'),
   ffprobe: atCommand('ffprobe'),
   browser: /puppeteer|playwright|--headless|--screenshot/i,
-  sleep: atCommand('sleep', '\\s+\\d'),
-  psPoll: atCommand('(?:ps\\s+(?:aux|-[a-zA-Z]+)|pgrep)', '\\b'),
+  sleep: SLEEP,
+  psPoll: PS_POLL,
   curl: atCommand('curl', '\\b'),
 };
 
@@ -52,11 +51,6 @@ const BAN_LINES = {
 /** The text of a tool_result content, string or block list. */
 export const textOf = (content) => (typeof content === 'string' ? content
   : Array.isArray(content) ? content.map((c) => c.text ?? '').join('\n') : '');
-
-const withoutHeredocs = (cmd) => String(cmd).replace(HEREDOC_BODY, '$3');
-
-/** The command without heredoc bodies and quoted strings, so a tool named inside a grep pattern or a message does not count. Pure. */
-const bare = (cmd) => withoutHeredocs(cmd).replace(/"(?:[^"\\]|\\.)*"|'[^']*'/g, 'Q');
 
 /** The vawe verbs a shell command calls, in order, as { verb, args }. Pure. */
 export function commandVerbs(cmd) {
