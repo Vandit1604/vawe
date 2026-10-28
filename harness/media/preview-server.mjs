@@ -76,7 +76,8 @@ async function connectShared(final) {
   }
   try {
     const { default: puppeteer } = await import('puppeteer');
-    const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint, protocolTimeout: PROTOCOL_TIMEOUT_MS });
+    // Puppeteer's default viewport (800x600) is applied to every page a client attaches to, including another process's tab.
+    const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint, protocolTimeout: PROTOCOL_TIMEOUT_MS, defaultViewport: null });
     touch(final);
     return { browser, port: state.port, started };
   } catch { return null; }
