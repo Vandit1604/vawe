@@ -98,11 +98,11 @@ test('overshootShare: far over the range fires, the limit being 1.5 times the re
   assert.equal(overshootShare(arrivals([EASE.pop, EASE.pop, EASE.pop, EASE.pop, EASE.land, EASE.land, EASE.land, EASE.land, EASE.land, EASE.land])).length, 0);
 });
 
-test('overshootShare: css curves count, a fade alone, a decorative layer and a curve it cannot read do not', () => {
+test('overshootShare: css curves count, a fade alone and a curve it cannot read do not; an aria-hidden layer is measured', () => {
   const bezier = arrivals(['cubic-bezier(0.34, 1.56, 0.64, 1)', 'ease', 'ease-out', 'linear', 'ease-in-out', 'ease-out']);
   assert.match(overshootShare(bezier)[0].what, /1 of 6/);
   assert.equal(overshootShare(arrivals(Array(6).fill(EASE.land)).map((r) => ({ ...r, props: ['opacity'] }))).length, 0);
-  assert.equal(overshootShare(arrivals(Array(6).fill(EASE.land)).map((r) => ({ ...r, decorative: true }))).length, 0);
+  assert.equal(overshootShare(arrivals(Array(6).fill(EASE.land)).map((r) => ({ ...r, decorative: true }))).length, 1);
   assert.equal(overshootShare(arrivals(Array(6).fill('inferred')).map((r) => ({ ...r, easing: 'inferred', kfEasings: ['inferred'] }))).length, 0);
   assert.equal(overshootShare(arrivals(Array(5).fill(EASE.land))).length, 0, 'fewer than arrivals_min');
 });

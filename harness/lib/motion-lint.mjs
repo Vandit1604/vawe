@@ -9,6 +9,7 @@ import { DECORATIVE } from './draft-check.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
 import { CUT, moves, moveProps, moveParts, entering, exiting, measured, byTarget, easeName, moveDirection } from './motion-records.mjs';
 import { motionVariety } from './motion-variety.mjs';
+import { NO_RECORDS_NOTE } from './slideshow.mjs';
 import { easeRef, jobLine, jobOf } from '../../core/motion/ease-jobs.js';
 import { isCameraMove } from './camera-moves.mjs';
 
@@ -316,6 +317,9 @@ export const sightedRecords = (motion) => {
   if (motion.scripted && !motion.boxes) return null;
   return motion.boxes ? mergeRecords(motion.records, recordsFromBoxes(motion.boxes)) : motion.records;
 };
+
+/** One line naming the checks that cannot run on a page that paints in seek(t) or vawe.onFrame with no boxes sampled; [] otherwise. */
+export const unseenMotionLines = (motion) => (sightedRecords(motion) === null ? [NO_RECORDS_NOTE] : []);
 
 const median = (xs) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] : null);
 const mostCommon = (xs) => [...new Set(xs)].sort((a, b) => xs.filter((x) => x === b).length - xs.filter((x) => x === a).length)[0] ?? null;

@@ -23,6 +23,10 @@ export const readNeed = (texts) => (texts.length ? round(rowsNeed(texts.map((t) 
 /** The longest a world may stay: the world-turns limit, or longer when its own text needs more time to read. The text counts for at most the readable-hold ceiling (one line holds about 5 s): padding words buy no more. */
 export const worldLimit = (span, max = TURN_SECONDS_MAX) => Math.max(max, Math.min(span.readNeed ?? 0, HOLD_RULE.ceiling) + READ_MARGIN_S);
 
+/** The [a, b] seconds each text world is held to be read: from its start for its read time (at most the ceiling) plus the margin, never past its end. Pure. */
+export const readHolds = (spans) => spans.filter((s) => s.start != null && s.readNeed > 0)
+  .map((s) => [s.start, round(Math.min(s.end, s.start + Math.min(s.readNeed, HOLD_RULE.ceiling) + READ_MARGIN_S))]);
+
 /** Every world id in page order. Pure. */
 export const worldIds = (samples) => [...new Set(samples.flatMap((s) => s.worlds.map((w) => w.id)))];
 

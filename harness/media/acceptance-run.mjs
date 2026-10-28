@@ -9,6 +9,7 @@ import { readVideo, statsWithCamera } from './draft-check.mjs';
 import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
 import { smoothness, hardJumps } from '../lib/smoothness.mjs';
 import { undeclaredStills } from '../lib/still-limit.mjs';
+import { readHolds } from '../lib/worlds.mjs';
 import { tailTiles } from '../lib/sheet-tiles.mjs';
 import { heldTextRuns } from '../lib/draft-check.mjs';
 import { textCollisions } from '../lib/text-collision.mjs';
@@ -35,7 +36,7 @@ export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots,
   const worldCuts = (worlds ?? []).flatMap((w) => [w.start, w.end]).filter((t) => t > 0);
   return {
     smooth: smoothness(diffs, { fps: FPS, cuts, turns: stats.turns.map((t) => t.t), worldCuts }),
-    stills: undeclaredStills(stats.static, authoring),
+    stills: undeclaredStills(stats.static, authoring, undefined, readHolds(worlds ?? [])),
     tail: tailTiles(tiles.diffs, tiles.fps, authoring, tailMoving),
     cuts: shots.length ? cutChecks(shots, hardJumps(diffs, FPS), FPS) : null,
     hasShots: shots.length > 0,

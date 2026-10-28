@@ -43,3 +43,11 @@ test('the sheet rate matches the judge: 5 fps, fewer for a film over 30 s', () =
   assert.equal(sheetFps(10), 5);
   assert.equal(sheetFps(60), 2.5);
 });
+
+test('a mid-film run inside a read hold is not counted; the tail is', () => {
+  const still = (n) => Array(n).fill(1);
+  const diffs = [20, ...still(8), 20, 20];
+  assert.equal(tileProblems(diffs, 5).length, 1);
+  assert.equal(tileProblems(diffs, 5, {}, false, [[0, 2]]).length, 0);
+  assert.equal(tileProblems([20, 20, ...still(5)], 5, {}, false, [[0, 3]]).length, 1);
+});

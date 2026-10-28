@@ -157,3 +157,9 @@ test('worlds with nothing readable on them (no ground, words or parts) are never
   assert.equal(a.signature, null);
   assert.equal(mergeSameContent([{ ...a, start: 0, end: 2 }, { ...b, start: 2, end: 4 }]).length, 2);
 });
+
+test('readHolds: a text world is read-held from its start for its read time plus the margin, inside its span', async () => {
+  const { readHolds } = await import('../../harness/lib/worlds.mjs');
+  const spans = [{ id: 'a', start: 0, end: 4, readNeed: 1.2 }, { id: 'b', start: 4, end: 5, readNeed: 3 }, { id: 'c', start: 5, end: 8, readNeed: 0 }, { id: 'd', start: null, end: null, readNeed: 2 }];
+  assert.deepEqual(readHolds(spans), [[0, 2], [4, 5]]);
+});

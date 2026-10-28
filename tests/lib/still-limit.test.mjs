@@ -30,3 +30,9 @@ test('a bare static-window covers the film, a waiver with no reason covers nothi
 test('stillText names the seconds, the limit and both fixes', () => {
   assert.equal(stillText({ a: 2, b: 2.7, len: 0.7 }), 'static window 2-2.7 s (0.7 s, limit 0.5 s): nothing moves; give the hold an element motion (typing, a counter, a glint), not a camera drift; waive: "allow": ["static-window@2-2.7"], "_why": {"static-window@2-2.7": "<where: a world id or a second, and what you measured, with its unit>"} in <script id="authoring">');
 });
+
+test('a still inside a read hold is not named; the part past it is', () => {
+  const holds = [[2, 4]];
+  assert.deepEqual(undeclaredStills([{ a: 2.2, b: 3.8, len: 1.6 }], {}, undefined, holds), []);
+  assert.equal(undeclaredStills([{ a: 3, b: 5, len: 2 }], {}, undefined, holds).length, 1);
+});

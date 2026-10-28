@@ -80,7 +80,7 @@ import { lengthLines } from '../lib/length-line.mjs';
 import { boardChecks, boardFilled, spectacleOf, lockedSpectacle, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
 import { ideasAdvice } from '../lib/ideas.mjs';
-import { slideshowTells, slideshowLines, NO_RECORDS_NOTE } from '../lib/slideshow.mjs';
+import { slideshowTells, slideshowLines } from '../lib/slideshow.mjs';
 import { worldRows } from '../lib/timeline.mjs';
 import { moveDocLines } from '../lib/move-docs.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
@@ -92,7 +92,7 @@ import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { cameraOnlySpans, cameraSpans } from '../lib/camera-moves.mjs';
 import { typingSpans } from '../lib/typing-spans.mjs';
 import { boardVerify } from '../lib/board-verify.mjs';
-import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, sightedRecords } from '../lib/motion-lint.mjs';
+import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, sightedRecords, unseenMotionLines } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { barLint, boxMotion, overshootPct, timedArrivals } from '../lib/bar-lint.mjs';
 import { measureDraftShape, overshootLine, rangeLines } from '../lib/draft-range.mjs';
@@ -1055,9 +1055,9 @@ function beatLines(pagePath, worlds, authoring) {
 /** The slideshow tells a draft shows without a video (entrances, exits, world spans); [] for a window or a waiver naming the code. */
 function slideshowAdvice(pagePath, motion, probe, authoring) {
   if (!probe.worlds) return [];
-  const { tells, skipped } = slideshowTells({ worlds: worldRows(probe.worlds), records: sightedRecords(motion) });
+  const { tells } = slideshowTells({ worlds: worldRows(probe.worlds), records: sightedRecords(motion) });
   const live = tells.filter((t) => !isWaived(authoring, 'slideshow', t.at[0]));
-  return [...(skipped ? [NO_RECORDS_NOTE] : []), ...(live.length ? [...slideshowLines({ score: live.length, of: 10, tells: live }), waiverHint('slideshow')] : [])];
+  return [...(live.length ? [...slideshowLines({ score: live.length, of: 10, tells: live }), waiverHint('slideshow')] : [])];
 }
 
 /** The waiver count line and the "fix first" lines, from the rules the earlier drafts of this film fired. */
@@ -1067,7 +1067,7 @@ const earlierWaiverAdvice = (pagePath, authoring) => waiverAdvice(authoring, rea
 export function probeAdvice(pagePath, { probe, motion }) {
   const authoring = pageAuthoring(pagePath);
   const contrast = contrastLines(unwaivedContrast(probe.contrast, authoring));
-  return [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...earlierWaiverAdvice(pagePath, authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe))];
+  return [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...earlierWaiverAdvice(pagePath, authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...unseenMotionLines(motion), ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe))];
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */

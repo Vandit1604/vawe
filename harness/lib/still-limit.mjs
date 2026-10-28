@@ -21,9 +21,9 @@ export function declaredHolds(authoring = {}, code = 'static-window') {
 
 const outside = (r, holds) => r.len - holds.reduce((s, [a, b]) => s + Math.max(0, Math.min(b, r.b) - Math.max(a, r.a)), 0);
 
-/** Still runs ({ a, b, len } s) whose time outside every declared hold is over `limit`. Pure. */
-export function undeclaredStills(runs, authoring = {}, limit = STILL_SEC) {
-  const holds = declaredHolds(authoring, 'static-window');
+/** Still runs ({ a, b, len } s) whose time outside every declared hold and read hold (worlds.mjs readHolds) is over `limit`. Pure. */
+export function undeclaredStills(runs, authoring = {}, limit = STILL_SEC, readHolds = []) {
+  const holds = [...declaredHolds(authoring, 'static-window'), ...readHolds];
   return runs.filter((r) => outside(r, holds) > limit + 1e-9);
 }
 

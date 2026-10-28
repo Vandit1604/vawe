@@ -5,6 +5,7 @@ import { readFeatures, summarize, probeSize } from './scene-stats.mjs';
 import { blankRuns, isFlat, problemsOf } from '../lib/ship-status.mjs';
 import { sampleTimes, settledSamples, DECORATIVE, CHROME, TEXTURE } from '../lib/draft-check.mjs';
 import { draftLowContrast, shownAndHidden } from '../lib/text-contrast.mjs';
+import { readHolds } from '../lib/worlds.mjs';
 import { sheetFps, tileProblems, TILE_W } from '../lib/sheet-tiles.mjs';
 import { specTimes, wordTimes, objectChecks } from '../lib/spec-conformance.mjs';
 import { sampleBoxTracks } from '../lib/box-track.mjs';
@@ -20,7 +21,7 @@ export function readVideo(mp4) {
 
 /** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. `page` is what the live page says: { worlds (the measured data-world spans, or null), tailMoving, canvasFilm, cameraOnly (the [a, b] seconds where only a whole-frame move runs), typing (the [a, b] seconds where the text keeps changing) }. */
 export function videoProblems({ feats, tiles }, authoring = {}, page = {}) {
-  return [...problemsOf(statsWithCamera(summarize(feats), page.cameraOnly, page.typing), blankRuns(feats, isFlat), undefined, authoring, page.worlds, page.canvasFilm), ...tileProblems(tiles.diffs, tiles.fps, authoring, page.tailMoving)];
+  return [...problemsOf(statsWithCamera(summarize(feats), page.cameraOnly, page.typing), blankRuns(feats, isFlat), undefined, authoring, page.worlds, page.canvasFilm), ...tileProblems(tiles.diffs, tiles.fps, authoring, page.tailMoving, readHolds(page.worlds ?? []))];
 }
 
 /** scene-stats with the seconds where only the camera moves counted as still (harness/lib/camera-moves.mjs). */

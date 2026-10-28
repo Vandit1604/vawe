@@ -155,3 +155,12 @@ test('a keyword-eased move gets the ease-table row for its job as the fix', () =
   assert.match(easeFix(rec({ ...move, fullFrame: true, opacity: [0, 1], duration: 2.4 })), /^Entrance:/);
   assert.match(easeFix(rec({ ...move, duration: 0.8 })), /^easing: EASE\.land to arrive.*taste\/craft\/motion-craft\.md$/);
 });
+
+test('unseenMotionLines: one line names the skipped checks of a page that paints in seek or onFrame with no boxes', async () => {
+  const { unseenMotionLines } = await import('../../harness/lib/motion-lint.mjs');
+  const [line, ...rest] = unseenMotionLines({ scripted: true, records: [] });
+  assert.match(line, /^checks skipped: .*slideshow.*onFrame/);
+  assert.deepEqual(rest, []);
+  assert.deepEqual(unseenMotionLines({ scripted: true, records: [], boxes: { tracks: [] } }), []);
+  assert.deepEqual(unseenMotionLines({ scripted: false, records: [] }), []);
+});

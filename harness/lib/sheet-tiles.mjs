@@ -39,15 +39,15 @@ export function tailTiles(diffs, fps, authoring = {}, moving = false) {
   return run ? run.tiles : 0;
 }
 
-/** The problem lines for the sheet's runs: over RUN_TILES anywhere, over TAIL_TILES at the end unless the page animates its tail (`moving`). Pure. */
-export function tileProblems(diffs, fps, authoring = {}, moving = false) {
+/** The problem lines for the sheet's runs: over RUN_TILES anywhere except inside a read hold (worlds.mjs readHolds), over TAIL_TILES at the end unless the page animates its tail (`moving`). Pure. */
+export function tileProblems(diffs, fps, authoring = {}, moving = false, readHolds = []) {
   const heldRun = insideHold(authoring, 'tile-run');
   const heldTail = insideHold(authoring, 'tail-tiles');
   const lastTile = +(diffs.length / fps).toFixed(2);
   const lines = [];
   for (const r of tileRuns(diffs, fps)) {
     const tail = r.b === lastTile;
-    if ((tail ? heldTail : heldRun)(r) || (tail && moving)) continue;
+    if ((tail ? heldTail : heldRun)(r) || (tail && moving) || (!tail && readHolds.some(([a, b]) => a <= r.a + 1e-9 && r.b <= b + 1 / fps))) continue;
     const limit = tail ? TAIL_TILES : RUN_TILES;
     if (r.tiles <= limit) continue;
     lines.push(`${r.tiles} near-identical ${tail ? 'tail ' : ''}tiles ${r.a}-${r.b} s on the judge's sheet (limit ${limit}): add a move there or make the push larger; ${waiverHint(`${tail ? 'tail-tiles' : 'tile-run'}@${r.a}-${r.b}`)}`);

@@ -285,9 +285,9 @@ function arrivalOvershoots(records) {
   return readable.some((r) => curvesOf(r).some((c) => overshoots(c, SHOOT.tolerance)));
 }
 
-/** The arrivals of the animation records, one per element: { at, over }. Decorative and full-frame elements are not arrivals. */
+/** The arrivals of the animation records, one per element: { at, over }. Full-frame elements are not arrivals; aria-hidden elements are. */
 function recordArrivals(records) {
-  return byTarget(records.filter((r) => !r.decorative && !r.fullFrame))
+  return byTarget(records.filter((r) => !r.fullFrame))
     .map((rs) => rs.filter((r) => entering(r) && r.duration > CUT))
     .filter((rs) => rs.length)
     .map((rs) => ({ at: Math.min(...rs.map((r) => r.delay)), over: arrivalOvershoots(rs) }))

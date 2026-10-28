@@ -124,3 +124,8 @@ test('an element that hops across every cut is a handoff: no swap-no-carry', () 
 test('an element visible on both sides that holds still at the cut is no handoff', () => {
   assert.ok(withThread(thread(() => '0px 0px')).includes('swap-no-carry'));
 });
+
+test('a short exit-then-enter gap under the cut window does not fire dead-gap', () => {
+  const short = { worlds: classic.worlds, records: [0, 2, 4, 6].flatMap((t, i) => [rec(`h${i}`, t + 0.1, move('0px 50px')), ...(i < 3 ? [out(`h${i}`, t + 1.5, { duration: 0.4 })] : [])]) };
+  assert.ok(!codes(slideshowTells(short)).includes('dead-gap'));
+});

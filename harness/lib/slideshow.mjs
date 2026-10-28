@@ -101,10 +101,10 @@ function deadGap(worlds, records) {
   const dead = bs.map((b, i) => {
     const out = rs.filter(exiting).filter((r) => worldIndex(worlds, r.delay) === i);
     const next = firstPerTarget(rs.filter(entering).filter((r) => worldIndex(worlds, r.delay) === i + 1))[0];
-    return out.length > 0 && Boolean(next) && next.delay >= Math.max(...out.map((r) => r.delay + r.duration));
+    return out.length > 0 && Boolean(next) && next.delay - Math.max(...out.map((r) => r.delay + r.duration)) > CARRY_WINDOW_S;
   });
   if (!mostly(dead)) return null;
-  return { code: 'dead-gap', at: bs.filter((b, i) => dead[i]).map((b) => r2(b.at)), what: `${dead.filter(Boolean).length} of ${bs.length} cuts start the next scene only after the last one fully left`,
+  return { code: 'dead-gap', at: bs.filter((b, i) => dead[i]).map((b) => r2(b.at)), what: `${dead.filter(Boolean).length} of ${bs.length} cuts start the next scene over ${CARRY_WINDOW_S} s after the last one fully left`,
     fix: 'overlap 0.2 to 0.4 s: the next scene starts while the last one exits' };
 }
 
@@ -144,7 +144,7 @@ function staticHolds(staticRuns, duration) {
     fix: 'keep a part moving inside every hold (a counter, a caret, a light)' };
 }
 
-export const NO_RECORDS_NOTE = 'checks skipped: slideshow entrance and exit tells (the page paints in seek(t) and no element boxes were sampled, so no motion is seen)';
+export const NO_RECORDS_NOTE = 'checks skipped: slideshow entrance and exit tells, arrival and exit lint (the page paints in seek(t) or vawe.onFrame and no element boxes were sampled, so no motion is seen)';
 
 /**
  * { score, of, tells, skipped } of a film. `transitions` and `staticRuns` may be null (no video): the tells that need them are skipped.
