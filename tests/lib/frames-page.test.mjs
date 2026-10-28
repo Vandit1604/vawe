@@ -4,8 +4,9 @@ import { worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../../
 import { stillCandidates } from '../../harness/media/world-sample.mjs';
 
 test('parseFramesArgs reads the page, --full and --world as a comma list or repeated', () => {
-  assert.deepEqual(parseFramesArgs(['p.html']), { page: 'p.html', full: false, worlds: [] });
-  assert.deepEqual(parseFramesArgs(['p.html', '--full', '--world', 's1,s3', '--world', 's5']), { page: 'p.html', full: true, worlds: ['s1', 's3', 's5'] });
+  assert.deepEqual(parseFramesArgs(['p.html']), { page: 'p.html', full: false, zoom: false, worlds: [] });
+  assert.deepEqual(parseFramesArgs(['p.html', '--full', '--world', 's1,s3', '--world', 's5']), { page: 'p.html', full: true, zoom: false, worlds: ['s1', 's3', 's5'] });
+  assert.equal(parseFramesArgs(['p.html', '--zoom']).zoom, true);
   assert.throws(() => parseFramesArgs(['p.html', '--world']), /--world needs a world id/);
   assert.throws(() => parseFramesArgs(['p.html', '--wide']), /unknown flag --wide/);
 });

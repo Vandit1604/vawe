@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // `vawe frames <page>`: one still of each data-world element alone, before any motion is written.
-//   node harness/media/frames.mjs <page.html> [--full] [--world <id>[,<id>]]
+//   node harness/media/frames.mjs <page.html> [--full] [--zoom] [--world <id>[,<id>]]
 // Writes out/<film>-frames/<id>.png, the artboard sheet out/<film>-frames.png and films/<film>/frames.html, then prints the
 // absolute path of each PNG and the still-frame layout rules each world fires. The still is at the middle of the world's visible span
 // (the first second inside it where the world shows); the other worlds are hidden.
+// frames.html zooms into <id>-full.png when it exists: --zoom shoots them in the same session (about 5 s more), --full leaves them behind.
 // --full: full-size stills out/<film>-frames/<id>-full.png, no sheet or frames.html. --world: only those worlds, no sheet or frames.html.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -68,12 +69,18 @@ async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
   return shots;
 }
 
+/** The full-size still of a shot when one is on disk, else undefined (the page then zooms into the draft still). */
+function zoomStill(shot) {
+  const onDisk = path.join(path.dirname(shot.png), `${shot.id}-full.png`);
+  return shot.fullPng ?? (fs.existsSync(onDisk) ? onDisk : undefined);
+}
+
 async function main(argv) {
   const t0 = Date.now();
   let args;
   try { args = parseFramesArgs(argv); } catch (e) { die(e.message); }
-  const { page: pagePath, full, worlds: ids } = args;
-  if (!pagePath) die('missing <page>; usage: node harness/media/frames.mjs <page.html> [--full] [--world <id>[,<id>]]');
+  const { page: pagePath, full, zoom, worlds: ids } = args;
+  if (!pagePath) die('missing <page>; usage: node harness/media/frames.mjs <page.html> [--full] [--zoom] [--world <id>[,<id>]]');
   if (!fs.existsSync(pagePath)) die(`no such page: ${pagePath}`);
   const abs = path.resolve(pagePath);
   const film = path.basename(path.dirname(abs));
@@ -87,7 +94,7 @@ async function main(argv) {
       await settle(opened.page);
       await opened.markWarm?.();
     }
-    shots = await shootWorlds(opened, abs, stills, { ids, suffix: full ? '-full' : '', zoom: !full && !ids.length });
+    shots = await shootWorlds(opened, abs, stills, { ids, suffix: full ? '-full' : '', zoom: zoom && !full && !ids.length });
   } finally {
     await opened.close();
   }
@@ -104,7 +111,7 @@ async function main(argv) {
   const html = path.join(path.dirname(abs), 'frames.html');
   const cuts = cutSpans(shots, Number(readPageMeta(abs, 'duration')));
   await writeArtboardSheet({ title: `${film}: key frames`, aspect: readPageMeta(abs, 'aspect') || '16:9', htmlPath: html, png: sheet,
-    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png, fullPng: s.fullPng })) });
+    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png, fullPng: zoomStill(s) })) });
   console.log([`frames: ${head}`, `  sheet  ${sheet}`, `  page   ${html}`, ...paths, ...rules, done()].join('\n'));
 }
 

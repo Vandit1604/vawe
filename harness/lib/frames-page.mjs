@@ -2,17 +2,18 @@
 
 import { PLACEHOLDER, STARTER_LINE } from './measured-brief.mjs';
 
-/** { page, full, worlds } from the argv after the script name; --world takes ids, comma-separated or repeated. Throws an Error naming the flag. Pure. */
+/** { page, full, zoom, worlds } from the argv after the script name; --world takes ids, comma-separated or repeated. Throws an Error naming the flag. Pure. */
 export function parseFramesArgs(argv) {
-  const out = { page: null, full: false, worlds: [] };
+  const out = { page: null, full: false, zoom: false, worlds: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--full') out.full = true;
+    else if (a === '--zoom') out.zoom = true;
     else if (a === '--world') {
       const v = argv[++i];
       if (!v || v.startsWith('--')) throw new Error('--world needs a world id, for example --world s3 or --world s1,s3');
       out.worlds.push(...v.split(',').map((s) => s.trim()).filter(Boolean));
-    } else if (a.startsWith('--')) throw new Error(`unknown flag ${a}; valid: --full --world <id>`);
+    } else if (a.startsWith('--')) throw new Error(`unknown flag ${a}; valid: --full --zoom --world <id>`);
     else if (out.page === null) out.page = a;
     else throw new Error(`unexpected argument ${a}; one page only`);
   }
