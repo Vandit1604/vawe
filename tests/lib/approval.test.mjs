@@ -5,7 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { pageDigest, shipProblem, approveProblem, writeApproval, selfApproved, referencedFiles } from '../../harness/lib/approval.mjs';
+import { pageDigest, shipProblem, approveProblem, writeApproval, selfApproved, referencedFiles, recordOwnerVerdict, approvalPath } from '../../harness/lib/approval.mjs';
+import { readRuns } from '../../harness/lib/runlog.mjs';
 import { selfApprovedTricks } from '../../harness/lib/judge-tricks.mjs';
 import { verbEvent } from '../../harness/lib/verb-log.mjs';
 
@@ -83,4 +84,22 @@ test('an approval by the agent that ran the film is self-approved and reaches th
   const [t] = selfApprovedTricks({ by: 'crave' }, runs);
   assert.equal(t.trick, 'self-approved');
   assert.deepEqual(selfApprovedTricks(null, runs), []);
+});
+
+test('an approve record is not other work by the approving agent', () => {
+  assert.equal(selfApproved({ by: 'crave' }, [{ agent: 'crave', cmd: 'approve', verdict: 'approve' }]), false);
+});
+
+test('approve and reject append an owner record with note, draft and page hash; reject withdraws the approval', () => {
+  const { root, page, draft } = film();
+  fs.writeFileSync(draft, 'mp4');
+  writeApproval(page, { root });
+  recordOwnerVerdict(page, { verdict: 'approve', note: 'good', root });
+  assert.ok(fs.existsSync(approvalPath(page, root)));
+  recordOwnerVerdict(page, { verdict: 'reject', note: 'too slow', root });
+  assert.equal(fs.existsSync(approvalPath(page, root)), false);
+  const [a, r] = readRuns('f', root);
+  assert.deepEqual([a.cmd, a.verdict, a.note, a.draft, a.pageHash], ['approve', 'approve', 'good', path.join('out', 'f-draft.mp4'), pageDigest(page)]);
+  assert.deepEqual([r.verdict, r.note], ['reject', 'too slow']);
+  assert.match(a.draftMtime, /^\d{4}-\d\d-\d\dT/);
 });

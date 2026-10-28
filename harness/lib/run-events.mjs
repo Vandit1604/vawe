@@ -52,3 +52,8 @@ export const shipEvent = ({ verdict, renderS, acceptance, failure = null }) => (
   cmd: 'ship', verdict: verdict ?? null, renderS: tenths(renderS), acceptance: acceptance ?? null,
   ...(failure ? { failedAt: failure.pct, reason: failure.reason, page: failure.page } : {}),
 });
+
+/** The owner's verdict on a draft (`vawe approve`): `verdict` is approve or reject, `draft` the draft path and `draftMtime` its mtime (ISO) when it exists, `pageHash` the page digest at that moment. */
+export const approveEvent = ({ verdict, note = null, draft = null, draftMtime = null, pageHash }) => ({
+  cmd: 'approve', verdict, note, draft, draftMtime, pageHash,
+});

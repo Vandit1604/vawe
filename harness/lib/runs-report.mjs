@@ -45,6 +45,7 @@ export function normalize(r) {
     signature: e.signature && typeof e.signature === 'object' && !e.signature.offered ? e.signature : null,
     notes: Array.isArray(e.notes) ? e.notes : null, waivers: Array.isArray(e.waivers) ? e.waivers : null,
     sameness: e.sameness ?? null, template: e.template ?? null, bar: Array.isArray(e.bar) ? e.bar : null,
+    note: e.cmd === 'approve' ? e.note ?? null : null,
     verb: e.verb ?? null, loopStage: e.cmd === 'verb' ? e.stage ?? null : null, exitCode: e.exitCode ?? null, error: e.error ?? e.reason ?? null,
     phases: phasesOf(e), shape: phasesOf(e) ? { chrome: e.chrome, frames: e.frames, reused: e.reusedFrames } : null,
     slotWaitS: e.slotWaitS ?? null, red: e.acceptance?.red ?? null, tagged: e.cmd === 'verb' ? e.tagged !== false : agentName(e.agent) !== null,
@@ -124,6 +125,13 @@ export function draftSeries(events) {
   return ['quality per draft:', ...table([['#', 'time', 'accept', 'rules', 'red rows'], ...rows]).map((l) => `  ${l}`), ...(hidden ? [`  (${hidden} earlier drafts not shown)`] : []), ...(judged.length ? [`  judge totals in order: ${judged.join(', ')}`] : [])];
 }
 
+/** One line per judge round (stage, verdict, total) and per owner approve or reject with its note, in time order. */
+export function outcomeLines(events) {
+  return events.filter((e) => isRound(e) || e.cmd === 'approve').map((e) => (e.cmd === 'approve'
+    ? `owner ${e.verdict} ${clock(e.at)}${e.note ? `: ${e.note}` : ''}`
+    : `judge ${clock(e.at)} ${e.stage ?? '?'} ${e.verdict} total ${num(e.total, 0)}`));
+}
+
 /** One compact line per draft that logged its rules: the rules it fired, and against the draft before it which were fixed (fired then, not now) and which are still firing. */
 export function draftRuleLines(events) {
   const drafts = events.filter((e) => e.cmd === 'dev' && e.fired);
@@ -163,7 +171,7 @@ export function filmLines(film, records) {
   const pass = s.passed ? `PASS after ${s.roundsToPass} judge round${s.roundsToPass > 1 ? 's' : ''}` : 'no PASS yet';
   return [
     ...(calls.length ? timeLines(calls) : [`${film}: no verb calls logged (a log from before every verb was logged)`]),
-    ...failedLines(events), ...draftSeries(events), ...draftRuleLines(events), ...draftPhaseLines(events),
+    ...failedLines(events), ...draftSeries(events), ...draftRuleLines(events), ...draftPhaseLines(events), ...outcomeLines(events),
     `drafts ${s.drafts} · median draft ${num(s.medianDraftS)} s · ${pass} · first judged total ${num(s.firstTotal, 0)}`,
   ];
 }

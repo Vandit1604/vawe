@@ -2,7 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { filmKeyOf, agentId, namedAgent } from './runlog.mjs';
+import { filmKeyOf, agentId, namedAgent, appendRun } from './runlog.mjs';
+import { approveEvent } from './run-events.mjs';
 
 const TEXT_FILE = /\.(html|css|m?js|svg)$/i;
 const FILE_TOKEN = /[\w@./-]+\.[a-z0-9]{2,5}\b/gi;
@@ -67,8 +68,21 @@ export function writeApproval(pagePath, { root = '.', now = new Date() } = {}) {
   return record;
 }
 
+/** The draft the owner judged: { draft, draftMtime } as relative path and ISO mtime, nulls when there is no draft. */
+export function draftStamp(pagePath, { root = '.' } = {}) {
+  const draft = fullDraftPath(pagePath, root);
+  if (!fs.existsSync(draft)) return { draft: null, draftMtime: null };
+  return { draft: path.relative(root, draft), draftMtime: fs.statSync(draft).mtime.toISOString() };
+}
+
+/** Records the owner's verdict in the run log. A reject also removes the approval, so the draft cannot ship until the owner approves again. */
+export function recordOwnerVerdict(pagePath, { verdict, note = null, root = '.' }) {
+  if (verdict === 'reject') fs.rmSync(approvalPath(pagePath, root), { force: true });
+  return appendRun(pagePath, approveEvent({ verdict, note, ...draftStamp(pagePath, { root }), pageHash: pageDigest(pagePath) }), { root });
+}
+
 /** True when the approver is a named agent (VAWE_AGENT) that also ran other verbs on the film: the author approved its own draft. */
 export function selfApproved(approval, runs) {
   const by = namedAgent(approval?.by);
-  return Boolean(by) && runs.some((r) => r.agent === by && r.verb !== 'approve');
+  return Boolean(by) && runs.some((r) => r.agent === by && r.verb !== 'approve' && r.cmd !== 'approve');
 }

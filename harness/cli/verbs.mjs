@@ -234,9 +234,12 @@ export const VERBS = [
     tier: 'core',
     name: 'approve', summary: 'use when the owner signs off the full draft of a page: vawe ship needs it; a film session never runs this',
     positional: [PAGE],
-    flags: [],
+    flags: [
+      { name: 'reject', type: 'bool', help: 'record that the owner rejects the draft, and withdraw any approval' },
+      { name: 'note', type: 'string', default: 'none', help: 'the owner\'s reason, kept in the run log' },
+    ],
     example: 'vawe approve films/my-launch/page.html   (after vawe dev without --from and --to)',
-    build: (v, [page]) => [{ script: 'harness/live/approve.mjs', args: [page] }],
+    build: (v, [page]) => [{ script: 'harness/live/approve.mjs', args: [page, ...(v.reject ? ['--reject'] : []), ...opt('--note', v.note)] }],
     next: (v, [page]) => `bin/vawe ship ${page}`,
   },
   {
