@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { Icon } from "../components/Icon";
 import { MatTile } from "../components/MatTile";
-import { MAKERS, PROMPTS_PATH, recreatePrompt, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration-shared";
+import { INSPIRATION_PAGE, MAKERS, PROMPTS_PATH, recreatePrompt, titleOf, type InspirationCard, type InspirationType } from "../../lib/inspiration-shared";
 
 // The --ease-out and --ease-in tokens: the Web Animations API cannot read a custom property.
 const EASE_OUT = "cubic-bezier(.23,1,.32,1)";
@@ -11,8 +11,8 @@ const EASE_IN = "cubic-bezier(.55,.055,.675,.19)";
 const COPIED_MS = 1600;
 // The first row's posters are the largest paint on load, so they skip lazy loading.
 const FIRST_ROW = 6;
-// Eight rows of six: enough to browse, and the rest stay out of the DOM until asked for.
-const PAGE = 48;
+// Eight rows of six: enough to browse, and the rest stay out of the DOM until asked for. The page lists the rest in a noscript block.
+const PAGE = INSPIRATION_PAGE;
 
 type Filters = { q: string; types: string[]; prompt: boolean; made: string };
 type Prompts = Record<string, string> | null;

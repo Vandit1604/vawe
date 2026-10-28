@@ -2,7 +2,7 @@
 // text and return numbers, so tests/lib/seo-pseo.test.mjs can run them on small fixtures. No network here.
 
 const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
-const DROP = new Set(['script', 'style', 'svg', 'noscript', 'template']);
+const DROP = new Set(['script', 'style', 'svg', 'template']);
 const INLINE = new Set(['a', 'abbr', 'b', 'code', 'em', 'i', 'kbd', 'mark', 'small', 'span', 'strong', 'sub', 'sup', 'u']);
 // A paragraph inside one of these is card or table text, not prose.
 const CARD_TAGS = new Set(['a', 'article', 'li', 'button', 'table', 'figure', 'form', 'dl']);

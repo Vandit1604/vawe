@@ -5,7 +5,7 @@ import { pageMetadata } from "../components/seo";
 import { Next, PageTop } from "../components/Xp";
 import { breadcrumbSchema, jsonLdScript } from "../../lib/schema";
 import { inspirationSchema } from "../../lib/schema-content";
-import { INSPIRATION, INSPIRATION_DESCRIPTION, INSPIRATION_PATH, INSPIRATION_TITLE, INSPIRATION_TYPES } from "../../lib/inspiration";
+import { INSPIRATION, INSPIRATION_DESCRIPTION, INSPIRATION_PAGE, INSPIRATION_PATH, INSPIRATION_TITLE, INSPIRATION_TYPES, titleOf } from "../../lib/inspiration";
 import { InspirationWall } from "./InspirationWall";
 import "./inspiration.css";
 
@@ -36,6 +36,16 @@ export default function Inspiration() {
             <h1>Motion video inspiration</h1>
             <p className="in-lede">Made with Claude and other AI, from posts on X.</p>
           </InspirationWall>
+          <noscript>
+            <h2>More posts</h2>
+            <ul>
+              {INSPIRATION.slice(INSPIRATION_PAGE).map((p) => (
+                <li key={p.id}>
+                  <a href={p.url} rel="noopener">{titleOf(p)}</a>, by {p.creator.name ? `${p.creator.name} (@${p.creator.handle})` : `@${p.creator.handle}`}
+                </li>
+              ))}
+            </ul>
+          </noscript>
           <Next
             title="Make one of your own."
             lead="Copy a recreation prompt and give it to your agent, or write the page it inspired."
