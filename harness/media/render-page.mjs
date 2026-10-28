@@ -108,6 +108,7 @@ import { watchLoad, loadStallLines } from '../lib/load-stall.mjs';
 import { canvasCoversFrame, CANVAS_SHARE, DOM_PICTURE_CHECKS, canvasFilmNote } from '../lib/canvas-film.mjs';
 import { takeRenderSlot, slotsInUse } from '../lib/render-slots.mjs';
 import { noteVerb } from '../lib/verb-log.mjs';
+import { createPhaseTimer } from '../lib/phase-timer.mjs';
 import { machineLanes } from '../lib/lane-budget.mjs';
 
 // A laptop running two renders at 4 workers each overheats and throttles; the second render starts cool.
@@ -817,22 +818,26 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   const frame = resolveFrame(pagePath, opts);
   const wantAudio = opts.audio ?? (from === 0 && durArg == null);
   if (opts.audio && from > 0) throw new RenderError('--audio needs a render from 0: the mix has no offset');
-  const slotAskedAt = Date.now();
-  const slot = await takeRenderSlot({ kind: process.env.VAWE_RENDER_KIND || (final ? 'final' : 'draft'), who: filmKeyOf(pagePath) });
-  noteVerb({ slotWaitS: (Date.now() - slotAskedAt) / 1000 });
+  const phases = createPhaseTimer();
+  const startS = process.uptime();
+  const slot = await phases.time('slot', () => takeRenderSlot({ kind: process.env.VAWE_RENDER_KIND || (final ? 'final' : 'draft'), who: filmKeyOf(pagePath) }));
+  noteVerb({ slotWaitS: phases.seconds('slot') });
   removeStaleFrames(path.dirname(path.resolve(outPath)));
-  const { page, url, close } = await openPage(pagePath, frame, { final });
+  const { page, url, close, chrome } = await phases.time('chrome', () => openPage(pagePath, frame, { final }));
   const scriptErrors = watchPageErrors(page);
   try {
-    await gotoLoaded(page, url, pagePath);
-    try { await settle(page); } catch (e) {
-      const msg = String(e.message).replace(/^.*?Error: /, '');
-      if (/^(font (still loading|failed)|page not ready)/.test(msg)) throw new InvariantError([msg]);
-      throw e;
-    }
-    const audioRead = await readAudio(page, pagePath);
-    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page, pagePath), ...audioRead.problems, ...await assertProblems(page)];
-    if (early.length) throw new InvariantError(early);
+    const audioRead = await phases.time('load', async () => {
+      await gotoLoaded(page, url, pagePath);
+      try { await settle(page); } catch (e) {
+        const msg = String(e.message).replace(/^.*?Error: /, '');
+        if (/^(font (still loading|failed)|page not ready)/.test(msg)) throw new InvariantError([msg]);
+        throw e;
+      }
+      const read = await readAudio(page, pagePath);
+      const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page, pagePath), ...read.problems, ...await assertProblems(page)];
+      if (early.length) throw new InvariantError(early);
+      return read;
+    });
 
     const totalDur = await page.evaluate(() => {
       const m = document.querySelector('meta[name="duration"]');
@@ -893,9 +898,11 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (!fs.existsSync(tmpOut) || fs.statSync(tmpOut).size === 0) {
       throw new RenderError(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
-    const stats = probeStats(tmpOut);
-    const oneColour = oneFlatColour(stats) && from === 0 && durArg == null;
-    const late = frameProblems(stats.map((s) => s.flat), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')), oneColour, hint: oneColour ? drewNothingHint(REPO_ROOT, pagePath) : '' });
+    const late = await phases.time('verify', async () => {
+      const stats = probeStats(tmpOut);
+      const oneColour = oneFlatColour(stats) && from === 0 && durArg == null;
+      return frameProblems(stats.map((s) => s.flat), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')), oneColour, hint: oneColour ? drewNothingHint(REPO_ROOT, pagePath) : '' });
+    });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
     if (broken.length) { fs.rmSync(tmpOut, { force: true }); fs.rmSync(tmpDir, { recursive: true, force: true }); throw new InvariantError(broken); }
@@ -907,11 +914,16 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       return mixed;
     };
     let mixed;
-    try { mixed = await place(tmpOut, outPath); } catch (e) {
+    try { mixed = await phases.time('audio', () => place(tmpOut, outPath)); } catch (e) {
       fs.rmSync(tmpOut, { force: true });
       throw Object.assign(e, { stage: 'audio mux', progress: 1, framesDir: tmpDir });
     }
-    const result = { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, advice };
+    const reusedFrames = reused.reduce((a, b) => a + b, 0);
+    const timing = {
+      phases: { start: startS, slot: phases.seconds('slot'), chrome: phases.seconds('chrome'), load: phases.seconds('load'), prepass: prepassMs / 1000, capture: captureMs / 1000, verify: phases.seconds('verify'), encode: encodeMs / 1000, audio: phases.seconds('audio') },
+      shape: { chrome, frames, reused: reusedFrames, fps, width: frame.outWidth, height: frame.outHeight, workers, slices: Math.ceil(frames / sliceFrames), durS: dur },
+    };
+    const result = { frames, subframes: totalSub, reused: reusedFrames, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, advice, ...timing };
     opts.onMaster?.(result);
     if (tmpWeb) {
       const webRes = ffmpegWebEncode(tmpDir, fps, kArr, subframeStart, tmpWeb);
@@ -1159,7 +1171,7 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds(), capture: frameFormat(false).label });
   const notes = writeDevNotes(mp4, { timing, ...report.notes });
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
-  appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired, worlds: r.probe?.worlds }));
+  appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), phases: r.phases, shape: r.shape, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired, worlds: r.probe?.worlds }));
   const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
   console.log([timing, look, ...lensLines(r.probe?.lens, r.probe?.worlds), report.signature.line, soundSummary(r.level), ...report.red, ...range, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }

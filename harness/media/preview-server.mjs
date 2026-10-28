@@ -64,7 +64,8 @@ function waitForState(final, timeoutMs) {
 
 async function connectShared(final) {
   let state = readState(final);
-  if (!state || !pidAlive(state.pid)) {
+  const started = !state || !pidAlive(state.pid);
+  if (started) {
     try {
       const log = openBrowserLog(final);
       try { spawn(process.execPath, [SELF, '--daemon', ...(final ? [] : ['--draft'])], { detached: true, stdio: ['ignore', log, log] }).unref(); }
@@ -77,7 +78,7 @@ async function connectShared(final) {
     const { default: puppeteer } = await import('puppeteer');
     const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint, protocolTimeout: PROTOCOL_TIMEOUT_MS });
     touch(final);
-    return { browser, port: state.port };
+    return { browser, port: state.port, started };
   } catch { return null; }
 }
 
@@ -145,19 +146,19 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
       const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
       await page.setViewport({ width, height, deviceScaleFactor: scale });
       const release = holdAlive(final);
-      if (warm) return { page, url, persistent: true, reused, markWarm: () => page.evaluate((v) => { window.__warmSig = v; }, sig), close: async () => { release(); shared.browser.disconnect(); } };
+      if (warm) return { page, url, persistent: true, chrome: shared.started ? 'launched' : 'reused', reused, markWarm: () => page.evaluate((v) => { window.__warmSig = v; }, sig), close: async () => { release(); shared.browser.disconnect(); } };
       // `disconnect()`, never `close()`: this call's own CDP connection to the shared browser, not the
       // browser itself. Closing only the page and never disconnecting left the connection's open socket
       // holding the process alive well past the render finishing (a real hang this file was measured
       // against: a windowed draft's own log line printed, then nothing exited for ~30s).
-      return { page, url, persistent: true, close: async () => { release(); await page.close().catch(() => {}); shared.browser.disconnect(); } };
+      return { page, url, persistent: true, chrome: shared.started ? 'launched' : 'reused', close: async () => { release(); await page.close().catch(() => {}); shared.browser.disconnect(); } };
     }
   }
   const root = pageRoot(abs);
   const { close: closeServer, port } = await serveRepo({ root });
   const { page, close: closePage } = await launchPage({ width, height, scale, args: pageArgs(final) });
   const url = `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}`;
-  return { page, url, persistent: false, close: async () => { await closePage(); closeServer(); } };
+  return { page, url, persistent: false, chrome: 'launched', close: async () => { await closePage(); closeServer(); } };
 }
 
 async function daemonMain(final) {

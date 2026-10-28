@@ -20,6 +20,11 @@ const sum = (scores) => {
   return v.length > 1 ? v.reduce((a, b) => a + b, 0) : null;
 };
 
+const PHASES = [['start', 'startS'], ['slot', 'slotS'], ['chrome', 'chromeS'], ['load', 'loadS'], ['prepass', 'prepassS'], ['capture', 'captureS'], ['verify', 'verifyS'], ['encode', 'encodeS'], ['audio', 'audioS'], ['checks', 'checksTotalS'], ['sheet', 'sheetS'], ['other', 'otherS']];
+
+/** The phase seconds of a draft record by name (start, slot, ... other), or null for a record from before the split. */
+const phasesOf = (e) => (e.cmd === 'dev' && e.otherS != null ? Object.fromEntries(PHASES.map(([name, key]) => [name, e[key] ?? 0])) : null);
+
 /** An old record in the new event shape: `render` was a draft or a final, `judge` a verdict. */
 function fromOld(r) {
   if (r.render) return { cmd: /-draft/.test(r.render.file ?? '') ? 'dev' : 'ship', seconds: r.render.ms != null ? r.render.ms / 1000 : null };
@@ -41,6 +46,7 @@ export function normalize(r) {
     notes: Array.isArray(e.notes) ? e.notes : null, waivers: Array.isArray(e.waivers) ? e.waivers : null,
     sameness: e.sameness ?? null, template: e.template ?? null, bar: Array.isArray(e.bar) ? e.bar : null,
     verb: e.verb ?? null, loopStage: e.cmd === 'verb' ? e.stage ?? null : null, exitCode: e.exitCode ?? null, error: e.error ?? e.reason ?? null,
+    phases: phasesOf(e), shape: phasesOf(e) ? { chrome: e.chrome, frames: e.frames, reused: e.reusedFrames } : null,
     slotWaitS: e.slotWaitS ?? null, red: e.acceptance?.red ?? null, tagged: e.cmd === 'verb' ? e.tagged !== false : agentName(e.agent) !== null,
   };
 }
@@ -132,6 +138,22 @@ export function draftRuleLines(events) {
   });
 }
 
+/** One compact line per draft that logged its phases: where the wall time went, the zero phases left out. */
+export function draftPhaseLines(events) {
+  return events.filter((e) => e.phases).map((e) => {
+    const parts = PHASES.map(([name]) => [name, e.phases[name]]).filter(([, s]) => s >= 0.05).map(([name, s]) => `${name} ${num(s)}`);
+    const frames = `${e.shape.frames} frames${e.shape.reused ? `, ${e.shape.reused} reused` : ''}`;
+    return `time ${clock(e.at)}: ${num(e.seconds)} s = ${parts.join(' · ')} (chrome ${e.shape.chrome}, ${frames})`;
+  });
+}
+
+/** The median seconds of each phase over the drafts that logged them: { wall, drafts, phases: { start: s, ... } }, or null when none did. */
+export function phaseMedians(events) {
+  const drafts = events.filter((e) => e.phases && e.seconds != null);
+  if (!drafts.length) return null;
+  return { drafts: drafts.length, wall: median(drafts.map((e) => e.seconds)), phases: Object.fromEntries(PHASES.map(([name]) => [name, median(drafts.map((e) => e.phases[name]))])) };
+}
+
 /** The lines of `vawe runs <film>`: time by stage and verb, failures by cause, the draft series, then one summary line. */
 export function filmLines(film, records) {
   const events = records.map(normalize).sort((a, b) => String(a.at).localeCompare(String(b.at)));
@@ -141,9 +163,15 @@ export function filmLines(film, records) {
   const pass = s.passed ? `PASS after ${s.roundsToPass} judge round${s.roundsToPass > 1 ? 's' : ''}` : 'no PASS yet';
   return [
     ...(calls.length ? timeLines(calls) : [`${film}: no verb calls logged (a log from before every verb was logged)`]),
-    ...failedLines(events), ...draftSeries(events), ...draftRuleLines(events),
+    ...failedLines(events), ...draftSeries(events), ...draftRuleLines(events), ...draftPhaseLines(events),
     `drafts ${s.drafts} · median draft ${num(s.medianDraftS)} s · ${pass} · first judged total ${num(s.firstTotal, 0)}`,
   ];
+}
+
+/** phaseMedians over every film's events of the last 30 days. */
+export function allPhaseMedians(films, now) {
+  const since = now - WINDOW_DAYS * DAY_MS;
+  return phaseMedians(films.filter(({ film }) => !film.startsWith('_')).flatMap(({ runs }) => runs.map(normalize)).filter((e) => Date.parse(e.at) >= since));
 }
 
 /** One row per film with an event in the last 30 days: stats plus who ran it (model, else agent name), newest first. */
@@ -170,15 +198,16 @@ export function modelRows(rows) {
   });
 }
 
-/** The lines of `vawe runs --all`: at most 40, plain text. */
-export function allLines(rows, models) {
+/** The lines of `vawe runs --all`: at most 40, plain text; `phases` is phaseMedians over the drafts of the last 30 days. */
+export function allLines(rows, models, phases = null) {
   if (!rows.length) return ['no films with runs in the last 30 days'];
   const modelBlock = models.length ? ['', ...table([['model', 'films', 'med drafts', 'med draft s', 'med first total', 'passed'],
     ...models.map((m) => [m.model, m.films, num(m.medianDrafts), num(m.medianDraftS), num(m.medianFirstTotal, 0), `${m.passed}/${m.films}`])])] : [];
-  const room = MAX_LINES - 1 - modelBlock.length - 1;
+  const phaseBlock = phases ? ['', `median of ${phases.drafts} drafts, ${num(phases.wall)} s wall: ${PHASES.map(([name]) => `${name} ${num(phases.phases[name])}`).join(' · ')}`] : [];
+  const room = MAX_LINES - 1 - modelBlock.length - phaseBlock.length - 1;
   const shown = rows.length > room ? rows.slice(0, room - 1) : rows;
   const body = table([['film', 'drafts', 'med draft s', 'first total', 'best total', 'PASS', 'agent/model'],
     ...shown.map((r) => [r.film, r.drafts, num(r.medianDraftS), num(r.firstTotal, 0), num(r.bestTotal, 0), r.passed ? 'yes' : 'no', r.model ?? r.agent ?? '-'])]);
   const more = rows.length > shown.length ? [`... ${rows.length - shown.length} more films (use --json)`] : [];
-  return [...body, ...more, ...modelBlock];
+  return [...body, ...more, ...modelBlock, ...phaseBlock];
 }

@@ -1,6 +1,6 @@
 // vawe runs <film> | --all | --taste [--json] [--dir out]: reads <dir>/<film>.runs.jsonl (harness/lib/runlog.mjs) into tables (harness/lib/runs-report.mjs).
 import { readAllRuns, filmKeyOf } from '../lib/runlog.mjs';
-import { filmLines, allRows, modelRows, allLines } from '../lib/runs-report.mjs';
+import { filmLines, allRows, modelRows, allLines, allPhaseMedians } from '../lib/runs-report.mjs';
 import { tasteReport, tasteLines } from '../lib/taste-report.mjs';
 import { metaReader } from '../lib/variety.mjs';
 import RULES from '../../taste/build/rules.json' with { type: 'json' };
@@ -17,8 +17,10 @@ if (args.includes('--taste')) {
   const report = tasteReport(readAllRuns(dir), { ruleIds: Object.keys(RULES), readMeta: metaReader(path.resolve(dir, '..')) });
   console.log(json ? JSON.stringify(report, null, 1) : tasteLines(report).join('\n'));
 } else if (args.includes('--all')) {
-  const rows = allRows(readAllRuns(dir), Date.now());
-  console.log(json ? JSON.stringify({ films: rows, models: modelRows(rows) }, null, 1) : allLines(rows, modelRows(rows)).join('\n'));
+  const films = readAllRuns(dir);
+  const rows = allRows(films, Date.now());
+  const phases = allPhaseMedians(films, Date.now());
+  console.log(json ? JSON.stringify({ films: rows, models: modelRows(rows), phases }, null, 1) : allLines(rows, modelRows(rows), phases).join('\n'));
 } else if (film) {
   const key = filmKeyOf(film);
   const runs = readAllRuns(dir).find((f) => f.film === key)?.runs ?? [];

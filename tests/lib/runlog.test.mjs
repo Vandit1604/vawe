@@ -6,7 +6,7 @@ import path from 'node:path';
 import { appendRun, readRuns, readAllRuns, agentId, namedAgent } from '../../harness/lib/runlog.mjs';
 import { newEvent, devEvent, judgeEvent, shipEvent } from '../../harness/lib/run-events.mjs';
 import { selfRecordCheck } from '../../harness/lib/judge-self-record.mjs';
-import { filmLines, allRows, modelRows, allLines, normalize } from '../../harness/lib/runs-report.mjs';
+import { filmLines, allRows, modelRows, allLines, normalize, phaseMedians } from '../../harness/lib/runs-report.mjs';
 import { jobLogPath, shipVerdict } from '../../harness/lib/ship-status.mjs';
 
 const ROWS = [
@@ -26,14 +26,19 @@ function inTempDir(env, fn) {
   }
 }
 
+const PHASES = { start: 0.5, slot: 0, chrome: 0.3, load: 1.2, prepass: 0, capture: 18.04, verify: 0.4, encode: 0.3, audio: 0.6 };
+const SHAPE = { chrome: 'reused', frames: 150, reused: 10, fps: 30, width: 960, height: 540, workers: 2, slices: 3, durS: 5 };
+
 test('event shapes: new, dev, judge, ship carry only their own fields', () => {
   assert.deepEqual(newEvent({ template: 'prompts/a.md', length: 5, answered: new Set(['show']), guessed: ['words'] }),
     { cmd: 'new', template: 'prompts/a.md', length: 5, answered: ['show'], guessed: ['words'], signature: { offered: {}, chosen: {} } });
-  assert.deepEqual(devEvent({ tier: 'draft', wallS: 31.44, captureS: 18.04, checks: [['contrast', 3.14], ['spec', 2]], cache: { hit: 1, miss: 2 }, rows: ROWS }),
-    { cmd: 'dev', tier: 'draft', wallS: 31.4, captureS: 18, checksS: { contrast: 3.1, spec: 2 }, cache: { hit: 1, miss: 2 }, acceptance: { green: 1, measured: 2, red: ['b'] }, signature: {}, measured: {}, rules_fired: [], worlds: null });
+  assert.deepEqual(devEvent({ tier: 'draft', wallS: 31.44, phases: PHASES, shape: SHAPE, checks: [['contrast', 3.14], ['spec', 2], ['sheet', 1]], cache: { hit: 1, miss: 2 }, rows: ROWS }),
+    { cmd: 'dev', tier: 'draft', wallS: 31.4, startS: 0.5, slotS: 0, chromeS: 0.3, loadS: 1.2, prepassS: 0, captureS: 18, verifyS: 0.4, encodeS: 0.3, audioS: 0.6, checksTotalS: 5.1, sheetS: 1, otherS: 4,
+      chrome: 'reused', frames: 150, reusedFrames: 10, fps: 30, width: 960, height: 540, workers: 2, slices: 3, durS: 5,
+      checksS: { contrast: 3.1, spec: 2, sheet: 1 }, cache: { hit: 1, miss: 2 }, acceptance: { green: 1, measured: 2, red: ['b'] }, signature: {}, measured: {}, rules_fired: [], worlds: null });
   const worlds = [{ id: 'a', start: 0, end: 2, ground: '#112233' }];
-  assert.deepEqual(devEvent({ tier: 'draft', wallS: 1, captureS: 1, checks: [], cache: { hit: 0, miss: 0 }, rows: null, worlds }).worlds, worlds);
-  assert.equal(devEvent({ tier: 'fast', wallS: 1, captureS: 1, checks: [], cache: { hit: 0, miss: 0 }, rows: null }).acceptance, null);
+  assert.deepEqual(devEvent({ tier: 'draft', wallS: 1, phases: PHASES, shape: SHAPE, checks: [], cache: { hit: 0, miss: 0 }, rows: null, worlds }).worlds, worlds);
+  assert.equal(devEvent({ tier: 'fast', wallS: 1, phases: PHASES, shape: SHAPE, checks: [], cache: { hit: 0, miss: 0 }, rows: null }).acceptance, null);
   assert.deepEqual(judgeEvent({ stage: 'draft', verdict: 'FIX', scores: { hook: 9, motion: 6 }, anchor: [{ yes: true }, { yes: false }], ledger: { fixed: 1, partly: 0, still: 2, unmarked: 0, new: 1 }, seconds: 30.2 }),
     { cmd: 'judge', stage: 'draft', verdict: 'FIX', scores: { hook: 9, motion: 6 }, total: 15, anchorYes: 1, anchorTotal: 2, bar: null, ledger: { fixed: 1, partly: 0, still: 2, unmarked: 0, new: 1 }, seconds: 30.2, notes: null, waivers: null, sameness: null, template: null });
   assert.deepEqual(judgeEvent({ stage: 'final', verdict: 'FIX', bar: [{ ref: 'A', dial: 'text', winner: 'A' }] }).bar, [{ ref: 'A', dial: 'text', winner: 'A' }]);
@@ -179,4 +184,22 @@ test('appendRun with a root writes under <root>/out and leaves the working direc
   });
   assert.equal(readAllRuns(path.join(root, 'out'))[0].runs[0].film, 'demo');
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('dev event: the phases, the checks and otherS add up to the wall time within rounding', () => {
+  const checks = [['contrast', 3.14], ['sheet', 1.06]];
+  const e = devEvent({ tier: 'draft', wallS: 31.44, phases: PHASES, shape: SHAPE, checks, cache: { hit: 0, miss: 2 }, rows: null });
+  const total = ['startS', 'slotS', 'chromeS', 'loadS', 'prepassS', 'captureS', 'verifyS', 'encodeS', 'audioS', 'checksTotalS', 'sheetS', 'otherS'].reduce((a, k) => a + e[k], 0);
+  assert.ok(Math.abs(total - e.wallS) <= 0.7, `${total} vs ${e.wallS}`);
+});
+
+test('runs <film>: one phase line per draft, and the median of each phase', () => {
+  const dev = (at, over) => ({ at, cmd: 'dev', agent: 'hud', ...devEvent({ tier: 'draft', wallS: 20, phases: PHASES, shape: SHAPE, checks: [['sheet', 1]], cache: { hit: 0, miss: 1 }, rows: null, ...over }) });
+  const text = filmLines('x', [dev('2026-10-09T20:00:00.000Z'), { at: '2026-10-09T19:00:00.000Z', cmd: 'dev', wallS: 9 }]).join('\n');
+  assert.match(text, /^time 10-09 20:00: 20 s = start 0\.5 · chrome 0\.3 · load 1\.2 · capture 18 · verify 0\.4 · encode 0\.3 · audio 0\.6 · sheet 1 \(chrome reused, 150 frames, 10 reused\)$/m);
+  assert.equal(text.match(/^time /gm).length, 1);
+  const m = phaseMedians([dev('2026-10-09T20:00:00.000Z'), dev('2026-10-09T21:00:00.000Z', { phases: { ...PHASES, capture: 10.04 } }), dev('2026-10-09T22:00:00.000Z', { phases: { ...PHASES, capture: 30.04 } })].map(normalize));
+  assert.deepEqual([m.drafts, m.wall, m.phases.capture], [3, 20, 18]);
+  assert.match(allLines([{ film: 'a', last: 'x', drafts: 1, medianDraftS: 20, firstTotal: null, bestTotal: null, passed: false }], [], m).at(-1), /^median of 3 drafts, 20 s wall: start 0\.5 /);
+  assert.equal(phaseMedians([]), null);
 });

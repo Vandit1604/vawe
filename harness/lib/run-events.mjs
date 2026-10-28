@@ -10,9 +10,23 @@ export const newEvent = ({ template, length, answered, guessed, ranges = [], cho
   signature: { offered: Object.fromEntries(ranges.map((d) => [d.dial, d.range])), chosen },
 });
 
-/** `vawe dev`: seconds, the check seconds by name, the tier and cache use, the acceptance rows (null for a window), the chosen signature dials, what the moves measured for them, and the rules the draft fired ({ id, value, t }). */
-export const devEvent = ({ tier, wallS, captureS, checks, cache, rows, signature = {}, measured = {}, fired = [], worlds = null }) => ({
-  cmd: 'dev', tier, wallS: tenths(wallS), captureS: tenths(captureS),
+/** The seconds of `phases` (start, slot, chrome, load, prepass, capture, verify, encode, audio) and of the checks, with `otherS` the wall time none of them cover. The `sheet` check is the key-frame sheet written after the render. */
+const phaseFields = (wallS, phases, checks) => {
+  const sheet = checks.filter(([name]) => name === 'sheet').reduce((a, [, s]) => a + s, 0);
+  const checksTotal = checks.reduce((a, [, s]) => a + s, 0) - sheet;
+  const covered = Object.values(phases).reduce((a, s) => a + s, 0) + checksTotal + sheet;
+  return {
+    startS: tenths(phases.start), slotS: tenths(phases.slot), chromeS: tenths(phases.chrome), loadS: tenths(phases.load), prepassS: tenths(phases.prepass),
+    captureS: tenths(phases.capture), verifyS: tenths(phases.verify), encodeS: tenths(phases.encode), audioS: tenths(phases.audio),
+    checksTotalS: tenths(checksTotal), sheetS: tenths(sheet), otherS: tenths(wallS - covered),
+  };
+};
+
+/** `vawe dev`: the seconds of every phase (phaseFields) beside the wall time, what was rendered (`shape`: chrome 'launched' or 'reused', frames, reused, fps, width, height, workers, slices, durS), the check seconds by name, the tier and cache use, the acceptance rows (null for a window), the chosen signature dials, what the moves measured for them, and the rules the draft fired ({ id, value, t }). */
+export const devEvent = ({ tier, wallS, phases, shape, checks, cache, rows, signature = {}, measured = {}, fired = [], worlds = null }) => ({
+  cmd: 'dev', tier, wallS: tenths(wallS), ...phaseFields(wallS, phases, checks),
+  chrome: shape.chrome, frames: shape.frames, reusedFrames: shape.reused, fps: shape.fps, width: shape.width, height: shape.height,
+  workers: shape.workers, slices: shape.slices, durS: tenths(shape.durS),
   checksS: Object.fromEntries(checks.map(([name, s]) => [name, tenths(s)])),
   cache, acceptance: rows ? acceptanceCounts(rows) : null,
   signature, measured, rules_fired: fired, worlds: worlds?.length ? worlds : null,
