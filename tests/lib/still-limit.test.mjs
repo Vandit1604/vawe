@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { declaredHolds, undeclaredStills, stillText } from '../../harness/lib/still-limit.mjs';
+import { readHolds } from '../../harness/lib/worlds.mjs';
+import { lineNeed } from '../../harness/lib/read-hold.mjs';
 
 const why = (entries) => Object.fromEntries(entries.map((e, i) => [e, `the wordmark of world s${i + 1} is held 0.9 s as the last beat`]));
 
@@ -35,4 +37,9 @@ test('a still inside a read hold is not named; the part past it is', () => {
   const holds = [[2, 4]];
   assert.deepEqual(undeclaredStills([{ a: 2.2, b: 3.8, len: 1.6 }], {}, undefined, holds), []);
   assert.equal(undeclaredStills([{ a: 3, b: 5, len: 2 }], {}, undefined, holds).length, 1);
+});
+
+test('a frozen 2 s one-line world still fires static-window: its read hold ends at its read time', () => {
+  const holds = readHolds([{ id: 'a', start: 0, end: 2, readNeed: lineNeed(3) }]);
+  assert.equal(undeclaredStills([{ a: 0, b: 2, len: 2 }], {}, undefined, holds).length, 1);
 });

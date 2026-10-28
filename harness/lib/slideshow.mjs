@@ -101,10 +101,10 @@ function deadGap(worlds, records) {
   const dead = bs.map((b, i) => {
     const out = rs.filter(exiting).filter((r) => worldIndex(worlds, r.delay) === i);
     const next = firstPerTarget(rs.filter(entering).filter((r) => worldIndex(worlds, r.delay) === i + 1))[0];
-    return out.length > 0 && Boolean(next) && next.delay - Math.max(...out.map((r) => r.delay + r.duration)) > CARRY_WINDOW_S;
+    return out.length > 0 && Boolean(next) && next.delay >= Math.max(...out.map((r) => r.delay + r.duration));
   });
   if (!mostly(dead)) return null;
-  return { code: 'dead-gap', at: bs.filter((b, i) => dead[i]).map((b) => r2(b.at)), what: `${dead.filter(Boolean).length} of ${bs.length} cuts start the next scene over ${CARRY_WINDOW_S} s after the last one fully left`,
+  return { code: 'dead-gap', at: bs.filter((b, i) => dead[i]).map((b) => r2(b.at)), what: `${dead.filter(Boolean).length} of ${bs.length} cuts start the next scene only after the last one fully left`,
     fix: 'overlap 0.2 to 0.4 s: the next scene starts while the last one exits' };
 }
 

@@ -17,11 +17,11 @@ test('the tail moves when an animation runs on a visible part at every sample', 
   assert.equal(tailMoving([[part], [], [part]]), false);
 });
 
-test('a camera push or a whole-frame element is not a part moving; an aria-hidden part is', () => {
+test('a camera push, a whole-frame element or a decorative ground drift is not a part moving', () => {
   assert.equal(tailMoving([[camera], [camera], [camera]]), false);
   assert.equal(tailMoving([[stage], [stage], [stage]]), false);
-  assert.equal(tailMoving([[ground], [ground], [ground]]), true);
-  assert.equal(tailMoving([[camera, stage], [camera, part], [part]]), false);
+  assert.equal(tailMoving([[ground], [ground], [ground]]), false);
+  assert.equal(tailMoving([[camera, stage, ground], [camera, part], [part]]), false);
 });
 
 test('a page that was not sampled, or has no animation, is not called moving', () => {
