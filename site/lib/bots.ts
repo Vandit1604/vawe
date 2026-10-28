@@ -52,7 +52,6 @@ export const BOT_TABLE: Rule[] = [
   { bot: "cursor", class: "coding-agent", ua: /^got \(https:\/\/github\.com\/sindresorhus\/got\)/ },
   { bot: "windsurf", class: "coding-agent", ua: /^colly - https:\/\/github\.com\/gocolly\/colly/ },
   { bot: "aider", class: "coding-agent", ua: /Aider\/\d/ },
-  { bot: "copilot-vscode", class: "coding-agent", ua: /\bCode\/\d[\d.]* .*Electron\// },
   {
     bot: "opencode",
     class: "coding-agent",
@@ -132,7 +131,8 @@ export type EventInput = RequestFacts & {
 };
 
 // A human who arrives from an AI answer is logged without an IP; only the bot classes keep one.
-const KEEPS_IP: ReadonlySet<BotClass> = new Set(["ai-training", "ai-search", "ai-user-fetch", "coding-agent", "search-engine"]);
+// Coding agents run on a person's machine, so their IP is a person's IP and is never kept.
+const KEEPS_IP: ReadonlySet<BotClass> = new Set(["ai-training", "ai-search", "ai-user-fetch", "search-engine"]);
 
 export function buildBotEvent(i: EventInput): BotEvent | null {
   const c = classifyRequest(i);
@@ -151,11 +151,27 @@ export function buildBotEvent(i: EventInput): BotEvent | null {
   return event;
 }
 
+const RETENTION_DAYS = 90;
+
+async function pruneOldLogs(dir: string, today: string): Promise<void> {
+  const { readdir, unlink } = await import("node:fs/promises");
+  const path = await import("node:path");
+  const cutoff = new Date(Date.parse(today) - RETENTION_DAYS * 86_400_000).toISOString().slice(0, 10);
+  for (const name of await readdir(dir)) {
+    const day = /^bots-(\d{4}-\d{2}-\d{2})\.jsonl$/.exec(name)?.[1];
+    if (day && day < cutoff) await unlink(path.join(dir, name)).catch(() => {});
+  }
+}
+
 export async function appendBotEvent(dir: string, event: BotEvent): Promise<void> {
-  const { appendFile, mkdir } = await import("node:fs/promises");
+  const { appendFile, mkdir, access } = await import("node:fs/promises");
   const path = await import("node:path");
   await mkdir(dir, { recursive: true });
-  await appendFile(path.join(dir, `bots-${event.t.slice(0, 10)}.jsonl`), JSON.stringify(event) + "\n");
+  const day = event.t.slice(0, 10);
+  const file = path.join(dir, `bots-${day}.jsonl`);
+  const firstOfDay = await access(file).then(() => false, () => true);
+  await appendFile(file, JSON.stringify(event) + "\n");
+  if (firstOfDay) await pruneOldLogs(dir, day).catch(() => {});
 }
 
 type MiddlewareRequest = {

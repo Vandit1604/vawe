@@ -1,5 +1,6 @@
 import { REPO_URL } from "../schema";
 import { MOVES } from "../moves";
+import { FACTS } from "./facts";
 import type { Crumb, Link, Meta, NextBlock, Para } from "./types";
 
 export type Step = { lead: string; line: Para };
@@ -51,17 +52,7 @@ export const ABOUT = {
     {
       id: "facts",
       title: "Quick facts",
-      steps: [
-        { lead: "Free.", line: ["vawe is free and open source under Apache-2.0, for any purpose including commercial use."] },
-        {
-          lead: "Install.",
-          line: ["Clone ", { text: "the repository", href: REPO_URL }, ", then run ", { code: "npm install" }, " and ", { code: "bin/vawe doctor" }, ". There is no npm package."],
-        },
-        { lead: "No account.", line: ["There is no hosted API, no account and no per-render fee. vawe runs on your machine."] },
-        { lead: "Needs.", line: ["Node 22 or newer, git, ffmpeg and Chrome. The doctor command checks each tool."] },
-        { lead: "Output.", line: ["An H.264 mp4 in 16:9, 9:16, 1:1, 4:5 or 4:3, from one page."] },
-        { lead: "Limits.", line: ["vawe renders on one machine. Output can differ between hosts with a different GPU or Chrome version."] },
-      ],
+      steps: FACTS.map((f) => ({ lead: f.lead, line: f.a })),
     },
     {
       id: "why",

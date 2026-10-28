@@ -20,7 +20,7 @@
   },
   "//puppeteer-note": "Puppeteer drives Chrome for every page render and check (harness/media/render-page.mjs). Its postinstall downloads a full Chrome; CI jobs that open no browser set PUPPETEER_SKIP_DOWNLOAD=1.",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "license": "Apache-2.0",
   "repository": {

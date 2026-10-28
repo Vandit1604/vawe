@@ -1,5 +1,7 @@
 import { source } from '@/lib/source';
 
+export { prefersMarkdown } from './accept';
+
 export const SITE = 'https://vawe.dev';
 
 type DocsPage = NonNullable<ReturnType<typeof source.getPage>>;
@@ -63,16 +65,4 @@ export function markdownResponse(body: string, canonical: string, status = 200, 
   };
   if (negotiated) headers.Vary = 'Accept';
   return new Response(body, { status, headers });
-}
-
-export function prefersMarkdown(accept: string | null) {
-  if (!accept) return false;
-  const q = new Map<string, number>();
-  for (const part of accept.split(',')) {
-    const [type, ...params] = part.trim().toLowerCase().split(';');
-    const param = params.map((p) => p.trim()).find((p) => p.startsWith('q='));
-    q.set(type.trim(), param ? Number(param.slice(2)) || 0 : 1);
-  }
-  const markdown = q.get('text/markdown') ?? 0;
-  return markdown > 0 && markdown > (q.get('text/html') ?? 0);
 }

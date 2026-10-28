@@ -40,7 +40,8 @@ const nextConfig = {
         destination: "https://vawe.dev/:path*",
         permanent: true,
       },
-      ALIAS_HOST_REDIRECT,
+      // Next splits the Host on ':' before matching, so `[::1]:3000` arrives as `[` and would redirect; dev and LAN testing skip the rule.
+      ...(process.env.NODE_ENV === "production" ? [ALIAS_HOST_REDIRECT] : []),
       ...LEGACY_REDIRECTS,
       // THE FEATURES FOLD: eight feature detail pages became three sections on /features itself.
       // Wildcarded, because the slugs were content and a new one must not 404 either. The route's

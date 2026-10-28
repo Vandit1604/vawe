@@ -1,6 +1,6 @@
 import { CONTACT_URL, REPO_URL, SITE_DESCRIPTION, SITE_NAME, SITE_URL, absoluteUrl } from "./site";
 
-// ai.txt (ai-visibility.org.uk spec v1.1.1). Keep in sync with app/robots.ts and lib/llms.ts: the
+// ai.txt (ai-visibility.org.uk spec v1.1.1). Keep in sync with app/robots.txt/route.ts and lib/llms.ts: the
 // scope below is the robots.txt rule, the identity is the Organization JSON-LD (lib/schema.ts).
 // Training is allowed on purpose, the same as robots.txt allows every crawler.
 export function aiTxt() {
@@ -33,6 +33,7 @@ markdown-copies: pages with a .md version name their HTML page as canonical
 [scope]
 include: /
 exclude: /api/
+allow: /api/md/
 
 [contact]
 url: ${CONTACT_URL}

@@ -7,6 +7,7 @@ import { LandingMotion } from "./components/LandingMotion";
 import { organizationSchema, websiteSchema, softwareApplicationSchema, softwareSourceCodeSchema, jsonLdScript } from "../lib/schema";
 import { faqSchema } from "../lib/schema-content";
 import { FAQ } from "../lib/faq";
+import { RichText } from "./components/RichText";
 import { clip, moveByName } from "../lib/moves";
 import { HOME } from "../lib/content/home";
 import "./landing.css";
@@ -119,7 +120,7 @@ export default function Home() {
               <details key={item.q} open={i === 0}>
                 <summary>{item.q}</summary>
                 <p>
-                  {item.a.map((seg, j) => (typeof seg === "string" ? seg : <a key={j} href={seg.href}>{seg.text}</a>))}
+                  <RichText p={item.a} />
                 </p>
               </details>
             ))}

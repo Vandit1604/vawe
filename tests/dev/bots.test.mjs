@@ -96,6 +96,24 @@ test('logBotRequest writes one line per bot request, none for humans, none witho
   assert.equal(JSON.parse(all.find((l) => !l.includes('2026-10-28T00'))).ip, '20.0.0.1');
 });
 
+test('coding agents and a person in VS Code are never logged with an IP', () => {
+  const vscode = 'Mozilla/5.0 (Macintosh) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.95.0 Chrome/128.0 Electron/32.0.0 Safari/537.36';
+  assert.equal(buildBotEvent({ userAgent: vscode, ip: '9.9.9.9', path: '/x' }), null);
+  const agent = buildBotEvent({ userAgent: 'got (https://github.com/sindresorhus/got)', ip: '9.9.9.9', path: '/x' });
+  assert.equal(agent.class, 'coding-agent');
+  assert.equal('ip' in agent, false);
+});
+
+test('the first write of a day deletes bot logs older than 90 days', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'botprune-'));
+  for (const f of ['bots-2026-07-01.jsonl', 'bots-2026-07-30.jsonl', 'bots-2026-10-27.jsonl', 'notes.txt']) fs.writeFileSync(path.join(dir, f), '{}\n');
+  await appendBotEvent(dir, buildBotEvent({ userAgent: UA.gptbot, path: '/a', now: new Date('2026-10-28T10:00:00Z') }));
+  assert.deepEqual(fs.readdirSync(dir).sort(), ['bots-2026-07-30.jsonl', 'bots-2026-10-27.jsonl', 'bots-2026-10-28.jsonl', 'notes.txt']);
+  fs.writeFileSync(path.join(dir, 'bots-2026-07-31.jsonl'), '{}\n');
+  await appendBotEvent(dir, buildBotEvent({ userAgent: UA.gptbot, path: '/b', now: new Date('2026-10-28T11:00:00Z') }));
+  assert.ok(fs.existsSync(path.join(dir, 'bots-2026-07-31.jsonl')));
+});
+
 test('IP lists: CIDR matching for v4 and v6', () => {
   const lists = cidrsFromJson({ prefixes: [{ ipv4Prefix: '20.171.206.0/24' }, { ipv6Prefix: '2001:db8::/32' }, { ipv4Prefix: '34.162.230.222/32' }] });
   assert.equal(lists.length, 3);
@@ -111,7 +129,7 @@ test('the report summarises a fixture log', () => {
     { t: '2026-10-27T10:00:00Z', class: 'ai-training', bot: 'GPTBot', path: '/a', served: 'html', wantsMd: false, refHost: '', ip: '20.171.206.5' },
     { t: '2026-10-27T10:01:00Z', class: 'ai-training', bot: 'GPTBot', path: '/missing', status: 404, served: 'html', wantsMd: false, refHost: '', ip: '6.6.6.6' },
     { t: '2026-10-27T10:02:00Z', class: 'ai-user-fetch', bot: 'Claude-User', path: '/a.md', served: 'md', wantsMd: true, refHost: '', ip: '1.2.3.4' },
-    { t: '2026-10-27T10:03:00Z', class: 'coding-agent', bot: 'cursor', path: '/a', served: 'html', wantsMd: false, refHost: '', ip: '5.5.5.5' },
+    { t: '2026-10-27T10:03:00Z', class: 'coding-agent', bot: 'cursor', path: '/a', served: 'html', wantsMd: false, refHost: '' },
     { t: '2026-10-27T10:04:00Z', class: 'ai-referral', bot: 'chatgpt', path: '/a', served: 'html', wantsMd: false, refHost: 'chatgpt.com' },
     { t: '2026-09-01T10:04:00Z', class: 'ai-referral', bot: 'chatgpt', path: '/old', served: 'html', wantsMd: false, refHost: 'chatgpt.com' },
   ];
@@ -127,7 +145,12 @@ test('the report summarises a fixture log', () => {
 });
 
 test('alias hosts redirect to the apex with a 301; own and loopback hosts do not', async () => {
+  const env = process.env.NODE_ENV;
+  process.env.NODE_ENV = 'development';
+  assert.equal((await config.redirects()).some((r) => r.has?.[0]?.value === ALIAS_HOST_PATTERN), false);
+  process.env.NODE_ENV = 'production';
   const rules = await config.redirects();
+  process.env.NODE_ENV = env;
   const rule = rules.find((r) => r.has?.[0]?.value === ALIAS_HOST_PATTERN);
   assert.equal(rule.statusCode, 301);
   assert.equal(rule.destination, 'https://vawe.dev/:path*');

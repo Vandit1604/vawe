@@ -11,7 +11,7 @@ import { SITE_URL } from "../../lib/site";
  * audience, and they ride on the `*` group below. Only the search and user-fetch bots are named: they
  * decide whether an answer engine can cite the site, and a named group is the proof it was meant.
  *
- * The one disallow is not content: /api is machinery.
+ * The one disallow is not content: /api is machinery. /api/md/ stays open: llms.txt links its catalog.
  *
  * It is a route and not app/robots.ts because the metadata form cannot print comments, and the
  * comments are how a crawler finds /llms.txt and /ai.txt.
@@ -30,11 +30,13 @@ const body = `# Keep in sync with ${SITE_URL}/llms.txt and ${SITE_URL}/ai.txt.
 # AI search and user-fetch crawlers: allowed. They decide whether answer engines can cite the site.
 ${ANSWER_BOTS.map((bot) => `User-agent: ${bot}`).join("\n")}
 Allow: /
+Allow: /api/md/
 Disallow: /api/
 
 # Everyone else, training crawlers included: allowed.
 User-agent: *
 Allow: /
+Allow: /api/md/
 Disallow: /api/
 
 Sitemap: ${SITE_URL}/sitemap.xml

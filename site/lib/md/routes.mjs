@@ -1,5 +1,5 @@
 // Which routes have a markdown version. Plain JS with no imports, because the middleware (edge
-// runtime) and tests/site/markdown-coverage.test.mjs read it too. lib/md/registry.ts holds one
+// runtime) and tests/lib/site-markdown-coverage.test.mjs read it too. lib/md/registry.ts holds one
 // renderer per RENDERED pattern and throws at load if the two lists differ.
 //
 // To add a page: put its pattern in RENDERED and add its renderer to registry.ts. A page that has no
