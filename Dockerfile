@@ -108,6 +108,13 @@ COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.source ./docs/.source
 COPY --chown=nextjs:nodejs site/docker-start.sh ./
 RUN chmod +x docker-start.sh
 
+# Bot log (site/lib/bots.ts): one JSON line per AI or search-engine request. Mount a volume here,
+# e.g. `-v vawe-bots:/data/bots` (Coolify: persistent storage, destination /data/bots). Unset
+# BOT_LOG_DIR to log nothing.
+RUN mkdir -p /data/bots && chown nextjs:nodejs /data/bots
+ENV BOT_LOG_DIR=/data/bots
+VOLUME /data/bots
+
 USER nextjs
 EXPOSE 3000
 ENV DOCS_ORIGIN=http://127.0.0.1:3001

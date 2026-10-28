@@ -23,8 +23,8 @@ function main(argv) {
     throw new UsageError(`unknown verb "${name}"${guess ? `; did you mean ${guess}?` : ''}; vawe-dev --help lists them`);
   }
   if (rest.includes('--help') || rest.includes('-h')) return console.log(verbHelp(verb).replace(/^vawe /m, 'vawe-dev '));
-  const { values } = parseArgs(verb, rest);
-  const step = verb.build(values);
+  const { values, positional } = parseArgs(verb, rest);
+  const step = verb.build(values, positional);
   const r = spawnSync(process.execPath, [path.join(ROOT, step.script), ...step.args], { stdio: 'inherit', cwd: process.cwd() });
   process.exitCode = r.status ?? 1;
 }

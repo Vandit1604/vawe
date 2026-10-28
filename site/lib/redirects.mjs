@@ -227,3 +227,15 @@ export const LEGACY_REDIRECTS = [
   permanent("/moves", MOVES),
   permanent("/moves/:name([a-z0-9-]+)", "/video-components/:name"),
 ];
+
+// Any Host other than the apex gets a 301 to it: the raw server IP and stray alias hostnames were
+// crawled as separate sites. Loopback names stay out so local dev, the container healthcheck and the
+// docs proxy keep working. The www rule in next.config.mjs runs first and keeps its 308.
+const OWN_HOSTS = ["vawe\\.dev", "localhost", "127\\.0\\.0\\.1", "0\\.0\\.0\\.0", "\\[::1\\]"];
+export const ALIAS_HOST_PATTERN = `^(?!(?:${OWN_HOSTS.join("|")})(?::\\d+)?$).+`;
+export const ALIAS_HOST_REDIRECT = {
+  source: "/:path*",
+  has: [{ type: "host", value: ALIAS_HOST_PATTERN }],
+  destination: "https://vawe.dev/:path*",
+  statusCode: 301,
+};
