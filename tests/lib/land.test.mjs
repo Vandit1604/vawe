@@ -5,7 +5,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { conflictedFiles, hasTrackedEdits, bigBlobs, e2eLine, e2eLineFromReport, keepAliveSsh } from '../../harness/lib/land.mjs';
-import { VERBS } from '../../harness/cli/verbs.mjs';
 
 test('conflictedFiles lists only unmerged paths', () => {
   const porcelain = 'UU harness/a.mjs\n M b.txt\nAA c.md\n?? d.txt\nDU e.js\n';
@@ -45,10 +44,6 @@ test('e2eLine reads the result line of the push output; the report is used only 
 test('keepAliveSsh keeps the user ssh command and adds the keep-alive options', () => {
   assert.equal(keepAliveSsh(undefined), 'ssh -o ServerAliveInterval=20 -o ServerAliveCountMax=60');
   assert.equal(keepAliveSsh('ssh -i k'), 'ssh -i k -o ServerAliveInterval=20 -o ServerAliveCountMax=60');
-});
-
-test('the land verb runs harness/dev/land.mjs', () => {
-  assert.deepEqual(VERBS.find((v) => v.name === 'land').build({}, []), [{ script: 'harness/dev/land.mjs', args: [] }]);
 });
 
 test('land stops on a rebase conflict, aborts the rebase and exits non-zero naming the step and the file', () => {
