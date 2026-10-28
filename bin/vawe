@@ -19,7 +19,6 @@ import { recentFailedShipLines } from '../harness/lib/ship-status.mjs';
 import { newEvent } from '../harness/lib/run-events.mjs';
 import { doctorHintFromFile } from '../harness/lib/doctor-hint.mjs';
 import { ensureHooks, gitAt } from '../harness/lib/git-hooks.mjs';
-import { heldEmitter } from '../harness/cli/held-output.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MAX_SCAN = 4_000_000;
@@ -33,22 +32,21 @@ function requireFiles(verb, values, positional) {
   }
 }
 
-function runStep(step, call, after = null) {
-  const emit = heldEmitter(after);
+function runStep(step, call) {
   const argv = step.node || [path.join(ROOT, step.script), ...step.args];
   return new Promise((resolve) => {
     const child = spawn(process.execPath, argv, { stdio: ['inherit', 'pipe', 'pipe'], cwd: ROOT, env: { ...process.env, ...step.env, VAWE_VERB_NOTES: call.notes } });
     let stderr = '';
-    child.stdout.on('data', (d) => emit(() => { process.stdout.write(d); if (call.stdout.length < MAX_SCAN) call.stdout += d; }));
+    child.stdout.on('data', (d) => { process.stdout.write(d); if (call.stdout.length < MAX_SCAN) call.stdout += d; });
     child.stderr.on('data', (d) => { stderr += d; });
-    child.on('close', (code, signal) => emit(() => {
+    child.on('close', (code, signal) => {
       const clean = stripChromeNoise(stderr);
       process.stderr.write(clean);
       call.stderr = clean;
       const hint = code === 0 ? null : doctorHintFromFile(ROOT, stderr);
       if (hint) console.error(hint);
       resolve({ code: code ?? 1, signal });
-    }));
+    });
   });
 }
 
@@ -79,16 +77,8 @@ async function execute(verb, rest, call) {
     return 0;
   }
   const startedMs = Date.now();
-  for (let i = 0; i < steps.length; i++) {
-    const step = steps[i];
+  for (const [i, step] of steps.entries()) {
     if (step.label) console.log(`\n[${verb.name} ${i + 1}/${steps.length}: ${step.label}]`);
-    if (step.overlap) {
-      const first = runStep(step, call);
-      const [a, b] = await Promise.all([first, runStep(steps[++i], call, first)]);
-      const code = stepCode(a, call) || stepCode(b, call);
-      if (code !== 0) return code;
-      continue;
-    }
     const code = stepCode(await runStep(step, call), call);
     if (code !== 0) return code;
   }

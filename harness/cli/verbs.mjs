@@ -177,7 +177,7 @@ export const VERBS = [
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [
-      { script: 'harness/live/dev-warn.mjs', args: [page], overlap: true },
+      { script: 'harness/live/dev-warn.mjs', args: [page] },
       { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.silent ? ['--silent'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : [])] },
       ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
       { script: 'harness/live/dev-end.mjs', args: [page] },
