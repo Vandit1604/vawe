@@ -12,17 +12,18 @@ import { MOVES_DESCRIPTION, MOVES_TITLE, GROUPS, MOVES, JOBS as MOVE_JOBS, group
 import { moveSeoDescription, relatedMoves } from "../move-seo";
 import { SITE_URL } from "../site";
 import { absolutize, bareTitle, codeBlock, heading, item, markdownPage, table, type Link } from "./format";
+import { CONTENT_RENDERERS } from "./pages";
 import { RENDERED, matchPattern, mdUrlOf } from "./routes.mjs";
 
 // The renderers of every page that has a markdown version. Each one reads the data the HTML page
 // reads (lib/blog.ts, lib/moves.ts, lib/easing.ts, lib/inspiration.ts, content/agent-guide.md); none
-// parses the rendered HTML. The route list is lib/md/routes.mjs, which the middleware and the
+// parses the rendered HTML. The pages whose words live in lib/content/ are in lib/md/pages.ts. The route list is lib/md/routes.mjs, which the middleware and the
 // coverage test read too.
 
 export type Doc = { title: string; description: string; body: string; updated?: string; related?: Link[] };
 export type Entry = { path: string; title: string; description: string; kind: "page" | "item"; full: boolean };
 type Params = Record<string, string>;
-type Renderer = { entries(): Entry[]; render(params: Params): Doc | null };
+export type Renderer = { entries(): Entry[]; render(params: Params): Doc | null };
 
 const dates = lastmod as Record<string, string>;
 const read = (file: string) => fs.readFileSync(path.join(process.cwd(), file), "utf8");
@@ -197,6 +198,7 @@ const RENDERERS: Record<string, Renderer> = {
   "/easing/[slug]": easeItem,
   "/inspiration": inspirationIndex,
   "/ai-agents": agentsPage,
+  ...CONTENT_RENDERERS,
 };
 
 const patterns = Object.keys(RENDERERS);

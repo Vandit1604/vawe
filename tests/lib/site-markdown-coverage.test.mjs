@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { RENDERED, SKIPPED, isRendered, matchPattern, skipReason } from '../../site/lib/md/routes.mjs';
+import { DOCS_APP, RENDERED, SKIPPED, isDocsApp, isRendered, matchPattern, skipReason } from '../../site/lib/md/routes.mjs';
 
 const SITE = path.resolve(import.meta.dirname, '../../site');
 const pages = JSON.parse(fs.readFileSync(path.join(SITE, 'lib/site-pages.json'), 'utf8'));
@@ -20,7 +20,7 @@ function appRoutes(dir = path.join(SITE, 'app'), prefix = '') {
   return out;
 }
 
-const covered = (route) => isRendered(route) || skipReason(route) !== undefined;
+const covered = (route) => isRendered(route) || isDocsApp(route) || skipReason(route) !== undefined;
 const asPattern = (route) => route.replace(/\[[^\]]+\]/g, 'x');
 
 test('every site-pages.json route has a markdown renderer or a reasoned skip', () => {
@@ -41,4 +41,16 @@ test('every skip has a reason and no pattern is both rendered and skipped', () =
 test('every rendered pattern names a page that exists', () => {
   const routes = new Set(appRoutes());
   for (const p of RENDERED) assert.ok(routes.has(p), `${p} has no app page.tsx`);
+});
+
+test('docs are covered by the docs app, which serves markdown and lists its pages', () => {
+  const docs = path.resolve(import.meta.dirname, '../../docs-site');
+  for (const f of ['app/docs-md/[[...slug]]/route.ts', 'app/docs/llms-index.json/route.ts', 'proxy.ts']) assert.ok(fs.existsSync(path.join(docs, f)), f);
+  for (const r of pages.docs.map((d) => d.path)) assert.ok(isDocsApp(r) && !isRendered(r), `${r} belongs to the docs app only`);
+  assert.deepEqual(DOCS_APP, ['/docs', '/docs/[slug]']);
+});
+
+test('every content page has a renderer: nothing is skipped', () => {
+  assert.deepEqual(SKIPPED, []);
+  for (const r of pages.routes.map((p) => p.path)) assert.ok(isRendered(r) || isDocsApp(r), `${r} has no renderer`);
 });

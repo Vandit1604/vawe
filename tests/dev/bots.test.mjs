@@ -127,6 +127,7 @@ test('the report summarises a fixture log', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'botlog-'));
   const lines = [
     { t: '2026-10-27T10:00:00Z', class: 'ai-training', bot: 'GPTBot', path: '/a', served: 'html', wantsMd: false, refHost: '', ip: '20.171.206.5' },
+    { t: '2026-10-27T10:01:00Z', class: 'ai-training', bot: 'GPTBot', path: '/missing', served: 'html', wantsMd: false, refHost: '', ip: '6.6.6.6' },
     { t: '2026-10-27T10:01:00Z', class: 'ai-training', bot: 'GPTBot', path: '/missing', status: 404, served: 'html', wantsMd: false, refHost: '', ip: '6.6.6.6' },
     { t: '2026-10-27T10:02:00Z', class: 'ai-user-fetch', bot: 'Claude-User', path: '/a.md', served: 'md', wantsMd: true, refHost: '', ip: '1.2.3.4' },
     { t: '2026-10-27T10:03:00Z', class: 'coding-agent', bot: 'cursor', path: '/a', served: 'html', wantsMd: false, refHost: '' },
@@ -135,7 +136,7 @@ test('the report summarises a fixture log', () => {
   ];
   fs.writeFileSync(path.join(dir, 'bots-2026-10-27.jsonl'), lines.map((l) => JSON.stringify(l)).join('\n') + '\n{torn');
   const events = readEvents(dir, { days: 30, now: Date.parse('2026-10-28T00:00:00Z') });
-  assert.equal(events.length, 5);
+  assert.equal(events.length, 6);
   const text = reportLines(events, { GPTBot: cidrsFromJson({ prefixes: [{ ipv4Prefix: '20.171.206.0/24' }] }), 'Claude-User': null }).join('\n');
   assert.match(text, /GPTBot: 2 hits, 2 pages, md 0%, wantsMd 0%; ip: 1 verified, 1 UNVERIFIED/);
   assert.match(text, /404: 1 on \/missing \(1\)/);

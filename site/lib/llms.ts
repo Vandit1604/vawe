@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { BLOG_URL } from "./blog";
+import { docMarkdown, docsIndex } from "./docs-index";
 import { INSPIRATION, titleOf } from "./inspiration";
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME } from "./site";
 import { item } from "./md/format";
@@ -22,7 +23,7 @@ const withMarkdownLinks = (text: string) =>
 
 const itemsUnder = (prefix: string) => listMarkdownRoutes().filter((e) => e.kind === "item" && e.path.startsWith(prefix));
 
-export function llmsText() {
+export async function llmsText() {
   const base = fs.readFileSync(path.join(process.cwd(), "content/llms-base.txt"), "utf8");
   const posts = itemsUnder("/blog/");
   const blog = [
@@ -36,6 +37,9 @@ export function llmsText() {
     return `- [${titleOf(p)}](${p.url}): by ${by}${p.madeWith ? `, made with ${p.madeWith}` : ""}`;
   }).join("\n");
   const components = itemsUnder("/video-components/").map((e) => item(e.title, mdUrlOf(e.path), e.description)).join("\n");
+  const compare = itemsUnder("/vs/").map((e) => item(e.title, mdUrlOf(e.path), e.description)).join("\n");
+  const docs = await docsIndex();
+  const docsSection = docs.length ? ["## Docs", ...docs.map((d) => item(d.title, d.markdown, d.description))].join("\n") : "";
   const machine = [
     "## Machine-readable",
     item("Full content", "/llms-full.txt", "the guide and the main pages in one file"),
@@ -43,18 +47,34 @@ export function llmsText() {
     item("Sitemap", "/sitemap.xml", "every URL of the site"),
     item("AI usage policy", "/ai.txt", "what AI systems may do with this site"),
   ].join("\n");
-  const text = base.replace("{{BLOG}}", blog).replace("{{INSPIRATION}}", inspiration).replace("{{VIDEO_COMPONENTS}}", components);
+  const text = base.replace("{{BLOG}}", blog).replace("{{INSPIRATION}}", inspiration).replace("{{VIDEO_COMPONENTS}}", components).replace("{{COMPARE}}", compare).replace("{{DOCS}}\n\n", docsSection ? `${docsSection}\n\n` : "");
   const sync = `<!-- Keep in sync with ${absoluteUrl("/robots.txt")} and ${absoluteUrl("/ai.txt")}. -->`;
   return `${withMarkdownLinks(text).trimEnd()}\n\n${machine}\n\n${sync}\n`;
 }
 
-export function llmsFull() {
+// Whole pages only, in order: the site pages come first, so the docs at the end are what a tight budget drops.
+function cutToBudget(parts: string[]) {
+  const kept: string[] = [];
+  let size = 0;
+  for (const part of parts) {
+    size += part.length + 9;
+    if (size > FULL_MAX_CHARS) break;
+    kept.push(part);
+  }
+  return `${kept.join("\n\n---\n\n")}\n`;
+}
+
+export async function llmsFull() {
   const pages = listMarkdownRoutes()
     .filter((e) => e.full)
     .map((e) => ({ path: e.path, md: renderMarkdown(e.path)?.text ?? "" }))
     .filter((p) => p.md);
+  const docs = await docsIndex();
+  const docPages = (await Promise.all(docs.map(async (d) => ({ path: new URL(d.url).pathname, md: await docMarkdown(d) })))).filter((d) => d.md);
   const head = `# ${SITE_NAME} - full content\n\n> ${SITE_DESCRIPTION}\n\nGenerated: ${new Date().toISOString().slice(0, 10)}\n\nThe guide, the main pages and the newest items of each collection. Every page and item: ${absoluteUrl("/llms.txt")}`;
-  const text = `${[head, ...pages.map((p) => `<!-- source: ${absoluteUrl(p.path)} -->\n${p.md.trim()}`)].join("\n\n---\n\n")}\n`;
-  if (text.length > FULL_MAX_CHARS) console.warn(`llms-full.txt is ${text.length} characters, over the ${FULL_MAX_CHARS} budget: lower a *_FULL_LIMIT in lib/md/registry.ts`);
-  return text;
+  const all = [...pages, ...docPages];
+  const text = `${[head, ...all.map((p) => `<!-- source: ${absoluteUrl(p.path)} -->\n${p.md.trim()}`)].join("\n\n---\n\n")}\n`;
+  if (text.length <= FULL_MAX_CHARS) return text;
+  console.warn(`llms-full.txt is ${text.length} characters, over the ${FULL_MAX_CHARS} budget: docs pages after the cut are dropped; lower a *_FULL_LIMIT in lib/md/registry.ts`);
+  return cutToBudget([head, ...all.map((p) => `<!-- source: ${absoluteUrl(p.path)} -->\n${p.md.trim()}`)]);
 }

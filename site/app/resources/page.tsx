@@ -5,7 +5,9 @@ import { MatTile } from "../components/MatTile";
 import { pageMetadata } from "../components/seo";
 import { PageTop, Toc } from "../components/Xp";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
-import { RESOURCES, type Item } from "../../lib/content/resources";
+import { RESOURCES, resourceGroups, type Item } from "../../lib/content/resources";
+import { llmsFull, llmsText } from "../../lib/llms";
+import { renderMarkdown } from "../../lib/md/registry";
 import "../components/study.css";
 import "../components/intent.css";
 import "./resources.css";
@@ -13,8 +15,6 @@ import "./resources.css";
 export const revalidate = 3600;
 
 export const metadata = pageMetadata({ ...RESOURCES.meta, path: RESOURCES.path });
-
-const { groups: GROUPS } = RESOURCES;
 
 function RowIcon({ name }: { name: Item["icon"] }) {
   return <span className="rs-ico">{name === "github" ? <GithubMark size={16} /> : <Icon name={name} size={16} />}</span>;
@@ -58,9 +58,15 @@ function ToolCard({ i }: { i: Item }) {
   );
 }
 
-const COUNT = GROUPS.reduce((n, g) => n + g.items.length, 0);
+const bytes = (text: string) => Buffer.byteLength(text);
 
-export default function Resources() {
+export default async function Resources() {
+  const GROUPS = resourceGroups({
+    llms: bytes(await llmsText()),
+    llmsFull: bytes(await llmsFull()),
+    agents: bytes(renderMarkdown("/ai-agents")?.text ?? ""),
+  });
+  const COUNT = GROUPS.reduce((n, g) => n + g.items.length, 0);
   return (
     <div className="shell">
       <Header active="resources" />

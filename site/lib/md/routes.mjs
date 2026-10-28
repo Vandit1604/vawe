@@ -2,7 +2,7 @@
 // runtime) and tests/lib/site-markdown-coverage.test.mjs read it too. lib/md/registry.ts holds one
 // renderer per RENDERED pattern and throws at load if the two lists differ.
 //
-// To add a page: put its pattern in RENDERED and add its renderer to registry.ts. A page that has no
+// To add a page: put its pattern in RENDERED and add its renderer to registry.ts (or lib/md/pages.ts for a page whose words live in lib/content/). A page that has no
 // renderer yet goes in SKIPPED with the reason; the coverage test fails for any page in neither list.
 
 export const RENDERED = [
@@ -14,31 +14,31 @@ export const RENDERED = [
   "/easing",
   "/easing/[slug]",
   "/inspiration",
+  "/",
+  "/features",
+  "/resources",
+  "/about",
+  "/determinism",
+  "/when-determinism-matters",
+  "/problems",
+  "/roadmap",
+  "/launch-video",
+  "/remotion-alternatives",
+  "/hyperframes-alternatives",
+  "/vs/[slug]",
 ];
 
-const COPY_IN_JSX = "phase 2: copy moves to a data file";
-const DOCS = "phase 3: served from docs-site MDX";
+// The docs are a separate app (docs-site/). It serves its own .md and negotiated markdown, and
+// lists its pages at /docs/llms-index.json, so the site neither renders nor skips them.
+export const DOCS_APP = ["/docs", "/docs/[slug]"];
 
-export const SKIPPED = [
-  { pattern: "/", reason: COPY_IN_JSX },
-  { pattern: "/features", reason: COPY_IN_JSX },
-  { pattern: "/resources", reason: COPY_IN_JSX },
-  { pattern: "/about", reason: COPY_IN_JSX },
-  { pattern: "/determinism", reason: COPY_IN_JSX },
-  { pattern: "/when-determinism-matters", reason: COPY_IN_JSX },
-  { pattern: "/problems", reason: COPY_IN_JSX },
-  { pattern: "/roadmap", reason: COPY_IN_JSX },
-  { pattern: "/launch-video", reason: COPY_IN_JSX },
-  { pattern: "/remotion-alternatives", reason: COPY_IN_JSX },
-  { pattern: "/hyperframes-alternatives", reason: COPY_IN_JSX },
-  { pattern: "/vs/[slug]", reason: COPY_IN_JSX },
-  { pattern: "/docs", reason: DOCS },
-  { pattern: "/docs/[slug]", reason: DOCS },
-];
+// No page lacks a renderer today. A page that has none yet goes here with the reason; the coverage
+// test fails for any page in neither list.
+export const SKIPPED = [];
 
 // Paths the middleware never rewrites: real files (the move .md files live in public/moves), the
 // docs app and the site-level data files.
-export const MD_EXCLUDED = ["/moves/", "/docs", "/docs-static/", "/api/", "/_next/", "/.well-known/", "/llms.txt", "/llms-full.txt", "/ai.txt", "/robots.txt", "/sitemap.xml"];
+export const MD_EXCLUDED = ["/moves/", "/docs", "/docs-static/", "/api/", "/_next/", "/.well-known/", "/llms.txt", "/llms-full.txt", "/ai.txt", "/robots.txt", "/sitemap.xml", "/rss.xml", "/blog/rss.xml"];
 
 // "/blog/[slug]" against "/blog/my-post": the params, or null.
 export function matchPattern(pattern, path) {
@@ -58,6 +58,7 @@ export function matchPattern(pattern, path) {
 
 export const isRendered = (path) => RENDERED.some((p) => matchPattern(p, path));
 export const skipReason = (path) => SKIPPED.find((s) => matchPattern(s.pattern, path))?.reason;
+export const isDocsApp = (path) => DOCS_APP.some((p) => matchPattern(p, path));
 
 // "/blog/my-post.md" is "/blog/my-post"; "/index.md" is "/". Null when the path has no .md suffix.
 export function pathOfMdUrl(pathname) {

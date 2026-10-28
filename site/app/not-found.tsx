@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { logBotNotFound } from "../lib/bots";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 
 export const metadata = { title: "Page not found | vawe", robots: { index: false } };
 
-export default function NotFound() {
+export default async function NotFound() {
+  logBotNotFound(await headers());
   return (
     <div className="shell">
       <Header />

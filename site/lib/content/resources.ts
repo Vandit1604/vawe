@@ -7,8 +7,6 @@ import { EASES } from "../easing";
 import { MOVES } from "../moves";
 import { INSPIRATION, INSPIRATION_PATH } from "../inspiration";
 import { allPosts } from "../blog";
-import { renderMarkdown } from "../md/registry";
-import { llmsFull, llmsText } from "../llms";
 import { RIVALS } from "./vs";
 import type { Crumb, Meta } from "./types";
 
@@ -39,7 +37,10 @@ const skill = (name: string, line: string): Item => ({
   external: true,
 });
 
-const GROUPS: Group[] = [
+// The sizes of the generated files, in bytes. The markdown renderer passes none: those files render this page too.
+export type FileSizes = { llms: number; llmsFull: number; agents: number };
+
+export const resourceGroups = (sizes?: FileSizes): Group[] => [
   {
     id: "tools",
     title: "Tools",
@@ -84,9 +85,9 @@ const GROUPS: Group[] = [
     lead: "Plain files an AI agent can fetch without a browser.",
     tile: { word: "Agents", tone: "graphite", detail: "agents", shift: -1 },
     items: [
-      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and video component.", icon: "file", meta: kb(Buffer.byteLength(llmsText())), code: true },
-      { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the video components in one text file.", icon: "file", meta: kb(Buffer.byteLength(llmsFull())), code: true },
-      { href: "/ai-agents.md", title: "/ai-agents.md", line: "How an agent writes and renders a film, as Markdown.", icon: "markdown", meta: kb(Buffer.byteLength(renderMarkdown("/ai-agents")?.text ?? "")), code: true },
+      { href: "/llms.txt", title: "/llms.txt", line: "The site as a short index: install, the page contract, every page and video component.", icon: "file", meta: sizes && kb(sizes.llms), code: true },
+      { href: "/llms-full.txt", title: "/llms-full.txt", line: "The guide, the pages and the video components in one text file.", icon: "file", meta: sizes && kb(sizes.llmsFull), code: true },
+      { href: "/ai-agents.md", title: "/ai-agents.md", line: "How an agent writes and renders a film, as Markdown.", icon: "markdown", meta: sizes && kb(sizes.agents), code: true },
       { href: "/moves/index.json", title: "/moves/index.json", line: "Every video component with its group, look, jobs, duration and file, to filter by script.", icon: "json", meta: publicSize("moves/index.json"), code: true },
       { href: "/ai-agents", title: "How an agent installs vawe", line: "Clone the repo, run bin/vawe doctor, then write one HTML page.", icon: "terminal", meta: "guide" },
     ],
@@ -148,7 +149,6 @@ export const RESOURCES = {
   } as Meta,
   crumb: { current: "Resources" } as Crumb,
   h1: "Resources for motion graphics by code",
-  groups: GROUPS,
   lede: (count: number) => `Easing curves, video components, files for AI agents, guides and comparisons: ${count} links in six groups.`,
   tocLabel: "Groups",
 };

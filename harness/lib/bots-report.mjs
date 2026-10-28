@@ -93,11 +93,14 @@ export function summarize(events, lists = {}) {
     }
     const key = `${e.class}/${e.bot}`;
     const g = groups.get(key) ?? { class: e.class, bot: e.bot, hits: 0, paths: new Map(), md: 0, wantsMd: 0, nf: new Map(), verified: 0, unverified: 0, noList: 0, noIp: 0 };
+    if (e.status === 404) {
+      bump(g.nf, e.path);
+      continue;
+    }
     g.hits++;
     bump(g.paths, e.path);
     if (e.served === 'md') g.md++;
     if (e.wantsMd) g.wantsMd++;
-    if (e.status === 404) bump(g.nf, e.path);
     const list = lists[e.bot];
     if (!IP_LISTS[e.bot] || list === null || list === undefined) g.noList++;
     else if (!e.ip) g.noIp++;
