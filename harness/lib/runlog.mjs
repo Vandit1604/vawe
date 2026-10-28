@@ -1,18 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { randomBytes } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 
-const PROCESS_ID = randomBytes(2).toString('hex');
 const RUNS_SUFFIX = '.runs.jsonl';
 
 function gitInfo(cwd) {
   try {
     const opts = { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], cwd };
     const sha = execFileSync('git', ['rev-parse', '--short', 'HEAD'], opts).trim();
-    const dirty = execFileSync('git', ['status', '--porcelain'], opts).trim().length > 0;
-    return { git: sha || null, dirty };
-  } catch { return { git: null, dirty: false }; }
+    const trackedDirty = execFileSync('git', ['status', '--porcelain', '--untracked-files=no'], opts).trim().length > 0;
+    return { git: sha || null, trackedDirty };
+  } catch { return { git: null, trackedDirty: false }; }
 }
 
 /** A film's key: its file name, or its folder name for a page (films/<name>/page.html). */
@@ -28,29 +27,33 @@ export function runsPathFor(film, root = '.') {
 }
 
 // An Agent-tool subagent shares the session id and CLAUDE_PID with its parent (measured 2026-09-27), so
-// only VAWE_AGENT names an agent. Without it the id is the session plus one random tag per process: it
-// groups nothing across commands, and `namedAgent` tells it from a real name by the "#".
-export function agentId() {
-  if (process.env.VAWE_AGENT) return process.env.VAWE_AGENT;
-  const session = process.env.CLAUDE_CODE_SESSION_ID;
-  return `${session ? session.slice(0, 8) : 'shell'}#${PROCESS_ID}`;
+// only VAWE_AGENT names an agent. Without it the id is the session plus a tag stable over the session's
+// commands, and `namedAgent` tells it from a real name by the "#".
+export function agentId(env = process.env) {
+  if (env.VAWE_AGENT) return env.VAWE_AGENT;
+  const session = env.CLAUDE_CODE_SESSION_ID;
+  const tag = createHash('sha1').update(`${session ?? ''}:${env.CLAUDE_PID ?? process.ppid}`).digest('hex').slice(0, 4);
+  return `${session ? session.slice(0, 8) : 'shell'}#${tag}`;
 }
+
+// CLAUDE_CODE_SUBAGENT_MODEL is the only model name Claude Code puts in a Bash call's environment (inspected 2026-10-28).
+export const modelId = (env = process.env) => env.VAWE_MODEL || env.CLAUDE_CODE_SUBAGENT_MODEL || null;
 
 /** The agent id when a person or a brief chose it (VAWE_AGENT), else null. Old records hold a CLAUDE_PID, which counts as a name. */
 export const namedAgent = (agent) => (agent && !String(agent).includes('#') ? String(agent) : null);
 
 /** appendRun(film, event, { root }): write one JSON line to <root>/out, the event's own fields after the common ones (harness/lib/run-events.mjs builds them). `root` is also the repo the git stamp reads. */
 export function appendRun(film, event = {}, { root } = {}) {
-  const { git, dirty } = gitInfo(root);
+  const { git, trackedDirty } = gitInfo(root);
   const line = {
     at: new Date().toISOString(),
     cmd: event.cmd || 'unknown',
     film: filmKeyOf(film),
     session: process.env.CLAUDE_CODE_SESSION_ID || null,
     agent: agentId(),
-    model: process.env.VAWE_MODEL || null,
+    model: modelId(),
     git,
-    dirty,
+    trackedDirty,
     ...event,
   };
   const out = runsPathFor(film, root);

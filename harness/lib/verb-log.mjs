@@ -47,14 +47,22 @@ export function causeOf(reason) {
 
 const tenths = (s) => Math.round(s * 10) / 10;
 
-/** The runs.jsonl fields of one call. `pageHash` is the digest of the page a critique looked at (the ship gate reads it). `stage` is stage-say's stage for the film when the call started; `tagged` is false for a run no VAWE_AGENT names. */
-export function verbEvent({ verb, args, stage = null, startMs, endMs, exitCode, reason = null, slotWaitS = null, images = [], pageHash = null, env = process.env }) {
+/** The reason a verb refused to run, from its `vawe: <verb> refused: <reason>` stderr line; null when it did not refuse. */
+export function refusalOf(stderr = '') {
+  return /^vawe: \S+ refused: (.+)$/m.exec(stderr)?.[1] ?? null;
+}
+
+/** The runs.jsonl fields of one call. `pageHash` is the digest of the page the call concerned (the ship gate reads it on a critique). `stage` is the loop stage of the call (verbStage, else stage-say's stage for the film); `tagged` is false for a run no VAWE_AGENT names. `help` marks a `<verb> --help` lookup, `usage` a call the argument parser rejected, `refused` the reason a verb declined to run. */
+export function verbEvent({ verb, args, stage = null, startMs, endMs, exitCode, reason = null, slotWaitS = null, images = [], pageHash = null, help = false, usage = false, refused = null, env = process.env }) {
   return {
     cmd: 'verb', verb, args, stage,
     start: new Date(startMs).toISOString(), durationS: tenths((endMs - startMs) / 1000),
     exitCode, error: exitCode === 0 ? null : reason, slotWaitS: slotWaitS == null ? null : tenths(slotWaitS),
     images, tagged: namedAgent(agentId()) !== null,
     ...(pageHash ? { pageHash } : {}),
+    ...(help ? { help: true } : {}),
+    ...(usage ? { usage: true } : {}),
+    ...(refused ? { refused } : {}),
     ...(verb === 'ship' && env.VAWE_UNATTENDED === '1' ? { unattended: true } : {}),
   };
 }

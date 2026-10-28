@@ -158,14 +158,20 @@ export function nextStep(page, root = process.cwd()) {
   return { name, stage: 'judge', next: SAY.critique(name, rel), why: 'the final is rendered; a fresh session judges it' };
 }
 
+/** The page film git sees as changed and edited most recently (within RECENT_MS), or null. */
+export function recentPage(root) {
+  const recent = pages(root).map((p) => ({ p, t: mtime(p) })).filter((x) => Date.now() - x.t < RECENT_MS).sort((a, b) => b.t - a.t);
+  return recent.length ? recent[0].p : null;
+}
+
 function main() {
   if (process.argv.includes('--reset')) return;
   const root = process.cwd();
   const stale = staleCheckoutLine(root);
   if (stale) console.log(`vawe: ${stale}`);
-  const recent = pages(root).map((p) => ({ p, t: mtime(p) })).filter((x) => Date.now() - x.t < RECENT_MS).sort((a, b) => b.t - a.t);
-  if (!recent.length) return;
-  const s = nextStep(recent[0].p, root);
+  const page = recentPage(root);
+  if (!page) return;
+  const s = nextStep(page, root);
   console.log(`vawe: ${s.name}: ${s.why}.\n  next: ${s.next}`);
 }
 
