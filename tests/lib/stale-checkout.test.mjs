@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { commitsBehind, fetchDue, staleLine, staleCheckoutLine } from '../../harness/lib/stale-checkout.mjs';
+import { commitsBehind, fetchDue, staleLine, staleCheckoutLine, canFastForward } from '../../harness/lib/stale-checkout.mjs';
 
 const git = (cwd, ...args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 
@@ -41,6 +41,8 @@ test('a worktree behind origin/main gets the line after one fetch, then the cach
     fs.writeFileSync(path.join(a, 'f.txt'), '1');
     git(a, 'add', 'f.txt'); git(a, 'commit', '-qm', 'one'); git(a, 'push', '-q', 'origin', 'HEAD:main');
     git(dir, 'clone', '-q', origin, b);
+    git(b, 'config', 'user.email', 't@t'); git(b, 'config', 'user.name', 't');
+    git(b, 'commit', '-q', '--allow-empty', '-m', 'local');
     assert.equal(staleCheckoutLine(b, { now: 1_000_000 }), '');
     fs.writeFileSync(path.join(a, 'f.txt'), '2');
     git(a, 'commit', '-qam', 'two'); git(a, 'push', '-q', 'origin', 'HEAD:main');
@@ -54,4 +56,71 @@ test('a worktree behind origin/main gets the line after one fetch, then the cach
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+const ONLY_NOW = { now: Number.MAX_SAFE_INTEGER };
+function stubGit({ ahead = 0, edits = '', detached = false, refuse = false, operationDir = null }) {
+  const calls = [];
+  const fn = (args) => {
+    calls.push(args.join(' '));
+    const [cmd] = args;
+    if (cmd === 'fetch') return '';
+    if (cmd === 'rev-list') return args[2] === 'HEAD..origin/main' ? '3\n' : `${ahead}\n`;
+    if (cmd === 'status') return edits;
+    if (cmd === 'rev-parse') return `${operationDir}\n`;
+    if (cmd === 'symbolic-ref' && detached) throw new Error('detached');
+    if ((cmd === 'merge' || cmd === 'checkout') && refuse) throw new Error('untracked file would be overwritten');
+    return '';
+  };
+  return { fn, calls };
+}
+const gitDirWith = (name) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-gitdir-'));
+  if (name) fs.mkdirSync(path.join(dir, name));
+  return dir;
+};
+const staleRoot = () => fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-stale-root-'));
+
+test('canFastForward is true only for a behind checkout with nothing of its own', () => {
+  const clean = { behind: 2, ahead: 0, trackedEdits: false, operation: '' };
+  assert.equal(canFastForward(clean), true);
+  assert.equal(canFastForward({ ...clean, behind: 0 }), false);
+  assert.equal(canFastForward({ ...clean, ahead: 1 }), false);
+  assert.equal(canFastForward({ ...clean, trackedEdits: true }), false);
+  assert.equal(canFastForward({ ...clean, operation: 'a rebase is in progress' }), false);
+});
+
+test('a clean checkout behind origin/main moves forward on a branch and prints one line', () => {
+  const { fn, calls } = stubGit({ operationDir: gitDirWith('') });
+  assert.equal(staleCheckoutLine(staleRoot(), { ...ONLY_NOW, git: fn }), 'this checkout moved forward 3 commits to origin/main');
+  assert.ok(calls.includes('merge --ff-only origin/main'));
+});
+
+test('a clean detached checkout moves with checkout --detach', () => {
+  const { fn, calls } = stubGit({ detached: true, operationDir: gitDirWith('') });
+  assert.match(staleCheckoutLine(staleRoot(), { ...ONLY_NOW, git: fn }), /moved forward 3 commits/);
+  assert.ok(calls.includes('checkout --detach origin/main'));
+});
+
+test('local commits keep the warning and run no move', () => {
+  const { fn, calls } = stubGit({ ahead: 1, operationDir: gitDirWith('') });
+  assert.match(staleCheckoutLine(staleRoot(), { ...ONLY_NOW, git: fn }), /3 commits behind origin\/main/);
+  assert.ok(!calls.some((c) => c.startsWith('merge') || c.startsWith('checkout')));
+});
+
+test('tracked edits keep the warning and run no move', () => {
+  const { fn, calls } = stubGit({ edits: ' M f.txt\n', operationDir: gitDirWith('') });
+  assert.match(staleCheckoutLine(staleRoot(), { ...ONLY_NOW, git: fn }), /commit or stash/);
+  assert.ok(!calls.some((c) => c.startsWith('merge') || c.startsWith('checkout')));
+});
+
+test('a rebase in progress keeps the warning and runs no move', () => {
+  const { fn, calls } = stubGit({ operationDir: gitDirWith('rebase-merge') });
+  assert.match(staleCheckoutLine(staleRoot(), { ...ONLY_NOW, git: fn }), /3 commits behind origin\/main/);
+  assert.ok(!calls.some((c) => c.startsWith('merge') || c.startsWith('checkout')));
+});
+
+test('a git refusal falls back to the warning', () => {
+  const { fn } = stubGit({ refuse: true, operationDir: gitDirWith('') });
+  assert.match(staleCheckoutLine(staleRoot(), { ...ONLY_NOW, git: fn }), /3 commits behind origin\/main.*git rebase origin\/main/);
 });
