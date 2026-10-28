@@ -9,7 +9,11 @@ let removed = 0;
 for (const w of plan) {
   if (w.keep) { console.log(`  keep    ${w.path}  (${w.branch || 'detached'}): ${w.keep}`); continue; }
   if (!yes) { console.log(`  remove  ${w.path}  (${w.branch}): merged, clean, unlocked`); continue; }
-  try { removeWorktree(process.cwd(), w); removed++; console.log(`  removed ${w.path}  (${w.branch})`); }
+  try {
+    const branchKept = removeWorktree(process.cwd(), w);
+    removed++;
+    console.log(`  removed ${w.path}  (${w.branch})${branchKept ? `, branch kept: ${branchKept}` : ''}`);
+  }
   catch (e) { console.log(`  keep    ${w.path}  (${w.branch}): git refused: ${String(e.stderr || e.message).trim().split('\n')[0]}`); }
 }
 

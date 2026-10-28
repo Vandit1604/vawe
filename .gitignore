@@ -17,6 +17,7 @@ assets/fonts/*.woff
 # bin/vawe is the tracked CLI; anything else in bin/ is a local build
 bin/*
 !bin/vawe
+!bin/vawe-dev
 
 # verify + previews (generated output). out/ itself is covered wholesale above; these two live
 # outside out/.

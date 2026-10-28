@@ -54,10 +54,19 @@ export function staleCheckoutLine(root, { now = Date.now(), git = gitIn(root) } 
   const trackedEdits = git(['status', '--porcelain', '--untracked-files=no']).trim().length > 0;
   const ahead = Number.parseInt(git(['rev-list', '--count', 'origin/main..HEAD']), 10) || 0;
   const operation = operationInProgress(git(['rev-parse', '--absolute-git-dir']).trim());
-  if (canFastForward({ behind, ahead, trackedEdits, operation }) && fastForward(git)) {
+  const canMove = canFastForward({ behind, ahead, trackedEdits, operation });
+  const overwritten = canMove ? firstExistingAdd(root, git) : '';
+  if (overwritten) return `${staleLine(behind, trackedEdits)}; not moved: origin/main adds ${overwritten}, which exists here`;
+  if (canMove && fastForward(git)) {
     return `this checkout moved forward ${behind} commit${behind === 1 ? '' : 's'} to origin/main`;
   }
   return staleLine(behind, trackedEdits);
+}
+
+/** The first file origin/main adds that already sits on disk (an ignored or untracked file a move would overwrite), or ''. */
+function firstExistingAdd(root, git) {
+  const added = git(['diff', '--name-only', '--diff-filter=A', 'HEAD', 'origin/main']).split('\n').filter(Boolean);
+  return added.find((f) => fs.existsSync(path.join(root, f))) || '';
 }
 
 function fastForward(git) {

@@ -59,7 +59,7 @@ test('a worktree behind origin/main gets the line after one fetch, then the cach
 });
 
 const ONLY_NOW = { now: Number.MAX_SAFE_INTEGER };
-function stubGit({ ahead = 0, edits = '', detached = false, refuse = false, operationDir = null }) {
+function stubGit({ ahead = 0, edits = '', detached = false, refuse = false, operationDir = null, added = '' }) {
   const calls = [];
   const fn = (args) => {
     calls.push(args.join(' '));
@@ -67,6 +67,7 @@ function stubGit({ ahead = 0, edits = '', detached = false, refuse = false, oper
     if (cmd === 'fetch') return '';
     if (cmd === 'rev-list') return args[2] === 'HEAD..origin/main' ? '3\n' : `${ahead}\n`;
     if (cmd === 'status') return edits;
+    if (cmd === 'diff') return added;
     if (cmd === 'rev-parse') return `${operationDir}\n`;
     if (cmd === 'symbolic-ref' && detached) throw new Error('detached');
     if ((cmd === 'merge' || cmd === 'checkout') && refuse) throw new Error('untracked file would be overwritten');
@@ -123,4 +124,14 @@ test('a rebase in progress keeps the warning and runs no move', () => {
 test('a git refusal falls back to the warning', () => {
   const { fn } = stubGit({ refuse: true, operationDir: gitDirWith('') });
   assert.match(staleCheckoutLine(staleRoot(), { ...ONLY_NOW, git: fn }), /3 commits behind origin\/main.*git rebase origin\/main/);
+});
+
+test('a file origin/main adds that already exists on disk blocks the move and is named', () => {
+  const root = staleRoot();
+  fs.mkdirSync(path.join(root, 'assets'));
+  fs.writeFileSync(path.join(root, 'assets', 'logo.svg'), 'local');
+  const { fn, calls } = stubGit({ operationDir: gitDirWith(''), added: 'docs/new.md\nassets/logo.svg\n' });
+  const line = staleCheckoutLine(root, { ...ONLY_NOW, git: fn });
+  assert.match(line, /3 commits behind origin\/main.*not moved: origin\/main adds assets\/logo\.svg, which exists here/);
+  assert.ok(!calls.some((c) => c.startsWith('merge') || c.startsWith('checkout')));
 });

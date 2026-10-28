@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+// vawe-dev: tools for working on the framework itself. `vawe-dev --help` lists the verbs; `bin/vawe` makes films.
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { closest, parseArgs, UsageError, verbHelp } from '../harness/cli/parse.mjs';
+import { DEV_VERBS } from '../harness/dev/verbs.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+function topHelp() {
+  const width = Math.max(...DEV_VERBS.map((v) => v.name.length)) + 2;
+  return ['vawe-dev: tools for working on the framework.', '', 'usage: vawe-dev <verb> [args]   (vawe-dev <verb> --help for flags)', '',
+    ...DEV_VERBS.map((v) => `  ${v.name.padEnd(width)}${v.summary}`)].join('\n');
+}
+
+function main(argv) {
+  const [name, ...rest] = argv;
+  if (!name || name === '--help' || name === '-h') return console.log(topHelp());
+  const verb = DEV_VERBS.find((v) => v.name === name);
+  if (!verb) {
+    const guess = closest(name, DEV_VERBS.map((v) => v.name));
+    throw new UsageError(`unknown verb "${name}"${guess ? `; did you mean ${guess}?` : ''}; vawe-dev --help lists them`);
+  }
+  if (rest.includes('--help') || rest.includes('-h')) return console.log(verbHelp(verb).replace(/^vawe /m, 'vawe-dev '));
+  const { values } = parseArgs(verb, rest);
+  const step = verb.build(values);
+  const r = spawnSync(process.execPath, [path.join(ROOT, step.script), ...step.args], { stdio: 'inherit', cwd: process.cwd() });
+  process.exitCode = r.status ?? 1;
+}
+
+try { main(process.argv.slice(2)); } catch (e) {
+  if (!(e instanceof UsageError)) throw e;
+  console.error(`vawe-dev: ${e.message}`);
+  process.exitCode = 2;
+}

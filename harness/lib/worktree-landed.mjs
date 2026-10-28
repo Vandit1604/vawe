@@ -47,6 +47,20 @@ export function dirtyFiles(t) {
     .map((l) => l.slice(3).replace(/^"|"$/g, '')).filter((f) => f && !f.endsWith('/'));
 }
 
+function newestMtime(dir, files) {
+  let best = 0;
+  for (const f of files) {
+    try { const t = fs.statSync(path.join(dir, f)).mtimeMs; if (t > best) best = t; } catch { /* raced or deleted, skip */ }
+  }
+  return best;
+}
+
+/** When a worktree last saw work, in ms: its newest commit or its newest dirty file, 0 when neither is found. */
+export function worktreeActivity(t) {
+  const ts = git(['log', '-1', '--format=%ct'], { cwd: t.path });
+  return Math.max(ts ? Number(ts) * 1000 : 0, newestMtime(t.path, dirtyFiles(t)));
+}
+
 const CAP_COMMITS = 200;
 
 /** `{ commits, stranded, capped }` for one worktree: commit count ahead of main, the list of files
