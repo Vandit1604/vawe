@@ -69,10 +69,10 @@ async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
   return shots;
 }
 
-/** The full-size still of a shot when one is on disk, else undefined (the page then zooms into the draft still). */
-function zoomStill(shot) {
+/** The full-size still of a shot when one on disk is newer than the page, else undefined (the page then zooms into the draft still). */
+export function zoomStill(shot, pageMs) {
   const onDisk = path.join(path.dirname(shot.png), `${shot.id}-full.png`);
-  return shot.fullPng ?? (fs.existsSync(onDisk) ? onDisk : undefined);
+  return shot.fullPng ?? (fs.existsSync(onDisk) && fs.statSync(onDisk).mtimeMs >= pageMs ? onDisk : undefined);
 }
 
 async function main(argv) {
@@ -111,7 +111,7 @@ async function main(argv) {
   const html = path.join(path.dirname(abs), 'frames.html');
   const cuts = cutSpans(shots, Number(readPageMeta(abs, 'duration')));
   await writeArtboardSheet({ title: `${film}: key frames`, aspect: readPageMeta(abs, 'aspect') || '16:9', htmlPath: html, png: sheet,
-    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png, fullPng: zoomStill(s) })) });
+    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png, fullPng: zoomStill(s, fs.statSync(abs).mtimeMs) })) });
   console.log([`frames: ${head}`, `  sheet  ${sheet}`, `  page   ${html}`, ...paths, ...rules, done()].join('\n'));
 }
 
