@@ -198,7 +198,7 @@ export function logBotRequest(req: MiddlewareRequest, served?: "html" | "md", st
   if (event) appendBotEvent(dir, event).catch(() => {});
 }
 
-// The middleware cannot see the status; the 404 page can. It logs a second line for the same request,
+// The middleware cannot see the status; lib/missing.ts can. It logs a second line for the same request,
 // which the report counts under 404s and not as another hit. The middleware passes the path in x-bot-path.
 export function logBotNotFound(headers: { get(name: string): string | null }): void {
   logBotRequest({ headers, nextUrl: { pathname: headers.get("x-bot-path") ?? "", searchParams: { get: () => null } } }, "html", 404);

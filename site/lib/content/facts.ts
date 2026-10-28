@@ -27,7 +27,7 @@ export const FACTS: Fact[] = [
     id: "account",
     lead: "No account.",
     q: "Does vawe need an account or a hosted API?",
-    a: ["No. There is no account, no hosted API and no per-render fee. vawe runs on your machine."],
+    a: ["vawe needs no account and no hosted API, and has no per-render fee. It runs on your machine."],
   },
   {
     id: "needs",
