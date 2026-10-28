@@ -1,6 +1,7 @@
 import { source } from '@/lib/source';
 import { DocsPage, DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
+import { markdownUrl } from '@/lib/markdown';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 
@@ -45,7 +46,7 @@ export async function generateMetadata(props: {
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: { canonical: url, types: { 'text/markdown': markdownUrl(page) } },
     openGraph: {
       title,
       description,
