@@ -68,18 +68,22 @@ const routePathOf = (pageFile) => {
   return r === '' ? '/' : `/${r}`;
 };
 const isDynamicRoute = (routePath) => routePath.includes('[');
+// A catch-all segment owns the URLs no route claims (the bot-logging 404), so it has no canonical or card.
+const isCatchAll = (pageFile) => /\[\.\.\./.test(path.relative(SITE_APP, pageFile));
+// /vs/[slug] -> a pattern that matches /vs/remotion.
+const routePattern = (routePath) => new RegExp(`^${routePath.replace(/\[[^\]]+\]/g, '[^/]+')}$`);
 
 // ===== 1. every route has a canonical ==========================================================
 {
-  const layout = read(path.join(SITE_APP, 'layout.tsx'));
-  if (!/alternates:\s*\{\s*canonical:\s*["']\/["']/.test(layout)) {
-    f.fail('seo-no-canonical', 'the home route "/" has no canonical set in the root layout', {
-      at: 'site/app/layout.tsx',
-      fix: 'set metadata.alternates.canonical to "/" in the root layout (home has no page-level metadata export)',
+  const homeCanonical = /alternates:\s*\{\s*canonical:\s*["']\/["']/;
+  if (!homeCanonical.test(read(path.join(SITE_APP, 'layout.tsx'))) && !homeCanonical.test(read(HOME))) {
+    f.fail('seo-no-canonical', 'the home route "/" has no canonical in site/app/page.tsx or the root layout', {
+      at: 'site/app/page.tsx',
+      fix: 'export metadata with alternates.canonical "/" from site/app/page.tsx',
     });
   }
   for (const p of pageFiles) {
-    if (p === HOME) continue;
+    if (p === HOME || isCatchAll(p)) continue;
     const src = read(p);
     if (!/\bpageMetadata\s*\(/.test(src)) {
       f.fail('seo-no-canonical', `${rel(p)} sets no metadata through pageMetadata(), so it has no canonical`, {
@@ -104,7 +108,7 @@ const isDynamicRoute = (routePath) => routePath.includes('[');
 
 // ===== 2. every detail route has its own opengraph-image =======================================
 for (const p of pageFiles) {
-  if (p === HOME) continue; // documented exception: the home card is hand-made, set in app/layout.tsx
+  if (p === HOME || isCatchAll(p)) continue; // the home card is hand-made, set in app/layout.tsx
   const ogFile = path.join(path.dirname(p), 'opengraph-image.tsx');
   if (!fs.existsSync(ogFile)) {
     f.fail('seo-no-og-image', `${routePathOf(p)} has no opengraph-image.tsx, so its share card falls back to the site default`, {
@@ -133,8 +137,9 @@ for (const p of pageFiles) {
       });
     }
   }
+  const dynamicPatterns = pageFiles.map(routePathOf).filter(isDynamicRoute).map(routePattern);
   for (const r of listedRoutePaths) {
-    if (!staticRoutePaths.has(r)) {
+    if (!staticRoutePaths.has(r) && !dynamicPatterns.some((re) => re.test(r))) {
       f.fail('seo-sitemap-phantom-route', `${r} is listed in site-pages.json but no page.tsx renders it`, {
         at: 'site/lib/site-pages.json',
         fix: `remove ${r} from site/lib/site-pages.json (or restore the page)`,
@@ -191,7 +196,7 @@ for (const p of pageFiles) {
     const patched = read(schemaFile).replace(
       'import pkg from "../../package.json";',
       'import pkg from "../../package.json" with { type: "json" };',
-    );
+    ).replace(/from "(\.\/[\w-]+)";/g, (m, spec) => (fs.existsSync(path.join(SITE_LIB, `${spec}.ts`)) ? `from "${spec}.ts";` : m));
     if (patched === read(schemaFile)) {
       f.fail('seo-schema-probe-broken', 'schema.ts no longer imports package.json the way this gate expects to patch', {
         at: 'site/lib/schema.ts',
