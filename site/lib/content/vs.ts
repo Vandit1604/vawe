@@ -1,4 +1,6 @@
-import { MOVES } from "../../lib/moves";
+import { MOVES } from "../moves";
+import { REPO_URL } from "../schema";
+import type { Link, NextBlock } from "./types";
 export type Source = { label: string; url: string };
 export type Mark = "yes" | "no" | "partial";
 export type Row = { feature: string; them: string; vawe: string; t?: Mark; v?: Mark };
@@ -317,3 +319,38 @@ export const RIVALS: Rival[] = [
 ];
 
 export const RIVAL_BY_SLUG = Object.fromEntries(RIVALS.map((r) => [r.slug, r]));
+
+export const MARK_LABEL: Record<Mark, string> = { yes: "Yes", no: "No", partial: "Partly" };
+
+export function vsPage(r: Rival) {
+  return {
+    path: `/vs/${r.slug}`,
+    parent: { href: "/remotion-alternatives", label: "Compare" } as Link,
+    current: `vawe vs ${r.name}`,
+    note: `Facts read from ${r.name}’s own pages on ${r.read}. Sources are listed at the end. vawe runs on your machine, needs no account and has no per-render fee.`,
+    toc: [
+      { href: "#choose", label: "Which to choose" },
+      { href: "#table", label: "Side by side" },
+      { href: "#stronger", label: `Where ${r.name} is stronger` },
+      { href: "#faq", label: "Questions" },
+    ] as Link[],
+    chooseLabel: "Which one to choose",
+    chooseThem: `Choose ${r.name} when`,
+    choosevawe: "Choose vawe when",
+    what: `What ${r.name} is.`,
+    table: { title: "Side by side.", feature: "feature" },
+    stronger: `Where ${r.name} is stronger.`,
+    faqTitle: "Questions.",
+    next: {
+      title: "Try vawe on one page.",
+      lead: ["Write a page, run one command, get an MP4."],
+      primary: { href: "/docs/html-to-mp4-with-claude-code", label: "HTML to MP4 with Claude Code" },
+      secondary: { href: REPO_URL, label: "Star vawe on GitHub" },
+      related: [
+        ...r.related,
+        { href: "/video-components", label: "See the video components" },
+        { href: "/problems", label: "Hard problems and where vawe stands" },
+      ],
+    } as NextBlock,
+  };
+}

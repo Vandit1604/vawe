@@ -1,4 +1,6 @@
-import { MOVES } from "../../lib/moves";
+import { MOVES } from "../moves";
+import { REPO_URL } from "../schema";
+import type { Crumb, Link, Meta, NextBlock, Para } from "./types";
 export type Status = "solved" | "progress" | "parked";
 
 export type Problem = {
@@ -159,4 +161,43 @@ export const VISUALS: Record<number, Visual> = {
   10: { kind: "poster", move: "chart-build", alt: "A frame from the chart-build video component." },
   11: { kind: "poster", move: "exposure-flash", alt: "A frame from the exposure-flash video component." },
   12: { kind: "poster", move: "success-check", alt: "A frame from the success-check video component." },
+};
+
+export const PROBLEMS_PAGE = {
+  path: "/problems",
+  title: "The hard problems in agent-made motion graphics, and where vawe stands",
+  datePublished: "2026-10-03",
+  meta: {
+    title: "vawe · hard problems in agent-made motion graphics",
+    description:
+      "Thirteen problems that decide whether an agent can make a good film: determinism, blur, eases, model cost, taste and render speed. Seven are solved, with numbers. Six are open.",
+  } as Meta,
+  crumb: { group: "Project", current: "Hard problems" } as Crumb,
+  h1: "The hard problems in agent-made motion graphics.",
+  lede: `An agent can write a page of HTML in a minute. Turning that page into a film that looks designed is the hard part. These are the ${PROBLEMS.length} problems vawe works on, with the measured result for each. ${SOLVED.length} are solved. ${OPEN.length} are still open. The acceptance table has 17 rows: 16 are measured by code and 1 by the judge.`,
+  note: [
+    "The plan for the open problems is on the ",
+    { text: "roadmap", href: "/roadmap" },
+    ". Numbers come from vawe’s own runs and tests. vawe runs on your machine, needs no account and has no per-render fee.",
+  ] as Para,
+  tocLabel: "Jump to",
+  toc: [
+    { href: "#solved", label: `Solved (${SOLVED.length})` },
+    { href: "#open", label: `Still solving (${OPEN.length})` },
+  ] as Link[],
+  solved: { title: "Solved", lead: "Each of these has a mechanism in the engine and a measured result." },
+  open: { title: "Still solving", lead: "These are open. Each entry says what is known and what is not." },
+  labels: { why: "Why it is hard", stands: "Where vawe stands" },
+  next: {
+    title: "See the engine at work.",
+    lead: ["Every video component in the library uses the eases from problem 4. The determinism page shows the clock from problem 1."],
+    primary: { href: "/video-components", label: `Browse the ${MOVES.length} video components` },
+    secondary: { href: "/roadmap", label: "Read the roadmap" },
+    related: [
+      { href: "/determinism", label: "Why the same page renders the same frames" },
+      { href: "/ai-agents", label: "How an agent writes and checks a film" },
+      { href: "/vs/remotion", label: "vawe vs Remotion" },
+      { href: REPO_URL, label: "Star vawe on GitHub" },
+    ],
+  } as NextBlock,
 };

@@ -5,22 +5,14 @@ import { jsonLdScript, techArticleSchema } from "../../lib/schema";
 import { Clip } from "../components/Clip";
 import { EaseCurve } from "../components/EaseCurve";
 import { Icon } from "../components/Icon";
-import { REPO_URL } from "../components/Header";
-import { Next, PageTop, Toc } from "../components/Xp";
+import { PageTop, Toc } from "../components/Xp";
+import { NextView, RichText } from "../components/RichText";
 import { MOVES, clip } from "../../lib/moves";
-import { OPEN, PROBLEMS, SOLVED, STATUS_LABEL, VISUALS, type Problem } from "./data";
+import { OPEN, PROBLEMS_PAGE as C, SOLVED, STATUS_LABEL, VISUALS, type Problem } from "../../lib/content/problems";
 import "../components/intent.css";
 import "../components/study.css";
 
-const TITLE = "The hard problems in agent-made motion graphics, and where vawe stands";
-const DESCRIPTION =
-  "Thirteen problems that decide whether an agent can make a good film: determinism, blur, eases, model cost, taste and render speed. Seven are solved, with numbers. Six are open.";
-
-export const metadata = pageMetadata({
-  title: "vawe · hard problems in agent-made motion graphics",
-  description: DESCRIPTION,
-  path: "/problems",
-});
+export const metadata = pageMetadata({ ...C.meta, path: C.path });
 
 function Visual({ id }: { id: number }) {
   const v = VISUALS[id];
@@ -52,11 +44,11 @@ function ProblemCard({ p }: { p: Problem }) {
         <h3>{p.title}</h3>
         <dl>
           <div>
-            <dt>Why it is hard</dt>
+            <dt>{C.labels.why}</dt>
             <dd>{p.why}</dd>
           </div>
           <div>
-            <dt>Where vawe stands</dt>
+            <dt>{C.labels.stands}</dt>
             <dd>{p.does}</dd>
           </div>
         </dl>
@@ -82,36 +74,24 @@ export default function Problems() {
             type="application/ld+json"
             dangerouslySetInnerHTML={jsonLdScript(
               techArticleSchema({
-                headline: TITLE,
-                description: DESCRIPTION,
-                path: "/problems",
-                datePublished: "2026-10-03",
+                headline: C.title,
+                description: C.meta.description,
+                path: C.path,
+                datePublished: C.datePublished,
               }),
             )}
           />
           <section className="phead">
-            <PageTop group="Project" current="Hard problems" />
-            <h1>The hard problems in agent-made motion graphics.</h1>
-            <p>
-              An agent can write a page of HTML in a minute. Turning that page into a film that looks
-              designed is the hard part. These are the {PROBLEMS.length} problems vawe works on, with
-              the measured result for each. {SOLVED.length} are solved. {OPEN.length} are still open. The
-              acceptance table has 17 rows: 16 are measured by code and 1 by the judge.
-            </p>
-            <p className="bnote">
-              The plan for the open problems is on the <a href="/roadmap">roadmap</a>. Numbers come
-              from vawe’s own runs and tests. vawe runs on your machine, needs no account and has
-              no per-render fee.
-            </p>
-            <Toc label="Jump to" items={[
-              { href: "#solved", label: `Solved (${SOLVED.length})` },
-              { href: "#open", label: `Still solving (${OPEN.length})` },
-            ]} />
+            <PageTop group={C.crumb.group} current={C.crumb.current} />
+            <h1>{C.h1}</h1>
+            <p>{C.lede}</p>
+            <p className="bnote"><RichText p={C.note} /></p>
+            <Toc label={C.tocLabel} items={C.toc} />
           </section>
 
           <section className="sgroup" aria-labelledby="solved">
-            <h2 id="solved">Solved</h2>
-            <p>Each of these has a mechanism in the engine and a measured result.</p>
+            <h2 id="solved">{C.solved.title}</h2>
+            <p>{C.solved.lead}</p>
             <ol className="slist">
               {SOLVED.map((p) => (
                 <ProblemCard key={p.id} p={p} />
@@ -120,8 +100,8 @@ export default function Problems() {
           </section>
 
           <section className="sgroup" aria-labelledby="open">
-            <h2 id="open">Still solving</h2>
-            <p>These are open. Each entry says what is known and what is not.</p>
+            <h2 id="open">{C.open.title}</h2>
+            <p>{C.open.lead}</p>
             <ol className="slist" start={SOLVED.length + 1}>
               {OPEN.map((p) => (
                 <ProblemCard key={p.id} p={p} />
@@ -129,21 +109,10 @@ export default function Problems() {
             </ol>
           </section>
 
-          <Next
-            title="See the engine at work."
-            lead="Every video component in the library uses the eases from problem 4. The determinism page shows the clock from problem 1."
-            primary={{ href: "/video-components", label: `Browse the ${MOVES.length} video components` }}
-            secondary={{ href: "/roadmap", label: "Read the roadmap" }}
-            related={[
-              { href: "/determinism", label: "Why the same page renders the same frames" },
-              { href: "/ai-agents", label: "How an agent writes and checks a film" },
-              { href: "/vs/remotion", label: "vawe vs Remotion" },
-              { href: REPO_URL, label: "Star vawe on GitHub" },
-            ]}
-          />
+          <NextView n={C.next} />
         </main>
       </div>
-      <Footer active="/problems" />
+      <Footer active={C.path} />
     </div>
   );
 }

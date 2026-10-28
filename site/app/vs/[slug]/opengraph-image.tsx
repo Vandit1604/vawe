@@ -1,5 +1,5 @@
 import { OG_SIZE, staticOgImage } from "../../components/ogCard";
-import { RIVALS, RIVAL_BY_SLUG } from "../data";
+import { RIVALS, RIVAL_BY_SLUG } from "../../../lib/content/vs";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
