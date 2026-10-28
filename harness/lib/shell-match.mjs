@@ -12,5 +12,14 @@ export const atCommand = (name, after = '\\s') => new RegExp(`(?:^|[\\n;&|(\`]\\
 export const SLEEP = atCommand('sleep', '\\s+\\d');
 export const PS_POLL = atCommand('(?:ps\\s+(?:aux|-[a-zA-Z]+)|pgrep)', '\\b');
 
-/** A command that polls for a job: sleep, ps or pgrep at command position. Has `test` so it works as a rule matcher. */
-export const POLL = { test: (cmd) => SLEEP.test(bare(cmd)) || PS_POLL.test(bare(cmd)) };
+const LOOP = /\b(?:until|while)\b/;
+const JOB_NAME = /\b(?:vawe|chrome|ffmpeg|render|draft|films?)\b/i;
+
+/** A ps or pgrep that waits for a job: at command position, inside an until or while loop or naming a vawe job. A one-time `pgrep caffeinate` is not one. Takes the whole command, since a job name may sit in a quoted pattern. */
+export const PS_WAIT = {
+  raw: true,
+  test: (cmd) => PS_POLL.test(bare(cmd)) && (LOOP.test(bare(cmd)) || JOB_NAME.test(withoutHeredocs(cmd))),
+};
+
+/** A command that waits for a job: a sleep, or a PS_WAIT. Has `test` so it works as a rule matcher. */
+export const POLL = { test: (cmd) => SLEEP.test(bare(cmd)) || PS_WAIT.test(cmd) };
