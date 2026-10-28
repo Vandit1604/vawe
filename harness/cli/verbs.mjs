@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { UsageError } from './parse.mjs';
+import { causeOf } from '../lib/verb-log.mjs';
 import { compareProblem, CUTS } from '../media/compare-frames.mjs';
 import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
@@ -45,6 +46,11 @@ export const testSteps = () => [{ node: ['--test', ...testFiles('tests').filter(
 const pageName = (page) => {
   const base = path.basename(page, '.html');
   return base === 'page' ? path.basename(path.dirname(path.resolve(page))) : base;
+};
+export const devFix = (reason, [page]) => {
+  if (/render slot|Navigation timeout/i.test(reason)) return `bin/vawe wait ${page}`;
+  if (causeOf(reason) === 'browser lost') return `the browser died mid-render: find the heavy second with bin/vawe dev ${page} --from 0 --to 4, then the next 4 s; a page with large images, canvas or WebGL work per frame crashes it`;
+  return `bin/vawe frames ${page}`;
 };
 const devNext = (v, [page]) => {
   if (isClipDemo(page)) return nextStep(path.resolve(page), ROOT).next;
@@ -197,7 +203,7 @@ export const VERBS = [
       { script: 'harness/live/dev-end.mjs', args: [page] },
     ],
     next: devNext,
-    fix: (reason, [page]) => (/render slot|Navigation timeout/i.test(reason) ? `bin/vawe wait ${page}` : `bin/vawe frames ${page}`),
+    fix: devFix,
   },
   {
     tier: 'core',
