@@ -3,13 +3,14 @@ import path from "node:path";
 import { Marked, type Tokens } from "marked";
 import { smart, smartHtml } from "./typo.mjs";
 import added from "./blog-added.json";
+import { SITE_URL } from "./site";
 
 export { smart };
 
 // The blog's one owner: reads content/blog/*.md at build time, checks the front matter and renders
 // the Markdown. Every blog route, the sitemap and the RSS feed read posts through this file.
 
-export const BLOG_URL = "https://vawe.dev/blog";
+export const BLOG_URL = `${SITE_URL}/blog`;
 
 export const SECTIONS = [
   { id: "how-to", label: "How-to", intro: "Step-by-step guides that end with a file you can run: render HTML to a video, export an animation, drive vawe from an agent." },
@@ -17,6 +18,10 @@ export const SECTIONS = [
   { id: "agents", label: "Agents", intro: "What an AI agent gets wrong on its own, and the commands, defaults, checks and judges that make it succeed." },
   { id: "motion-sound", label: "Motion and sound", intro: "Easing, transitions, blur, depth and audio: how we turned a good film into measured rules." },
 ] as const;
+
+export const BLOG_TITLE = "vawe blog: building agent-native motion graphics";
+export const BLOG_DESCRIPTION =
+  "Engineering notes from building vawe, where agents write motion graphics as HTML: what broke, what we measured and what we changed.";
 
 export type SectionId = (typeof SECTIONS)[number]["id"];
 

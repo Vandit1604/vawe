@@ -1,7 +1,7 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import { GROUPS, JOBS, LOOKS, MOVES, NUMBERED, clip, toCard } from "../../lib/moves";
+import { GROUPS, JOBS, LOOKS, MOVES, MOVES_DESCRIPTION, MOVES_TITLE, NUMBERED, clip, toCard } from "../../lib/moves";
 import { jsonLdScript } from "../../lib/schema";
 import { movesItemListSchema } from "../../lib/schema-content";
 import { MovesGallery } from "./MovesGallery";
@@ -11,8 +11,8 @@ import { MiscSvg } from "./icons";
 import "./moves.css";
 
 export const metadata = pageMetadata({
-  title: `${MOVES.length} CSS video components for AI-agent video | vawe`,
-  description: `${MOVES.length} proven motion video components, each a clip and the markdown an agent copies: when to use it, the CSS and Web Animations snippet, the notes and the sound cue.`,
+  title: MOVES_TITLE,
+  description: MOVES_DESCRIPTION,
   path: "/video-components",
 });
 

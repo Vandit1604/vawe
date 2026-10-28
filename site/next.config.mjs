@@ -53,13 +53,9 @@ const nextConfig = {
   // Later entries win, so the versioned rule comes last.
   async headers() {
     const media = "/moves/:file(.+\\.(?:mp4|webm|webp|md))";
-    const canonicalLink = (path) => ({ key: "Link", value: `<https://vawe.dev${path}>; rel="canonical"` });
     return [
-      // The .md copies are alternate forms of the page; the Link header names the page as canonical.
-      { source: "/moves/:name([a-z0-9-]+).md", headers: [canonicalLink("/video-components/:name")] },
-      { source: "/video-components/:name([a-z0-9-]+).md", headers: [canonicalLink("/video-components/:name")] },
-      { source: "/blog/:slug([a-z0-9-]+).md", headers: [canonicalLink("/blog/:slug")] },
-      { source: "/ai-agents.md", headers: [canonicalLink("/ai-agents")] },
+      // Link headers (canonical, describedby) come from the markdown
+      // handler and middleware.ts, not from here.
       // Data files for agents: fetchable, not for the index.
       { source: "/:file(llms\\.txt|llms-full\\.txt)", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
       { source: "/:dir(moves|video-components)/index.json", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
@@ -73,11 +69,9 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // The files for agents keep their /moves path (clips, .md, index.json); the gallery moved to /video-components, so its twin URLs serve the same files.
+      // The files for agents keep their /moves path (clips, .md, index.json); the gallery moved to /video-components, so its index.json serves the same file. Its .md twins go through middleware.ts.
       { source: "/video-components/index.json", destination: "/moves/index.json" },
-      { source: "/video-components/:name([a-z0-9-]+).md", destination: "/moves/:name.md" },
       // the docs pages (fumadocs already routes these at /docs in its own app)
-      { source: "/blog/:slug([a-z0-9-]+).md", destination: "/blog-md/:slug" },
       { source: "/docs", destination: `${DOCS_ORIGIN}/docs` },
       { source: "/docs/:path*", destination: `${DOCS_ORIGIN}/docs/:path*` },
       // its assets, which docs-site emits under assetPrefix "/docs-static" precisely so they do

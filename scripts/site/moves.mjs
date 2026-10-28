@@ -1,8 +1,8 @@
 // Build the /video-components gallery's data from prompts/moves: one JSON file the site imports at build time,
-// the raw move markdown served as text, the moves section of llms.txt, and (with --clips) the web
+// the raw move markdown served as text, and (with --clips) the web
 // copies of each clip, and public/moves/index.json (the same data, filterable by an agent).
 //
-//   node scripts/site/moves.mjs            data, raw .md and llms.txt (pure node, runs in prebuild)
+//   node scripts/site/moves.mjs            data and raw .md (pure node, runs in prebuild)
 //   node scripts/site/moves.mjs --clips    also encode any clip whose source changed (needs ffmpeg)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,7 +14,6 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const SRC = path.join(root, 'prompts', 'moves');
 const OUT_DIR = path.join(root, 'site', 'public', 'moves');
 const DATA = path.join(root, 'site', 'lib', 'moves.json');
-const LLMS = path.join(root, 'site', 'content', 'llms-base.txt');
 const INDEX = path.join(OUT_DIR, 'index.json');
 const REPO_BLOB = 'https://github.com/Vandit1604/vawe/blob/main/prompts/moves/';
 const SITE = 'https://vawe.dev';
@@ -312,18 +311,6 @@ function encodeClip(stem) {
   ff([...last, '-quality', '72', out('hd.webp')]);
 }
 
-// ---- llms.txt: the moves section is regenerated, the rest is hand-written ---------------------------
-function llmsSection(moves) {
-  const lines = moves.map((m) => `- [${m.title}](${SITE}/moves/${m.name}.md): ${m.use}`);
-  return `## Video components
-Each video component is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is ${SITE}/video-components.
-To filter: fetch ${SITE}/moves/index.json. Top-level groups, looks and jobs list the ids. Each video component has group, look, jobs, use (the when line), clip, md and duration.
-A human link filters the same way: ${SITE}/video-components?group=end-a-film&look=paper&q=wipe (group, look and job take comma lists: OR within one, AND across).
-
-${lines.join('\n')}
-`;
-}
-
 function writeIndex(moves, data) {
   const out = moves.map((m) => ({
     name: m.name,
@@ -339,15 +326,6 @@ function writeIndex(moves, data) {
     duration: m.duration,
   }));
   fs.writeFileSync(INDEX, `${JSON.stringify({ site: SITE, groups: data.groups, looks: data.looks, featured: data.featured, jobs: data.jobs.map(({ id, label }) => ({ id, label })), moves: out }, null, 1)}\n`);
-}
-
-function writeLlms(moves, data) {
-  const text = read(LLMS);
-  const section = llmsSection(moves);
-  const start = text.indexOf('## Video components\n');
-  if (start === -1) return fs.writeFileSync(LLMS, `${text.trimEnd()}\n\n${section}`);
-  const next = text.indexOf('\n## ', start + 1);
-  fs.writeFileSync(LLMS, text.slice(0, start) + section + (next === -1 ? '' : text.slice(next)));
 }
 
 // ---- main -------------------------------------------------------------------------------------------
@@ -401,5 +379,4 @@ if (unknown.length) throw new Error(`Featured names a move with no doc or clip: 
 const data = { groups: index.groups, looks, jobs: index.jobs, featured: index.featured, moves };
 fs.writeFileSync(DATA, `${JSON.stringify(data, null, 1)}\n`);
 writeIndex(moves, data);
-writeLlms(moves, data);
 console.log(`✓ ${moves.length} moves -> site/lib/moves.json, site/public/moves${withClips ? ` (${encoded} clip(s) encoded)` : ''}`);

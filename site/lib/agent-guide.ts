@@ -1,14 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { llmsText } from "./llms";
 
-const read = (file: string) => fs.readFileSync(path.join(process.cwd(), file), "utf8");
+export const AGENTS_TITLE = "AI agent video generation: HTML to video with vawe";
+export const AGENTS_DESCRIPTION =
+  "An agent writes a Vawe film as one HTML page, in the web platform it already knows, and one command renders, checks and ships it. A fresh session judges the result, never the one that wrote it.";
 
-export const agentGuide = () => read("content/agent-guide.md");
-
-// llms-full.txt is the guide plus everything llms.txt links to by name: the site map and the moves list.
-export function llmsFull() {
-  const llms = llmsText();
-  const start = llms.indexOf("## Site\n");
-  return `${agentGuide().trimEnd()}\n\n---\n\n# Site map and video components (same content as https://vawe.dev/llms.txt)\n\n${llms.slice(start >= 0 ? start : 0)}`;
-}
+export const agentGuide = () => fs.readFileSync(path.join(process.cwd(), "content/agent-guide.md"), "utf8");

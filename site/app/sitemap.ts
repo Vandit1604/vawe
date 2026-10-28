@@ -4,6 +4,7 @@ import lastmod from "../lib/lastmod.json";
 import { MOVES } from "../lib/moves";
 import { EASES } from "../lib/easing";
 import { allPosts, latestDate } from "../lib/blog";
+import { SITE_URL } from "../lib/site";
 
 /* site/app/sitemap.ts: every URL vawe.dev serves. The routes come from lib/site-pages.json, the same
  * file the footer nav reads; the move pages come from lib/moves.json, the posts from lib/blog.ts. To
@@ -15,8 +16,6 @@ import { allPosts, latestDate } from "../lib/blog";
  * so a missing one is better than a made-up one. Google ignores changefreq and priority, so they are
  * not emitted.
  */
-
-const BASE = "https://vawe.dev";
 
 type Entry = { path: string; lastmod?: string };
 
@@ -36,7 +35,7 @@ function entries(): Entry[] {
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return entries().map((e) => ({
-    url: `${BASE}${e.path}`,
+    url: `${SITE_URL}${e.path}`,
     ...(e.lastmod ? { lastModified: e.lastmod } : {}),
   }));
 }

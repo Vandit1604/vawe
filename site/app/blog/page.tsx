@@ -2,20 +2,16 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { blogSchema, breadcrumbSchema, jsonLdScript } from "../../lib/schema";
-import { allPosts, indexPosts, postsBySection } from "../../lib/blog";
+import { BLOG_DESCRIPTION, BLOG_TITLE, allPosts, indexPosts, postsBySection } from "../../lib/blog";
 import { Card } from "./Card";
 import { HashFilter } from "./HashFilter";
 import { ViewToggle } from "./ViewToggle";
 import "./blog.css";
 
-const TITLE = "vawe blog: building agent-native motion graphics";
-const DESCRIPTION =
-  "Engineering notes from building vawe, where agents write motion graphics as HTML: what broke, what we measured and what we changed.";
-
-const base = pageMetadata({ title: TITLE, description: DESCRIPTION, path: "/blog" });
+const base = pageMetadata({ title: BLOG_TITLE, description: BLOG_DESCRIPTION, path: "/blog" });
 export const metadata = {
   ...base,
-  alternates: { ...base.alternates, types: { "application/rss+xml": "/blog/rss.xml" } },
+  alternates: { ...base.alternates, types: { ...base.alternates?.types, "application/rss+xml": "/blog/rss.xml" } },
 };
 
 // A post page links to /blog#<section>; the hash selects that filter. Without script every post shows.

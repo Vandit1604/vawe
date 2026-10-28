@@ -5,18 +5,15 @@ import { pageMetadata } from "../components/seo";
 import { Next, PageTop } from "../components/Xp";
 import { breadcrumbSchema, jsonLdScript } from "../../lib/schema";
 import { inspirationSchema } from "../../lib/schema-content";
-import { INSPIRATION, INSPIRATION_PATH, INSPIRATION_TYPES } from "../../lib/inspiration";
+import { INSPIRATION, INSPIRATION_DESCRIPTION, INSPIRATION_PATH, INSPIRATION_TITLE, INSPIRATION_TYPES } from "../../lib/inspiration";
 import { InspirationWall } from "./InspirationWall";
 import "./inspiration.css";
 
-const TITLE = "Motion video inspiration: AI-made motion design | vawe";
-const DESCRIPTION =
-  "Motion videos made with Claude and other AI, from posts on X. Each one credits its creator, links the post and gives a prompt to recreate it with vawe.";
 const SUGGEST = `${REPO_URL}/issues/new?title=${encodeURIComponent("Inspiration post: ")}`;
 
 // The videos play from X's CDN, which answers 403 to a request that carries a foreign Referer.
 export const metadata: Metadata = {
-  ...pageMetadata({ title: TITLE, description: DESCRIPTION, path: INSPIRATION_PATH }),
+  ...pageMetadata({ title: INSPIRATION_TITLE, description: INSPIRATION_DESCRIPTION, path: INSPIRATION_PATH }),
   referrer: "no-referrer",
 };
 
@@ -30,7 +27,7 @@ export default function Inspiration() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLdScript(inspirationSchema({ name: "Motion video inspiration", description: DESCRIPTION, count: 48 }))}
+        dangerouslySetInnerHTML={jsonLdScript(inspirationSchema({ name: "Motion video inspiration", description: INSPIRATION_DESCRIPTION, count: 48 }))}
       />
       <div className="wrap">
         <main id="content" className="in" tabIndex={-1}>

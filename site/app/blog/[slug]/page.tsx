@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Params) {
   return {
     ...base,
     keywords: post.keywords,
-    alternates: { ...base.alternates, types: { "application/rss+xml": "/blog/rss.xml" } },
+    alternates: { ...base.alternates, types: { ...base.alternates?.types, "application/rss+xml": "/blog/rss.xml" } },
     openGraph: {
       ...base.openGraph,
       type: "article",

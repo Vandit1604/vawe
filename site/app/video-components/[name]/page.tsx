@@ -31,7 +31,6 @@ export async function generateMetadata({ params }: Params) {
     description: moveSeoDescription(move),
     path: `/video-components/${move.name}`,
     type: "article",
-    markdown: `/moves/${move.name}.md`,
   });
 }
 

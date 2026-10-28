@@ -48,6 +48,8 @@ export const MOVES = (data.moves as Move[]).map(typeset);
 export const GROUPS = data.groups as Facet[];
 export const LOOKS = data.looks as string[];
 export const JOBS = (data.jobs as Job[]).map((j) => ({ ...j, label: smart(j.label) }));
+export const MOVES_TITLE = `${MOVES.length} CSS video components for AI-agent video | vawe`;
+export const MOVES_DESCRIPTION = `${MOVES.length} proven motion video components, each a clip and the markdown an agent copies: when to use it, the CSS and Web Animations snippet, the notes and the sound cue.`;
 export const FEATURED = data.featured as string[];
 
 // The gallery order: by category, then the order within it. Card numbers and prev/next follow it.

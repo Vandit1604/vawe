@@ -4,14 +4,13 @@ import { Next, PageTop, Toc } from "../components/Xp";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
+import { AGENTS_DESCRIPTION, AGENTS_TITLE } from "../../lib/agent-guide";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "AI agent video generation: HTML to video with vawe",
-  description:
-    "An agent writes a Vawe film as one HTML page, in the web platform it already knows, and one command renders, checks and ships it. A fresh session judges the result, never the one that wrote it.",
+  title: AGENTS_TITLE,
+  description: AGENTS_DESCRIPTION,
   path: "/ai-agents",
-  markdown: "/ai-agents.md",
 });
 
 /* /ai-agents · the intent page for "video rendering for AI agents". Every fact below is read off the

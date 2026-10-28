@@ -4,7 +4,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { jsonLdScript, breadcrumbSchema } from "../../lib/schema";
-import { CSS, EASES, FAMILIES, JOBS, PRODUCT_UI, STATS, VAWE, classicIn, copyIsBezier, copyValue, itemListSchema, jobIdsOf, roleOf, speedText, type Ease } from "../../lib/easing";
+import { CSS, EASES, EASING_DESCRIPTION, EASING_TITLE, FAMILIES, JOBS, PRODUCT_UI, STATS, VAWE, classicIn, copyIsBezier, copyValue, itemListSchema, jobIdsOf, roleOf, speedText, type Ease } from "../../lib/easing";
 import { Thumb } from "./Charts";
 import { Finder } from "./Finder";
 import { SpacingChart, ghostValues } from "./Spacing";
@@ -12,8 +12,8 @@ import { Next } from "../components/Xp";
 import "./easing.css";
 
 export const metadata = pageMetadata({
-  title: "Easing functions: CSS cubic-bezier, linear() and After Effects handles | vawe",
-  description: `${EASES.length} easing functions as CSS: search, preview, compare and copy cubic-bezier or linear(). ${VAWE.length} are After Effects handles, with a table of which to use for each job.`,
+  title: EASING_TITLE,
+  description: EASING_DESCRIPTION,
   path: "/easing",
 });
 

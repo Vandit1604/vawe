@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "../lib/site";
 
 // Two faces, two jobs (site/IDENTITY.md): Geist for headings and body, IBM Plex Mono for every number and label.
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -17,9 +18,10 @@ const BLURB =
   + "Motion graphics as code for you or an AI agent: a free, Apache-2.0 Remotion alternative.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://vawe.dev"),
+  metadataBase: new URL(SITE_URL),
   title: TITLE,
   description: BLURB,
+  other: { "ai-summary": BLURB },
   keywords: [
     "HTML to video", "video from code", "AI agent video generation", "motion graphics with code",
     "programmatic video", "Remotion alternative", "vibe coding", "deterministic rendering",

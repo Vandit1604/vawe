@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { isRendered, mdUrlOf } from "../../lib/md/routes.mjs";
 
+// A route with a markdown renderer (lib/md/routes.mjs) also gets its <link rel="alternate" type="text/markdown">.
+// `ai-summary` defaults to the meta description; pass `aiSummary` to give a key page its own.
+//
 // ONE HELPER, NOT 27 COPIES. Every route on vawe.dev calls this instead of hand-rolling its own
 // canonical/OpenGraph/Twitter block. `metadataBase` (app/layout.tsx) is set to https://vawe.dev, so a
 // relative `path` here resolves correctly for both the canonical link and the OG url.
@@ -14,13 +18,14 @@ export function pageMetadata(opts: {
   description: string;
   path: string;
   type?: "website" | "article";
-  markdown?: string;
+  aiSummary?: string;
 }): Metadata {
-  const { title, description, path, type = "website", markdown } = opts;
+  const { title, description, path, type = "website", aiSummary = description } = opts;
   return {
     title,
     description,
-    alternates: { canonical: path, ...(markdown ? { types: { "text/markdown": markdown } } : {}) },
+    alternates: { canonical: path, ...(isRendered(path) ? { types: { "text/markdown": mdUrlOf(path) } } : {}) },
+    other: { "ai-summary": aiSummary },
     openGraph: {
       title,
       description,

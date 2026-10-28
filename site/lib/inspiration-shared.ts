@@ -25,6 +25,10 @@ export type InspirationPost = {
 // What the wall needs per post. The prompt text stays out of the page and loads on demand (PROMPTS_PATH).
 export type InspirationCard = Omit<InspirationPost, "prompt"> & { posted: string; typeLabel: string; madeWith: string; promptSource?: string };
 
+export const INSPIRATION_TITLE = "Motion video inspiration: AI-made motion design | vawe";
+export const INSPIRATION_DESCRIPTION =
+  "Motion videos made with Claude and other AI, from posts on X. Each one credits its creator, links the post and gives a prompt to recreate it with vawe.";
+
 export const INSPIRATION_PATH = "/inspiration";
 export const PROMPTS_PATH = "/inspiration/prompts.json";
 

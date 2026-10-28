@@ -1,8 +1,7 @@
 import { BLOG_URL, allPosts, latestDate } from "../../../lib/blog";
+import { SITE_URL as SITE } from "../../../lib/site";
 
 export const revalidate = 3600;
-
-const SITE = "https://vawe.dev";
 
 function xml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

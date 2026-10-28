@@ -9,11 +9,9 @@
 // Google no longer shows an FAQ rich result for it; it stays as entity data for answer engines.
 
 import pkg from "../../package.json";
+import { REPO_URL, SITE_ALT_NAMES, SITE_DESCRIPTION as BRAND_DESCRIPTION, SITE_URL } from "./site";
 
-export const REPO_URL = "https://github.com/Vandit1604/vawe";
-const SITE_URL = "https://vawe.dev";
-const BRAND_DESCRIPTION =
-  "vawe is an open source framework that renders one HTML page into a video, so a developer or an AI agent can write motion graphics as code.";
+export { REPO_URL };
 
 // Apache-2.0, no paid tier: the licence and repo URL below are read off package.json rather than
 // retyped, so they cannot drift from the one the repo actually ships under.
@@ -22,7 +20,7 @@ export function organizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "vawe",
-    alternateName: ["Vawe", "vawe.dev"],
+    alternateName: SITE_ALT_NAMES,
     description: BRAND_DESCRIPTION,
     url: SITE_URL,
     // Google's logo guidance requires "at minimum" 112x112px (developers.google.com/search/docs/
@@ -39,7 +37,7 @@ export function websiteSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "vawe",
-    alternateName: ["Vawe", "vawe.dev"],
+    alternateName: SITE_ALT_NAMES,
     description: BRAND_DESCRIPTION,
     url: SITE_URL,
     inLanguage: "en",
