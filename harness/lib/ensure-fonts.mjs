@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { pageRoot } from '../media/preview-server.mjs';
 
 const FACE = /assets\/fonts\/([\w.-]+\.woff2)/g;
 const STYLESHEET_HREF = /<link\b[^>]*\bhref=["']([^"':]+\.css)["']/gi;
@@ -25,8 +26,9 @@ function pageSources(pagePath) {
   return [html, ...sheets.map((f) => fs.readFileSync(f, 'utf8'))];
 }
 
-/** Fetches the faces a page needs when any is missing, after one line saying so; true when the fetch ran. Offline the fetch fails and the render says what is missing. */
-export function ensurePageFonts(root, pagePath, { run, log = console.log } = {}) {
+/** Fetches the faces a page needs into the checkout the page lives in when any is missing, after one line saying so; true when the fetch ran. Offline the fetch fails and the render says what is missing. */
+export function ensurePageFonts(pagePath, { run, log = console.log } = {}) {
+  const root = pageRoot(path.resolve(pagePath));
   const files = fontFilesIn(...pageSources(pagePath));
   if (!missingFonts(root, files).length) return false;
   log('fonts missing from assets/fonts: fetching them with generators/media/fonts.mjs');

@@ -1203,7 +1203,7 @@ async function main() {
       + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--silent] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
-  ensurePageFonts(REPO_ROOT, pagePath);
+  ensurePageFonts(pagePath);
   const drift = briefProblems(pagePath);
   if (drift.length) console.error(adviceBlock(drift.map((p) => `${p}; the render uses the page: update the brief's length and aspect lines to match`)).join('\n'));
   const final = argv.includes('--final');

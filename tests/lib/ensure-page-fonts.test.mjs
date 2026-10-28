@@ -17,7 +17,7 @@ test('a missing face runs the generator once and says so in one line', () => {
   const { root, page } = checkout();
   const lines = [];
   const runs = [];
-  assert.equal(ensurePageFonts(root, page, { run: (cmd, args) => runs.push(args), log: (l) => lines.push(l) }), true);
+  assert.equal(ensurePageFonts(page, { run: (cmd, args) => runs.push(args), log: (l) => lines.push(l) }), true);
   assert.equal(runs.length, 1);
   assert.match(runs[0][0], /generators.media.fonts\.mjs$/);
   assert.equal(lines.length, 1);
@@ -28,7 +28,7 @@ test('when every face is there, nothing runs and nothing prints', () => {
   const { root, page } = checkout();
   fs.writeFileSync(path.join(root, 'assets', 'fonts', 'A.woff2'), 'x');
   const lines = [];
-  assert.equal(ensurePageFonts(root, page, { run: () => assert.fail('ran'), log: (l) => lines.push(l) }), false);
+  assert.equal(ensurePageFonts(page, { run: () => assert.fail('ran'), log: (l) => lines.push(l) }), false);
   assert.deepEqual(lines, []);
   fs.rmSync(root, { recursive: true, force: true });
 });

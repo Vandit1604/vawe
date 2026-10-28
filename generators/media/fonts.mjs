@@ -119,7 +119,9 @@ async function grab([name, pkg, ver, file]) {
     // The pin is only worth what the check is worth: refuse to WRITE bytes the lock does not name,
     // so a re-published version cannot enter the tree and be discovered later as 57 changed scenes.
     if (want && got !== want.sha256) return { name, status: 'mismatch', want: want.sha256, got, remote: true };
-    fs.writeFileSync(dest, buf);
+    const part = `${dest}.${process.pid}.part`;
+    fs.writeFileSync(part, buf);
+    fs.renameSync(part, dest);
     return { name, status: 'ok', kb: Math.round(buf.length / 1024), got };
   } catch (e) {
     return { name, status: 'fail', why: e.message };

@@ -89,7 +89,7 @@ async function pool(tasks, limit) {
 
 const t0 = Date.now();
 const pages = findPages();
-for (const p of pages) ensurePageFonts(repoRoot, path.join(repoRoot, p));
+for (const p of pages) ensurePageFonts(path.join(repoRoot, p));
 const tests = [...PAGE_TESTS, ...motionTests()].filter((f) => fs.existsSync(path.join(repoRoot, f)));
 const tasks = [
   async () => {
