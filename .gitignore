@@ -305,3 +305,7 @@ prompts/moves/*.png
 prompts/moves/demo/*.variant.html
 # Stock footage under the Mixkit licence: used in the rendered clip, never redistributed as a file. credits.json keeps the provenance.
 prompts/moves/demo/assets/mask-rise/*.source.mp4
+
+# written by `vawe frames` next to each page
+films/*/frames.html
+films/*/*/frames.html

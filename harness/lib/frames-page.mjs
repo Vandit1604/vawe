@@ -1,49 +1,19 @@
-// `vawe frames`: the pure parts. films/<film>/frames.html holds the key frame of each world side by side, the world id under
-// each, like directions.html; harness/media/frames.mjs renders the stills it points at.
+// `vawe frames`: the pure parts. The sheet layout is harness/lib/artboard.mjs; harness/media/frames.mjs renders the stills.
 
 import { PLACEHOLDER, STARTER_LINE } from './measured-brief.mjs';
 
-const escape =(text) => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-
-const FRAMES_TEMPLATE = `<!doctype html>
-<html data-aspect="{{aspect}}">
-<head>
-<meta charset="utf-8">
-<meta name="duration" content="1">
-<title>{{title}}: key frames</title>
-<style>
-  :root { --sheet: #e4e1da; --label: #14161a; }
-  html, body { margin: 0; min-height: 100%; background: var(--sheet); }
-  body { box-sizing: border-box; display: grid; grid-template-columns: repeat({{cols}}, minmax(0, 1fr)); gap: 2vw; padding: 5vh 3vw;
-         font: 400 1.9vh/1.35 ui-monospace, Menlo, monospace; color: var(--label); }
-  figure { margin: 0; display: grid; gap: 1vh; min-width: 0; }
-  img { width: 100%; display: block; }
-</style>
-</head>
-<body>
-{{figures}}
-</body>
-</html>
-`;
-
-/** The frames.html text: one figure per world, in page order. `worlds` is [{ id, src }] with src relative to the page. Pure. */
-export function framesPage({ title, aspect = '16:9', worlds }) {
-  const figures = worlds.map((w) => `<figure><img src="${escape(w.src)}" alt="${escape(w.id)}"><figcaption>${escape(w.id)}</figcaption></figure>`).join('\n');
-  return FRAMES_TEMPLATE.replaceAll('{{aspect}}', escape(aspect)).replaceAll('{{title}}', escape(title))
-    .replaceAll('{{cols}}', String(Math.min(worlds.length, 3) || 1)).replaceAll('{{figures}}', figures);
-}
-
-/** { page, full, worlds } from the argv after the script name; --world takes ids, comma-separated or repeated. Throws an Error naming the flag. Pure. */
+/** { page, full, zoom, worlds } from the argv after the script name; --world takes ids, comma-separated or repeated. Throws an Error naming the flag. Pure. */
 export function parseFramesArgs(argv) {
-  const out = { page: null, full: false, worlds: [] };
+  const out = { page: null, full: false, zoom: false, worlds: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--full') out.full = true;
+    else if (a === '--zoom') out.zoom = true;
     else if (a === '--world') {
       const v = argv[++i];
       if (!v || v.startsWith('--')) throw new Error('--world needs a world id, for example --world s3 or --world s1,s3');
       out.worlds.push(...v.split(',').map((s) => s.trim()).filter(Boolean));
-    } else if (a.startsWith('--')) throw new Error(`unknown flag ${a}; valid: --full --world <id>`);
+    } else if (a.startsWith('--')) throw new Error(`unknown flag ${a}; valid: --full --zoom --world <id>`);
     else if (out.page === null) out.page = a;
     else throw new Error(`unexpected argument ${a}; one page only`);
   }

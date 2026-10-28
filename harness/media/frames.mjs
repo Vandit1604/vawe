@@ -1,32 +1,28 @@
 #!/usr/bin/env node
 // `vawe frames <page>`: one still of each data-world element alone, before any motion is written.
-//   node harness/media/frames.mjs <page.html> [--full] [--world <id>[,<id>]]
-// Writes out/<film>-frames/<id>.png, the labelled contact sheet out/<film>-frames.png and films/<film>/frames.html, then prints the
+//   node harness/media/frames.mjs <page.html> [--full] [--zoom] [--world <id>[,<id>]]
+// Writes out/<film>-frames/<id>.png, the artboard sheet out/<film>-frames.png and films/<film>/frames.html, then prints the
 // absolute path of each PNG and the still-frame layout rules each world fires. The still is at the middle of the world's visible span
 // (the first second inside it where the world shows); the other worlds are hidden.
+// frames.html zooms into <id>-full.png when it exists: --zoom shoots them in the same session (about 5 s more), --full leaves them behind.
 // --full: full-size stills out/<film>-frames/<id>-full.png, no sheet or frames.html. --world: only those worlds, no sheet or frames.html.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { openPage, seekAll, settle, resolveFrame, readPageMeta } from './render-page.mjs';
 import { sampleWorlds, stillCandidates, worldShowsNow, readWorldAnimations } from './world-sample.mjs';
 import { sampleLayout } from './draft-check.mjs';
-import { tile } from './compare-frames.mjs';
+import { artboardCaption, cutSpans } from '../lib/artboard.mjs';
+import { writeArtboardSheet } from './artboard-sheet.mjs';
 import { layoutLint, namedText } from '../lib/layout-lint.mjs';
 import { readBrief } from '../lib/brief-tables.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { unwaived } from '../lib/motion-lint.mjs';
 import { firedRules, firedLines } from '../lib/taste-steps.mjs';
-import { framesPage, worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../lib/frames-page.mjs';
+import { worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../lib/frames-page.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const hideOthers = (id) => `[data-world]:not([data-world="${id}"]) { display: none !important; }`;
 const noSeek = async () => {};
-
-function labelled(png, text, out) {
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', png, '-vf', `drawtext=text='${text}':x=12:y=12:fontsize=44:fontcolor=white:box=1:boxcolor=black@0.6`, out]);
-  if (r.status !== 0) die(`label failed: ${String(r.stderr || '').trim()}`);
-}
 
 /** Seeks to the first candidate second at which the world shows (the others are hidden); returns that second, or the first candidate when none does. */
 async function seekToShown(page, span, anims) {
@@ -40,8 +36,16 @@ async function seekToShown(page, span, anims) {
   return times[0];
 }
 
-/** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fired }] in page order. */
-async function shootWorlds(opened, pagePath, stills, { ids, suffix }) {
+/** Screenshots the page at its own size (scale 1) and puts the viewport back; the layout does not change, only the pixels. */
+async function shootFullSize(page, out) {
+  const view = page.viewport();
+  await page.setViewport({ ...view, deviceScaleFactor: 1 });
+  try { await page.screenshot({ path: out }); } finally { await page.setViewport(view); }
+  return out;
+}
+
+/** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fullPng, fired }] (fullPng only with `zoom`) in page order. */
+async function shootWorlds(opened, pagePath, stills, { ids, suffix, zoom }) {
   const dur = Number(readPageMeta(pagePath, 'duration'));
   const anims = await readWorldAnimations(opened.page);
   const found = await sampleWorlds(opened.page, dur, (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms));
@@ -56,20 +60,27 @@ async function shootWorlds(opened, pagePath, stills, { ids, suffix }) {
     const at = await seekToShown(opened.page, span, anims);
     const png = path.join(stills, `${span.id}${suffix}.png`);
     await opened.page.screenshot({ path: png });
+    const fullPng = zoom ? await shootFullSize(opened.page, path.join(stills, `${span.id}-full.png`)) : undefined;
     const layout = await sampleLayout(opened.page, [at], noSeek);
     await style.evaluate((el) => el.remove());
     const found = unwaived(layoutLint(layout, { named }), authoring);
-    shots.push({ id: span.id, at, png, fired: firedRules(found, [], []) });
+    shots.push({ id: span.id, start: span.start, end: span.end, at, png, fullPng, fired: firedRules(found, [], []) });
   }
   return shots;
+}
+
+/** The full-size still of a shot when one is on disk, else undefined (the page then zooms into the draft still). */
+function zoomStill(shot) {
+  const onDisk = path.join(path.dirname(shot.png), `${shot.id}-full.png`);
+  return shot.fullPng ?? (fs.existsSync(onDisk) ? onDisk : undefined);
 }
 
 async function main(argv) {
   const t0 = Date.now();
   let args;
   try { args = parseFramesArgs(argv); } catch (e) { die(e.message); }
-  const { page: pagePath, full, worlds: ids } = args;
-  if (!pagePath) die('missing <page>; usage: node harness/media/frames.mjs <page.html> [--full] [--world <id>[,<id>]]');
+  const { page: pagePath, full, zoom, worlds: ids } = args;
+  if (!pagePath) die('missing <page>; usage: node harness/media/frames.mjs <page.html> [--full] [--zoom] [--world <id>[,<id>]]');
   if (!fs.existsSync(pagePath)) die(`no such page: ${pagePath}`);
   const abs = path.resolve(pagePath);
   const film = path.basename(path.dirname(abs));
@@ -83,7 +94,7 @@ async function main(argv) {
       await settle(opened.page);
       await opened.markWarm?.();
     }
-    shots = await shootWorlds(opened, abs, stills, { ids, suffix: full ? '-full' : '' });
+    shots = await shootWorlds(opened, abs, stills, { ids, suffix: full ? '-full' : '', zoom: zoom && !full && !ids.length });
   } finally {
     await opened.close();
   }
@@ -97,14 +108,10 @@ async function main(argv) {
     return;
   }
   const sheet = path.resolve('out', `${film}-frames.png`);
-  const tmp = fs.mkdtempSync(path.join(path.dirname(sheet), '.frames-'));
-  try {
-    tile(shots.map((s) => { const out = path.join(tmp, `${s.id}.png`); labelled(s.png, s.id, out); return out; }), sheet);
-  } finally {
-    fs.rmSync(tmp, { recursive: true, force: true });
-  }
   const html = path.join(path.dirname(abs), 'frames.html');
-  fs.writeFileSync(html, framesPage({ title: film, aspect: readPageMeta(abs, 'aspect') || '16:9', worlds: shots.map((s) => ({ id: s.id, src: path.relative(path.dirname(abs), s.png) })) }));
+  const cuts = cutSpans(shots, Number(readPageMeta(abs, 'duration')));
+  await writeArtboardSheet({ title: `${film}: key frames`, aspect: readPageMeta(abs, 'aspect') || '16:9', htmlPath: html, png: sheet,
+    items: shots.map((s, i) => ({ ...artboardCaption(i, s.id, ...cuts[i]), png: s.png, fullPng: zoomStill(s) })) });
   console.log([`frames: ${head}`, `  sheet  ${sheet}`, `  page   ${html}`, ...paths, ...rules, done()].join('\n'));
 }
 

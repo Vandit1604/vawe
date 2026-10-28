@@ -7,7 +7,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { frameTile, tileGrid } from '../lib/tile.mjs';
+import { frameTile } from '../lib/tile.mjs';
+import { artboardLayout, artboardCaption } from '../lib/artboard.mjs';
+import { writeArtboardSheet } from './artboard-sheet.mjs';
 import { durationOf } from '../lib/contact-sheet.mjs';
 import { worldAt, worldRows } from '../lib/timeline.mjs';
 import { REPO_ROOT } from '../lib/render-harness.mjs';
@@ -17,7 +19,6 @@ import { filmNameOf } from './see/strip-math.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const EVEN_TILES = 12;
-const TILE_W = 480;
 const IMAGE_TILES_MAX = 48;
 const IMAGE = /\.(png|jpe?g|webp)$/i;
 
@@ -116,11 +117,15 @@ async function main(argv) {
     let read;
     try { read = isFolder ? imageTiles(source) : isPage ? await pageTiles(source, flag('--at'), labels, dir) : videoTiles(source, flag('--at'), Number(flag('--from') ?? 0)); } catch (e) { die(e.message); }
     if (labelPage) read = await withPageWorlds(read, labelPage);
-    const th = Math.round((TILE_W * read.size.h) / read.size.w);
-    const tiles = read.shots.map((s, i) => frameTile(s.png, s.at ?? s.t, path.join(dir, `t${i}.png`), { tw: TILE_W, th, label: s.label ?? tileLabel(s.t, s.world) }));
-    const cols = Number(flag('--cols')) || Math.min(tiles.length, 4);
-    tileGrid(tiles, { cols, tw: TILE_W, th, out });
-    console.log(`✓ ${out}: ${tiles.length} tile(s), ${cols} per row, left to right: ${read.shots.map((s) => s.label ?? tileLabel(s.t, s.world)).join(', ')}`);
+    const cols = Number(flag('--cols')) || undefined;
+    const { items: boxes } = artboardLayout({ count: read.shots.length, aspect: `${read.size.w}:${read.size.h}`, cols });
+    const items = read.shots.map((s, i) => {
+      const png = frameTile(s.png, s.at ?? s.t, path.join(dir, `t${i}.png`), { tw: boxes[i].frame.w, th: boxes[i].frame.h });
+      const caption = s.label ? { left: s.label, right: '' } : { ...artboardCaption(i, s.world ?? '', NaN, NaN), right: `${s.t} s` };
+      return { ...caption, png };
+    });
+    const layout = await writeArtboardSheet({ title: path.basename(out), aspect: `${read.size.w}:${read.size.h}`, items, htmlPath: path.join(dir, 'sheet.html'), png: out, cols });
+    console.log(`✓ ${out}: ${items.length} tile(s), ${layout.cols} per row, left to right: ${read.shots.map((s) => s.label ?? tileLabel(s.t, s.world)).join(', ')}`);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

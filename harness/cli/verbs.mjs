@@ -136,6 +136,7 @@ export const VERBS = [
     positional: [PAGE],
     flags: [
       { name: 'full', type: 'bool', help: 'full-size stills (the page\'s own size, 1920x1080 for 16:9) as out/<name>-frames/<id>-full.png; no sheet, no frames.html' },
+      { name: 'zoom', type: 'bool', help: 'also shoot a full-size still per world (about 5 s more) so a click in frames.html opens it sharp; without it the page zooms into a full still left by an earlier --full run, else the draft still' },
       { name: 'world', type: 'string', repeat: true, help: 'only this world id (comma list or repeat the flag); no sheet, no frames.html. Each still is at its own world\'s time' },
       { name: 'looks', type: 'bool', help: 'instead of the world stills: a page frame under every named camera look of the lens (and as-is), one labelled grid per second; the page is not edited' },
       { name: 'at', type: 'string', help: 'with --looks: comma-separated film seconds, for example 4.5,9' },
@@ -147,9 +148,9 @@ export const VERBS = [
       if (!v.looks) {
         const stray = ['at', 'only', 'out'].find((f) => v[f] !== undefined);
         if (stray) throw new UsageError(`--${stray} needs --looks`);
-        return [{ script: 'harness/media/frames.mjs', args: [page, ...(v.full ? ['--full'] : []), ...(v.world ?? []).flatMap((w) => ['--world', w])] }];
+        return [{ script: 'harness/media/frames.mjs', args: [page, ...(v.full ? ['--full'] : []), ...(v.zoom ? ['--zoom'] : []), ...(v.world ?? []).flatMap((w) => ['--world', w])] }];
       }
-      if (v.full || v.world?.length) throw new UsageError('--looks does not take --full or --world');
+      if (v.full || v.zoom || v.world?.length) throw new UsageError('--looks does not take --full, --zoom or --world');
       const problem = looksProblem({ at: v.at, only: v.only });
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/looks.mjs', args: [page, ...opt('--at', v.at), ...opt('--only', v.only), ...opt('--out', v.out)] }];
@@ -326,7 +327,7 @@ export const VERBS = [
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
       { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },
       { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page, or an mp4 named after its film: the worlds come from films/<name>/page.html)' },
-      { name: 'cols', type: 'number', default: 4, help: 'tiles per row' },
+      { name: 'cols', type: 'number', default: 'by count, at most 3', help: 'tiles per row' },
       { name: 'ref', type: 'path', help: 'a reference mp4 (a page or an mp4, never a folder): each row is the reference left, yours right, at the same second; --at may be \`cuts\` for the middle of each world change of the last full draft', kind: 'file' },
       { name: 'out', type: 'path', default: 'out/sheet-<name>.png (--ref: out/compare-<name>.png)', help: 'the PNG path' },
     ],
