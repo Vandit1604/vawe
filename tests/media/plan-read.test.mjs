@@ -1,11 +1,12 @@
 // The plan read before any render (harness/media/plan-read.mjs): a 4-card slideshow lists its tells from the page alone, and the `vawe new`
-// starter lists none, so a new film starts clean.
+// starter lists none, so a new film starts clean. The same holds for each film type's starter, apart from the note that names its declared holds.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { readPlan } from '../../harness/media/plan-read.mjs';
 import { starterPage, starterFace } from '../../harness/cli/new.mjs';
+import { STARTERS } from '../../harness/cli/route.mjs';
 
 const ROOT = path.resolve(new URL('../../', import.meta.url).pathname);
 
@@ -24,6 +25,23 @@ test('the vawe new starter lists no page ban before any render', async () => {
     fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ length: 10, face }));
     const { advice } = await readPlan(path.join(dir, 'page.html'));
     assert.deepEqual(advice, []);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('the starter of each film type lists no page ban before any render', async () => {
+  const dir = path.join(ROOT, 'films', `zz-plan-read-types-${process.pid}`);
+  const face = starterFace('zz-plan-read');
+  fs.mkdirSync(path.join(dir, 'assets'), { recursive: true });
+  try {
+    fs.copyFileSync(path.join(ROOT, 'assets', 'fonts', face.font), path.join(dir, 'assets', face.font));
+    for (const [type, length] of [['sting', 5], ['brand launch', 11], ['story or explainer', 10.5]]) {
+      assert.ok(type in STARTERS, type);
+      fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ type, length, title: 'Northwind', face }));
+      const { advice } = await readPlan(path.join(dir, 'page.html'));
+      assert.deepEqual(advice.filter((line) => !/^\d+ waived: /.test(line)), [], type);
+    }
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

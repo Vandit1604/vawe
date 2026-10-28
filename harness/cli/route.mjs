@@ -30,6 +30,17 @@ const WORDS = [
   ['brand launch', /\b(launch|promo|product|saas|landing page|website|site|url|ai demo|product demo|demo video|feature tour|walkthrough|proof film|case study)\b/],
 ];
 
+// The page `vawe new` starts from, by film type: a file in harness/cli/starters/, the start of each world and the
+// spectacle second as fractions of the length. Every other type takes the general starter.
+export const STARTERS = {
+  sting: { file: 'sting', beats: [0, 0.3, 0.7], spectacle: 0.36 },
+  'brand launch': { file: 'brand-launch', beats: [0, 0.21, 0.6, 0.78], spectacle: 0.81 },
+  'story or explainer': { file: 'story', beats: [0, 0.23, 0.52, 0.81], spectacle: 0.84 },
+};
+
+/** The STARTERS key for a routed film, or undefined: an unmatched request and a sting past STING_MAX_S (the invented-product fallback) take the general starter. */
+export const starterType = (route, length) => (route?.known && route.type in STARTERS && !(route.type === 'sting' && length > STING_MAX_S) ? route.type : undefined);
+
 // RECIPES.md "Complete videos": one chain per 20 to 30 s film, found by its heading number.
 export const RECIPES = 'prompts/moves/RECIPES.md';
 const RECIPE_MIN_S = 20;
