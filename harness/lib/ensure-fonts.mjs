@@ -25,6 +25,14 @@ function pageSources(pagePath) {
   return [html, ...sheets.map((f) => fs.readFileSync(f, 'utf8'))];
 }
 
+/** Fetches the faces a page needs when any is missing, after one line saying so; true when the fetch ran. Offline the fetch fails and the render says what is missing. */
+export function ensurePageFonts(root, pagePath, { run, log = console.log } = {}) {
+  const files = fontFilesIn(...pageSources(pagePath));
+  if (!missingFonts(root, files).length) return false;
+  log('fonts missing from assets/fonts: fetching them with generators/media/fonts.mjs');
+  return ensureFonts(root, files, { run });
+}
+
 /** The command to run when the page's faces are missing from this checkout, else ''. */
 export function missingFontsLine(root, pagePath) {
   const missing = missingFonts(root, fontFilesIn(...pageSources(pagePath)));

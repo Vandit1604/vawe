@@ -46,7 +46,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { scratch } from '../lib/scratch.mjs';
-import { drewNothingHint, missingFontsLine } from '../lib/ensure-fonts.mjs';
+import { drewNothingHint, ensurePageFonts, missingFontsLine } from '../lib/ensure-fonts.mjs';
 import { BLANK_RETRY_WAIT_MS, isBlankShot, shouldRetake } from '../lib/blank-shot.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, awaitReady, installPageReady, installPageFrame } from '../../core/engine/page-seek.js';
@@ -1203,6 +1203,7 @@ async function main() {
       + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--silent] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
+  ensurePageFonts(REPO_ROOT, pagePath);
   const drift = briefProblems(pagePath);
   if (drift.length) console.error(adviceBlock(drift.map((p) => `${p}; the render uses the page: update the brief's length and aspect lines to match`)).join('\n'));
   const final = argv.includes('--final');

@@ -8,6 +8,7 @@ import path from 'node:path';
 import { execFileSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readPageMeta } from '../media/render-page.mjs';
+import { ensurePageFonts } from '../lib/ensure-fonts.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RUNS_DIR = path.join(repoRoot, 'quality', 'runs', 'e2e');
@@ -88,6 +89,7 @@ async function pool(tasks, limit) {
 
 const t0 = Date.now();
 const pages = findPages();
+for (const p of pages) ensurePageFonts(repoRoot, path.join(repoRoot, p));
 const tests = [...PAGE_TESTS, ...motionTests()].filter((f) => fs.existsSync(path.join(repoRoot, f)));
 const tasks = [
   async () => {
