@@ -39,15 +39,16 @@ The entrance is a move, not only a fade. The exit is shorter than the entrance. 
 ## The loop
 
 ```bash
-bin/vawe dev      films/hello/page.html                  # draft: half size, 30 fps, silent
+bin/vawe dev      films/hello/page.html                  # draft: half size, 30 fps, audio mixed
 bin/vawe dev      films/hello/page.html --from 2 --to 4  # only the seconds you work on
 bin/vawe critique films/hello/page.html                  # in a fresh session
+bin/vawe approve  films/hello/page.html                  # you, after you watch the whole draft
 bin/vawe ship     films/hello/page.html                  # final: 60 fps, blur, audio
 ```
 
 Draft the hardest two to four seconds first. Give the draft to a session that did not write the page. It names the shot, the frame and the fix. Fix the worst items, render only those seconds again, and critique again.
 
-`bin/vawe ship` runs in the background. Run `bin/vawe ship --status --wait` to wait for the result.
+`bin/vawe ship` refuses until a fresh session has reviewed the page and you have run `bin/vawe approve` on the whole draft. It runs in the background. Run `bin/vawe ship --status --wait` to wait for the result.
 
 <Callout title="No em dashes on screen">
 On-screen copy cannot contain an em dash. The validator rejects it. Use a comma, a period or a middot.

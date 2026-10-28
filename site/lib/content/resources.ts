@@ -95,9 +95,10 @@ export const resourceGroups = (sizes?: FileSizes): Group[] => [
   {
     id: "skills",
     title: "Agent skills",
-    lead: "Five SKILL.md files in the skills/ folder of the GitHub repo.",
+    lead: "Six SKILL.md files in the skills/ folder of the GitHub repo.",
     tile: { word: "Skills", tone: "accent", detail: "skills", flip: true },
     items: [
+      skill("html-to-video", "Start here: make a film from one HTML page when none exists yet."),
       skill("vawe-brief", "Ask for the missing facts, then write the film’s brief."),
       skill("vawe-page", "Write page.html: audio tags, springs and the usual first-draft mistakes."),
       skill("vawe-transitions", "Plan what carries over at every cut."),

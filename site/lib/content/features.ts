@@ -53,7 +53,7 @@ export const FEATURES_BARS: { label: string; s: number }[] = [
   { label: "moth-photogram, seconds 4 to 6 only", s: 6.8 },
 ];
 
-const SKILLS = "vawe-brief, vawe-page, vawe-critique, vawe-transitions and vawe-reference";
+const SKILLS = "html-to-video, vawe-brief, vawe-page, vawe-critique, vawe-transitions and vawe-reference";
 
 export const FEATURES = {
   path: "/features",
@@ -122,7 +122,7 @@ pass a glint), never a camera drift`,
           body: [
             "The site serves the guide as ",
             { code: "llms.txt" },
-            ` and markdown. Five skills carry the parts an agent gets wrong: ${SKILLS}. `,
+            ` and markdown. Six skills carry the parts an agent gets wrong: ${SKILLS}. `,
             { text: "How an agent writes the page", href: "/ai-agents" },
             ".",
           ],
@@ -198,12 +198,12 @@ bin/vawe approve <page>
       features: [
         {
           title: "Drafts at half size",
-          body: ["A draft is half size, 30 fps and silent, for a quick look. Only the final adds the audio mix and motion blur."],
+          body: ["A draft is half size at 30 fps, with the audio mix, for a quick look. Only the final adds motion blur."],
           proof: {
             kind: "code",
             code: {
               label: "two renders",
-              text: `bin/vawe dev  <page>   // half size, 30 fps, silent
+              text: `bin/vawe dev  <page>   // half size, 30 fps, audio
 bin/vawe ship <page>   // 60 fps, blur, audio`,
             },
           },

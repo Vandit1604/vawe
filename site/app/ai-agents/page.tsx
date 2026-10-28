@@ -55,7 +55,7 @@ export default function AiAgents() {
               <h2>One command, one loop.</h2>
               <p>
                 <code>bin/vawe</code> runs everything. <code>new</code> starts a film from a
-                template, <code>dev</code> renders a half-size, silent draft and checks it,{" "}
+                template, <code>dev</code> renders a half-size draft and checks it,{" "}
                 <code>critique</code> lays out the frames to look at, and <code>ship</code> renders
                 the final at 60fps with motion blur and audio. A wrong flag exits with the list of
                 valid ones, so an agent corrects itself in one step instead of reading source.

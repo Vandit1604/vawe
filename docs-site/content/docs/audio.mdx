@@ -43,4 +43,4 @@ Name each beat once in CSS (`--beat-2: 1.85s`) and read it in every delay of tha
 
 `bin/vawe critique <page>` runs `page-check`. It reports a cue with no onset in the rendered audio (`cue-not-heard`), a cue more than two frames from its `data-at` (`cue-onset-drift`), and a cue off the cut it belongs to (`sound-off-hit`).
 
-To draft with sound, add `--audio`: `bin/vawe dev <page> --audio`. A draft is silent by default.
+A whole draft mixes the audio tags. A `--from/--to` window is silent, and `bin/vawe dev <page> --silent` leaves the audio out.
