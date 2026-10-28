@@ -1,0 +1,118 @@
+<!doctype html>
+<html data-aspect="{{aspect}}">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="{{length}}">
+<meta name="aspect" content="{{aspect}}">
+<meta name="message" content="one thing to remember">
+<meta name="spectacle" content="{{spectacle}}">
+<meta name="signature" content="{{signature}}">
+<title>{{title}}</title>
+<script type="application/json" id="authoring">{"allow": ["static-window@0-{{b2}}", "static-window@{{b2}}-{{b3}}", "static-window@{{b3}}-{{b4}}", "static-window@{{b4}}-{{length}}", "tile-run@0-{{b3}}", "tile-run@{{b3}}-{{b4}}"], "_why": {
+  "static-window@0-{{b2}}": "world s1, 0-{{b2}} s: the problem is held for its read time",
+  "static-window@{{b2}}-{{b3}}": "world s2, {{b2}}-{{b3}} s: the token runs the steps inside this hold",
+  "static-window@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the result is held for its read time",
+  "static-window@{{b4}}-{{length}}": "world s4, {{b4}}-{{length}} s: the wordless closing image rests the eye",
+  "tile-run@0-{{b3}}": "worlds s1 and s2, 0-{{b3}} s: the problem is held for its read time and the token runs the steps",
+  "tile-run@{{b3}}-{{b4}}": "world s3, {{b3}}-{{b4}} s: the result is held for its read time"}}</script>
+<!-- a story: s1 the problem, s2 the mechanism (a token runs the steps), s3 the result (the gap closes), s4 the end with no words (the spectacle: the mark lands big).
+  The mark is the thread: it rides over every cut and ends as the closing image. Replace the three steps with the real mechanism, the numbers with the real ones,
+  the square with the brand mark, the grey with the palette and the face with the brand's; keep the order. -->
+<style>
+  @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
+  :root { --ground: {{ground}} /* unchosen: palette dial */; --ink: {{ink}} /* unchosen: palette dial */; --unit: min(var(--vh), calc(var(--vw) * 0.56)); {{beats}} }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; font-family: "{{family}}", sans-serif; }
+  .world { position: absolute; inset: 0; isolation: isolate; box-sizing: border-box; display: grid; align-content: center; justify-items: start; gap: calc(var(--unit) * 0.04);
+           padding: 0 calc(var(--vw) * 0.08); }
+{{groundCss}}
+  h1, p { margin: 0; letter-spacing: -0.03em; }
+  h1 { font-size: calc(var(--unit) * 0.14); font-weight: 700; line-height: 1; }
+  .line { font-size: calc(var(--unit) * 0.09); font-weight: 500; }
+  .flow { position: relative; display: flex; align-items: center; width: calc(var(--vw) * 0.84); }
+  .node { flex: none; padding: calc(var(--unit) * 0.02) calc(var(--unit) * 0.03); border: calc(var(--unit) * 0.008) solid currentColor; border-radius: calc(var(--unit) * 0.04); font-size: calc(var(--unit) * 0.09); font-weight: 600; letter-spacing: -0.01em; }
+  .link { flex: 1; height: calc(var(--unit) * 0.008); background: currentColor; transform-origin: left; }
+  .token { position: absolute; left: 0; top: 50%; width: calc(var(--unit) * 0.05); height: calc(var(--unit) * 0.05); margin-top: calc(var(--unit) * -0.025); border-radius: 50%; background: currentColor; }
+  h2 { font-size: calc(var(--unit) * 0.16); font-weight: 700; line-height: 0.9; }
+  .gap { display: grid; gap: calc(var(--unit) * 0.01); width: calc(var(--unit) * 1.5); font-size: calc(var(--unit) * 0.09); font-weight: 600; letter-spacing: -0.01em; }
+  .gap i { display: block; height: calc(var(--unit) * 0.04); margin-bottom: calc(var(--unit) * 0.01); background: currentColor; transform-origin: left; }
+  .gap .before i { width: 100%; opacity: 0.4; }
+  .gap .after i { width: 33%; }
+  .thread { position: absolute; left: 0; top: 0; width: calc(var(--unit) * 0.14); height: calc(var(--unit) * 0.14); color: var(--ink); }
+</style>
+<script type="module">
+import { enter, layer, stagger, keys, EASE } from '../../core/motion/presets.js';
+const root = document.documentElement;
+const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
+const meta = (name) => parseFloat(document.querySelector('meta[name="' + name + '"]').content);
+const end = meta('duration');
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const worlds = [...$$('[data-world]')];
+const cutTo = (el, visibility, at, fill) => el.animate([{ visibility: visibility === 'visible' ? 'hidden' : 'visible' }, { visibility }], { delay: at * 1000, duration: 1, fill });
+// each ground blob drifts by [x, y] fractions of the frame while its world shows
+const DRIFT = [[-0.2, 0.1], [0.18, -0.2], [0.14, -0.16]];
+// the cut frame already carries the first thing moving: a blank frame there fails the draft check
+const span = worlds.map((_, i) => [i ? beat(i + 1) - 0.03 : 0, i + 1 === worlds.length ? end : beat(i + 2) - 0.03]);
+worlds.forEach((world, i) => {
+  const [from, to] = span[i];
+  if (i) cutTo(world, 'visible', from, 'both');
+  if (i + 1 < worlds.length) cutTo(world, 'hidden', to, 'forwards');
+  world.querySelectorAll('.ground i').forEach((blob, k) => blob.animate([{ translate: '0 0' }, { translate: 'calc(var(--vw) * ' + DRIFT[k][0] + ') calc(var(--vh) * ' + DRIFT[k][1] + ')' }], { delay: from * 1000, duration: (to - from) * 1000, easing: EASE.glide, fill: 'both' }));
+});
+
+// the thread sits above the grounds, so its ink flips with them: even worlds are --ink
+worlds.slice(1).forEach((_, k) => $('.thread').animate([{ color: k % 2 ? 'var(--ink)' : 'var(--ground)' }], { delay: span[k + 1][0] * 1000, duration: 1, fill: 'forwards' }));
+// one place per world, [x, y] as fractions of the frame; the mark winds up, leaves its place 0.23 s before each cut and lands in the next 0.27 s after it
+const PLACE = [[0.78, 0.22], [0.86, 0.14], [0.8, 0.12], [0.46, 0.43]];
+const at = (k, back = 0, next = PLACE[Math.min(k + 1, PLACE.length - 1)]) => 'calc(var(--vw) * ' + (PLACE[k][0] - back * (next[0] - PLACE[k][0])) + ') calc(var(--vh) * ' + (PLACE[k][1] - back * (next[1] - PLACE[k][1])) + ')';
+const carry = worlds.slice(1).flatMap((_, k) => [[span[k][1] - 0.4, at(k)], [span[k][1] - 0.23, at(k, 0.06), 'fling'], [span[k][1] + 0.27, at(k + 1), 'hang']]);
+enter($('.thread'), { at: 0.3, band: 'energy', from: '0 0', scale: 0.4, ease: 'pop' });
+keys($('.thread'), 'translate', [[0, at(0)], ...carry, [end, at(worlds.length - 1)]]);
+$('.thread').animate([{ rotate: '0deg' }, { rotate: '90deg' }], { delay: (beat(4) + 0.5) * 1000, duration: (end - beat(4) - 0.5) * 1000, easing: EASE.land, fill: 'both' });
+
+// s1 the problem: rises from below
+layer($('h1'), $('.problem .line'), { at: 0.05, band: 'professional', blur: 10, from: '0 0.4em', secondary: { blur: 6 } });
+
+// s2 the mechanism: the steps arrive from the right and the links draw; the token runs step to step and each step pops as it arrives
+const [step] = span[1];
+const nodes = [...$$('.node')];
+stagger(nodes, { at: step, band: 'professional', from: '2em 0', nudgeEvery: 2 });
+$$('.link').forEach((link, k) => link.animate([{ scale: '0 1' }, { scale: '1 1' }], { delay: (step + 0.3 + k * 0.2) * 1000, duration: 500, easing: EASE.land, fill: 'both' }));
+const left = (el) => el.getBoundingClientRect().left;
+const [HOP, REST] = [0.6, 0.6];
+const run = nodes.slice(1).map((node) => left(node) - left(nodes[0]));
+enter($('.token'), { at: step + 0.9, band: 'energy', from: '0 0', scale: 0.4 });
+keys($('.token'), 'translate', [[step + 1.2, '0 0'], ...run.flatMap((x, k) => [[step + 1.2 + k * (HOP + REST) + HOP, x + 'px 0', { in: 'hang' }], [step + 1.2 + (k + 1) * (HOP + REST), x + 'px 0']])]);
+nodes.slice(1).forEach((node, k) => node.animate([{ scale: '1' }, { scale: '1.12' }, { scale: '1' }], { delay: (step + 1.2 + k * (HOP + REST) + HOP) * 1000, duration: 400, easing: EASE.nudge, fill: 'both' }));
+
+// s3 the result: the number drops in from above, the bars slide in from the right and the short one lands
+const [result] = span[2];
+layer($('h2'), $('.result .line'), { at: result, band: 'professional', from: '0 -0.5em', secondary: { from: '0 0.3em' } });
+stagger($$('.gap > div'), { at: result + 0.5, band: 'professional', from: '3em 0', nudgeEvery: 1 });
+
+// s4 the end, with no words: the mark lands big and turns to rest (the spectacle)
+$('.thread').animate([{ scale: '1' }, { scale: '2' }], { delay: (beat(4) + 0.27) * 1000, duration: 650, easing: EASE.pop, fill: 'forwards' });
+</script>
+</head>
+<body>
+<main class="world problem" data-world="s1">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <h1>{{title}}</h1>
+  <p class="line">why it matters</p>
+</main>
+<section class="world" data-world="s2">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="flow"><span class="node">Input</span><i class="link"></i><span class="node">Rule</span><i class="link"></i><span class="node">Route</span><i class="link"></i><span class="node">Output</span><i class="token"></i></div>
+</section>
+<section class="world result" data-world="s3">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+  <h2>3x</h2>
+  <p class="line">faster than before</p>
+  <div class="gap"><div class="before">before 6 d<i></i></div><div class="after">after 2 d<i></i></div></div>
+</section>
+<section class="world" data-world="s4">
+  <div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>
+</section>
+<svg class="thread" viewBox="0 0 100 100" role="img" aria-label="mark"><rect x="20" y="20" width="60" height="60" rx="14" fill="currentColor"/></svg>
+</body>
+</html>

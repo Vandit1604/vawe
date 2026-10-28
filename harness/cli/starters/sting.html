@@ -1,0 +1,72 @@
+<!doctype html>
+<html data-aspect="{{aspect}}">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="{{length}}">
+<meta name="aspect" content="{{aspect}}">
+<meta name="message" content="one thing to remember">
+<meta name="spectacle" content="{{spectacle}}">
+<meta name="signature" content="{{signature}}">
+<title>{{title}}</title>
+<script type="application/json" id="authoring">{"allow": ["static-window@0-{{b2}}"], "_why": {"static-window@0-{{b2}}": "world s1, {{b2}} s: the quiet beat before the spectacle holds the landed mark still"}}</script>
+<!-- a sting: s1 is the quiet beat (the mark alone), the spectacle opens the word from behind the mark, then the lockup holds with the mark still turning.
+  Replace the ring with the brand mark, the grey with the palette and the stand-in face with the brand's; keep the beats. -->
+<style>
+  @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
+  :root { --ground: {{ground}} /* unchosen: palette dial */; --ink: {{ink}} /* unchosen: palette dial */; {{beats}} }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  .world { position: absolute; inset: 0; isolation: isolate; }
+{{groundCss}}
+  .lockup { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: calc(var(--vh) * 0.04); color: var(--ink); font-family: "{{family}}", sans-serif; }
+  .row { display: flex; align-items: center; gap: calc(var(--vh) * 0.04); }
+  .mark { width: calc(var(--vh) * 0.2); height: calc(var(--vh) * 0.2); z-index: 1; }
+  .word { margin: 0; font-size: min(calc(var(--vh) * 0.17), calc(var(--vw) * {{wordFit}})); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; white-space: nowrap; }
+  .line { margin: 0; font-size: min(calc(var(--vh) * 0.09), calc(var(--vw) * 0.06)); font-weight: 500; letter-spacing: -0.01em; }
+</style>
+<script type="module">
+import { enter, EASE } from '../../core/motion/presets.js';
+await document.fonts.ready;
+const root = document.documentElement;
+const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
+const end = parseFloat(document.querySelector('meta[name="duration"]').content);
+const $ = (s) => document.querySelector(s);
+const worlds = [...document.querySelectorAll('[data-world]')];
+const REVEAL = 0.65;
+const cutTo = (el, visibility, at, fill) => el.animate([{ visibility: visibility === 'visible' ? 'hidden' : 'visible' }, { visibility }], { delay: at * 1000, duration: 1, fill });
+// each ground blob drifts by [x, y] fractions of the frame while its world shows
+const DRIFT = [[-0.2, 0.1], [0.18, -0.2], [0.14, -0.16]];
+worlds.forEach((world, i) => {
+  const from = i === 0 ? 0 : beat(i + 1) - 0.03, to = i + 1 === worlds.length ? end : beat(i + 2) - 0.03;
+  if (i) cutTo(world, 'visible', from, 'both');
+  if (i + 1 < worlds.length) cutTo(world, 'hidden', to, 'forwards');
+  world.querySelectorAll('.ground i').forEach((blob, k) => blob.animate([{ translate: '0 0' }, { translate: 'calc(var(--vw) * ' + DRIFT[k][0] + ') calc(var(--vh) * ' + DRIFT[k][1] + ')' }], { delay: (from + 0.35) * 1000, duration: (to - from - 0.35) * 1000, easing: EASE.glide, fill: 'both' }));
+});
+// the lockup sits above the grounds, so its ink flips with them: even worlds are --ink
+worlds.slice(1).forEach((_, k) => $('.lockup').animate([{ color: k % 2 ? 'var(--ink)' : 'var(--ground)' }], { delay: (beat(k + 2) - 0.03) * 1000, duration: 1, fill: 'forwards' }));
+
+// s1, the quiet beat: the mark lands alone and rests; it turns a quarter, from the landing to the last frame
+enter($('.mark'), { at: 0.05, from: 'calc(var(--vw) * -0.2) 0', scale: 0.6, ease: 'land' });
+$('.mark').animate([{ rotate: '0deg' }, { rotate: '90deg' }], { delay: (beat(2) + REVEAL + 0.1) * 1000, duration: (end - beat(2) - REVEAL - 0.1) * 1000, easing: EASE.land, fill: 'both' });
+// the spectacle: the lockup opens out and the word slides from behind the mark
+const shift = ($('.word').getBoundingClientRect().width + parseFloat(getComputedStyle($('.row')).columnGap)) / 2;
+const open = { delay: beat(2) * 1000, duration: REVEAL * 1000, fill: 'both' };
+// the row first moves a little the wrong way, then lands
+$('.row').animate([{ translate: shift + 'px 0', easing: 'ease-out' }, { translate: shift * 1.08 + 'px 0', offset: 0.15, easing: EASE.land }, { translate: '0 0' }], open);
+$('.word').animate([{ clipPath: 'inset(-0.3em 100% -0.3em 0)' }, { clipPath: 'inset(-0.3em -0.3em -0.3em 0)' }], { ...open, easing: EASE.land });
+// the slide finishes a little after the clip, so the word settles in two steps
+$('.word').animate([{ translate: '-1em 0' }, { translate: '0 0' }], { ...open, duration: (REVEAL + 0.12) * 1000, easing: EASE.land });
+$('.word').animate([{ opacity: 0 }, { opacity: 1 }], { ...open, duration: 100, easing: 'linear' });
+enter($('.line'), { at: beat(2) + 0.8, band: 'professional', from: '0 0.4em' });
+</script>
+</head>
+<body>
+{{worlds}}
+<div class="lockup">
+  <div class="row">
+    <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="mark"><rect x="20" y="20" width="60" height="60" rx="14" fill="currentColor"/></svg>
+    <h1 class="word">{{title}}</h1>
+  </div>
+  <p class="line">why it matters</p>
+</div>
+</body>
+</html>
