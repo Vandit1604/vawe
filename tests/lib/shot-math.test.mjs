@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseWidths, parseTargets, problemLines, shotProblem, resolveTarget, shotName, viewportHeight } from '../../harness/media/shot-math.mjs';
+import { isFaviconUrl, isRequestNoise, parseWidths, parseTargets, problemLines, shotProblem, resolveTarget, shotName, viewportHeight } from '../../harness/media/shot-math.mjs';
 
 test('parseWidths reads a comma list and refuses the rest', () => {
   assert.deepEqual(parseWidths('1440,390'), [1440, 390]);
@@ -47,4 +47,11 @@ test('problemLines names each problem, caps each list and counts the rest', () =
 test('parseTargets splits a comma list', () => {
   assert.deepEqual(parseTargets('/,/blog'), ['/', '/blog']);
   assert.deepEqual(parseTargets(undefined), []);
+});
+
+test('a 404 is one line: the console copy and the favicon are not listed', () => {
+  assert.equal(isRequestNoise('Failed to load resource: the server responded with a status of 404 (Not Found)'), true);
+  assert.equal(isRequestNoise('boom: bad state'), false);
+  assert.equal(isFaviconUrl('http://127.0.0.1:3000/favicon.ico'), true);
+  assert.equal(isFaviconUrl('http://127.0.0.1:3000/gone.png'), false);
 });

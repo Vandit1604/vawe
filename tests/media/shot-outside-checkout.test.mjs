@@ -47,6 +47,8 @@ test('shot names each failed request and console error, not only their count', (
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /failed request: http:\/\/127\.0\.0\.1:\d+\/gone\.png \(HTTP 404\)/);
     assert.match(r.stdout, /console error: .*boom: bad state/);
+    assert.match(r.stdout, /1 console error\(s\), 1 failed request\(s\)/);
+    assert.doesNotMatch(r.stdout, /Failed to load resource|favicon/);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

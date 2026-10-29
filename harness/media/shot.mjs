@@ -10,7 +10,7 @@ import path from 'node:path';
 import { launchPage, serveRepo } from '../lib/render-harness.mjs';
 import { pageRoot } from './preview-server.mjs';
 import { withSite } from '../lib/site-server.mjs';
-import { DEFAULT_BASE, DEFAULT_WIDTHS, navigationProblem, parseTargets, parseWidths, problemLines, resolveTarget, shotName, shotProblem, viewportHeight } from './shot-math.mjs';
+import { DEFAULT_BASE, DEFAULT_WIDTHS, isFaviconUrl, isRequestNoise, navigationProblem, parseTargets, parseWidths, problemLines, resolveTarget, shotName, shotProblem, viewportHeight } from './shot-math.mjs';
 import { parseTour, tourSize } from './tour-math.mjs';
 import { captureTour, encodeTour, tourTmpDir } from './tour.mjs';
 
@@ -54,9 +54,9 @@ async function shoot({ url, name, width, full, outDir }) {
   const { page, close } = await launchPage({ width, height: viewportHeight(width) });
   const problems = { errors: [], failed: [] };
   page.on('pageerror', (e) => { problems.errors.push(String(e.message ?? e).split('\n')[0]); });
-  page.on('console', (m) => { if (m.type() === 'error') problems.errors.push(m.text().split('\n')[0]); });
-  page.on('response', (r) => { if (r.status() >= 400) problems.failed.push(`${r.url()} (HTTP ${r.status()})`); });
-  page.on('requestfailed', (r) => { problems.failed.push(`${r.url()} (${r.failure()?.errorText ?? 'failed'})`); });
+  page.on('console', (m) => { if (m.type() === 'error' && !isRequestNoise(m.text())) problems.errors.push(m.text().split('\n')[0]); });
+  page.on('response', (r) => { if (r.status() >= 400 && !isFaviconUrl(r.url())) problems.failed.push(`${r.url()} (HTTP ${r.status()})`); });
+  page.on('requestfailed', (r) => { if (!isFaviconUrl(r.url())) problems.failed.push(`${r.url()} (${r.failure()?.errorText ?? 'failed'})`); });
   try {
     await gotoChecked(page, url);
     await loadLazy(page);

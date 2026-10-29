@@ -59,3 +59,7 @@ export function problemLines({ errors, failed }, max = PROBLEM_LINES_MAX) {
   const list = (label, items) => [...items.slice(0, max).map((i) => `  ${label}: ${i}`), ...(items.length > max ? [`  and ${items.length - max} more ${label}s`] : [])];
   return [...list('failed request', failed), ...list('console error', errors)];
 }
+
+// Chrome logs "Failed to load resource" for every 404, and the failed-request line already names the URL. A page without a favicon always misses /favicon.ico.
+export const isRequestNoise = (text) => /^Failed to load resource/.test(text);
+export const isFaviconUrl = (url) => /\/favicon\.ico(\?|$)/.test(url);
