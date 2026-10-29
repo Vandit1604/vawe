@@ -67,24 +67,8 @@ const TOKENS = {
   ink2: "#ededed",
   muted: "#a1a1a1",
   line: "#242424",
-  accent: "#3291ff",
   bg2: "#0a0a0a",
 };
-
-// The same clip-path mark site/og/card.html draws for the homepage card, so the two image-generation
-// paths (that one screenshots a browser, this one runs Satori) still read as one wordmark.
-function Mark() {
-  return (
-    <div
-      style={{
-        width: 22,
-        height: 22,
-        background: TOKENS.accent,
-        clipPath: "polygon(0 62%,25% 22%,50% 62%,75% 22%,100% 62%,100% 100%,0 100%)",
-      }}
-    />
-  );
-}
 
 function clamp(text: string, max: number) {
   if (text.length <= max) return text;
@@ -120,8 +104,7 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
     >
       {/* Masthead: the wordmark, quiet, and the path it belongs to. */}
       <div style={{ display: "flex", alignItems: "center", padding: "40px 64px 0 64px" }}>
-        <Mark />
-        <div style={{ marginLeft: 10, fontSize: 19, fontWeight: 600, letterSpacing: "-0.02em" }}>vawe</div>
+        <div style={{ fontSize: 19, fontWeight: 600, letterSpacing: "-0.02em" }}>vawe</div>
         <div style={{ display: "flex", marginLeft: "auto", fontFamily: "IBM Plex Mono", fontSize: 14, color: TOKENS.muted, letterSpacing: "0.02em" }}>
           {`vawe.dev${urlPath}`}
         </div>
@@ -228,4 +211,36 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
 export async function staticOgImage(opts: { tag: string; title: string; description: string; path: string }) {
   const fonts = await loadOgFonts();
   return new ImageResponse(renderOgCard({ ...opts, panel: null }), { ...OG_SIZE, fonts });
+}
+
+// The site-wide default card: the wordmark as text and one plain line. No logo mark, so it stands
+// through a logo change.
+export async function brandOgImage(line: string) {
+  const fonts = await loadOgFonts();
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: OG_SIZE.width,
+          height: OG_SIZE.height,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "0 96px",
+          background: TOKENS.bg,
+          fontFamily: "Geist",
+          color: TOKENS.ink,
+        }}
+      >
+        <div style={{ display: "flex", fontSize: 200, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.05em" }}>vawe</div>
+        <div style={{ display: "flex", marginTop: 32, maxWidth: 880, fontSize: 36, lineHeight: 1.35, color: TOKENS.ink2, fontWeight: 400 }}>
+          {line}
+        </div>
+        <div style={{ display: "flex", marginTop: 48, fontFamily: "IBM Plex Mono", fontSize: 22, color: TOKENS.muted, letterSpacing: "0.02em" }}>
+          vawe.dev
+        </div>
+      </div>
+    ),
+    { ...OG_SIZE, fonts },
+  );
 }
