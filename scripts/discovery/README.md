@@ -26,7 +26,7 @@ node scripts/discovery/run.mjs --channels github,context7,skills --limit 10    #
 node scripts/discovery/run.mjs --prev scripts/discovery/runs/baseline-2026-10-15.json   # report the change against an earlier run
 ```
 
-It writes `scripts/discovery/runs/<date>.json` (every result, with `ours: true` on a vawe hit) and `runs/<date>.md` (vawe's rank per query per channel, then the most frequent winners per channel). A channel that blocks three queries in a row is skipped and its queries show an error. Commit the pair when the run is a baseline you want to compare against.
+It writes `scripts/discovery/runs/<date>.json` (every result, with `ours: true` on a vawe hit) and `runs/<date>.md` (vawe's rank per query per channel, then the most frequent winners per channel). A channel that blocks three queries in a row is skipped and its queries show an error. Git ignores every run except `baseline-*`: rename the pair to `baseline-<date>` to commit it as a baseline you want to compare against.
 
 ## Read the report
 
