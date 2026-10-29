@@ -9,7 +9,7 @@ group: reference
 **Use when** a real product, company or site is the subject and the film must show it as it is:
 its own colours, its own type, its own screens. Never invented UI.
 
-**Length:** 15 to 40 seconds. Under 15 seconds, use one continuous action.
+**Length:** 8 to 40 seconds. Under 8 seconds, use one continuous action.
 
 ## The template
 

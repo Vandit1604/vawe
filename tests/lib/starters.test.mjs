@@ -5,9 +5,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { STARTERS, readRouting } from '../../harness/cli/route.mjs';
+import { STARTERS, readRouting, starterSpec, starterType } from '../../harness/cli/route.mjs';
 import { newFilm, starterPage, starterFace, typeBeats } from '../../harness/cli/new.mjs';
 import { isStarterPage } from '../../harness/lib/frames-page.mjs';
+import { measuredSections } from '../../harness/lib/measured-brief.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const TYPES = Object.keys(STARTERS);
@@ -64,6 +65,35 @@ test('the template Length line is the one owner: the brief and the page say the 
 test('a film shorter than the template Length takes the general starter', () => {
   for (const [name, request] of [['zz-k', 'an 11 s launch film for https://acme.example'], ['zz-l', 'an 11 s explainer: how a refund works']]) {
     assert.match(newIn(name, { request }).page, /<ul class="facts">/, name);
+  }
+});
+
+test('the length picks the starter: general below the short min and past the short max, short between, full from the min', () => {
+  const route = (type) => ({ known: true, type });
+  const spec = (type, length) => (starterType(route(type), length) ? starterSpec(type, length).worlds?.length ?? 'full' : 'general');
+  assert.deepEqual([7.9, 8, 9, 9.1, 14.9, 15].map((s) => spec('brand launch', s)), ['general', 4, 4, 'general', 'general', 'full']);
+  assert.deepEqual([8.9, 9, 9.5, 9.6, 29.9, 30].map((s) => spec('story or explainer', s)), ['general', 4, 4, 'general', 'general', 'full']);
+});
+
+test('the short starter pages keep the worlds of the full starter, declare no waiver and match the brief Shots ids', () => {
+  for (const [type, lengths, ids] of [['brand launch', [8, 9], ['s1', 's2', 's4', 's7']], ['story or explainer', [9, 9.5], ['s1', 's2', 's6', 's12']]]) {
+    for (const length of lengths) {
+      const page = starterPage({ type, length, title: 'Acme', face: starterFace('zz-short') });
+      assert.deepEqual(worldIds(page), ids, `${type} ${length} s`);
+      const beats = typeBeats(type, length);
+      assert.deepEqual(beats.map((b) => b.id), ids);
+      const { spec } = measuredSections({ name: 'zz-short', request: 'r', title: 'Acme', length, beats, face: starterFace('zz-short') }).sections;
+      assert.deepEqual(spec.split('\n').filter((l) => /^\| s\d+ /.test(l)).map((l) => l.split('|')[1].trim()), ids);
+      assert.doesNotMatch(page, /id="authoring"|\{\{/);
+      assert.match(page, new RegExp(`<meta name="duration" content="${length}">`));
+    }
+  }
+});
+
+test('the template Length line states the short minimum of its starter', () => {
+  for (const [file, type] of [['brand-launch-from-url', 'brand launch'], ['story-explainer', 'story or explainer']]) {
+    const low = fs.readFileSync(path.join(ROOT, 'prompts', `${file}.md`), 'utf8').match(/^\*\*Length:\*\* (\d+)/m)[1];
+    assert.equal(Number(low), STARTERS[type].short.min, file);
   }
 });
 

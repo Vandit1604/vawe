@@ -12,7 +12,7 @@ Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with
 invents and no product capture. Route 3 in `guides/ROUTING.md`. The longest median
 preview in the Opus 5.5 dataset (102 s) belongs to this type, so plan the length.
 
-**Length:** 30 seconds to 3 minutes. Over 60 seconds, use the director's brief instead.
+**Length:** 9 seconds to 3 minutes. Over 60 seconds, use the director's brief instead.
 
 ## The template
 

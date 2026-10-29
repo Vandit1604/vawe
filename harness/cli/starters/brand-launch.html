@@ -70,60 +70,79 @@ worlds.forEach((world, i) => {
 
 // the thread sits above the grounds, so its ink flips with them: even worlds are --ink
 worlds.slice(1).forEach((_, k) => $('.thread').animate([{ color: k % 2 ? 'var(--ink)' : 'var(--ground)' }], { delay: span[k + 1][0] * 1000, duration: 1, fill: 'forwards' }));
-// one place per world, [x, y] as fractions of the frame; the mark winds up, leaves its place 0.23 s before each cut and lands in the next 0.27 s after it
+// one place per world id (s1 first), [x, y] as fractions of the frame; the mark winds up, leaves its place 0.23 s before each cut and lands in the next 0.27 s after it
 const PLACE = [[0.78, 0.22], [0.86, 0.14], [0.84, 0.8], [0.8, 0.2], [0.8, 0.62], [0.86, 0.1], [0.08, 0.26]];
-const at = (k, back = 0, next = PLACE[Math.min(k + 1, PLACE.length - 1)]) => 'calc(var(--vw) * ' + (PLACE[k][0] - back * (next[0] - PLACE[k][0])) + ') calc(var(--vh) * ' + (PLACE[k][1] - back * (next[1] - PLACE[k][1])) + ')';
+const places = worlds.map((world) => PLACE[world.dataset.world.slice(1) - 1]);
+const at = (k, back = 0, next = places[Math.min(k + 1, places.length - 1)]) => 'calc(var(--vw) * ' + (places[k][0] - back * (next[0] - places[k][0])) + ') calc(var(--vh) * ' + (places[k][1] - back * (next[1] - places[k][1])) + ')';
 const carry = worlds.slice(1).flatMap((_, k) => [[span[k][1] - 0.4, at(k)], [span[k][1] - 0.23, at(k, 0.06), 'fling'], [span[k][1] + 0.27, at(k + 1), 'hang']]);
-enter($('.thread'), { at: 0.8, band: 'energy', from: '0 0', scale: 0.4, ease: 'pop' });
+enter($('.thread'), { at: when(0, 0.35), band: 'energy', from: '0 0', scale: 0.4, ease: 'nudge' });
 keys($('.thread'), 'translate', [[0, at(0)], ...carry, [end, at(worlds.length - 1)]]);
-$('.thread').animate([{ rotate: '0deg' }, { rotate: '90deg' }], { delay: (beat(7) + 0.5) * 1000, duration: (end - beat(7) - 0.5) * 1000, easing: EASE.glide, fill: 'both' });
+$('.thread').animate([{ rotate: '0deg' }, { rotate: '90deg' }], { delay: (beat(worlds.length) + 0.5) * 1000, duration: (end - beat(worlds.length) - 0.5) * 1000, easing: EASE.glide, fill: 'both' });
 
+// each world's moves, run for the worlds the page keeps; i is the world's position
+const MOVES = {};
 // s1 hook: rises from below
-layer($('h1'), $('.hook .line'), { at: 0.05, band: 'professional', blur: 10, from: '0 0.4em', secondary: { blur: 6 } });
+MOVES.s1 = () => {
+  layer($('h1'), $('.hook .line'), { at: 0.05, band: 'professional', blur: 10, from: '0 0.4em', secondary: { blur: 6 } });
+};
 
 // s2 the product working: the panel slides in from the right and its rows follow; the meter fills slowly and the statuses change together
-const [ui] = span[1];
-enter($('.shipments'), { at: ui, band: 'professional', from: '3em 0', ease: 'nudge' });
-stagger($$('.shipments header, .shipments li'), { at: when(1, 0.17), band: 'professional', from: '0 0.6em' });
-$('.meter i').animate([{ scale: '0.15 1' }, { scale: '1 1' }], { delay: when(1, 0.3) * 1000, duration: over(1, 0.57) * 1000, easing: EASE.glide, fill: 'both' });
-const flip = when(1, 0.55);
-$$('.status > :first-child').forEach((old, k) => old.animate([{ opacity: 1 }, { opacity: 0 }], { delay: (flip + k * 0.08) * 1000, duration: 150, easing: EASE.land, fill: 'both' }));
-stagger($$('.status > :last-child'), { at: flip + 0.2, band: 'energy', from: '0 0.4em' });
-// the punch-in lands as the statuses change, and the view settles back near the end of the world
-const punch = (at, to) => $('.shipments').animate([{ scale: to[0] }, { scale: to[1] }], { delay: at * 1000, duration: over(1, 0.17) * 1000, easing: EASE.land, fill: 'both' });
-punch(flip, [1, 1.12]);
-punch(when(1, 0.78), [1.12, 1]);
+MOVES.s2 = (i) => {
+  const [ui] = span[i];
+  enter($('.shipments'), { at: ui, band: 'professional', from: '3em 0', ease: 'nudge' });
+  stagger($$('.shipments header, .shipments li'), { at: when(i, 0.17), band: 'professional', from: '0 0.6em' });
+  $('.meter i').animate([{ scale: '0.15 1' }, { scale: '1 1' }], { delay: when(i, 0.3) * 1000, duration: over(i, 0.57) * 1000, easing: EASE.glide, fill: 'both' });
+  const flip = when(i, 0.55);
+  $$('.status > :first-child').forEach((old, k) => old.animate([{ opacity: 1 }, { opacity: 0 }], { delay: (flip + k * 0.08) * 1000, duration: 150, easing: EASE.land, fill: 'both' }));
+  stagger($$('.status > :last-child'), { at: flip + 0.2, band: 'energy', from: '0 0.4em' });
+  // the punch-in lands as the statuses change, and the view settles back near the end of the world
+  const punch = (at, to) => $('.shipments').animate([{ scale: to[0] }, { scale: to[1] }], { delay: at * 1000, duration: over(i, 0.17) * 1000, easing: EASE.land, fill: 'both' });
+  punch(flip, [1, 1.12]);
+  punch(when(i, 0.78), [1.12, 1]);
+};
 
 // s3 a second moment: the rules card slides in from the left, its rows follow and each switch flips on with a spring
-enter($('.rules'), { at: span[2][0], band: 'professional', from: '-3em 0', ease: 'nudge' });
-stagger($$('.rules header, .rules li'), { at: when(2, 0.17), band: 'professional', from: '-1.5em 0' });
-$$('.switch i').forEach((knob, k) => knob.animate([{ translate: '0 0' }, { translate: '1em 0' }], { delay: when(2, 0.43 + k * 0.22) * 1000, duration: over(2, 0.2) * 1000, easing: EASE.pop, fill: 'both' }));
+MOVES.s3 = (i) => {
+  enter($('.rules'), { at: span[i][0], band: 'professional', from: '-3em 0', ease: 'nudge' });
+  stagger($$('.rules header, .rules li'), { at: when(i, 0.17), band: 'professional', from: '-1.5em 0' });
+  $$('.switch i').forEach((knob, k) => knob.animate([{ translate: '0 0' }, { translate: '1em 0' }], { delay: when(i, 0.43 + k * 0.22) * 1000, duration: over(i, 0.2) * 1000, easing: EASE.pop, fill: 'both' }));
 
-const rulesPunch = (at, to) => $('.rules').animate([{ scale: to[0] }, { scale: to[1] }], { delay: at * 1000, duration: over(2, 0.22) * 1000, easing: EASE.land, fill: 'both' });
-rulesPunch(when(2, 0.43), [1, 1.14]);
-rulesPunch(when(2, 0.72), [1.14, 1]);
+  const rulesPunch = (at, to) => $('.rules').animate([{ scale: to[0] }, { scale: to[1] }], { delay: at * 1000, duration: over(i, 0.22) * 1000, easing: EASE.land, fill: 'both' });
+  rulesPunch(when(i, 0.43), [1, 1.14]);
+  rulesPunch(when(i, 0.72), [1.14, 1]);
+};
 
 // s4 the number: it drops in from above and its line rises under it
-const [count] = span[3];
-enter($('.count .big'), { at: count, band: 'professional', from: '0 -0.5em' });
-enter($('.count .line'), { at: when(3, 0.23), band: 'professional', from: '0 0.4em', ease: 'nudge' });
-const figures = [...$$('.big span')];
-figures.forEach((figure, k) => {
-  figure.animate([{ opacity: 0 }, { opacity: 1 }], { delay: when(3, k * 0.27) * 1000, duration: 1, fill: 'both' });
-  if (k + 1 < figures.length) figure.animate([{ opacity: 1 }, { opacity: 0 }], { delay: when(3, (k + 1) * 0.27) * 1000, duration: 1, fill: 'forwards' });
-});
+MOVES.s4 = (i) => {
+  const [count] = span[i];
+  enter($('.count .big'), { at: count, band: 'professional', from: '0 -0.5em' });
+  enter($('.count .line'), { at: when(i, 0.23), band: 'professional', from: '0 0.4em', ease: 'nudge' });
+  const figures = [...$$('.big span')];
+  figures.forEach((figure, k) => {
+    figure.animate([{ opacity: 0 }, { opacity: 1 }], { delay: when(i, k * 0.27) * 1000, duration: 1, fill: 'both' });
+    if (k + 1 < figures.length) figure.animate([{ opacity: 1 }, { opacity: 0 }], { delay: when(i, (k + 1) * 0.27) * 1000, duration: 1, fill: 'forwards' });
+  });
+};
 
 // s5 proof, with no words: the bars rise from below
-$$('.bars i').forEach((bar, k) => enter(bar, { at: when(4, k * 0.13), duration: over(4, 0.2), from: '0 6em' }));
-$('.bars i:last-child').animate([{ scale: '1' }, { scale: '1.12 1.04' }, { scale: '1' }], { delay: when(4, 0.55) * 1000, duration: over(4, 0.3) * 1000, easing: EASE.pop, fill: 'both' });
+MOVES.s5 = (i) => {
+  $$('.bars i').forEach((bar, k) => enter(bar, { at: when(i, k * 0.13), duration: over(i, 0.2), from: '0 6em' }));
+  $('.bars i:last-child').animate([{ scale: '1' }, { scale: '1.12 1.04' }, { scale: '1' }], { delay: when(i, 0.55) * 1000, duration: over(i, 0.3) * 1000, easing: EASE.pop, fill: 'both' });
+};
 
 // s6 proof, with no words: the line and the area under it are drawn from left to right
-$('.graph').animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% -10% -10% 0)' }], { delay: when(5, 0.1) * 1000, duration: over(5, 0.75) * 1000, easing: EASE.glide, fill: 'both' });
+MOVES.s6 = (i) => {
+  $('.graph').animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% -10% -10% 0)' }], { delay: when(i, 0.1) * 1000, duration: over(i, 0.75) * 1000, easing: EASE.glide, fill: 'both' });
+};
 
 // s7 end card: the mark lands, the name and one line arrive with it (the spectacle: the mark lands)
-const [card] = span[6];
-enter($('.card h1'), { at: card + 0.05, band: 'professional', from: '0 0.4em' });
-enter($('.card .line'), { at: when(6, 0.55), band: 'professional', from: '0 0.4em', ease: 'nudge' });
+MOVES.s7 = (i) => {
+  const [card] = span[i];
+  enter($('.card h1'), { at: card + 0.05, band: 'professional', from: '0 0.4em' });
+  enter($('.card .line'), { at: when(i, 0.55), band: 'professional', from: '0 0.4em', ease: 'nudge' });
+};
+
+worlds.forEach((world, i) => MOVES[world.dataset.world]?.(i));
 </script>
 </head>
 <body>

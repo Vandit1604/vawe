@@ -33,15 +33,32 @@ const WORDS = [
 
 // The page `vawe new` starts from, by film type: a file in harness/cli/starters/, the start of each world and the
 // spectacle second as fractions of the length, and `min`, the shortest length it fits (the low end of the template's Length line:
-// worlds shorter than that cannot hold their text). Every other type, and a shorter film, takes the general starter.
+// worlds shorter than that cannot hold their text). `short` is the same file cut to the `worlds` listed, for lengths from short.min to short.max seconds (the longest one that passes the draft check with no advice).
+// Every other type, and a shorter film, takes the general starter.
 export const STARTERS = {
   sting: { file: 'sting', beats: [0, 0.3, 0.7], spectacle: 0.36 },
-  'brand launch': { file: 'brand-launch', min: 15, beats: [0, 0.14375, 0.33125, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.856 },
-  'story or explainer': { file: 'story', min: 30, beats: [0, 0.1, 0.1883, 0.2767, 0.4133, 0.491, 0.5577, 0.646, 0.7127, 0.7893, 0.856, 0.9227], spectacle: 0.936 },
+  'brand launch': {
+    file: 'brand-launch', min: 15, beats: [0, 0.14375, 0.33125, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.856,
+    short: { min: 8, max: 9, worlds: ['s1', 's2', 's4', 's7'], beats: [0, 0.17, 0.5, 0.78], spectacle: 0.8 },
+  },
+  'story or explainer': {
+    file: 'story', min: 30, beats: [0, 0.1, 0.1883, 0.2767, 0.4133, 0.491, 0.5577, 0.646, 0.7127, 0.7893, 0.856, 0.9227], spectacle: 0.936,
+    short: { min: 9, max: 9.5, worlds: ['s1', 's2', 's6', 's12'], beats: [0, 0.28, 0.55, 0.75], spectacle: 0.775 },
+  },
 };
 
-/** The STARTERS key for a routed film, or undefined: an unmatched request and a sting past STING_MAX_S (the invented-product fallback) take the general starter. */
-export const starterType = (route, length) => (route?.known && route.type in STARTERS && !(route.type === 'sting' && length > STING_MAX_S) && !(length < (STARTERS[route.type].min ?? 0)) ? route.type : undefined);
+/** The STARTERS entry for a type at a length: the short cut of the file below the entry's `min`. */
+export const starterSpec = (type, length) => {
+  const { short, ...full } = STARTERS[type];
+  return short && length < full.min ? { ...full, ...short } : full;
+};
+
+/** The STARTERS key for a routed film, or undefined: an unmatched request, a sting past STING_MAX_S (the invented-product fallback) and a length no starter fits take the general starter. */
+export const starterType = (route, length) => {
+  if (!route?.known || !(route.type in STARTERS) || (route.type === 'sting' && length > STING_MAX_S)) return undefined;
+  const { min = 0, short } = STARTERS[route.type];
+  return length >= min || (short && length >= short.min && length <= short.max) ? route.type : undefined;
+};
 
 // RECIPES.md "Complete videos": one chain per 20 to 30 s film, found by its heading number.
 export const RECIPES = 'prompts/moves/RECIPES.md';
