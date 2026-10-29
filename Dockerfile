@@ -28,6 +28,9 @@ COPY core ./core
 # what a RUN step opens, which is why this one arrived as a failed deploy rather than a failed gate.
 COPY harness/media/fonts.lock.json ./harness/media/fonts.lock.json
 RUN node generators/media/fonts.mjs
+# scripts/site/moves.mjs (the site prebuild) imports the clip hash owner; a missing import kills the
+# prebuild before its "prompts/moves is not here" early exit runs.
+COPY harness/lib/clip-hash.mjs ./harness/lib/clip-hash.mjs
 
 # --- the site ---
 # The REPO ROOT package.json, because site/lib/schema.ts imports `../../package.json` to read the

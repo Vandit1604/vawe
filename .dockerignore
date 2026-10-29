@@ -22,6 +22,8 @@
 !scripts
 # generators/media/fonts.mjs refuses to run without its lock, and the builder stage runs it.
 !harness/media/fonts.lock.json
+# scripts/site/moves.mjs imports it, and the site prebuild runs moves.mjs.
+!harness/lib/clip-hash.mjs
 !generators
 !core
 
