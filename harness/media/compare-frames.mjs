@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { paramsFilm } from '../lib/page-params.mjs';
 
 const ROW_H = 360;
 /** `--at cuts`: the middle of each world change of ours, from the last full draft's measured data-world spans. */
@@ -131,6 +132,8 @@ export async function comparePage({ page: pagePath, ref, times, out }) {
   }
 }
 
+export const compareOut = (source) => path.join('out', `${paramsFilm(`compare-${path.basename(source, path.extname(source))}`)}.png`);
+
 async function main() {
   const argv = process.argv.slice(2);
   const flag = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
@@ -142,7 +145,7 @@ async function main() {
   for (const [name, f] of [[page ? '--page' : '<ours.mp4>', page || ours], ['--ref', ref]]) if (f && !fs.existsSync(f)) die(`no such file for ${name}: ${f}`);
   const source = page || ours;
   const times = flag('--at') === CUTS ? await (await import('./see/strip.mjs')).cutSeconds(source) : parseAt(flag('--at'));
-  const out = path.resolve(flag('--out') || path.join('out', `compare-${path.basename(source, path.extname(source))}.png`));
+  const out = path.resolve(flag('--out') || compareOut(source));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   if (page) await comparePage({ page, ref, times, out });
   else await compareFrames({ ours, ref, times, out, from: Number(flag('--from')) || 0 });

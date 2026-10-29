@@ -4,14 +4,15 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { filmKeyOf, agentId, namedAgent, appendRun } from './runlog.mjs';
 import { approveEvent } from './run-events.mjs';
+import { paramsFilm } from './page-params.mjs';
 
 const TEXT_FILE = /\.(html|css|m?js|svg)$/i;
 const FILE_TOKEN = /[\w@./-]+\.[a-z0-9]{2,5}\b/gi;
 
 export const SHOW_OWNER = 'show the draft to the owner (storyboard: bin/vawe sheet <draft>) and stop';
 
-export const approvalPath = (film, root = '.') => path.join(root, 'out', `${filmKeyOf(film)}.approved`);
-export const fullDraftPath = (film, root = '.') => path.join(root, 'out', `${filmKeyOf(film)}-draft.mp4`);
+export const approvalPath = (film, root = '.') => path.join(root, 'out', `${paramsFilm(filmKeyOf(film))}.approved`);
+export const fullDraftPath = (film, root = '.') => path.join(root, 'out', `${paramsFilm(filmKeyOf(film))}-draft.mp4`);
 
 /** The page and every file it names inside its folder, followed through css, js and svg, sorted. */
 export function referencedFiles(pagePath) {

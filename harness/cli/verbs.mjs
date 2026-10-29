@@ -14,6 +14,7 @@ import { parseTargets, shotProblem } from '../media/shot-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { looksProblem } from '../lib/looks.mjs';
+import { PARAMS_ENV, paramsQuery, paramsFilm, paramsFlags } from '../lib/page-params.mjs';
 import { seeProblem } from '../media/see/one-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
 import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs';
@@ -63,6 +64,10 @@ const devNext = (v, [page]) => {
 };
 const readFresh = (file, sinceMs) => (fs.existsSync(file) && fs.statSync(file).mtimeMs >= sinceMs ? readFindings(file) || [] : []);
 const critiqueFindingsFile = (page) => path.join(scratch('critique', filmKey(page)), 'findings.json');
+const paramEnv = (v) => ({ [PARAMS_ENV]: paramsQuery(v.param) });
+const needsPage = (v, input, verbName) => {
+  if (v.param && !String(input).endsWith('.html')) throw new UsageError(`--param goes to a page: ${verbName} was given ${input}`);
+};
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
 
 /** The compare-frames step of `vawe sheet --ref`: a page is seeked, an mp4 is read; the reference is always beside it. */
@@ -242,7 +247,7 @@ export const VERBS = [
     fix: (reason, [page]) => (page?.endsWith('.html') && !/ship refused/.test(reason) ? `bin/vawe dev ${page}` : null),
     next: (v, [page]) => {
       if (v.status) return null;
-      if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
+      if (v.wait) return `vawe judge out/${paramsFilm(pageName(page), paramEnv(v))}.mp4`;
       return `rendering in the background: bin/vawe wait ${page} (one call waits up to 3.5 minutes, then says STILL RUNNING: call it again; run it alone, not in parallel); ${WAIT_WORK}`;
     },
   },
@@ -269,12 +274,13 @@ export const VERBS = [
     name: 'approve', summary: 'use when the owner signs off the full draft of a page: vawe ship needs it; a film session never runs this',
     positional: [PAGE],
     flags: [
+      PARAM,
       { name: 'reject', type: 'bool', help: 'record that the owner rejects the draft, and withdraw any approval' },
       { name: 'note', type: 'string', default: 'none', help: 'the owner\'s reason, kept in the run log' },
     ],
     example: 'vawe approve films/my-launch/page.html   (after vawe dev without --from and --to)',
     build: (v, [page]) => [{ script: 'harness/live/approve.mjs', args: [page, ...(v.reject ? ['--reject'] : []), ...opt('--note', v.note)] }],
-    next: (v, [page]) => `bin/vawe ship ${page}`,
+    next: (v, [page]) => `bin/vawe ship ${page}${paramsFlags(paramEnv(v))}`,
   },
   {
     tier: 'core',
@@ -366,7 +372,7 @@ export const VERBS = [
       { name: 'out', type: 'path', default: 'out/sheet-<name>.png (--ref: out/compare-<name>.png)', help: 'the PNG path' },
     ],
     example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels   |   vawe sheet films/my-launch/page.html --ref refs/ad.mp4 --at 2.5,3.1,4   |   vawe sheet out/my-launch.mp4 --ref refs/ad.mp4 --at cuts',
-    build: (v, [input]) => v.ref ? versus(v, input) : [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
+    build: (v, [input]) => (needsPage(v, input, 'sheet'), v.ref ? versus(v, input) : [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...opt('--from', v.from), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }]),
     next: (v) => (v.ref ? `look at the PNG: ${v.at === CUTS ? 'one frame per world change, at its middle' : 'one frame per --at second'}, reference left, yours right; fix the worst row first` : 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment'),
   },
   {
@@ -403,6 +409,7 @@ export const VERBS = [
     build: (v, [input]) => {
       const problem = stillProblem({ source: input, at: v.at });
       if (problem) throw new UsageError(problem);
+      needsPage(v, input, 'still');
       return [{ script: 'harness/media/still.mjs', args: [input, '--at', v.at, ...opt('--out', v.out)] }];
     },
     next: () => 'Read the PNG at full size; vawe zoom <page|mp4> --at <s> --box x,y,w,h enlarges one region',

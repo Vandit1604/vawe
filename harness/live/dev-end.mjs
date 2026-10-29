@@ -11,13 +11,14 @@ import { slotsInUse } from '../lib/render-slots.mjs';
 import { waitCommand } from '../lib/render-wait.mjs';
 import { adviceOfDevNotes, topAdviceLines } from './plan-status.mjs';
 import { pageStill } from '../media/still.mjs';
+import { paramsFilm } from '../lib/page-params.mjs';
 
 // The draft's own browser takes the still: the final browser would start a second Chrome.
 async function fullSizeStill(page, film) {
   const worlds = readRuns(film).filter((r) => r.cmd === 'dev' && !r.failed).at(-1)?.worlds;
   const at = reviewStillSecond(worlds, spectacleOf(fs.readFileSync(page, 'utf8')));
   if (at == null) return [];
-  const out = path.resolve('out', `${film}-draft-full.png`);
+  const out = path.resolve('out', `${paramsFilm(film)}-draft-full.png`);
   try {
     const got = await pageStill(page, at, out, { final: false });
     return [`full-size still: ${out}: ${got.size}, the frame at ${got.t}s`];
@@ -27,8 +28,9 @@ async function fullSizeStill(page, film) {
 const [page] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (page) {
   const film = filmKeyOf(page);
-  const notes = fs.existsSync(path.resolve('out', `${film}.dev.md`)) ? fs.readFileSync(path.resolve('out', `${film}.dev.md`), 'utf8') : '';
+  const notesFile = path.resolve('out', `${paramsFilm(film)}.dev.md`);
+  const notes = fs.existsSync(notesFile) ? fs.readFileSync(notesFile, 'utf8') : '';
   const wait = waitCommand(page, slotsInUse());
-  const lines = [...topAdviceLines(adviceOfDevNotes(notes), film), ...await fullSizeStill(page, film), ...(wait ? [`a render is still running: ${wait}`] : [])];
+  const lines = [...topAdviceLines(adviceOfDevNotes(notes), paramsFilm(film)), ...await fullSizeStill(page, film), ...(wait ? [`a render is still running: ${wait}`] : [])];
   if (lines.length) console.log(`\n${lines.join('\n')}`);
 }

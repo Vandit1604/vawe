@@ -32,10 +32,12 @@ test('another look is another render key', () => {
 });
 
 test('default output names differ per look', () => {
-  assert.equal(stillPath(PAGE, 1, ''), path.resolve('out/still/param-look-1s.png'));
-  assert.equal(stillPath(PAGE, 1, 'look-riso'), path.resolve('out/still/param-look-look-riso-1s.png'));
+  assert.equal(stillPath(PAGE, 1), path.resolve('out/still/param-look-1s.png'));
   process.env[PARAMS_ENV] = 'look=riso';
-  try { assert.equal(defaultOut(PAGE, { aspect: '16:9', final: false }), path.join('out', 'param-look-look-riso-draft.mp4')); } finally { delete process.env[PARAMS_ENV]; }
+  try {
+    assert.equal(stillPath(PAGE, 1), path.resolve('out/still/param-look-look-riso-1s.png'));
+    assert.equal(defaultOut(PAGE, { aspect: '16:9', final: false }), path.join('out', 'param-look-look-riso-draft.mp4'));
+  } finally { delete process.env[PARAMS_ENV]; }
 });
 
 test('vawe still --param look=riso renders the page with ?look=riso', () => {

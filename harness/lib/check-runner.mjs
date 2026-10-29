@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto';
 import { REPO_ROOT } from './render-harness.mjs';
 import { runsIn } from './draft-tiers.mjs';
 import { treeSignature } from '../media/preview-server.mjs';
+import { paramsFilm } from './page-params.mjs';
 
 const readJson = (file) => { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return {}; } };
 
@@ -15,7 +16,7 @@ export function createChecks({ pagePath, mode = 'draft', cache = true }) {
   const abs = path.resolve(pagePath);
   const base = path.basename(abs, '.html');
   const film = base === 'page' ? path.basename(path.dirname(abs)) : base;
-  const file = path.resolve('out', `${film}.checks.json`);
+  const file = path.resolve('out', `${paramsFilm(film)}.checks.json`);
   const stored = cache ? readJson(file) : {};
   const kept = {};
   const spent = new Map();

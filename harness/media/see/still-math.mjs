@@ -2,6 +2,7 @@
 import path from 'node:path';
 import { isUrl } from '../../lib/url.mjs';
 import { atProblem } from './at-problem.mjs';
+import { paramsFilm } from '../../lib/page-params.mjs';
 
 const USAGE = 'usage: bin/vawe still <page|mp4> --at <s> [--out file.png]';
 
@@ -13,11 +14,11 @@ export function stillProblem({ source, at }) {
 }
 
 /** The default PNG path: out/still/<film>[-<params>]-<seconds>s.png. Pure. */
-export function stillPath(source, at, slug = '') {
+export function stillPath(source, at) {
   const abs = isUrl(source) ? new URL(source).pathname : path.resolve(source);
   const base = path.basename(abs, path.extname(abs));
   const film = base === 'page' ? path.basename(path.dirname(abs)) : base;
-  return path.resolve('out', 'still', `${film}${slug ? `-${slug}` : ''}-${at}s.png`);
+  return path.resolve('out', 'still', `${paramsFilm(film)}-${at}s.png`);
 }
 
 /** The ffmpeg argv for one frame. A URL seeks on the input so ffmpeg reads one range, not the file up to the second. Pure. */

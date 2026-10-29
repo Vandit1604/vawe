@@ -57,7 +57,7 @@ import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-sta
 import { devEvent, devFailedEvent, shipEvent } from '../lib/run-events.mjs';
 import { REPO_ROOT, serveRepo, trackBrowser, pageArgs, insideRoot, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
-import { pageQuery, paramsSlug } from '../lib/page-params.mjs';
+import { pageQuery, paramsFilm, paramsFlags } from '../lib/page-params.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
 import { sampleTail } from './tail-sample.mjs';
@@ -988,7 +988,7 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   const base = path.basename(abs, '.html');
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
   const range = !final && (from > 0 || to != null) ? `-${from}-${to ?? 'end'}` : '';
-  return path.join('out', `${name}${paramsSlug() ? `-${paramsSlug()}` : ''}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
+  return path.join('out', `${paramsFilm(name)}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
 const motionRecords = (motion) => sightedRecords(motion) ?? motion.records;
@@ -1184,11 +1184,13 @@ function faultFromEnv(value) {
   return ([lo], attempt) => { if (lo === Number(m[1]) && attempt <= Number(m[2])) throw new Error('Target closed (VAWE_TEST_SLICE_FAULT)'); };
 }
 
+export const resumeLine = (framesDir, page) => `frames kept in ${framesDir}; bin/vawe ship ${page}${paramsFlags()} resumes it`;
+
 // The ship job reads the failed line back from this render's log and logs the ship event itself (--job).
 function reportFailedFinal(pagePath, e, byJob) {
   const page = path.relative(process.cwd(), path.resolve(pagePath));
   const failure = { pct: Math.floor(100 * (e.progress ?? 0)), reason: `${e.stage ? `${e.stage}: ` : ''}${String((e.problems || [e.message])[0]).split('\n')[0]}`, page };
-  if (e.framesDir) console.error(`frames kept in ${e.framesDir}; bin/vawe ship ${page} resumes it`);
+  if (e.framesDir) console.error(resumeLine(e.framesDir, page));
   console.error(finalFailedLine(failure.pct, failure.reason));
   if (!byJob) appendRun(pagePath, shipEvent({ verdict: 'failed', renderS: process.uptime(), failure }));
 }
