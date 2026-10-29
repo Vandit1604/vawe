@@ -5,7 +5,7 @@
   "plugins": [
     {
       "name": "vawe",
-      "source": "./",
+      "source": "./skills",
       "description": "Six skills that take a coding agent from a film request to a rendered mp4 with vawe: start, brief, page, transitions, critique, reference. They run inside a vawe checkout.",
       "version": "2.0.0",
       "author": { "name": "Vandit Singh" },
@@ -15,12 +15,12 @@
       "keywords": ["video", "motion-graphics", "html-to-video", "agent"],
       "strict": false,
       "skills": [
-        "./skills/html-to-video",
-        "./skills/vawe-brief",
-        "./skills/vawe-page",
-        "./skills/vawe-transitions",
-        "./skills/vawe-critique",
-        "./skills/vawe-reference"
+        "./html-to-video",
+        "./vawe-brief",
+        "./vawe-page",
+        "./vawe-transitions",
+        "./vawe-critique",
+        "./vawe-reference"
       ]
     }
   ]
