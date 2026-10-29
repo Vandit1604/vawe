@@ -57,6 +57,7 @@ import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-sta
 import { devEvent, devFailedEvent, shipEvent } from '../lib/run-events.mjs';
 import { REPO_ROOT, serveRepo, trackBrowser, pageArgs, insideRoot, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
+import { pageQuery, paramsSlug } from '../lib/page-params.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
 import { sampleTail } from './tail-sample.mjs';
@@ -233,7 +234,7 @@ export const usesSvgFilter = (pagePath) => pageSourceMatches(pagePath, SVG_FILTE
 async function openLanePage(lane, pagePath, frame) {
   const page = await lane.browser.newPage();
   await page.setViewport({ width: frame.width, height: frame.height, deviceScaleFactor: frame.scale });
-  const url = `http://127.0.0.1:${lane.port}/${path.relative(REPO_ROOT, path.resolve(pagePath))}`;
+  const url = `http://127.0.0.1:${lane.port}/${path.relative(REPO_ROOT, path.resolve(pagePath))}${pageQuery()}`;
   return { page, url, persistent: true, close: () => page.close() };
 }
 
@@ -312,9 +313,9 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
 // The pixels of a render are a pure function of the page folder, core/ and the render settings: this key names
 // both the speed pass answer and the frames dir, so a second render of an unchanged page reuses them.
 // It hashes bytes, not mtimes: a touch, checkout or rebase between a failed final and its resume must keep the key.
-export function renderKey({ pagePath, frame, frames, fps, from, blur, draftVariant = null }) {
+export function renderKey({ pagePath, frame, frames, fps, from, blur, draftVariant = null, query = pageQuery() }) {
   const files = [path.dirname(path.resolve(pagePath)), path.join(REPO_ROOT, 'core')];
-  return createHash('sha1').update(JSON.stringify([treeSignature(files, { content: true }), path.resolve(pagePath), frame, frames, fps, from, blur, ...(draftVariant ? [draftVariant] : [])])).digest('hex').slice(0, 16);
+  return createHash('sha1').update(JSON.stringify([treeSignature(files, { content: true }), path.resolve(pagePath), frame, frames, fps, from, blur, ...(draftVariant ? [draftVariant] : []), ...(query ? [query] : [])])).digest('hex').slice(0, 16);
 }
 
 async function frameSubframes(page, job, key) {
@@ -987,7 +988,7 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   const base = path.basename(abs, '.html');
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
   const range = !final && (from > 0 || to != null) ? `-${from}-${to ?? 'end'}` : '';
-  return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
+  return path.join('out', `${name}${paramsSlug() ? `-${paramsSlug()}` : ''}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
 const motionRecords = (motion) => sightedRecords(motion) ?? motion.records;

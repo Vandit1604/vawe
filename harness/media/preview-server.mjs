@@ -14,6 +14,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { scratch } from '../lib/scratch.mjs';
 import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, pageArgs, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
+import { pageQuery } from '../lib/page-params.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 // One daemon per checkout and capture mode (a draft and a final need different browser flags): a shared state file made a worktree render pages from another checkout's root.
@@ -159,7 +160,7 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
   if (insideRoot(REPO_ROOT, abs)) {
     const shared = await connectShared(final);
     if (shared) {
-      const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}${warm ? WARM_HASH : ''}`;
+      const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}${pageQuery()}${warm ? WARM_HASH : ''}`;
       const sig = warm ? treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core')]) : '';
       const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
       await page.setViewport({ width, height, deviceScaleFactor: scale });
@@ -184,7 +185,7 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
   const root = pageRoot(abs);
   const { close: closeServer, port } = await serveRepo({ root });
   const { page, close: closePage } = await launchPage({ width, height, scale, args: pageArgs(final) });
-  const url = `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}`;
+  const url = `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}${pageQuery()}`;
   return { page, url, persistent: false, chrome: 'launched', close: async () => { await closePage(); closeServer(); } };
 }
 

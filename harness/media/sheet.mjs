@@ -8,6 +8,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { frameTile } from '../lib/tile.mjs';
+import { paramsSlug } from '../lib/page-params.mjs';
 import { artboardLayout, artboardCaption } from '../lib/artboard.mjs';
 import { writeArtboardSheet } from './artboard-sheet.mjs';
 import { durationOf } from '../lib/contact-sheet.mjs';
@@ -111,7 +112,7 @@ async function main(argv) {
   const isFolder = fs.statSync(source).isDirectory();
   const labelPage = labels && !isPage ? `films/${filmNameOf(source)}/page.html` : null;
   if (labels && (isFolder || (labelPage && !fs.existsSync(labelPage)))) die(`--labels reads the worlds from the film's page${labelPage ? ` (${labelPage} does not exist)` : ''}; give the page, or an mp4 named after its film`);
-  const out = path.resolve(flag('--out') || path.join('out', `sheet-${path.basename(source, path.extname(source)) === 'page' ? path.basename(path.dirname(path.resolve(source))) : path.basename(source, path.extname(source))}.png`));
+  const out = path.resolve(flag('--out') || path.join('out', `sheet-${path.basename(source, path.extname(source)) === 'page' ? path.basename(path.dirname(path.resolve(source))) : path.basename(source, path.extname(source))}${paramsSlug() ? `-${paramsSlug()}` : ''}.png`));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-sheet-'));
   try {

@@ -12,12 +12,12 @@ export function stillProblem({ source, at }) {
   return atProblem(at);
 }
 
-/** The default PNG path: out/still/<film>-<seconds>s.png. Pure. */
-export function stillPath(source, at) {
+/** The default PNG path: out/still/<film>[-<params>]-<seconds>s.png. Pure. */
+export function stillPath(source, at, slug = '') {
   const abs = isUrl(source) ? new URL(source).pathname : path.resolve(source);
   const base = path.basename(abs, path.extname(abs));
   const film = base === 'page' ? path.basename(path.dirname(abs)) : base;
-  return path.resolve('out', 'still', `${film}-${at}s.png`);
+  return path.resolve('out', 'still', `${film}${slug ? `-${slug}` : ''}-${at}s.png`);
 }
 
 /** The ffmpeg argv for one frame. A URL seeks on the input so ffmpeg reads one range, not the file up to the second. Pure. */

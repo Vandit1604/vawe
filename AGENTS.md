@@ -16,6 +16,8 @@ canvas, three.js); if natural code fails, report it as a framework bug.
 - Time is the seek, never the clock: CSS `@keyframes`, `element.animate()` or `window.seek(t)` as a pure function of t. No timers, no state between frames, no unseeded random: a virtual clock (`core/engine/page-clock.js`) owns them.
 - Lay out with `--vw`/`--vh` and `<html data-aspect>` for `16:9 9:16 1:1 4:5 4:3`. Never crop.
 - Each beat is one element with `data-world="<id>"` (lowercase, the brief's Shots ids). `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the one big moment.
+- One page, several looks: `bin/vawe dev|still|ship|sheet <page> --param look=riso` (repeatable) loads the page as `page.html?look=riso`;
+  read it with `new URLSearchParams(location.search)`. It joins the render key and the default output name (`-look-riso`).
 - Every tunable number is a literal (a `[[f, v]]` table, a keyframe stop, a `:root` property): the studio edits it.
 - Sound is `<audio>` tags: small effects on actions, a recorded effect first, no bed. A music track only from a file the user gives; `data-synth="bed"` is refused (`taste/craft/sound.md`).
 - A rule broken for cause is declared in the page with a measured reason, nowhere else (`skills/vawe-page/SKILL.md`, Waivers). A waiver is for a break that is the point of the shot. For any other break, try the fix first and write `tried <what>` in the `_why`.

@@ -77,6 +77,7 @@ function versus(v, input) {
 
 const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
 const ASPECT = 'one of 16:9 9:16 1:1 4:5 4:3';
+const PARAM = { name: 'param', type: 'string', repeat: true, help: 'a page option key=value, repeatable: the page reads it with new URLSearchParams(location.search), for example --param look=riso. A page only; part of the render key; the default output name gets it (-look-riso), so renders of two looks do not overwrite each other' };
 
 export const VERBS = [
   {
@@ -200,6 +201,7 @@ export const VERBS = [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT },
       { name: 'lock-length', type: 'bool', help: 'write the found length of a duration="auto" page into its meta, so a cut to music can fix it' },
       { name: 'silent', type: 'bool', help: 'picture-only draft: leave the audio tags out of the mix (faster)' },
+      PARAM,
       { name: 'out', type: 'path', default: 'out/<name>-draft.mp4, or out/<name>-draft-<from>-<to>.mp4 for a range', help: 'output file' },
       { name: 'fast', type: 'bool', help: 'run only the fast checks (page errors, text size and collisions, still windows, tail tiles, smoothness, motion lint on declared animations)' },
       { name: 'full', type: 'bool', help: 'also run the ship-tier checks: per-frame box motion lint, object tracks, loudness and peak' },
@@ -222,6 +224,7 @@ export const VERBS = [
     positional: [{ name: 'page|job', help: 'films/<name>/page.html; with --status, that page or a job id (default: the newest job)' }],
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
+      PARAM,
       { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
       { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait up to 3.5 minutes for the background job, one progress line per minute' },
       { name: 'status', type: 'bool', help: 'print the progress or the result of a background render' },
@@ -359,6 +362,7 @@ export const VERBS = [
       { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page, or an mp4 named after its film: the worlds come from films/<name>/page.html)' },
       { name: 'cols', type: 'number', default: 'by count, at most 3', help: 'tiles per row' },
       { name: 'ref', type: 'path', help: 'a reference mp4 (a page or an mp4, never a folder): each row is the reference left, yours right, at the same second; --at may be \`cuts\` for the middle of each world change of the last full draft', kind: 'file' },
+      PARAM,
       { name: 'out', type: 'path', default: 'out/sheet-<name>.png (--ref: out/compare-<name>.png)', help: 'the PNG path' },
     ],
     example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels   |   vawe sheet films/my-launch/page.html --ref refs/ad.mp4 --at 2.5,3.1,4   |   vawe sheet out/my-launch.mp4 --ref refs/ad.mp4 --at cuts',
@@ -392,6 +396,7 @@ export const VERBS = [
     positional: [{ name: 'page|mp4', required: true, kind: 'file', remote: true, help: 'films/<name>/page.html, an mp4, or an https mp4 URL (read with one range request)' }],
     flags: [
       { name: 'at', type: 'string', help: 'the film second to write; past the last frame it is moved to the last frame and the output says so' },
+      PARAM,
       { name: 'out', type: 'path', default: 'out/still/<name>-<s>s.png', help: 'the PNG path' },
     ],
     example: 'vawe still films/my-launch/page.html --at 4.2   |   vawe still out/my-launch.mp4 --at 4.2 --out /tmp/f.png',
