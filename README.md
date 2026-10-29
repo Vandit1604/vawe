@@ -110,12 +110,14 @@ finds the seven ways a seeked CSS animation breaks without an error. More: [vawe
   `SKILL.md`. The skills run inside a vawe checkout (see Quickstart). Install them in two ways:
 
   ```bash
-  npx skills add vawe-hq/vawe
-  claude plugin marketplace add vawe-hq/vawe
+  npx skills add vawe-hq/skills
+  claude plugin marketplace add vawe-hq/skills
   claude plugin install vawe@vawe-skills
   ```
 
   The first line works for any agent the `skills` CLI supports. The last two are for Claude Code.
+  [vawe-hq/skills](https://github.com/vawe-hq/skills) is a small copy of `skills/` that a workflow
+  keeps in sync, so an install does not download this repository.
 - Ask your agent for a film in plain words. It runs `bin/vawe new <name> --request "<the ask>"` and
   follows the `next:` lines.
 

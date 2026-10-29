@@ -1,0 +1,59 @@
+# Copies skills/ and the plugin marketplace to vawe-hq/skills, so an install fetches about 60 KB
+# instead of this repository. skills/ here is the one source; nothing is edited in vawe-hq/skills.
+# SKILLS_DEPLOY_KEY is a deploy key with write access to vawe-hq/skills only.
+name: sync skills
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "skills/**"
+      - ".claude-plugin/**"
+      - ".github/skills-repo/**"
+      - ".github/workflows/sync-skills.yml"
+      - "LICENSE"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            skills
+            .claude-plugin
+            .github/skills-repo
+            LICENSE
+          sparse-checkout-cone-mode: false
+
+      - name: Push to vawe-hq/skills
+        env:
+          DEPLOY_KEY: ${{ secrets.SKILLS_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/skills
+          chmod 600 ~/.ssh/skills
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/skills -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          git clone --depth 1 git@github.com:vawe-hq/skills.git out 2>/dev/null \
+            || { git init -q -b main out && git -C out remote add origin git@github.com:vawe-hq/skills.git; }
+          rsync -a --delete skills/ out/skills/
+          mkdir -p out/.claude-plugin
+          cp .claude-plugin/marketplace.json out/.claude-plugin/marketplace.json
+          cp LICENSE out/LICENSE
+          cp .github/skills-repo/README.md out/README.md
+          cd out
+          git add -A
+          if git diff --cached --quiet; then echo "vawe-hq/skills is current"; exit 0; fi
+          git -c user.name="vawe-hq sync" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "sync from vawe-hq/vawe@${GITHUB_SHA::9}"
+          git push origin HEAD:main
