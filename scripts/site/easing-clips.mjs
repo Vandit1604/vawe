@@ -1,7 +1,7 @@
 // Render the clip on each vawe /easing page: a 2 s film of the ease against linear, drawn with the vawe
 // renderer and encoded to 640 px. One render at a time, so the laptop stays cool.
 //
-//   node scripts/site/easing-clips.mjs [slug ...]     needs ffmpeg; writes site/public/easing/<slug>.{mp4,webm,webp}
+//   node scripts/site/easing-clips.mjs [slug ...]     needs ffmpeg; writes site/public/easing/<slug>.{mp4,webp}
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -73,7 +73,6 @@ for (const e of eases) {
     const base = path.join(OUT, e.slug);
     const scale = ['-vf', 'scale=640:-2'];
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', draft, ...scale, '-an', '-c:v', 'libx264', '-crf', '30', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', `${base}.mp4`]);
-    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', draft, ...scale, '-an', '-c:v', 'libvpx-vp9', '-crf', '38', '-b:v', '0', `${base}.webm`]);
     execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-ss', '1.6', '-i', draft, '-frames:v', '1', ...scale, '-c:v', 'libwebp', '-quality', '75', `${base}.webp`]);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });

@@ -62,7 +62,7 @@ export default function About() {
               {sec.filmCaption ? (
                 <div className="isec-art">
                   <div className="ab-film">
-                    <Clip webm="/examples/showcase.webm" src="/examples/showcase.mp4" poster="/examples/showcase.webp" decorative />
+                    <Clip src="/examples/showcase.mp4" poster="/examples/showcase.webp" decorative />
                   </div>
                   <span className="meta ab-cap">{sec.filmCaption}</span>
                 </div>

@@ -25,7 +25,7 @@ export const metadata = pageMetadata({ ...FEATURES.meta, path: FEATURES.path });
  * read lib/moves.json and lib/easing.json.
  */
 
-const showcase = { webm: "/examples/showcase.webm", mp4: "/examples/showcase.mp4", poster: "/examples/showcase.webp" };
+const showcase = { mp4: "/examples/showcase.mp4", poster: "/examples/showcase.webp" };
 
 function Code({ label, children }: { label: string; children: string }) {
   return (
@@ -130,7 +130,7 @@ export default function Features() {
             <h1>{FEATURES.h1}</h1>
             <Toc items={FEATURES.toc} />
             <div className="ft-film ft-hero">
-              <Clip webm={showcase.webm} src={showcase.mp4} poster={showcase.poster} decorative />
+              <Clip src={showcase.mp4} poster={showcase.poster} decorative />
             </div>
           </section>
 
@@ -144,7 +144,7 @@ export default function Features() {
 
           <section className="ft-end" aria-label="A film made with vawe">
             <div className="ft-film">
-              <Clip webm="/examples/cindre.webm" src="/examples/cindre.mp4" poster="/examples/cindre.webp" decorative />
+              <Clip src="/examples/cindre.mp4" poster="/examples/cindre.webp" decorative />
             </div>
             <span className="meta">{FEATURES.end.caption}</span>
           </section>

@@ -204,7 +204,7 @@ export default async function EasePage({ params }: Params) {
               <figure className="panel ez-clip">
                 <div className="ez-stage">
                   <img src={`/easing/${e.slug}.webp`} alt="" width={640} height={360} loading="lazy" decoding="async" />
-                  <Clip src={`/easing/${e.slug}.mp4`} webm={`/easing/${e.slug}.webm`} />
+                  <Clip src={`/easing/${e.slug}.mp4`} />
                 </div>
                 <figcaption className="ez-cap">2&nbsp;s film from the vawe renderer: {e.name} against linear.</figcaption>
               </figure>

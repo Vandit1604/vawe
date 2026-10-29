@@ -19,9 +19,9 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
  * way in. The films carry the story; the copy stays short.
  */
 
-type Film = { webm: string; mp4: string; poster: string };
+type Film = { mp4: string; poster: string };
 
-const example = (id: string): Film => ({ webm: `/examples/${id}.webm`, mp4: `/examples/${id}.mp4`, poster: `/examples/${id}.webp` });
+const example = (id: string): Film => ({ mp4: `/examples/${id}.mp4`, poster: `/examples/${id}.webp` });
 const { hero, chapters, how, moves, end } = HOME;
 const HERO = example(hero.film);
 
@@ -44,7 +44,7 @@ export default function Home() {
 
         <section className="lp-hero" id="intro" aria-label="vawe">
           <div className="lp-frame lp-hero-frame">
-            <Clip className="lp-film" webm={HERO.webm} src={HERO.mp4} poster={HERO.poster} decorative />
+            <Clip className="lp-film" src={HERO.mp4} poster={HERO.poster} decorative />
             <div className="lp-hero-copy">
               <h1 className="lp-display">
                 <span className="mono lp-hero-brand">{hero.brand}</span>
@@ -63,7 +63,7 @@ export default function Home() {
           <section className="lp-ch" id={c.id} key={c.id} aria-labelledby={`${c.id}-h`}>
             <div className="lp-stage">
               <div className="lp-pane lp-frame">
-                <Clip className="lp-film" webm={example(c.film).webm} src={example(c.film).mp4} poster={example(c.film).poster} decorative />
+                <Clip className="lp-film" src={example(c.film).mp4} poster={example(c.film).poster} decorative />
                 <p className="lp-tag mono">{c.tag}</p>
                 <div className="lp-cap">
                   <h2 id={`${c.id}-h`}>{c.title}</h2>
@@ -106,7 +106,7 @@ export default function Home() {
             const f = clip(m);
             return (
               <Link className="lp-cell" href={`/video-components/${m.name}`} key={m.name} prefetch={false}>
-                <div className="lp-frame"><Clip className="lp-film" webm={f.webm} src={f.mp4} poster={f.poster} decorative /></div>
+                <div className="lp-frame"><Clip className="lp-film" src={f.mp4} poster={f.poster} decorative /></div>
                 <span className="mono">{m.title}</span>
               </Link>
             );
