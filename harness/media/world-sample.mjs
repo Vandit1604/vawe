@@ -32,6 +32,7 @@ function worldsSample(minOpacity, minShare) {
     if ((p.length > 3 ? p[3] : 1) <= 0) return null;
     return `#${p.slice(0, 3).map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
   };
+  const hash = (text) => { let h = 5381; for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0; return h.toString(36); };
   const bgOf = (el) => hex(getComputedStyle(el).backgroundColor);
   const covers = (el) => {
     const r = el.getBoundingClientRect();
@@ -48,14 +49,14 @@ function worldsSample(minOpacity, minShare) {
   const textsOf = (world) => [...world.querySelectorAll('*')]
     .filter((n) => [...n.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim()) && !n.closest('[aria-hidden="true"],[data-chrome]') && elementShows(n, minOpacity))
     .map((n) => n.textContent.replace(/\s+/g, ' ').trim());
-  // What the world shows besides words: the world and each visible descendant as tag.class, its background colour and image, the source of an img or video, and its box in twentieths of the frame, so two worlds
+  // What the world shows besides words: the world and each visible descendant as tag.class, its background colour and image, a hash of the source of an img or video (a data: url would fill the check files), and its box in twentieths of the frame, so two worlds
   // that hold the same copy of the same things match and two worlds that hold different things do not.
   const shapeOf = (world) => [world, ...world.querySelectorAll('*')].filter((n) => elementShows(n, minOpacity)).slice(0, 80).map((n) => {
     const r = n.getBoundingClientRect();
     const q = (v, whole) => Math.round((v / whole) * 20);
     const cls = typeof n.className === 'string' ? n.className.trim().split(/\s+/)[0] : '';
     const image = getComputedStyle(n).backgroundImage;
-    return `${n.tagName.toLowerCase()}.${cls}|${bgOf(n) || ''}|${image === 'none' ? '' : image.slice(0, 160)}|${n.currentSrc || ''}|${q(r.x, innerWidth)},${q(r.y, innerHeight)},${q(r.width, innerWidth)},${q(r.height, innerHeight)}`;
+    return `${n.tagName.toLowerCase()}.${cls}|${bgOf(n) || ''}|${image === 'none' ? '' : image.slice(0, 160)}|${n.currentSrc ? hash(n.currentSrc) : ''}|${q(r.x, innerWidth)},${q(r.y, innerHeight)},${q(r.width, innerWidth)},${q(r.height, innerHeight)}`;
   }).sort();
   return [...document.querySelectorAll('[data-world]')].map((el) => {
     const visible = elementShows(el, minOpacity);
