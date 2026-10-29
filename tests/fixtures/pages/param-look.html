@@ -6,7 +6,7 @@
 html,body{height:100%;overflow:hidden;background:#808080}
 html[data-look="riso"],html[data-look="riso"] body{background:#ff0000}
 </style></head><body>
-<div style="position:absolute;right:10%;bottom:10%;width:20%;height:20%;background:#fff"></div>
+<div data-world="a" style="position:absolute;inset:0"><div style="position:absolute;right:10%;bottom:10%;width:20%;height:20%;background:#fff"></div></div>
 <script>
 const look = new URLSearchParams(location.search).get('look');
 if (look) document.documentElement.setAttribute('data-look', look);
