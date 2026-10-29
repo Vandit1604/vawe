@@ -226,7 +226,7 @@ export function noRefsLines(dir) {
   return [
     `no reference films in ${dir} yet. Study these instead:`,
     '  films/examples/colour-sting/   a judged-PASS 5 s sting: bin/vawe frames films/examples/colour-sting/page.html --full writes its stills',
-    '  prompts/moves/README.md        moves to copy, each with a clip: bin/vawe strip prompts/moves/<move>.mp4 --at <s> shows how it moves',
+    '  prompts/moves/README.md        moves to copy, each with a clip: bin/vawe strip site/public/moves/<move>.mp4 --at <s> shows how it moves',
     '  bin/vawe refs add <url> --type product|brand   adds a film you admire (needs yt-dlp), then bin/vawe refs frames <id>',
     'Then name 4 to 6 still paths and what each gives in brief.md "Taken from".',
   ];

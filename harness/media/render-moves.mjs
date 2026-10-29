@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Render every prompts/moves/demo/<move>.html to prompts/moves/<move>.mp4: 1280 px wide, 60 fps, the
-// demo's own duration. Renders only stale clips (source hash differs from clips.lock.json); --all or --only forces.
+// demo's own duration. Renders only stale clips (source hash differs from clips.lock.json); --all or --only forces. The masters are not tracked.
 // A demo with <meta name="variants" content="light"> and <html data-theme="dark"> also renders <move>-light.mp4: the same page with data-theme set to the variant.
 // Runs a few renders at once; each waits for a machine-wide render slot (harness/lib/render-slots.mjs).
 //   node harness/media/render-moves.mjs [--only <name>] [--all]
@@ -159,9 +159,9 @@ export async function recordClips(entries, lockFile = LOCK) {
   }
 }
 
-/** Why the clip must be rendered again, or '' when its sources match the recorded hash. */
+/** Why the clip must be rendered again, or '' when its sources match the recorded hash. The masters are not tracked, so a lock entry makes a clip current without a local file. */
 export function staleReason({ id, name, theme }, lock) {
-  if (!fs.existsSync(path.join(MOVES, `${id}.mp4`))) return 'no clip yet';
+  if (!lock[id]) return 'no clip yet';
   return hashOf(lock[id]) === sourceHash(name, theme) ? '' : 'the clip size, demo, demo.css, its asset files or a core/ import changed';
 }
 

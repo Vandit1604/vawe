@@ -33,10 +33,10 @@ How they move, from `bin/vawe strip` on the clips:
 
 | move taken | ref id | cut s |
 |---|---|---|
-| match-cut | prompts/moves/match-cut.mp4 | 0.60 |
-| logo-sting | prompts/moves/logo-sting.mp4 | 0.60 |
-| pull-back-reveal | prompts/moves/pull-back-reveal.mp4 | 0.00 |
-| camera-moves | prompts/moves/camera-moves.mp4 | 0.00 |
+| match-cut | site/public/moves/match-cut.mp4 | 0.60 |
+| logo-sting | site/public/moves/logo-sting.mp4 | 0.60 |
+| pull-back-reveal | site/public/moves/pull-back-reveal.mp4 | 0.00 |
+| camera-moves | site/public/moves/camera-moves.mp4 | 0.00 |
 
 ## The brand
 

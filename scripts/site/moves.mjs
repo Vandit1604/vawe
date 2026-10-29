@@ -69,7 +69,7 @@ function href(target) {
   if (/^(https?:|#|\/)/.test(target)) return target;
   const md = target.match(/^([a-z0-9-]+)\.md$/);
   if (md) return `/video-components/${md[1]}`;
-  const clip = target.match(/^([a-z0-9-]+)\.mp4$/);
+  const clip = target.match(/^(?:\.\.\/\.\.\/site\/public\/moves\/)?([a-z0-9-]+)\.mp4$/);
   if (clip) return `/moves/${clip[1]}.mp4`;
   return REPO_BLOB + target;
 }
@@ -246,6 +246,16 @@ function lastChanged(files) {
   return new Date(newest).toISOString().slice(0, 10);
 }
 
+// The master clips (prompts/moves/<stem>.mp4) are not tracked: `bin/vawe moves --only <move>` renders one.
+// Without a master, the hash, date and length recorded in site/lib/moves.json stand. With one, they are
+// read from it, and a master that differs from the record counts as changed today.
+function clipFacts(file, recorded) {
+  if (!fs.existsSync(file)) return recorded;
+  const hash = hashFile(file);
+  if (recorded.hash === hash) return recorded;
+  return { hash, date: new Date(fs.statSync(file).mtimeMs).toISOString().slice(0, 10), duration: mp4Seconds(file) };
+}
+
 // ---- one move -------------------------------------------------------------------------------------
 function readMove(file, index) {
   const name = file.replace(/\.md$/, '');
@@ -258,9 +268,12 @@ function readMove(file, index) {
   const look = page.match(/data-look="([a-z-]+)"/)?.[1] ?? DEFAULT_LOOK;
   const theme = page.match(/<html[^>]*data-theme="([a-z]+)"/)?.[1] ?? DEFAULT_THEME;
   const declared = (page.match(/<meta name="variants" content="([^"]*)"/)?.[1] ?? '').split(/\s+/);
+  const before = recorded.get(name);
   const clip = path.join(SRC, `${name}.mp4`);
-  const variant = declared.find((t) => t && t !== theme && fs.existsSync(path.join(SRC, `${name}-${t}.mp4`))) ?? null;
+  const variant = declared.find((t) => t && t !== theme && (fs.existsSync(path.join(SRC, `${name}-${t}.mp4`)) || before?.variant === t)) ?? null;
   const alt = variant && path.join(SRC, `${name}-${variant}.mp4`);
+  const own = clipFacts(clip, { hash: before?.clipHash ?? null, date: before?.clipDate ?? null, duration: before?.duration ?? null });
+  const other = alt && clipFacts(alt, { hash: before?.variantHash ?? null, date: null, duration: null });
   const sound = md.match(/^Sound:\s*(.+)/m)?.[1].trim() ?? null;
   const blocks = renderMarkdown(md);
   const firstCode = blocks.findIndex((b) => b.type === 'code');
@@ -278,13 +291,13 @@ function readMove(file, index) {
     snippet,
     eases: easesOf(snippet, page),
     published: firstCommitted(path.join(SRC, file)),
-    modified: lastChanged([path.join(SRC, file), clip, ...(alt ? [alt] : [])]),
-    clipDate: fs.existsSync(clip) ? lastChanged([clip]) : null,
-    clipHash: fs.existsSync(clip) ? hashFile(clip) : null,
+    modified: [lastChanged([path.join(SRC, file)]), own.date, other?.date, before?.modified].filter(Boolean).sort().pop(),
+    clipDate: own.date,
+    clipHash: own.hash,
     theme,
     variant,
-    variantHash: alt ? hashFile(alt) : null,
-    duration: fs.existsSync(clip) ? mp4Seconds(clip) : null,
+    variantHash: other?.hash ?? null,
+    duration: own.duration,
     useHtml: joined(blocks.slice(0, Math.max(firstCode, 0))),
     codeHtml: firstCode === -1 ? '' : blocks[firstCode].html,
     soundHtml: joined(blocks.filter((b) => b.type === 'sound')),
@@ -293,7 +306,7 @@ function readMove(file, index) {
 }
 
 // ---- clips ------------------------------------------------------------------------------------------
-// One source per move, rendered by `bin/vawe moves` at 1280x720 60 fps. The move page plays the H.264
+// One source per move (an untracked master), rendered by `bin/vawe moves` at 1280x720 60 fps. The move page plays the H.264
 // copy at full size; the gallery grid plays a 640 px VP9 copy over a 640 px poster.
 const CLIP_FILES = ['mp4', 'webm', 'webp', 'hd.webp'];
 
@@ -339,6 +352,7 @@ if (!fs.existsSync(SRC)) {
 const withClips = process.argv.includes('--clips');
 const index = readIndex();
 const previous = fs.existsSync(DATA) ? JSON.parse(read(DATA)) : { moves: [] };
+const recorded = new Map(previous.moves.map((m) => [m.name, m]));
 const encodedHash = new Map(previous.moves.flatMap((m) => [[m.name, m.clipHash], [`${m.name}-${m.variant}`, m.variantHash]]));
 const files = fs.readdirSync(SRC).filter((f) => f.endsWith('.md') && !NOT_MOVES.has(f)).sort();
 const readmeOrder = [...index.groupOf.keys()];
@@ -351,11 +365,15 @@ if (missing.length) console.warn(`~ not in a README group table: ${missing.join(
 fs.mkdirSync(OUT_DIR, { recursive: true });
 let encoded = 0;
 for (const m of moves) {
-  fs.copyFileSync(path.join(SRC, `${m.name}.md`), path.join(OUT_DIR, `${m.name}.md`));
+  fs.writeFileSync(path.join(OUT_DIR, `${m.name}.md`), read(path.join(SRC, `${m.name}.md`)).replaceAll('](../../site/public/moves/', ']('));
   for (const [stem, hash, key] of [[m.name, m.clipHash, 'clipHash'], [`${m.name}-${m.variant}`, m.variantHash, 'variantHash']]) {
     if (!hash) continue;
     const have = CLIP_FILES.every((e) => fs.existsSync(path.join(OUT_DIR, `${stem}.${e}`)));
     if (have && encodedHash.get(stem) === hash) continue;
+    if (withClips && !fs.existsSync(path.join(SRC, `${stem}.mp4`))) {
+      console.warn(`~ ${stem}: no master clip here, render it with: bin/vawe moves --only ${m.name}`);
+      continue;
+    }
     if (!withClips) {
       console.warn(`~ ${stem}: clip changed or missing, run with --clips`);
       m[key] = encodedHash.get(stem) ?? null;

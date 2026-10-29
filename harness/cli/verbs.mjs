@@ -475,7 +475,7 @@ export const VERBS = [
   },
   {
     tier: 'maintainer',
-    name: 'moves', summary: 'render the stale prompts/moves/demo/<move>.html clips to prompts/moves/<move>.mp4 (1280 px, 60 fps) in parallel; a clip is stale when its demo, demo.css or a core/ import changed; a demo with a variants meta also renders <move>-<theme>.mp4',
+    name: 'moves', summary: 'render the stale prompts/moves/demo/<move>.html clips to prompts/moves/<move>.mp4 (1280 px, 60 fps) in parallel; the masters are not tracked, the web copy is site/public/moves/<move>.mp4; a clip is stale when its demo, demo.css or a core/ import changed; a demo with a variants meta also renders <move>-<theme>.mp4',
     positional: [],
     flags: [
       { name: 'only', type: 'string', help: 'render one move by name, for example weight-morph, even when current; also writes a 12-frame contact sheet to out/moves/<move>-sheet.png' },
@@ -483,7 +483,7 @@ export const VERBS = [
     ],
     example: 'vawe moves --only weight-morph',
     build: (v) => [{ script: 'harness/media/render-moves.mjs', args: [...opt('--only', v.only), ...(v.all ? ['--all'] : [])] }],
-    next: () => 'look at a clip in prompts/moves/ before you commit it',
+    next: () => 'look at the clip in prompts/moves/ and run node scripts/site/moves.mjs --clips to encode its web copy',
   },
   {
     tier: 'more',

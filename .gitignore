@@ -299,6 +299,8 @@ assets/edit-montage/
 films/recreations/
 # draft key-frame sheets that bin/vawe moves leaves next to each clip
 prompts/moves/*.png
+# the master clips: bin/vawe moves renders them, site/public/moves holds the web encode
+prompts/moves/*.mp4
 # render-page keeps a failed render's frames next to the output so a resume finds them; never source
 *.mp4.frames-*/
 # the page bin/vawe moves renders a theme variant from, deleted after the render
