@@ -38,3 +38,16 @@ test('shot of a missing html file fails with exit 1 and a reason', () => {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('shot names each failed request and console error, not only their count', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-shot-'));
+  try {
+    fs.writeFileSync(path.join(dir, 'page.html'), '<!doctype html><title>x</title><body><img src="gone.png"><script>console.error("boom: bad state")</script></body>');
+    const r = shot([path.join(dir, 'page.html'), '--w', '400', '--out', path.join(dir, 'out')]);
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /failed request: http:\/\/127\.0\.0\.1:\d+\/gone\.png \(HTTP 404\)/);
+    assert.match(r.stdout, /console error: .*boom: bad state/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});

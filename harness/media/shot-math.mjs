@@ -51,3 +51,11 @@ export function navigationProblem({ url, status, finalUrl }) {
   if (finalUrl.startsWith('chrome-error:')) return `Chrome showed an error page for ${url}`;
   return null;
 }
+
+export const PROBLEM_LINES_MAX = 10;
+
+/** The lines that name each failed request and console error of one shot, the first `max` of each kind and "and N more". Pure. */
+export function problemLines({ errors, failed }, max = PROBLEM_LINES_MAX) {
+  const list = (label, items) => [...items.slice(0, max).map((i) => `  ${label}: ${i}`), ...(items.length > max ? [`  and ${items.length - max} more ${label}s`] : [])];
+  return [...list('failed request', failed), ...list('console error', errors)];
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseWidths, parseTargets, shotProblem, resolveTarget, shotName, viewportHeight } from '../../harness/media/shot-math.mjs';
+import { parseWidths, parseTargets, problemLines, shotProblem, resolveTarget, shotName, viewportHeight } from '../../harness/media/shot-math.mjs';
 
 test('parseWidths reads a comma list and refuses the rest', () => {
   assert.deepEqual(parseWidths('1440,390'), [1440, 390]);
@@ -33,6 +33,15 @@ test('shotName is one slug per route and width', () => {
 test('a phone width gets a phone height', () => {
   assert.equal(viewportHeight(390), 844);
   assert.equal(viewportHeight(1440), 900);
+});
+
+test('problemLines names each problem, caps each list and counts the rest', () => {
+  assert.deepEqual(problemLines({ errors: [], failed: [] }), []);
+  assert.deepEqual(problemLines({ errors: ['boom'], failed: ['http://x/a.png (HTTP 404)'] }), ['  failed request: http://x/a.png (HTTP 404)', '  console error: boom']);
+  const lines = problemLines({ errors: Array.from({ length: 13 }, (_, i) => `e${i}`), failed: [] });
+  assert.equal(lines.length, 11);
+  assert.equal(lines[9], '  console error: e9');
+  assert.equal(lines[10], '  and 3 more console errors');
 });
 
 test('parseTargets splits a comma list', () => {

@@ -10,7 +10,7 @@ import path from 'node:path';
 import { launchPage, serveRepo } from '../lib/render-harness.mjs';
 import { pageRoot } from './preview-server.mjs';
 import { withSite } from '../lib/site-server.mjs';
-import { DEFAULT_BASE, DEFAULT_WIDTHS, navigationProblem, parseTargets, parseWidths, resolveTarget, shotName, shotProblem, viewportHeight } from './shot-math.mjs';
+import { DEFAULT_BASE, DEFAULT_WIDTHS, navigationProblem, parseTargets, parseWidths, problemLines, resolveTarget, shotName, shotProblem, viewportHeight } from './shot-math.mjs';
 import { parseTour, tourSize } from './tour-math.mjs';
 import { captureTour, encodeTour, tourTmpDir } from './tour.mjs';
 
@@ -52,11 +52,11 @@ async function loadLazy(page) {
 
 async function shoot({ url, name, width, full, outDir }) {
   const { page, close } = await launchPage({ width, height: viewportHeight(width) });
-  const problems = { errors: 0, failed: 0 };
-  page.on('pageerror', () => { problems.errors++; });
-  page.on('console', (m) => { if (m.type() === 'error') problems.errors++; });
-  page.on('response', (r) => { if (r.status() >= 400) problems.failed++; });
-  page.on('requestfailed', () => { problems.failed++; });
+  const problems = { errors: [], failed: [] };
+  page.on('pageerror', (e) => { problems.errors.push(String(e.message ?? e).split('\n')[0]); });
+  page.on('console', (m) => { if (m.type() === 'error') problems.errors.push(m.text().split('\n')[0]); });
+  page.on('response', (r) => { if (r.status() >= 400) problems.failed.push(`${r.url()} (HTTP ${r.status()})`); });
+  page.on('requestfailed', (r) => { problems.failed.push(`${r.url()} (${r.failure()?.errorText ?? 'failed'})`); });
   try {
     await gotoChecked(page, url);
     await loadLazy(page);
@@ -64,10 +64,11 @@ async function shoot({ url, name, width, full, outDir }) {
     const file = path.join(outDir, name);
     await page.screenshot({ path: file, fullPage: full });
     const notes = [full ? `full page ${height}px tall` : 'first screen'];
-    if (problems.errors) notes.push(`${problems.errors} console error(s)`);
-    if (problems.failed) notes.push(`${problems.failed} failed request(s)`);
+    if (problems.errors.length) notes.push(`${problems.errors.length} console error(s)`);
+    if (problems.failed.length) notes.push(`${problems.failed.length} failed request(s)`);
     if (overflow > 0) notes.push(`sideways overflow ${overflow}px`);
     console.log(`✓ ${file}: ${width}px wide, ${notes.join(', ')}`);
+    for (const line of problemLines(problems)) console.log(line);
   } finally {
     await close();
   }
