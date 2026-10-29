@@ -10,7 +10,6 @@ import { clampToLastFrame, probe } from './see-views.mjs';
 import { isUrl } from '../lib/url.mjs';
 import { stillArgs, stillPath, stillProblem } from './see/still-math.mjs';
 import { resolveDuration } from './page-duration.mjs';
-import { paramsSlug } from '../lib/page-params.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 
@@ -53,7 +52,7 @@ async function main(argv) {
   const problem = stillProblem({ source, at });
   if (problem) die(problem);
   if (!isUrl(source) && !fs.existsSync(source)) die(`no such file: ${source}`);
-  const out = path.resolve(flag('--out') || stillPath(source, at, paramsSlug()));
+  const out = path.resolve(flag('--out') || stillPath(source, at));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   let got;
   try { got = source.endsWith('.html') ? await pageStill(source, Number(at), out) : videoStill(source, Number(at), out); } catch (e) { die(e.message); }
