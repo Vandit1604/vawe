@@ -6,9 +6,9 @@
 //   node scripts/site/moves.mjs --clips    also encode any clip whose source changed (needs ffmpeg)
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { clipFacts } from './clip-facts.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SRC = path.join(root, 'prompts', 'moves');
@@ -25,7 +25,6 @@ const { EASE_HANDLES } = await import(pathToFileURL(path.join(root, 'core', 'mot
 const { resolveHandle } = await import(pathToFileURL(path.join(root, 'core', 'motion', 'motion.js')));
 
 const read = (p) => fs.readFileSync(p, 'utf8');
-const hashFile = (p) => crypto.createHash('sha1').update(fs.readFileSync(p)).digest('hex').slice(0, 12);
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const plain = (md) => md.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*`]/g, '').replace(/\s+/g, ' ').trim();
@@ -200,17 +199,6 @@ function renderMarkdown(md) {
   return blocks;
 }
 
-// Seconds, from the mvhd box of an mp4 (the move clips are plain H.264, so no ffprobe in prebuild).
-function mp4Seconds(file) {
-  const b = fs.readFileSync(file);
-  const at = b.indexOf('mvhd');
-  if (at === -1) return null;
-  const v1 = b[at + 4] === 1;
-  const scale = b.readUInt32BE(at + (v1 ? 24 : 16));
-  const units = v1 ? Number(b.readBigUInt64BE(at + 28)) : b.readUInt32BE(at + 20);
-  return scale ? Math.round((units / scale) * 100) / 100 : null;
-}
-
 // The vawe eases a move uses, with the After Effects handle pair behind each (influence is a per cent of
 // the segment, speed a multiple of its average velocity). The page shows them as data.
 function easesOf(...sources) {
@@ -246,16 +234,6 @@ function lastChanged(files) {
   return new Date(newest).toISOString().slice(0, 10);
 }
 
-// The master clips (prompts/moves/<stem>.mp4) are not tracked: `bin/vawe moves --only <move>` renders one.
-// Without a master, the hash, date and length recorded in site/lib/moves.json stand. With one, they are
-// read from it, and a master that differs from the record counts as changed today.
-function clipFacts(file, recorded) {
-  if (!fs.existsSync(file)) return recorded;
-  const hash = hashFile(file);
-  if (recorded.hash === hash) return recorded;
-  return { hash, date: new Date(fs.statSync(file).mtimeMs).toISOString().slice(0, 10), duration: mp4Seconds(file) };
-}
-
 // ---- one move -------------------------------------------------------------------------------------
 function readMove(file, index) {
   const name = file.replace(/\.md$/, '');
@@ -272,8 +250,8 @@ function readMove(file, index) {
   const clip = path.join(SRC, `${name}.mp4`);
   const variant = declared.find((t) => t && t !== theme && (fs.existsSync(path.join(SRC, `${name}-${t}.mp4`)) || before?.variant === t)) ?? null;
   const alt = variant && path.join(SRC, `${name}-${variant}.mp4`);
-  const own = clipFacts(clip, { hash: before?.clipHash ?? null, date: before?.clipDate ?? null, duration: before?.duration ?? null });
-  const other = alt && clipFacts(alt, { hash: before?.variantHash ?? null, date: null, duration: null });
+  const own = clipFacts(clip, { hash: before?.clipHash ?? null, date: before?.clipDate ?? null, duration: before?.duration ?? null }, lock[name]?.clip, name);
+  const other = alt && clipFacts(alt, { hash: before?.variantHash ?? null, date: null, duration: null }, lock[`${name}-${variant}`]?.clip, `${name}-${variant}`);
   const sound = md.match(/^Sound:\s*(.+)/m)?.[1].trim() ?? null;
   const blocks = renderMarkdown(md);
   const firstCode = blocks.findIndex((b) => b.type === 'code');
@@ -352,6 +330,8 @@ if (!fs.existsSync(SRC)) {
 const withClips = process.argv.includes('--clips');
 const index = readIndex();
 const previous = fs.existsSync(DATA) ? JSON.parse(read(DATA)) : { moves: [] };
+const lockFile = path.join(SRC, 'clips.lock.json');
+const lock = fs.existsSync(lockFile) ? JSON.parse(read(lockFile)) : {};
 const recorded = new Map(previous.moves.map((m) => [m.name, m]));
 const encodedHash = new Map(previous.moves.flatMap((m) => [[m.name, m.clipHash], [`${m.name}-${m.variant}`, m.variantHash]]));
 const files = fs.readdirSync(SRC).filter((f) => f.endsWith('.md') && !NOT_MOVES.has(f)).sort();

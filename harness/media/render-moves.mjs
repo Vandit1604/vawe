@@ -15,6 +15,7 @@ import { ensureFonts, fontFilesIn } from '../lib/ensure-fonts.mjs';
 import { JOBS } from '../../core/motion/ease-jobs.js';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaived, waiverHint } from '../lib/waivers.mjs';
+import { clipHash } from '../lib/clip-hash.mjs';
 import { chooseCrf, RENDER_CRF, CLIP_BUDGET_BYTES } from '../lib/clip-budget.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -264,7 +265,7 @@ async function main() {
   const results = await renderAll(clips);
   const failed = results.filter((r) => r.code !== 0);
   const done = results.filter((r) => r.code === 0);
-  if (done.length) await recordClips(Object.fromEntries(done.map((r) => [r.id, { hash: sourceHash(r.clip.name, r.clip.theme), crf: r.crf }])));
+  if (done.length) await recordClips(Object.fromEntries(done.map((r) => [r.id, { hash: sourceHash(r.clip.name, r.clip.theme), crf: r.crf, clip: clipHash(path.join(MOVES, `${r.id}.mp4`)) }])));
   console.log(`${results.length - failed.length} of ${results.length} clips rendered to prompts/moves/`);
   if (only && done.some((r) => r.id === only)) {
     console.log(`  sheet    ${path.relative(ROOT, writeClipSheet(only))}`);

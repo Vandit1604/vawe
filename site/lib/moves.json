@@ -603,7 +603,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-19",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-19",
    "clipHash": "7247d5519838",
    "theme": "light",
@@ -641,7 +641,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "d0bcc06c1abd",
    "theme": "dark",
@@ -667,7 +667,7 @@
    "snippet": "import { typeTimes, typedCount, show } from '../../prompts/moves/demo/assets/stage.js';\nconst times = typeTimes('vawe ship launch', 700);              // 30 ms a character, 70 ms more after a space, seeded jitter\nconst lit = (ms, since) => ms - since < 500 || Math.floor((ms - since) / 500) % 2 === 0;   // solid after a key, then 1 Hz\nvawe.onFrame((s) => {\n  const ms = s * 1000;\n  typed.textContent = 'vawe ship launch'.slice(0, typedCount(times, ms));\n  const since = ms < 1900 ? times.filter((t) => t <= ms).pop() ?? 0 : 3300;   // 1900 ms: Enter, 3300 ms: the next prompt\n  c1.style.visibility = ms < 1900 && lit(ms, since) ? 'visible' : 'hidden';\n  c2.style.visibility = ms >= 3300 && lit(ms, since) ? 'visible' : 'hidden';\n});\n[[r1, 2100], [r2, 2420], [r3, 3200], [next, 3300]].forEach(([el, at]) => show(el, at));   // output rows print whole, never fade",
    "eases": [],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "3357f4afb665",
    "theme": "light",
@@ -705,7 +705,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "3efba243a79d",
    "theme": "dark",
@@ -743,7 +743,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "d4922d871feb",
    "theme": "dark",
@@ -769,7 +769,7 @@
    "snippet": "// every tile is a pure function of t: one leg is { at, from, to } on its drum\nconst k = (ms - leg.at) / 70;               // 70 ms for each flap\nconst steps = (leg.to - leg.from + drum.length) % drum.length;\n// k < steps: flap number n = floor(k) is falling, p = k - n\nconst angle = 180 * p * p;                  // gravity: it speeds up and stops on the next slat\nflap.style.transform = `rotateX(${-angle}deg)`;\n// front face: the old top half; back face: the next bottom half",
    "eases": [],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "04b464f2379b",
    "theme": "light",
@@ -818,7 +818,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "bc430913d9d3",
    "theme": "dark",
@@ -856,7 +856,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "54604cc51141",
    "theme": "dark",
@@ -905,7 +905,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "f615515e7eb6",
    "theme": "dark",
@@ -965,7 +965,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "b814e40f163c",
    "theme": "dark",
@@ -1014,7 +1014,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "fcafe65ac55d",
    "theme": "dark",
@@ -1063,7 +1063,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "aef677360df1",
    "theme": "light",
@@ -1101,7 +1101,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "22701a0b47c7",
    "theme": "dark",
@@ -1150,7 +1150,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "06c38f215bc9",
    "theme": "dark",
@@ -1199,7 +1199,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "32122317c04d",
    "theme": "dark",
@@ -1259,7 +1259,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "9aa4c161707b",
    "theme": "dark",
@@ -1308,7 +1308,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "e96761924062",
    "theme": "dark",
@@ -1346,7 +1346,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1ac3c555f8e6",
    "theme": "dark",
@@ -1384,7 +1384,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "76df57ab398b",
    "theme": "dark",
@@ -1433,7 +1433,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "dfb2cb428f64",
    "theme": "dark",
@@ -1482,7 +1482,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "38fd27a23c3a",
    "theme": "dark",
@@ -1531,7 +1531,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "10ed0883f748",
    "theme": "dark",
@@ -1557,7 +1557,7 @@
    "snippet": ".vcr { display: flex; flex-wrap: wrap; white-space: pre-wrap; }\n.vcr.lines { flex-direction: column; }\n.vcr-word { display: inline-flex; overflow: hidden; }       /* the clip box: one per word */\n.vcr-char { position: relative; white-space: pre-wrap; }\n.vcr-glyph { display: inline-block; }                       /* the part that moves */",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "7ab516b10c31",
    "theme": "dark",
@@ -1583,7 +1583,7 @@
    "snippet": ".ls { display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }\n.ls-letter { white-space: pre; position: relative; display: flex; }\n.ls-p { position: relative; }          /* the letter on show: y 0 to 100% (reverse) or -100% */\n.ls-s { position: absolute; }          /* the copy waiting outside: top -100% (reverse) or 100%, moves to 0 */\n.ls-p.pad { padding-bottom: 0.5rem; }  /* the random variants only */",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "49b1e986fe9b",
    "theme": "dark",
@@ -1609,7 +1609,7 @@
    "snippet": "import { springLinear, springDuration } from '/core/motion/springs.js';\nconst K = 160, D = 25, STAGGER = 40;\nconst spring = { duration: springDuration(K, D) * 1000, easing: springLinear(K, D), fill: 'forwards' };\n// block: preserve-3d, translateZ(-depth / 2). Faces: f0 translateZ(depth / 2); f1 rotateX(-90deg) translateZ(depth / 2); f2 rotateX(-180deg) translateZ(depth / 2)\nblock.animate([{ transform: `translateZ(calc(var(--depth) / -2)) rotateX(${90 * r}deg)` },\n               { transform: `translateZ(calc(var(--depth) / -2)) rotateX(${90 * (r + 1)}deg)` }], { delay: at + i * STAGGER, ...spring });\nface.shade.animate([{ opacity: 0 }, { opacity: 0.5 }], { delay: at + i * STAGGER, ...spring });   // the face turning away; the arriving face goes 0.5 to 0",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1e9d6e441142",
    "theme": "light",
@@ -1647,7 +1647,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "561cf3e3288b",
    "theme": "dark",
@@ -1685,7 +1685,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "41937e2d40ba",
    "theme": "dark",
@@ -1734,7 +1734,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "cb0c4a28249e",
    "theme": "dark",
@@ -1784,7 +1784,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "117dc9dd73f6",
    "theme": "dark",
@@ -1833,7 +1833,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "277c95548437",
    "theme": "dark",
@@ -1871,7 +1871,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "e02d67b6922e",
    "theme": "dark",
@@ -1920,7 +1920,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "a27d9867b5af",
    "theme": "dark",
@@ -1946,7 +1946,7 @@
    "snippet": "import { springDuration, springLinear } from '../../core/motion/springs.js';\nconst SHEET = { duration: springDuration(313, 35.4) * 1000, easing: springLinear(313, 35.4) };   // the system sheet: a critically damped spring, no overshoot\nsheet.animate([{ translate: `0 ${H}px` }, { translate: '0 0' }], { ...SHEET, delay: 1150, fill: 'both' });\npage.animate([{ scale: 1, translate: '0 0', borderRadius: '0px' }, { scale: 0.94, translate: `0 ${1.6 * u}px`, borderRadius: `${2.4 * u}px` }], { ...SHEET, delay: 1150, fill: 'both' });\ndim.animate([{ opacity: 0 }, { opacity: 0.3 }], { ...SHEET, delay: 1150, fill: 'both' });\n// dismiss: the same three, reversed, in 440 ms, with fill 'forwards' so the first set keeps its start state",
    "eases": [],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "c52bb94112e9",
    "theme": "light",
@@ -1995,7 +1995,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "00d76e49b7b8",
    "theme": "dark",
@@ -2044,7 +2044,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "d628e06523e3",
    "theme": "dark",
@@ -2093,7 +2093,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "3ff8aa4cd42d",
    "theme": "dark",
@@ -2142,7 +2142,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "b85f0d477bec",
    "theme": "dark",
@@ -2181,7 +2181,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "1eec12c5c616",
    "theme": "dark",
@@ -2241,7 +2241,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "c60a0ff931a9",
    "theme": "light",
@@ -2305,7 +2305,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "70e5485fe608",
    "theme": "dark",
@@ -2354,7 +2354,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "5d6526d44df9",
    "theme": "dark",
@@ -2403,7 +2403,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "737366265000",
    "theme": "dark",
@@ -2452,7 +2452,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1679f337d66e",
    "theme": "dark",
@@ -2501,7 +2501,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "bbaa643a89bb",
    "theme": "dark",
@@ -2539,7 +2539,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "4a6cefa6a012",
    "theme": "dark",
@@ -2599,7 +2599,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "af17c4213a67",
    "theme": "dark",
@@ -2648,7 +2648,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "dabe71e27a29",
    "theme": "dark",
@@ -2697,7 +2697,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "3409199e9c3e",
    "theme": "light",
@@ -2746,7 +2746,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1e30aaa952e5",
    "theme": "dark",
@@ -2795,7 +2795,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "59692011b4c7",
    "theme": "dark",
@@ -2877,7 +2877,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "4469f98cf3e1",
    "theme": "dark",
@@ -2926,7 +2926,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "c48f2045d786",
    "theme": "dark",
@@ -2986,7 +2986,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "126677b80df7",
    "theme": "light",
@@ -3024,7 +3024,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "654f40411964",
    "theme": "light",
@@ -3073,7 +3073,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "42392b696989",
    "theme": "dark",
@@ -3122,7 +3122,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "9b9fd1518d75",
    "theme": "light",
@@ -3171,7 +3171,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "67505997d7a8",
    "theme": "light",
@@ -3242,7 +3242,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-10",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-10",
    "clipHash": "861654587b48",
    "theme": "dark",
@@ -3291,7 +3291,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "44ab2cb36889",
    "theme": "light",
@@ -3340,7 +3340,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "0ac3388e9b51",
    "theme": "dark",
@@ -3389,7 +3389,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "e2989a558b16",
    "theme": "light",
@@ -3460,7 +3460,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "39e08b2a46bc",
    "theme": "dark",
@@ -3498,7 +3498,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "09dd102e407b",
    "theme": "dark",
@@ -3536,7 +3536,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "0bc78541fe16",
    "theme": "dark",
@@ -3574,7 +3574,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "66acd273f8ff",
    "theme": "light",
@@ -3612,7 +3612,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "3fcffcc3ae47",
    "theme": "dark",
@@ -3650,7 +3650,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "27918bca0586",
    "theme": "dark",
@@ -3688,7 +3688,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "06c01471d7a1",
    "theme": "dark",
@@ -3737,7 +3737,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "9aaad8923b33",
    "theme": "dark",
@@ -3775,7 +3775,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "7305e90f3e99",
    "theme": "dark",
@@ -3801,7 +3801,7 @@
    "snippet": "import '../../core/engine/page-api.js';\nimport { track, rng } from '../../core/motion/springs.js';\nconst s = 1.9, ch = caret.getBoundingClientRect().width;     // monospace: a caret is one character wide\nconst x0 = line.left + promptWidth, y = line.top + line.height / 2, winLeft = win.getBoundingClientRect().left;\nconst rand = rng(7);                                          // seeded: the same rhythm on every render\nlet clock = 0.2;\nconst at = [...text].map((c) => { clock += 0.026 + rand() * 0.024 + (c === ' ' ? 0.07 : 0); return clock; });\nconst keys = [[0, x0], ...at.map((t, i) => [t, x0 + (i + 1) * ch])];   // the caret x after each character\n\nvawe.onFrame((t) => {\n  const n = at.filter((a) => a <= t).length;                  // characters typed at t; show text.slice(0, n)\n  const follow = track(t, keys, 90, 20);                      // one soft spring per character\n  const tx = Math.min(W * 0.66 - s * follow, W * 0.05 - s * winLeft);   // caret rests at 66% of the width; never show past the window edge\n  world.style.transform = `translate(${tx}px, ${H * 0.5 - s * y}px) scale(${s})`;   // world { transform-origin: 0 0 }\n});",
    "eases": [],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "ae546f61f1b5",
    "theme": "dark",
@@ -3839,7 +3839,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "4d3660dc2e6d",
    "theme": "dark",
@@ -3878,7 +3878,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "6b1b4b292359",
    "theme": "dark",
@@ -3916,7 +3916,7 @@
     }
    ],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1adfa5d52cbc",
    "theme": "dark",
@@ -3942,7 +3942,7 @@
    "snippet": "import { lens, htmlSource, PALETTES, OFF } from '/core/surfaces/lens.js';\nconst cam = lens(htmlSource(document.getElementById('screen'), { scale: 2 }), {\n  aim: (t) => [1390, 520], zoom: (t) => 1 + 1.9 * ease(t), tiltY: 0.38, tiltX: 0.1,\n  dof: { blur: 0.55, focus: [1400, 520] },\n  palette: { stops: PALETTES.thermal, keepColor: 0.9 },\n  bloom: { strength: 0.9, radius: 42 }, grid: { amount: 0.9, cell: 3 },\n  aberration: { amount: (t) => 6 + 8 * lock(t) },\n  tear: { amount: (t) => (hit(t) ? 70 : 0) },\n});\nvawe.onFrame((t) => cam.draw(t));            // the seek awaits it\nconst p = cam.project(1498, 440, t);         // { x, y, scale, depth, visible } in CSS px: put a label there",
    "eases": [],
    "published": "2026-10-10",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "b81c13b716a0",
    "theme": "dark",
@@ -4014,7 +4014,7 @@
     }
    ],
    "published": "2026-10-07",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "94f3ab526bfa",
    "theme": "light",
@@ -4226,7 +4226,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "0c045eea61d8",
    "theme": "light",
@@ -4252,7 +4252,7 @@
    "snippet": "<div class=\"ground\"></div>                         <!-- inset: -8%, a dot grid or a texture -->\n<div class=\"light\"></div>                          <!-- one soft radial patch, lighter than the ground -->\n<h1 class=\"line\">Held, not <em>frozen.</em></h1>   <!-- no transform, ever -->\n<script type=\"module\">\nimport '../../core/engine/page-api.js';\nimport { noise1 } from '../../core/motion/springs.js';\nconst layers = [\n  { el: ground, seed: 1, amp: 1.6, grow: 0.03 },   // vh of travel, share of scale gained over 2 s\n  { el: light,  seed: 2, amp: 5,   grow: 0.06 },\n];\nconst rate = 0.5;                                  // noise steps per second: a new direction every 2 s\nvawe.onFrame((t) => {\n  const vh = innerHeight / 100;\n  layers.forEach(({ el, seed, amp, grow }) => {\n    const x = noise1(t * rate, seed * 10) * amp * vh, y = noise1(t * rate, seed * 10 + 5) * amp * vh * 0.7;\n    el.style.transform = `translate(${x}px, ${y}px) scale(${1 + grow * t / 2})`;\n  });\n});\n</script>",
    "eases": [],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "c0f85105f8a2",
    "theme": "dark",
@@ -4291,7 +4291,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "114fe33d8727",
    "theme": "dark",
@@ -4340,7 +4340,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "8087003d1091",
    "theme": "dark",
@@ -4389,7 +4389,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "33ac09a0c8bb",
    "theme": "dark",
@@ -4450,7 +4450,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "0ab96cf77b44",
    "theme": "dark",
@@ -4510,7 +4510,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1bb002fd8b21",
    "theme": "dark",
@@ -4570,7 +4570,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1efb07a0f69c",
    "theme": "dark",
@@ -4630,7 +4630,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "778555252fba",
    "theme": "dark",
@@ -4679,7 +4679,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "e6cddcfe5d46",
    "theme": "dark",
@@ -4728,7 +4728,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "7f16c32cd0ca",
    "theme": "dark",
@@ -4777,7 +4777,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1c9c212ff251",
    "theme": "dark",
@@ -4837,7 +4837,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "5b76cf6c9a87",
    "theme": "dark",
@@ -4886,7 +4886,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "18f9c6166fec",
    "theme": "light",
@@ -4946,7 +4946,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "6aaf4e2b24b6",
    "theme": "light",
@@ -5006,7 +5006,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "084489f3adc0",
    "theme": "light",
@@ -5077,7 +5077,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "9baebfd0251a",
    "theme": "dark",
@@ -5126,7 +5126,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "1f3458afb9f2",
    "theme": "dark",
@@ -5175,7 +5175,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "c673312aaeef",
    "theme": "light",
@@ -5213,7 +5213,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "cf897749feb1",
    "theme": "light",
@@ -5262,7 +5262,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "aaf700e58552",
    "theme": "dark",
@@ -5333,7 +5333,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "0626c1a6fc4c",
    "theme": "light",
@@ -5371,7 +5371,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "90961cd27978",
    "theme": "light",
@@ -5420,7 +5420,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-19",
    "clipHash": "e949e9c131d8",
    "theme": "light",
@@ -5480,7 +5480,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "7d424e9db747",
    "theme": "dark",
@@ -5562,7 +5562,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "2552050cb89b",
    "theme": "dark",
@@ -5600,7 +5600,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "9fd192fce4f6",
    "theme": "dark",
@@ -5638,7 +5638,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "8fd3e7cef13b",
    "theme": "light",
@@ -5720,7 +5720,7 @@
     }
    ],
    "published": "2026-09-30",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "086fb068af5b",
    "theme": "dark",
@@ -5746,7 +5746,7 @@
    "snippet": "<svg style=\"position:absolute;width:0;height:0\"><defs>\n  <filter id=\"gooey-filter\" x=\"-30%\" y=\"-30%\" width=\"160%\" height=\"160%\">\n    <feGaussianBlur id=\"gblur\" in=\"SourceGraphic\" stdDeviation=\"15\" result=\"blur-sm\"/>\n    <feColorMatrix in=\"blur-sm\" type=\"matrix\" values=\"1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9\" result=\"goo\"/>\n    <feComposite in=\"SourceGraphic\" in2=\"goo\" operator=\"atop\"/>\n  </filter>\n</defs></svg>\n<div class=\"filtered\" style=\"filter:url(#gooey-filter)\"> tab row (one #efefef box slides) + panel </div>\n<div class=\"labels\"> the tab titles, no filter </div>",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "b23000bdd694",
    "theme": "dark",
@@ -5772,7 +5772,7 @@
    "snippet": "import { show, runDot } from '../../prompts/moves/demo/assets/stage.js';\nconst DONE = [1700, 2500, 3300], STARTS = [700, ...DONE];   // ms: item n is active from STARTS[n]\nshow(todo, 700);                                             // the list prints in one frame\nrows.forEach((row, n) => {\n  const [open, active, done] = row.querySelectorAll('.slot > span');   // three states stacked in one grid cell\n  show(open, null, STARTS[n]);\n  show(active, STARTS[n], DONE[n]);                          // the active item is bold\n  if (DONE[n]) show(done, DONE[n]);                          // a closed item is struck and grey\n});\nverbs.forEach((v, n) => show(v, n ? STARTS[n] : null, STARTS[n + 1]));   // the status verb swaps whole\nrunDot(bashDot, 3500, 6000);                                 // the tool call dot blinks while it runs\nvawe.onFrame((s) => {                                        // the spinner turns in 30 degree steps, 120 ms each\n  spin.style.rotate = `${Math.floor((s * 1000 - 700) / 120) * 30}deg`;\n});",
    "eases": [],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "871d1c5b30b9",
    "theme": "light",
@@ -5832,7 +5832,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "2cb29cce3b8f",
    "theme": "dark",
@@ -5858,7 +5858,7 @@
    "snippet": "import { arrive, show, runDot, typeTimes, typedCount, leave } from '../../prompts/moves/demo/assets/stage.js';\n// the window fades in 0.22 s (clip framing); the session inside is already running\narrive(win, 100, { ms: 220, from: '0.8vh' });\n// the task types at 22 chars/s from 0.6 s; text shown = task.slice(0, typedCount(times, ms))\nconst times = typeTimes(task, 600);\n// Enter at 2.1 s: the prompt line is reprinted in place on one frame, no flight, no scale\nshow(youLine, 2100);\n// status line: seconds and tokens are a pure function of t (0.63 tokens a ms, shown in steps of 40); the spinner turns in 30 degree steps every 120 ms\n// a tool call: its head on one frame, its dot blinks grey until the result, which prints on one frame (hard steps, no fade, no rise)\nconst step = (sel, at, runMs = 150) => { show(head, at); runDot(dot, at, at + runMs); show(result, at + runMs); };\n// the diff rows print one per frame pair: 34 ms apart from 3.2 s\nrows.forEach((row, i) => show(row, 3200 + i * 34));\nshow(running, null, 4400); show(passed, 4400);   // Running... to Tests passed in place",
    "eases": [],
    "published": "2026-10-19",
-   "modified": "2026-10-19",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-19",
    "clipHash": "9d803d85d541",
    "theme": "light",
@@ -5884,7 +5884,7 @@
    "snippet": "import { arrive, show, runDot, leave } from '../../prompts/moves/demo/assets/stage.js';\n// only the window arrives (clip framing); every terminal row prints on one frame\nshow(commandHead, 2350); runDot(commandDot, 2350, 3500);\n// the prompt takes the input box's place in one frame: the box goes hidden, the prompt goes visible, at 2.45 s\nshow(perm, 2450, 3500);\n// selection: the marker and the colour step to option 2 at 2.85 s (hard steps); Enter at 3.35 s\n// the result and the next tool call print 0.15 s apart: show(result, 3500); show(nextHead, 3650)",
    "eases": [],
    "published": "2026-10-19",
-   "modified": "2026-10-19",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-19",
    "clipHash": "bd448a550b95",
    "theme": "light",
@@ -5933,7 +5933,7 @@
     }
    ],
    "published": "2026-10-19",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-19",
    "clipHash": "10950685ef20",
    "theme": "light",
@@ -5982,7 +5982,7 @@
     }
    ],
    "published": "2026-10-19",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "428e7841670e",
    "theme": "light",
@@ -6020,7 +6020,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "284beae6e8c4",
    "theme": "dark",
@@ -6058,7 +6058,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "13c1b7679ed1",
    "theme": "dark",
@@ -6096,7 +6096,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "add2e8b9e3cf",
    "theme": "light",
@@ -6134,7 +6134,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "be4034289a1b",
    "theme": "dark",
@@ -6172,7 +6172,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "e8a6d43d7407",
    "theme": "light",
@@ -6210,7 +6210,7 @@
     }
    ],
    "published": "2026-10-01",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "c33bf3035bce",
    "theme": "light",
@@ -6236,7 +6236,7 @@
    "snippet": "const BASE_VELOCITY = 8;            // percent of the path per second\nconst REPEAT = 2;                   // copies of the child list: 13 tiles x 2 = 26 items, 100/26 percent apart\nconst SCROLL_FACTOR = 5 / 1000;     // the original maps a constant 1 through [0, 1000] -> [0, 5]: speed x 1.005\nconst wrap = (v) => ((v % 100) + 100) % 100;\nwindow.seek = (t) => items.forEach((el, i) => {\n  const pct = wrap(BASE_VELOCITY * (1 + SCROLL_FACTOR) * t + (i * 100) / items.length);  // direction reverse: negate the first term\n  el.style.offsetPath = `path('${PATH}')`;                                              // viewBox px, same box as the svg\n  el.style.offsetDistance = `${easing ? easing(pct / 100) * 100 : pct}%`;                // optional easing of the lap\n  el.style.zIndex = Math.floor(1 + (pct / 100) * 10);                                   // rolling z: the lead item is on top\n});",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "2f1d542de76b",
    "theme": "dark",
@@ -6262,7 +6262,7 @@
    "snippet": "const SPEED = 9;                                          // u a second; the rows run at one speed, so no ease\nwindow.seek = (t) => rows.forEach((row, i) => { row.style.translate = `${ROWS[i].dir * SPEED * u * t}px 0`; });\narrive(lane, 150 + r * 110, { ms: 300, from: '1.2vh' });   // the lane, not the row, so the drift keeps the row's translate",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "ff2e5bba7d2f",
    "theme": "light",
@@ -6288,7 +6288,7 @@
    "snippet": "const RADIUS = 120, DURATION = 10, DIRECTION = 1;          // px of a 532 px tall box (scale by vh/532), seconds per turn, -1 reverses\nconst ease = (p) => p;                                      // \"linear\", the original default; any easing runs per turn\nwindow.seek = (t) => cards.forEach((el, i) => {\n  const offset = (i * 360) / cards.length;                  // start angle: even spacing\n  const a = DIRECTION * (offset + 360 * ease(((t / DURATION) % 1 + 1) % 1));\n  el.style.transform = `rotate(${a}deg) translate(${RADIUS * P}px, 0) rotate(${-a}deg)`;\n});",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "0b25180b4202",
    "theme": "dark",
@@ -6314,7 +6314,7 @@
    "snippet": "const STIFFNESS = 100, DAMPING = 30;                    // damping ratio 1.5: no bounce\nconst YAW = [[0, 0], [0.7, 90], [2.0, 180], [3.3, 270]]; // [second, degrees]: one jump of the target each\nconst yaw = REST + track(t, YAW, STIFFNESS, DAMPING);    // REST = -28 shows the front and one side\n// light from the upper left front: a face is darker as its turned normal leaves the light\nshade.style.opacity = 0.5 * (1 - Math.max(0, dot(normal, light)));",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "3ebec3accdcb",
    "theme": "light",
@@ -6340,7 +6340,7 @@
    "snippet": "const SIZE_PER_PX = 1 / 30;                                    // the demo: block size = pointer x / 30, clamped 1..64\nconst MOUSE_X = [[0, 60], [0.4, 60], [2.2, 600], [2.5, 600], [4.3, 60], [4.8, 60]];   // px from the left of the 500 px box\nwindow.seek = (t) => {\n  const size = Math.min(Math.max(kf(t, MOUSE_X, 'easeInOutSine') * SIZE_PER_PX, 1), 64);\n  c0.setAttribute('width', size);  c0.setAttribute('height', size);          // first layer (feComposite)\n  c1.setAttribute('width', size / 2); c1.setAttribute('height', size);       // crossLayers: tile half width\n  c2.setAttribute('width', size);  c2.setAttribute('height', size / 2);      // crossLayers: tile half height\n  for (const m of [m0, m1, m2]) m.setAttribute('radius', size / 2);          // feMorphology dilate\n};",
    "eases": [],
    "published": "2026-10-09",
-   "modified": "2026-10-18",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-18",
    "clipHash": "ef706b9f6f36",
    "theme": "dark",
@@ -6378,7 +6378,7 @@
     }
    ],
    "published": "2026-10-11",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "ebcb7154a388",
    "theme": "dark",
@@ -6416,7 +6416,7 @@
     }
    ],
    "published": "2026-10-09",
-   "modified": "2026-10-23",
+   "modified": "2026-10-29",
    "clipDate": "2026-10-23",
    "clipHash": "e6664d3a0205",
    "theme": "light",

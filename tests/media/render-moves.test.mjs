@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { recordClips, clipsOf, sourceHash, assertOwnAssets, demoProblems, demoWarnings, assertDemo, writeClipSheet } from '../../harness/media/render-moves.mjs';
+import { recordClips, clipsOf, sourceHash, staleReason, assertOwnAssets, demoProblems, demoWarnings, assertDemo, writeClipSheet } from '../../harness/media/render-moves.mjs';
 import { ensureFonts, fontFilesIn } from '../../harness/lib/ensure-fonts.mjs';
 import { filmKeyOf } from '../../harness/lib/runlog.mjs';
 import { filmOfCall } from '../../harness/lib/verb-log.mjs';
@@ -133,4 +133,11 @@ test('demoProblems: a demo that sets a property demo.css already sets on a class
   const warnings = demoWarnings('x', moves);
   assert.equal(warnings.length, 1);
   assert.match(warnings[0], /x: shadows demo\.css: custom properties --accent and class rules \.card \(padding\)\. Rename it to a demo-local name/);
+});
+
+test('staleReason: a lock entry makes a clip current without a local file, a missing entry or a changed source does not', () => {
+  const id = { id: 'agent-progress', name: 'agent-progress', theme: null };
+  assert.equal(staleReason(id, { 'agent-progress': { hash: sourceHash('agent-progress'), crf: 16 } }), '');
+  assert.equal(staleReason(id, {}), 'no clip yet');
+  assert.match(staleReason(id, { 'agent-progress': { hash: 'deadbeef', crf: 16 } }), /changed/);
 });

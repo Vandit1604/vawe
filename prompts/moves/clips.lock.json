@@ -73,7 +73,8 @@
   },
   "caret-follow": {
     "hash": "569c594bb114b5ae",
-    "crf": 16
+    "crf": 16,
+    "clip": "ae546f61f1b5"
   },
   "caret-typing": {
     "hash": "7ac267d16fb5a1ee",
@@ -89,7 +90,8 @@
   },
   "circling-elements": {
     "hash": "4b031ce8cbe3b6c9",
-    "crf": 16
+    "crf": 16,
+    "clip": "0b25180b4202"
   },
   "clip-expand": {
     "hash": "cc200524b51c5e6e",
@@ -165,7 +167,8 @@
   },
   "drift-hold": {
     "hash": "bae1a71db5f13a6d",
-    "crf": 16
+    "crf": 16,
+    "clip": "c0f85105f8a2"
   },
   "drop-and-land": {
     "hash": "75cc98840afc12cb",
@@ -197,7 +200,8 @@
   },
   "gooey-filter": {
     "hash": "2dfa92be6041b945",
-    "crf": 16
+    "crf": 16,
+    "clip": "b23000bdd694"
   },
   "gradient-mesh-field": {
     "hash": "88f724d0aa09106d",
@@ -241,7 +245,8 @@
   },
   "lens": {
     "hash": "ab49de3c68516396",
-    "crf": 19
+    "crf": 19,
+    "clip": "b81c13b716a0"
   },
   "letter-3d-swap": {
     "hash": "3c909a0c6b141bca",
@@ -253,7 +258,8 @@
   },
   "letter-swap": {
     "hash": "ca649c5dfa44fda5",
-    "crf": 16
+    "crf": 16,
+    "clip": "49b1e986fe9b"
   },
   "light-leak-transition": {
     "hash": "481b33b3b4cd93f7",
@@ -297,7 +303,8 @@
   },
   "marquee-along-path": {
     "hash": "6bf69ce0c45e8804",
-    "crf": 19
+    "crf": 19,
+    "clip": "2f1d542de76b"
   },
   "mask-rise": {
     "hash": "1727a8a2419f35c2",
@@ -353,7 +360,8 @@
   },
   "pixelate-svg-filter": {
     "hash": "1b0b0bc275c1b603",
-    "crf": 16
+    "crf": 16,
+    "clip": "ef706b9f6f36"
   },
   "progress-timeline": {
     "hash": "e5d5294f7997708e",
@@ -513,7 +521,8 @@
   },
   "vertical-cut-reveal": {
     "hash": "79ac347a10669706",
-    "crf": 16
+    "crf": 16,
+    "clip": "7ab516b10c31"
   },
   "weight-morph": {
     "hash": "6f784dacd60212f2",
