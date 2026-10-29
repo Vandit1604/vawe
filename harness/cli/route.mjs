@@ -2,6 +2,8 @@
 // from the table in guides/ROUTING.md; this file holds only the words that point at a row.
 import fs from 'node:fs';
 import path from 'node:path';
+import { TURN_SECONDS_MAX, READ_MARGIN_S } from '../lib/worlds.mjs';
+import { HOLD_RULE } from '../lib/read-hold.mjs';
 
 export const ROUTING = 'guides/ROUTING.md';
 export const FALLBACK = 'sting';
@@ -31,34 +33,54 @@ const WORDS = [
   ['brand launch', /\b(launch|promo|product|saas|landing page|website|site|url|ai demo|product demo|demo video|feature tour|walkthrough|proof film|case study)\b/],
 ];
 
-// The page `vawe new` starts from, by film type: a file in harness/cli/starters/, the start of each world and the
-// spectacle second as fractions of the length, and `min`, the shortest length it fits (the low end of the template's Length line:
-// worlds shorter than that cannot hold their text). `short` is the same file cut to the `worlds` listed, for lengths from short.min to short.max seconds (the longest one that passes the draft check with no advice).
-// Every other type, and a shorter film, takes the general starter.
+// The page `vawe new` starts from, by film type: a file in harness/cli/starters/, the start of each of its worlds and the spectacle
+// second as fractions of the length (the film at its fullest). A type with an `order` keeps only the first n worlds of it for a shorter
+// film (starterWorlds); every other type, and a film under starterMin, takes the general starter.
 export const STARTERS = {
   sting: { file: 'sting', beats: [0, 0.3, 0.7], spectacle: 0.36 },
   'brand launch': {
-    file: 'brand-launch', min: 15, beats: [0, 0.14375, 0.33125, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.856,
-    short: { min: 8, max: 9, worlds: ['s1', 's2', 's4', 's7'], beats: [0, 0.17, 0.5, 0.78], spectacle: 0.8 },
+    file: 'brand-launch', order: ['s1', 's2', 's7', 's4', 's5', 's3', 's6'],
+    beats: [0, 0.14375, 0.33125, 0.475, 0.6125, 0.7375, 0.8625], spectacle: 0.856,
   },
   'story or explainer': {
-    file: 'story', min: 30, beats: [0, 0.1, 0.1883, 0.2767, 0.4133, 0.491, 0.5577, 0.646, 0.7127, 0.7893, 0.856, 0.9227], spectacle: 0.936,
-    short: { min: 9, max: 9.5, worlds: ['s1', 's2', 's6', 's12'], beats: [0, 0.28, 0.55, 0.75], spectacle: 0.775 },
+    file: 'story', order: ['s1', 's2', 's12', 's6', 's8', 's5', 's3', 's4', 's7', 's11', 's10', 's9'],
+    beats: [0, 0.1, 0.1883, 0.2767, 0.4133, 0.491, 0.5577, 0.646, 0.7127, 0.7893, 0.856, 0.9227], spectacle: 0.936,
   },
 };
 
-/** The STARTERS entry for a type at a length: the short cut of the file below the entry's `min`. */
-export const starterSpec = (type, length) => {
-  const { short, ...full } = STARTERS[type];
-  return short && length < full.min ? { ...full, ...short } : full;
-};
+const MIN_WORLDS = 4;
+const index = (id) => Number(id.slice(1)) - 1;
+const fullShares = ({ beats }) => beats.map((start, i) => (beats[i + 1] ?? 1) - start);
 
-/** The STARTERS key for a routed film, or undefined: an unmatched request, a sting past STING_MAX_S (the invented-product fallback) and a length no starter fits take the general starter. */
-export const starterType = (route, length) => {
-  if (!route?.known || !(route.type in STARTERS) || (route.type === 'sting' && length > STING_MAX_S)) return undefined;
-  const { min = 0, short } = STARTERS[route.type];
-  return length >= min || (short && length >= short.min && length <= short.max) ? route.type : undefined;
-};
+/**
+ * The worlds a type's starter keeps at a length, in film order: [{ id, share }], the shares adding to 1. A world may span TURN_SECONDS_MAX (the world-held limit),
+ * so a film keeps the first ceil(length / TURN_SECONDS_MAX) worlds of `order`, at least MIN_WORLDS. A share is the world's share in the full starter, renormalised.
+ */
+export function starterWorlds(type, length) {
+  const entry = STARTERS[type];
+  const shares = fullShares(entry);
+  const count = entry.order ? Math.min(entry.order.length, Math.max(MIN_WORLDS, Math.ceil(length / TURN_SECONDS_MAX))) : shares.length;
+  const kept = (entry.order?.slice(0, count) ?? shares.map((_, i) => `s${i + 1}`)).map(index).sort((x, y) => x - y);
+  const total = kept.reduce((sum, i) => sum + shares[i], 0);
+  return kept.map((i) => ({ id: `s${i + 1}`, share: shares[i] / total }));
+}
+
+/** The shortest film a type's starter fits: its smallest MIN_WORLDS-world share must span a text's read floor plus the entrance and exit margin. 0 for a type with no `order`. */
+export function starterMin(type) {
+  if (!STARTERS[type].order) return 0;
+  const smallest = Math.min(...starterWorlds(type, 0).map((w) => w.share));
+  return Math.round((HOLD_RULE.floor + READ_MARGIN_S) / smallest);
+}
+
+/** The spectacle second: the full starter's offset from its last world's start, kept on the last world kept. */
+export function starterSpectacle(type, length) {
+  const { beats, spectacle } = STARTERS[type];
+  const last = starterWorlds(type, length).at(-1);
+  return length * (1 - last.share + spectacle - beats.at(-1));
+}
+
+/** The STARTERS key for a routed film, or undefined: an unmatched request, a sting past STING_MAX_S (the invented-product fallback) and a film under starterMin take the general starter. */
+export const starterType = (route, length) => (route?.known && route.type in STARTERS && !(route.type === 'sting' && length > STING_MAX_S) && length >= starterMin(route.type) ? route.type : undefined);
 
 // RECIPES.md "Complete videos": one chain per 20 to 30 s film, found by its heading number.
 export const RECIPES = 'prompts/moves/RECIPES.md';
@@ -112,7 +134,9 @@ export function routingTable(markdown) {
 
 function typeFor(text, length) {
   if (WORDS[0][1].test(text)) return { type: WORDS[0][0], why: 'the request names a reference' };
-  if (length !== undefined && length <= STING_MAX_S) return { type: 'sting', why: `${length} s is ${STING_MAX_S} s or less` };
+  const named = WORDS.slice(1).find(([, re]) => re.test(text))?.[0];
+  const fits = named in STARTERS && named !== 'sting' && length >= starterMin(named);
+  if (length !== undefined && length <= STING_MAX_S && !fits) return { type: 'sting', why: `${length} s is ${STING_MAX_S} s or less` };
   if (length !== undefined && length > LONG_MIN_S) return { type: 'long form', why: `${length} s is over ${LONG_MIN_S} s` };
   for (const [type, re] of WORDS.slice(1)) {
     const m = re.exec(text);
