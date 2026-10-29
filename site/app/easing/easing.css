@@ -95,6 +95,7 @@
 .ez-card:has(a:focus-visible){outline:var(--focus-ring);outline-offset:2px}
 .ez-card a{display:block;margin-top:var(--sp-3);font-family:var(--font-title);font-weight:var(--fw-head);font-size:var(--fs-ui);line-height:var(--lh-sub);letter-spacing:-.01em;outline:none;overflow-wrap:anywhere}
 .ez-card a::after{content:"";position:absolute;inset:0}
+.ez-card .ez-blurb{margin-top:var(--sp-2);color:var(--ink-2);font-size:var(--fs-ui);line-height:var(--lh-body);overflow-wrap:anywhere}
 .ez-card .meta{display:block;margin-top:var(--sp-2);white-space:normal;line-height:var(--lh-body)}
 .ez-fam{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);margin-top:var(--sp-5);font-size:var(--fs-ui)}
 .ez-fam a{display:inline-flex;align-items:center;min-height:var(--hit);color:var(--muted);transition:color var(--dur-hover) var(--ease-out);text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}

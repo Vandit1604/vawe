@@ -55,6 +55,7 @@ function Card({ e }: { e: Ease }) {
       </div>
       <SpacingChart values={ghosts} label={`${e.name} at ${CARD_GHOSTS} equal time steps`} />
       <Link href={`/easing/${e.slug}`} prefetch={false}>{e.name}</Link>
+      <p className="ez-blurb">{e.blurb}</p>
       <span className="meta">50% at {pct(e.t50)} / peak {speedText(e).replace(" (it ends vertically)", "").replace("over ", ">")}</span>
       <div className="ez-card-act">
         <button type="button" className="ez-copy" data-label={bezier ? "Copy bezier" : "Copy linear()"} title={close ? `Nearest cubic-bezier fit, worst gap ${((e.bezier.worst ?? 0) * 100).toFixed(1)} points` : undefined}>{bezier ? "Copy bezier" : "Copy linear()"}</button>
