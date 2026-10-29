@@ -1,4 +1,4 @@
-// Every move a type starter puts inside a world ends inside that world, at the shortest length that routes to the type and at its template default:
+// Every move a type starter puts inside a world ends inside that world, at the shortest length that routes to the type and at the lengths between it and the whole starter (a shorter film keeps fewer worlds):
 // the worlds scale with the length, so a move timed in fixed seconds would run into the next world.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -7,10 +7,10 @@ import path from 'node:path';
 import { openPage, resolveFrame } from '../../harness/media/render-page.mjs';
 import { loadOpened } from '../../harness/media/plan-read.mjs';
 import { starterPage, starterFace } from '../../harness/cli/new.mjs';
-import { STARTERS } from '../../harness/cli/route.mjs';
+import { starterMin } from '../../harness/cli/route.mjs';
 
 const ROOT = path.resolve(new URL('../../', import.meta.url).pathname);
-const LENGTHS = { sting: [5], 'brand launch': [STARTERS['brand launch'].min, 16], 'story or explainer': [STARTERS['story or explainer'].min, 30] };
+const CASES = [['sting', [5]], ['brand launch', [starterMin('brand launch'), 12, 15]], ['story or explainer', [starterMin('story or explainer'), 12, 20, 28, 29, 30]]];
 
 const movesPastTheirWorld = () => {
   const root = document.documentElement;
@@ -28,7 +28,7 @@ const movesPastTheirWorld = () => {
   });
 };
 
-for (const [type, lengths] of Object.entries(LENGTHS)) {
+for (const [type, lengths] of CASES) {
   test(`${type}: every move inside a world ends in that world, at ${[...new Set(lengths)].join(' s and ')} s`, async () => {
     const dir = path.join(ROOT, 'films', `zz-starter-moves-${process.pid}`);
     const page = path.join(dir, 'page.html');

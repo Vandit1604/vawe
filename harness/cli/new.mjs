@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { UsageError } from './parse.mjs';
 import { ensureFonts } from '../lib/ensure-fonts.mjs';
-import { pickTemplate, beatSheetLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES, STARTERS, starterType } from './route.mjs';
+import { pickTemplate, beatSheetLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES, STARTERS, starterWorlds, starterSpectacle, starterType } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
@@ -224,20 +224,27 @@ const fill = (template, values) => template.replace(/\{\{(\w+)\}\}/g, (_, key) =
 
 /** The worlds of a film type's starter: [{ id, start, end, wordless }], the starts being the STARTERS fractions of the length. */
 export function typeBeats(type, length) {
-  const starts = STARTERS[type].beats.map((f) => +(length * f).toFixed(2));
-  return starts.map((start, i) => ({ id: `s${i + 1}`, start, end: starts[i + 1] ?? length, wordless: false }));
+  let start = 0;
+  return starterWorlds(type, length).map(({ id, share }) => {
+    const beat = { id, start: +start.toFixed(2), end: +(start + share * length).toFixed(2), wordless: false };
+    start += share * length;
+    return beat;
+  });
 }
+
+const keepWorlds = (html, ids) => html.replace(/<(main|section)\b[^>]*data-world="(s\d+)"[\s\S]*?<\/\1>\n/g, (world, _tag, id) => (ids.includes(id) ? world : ''));
 
 /** The starter for a film type listed in STARTERS, else the general one. */
 export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 'Say the one thing', face = starterFace(), type }) {
-  const own = STARTERS[type];
+  const own = type && STARTERS[type];
   const safe = title.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const beats = own ? typeBeats(type, length) : starterBeats(length, [title, STARTER_LINE]);
-  return fill(own ? readStarterFile(`${own.file}.html`) : STARTER_TEMPLATE, {
+  const template = own ? keepWorlds(readStarterFile(`${own.file}.html`), beats.map((b) => b.id)) : STARTER_TEMPLATE;
+  return fill(template, {
     length, aspect, title: safe, font: face.font, family: face.family, ground: PLACEHOLDER.ground, ink: PLACEHOLDER.ink,
     signature: DIALS.map((d) => `${d}=`).join('; '), beats: beatVars(beats), groundCss: readStarterFile('ground.css').trimEnd(),
     worlds: own ? beats.map((b) => `<div class="world" data-world="${b.id}">${GROUND}</div>`).join('\n') : worldsHtml(beats, safe),
-    spectacle: own ? +(length * own.spectacle).toFixed(2) : '', wordFit: +(0.64 / (0.52 * title.length)).toFixed(3),
+    spectacle: own ? +starterSpectacle(type, length).toFixed(2) : '', wordFit: +(0.64 / (0.52 * title.length)).toFixed(3),
   });
 }
 
@@ -277,7 +284,8 @@ export function parseSections(markdown) {
 // Answers given as flags go in as answered lines, never as a default with the unanswered marker.
 function inputLines(questions, answers) {
   const given = { ...answers };
-  if (answers.length || answers.aspect) given.platform = [answers.aspect, answers.length].filter(Boolean).join(', ');
+  const format = questions.find((q) => /length|platform/i.test(q.key));
+  if (format && (answers.length || answers.aspect)) given[format.key.toLowerCase()] = [answers.aspect, answers.length].filter(Boolean).join(', ');
   const lines = questions.map((q) => (given[q.key.toLowerCase()] ? `- ${q.key}: ${given[q.key.toLowerCase()]}` : `- ${q.key}: ${q.default} ${UNANSWERED}`));
   const known = new Set(questions.map((q) => q.key.toLowerCase()));
   const extra = Object.entries(answers).filter(([k]) => !known.has(k)).map(([k, v]) => `- ${k}: ${v}`);
