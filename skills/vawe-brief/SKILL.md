@@ -2,9 +2,12 @@
 name: vawe-brief
 description: "Plan an HTML to video film (motion graphics as code). Turn a film request into films/<name>/brief.md: ask the person for the details that make a good film (subject, message, what to show, look), then write the brief in the measured anatomy and name the first draft command. Load when a person asks for a film and no brief.md exists yet."
 effort: medium
+license: Apache-2.0
 ---
 
 # vawe-brief: the interview, then the brief
+
+Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 
 A better film comes from a better prompt, and a better prompt comes from asking the person for the
 details a thin request leaves out. This skill runs that interview once, at the start, and writes the

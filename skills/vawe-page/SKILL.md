@@ -2,9 +2,12 @@
 name: vawe-page
 description: "Write an HTML page that renders to an mp4 video, programmatic video and motion graphics as code with CSS, SVG, canvas or three.js. Author a vawe page film: one films/<name>/page.html the renderer seeks frame by frame. Load before writing or editing any page.html: audio tags, the spring helpers, and the page-code mistakes a first draft makes. The page contract itself is in AGENTS.md."
 effort: medium
+license: Apache-2.0
 ---
 
 # vawe-page: write the page
+
+Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 
 A film is one HTML page; the renderer seeks it, screenshots every frame and mixes the audio offline.
 The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start with

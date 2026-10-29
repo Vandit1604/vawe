@@ -2,6 +2,7 @@
 name: html-to-video
 description: "Make a video from code: render an HTML page (CSS, Web Animations, SVG, canvas, three.js) to a deterministic mp4 with vawe, an open-source programmatic video and motion graphics framework for coding agents, and a free alternative to Remotion, HyperFrames and Motion Canvas. Load when asked for an HTML to video render, a launch video, a title sting, an explainer or motion graphics as code, and no film exists yet."
 effort: low
+license: Apache-2.0
 ---
 
 # html-to-video: start here

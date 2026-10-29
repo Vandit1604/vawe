@@ -2,9 +2,12 @@
 name: vawe-critique
 description: "Review and fix a video made from an HTML page. Look at a rendered page film and say what is wrong, as a fresh session that did not write it: the phone, strip and loop views, bin/vawe critique, page-check, the default-reject judge that names shot, frame and fix, the top five, and re-rendering only the affected seconds. Load after any draft render, before any fix."
 effort: high
+license: Apache-2.0
 ---
 
 # vawe-critique: how to look
+
+Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 
 The author never grades its own film. Run this in a session that has not seen the authoring
 (`VAWE_AGENT=<name>` for a subagent). Default verdict is REJECT; the film passes only when you

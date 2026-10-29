@@ -2,9 +2,12 @@
 name: vawe-transitions
 description: "Plan scene transitions for a motion graphics video made from HTML. Plan the handoff at every cut of a vawe film so the transitions are continuous, varied and chosen, not defaulted: name what carries over, run the idea method (guides/IDEATE.md) with the twelve families as devices, keep a ledger, and set up the execution. Load at stage 5, when you fill the Board's handoff column."
 effort: medium
+license: Apache-2.0
 ---
 
 # vawe-transitions: one handoff per cut
+
+Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 
 A model asked for a transition writes the same few: a crossfade, a whip pan, a slide-up, a scale-in. This skill makes the choice on purpose.
 The grammar (the twelve families, when each fits, its cost, moves to copy) is in `taste/craft/transitions.md` "The twelve handoff families": read it first,

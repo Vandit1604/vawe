@@ -2,9 +2,12 @@
 name: vawe-reference
 description: "Recreate a reference video as an HTML page, a video-from-code workflow. Match a reference film with a vawe page: bin/vawe see --spec writes SPEC.md frame by frame, every line is marked KEEP or CHANGE, the page is rebuilt light first, then bin/vawe critique --ref loops until the match passes. Load when a reference mp4 must be matched, not merely echoed."
 effort: high
+license: Apache-2.0
 ---
 
 # vawe-reference: reference -> SPEC -> KEEP/CHANGE -> rebuild -> match
+
+Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 
 Use when a reference film exists and the deliverable must match its light, pacing, type and curves.
 Not for "inspired by"; that is a director's brief (`prompts/directors-brief-long-form.md`).
