@@ -1,0 +1,27 @@
+{
+  "name": "vawe-skills",
+  "description": "Skills for vawe, the open-source HTML to video framework for coding agents.",
+  "owner": { "name": "Vandit Singh", "url": "https://vawe.dev" },
+  "plugins": [
+    {
+      "name": "vawe",
+      "source": "./skills",
+      "description": "Six skills that take a coding agent from a film request to a rendered mp4 with vawe: start, brief, page, transitions, critique, reference. They run inside a vawe checkout.",
+      "version": "2.0.0",
+      "author": { "name": "Vandit Singh" },
+      "homepage": "https://vawe.dev",
+      "repository": "https://github.com/Vandit1604/vawe",
+      "license": "Apache-2.0",
+      "keywords": ["video", "motion-graphics", "html-to-video", "agent"],
+      "strict": false,
+      "skills": [
+        "./html-to-video",
+        "./vawe-brief",
+        "./vawe-page",
+        "./vawe-transitions",
+        "./vawe-critique",
+        "./vawe-reference"
+      ]
+    }
+  ]
+}
