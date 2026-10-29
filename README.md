@@ -1,3 +1,24 @@
+<p align="center">
+  <a href="https://vawe.dev"><img alt="vawe: write one HTML page, get an mp4" src="assets/banner.png" width="100%"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/vawe-hq/vawe/blob/main/LICENSE"><img src="https://img.shields.io/github/license/vawe-hq/vawe?style=flat" alt="License"></a>
+  <a href="https://github.com/vawe-hq/vawe/stargazers"><img src="https://img.shields.io/github/stars/vawe-hq/vawe?style=flat" alt="GitHub stars"></a>
+  <a href="https://github.com/vawe-hq/vawe/commits/main"><img src="https://img.shields.io/github/last-commit/vawe-hq/vawe?style=flat" alt="Last commit"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen?style=flat" alt="Node.js 22 or newer"></a>
+  <a href="https://github.com/vawe-hq/skills"><img src="https://img.shields.io/badge/skills-npx%20skills%20add%20vawe--hq%2Fskills-black?style=flat" alt="Install the vawe skills: npx skills add vawe-hq/skills"></a>
+</p>
+
+<p align="center"><b>Write one HTML page, get an mp4.</b></p>
+
+<p align="center">
+  <a href="https://vawe.dev">vawe.dev</a> |
+  <a href="https://vawe.dev/docs">Docs</a> |
+  <a href="https://github.com/vawe-hq/vawe/discussions">Discussions</a> |
+  <a href="https://github.com/vawe-hq/skills">Skills</a>
+</p>
+
 # vawe: HTML to video for coding agents
 
 vawe is an open-source HTML to video framework for agent-native motion graphics: one HTML page in, one
