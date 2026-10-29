@@ -16,6 +16,8 @@ export const jobLogPath = (id) => path.join(SHIP_JOBS_DIR, `${id}.log`);
 
 export const samePage = (a, b) => path.resolve(a) === path.resolve(b);
 
+export const sameRender = (job, page, query) => samePage(job.page, page) && (job.query ?? '') === query;
+
 /** The line a failed final prints last; the ship job reads it back from the render's log. */
 export const finalFailedLine = (pct, reason) => `final failed at ${pct}% (${reason})`;
 

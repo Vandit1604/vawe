@@ -19,10 +19,11 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { defaultOut } from './render-page.mjs';
+import { pageQuery } from '../lib/page-params.mjs';
 import { videoProblems, readVideo } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { WAIT_WORK } from '../live/stage-say.mjs';
-import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs, waitCallsLeft } from '../lib/ship-status.mjs';
+import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs, waitCallsLeft, sameRender } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { waitForFilm, WAIT_CAP_DEFAULT_MS, stillRunningLine, waitExitCode } from '../lib/render-wait.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
@@ -48,22 +49,23 @@ function allJobs() {
   return fs.readdirSync(jobsDir()).filter((f) => f.endsWith('.json')).map((f) => readJob(f.slice(0, -5)));
 }
 
-function cancelRunning(page) {
+function cancelRunning(page, query) {
   for (const old of allJobs()) {
-    if (!['starting', 'running'].includes(old.status) || !samePage(old.page, page)) continue;
+    if (!['starting', 'running'].includes(old.status) || !sameRender(old, page, query)) continue;
     if (old.pid && pidAlive(old.pid)) process.kill(-old.pid, 'SIGTERM');
     writeJob({ ...old, status: 'cancelled', endedAt: Date.now() });
-    console.log(`cancelled the running job ${old.id} for the same page`);
+    console.log(`cancelled the running job ${old.id} for the same page${query ? ' and params' : ''}`);
   }
 }
 
 function startJob(page, renderArgs) {
   if (!fs.existsSync(page)) die(`no such page: ${page}`);
-  cancelRunning(page);
+  const query = pageQuery().slice(1);
+  cancelRunning(page, query);
   const name = path.basename(defaultOut(page, { aspect: '16:9', final: true }), '.mp4');
   const id = `${name}-${Date.now().toString(36)}`;
   const log = path.resolve(jobLogPath(id));
-  writeJob({ id, page, args: renderArgs, log, status: 'starting', startedAt: Date.now(), judge: process.env.VAWE_SHIP_JUDGE !== '0' });
+  writeJob({ id, page, query, args: renderArgs, log, status: 'starting', startedAt: Date.now(), judge: process.env.VAWE_SHIP_JUDGE !== '0' });
   spawn(process.execPath, [SELF, 'run', id], { detached: true, stdio: 'ignore' }).unref();
   console.log(`job ${id} started: final render of ${page} in the background`);
   console.log(`log: ${log}`);

@@ -1,8 +1,11 @@
-// The four events of out/<film>.runs.jsonl, one per step of the loop. Pure: each builder returns the
+// The four events of out/<film>.runs.jsonl, one per step of the loop. Each builder returns the
 // fields that harness/lib/runlog.mjs appendRun adds after the common ones (at, film, agent, model, git).
 import { acceptanceCounts } from './acceptance.mjs';
+import { PARAMS_ENV } from './page-params.mjs';
 
 const tenths = (s) => Math.round(s * 10) / 10;
+// The page options of the render (--param), so `vawe runs` tells the looks of one page apart.
+const paramsField = (env = process.env) => (env[PARAMS_ENV] ? { params: env[PARAMS_ENV] } : {});
 
 /** `vawe new`: which details the ask answered and which the brief guessed, and the signature dial ranges offered ({ dial, range }) with any chosen values. */
 export const newEvent = ({ template, length, answered, guessed, ranges = [], chosen = {} }) => ({
@@ -24,7 +27,7 @@ const phaseFields = (wallS, phases, checks) => {
 
 /** `vawe dev`: the seconds of every phase (phaseFields) beside the wall time, what was rendered (`shape`: chrome 'launched' or 'reused', frames, reused, fps, width, height, workers, slices, durS), the check seconds by name, the tier and cache use, the acceptance rows (null for a window), the chosen signature dials, what the moves measured for them, and the rules the draft fired ({ id, value, t }). */
 export const devEvent = ({ tier, wallS, phases, shape, checks, cache, rows, signature = {}, measured = {}, fired = [], worlds = null }) => ({
-  cmd: 'dev', tier, wallS: tenths(wallS), ...phaseFields(wallS, phases, checks),
+  cmd: 'dev', ...paramsField(), tier, wallS: tenths(wallS), ...phaseFields(wallS, phases, checks),
   chrome: shape.chrome, frames: shape.frames, reusedFrames: shape.reused, fps: shape.fps, width: shape.width, height: shape.height,
   workers: shape.workers, slices: shape.slices, durS: tenths(shape.durS),
   checksS: Object.fromEntries(checks.map(([name, s]) => [name, tenths(s)])),
@@ -49,7 +52,7 @@ export const judgeEvent = ({ stage, verdict, scores = null, anchor = null, bar =
 
 /** A final render: `verdict` PASS, FIX, failed, or null when no judge ran; `acceptance` as acceptanceCounts. A failed one also records `failedAt` (percent of subframes captured), `reason` and `page`. */
 export const shipEvent = ({ verdict, renderS, acceptance, failure = null }) => ({
-  cmd: 'ship', verdict: verdict ?? null, renderS: tenths(renderS), acceptance: acceptance ?? null,
+  cmd: 'ship', ...paramsField(), verdict: verdict ?? null, renderS: tenths(renderS), acceptance: acceptance ?? null,
   ...(failure ? { failedAt: failure.pct, reason: failure.reason, page: failure.page } : {}),
 });
 
