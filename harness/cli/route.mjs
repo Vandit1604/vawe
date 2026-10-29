@@ -2,7 +2,7 @@
 // from the table in guides/ROUTING.md; this file holds only the words that point at a row.
 import fs from 'node:fs';
 import path from 'node:path';
-import { TURN_SECONDS_MAX, READ_MARGIN_S } from '../lib/worlds.mjs';
+import { READ_MARGIN_S } from '../lib/worlds.mjs';
 import { HOLD_RULE } from '../lib/read-hold.mjs';
 
 export const ROUTING = 'guides/ROUTING.md';
@@ -52,24 +52,48 @@ const MIN_WORLDS = 4;
 const index = (id) => Number(id.slice(1)) - 1;
 const fullShares = ({ beats }) => beats.map((start, i) => (beats[i + 1] ?? 1) - start);
 
-/**
- * The worlds a type's starter keeps at a length, in film order: [{ id, share }], the shares adding to 1. A world may span TURN_SECONDS_MAX (the world-held limit),
- * so a film keeps the first ceil(length / TURN_SECONDS_MAX) worlds of `order`, at least MIN_WORLDS. A share is the world's share in the full starter, renormalised.
- */
-export function starterWorlds(type, length) {
+// A world must hold its text's read floor and the entrance and exit margin.
+const WORLD_FLOOR_S = HOLD_RULE.floor + READ_MARGIN_S;
+
+/** The first `count` worlds of a type's `order`, in film order: [{ id, share }], the shares adding to 1. A share is the world's share in the full starter, renormalised. */
+export function worldShares(type, count) {
   const entry = STARTERS[type];
   const shares = fullShares(entry);
-  const count = entry.order ? Math.min(entry.order.length, Math.max(MIN_WORLDS, Math.ceil(length / TURN_SECONDS_MAX))) : shares.length;
   const kept = (entry.order?.slice(0, count) ?? shares.map((_, i) => `s${i + 1}`)).map(index).sort((x, y) => x - y);
   const total = kept.reduce((sum, i) => sum + shares[i], 0);
   return kept.map((i) => ({ id: `s${i + 1}`, share: shares[i] / total }));
 }
 
-/** The shortest film a type's starter fits: its smallest MIN_WORLDS-world share must span a text's read floor plus the entrance and exit margin. 0 for a type with no `order`. */
+const STARTERS_DIR = path.join(import.meta.dirname, 'starters');
+
+/** The ids of a starter's worlds that show no text: they need no read time, only the world-held limit. */
+export const wordlessIds = (type) => {
+  const body = fs.readFileSync(path.join(STARTERS_DIR, `${STARTERS[type].file}.html`), 'utf8').split('<body>')[1];
+  return [...body.matchAll(/<(main|section)\b[^>]*data-world="(s\d+)"[\s\S]*?<\/\1>/g)].filter((m) => !/>[^<>]*\w[^<>]*</.test(m[0])).map((m) => m[2]);
+};
+
+const fits = (type, count, length) => {
+  const wordless = wordlessIds(type);
+  return worldShares(type, count).every((w) => wordless.includes(w.id) || w.share * length >= WORLD_FLOOR_S);
+};
+
+/**
+ * The worlds a type's starter keeps at a length: the largest count of the first worlds of `order` (at least MIN_WORLDS) whose shortest world still spans WORLD_FLOOR_S.
+ * More worlds also keep every span nearer TURN_SECONDS_MAX, the world-held limit, which the read floor makes unreachable for a text world: the two limits meet only at 2 s.
+ */
+export function starterWorlds(type, length) {
+  const { order } = STARTERS[type];
+  if (!order) return worldShares(type);
+  let count = MIN_WORLDS;
+  for (let n = MIN_WORLDS + 1; n <= order.length; n += 1) if (fits(type, n, length)) count = n;
+  return worldShares(type, count);
+}
+
+/** The shortest whole-second film a type's starter fits: the MIN_WORLDS worlds each span WORLD_FLOOR_S. 0 for a type with no `order`. */
 export function starterMin(type) {
   if (!STARTERS[type].order) return 0;
-  const smallest = Math.min(...starterWorlds(type, 0).map((w) => w.share));
-  return Math.round((HOLD_RULE.floor + READ_MARGIN_S) / smallest);
+  const wordless = wordlessIds(type);
+  return Math.ceil(WORLD_FLOOR_S / Math.min(...worldShares(type, MIN_WORLDS).filter((w) => !wordless.includes(w.id)).map((w) => w.share)));
 }
 
 /** The spectacle second: the full starter's offset from its last world's start, kept on the last world kept. */

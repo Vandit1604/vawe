@@ -10,7 +10,7 @@ import { starterPage, starterFace } from '../../harness/cli/new.mjs';
 import { starterMin } from '../../harness/cli/route.mjs';
 
 const ROOT = path.resolve(new URL('../../', import.meta.url).pathname);
-const CASES = [['sting', [5]], ['brand launch', [starterMin('brand launch'), 12, 15]], ['story or explainer', [starterMin('story or explainer'), 12, 20, 30]]];
+const CASES = [['sting', [5]], ['brand launch', [starterMin('brand launch'), 12, 15]], ['story or explainer', [starterMin('story or explainer'), 12, 20, 28, 29, 30]]];
 
 const movesPastTheirWorld = () => {
   const root = document.documentElement;

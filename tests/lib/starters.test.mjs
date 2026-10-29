@@ -5,9 +5,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { STARTERS, readRouting, starterWorlds, starterMin, starterType } from '../../harness/cli/route.mjs';
+import { STARTERS, readRouting, starterWorlds, worldShares, wordlessIds, starterMin, starterType } from '../../harness/cli/route.mjs';
 import { newFilm, starterPage, starterFace, typeBeats } from '../../harness/cli/new.mjs';
 import { isStarterPage } from '../../harness/lib/frames-page.mjs';
+import { HOLD_RULE } from '../../harness/lib/read-hold.mjs';
+import { READ_MARGIN_S } from '../../harness/lib/worlds.mjs';
 import { measuredSections } from '../../harness/lib/measured-brief.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
@@ -64,8 +66,8 @@ test('the template Length line is the one owner: the brief and the page say the 
 
 test('a request that names a launch or a story keeps its type from the starter minimum, a bare length of 10 s or less stays a sting', () => {
   const ids = (name, request) => worldIds(newIn(name, { request }).page);
-  assert.deepEqual(ids('zz-k', 'a 9 s launch film for acme'), ['s1', 's2', 's4', 's5', 's7']);
-  assert.deepEqual(ids('zz-l', 'an 12 s explainer of refunds'), ['s1', 's2', 's5', 's6', 's8', 's12']);
+  assert.deepEqual(ids('zz-k', 'a 9 s launch film for acme'), ['s1', 's2', 's4', 's7']);
+  assert.deepEqual(ids('zz-l', 'an 12 s explainer of refunds'), ['s1', 's2', 's6', 's8', 's12']);
   assert.deepEqual(ids('zz-m', 'a 6 s sting'), ['s1', 's2', 's3']);
   assert.deepEqual(ids('zz-n', 'a 9 s film'), ['s1', 's2', 's3']);
   assert.deepEqual(ids('zz-o', 'a 7 s launch film for acme'), ['s1', 's2', 's3']);
@@ -95,6 +97,31 @@ test('the worlds kept grow with the length, in film order, from the first of the
       before = ids;
     }
     assert.equal(before.length, order.length, type);
+  }
+});
+
+test('every kept world that shows text spans the read floor plus margin, from the starter minimum to the whole starter, and the count is the largest that does', () => {
+  const floor = HOLD_RULE.floor + READ_MARGIN_S;
+  for (const type of ['brand launch', 'story or explainer']) {
+    const all = STARTERS[type].order.length;
+    const wordless = wordlessIds(type);
+    const shortest = (worlds, length) => Math.min(...worlds.filter((w) => !wordless.includes(w.id)).map((w) => w.share * length));
+    for (let length = starterMin(type); ; length += 1) {
+      const worlds = starterWorlds(type, length);
+      assert.ok(shortest(worlds, length) >= floor - 1e-9, `${type} ${length} s: shortest text world ${shortest(worlds, length).toFixed(2)} s`);
+      if (worlds.length === all) break;
+      assert.ok(shortest(worldShares(type, worlds.length + 1), length) < floor, `${type} ${length} s keeps ${worlds.length} worlds but ${worlds.length + 1} fit`);
+    }
+  }
+});
+
+test('the starter minimum is the whole-second length at which the first four worlds each span the read floor plus margin', () => {
+  const floor = HOLD_RULE.floor + READ_MARGIN_S;
+  for (const type of ['brand launch', 'story or explainer']) {
+    const wordless = wordlessIds(type);
+    const shortest = (length) => Math.min(...worldShares(type, 4).filter((w) => !wordless.includes(w.id)).map((w) => w.share * length));
+    const min = starterMin(type);
+    assert.ok(shortest(min) >= floor - 1e-9 && shortest(min - 1) < floor, type);
   }
 });
 

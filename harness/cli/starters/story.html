@@ -42,7 +42,7 @@
   .gap .after i { width: 33%; }
   .disc { width: calc(var(--unit) * 0.9); height: calc(var(--unit) * 0.9); border-radius: 50%; background: currentColor; display: grid; place-items: center; align-self: center; justify-self: center; }
   .disc svg { width: 55%; overflow: visible; }
-  .disc polyline { fill: none; stroke: var(--ink); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }
+  .disc polyline { fill: none; stroke: var(--paper); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }
   .claim { display: flex; flex-wrap: wrap; gap: 0 0.3em; max-width: calc(var(--vw) * 0.7); font-size: calc(var(--unit) * 0.22); font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; }
   .rule { display: block; height: calc(var(--unit) * 0.012); width: calc(var(--vw) * 0.5); background: currentColor; transform-origin: left; }
   .dots { display: grid; grid-template-columns: repeat(6, calc(var(--unit) * 0.14)); gap: calc(var(--unit) * 0.06); align-self: center; justify-self: center; }
@@ -92,8 +92,7 @@ $('.thread').animate([{ rotate: '0deg' }, { rotate: '90deg' }], { delay: (beat(w
 const MOVES = {};
 // s1 the problem: rises from below
 MOVES.s1 = (i) => {
-  layer($('h1'), $('.problem .line'), { at: 0.05, band: 'professional', blur: 10, from: '0 0.4em', secondary: { blur: 6 } });
-  enter($('.problem .line:last-child'), { at: when(i, 0.3), band: 'professional', from: '0 0.4em' });
+  layer($('h1'), [...$$('.problem .line')], { at: 0.05, overlap: 0.6, band: 'professional', blur: 10, from: '0 0.4em', secondary: { blur: 6 } });
 };
 
 // s2 the mechanism: the steps arrive from the right and the links draw; the token runs step to step and each step lights as it arrives

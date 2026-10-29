@@ -36,7 +36,7 @@ test('the starter of each film type lists no page ban before any render', async 
   fs.mkdirSync(path.join(dir, 'assets'), { recursive: true });
   try {
     fs.copyFileSync(path.join(ROOT, 'assets', 'fonts', face.font), path.join(dir, 'assets', face.font));
-    for (const [type, length] of [['sting', 5], ...[[starterMin('brand launch'), 12, 15].map((l) => ['brand launch', l])].flat(), ...[starterMin('story or explainer'), 12, 20, 30].map((l) => ['story or explainer', l])]) {
+    for (const [type, length] of [['sting', 5], ...[[starterMin('brand launch'), 12, 15].map((l) => ['brand launch', l])].flat(), ...[starterMin('story or explainer'), 12, 20, 28, 29, 30].map((l) => ['story or explainer', l])]) {
       assert.ok(type in STARTERS, type);
       fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ type, length, title: 'Northwind', face }));
       const { advice } = await readPlan(path.join(dir, 'page.html'));
