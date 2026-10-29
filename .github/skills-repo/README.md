@@ -1,3 +1,21 @@
+<p align="center">
+  <a href="https://vawe.dev"><img alt="vawe skills: six agent skills from a video request to a render" src="assets/banner.png" width="100%"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/vawe-hq/skills/blob/main/LICENSE"><img src="https://img.shields.io/github/license/vawe-hq/skills?style=flat" alt="License"></a>
+  <a href="https://github.com/vawe-hq/skills/stargazers"><img src="https://img.shields.io/github/stars/vawe-hq/skills?style=flat" alt="GitHub stars"></a>
+  <a href="https://github.com/vawe-hq/skills/commits/main"><img src="https://img.shields.io/github/last-commit/vawe-hq/skills?style=flat" alt="Last commit"></a>
+</p>
+
+<p align="center"><b>Agent skills that take a coding agent from a film request to a rendered mp4.</b></p>
+
+<p align="center">
+  <a href="https://vawe.dev">vawe.dev</a> |
+  <a href="https://vawe.dev/docs">Docs</a> |
+  <a href="https://github.com/vawe-hq/vawe">vawe</a>
+</p>
+
 # vawe skills
 
 Six agent skills for [vawe](https://github.com/vawe-hq/vawe), the open-source framework that renders

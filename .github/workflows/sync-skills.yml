@@ -51,6 +51,7 @@ jobs:
           cp .claude-plugin/marketplace.json out/.claude-plugin/marketplace.json
           cp LICENSE out/LICENSE
           cp .github/skills-repo/README.md out/README.md
+          rsync -a --delete .github/skills-repo/assets/ out/assets/
           cd out
           git add -A
           if git diff --cached --quiet; then echo "vawe-hq/skills is current"; exit 0; fi
