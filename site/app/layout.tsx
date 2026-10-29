@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { SITE_URL } from "../lib/site";
+import { HOME } from "../lib/content/home";
 
 // Two faces, two jobs (site/IDENTITY.md): Geist for headings and body, IBM Plex Mono for every number and label.
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -16,6 +17,9 @@ const TITLE = "vawe: open-source HTML to video for AI agents";
 const BLURB =
   "Write one HTML page (CSS, SVG, canvas, three.js) and vawe renders a deterministic video. "
   + "Motion graphics as code for you or an AI agent: a free, Apache-2.0 Remotion alternative.";
+
+// The landing hero film (lib/content/home.ts), 1280x720 and 3.4 MB. og:video wants an absolute URL.
+const HERO_VIDEO = `${SITE_URL}/examples/${HOME.hero.film}.mp4`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -41,7 +45,7 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     siteName: "vawe",
-    images: [{ url: "/assets/og.png", width: 1200, height: 630, alt: "vawe: open-source HTML to video for AI agents" }],
+    videos: [{ url: HERO_VIDEO, secureUrl: HERO_VIDEO, type: "video/mp4", width: 1280, height: 720 }],
   },
   // summary_large_image is the only card that shows a 1200x630 at full width; the default "summary"
   // crops it to a small square and the headline is on the left, so it would crop the claim away.
@@ -49,7 +53,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: TITLE,
     description: BLURB,
-    images: ["/assets/og.png"],
   },
 };
 

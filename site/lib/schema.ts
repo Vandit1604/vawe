@@ -68,7 +68,7 @@ export function softwareApplicationSchema() {
     codeRepository: REPO_URL,
     downloadUrl: REPO_URL,
     isAccessibleForFree: true,
-    image: `${SITE_URL}/assets/og.png`,
+    image: `${SITE_URL}/opengraph-image`,
   };
 }
 
