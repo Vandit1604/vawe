@@ -10,7 +10,7 @@ hero: /blog/page-clock/hero.webp
 heroAlt: "A seek time t enters a virtual clock that sets Date, performance.now, requestAnimationFrame, timers and Math.random, and one identical frame comes out."
 ---
 
-To freeze `Date.now` and seed `Math.random` in a page, inject a small virtual clock before any page script runs. Ours is `core/engine/page-clock.js` in [vawe](https://github.com/Vandit1604/vawe): 75 lines of JavaScript. With it, a page can call `Math.random()` and `Date.now()` and still render the same video twice.
+To freeze `Date.now` and seed `Math.random` in a page, inject a small virtual clock before any page script runs. Ours is `core/engine/page-clock.js` in [vawe](https://github.com/vawe-hq/vawe): 75 lines of JavaScript. With it, a page can call `Math.random()` and `Date.now()` and still render the same video twice.
 
 The rule behind it: every frame is a pure function of `t`, the film time in seconds. Ask for the frame at 4.2 s twice, in any order, and get the same pixels. The clock is one item on our [determinism checklist for headless Chrome](/blog/determinism).
 

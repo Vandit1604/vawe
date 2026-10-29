@@ -57,7 +57,7 @@ We used the same kind of blind choice for the [video component gallery](/blog/si
 
 ## How to use it
 
-The six combos, with their rungs, rejects and evidence, are in `prompts/skill-combos.md` in the [vawe repo](https://github.com/Vandit1604/vawe). The brief template and the `DESIGN.md` advice carry the ladder, so a new film starts from it. To fetch one skill, run `command npx -y ui-skills get <slug>`. The [prompting guide](/docs/prompting) shows how to ask for a film.
+The six combos, with their rungs, rejects and evidence, are in `prompts/skill-combos.md` in the [vawe repo](https://github.com/vawe-hq/vawe). The brief template and the `DESIGN.md` advice carry the ladder, so a new film starts from it. To fetch one skill, run `command npx -y ui-skills get <slug>`. The [prompting guide](/docs/prompting) shows how to ask for a film.
 
 To rerun the test, build the same two frames once per combo and judge them blind for each frame kind.
 

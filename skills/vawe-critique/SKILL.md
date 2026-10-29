@@ -7,7 +7,7 @@ license: Apache-2.0
 
 # vawe-critique: how to look
 
-Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
+Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/vawe-hq/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 
 The author never grades its own film. Run this in a session that has not seen the authoring
 (`VAWE_AGENT=<name>` for a subagent). Default verdict is REJECT; the film passes only when you

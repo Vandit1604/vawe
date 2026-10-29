@@ -10,7 +10,7 @@ hero: /blog/advise-refuse/hero.webp
 heroAlt: "Two columns. Advise: every check prints a line starting with advice and the command continues. Refuse: only a non-deterministic render, a waiver with no reason and a final without approval stop a command."
 ---
 
-An AI agent guardrail should refuse only in two cases: the output is wrong, or the work is lost. In every other case it should advise. In [vawe](https://github.com/Vandit1604/vawe), an agent writes an HTML page and the harness renders it into a film. That rule leaves three refusals: a render that cannot repeat, a waiver with no reason, and a final render without a person's approval. Every other check prints a line that starts with `advice:` and lets the command continue.
+An AI agent guardrail should refuse only in two cases: the output is wrong, or the work is lost. In every other case it should advise. In [vawe](https://github.com/vawe-hq/vawe), an agent writes an HTML page and the harness renders it into a film. That rule leaves three refusals: a render that cannot repeat, a waiver with no reason, and a final render without a person's approval. Every other check prints a line that starts with `advice:` and lets the command continue.
 
 A guardrail can fail in two directions. It can stop the agent when the agent was right. Or it can wave through something expensive that nobody looked at. This post shows where we put the line.
 

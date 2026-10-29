@@ -27,8 +27,8 @@ export type Rival = {
 const READ = "2026-10-03";
 
 export const VAWE_SOURCES: Source[] = [
-  { label: "vawe README", url: "https://github.com/Vandit1604/vawe#readme" },
-  { label: "vawe LICENSE", url: "https://github.com/Vandit1604/vawe/blob/main/LICENSE" },
+  { label: "vawe README", url: "https://github.com/vawe-hq/vawe#readme" },
+  { label: "vawe LICENSE", url: "https://github.com/vawe-hq/vawe/blob/main/LICENSE" },
 ];
 
 export const RIVALS: Rival[] = [

@@ -12,7 +12,7 @@ heroAlt: "Pipeline: captured frames are blended in one ffmpeg pass, dithered and
 
 x264 preset fast encoded our master 25% faster than preset medium. It made a 15% larger file and landed 49 dB PSNR away from it. Preset faster was about twice as quick again, and we rejected it because it banded: a 54 px flat run on a dark ramp.
 
-This benchmark covers that trade. It also covers three more encode decisions from [vawe](https://github.com/Vandit1604/vawe): dither strength, a 10-bit AV1 web copy and a 2 MB size budget for gallery clips. Encoding is the last step of our headless Chrome pipeline. A final captures lossless PNG frames, blends the subframes for [motion blur](/blog/motion-blur), and encodes them.
+This benchmark covers that trade. It also covers three more encode decisions from [vawe](https://github.com/vawe-hq/vawe): dither strength, a 10-bit AV1 web copy and a 2 MB size budget for gallery clips. Encoding is the last step of our headless Chrome pipeline. A final captures lossless PNG frames, blends the subframes for [motion blur](/blog/motion-blur), and encodes them.
 
 <figure>
 

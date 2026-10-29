@@ -70,7 +70,7 @@ The `vawe frames` command renders one still for each `data-world` element, with 
 
 ## Try it
 
-From a checkout of [vawe](https://github.com/Vandit1604/vawe), render one still for each beat of the example page:
+From a checkout of [vawe](https://github.com/vawe-hq/vawe), render one still for each beat of the example page:
 
 ```bash
 bin/vawe frames films/examples/colour-sting/page.html

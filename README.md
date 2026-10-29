@@ -14,7 +14,7 @@ or [llms.txt](https://vawe.dev/llms.txt).
 ## Quickstart
 
 ```bash
-git clone https://github.com/Vandit1604/vawe.git && cd vawe
+git clone https://github.com/vawe-hq/vawe.git && cd vawe
 npm install                                  # Node 22+; ffmpeg must be on PATH
 npx puppeteer browsers install chrome        # bin/vawe doctor prints this and every other missing tool
 bin/vawe new hello --request "a 10 s sting for a coffee brand"
@@ -110,8 +110,8 @@ finds the seven ways a seeked CSS animation breaks without an error. More: [vawe
   `SKILL.md`. The skills run inside a vawe checkout (see Quickstart). Install them in two ways:
 
   ```bash
-  npx skills add Vandit1604/vawe
-  claude plugin marketplace add Vandit1604/vawe
+  npx skills add vawe-hq/vawe
+  claude plugin marketplace add vawe-hq/vawe
   claude plugin install vawe@vawe-skills
   ```
 

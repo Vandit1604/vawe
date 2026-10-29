@@ -12,7 +12,7 @@ heroAlt: "Table comparing the draft path and the final path: JPEG against lossle
 
 A video render that takes one Puppeteer screenshot per frame spends most of its time in the screenshot. Capture of one 20 s film fell from 140 s to 47 s when we gave each worker its own headless Chrome. JPEG capture, GPU compositing and a decode fix made drafts cheaper too.
 
-This post lists each change in [vawe](https://github.com/Vandit1604/vawe), what it gained and how to check it. It also lists the two changes we partly took back. A draft is the inner loop of an agent: edit the page, render a few seconds, look, repeat. The final render keeps slower settings.
+This post lists each change in [vawe](https://github.com/vawe-hq/vawe), what it gained and how to check it. It also lists the two changes we partly took back. A draft is the inner loop of an agent: edit the page, render a few seconds, look, repeat. The final render keeps slower settings.
 
 <figure>
 

@@ -12,7 +12,7 @@ heroAlt: "One animation runs from 0 to 1 second on a 5 second axis. After a seek
 
 To seek a CSS animation in Puppeteer, pause it and set its `currentTime`. Forward seeks work at once. Backward seeks fail in a quiet way. `document.getAnimations()` drops a finished animation with `fill: none`. A seek back to 0.25 s then finds nothing to move.
 
-We hit four bugs of this kind while we built [vawe](https://github.com/Vandit1604/vawe), which renders a web page to video one screenshot at a time. This post gives the fix for each. The result is one function, `seekTo(t)`, that puts every CSS keyframe, CSS transition, `element.animate()` call and SVG `<animate>` at time `t`, in any order. It lives in `core/engine/page-seek.js` and is one item on our [determinism checklist](/blog/determinism).
+We hit four bugs of this kind while we built [vawe](https://github.com/vawe-hq/vawe), which renders a web page to video one screenshot at a time. This post gives the fix for each. The result is one function, `seekTo(t)`, that puts every CSS keyframe, CSS transition, `element.animate()` call and SVG `<animate>` at time `t`, in any order. It lives in `core/engine/page-seek.js` and is one item on our [determinism checklist](/blog/determinism).
 
 ## What the bug looks like
 

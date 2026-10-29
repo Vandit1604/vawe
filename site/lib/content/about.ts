@@ -98,7 +98,7 @@ export const ABOUT = {
       id: "who",
       title: "Who makes it",
       className: "ab-who",
-      paragraphs: [[`${OWNER.name} owns the repository and made the first commit. GitHub profile: `, { text: "github.com/Vandit1604", href: OWNER.url }, "."]],
+      paragraphs: [[`${OWNER.name} made the first commit and runs the vawe-hq organization, which owns the repository. GitHub profile: `, { text: "github.com/Vandit1604", href: OWNER.url }, "."]],
     },
     {
       id: "help",

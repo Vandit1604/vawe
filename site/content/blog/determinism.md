@@ -16,7 +16,7 @@ Render one web page twice and compare the frames. They should match. In headless
 
 This matters for two reasons. A person who sees a wrong frame cannot tell if the page or the renderer is at fault. An AI agent cannot tell either. A renderer that gives the same frame every time removes one of the two causes.
 
-We built [vawe](https://github.com/Vandit1604/vawe), a renderer that turns an HTML page into an MP4. While we did, we found six sources of drift and one bug that looked like drift. Each section gives the cause, the fix and the test. The first two causes are in the page. The other four are in the browser.
+We built [vawe](https://github.com/vawe-hq/vawe), a renderer that turns an HTML page into an MP4. While we did, we found six sources of drift and one bug that looked like drift. Each section gives the cause, the fix and the test. The first two causes are in the page. The other four are in the browser.
 
 ![Bar chart of frames that differed between two renders, by cause.](/blog/determinism/hero.webp)
 

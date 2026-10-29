@@ -104,7 +104,7 @@ Word start passes by 0.3 ms, at 99% of its budget, so a small code change can ti
 
 In later sessions, agents used `look --vs` and `zoom --vs` 10 times and `see --vs` 3 times. The default reference worked. Before, nobody reused the reference after stage 2. That counts use. It does not measure quality.
 
-We have no score after the change. We did not rerun that film, and we will not invent a number. The flash, luma and read-count figures come from one trace of one session, so read them as an example and not as a rate. The next test is whether films made with these tools pass more often, against the ranges in [our motion graphics benchmark](/blog/quality-bar). The [docs on reading your film](/docs/reading-your-film) show the tools in the loop. The code is in the [vawe repo](https://github.com/Vandit1604/vawe).
+We have no score after the change. We did not rerun that film, and we will not invent a number. The flash, luma and read-count figures come from one trace of one session, so read them as an example and not as a rate. The next test is whether films made with these tools pass more often, against the ranges in [our motion graphics benchmark](/blog/quality-bar). The [docs on reading your film](/docs/reading-your-film) show the tools in the loop. The code is in the [vawe repo](https://github.com/vawe-hq/vawe).
 
 ## FAQ
 

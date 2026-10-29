@@ -12,7 +12,7 @@ heroAlt: "Eight capture slices: six have finish markers, one is marked lost afte
 
 Our worst render died at 97%, after 20,768 of 21,504 subframes. The only record of it was 3.7 GB of orphaned PNG files. Nothing told us which film they belonged to, so nothing reused them. In one later session, failed finals cost 49 minutes, 45% of the session.
 
-This post covers two fixes in [vawe](https://github.com/Vandit1604/vawe). The first lets a failed Puppeteer render resume. The second is a watchdog that turns a silent hang into an error that names the stuck step. A final takes about 16 minutes. The renderer cuts the film into slices, captures each slice on a page in headless Chrome, and encodes at the end. Slices run in parallel, as in [speed up Puppeteer screenshots](/blog/fast-drafts).
+This post covers two fixes in [vawe](https://github.com/vawe-hq/vawe). The first lets a failed Puppeteer render resume. The second is a watchdog that turns a silent hang into an error that names the stuck step. A final takes about 16 minutes. The renderer cuts the film into slices, captures each slice on a page in headless Chrome, and encodes at the end. Slices run in parallel, as in [speed up Puppeteer screenshots](/blog/fast-drafts).
 
 ## What we found
 

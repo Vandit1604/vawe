@@ -10,7 +10,7 @@ hero: /blog/new-asks/hero.webp
 heroAlt: "Decision flow of vawe new: unanswered subject, message or show prints the questions and writes nothing; answers or the defaults flag write the page and brief."
 ---
 
-To make an AI agent ask clarifying questions before it works, put the questions in the first command of the task. The command prints the open questions with a reason and an example for each, writes no files, and exits 0. The agent answers in a file or asks its human, runs the command again, and only then gets a starter. We built this into `vawe new`, the first command of every [vawe](https://github.com/Vandit1604/vawe) film, on 2026-10-01.
+To make an AI agent ask clarifying questions before it works, put the questions in the first command of the task. The command prints the open questions with a reason and an example for each, writes no files, and exits 0. The agent answers in a file or asks its human, runs the command again, and only then gets a starter. We built this into `vawe new`, the first command of every [vawe](https://github.com/vawe-hq/vawe) film, on 2026-10-01.
 
 Before that date `vawe new` filled every open detail with a default and wrote a page and a `brief.md` at once. The agent got something that rendered. Then it built a whole film around a subject, message and look it had guessed. Those first decisions shape every shot after them, so a wrong guess there costs the most. We called the result a template film.
 

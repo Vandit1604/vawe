@@ -12,7 +12,7 @@ heroAlt: "Schematic: three subframes of a fast circle show as three separate gho
 
 A browser has no shutter, so CSS cannot give an animation real motion blur in a video. To get it, capture several subframes for each output frame and blend them. We pick the count for each frame from how far things move in that frame. Neighbouring subframes sit at most 3 px apart, so a fast frame gets up to 32 subframes and a still frame gets one.
 
-This post covers how we choose the count, how the blend works and what it costs. It also covers one encode bug that dropped frames. The renderer is [vawe](https://github.com/Vandit1604/vawe), where every subframe is a screenshot.
+This post covers how we choose the count, how the blend works and what it costs. It also covers one encode bug that dropped frames. The renderer is [vawe](https://github.com/vawe-hq/vawe), where every subframe is a screenshot.
 
 <figure>
 

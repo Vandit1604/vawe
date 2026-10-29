@@ -81,7 +81,7 @@ vawe is an open-source renderer that does the same seek loop and also owns the c
 Install it. You need Node 22 or newer, git and ffmpeg:
 
 ```bash
-git clone https://github.com/Vandit1604/vawe.git
+git clone https://github.com/vawe-hq/vawe.git
 cd vawe && npm install
 bin/vawe doctor
 ```

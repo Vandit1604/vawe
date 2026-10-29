@@ -22,8 +22,9 @@ const NAV = [
 // Exported so Footer.tsx points at the same two URLs instead of re-typing them.
 export const DOCS_URL = "/docs";
 
-// The engine repository, public since 2026-09-16.
-export const REPO_URL = "https://github.com/Vandit1604/vawe";
+import { REPO_URL } from "../../lib/site";
+
+export { REPO_URL };
 
 export function Header({ active, overlay = false }: { active?: string; overlay?: boolean }) {
   return (

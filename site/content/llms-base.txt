@@ -1,11 +1,11 @@
 # Vawe
 > Open-source HTML to video framework for programmatic video and motion graphics as code. Vawe renders a deterministic mp4 from one HTML page, so you or an AI coding agent can write a film the way you write anything else, and re-render it the day the numbers change. A free alternative to Remotion, HyperFrames and Motion Canvas.
 
-A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The renderer seeks it frame by frame under a virtual clock and encodes an mp4. Source and the page contract: https://github.com/Vandit1604/vawe (AGENTS.md).
+A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The renderer seeks it frame by frame under a virtual clock and encodes an mp4. Source and the page contract: https://github.com/vawe-hq/vawe (AGENTS.md).
 
 ## Install and use (for agents)
 - Full guide as one Markdown file: https://vawe.dev/ai-agents.md. Everything in one text file: https://vawe.dev/llms-full.txt.
-- Install from source (no npm package, no hosted API, no account): `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
+- Install from source (no npm package, no hosted API, no account): `git clone https://github.com/vawe-hq/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 - Make a film: `bin/vawe new hello --request "<the ask>"`, then `bin/vawe dev films/hello/page.html` (draft), `bin/vawe critique films/hello/page.html` (in a fresh session), then the owner runs `bin/vawe approve films/hello/page.html` and `bin/vawe ship films/hello/page.html` renders the final mp4 in out/.
 - The page contract: one `films/<name>/page.html`, `<meta name="duration" content="seconds">`, time is the seek (CSS keyframes, Web Animations or `window.seek(t)`), no timers or unseeded random, relative assets, `<audio>` tags for sound. Read AGENTS.md in the repo first.
 

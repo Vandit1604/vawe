@@ -10,7 +10,7 @@ hero: /blog/run-logs/hero.webp
 heroAlt: "One JSONL log line per verb call, with stage, duration, exit code, slot wait and images, feeding a runs report for time, failures and the draft series."
 ---
 
-To add observability to an AI agent workflow, make the tool log every call. Then you can answer three questions without asking the agent. Where did the time go? What failed, and why? Did each draft fix what the last one flagged? In [vawe](https://github.com/Vandit1604/vawe) the log is one JSONL line per command in `out/<film>.runs.jsonl`, and a report command reads it.
+To add observability to an AI agent workflow, make the tool log every call. Then you can answer three questions without asking the agent. Where did the time go? What failed, and why? Did each draft fix what the last one flagged? In [vawe](https://github.com/vawe-hq/vawe) the log is one JSONL line per command in `out/<film>.runs.jsonl`, and a report command reads it.
 
 We started on 2026-10-04. We asked an agent to log how long each step of a 6.2-minute task took. It returned a table that summed to about 18 minutes. It had run `date` once, typed the other timestamps by hand and guessed its own thinking time. It said so, but the numbers still looked like measurements. A language model has no clock while it thinks. It sees time only in tool output. So we wrote a rule: ask an agent what it saw and decided, never how long something took.
 

@@ -16,7 +16,7 @@ We track one number: everything an agent reads before it writes the first layer 
 
 ## What counts as words read first
 
-`harness/dev/bench.mjs` counts the words an author reads before the first layer of a [vawe](https://github.com/Vandit1604/vawe) film. Five files count:
+`harness/dev/bench.mjs` counts the words an author reads before the first layer of a [vawe](https://github.com/vawe-hq/vawe) film. Five files count:
 
 | File | Words at the time of writing |
 |---|---|

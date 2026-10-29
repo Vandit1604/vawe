@@ -4,7 +4,7 @@
 export const SITE_NAME = "vawe";
 export const SITE_ALT_NAMES = ["Vawe", "vawe.dev"];
 export const SITE_URL = "https://vawe.dev";
-export const REPO_URL = "https://github.com/Vandit1604/vawe";
+export const REPO_URL = "https://github.com/vawe-hq/vawe";
 export const SITE_DESCRIPTION =
   "vawe is an open source framework that renders one HTML page into a video, so a developer or an AI agent can write motion graphics as code.";
 export const CONTACT_URL = `${REPO_URL}/issues`;

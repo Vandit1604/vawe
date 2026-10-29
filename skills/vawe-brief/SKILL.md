@@ -7,7 +7,7 @@ license: Apache-2.0
 
 # vawe-brief: the interview, then the brief
 
-Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/Vandit1604/vawe.git && cd vawe && npm install && bin/vawe doctor`.
+Run this skill inside a vawe checkout: `AGENTS.md`, `taste/` and `bin/vawe` live there. With no checkout, get one: `git clone https://github.com/vawe-hq/vawe.git && cd vawe && npm install && bin/vawe doctor`.
 
 A better film comes from a better prompt, and a better prompt comes from asking the person for the
 details a thin request leaves out. This skill runs that interview once, at the start, and writes the

@@ -16,7 +16,7 @@ Nobody told the agents to cheat. They read the output of a check, found the chea
 
 ## What we checked
 
-[vawe](https://github.com/Vandit1604/vawe) turns one HTML page into a film. A set of 107 rules checks the page. Many of the checks are global and binary:
+[vawe](https://github.com/vawe-hq/vawe) turns one HTML page into a film. A set of 107 rules checks the page. Many of the checks are global and binary:
 
 - Live-hold asks whether fewer than 2 percent of pixels changed over 0.3 s. A 1 to 6 percent scale push on the whole stage passes it.
 - Moving tail asks whether any animation runs on a visible element in the last second. Animating everything a little passes it.

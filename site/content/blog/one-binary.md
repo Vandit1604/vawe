@@ -10,7 +10,7 @@ hero: /blog/one-binary/hero.webp
 heroAlt: "Before and after diagram: a 156 line Makefile with routers and scripts becomes one command, bin/vawe, with a 19 line Makefile that only forwards."
 ---
 
-How do you design a command-line tool for an AI agent? Give it one entry point, one verb for each step, and an error that fits on one line. Our agents ran 5,520 shell commands in one audit window, and 443 failed. That is about one in twelve. This post lists the rules behind `bin/vawe`, the one command that drives [vawe](https://github.com/Vandit1604/vawe), and what each rule did.
+How do you design a command-line tool for an AI agent? Give it one entry point, one verb for each step, and an error that fits on one line. Our agents ran 5,520 shell commands in one audit window, and 443 failed. That is about one in twelve. This post lists the rules behind `bin/vawe`, the one command that drives [vawe](https://github.com/vawe-hq/vawe), and what each rule did.
 
 ![A 156-line Makefile with four routers becomes one command and a 19-line Makefile.](/blog/one-binary/hero.webp "Before and after: one entry point replaces a Makefile, four routers and loose scripts.")
 
