@@ -15,8 +15,8 @@ export function proxy(request: NextRequest) {
   }
 
   const slug = (match[1] ?? '').replace(/^index$/, '').replace(/\/$/, '');
-  // Behind the site, nextUrl and Host carry the public https://vawe.dev origin, so a rewrite there leaves
-  // the box (EPROTO on this plain-HTTP port, or a 301 from the edge). Target this server's own address.
+  // Behind the site, x-forwarded-proto: https makes nextUrl https on this plain-HTTP port, so a rewrite to it
+  // is proxied over TLS and fails (EPROTO). Target this server's own plain-HTTP address.
   const own = `http://${process.env.HOSTNAME || '127.0.0.1'}:${process.env.PORT || '3000'}`;
   const url = new URL(slug ? `/docs-md/${slug}` : '/docs-md', own);
   url.search = request.nextUrl.search;

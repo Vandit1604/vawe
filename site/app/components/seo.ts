@@ -11,7 +11,7 @@ import { isRendered, mdUrlOf } from "../../lib/md/routes.mjs";
 // No `images` field here on purpose: every route this helper serves has a sibling
 // `opengraph-image.tsx` (see app/components/ogCard.tsx) that Next reads and injects the og:image /
 // twitter:image tags from automatically. Setting an image here too would just print a second,
-// competing tag. The homepage and every route without its own card take the root `app/opengraph-image.tsx`; the homepage sets
+// competing tag. Only the homepage and routes that set no openGraph take the root `app/opengraph-image.tsx`; a route built with this helper needs its own card. The homepage sets
 // its own openGraph/twitter block directly in app/layout.tsx instead of calling this helper.
 export function pageMetadata(opts: {
   title: string;

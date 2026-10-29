@@ -107,7 +107,7 @@ finds the seven ways a seeked CSS animation breaks without an error. More: [vawe
   docs. Claude Code reads `CLAUDE.md`, which points to `AGENTS.md`.
 - `skills/` holds the skills an agent loads per stage: `html-to-video` (start here), `vawe-brief`,
   `vawe-page`, `vawe-critique`, `vawe-transitions`, `vawe-reference`. Any agent can read a
-  `SKILL.md`. The skills run inside a vawe checkout (see Quickstart). Install them in three ways:
+  `SKILL.md`. The skills run inside a vawe checkout (see Quickstart). Install them in two ways:
 
   ```bash
   npx skills add Vandit1604/vawe

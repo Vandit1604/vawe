@@ -18,7 +18,7 @@ const BLURB =
   "Write one HTML page (CSS, SVG, canvas, three.js) and vawe renders a deterministic video. "
   + "Motion graphics as code for you or an AI agent: a free, Apache-2.0 Remotion alternative.";
 
-// The landing hero film (lib/content/home.ts), 1280x720 and 3.4 MB. og:video wants an absolute URL.
+// The landing hero film (lib/content/home.ts); the size below is that file's. og:video wants an absolute URL.
 const HERO_VIDEO = `${SITE_URL}/examples/${HOME.hero.film}.mp4`;
 
 export const metadata: Metadata = {
