@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { ImageResponse } from "next/og";
 
@@ -70,6 +71,21 @@ const TOKENS = {
   bg2: "#0a0a0a",
 };
 
+// Satori draws an <img> from a data URI, not a currentColor SVG, so the lockup is read white (one colour, DESIGN.md "Logo").
+let lockupCache: string | null = null;
+function lockupDataUri() {
+  if (lockupCache) return lockupCache;
+  const svg = readFileSync(path.join(process.cwd(), "public/assets/vawe-lockup.svg"), "utf8").replaceAll("currentColor", TOKENS.ink);
+  lockupCache = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+  return lockupCache;
+}
+
+const LOCKUP_RATIO = 217 / 56;
+
+function Lockup({ height }: { height: number }) {
+  return <img src={lockupDataUri()} alt="vawe" width={Math.round(height * LOCKUP_RATIO)} height={height} style={{ display: "flex" }} />;
+}
+
 function clamp(text: string, max: number) {
   if (text.length <= max) return text;
   return `${text.slice(0, max - 1).trimEnd()}…`;
@@ -102,9 +118,9 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
         color: TOKENS.ink,
       }}
     >
-      {/* Masthead: the wordmark, quiet, and the path it belongs to. */}
+      {/* Masthead: the lockup, quiet, and the path it belongs to. */}
       <div style={{ display: "flex", alignItems: "center", padding: "40px 64px 0 64px" }}>
-        <div style={{ fontSize: 19, fontWeight: 600, letterSpacing: "-0.02em" }}>vawe</div>
+        <Lockup height={28} />
         <div style={{ display: "flex", marginLeft: "auto", fontFamily: "IBM Plex Mono", fontSize: 14, color: TOKENS.muted, letterSpacing: "0.02em" }}>
           {`vawe.dev${urlPath}`}
         </div>
@@ -213,8 +229,7 @@ export async function staticOgImage(opts: { tag: string; title: string; descript
   return new ImageResponse(renderOgCard({ ...opts, panel: null }), { ...OG_SIZE, fonts });
 }
 
-// The site-wide default card: the wordmark as text and one plain line. No logo mark, so it stands
-// through a logo change.
+// The site-wide default card: the lockup and one plain line.
 export async function brandOgImage(line: string) {
   const fonts = await loadOgFonts();
   return new ImageResponse(
@@ -232,7 +247,7 @@ export async function brandOgImage(line: string) {
           color: TOKENS.ink,
         }}
       >
-        <div style={{ display: "flex", fontSize: 200, fontWeight: 600, lineHeight: 1, letterSpacing: "-0.05em" }}>vawe</div>
+        <Lockup height={200} />
         <div style={{ display: "flex", marginTop: 32, maxWidth: 880, fontSize: 36, lineHeight: 1.35, color: TOKENS.ink2, fontWeight: 400 }}>
           {line}
         </div>
