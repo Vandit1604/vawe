@@ -3,8 +3,9 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { ImageResponse } from "next/og";
 
-// ONE TEMPLATE, NOT THREE COPIES. Every opengraph-image.tsx route (effects, blocks, the static
-// pages) calls renderOgCard with its own text and, where one exists, its own real content panel.
+// ONE TEMPLATE, NOT THREE COPIES. The generated cards (easing curves, video components, /vs pages) call
+// renderOgCard with their own text and, where one exists, a code panel. The main pages and the blog posts serve
+// pre-rendered brand-art cards from public/og/ instead (prerenderedOg, written by scripts/site/og-cards.mjs).
 // The card is built with next/og's ImageResponse (Satori), which needs actual font BYTES. Satori
 // reads ttf, otf and woff, and NOT woff2, which is the only format the site's variable faces ship.
 //
@@ -91,10 +92,7 @@ function clamp(text: string, max: number) {
   return `${text.slice(0, max - 1).trimEnd()}…`;
 }
 
-export type OgPanel =
-  | { kind: "image"; dataUri: string; alt: string }
-  | { kind: "code"; text: string }
-  | null;
+export type OgPanel = { kind: "code"; text: string } | null;
 
 // The panel is the one place this composition nests a box inside the padded content area, so it is
 // the one place the concentric-radius rule (outer = inner + padding) actually applies: the panel sits
@@ -179,41 +177,25 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
 
         {hasPanel && (
           <div style={{ display: "flex", marginLeft: 48, width: 544, alignItems: "flex-start" }}>
-            {panel.kind === "image" ? (
-              <img
-                src={panel.dataUri}
-                alt={panel.alt}
-                width={544}
-                height={306}
-                style={{
-                  width: 544,
-                  height: 306,
-                  objectFit: "cover",
-                  borderRadius: PANEL_RADIUS,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  width: 544,
-                  height: 400,
-                  padding: 28,
-                  background: TOKENS.bg2,
-                  borderRadius: PANEL_RADIUS,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  fontFamily: "IBM Plex Mono",
-                  fontSize: 15,
-                  lineHeight: 1.7,
-                  color: TOKENS.ink2,
-                  whiteSpace: "pre",
-                  overflow: "hidden",
-                }}
-              >
-                {clamp(panel.text, 420)}
-              </div>
-            )}
+            <div
+              style={{
+                display: "flex",
+                width: 544,
+                height: 400,
+                padding: 28,
+                background: TOKENS.bg2,
+                borderRadius: PANEL_RADIUS,
+                border: "1px solid rgba(255,255,255,0.08)",
+                fontFamily: "IBM Plex Mono",
+                fontSize: 15,
+                lineHeight: 1.7,
+                color: TOKENS.ink2,
+                whiteSpace: "pre",
+                overflow: "hidden",
+              }}
+            >
+              {clamp(panel.text, 420)}
+            </div>
           </div>
         )}
         </div>
@@ -227,4 +209,11 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
 export async function staticOgImage(opts: { tag: string; title: string; description: string; path: string }) {
   const fonts = await loadOgFonts();
   return new ImageResponse(renderOgCard({ ...opts, panel: null }), { ...OG_SIZE, fonts });
+}
+
+// A share card rendered ahead of time from assets/brand-art (scripts/site/og-cards.mjs), served as it is.
+// PNG, because LinkedIn does not read WebP for og:image.
+export function prerenderedOg(file: string) {
+  const png = readFileSync(path.join(process.cwd(), "public", file));
+  return new Response(new Uint8Array(png), { headers: { "Content-Type": "image/png" } });
 }
