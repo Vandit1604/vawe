@@ -4,5 +4,5 @@ export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default function Image() {
-  return prerenderedOg("/og/remotion-alternatives.png");
+  return prerenderedOg("/remotion-alternatives");
 }

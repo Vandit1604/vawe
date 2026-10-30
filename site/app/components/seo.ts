@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { isRendered, mdUrlOf } from "../../lib/md/routes.mjs";
 import { SITE_URL } from "../../lib/site";
 
-// The loops are `vawe dev` drafts: half of the 1200x630 card. Next does not resolve og:video against metadataBase,
+// The loops are `vawe dev` drafts, 960x504: half the 1920x1008 frame a 1200:630 page renders at. Next does not resolve og:video against metadataBase,
 // so the URL is absolute, as on the home page.
 const LOOP_SIZE = { width: 960, height: 504 } as const;
 

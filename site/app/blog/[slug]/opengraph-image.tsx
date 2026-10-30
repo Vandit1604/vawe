@@ -13,5 +13,5 @@ export function generateStaticParams() {
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (!postBySlug(slug)) notFound();
-  return prerenderedOg(`/og/blog/${slug}.png`);
+  return prerenderedOg(`/blog/${slug}`);
 }

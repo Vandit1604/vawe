@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { ImageResponse } from "next/og";
 
@@ -211,9 +211,10 @@ export async function staticOgImage(opts: { tag: string; title: string; descript
   return new ImageResponse(renderOgCard({ ...opts, panel: null }), { ...OG_SIZE, fonts });
 }
 
-// A share card rendered ahead of time from assets/brand-art (scripts/site/og-cards.mjs), served as it is.
+// A share card rendered ahead of time from assets/brand-art: public/og/<route>.png, written by scripts/site/og-cards.mjs.
 // PNG, because LinkedIn does not read WebP for og:image.
-export function prerenderedOg(file: string) {
-  const png = readFileSync(path.join(process.cwd(), "public", file));
-  return new Response(new Uint8Array(png), { headers: { "Content-Type": "image/png" } });
+export function prerenderedOg(route: string) {
+  const file = path.join(process.cwd(), "public/og", `${route}.png`);
+  if (!existsSync(file)) throw new Error(`no share card for ${route}: run node scripts/site/og-cards.mjs and commit site/public/og`);
+  return new Response(new Uint8Array(readFileSync(file)), { headers: { "Content-Type": "image/png" } });
 }

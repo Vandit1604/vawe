@@ -2,22 +2,16 @@ import fs from "node:fs";
 import path from "node:path";
 import { Marked, type Tokens } from "marked";
 import { smart, smartHtml } from "./typo.mjs";
+import { SECTIONS, TOPICS, parseFrontMatter } from "./blog-front-matter.mjs";
 import added from "./blog-added.json";
 import { SITE_URL } from "./site";
 
-export { smart };
+export { smart, SECTIONS };
 
 // The blog's one owner: reads content/blog/*.md at build time, checks the front matter and renders
 // the Markdown. Every blog route, the sitemap and the RSS feed read posts through this file.
 
 export const BLOG_URL = `${SITE_URL}/blog`;
-
-export const SECTIONS = [
-  { id: "how-to", label: "How-to", intro: "Step-by-step guides that end with a file you can run: render HTML to a video, export an animation, drive vawe from an agent." },
-  { id: "rendering", label: "Rendering", intro: "Headless Chrome, Puppeteer, speed and repeatable frames: what broke when we rendered a page to video, and what fixed it." },
-  { id: "agents", label: "Agents", intro: "What an AI agent gets wrong on its own, and the commands, defaults, checks and judges that make it succeed." },
-  { id: "motion-sound", label: "Motion and sound", intro: "Easing, transitions, blur, depth and audio: how we turned a good film into measured rules." },
-] as const;
 
 export const BLOG_TITLE = "vawe blog: building agent-native motion graphics";
 export const BLOG_DESCRIPTION =
@@ -64,29 +58,6 @@ const addedAt = added as Record<string, string>;
 
 function fail(file: string, msg: string): never {
   throw new Error(`content/blog/${file}: ${msg}`);
-}
-
-function unquote(raw: string) {
-  const v = raw.trim();
-  const q = v[0];
-  if (q === '"' || q === "'") {
-    const end = v.lastIndexOf(q);
-    if (end > 0) return v.slice(1, end).replace(/\\"/g, '"');
-  }
-  return v.replace(/\s+#.*$/, "").trim();
-}
-
-function parseFrontMatter(file: string, src: string) {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(src);
-  if (!m) fail(file, "no front matter between --- fences");
-  const data: Record<string, string> = {};
-  for (const line of m[1].split(/\r?\n/)) {
-    if (!line.trim() || line.trim().startsWith("#")) continue;
-    const i = line.indexOf(":");
-    if (i < 1) fail(file, `front matter line is not "key: value": ${line}`);
-    data[line.slice(0, i).trim()] = unquote(line.slice(i + 1));
-  }
-  return { data, body: m[2] };
 }
 
 const list = (v?: string) => (v ? v.split(",").map((s) => s.trim()).filter(Boolean) : []);
@@ -216,6 +187,7 @@ function loadPost(file: string): Post {
   if (data.featuredOrder && !/^\d+$/.test(data.featuredOrder)) fail(file, `featuredOrder must be a whole number, got "${data.featuredOrder}"`);
   const section = SECTIONS.find((s) => s.id === data.section);
   if (!section) fail(file, `section must be one of ${SECTIONS.map((s) => s.id).join(", ")}, got "${data.section}"`);
+  if (!(TOPICS as readonly string[]).includes(data.topic)) fail(file, `topic must be one of ${TOPICS.join(", ")}, got "${data.topic ?? ""}" (it picks the share card's scene)`);
   let hero: Post["hero"];
   if (data.hero) {
     if (!fs.existsSync(path.join(PUBLIC, data.hero))) fail(file, `hero ${data.hero} is not in site/public`);

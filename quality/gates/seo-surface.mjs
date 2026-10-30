@@ -15,7 +15,8 @@
 // violation is the whole failure mode.
 //
 //   1. every route under site/app/ that renders a page has a canonical
-//   2. every detail route (every route but home) has its own opengraph-image.tsx
+//   2. every detail route (every route but home) has its own opengraph-image.tsx, and every pre-rendered
+//      share card it serves exists (a stale card or a missing loop only warns)
 //   3. the sitemap (site/lib/site-pages.json, the file site/app/sitemap.ts reads) matches the real
 //      routes
 //   4. every JSON-LD builder in site/lib/schema.ts parses and carries the fields its schema.org type
@@ -38,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { DOCS_ORIGIN } from '../../site/lib/docs-origin.mjs';
 import { docsDir } from '../../scripts/site/docs-dir.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { ogInputs, readStamp } from '../../scripts/site/og-inputs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SITE_APP = path.join(ROOT, 'site/app');
@@ -106,6 +108,25 @@ for (const p of pageFiles) {
       fix: `add ${rel(ogFile)} (see site/app/components/ogCard.tsx for the shared card renderer)`,
     });
   }
+}
+
+// ===== 2b. every share card is rendered and current ===============================================
+// The main routes and the posts serve pre-rendered PNGs (scripts/site/og-cards.mjs): a missing one is a 500 on og:image.
+// A stale one still serves, so it only advises; so does a missing loop, since og:video is left out without its file.
+{
+  const RENDER = 'node scripts/site/og-cards.mjs';
+  const { cards, loops, unused, problems } = ogInputs(ROOT);
+  const stamp = readStamp(ROOT);
+  for (const p of problems) f.fail('seo-og-inputs', p, { fix: 'give the route a PAGES entry, or the post a section and topic that exist' });
+  for (const c of cards) {
+    if (!fs.existsSync(path.join(ROOT, c.file))) f.fail('seo-og-card-missing', `${c.file} is missing, so its og:image route errors`, { fix: RENDER });
+    else if (stamp[c.file] !== c.hash) f.warn('seo-og-card-stale', `${c.file} was rendered from other inputs than its page or post has now`, { fix: RENDER });
+  }
+  for (const l of loops) {
+    if (!fs.existsSync(path.join(ROOT, l.file))) f.warn('seo-og-loop-missing', `${l.route} has a loop in cards.js but no ${l.file}, so it has no og:video`, { fix: `${RENDER} --loops` });
+    else if (stamp[l.file] !== l.hash) f.warn('seo-og-loop-stale', `${l.file} was rendered from other inputs than its page has now in cards.js`, { fix: `${RENDER} --loops` });
+  }
+  for (const r of unused) f.warn('seo-og-page-unused', `${r} has a card in assets/brand-art/cards.js PAGES but no route with an opengraph-image.tsx`, { fix: 'remove the entry, or fix its route' });
 }
 
 // ===== 3. the sitemap matches the routes =========================================================
