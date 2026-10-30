@@ -31,3 +31,11 @@ body[data-format="square"] .copy { top: 72px; left: 72px; transform: none; }
 body[data-format="square"] { --mark: 48px; --h1: 80px; --sub: 32px; --mono: 28px; }
 body[data-format="og"] { --h1: 92px; --sub: 40px; --mono: 34px; --mark: 64px; --measure: 940px; }
 body[data-format="post"] { --h1: 80px; --measure: 980px; --sub: 34px; --mono: 32px; --mark: 60px; }
+
+body[data-format="card"] { --h1: 104px; --sub: 46px; --mono: 36px; --mark: 66px; --measure: 900px; }
+body[data-format="card"][data-kind="post"] { --h1: 100px; --measure: 860px; }
+body[data-format="card"] .copy { left: 112px; }
+.kicker { margin: 0 0 0.7em; font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 34px; letter-spacing: 0.06em; text-transform: uppercase; }
+[data-ink="a"] .kicker { color: var(--paper); }
+[data-ink="b"] .kicker { color: var(--blue); }
+body[data-format="card"] h1 { text-wrap: balance; }
