@@ -67,23 +67,11 @@ COPY site/ ./
 # So run the prebuild explicitly and then a plain `next build`, which takes the `.next` default from
 # next.config.mjs. `npm run build` would re-apply the pin. The guard is what stops a third attempt:
 # it names the cause instead of letting the failure arrive as a 404 on a page that returned 200.
+# Next bakes rewrites into the build, so the docs origin (site/lib/docs-origin.mjs) must be here at build time.
+ARG DOCS_ORIGIN=
+ENV DOCS_ORIGIN=$DOCS_ORIGIN
 RUN npm run prebuild && npx next build
 RUN test -d .next/static && test -d .next/standalone || { echo "✗ the site build wrote no .next/static or .next/standalone. Something re-applied NEXT_DIST_DIR; the runner COPYs below name .next."; exit 1; }
-
-# --- the docs app (fumadocs, Next 16) ---
-# It ships in the SAME image and runs alongside the site, which serves it at /docs by rewriting to
-# it. A second container would work too, but this is one deploy and one thing to keep alive: with
-# nothing listening on 3001, /docs 500s, and a docs link that dies whenever a separate service is
-# down is not worth the extra moving part for a project this size.
-WORKDIR /src/docs-site
-COPY docs-site/package.json docs-site/package-lock.json ./
-# --ignore-scripts is load-bearing: this package's postinstall runs `fumadocs-mdx`, which reads
-# source.config.ts and content/. Neither is in this layer, and neither may be — copying them here
-# to satisfy the postinstall would make every prose edit bust the dependency cache. So install the
-# deps only, and generate .source below, once the content is actually present.
-RUN npm ci --ignore-scripts
-COPY docs-site/ ./
-RUN npx fumadocs-mdx && npm run build
 
 # --- runtime: standalone server only, no dev deps ---
 FROM node:22-alpine AS runner
@@ -91,23 +79,18 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+# The middleware and llms.txt read it at run time; it must equal the build value.
+ARG DOCS_ORIGIN=
+ENV DOCS_ORIGIN=$DOCS_ORIGIN
 
 RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
 
 # standalone traces the server; public/ and .next/static are NOT included by it — copy explicitly.
-# each app sets outputFileTracingRoot to its own dir, so its standalone root holds server.js
+# the site sets outputFileTracingRoot to its own dir, so its standalone root holds server.js
 COPY --from=builder --chown=nextjs:nodejs /src/site/.next/standalone ./site
 COPY --from=builder --chown=nextjs:nodejs /src/site/.next/static ./site/.next/static
 COPY --from=builder --chown=nextjs:nodejs /src/site/public ./site/public
 
-COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.next/standalone ./docs
-COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.next/static ./docs/.next/static
-# fumadocs resolves content at runtime from .source
-COPY --from=builder --chown=nextjs:nodejs /src/docs-site/.source ./docs/.source
-
-# Start docs on 3001, then the site on $PORT. The site proxies /docs to it, so if docs is not up
-# the docs link 500s — start it first and let the site be the process that keeps the container
-# alive, so a docs crash surfaces as a restart rather than a silently broken tab.
 COPY --chown=nextjs:nodejs site/docker-start.sh ./
 RUN chmod +x docker-start.sh
 
@@ -120,5 +103,4 @@ VOLUME /data/bots
 
 USER nextjs
 EXPOSE 3000
-ENV DOCS_ORIGIN=http://127.0.0.1:3001
 CMD ["./docker-start.sh"]

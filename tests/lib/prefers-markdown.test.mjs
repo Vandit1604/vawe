@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { prefersMarkdown as site } from '../../site/lib/md/accept.ts';
-import { prefersMarkdown as docs } from '../../docs-site/lib/accept.ts';
 
 const CASES = [
   [null, false],
@@ -20,9 +19,8 @@ const CASES = [
   ['TEXT/MARKDOWN', true],
 ];
 
-test('the site and the docs app answer every Accept header alike', () => {
+test('the site answers every Accept header as expected', () => {
   for (const [accept, want] of CASES) {
     assert.equal(site(accept), want, `site: ${accept}`);
-    assert.equal(docs(accept), want, `docs: ${accept}`);
   }
 });

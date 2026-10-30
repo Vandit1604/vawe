@@ -4,7 +4,7 @@
 export const CHECKS = ['site', 'unit', 'e2e'];
 
 const RULES = [
-  { re: /^(site|docs-site|scripts\/site)\//, kind: 'site', checks: ['site'] },
+  { re: /^(site|scripts\/site)\//, kind: 'site', checks: ['site'] },
   { re: /^(Dockerfile|\.dockerignore)$/, kind: 'site', checks: ['site'] },
   { re: /^(README|CONTRIBUTING)\.md$|^(LICENSE|NOTICE|context7\.json)$|^(guides|research|research_notes)\//, kind: 'docs', checks: [] },
   { re: /^(AGENTS|CLAUDE)\.md$|^(skills|prompts|taste)\/.*\.md$/, kind: 'agent docs', checks: ['unit'] },
@@ -37,7 +37,7 @@ export function planChecks(files) {
   return { checks, reasons };
 }
 
-const NOT_RENDER_INPUT = /^(site|docs-site|guides|research|research_notes|skills|\.github)$|^[^/]*\.md$|^(LICENSE|NOTICE|context7\.json|\.oxlintrc\.json)$/;
+const NOT_RENDER_INPUT = /^(site|guides|research|research_notes|skills|\.github)$|^[^/]*\.md$|^(LICENSE|NOTICE|context7\.json|\.oxlintrc\.json)$/;
 
 /** The top-level entries of `git ls-tree HEAD` that can change a render: everything except a short list of dirs and files no render reads. */
 export function renderEntries(lsTree) {

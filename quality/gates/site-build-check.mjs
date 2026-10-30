@@ -33,8 +33,8 @@
 //                                    changes, this is the line to change.
 //
 // WHEN IT RUNS AT ALL. A push that touches nothing the site build reads (a film JSON, a doc, an
-// unrelated gate) pays nothing. The trigger set is DERIVED from the Dockerfile's own COPY lines (up to
-// the docs-site stage, which this file does not build) rather than hand-typed, so it cannot drift the
+// unrelated gate) pays nothing. The trigger set is DERIVED from the Dockerfile's own COPY lines
+// rather than hand-typed, so it cannot drift the
 // way a maintained list would.
 //
 // HOW IT DEGRADES. `site/node_modules` will not exist in a fresh clone or a freshly created worktree,
@@ -51,8 +51,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const f = gateFindings();
 const t0 = Date.now();
 
-// Every COPY source up to the docs-site stage: that stage builds a different app with a different
-// tsconfig, and this file only reproduces the site's own build.
 const dockerfile = fs.readFileSync(path.join(ROOT, 'Dockerfile'), 'utf8').split('\n');
 const triggers = new Set(['Dockerfile', '.dockerignore']);
 for (const line of dockerfile) {
@@ -60,7 +58,6 @@ for (const line of dockerfile) {
   if (!m) continue;
   const parts = m[1].split(/\s+/).filter((p) => !p.startsWith('--'));
   for (const s of parts.slice(0, -1)) {
-    if (s.startsWith('docs-site')) continue;
     triggers.add(s.replace(/\/+$/, ''));
   }
 }

@@ -5,8 +5,7 @@
   "branch": "main",
   "folders": [
     "guides",
-    "skills",
-    "docs-site/content"
+    "skills"
   ],
   "excludeFolders": [
     "quality",

@@ -5,26 +5,28 @@
 //   /            site/app/page.tsx
 //   /features    site/app/features/page.tsx
 //   /easing/x    site/app/easing/[name]/page.tsx (any one dynamic folder)
-//   /docs        docs-site/content/docs/index.mdx
-//   /docs/x      docs-site/content/docs/x.mdx
+//   /docs        content/docs/index.mdx in the docs checkout (DOCS_DIR)
+//   /docs/x      content/docs/x.mdx in the docs checkout
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { docsDir } from './docs-dir.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(root, 'site', 'lib', 'lastmod.json');
 const pages = JSON.parse(fs.readFileSync(path.join(root, 'site', 'lib', 'site-pages.json'), 'utf8'));
 
-if (!fs.existsSync(path.join(root, 'docs-site'))) {
-  console.log('~ docs-site is not here; using the committed site/lib/lastmod.json');
+const DOCS = docsDir(root);
+if (!fs.existsSync(DOCS)) {
+  console.log(`~ the docs checkout is not at ${DOCS} (set DOCS_DIR); using the committed site/lib/lastmod.json`);
   process.exit(0);
 }
 
 function sourceOf(route) {
   if (route.startsWith('/docs')) {
     const slug = route === '/docs' ? 'index' : route.slice('/docs/'.length);
-    return path.join(root, 'docs-site', 'content', 'docs', `${slug}.mdx`);
+    return path.join(DOCS, 'content', 'docs', `${slug}.mdx`);
   }
   const dir = path.join(root, 'site', 'app', route);
   if (fs.existsSync(path.join(dir, 'page.tsx'))) return path.join(dir, 'page.tsx');

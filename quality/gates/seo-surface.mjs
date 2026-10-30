@@ -35,12 +35,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { docsDir } from '../../scripts/site/docs-dir.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SITE_APP = path.join(ROOT, 'site/app');
 const SITE_LIB = path.join(ROOT, 'site/lib');
-const DOCS_DIR = path.join(ROOT, 'docs-site/content/docs');
+const DOCS_DIR = path.join(docsDir(ROOT), 'content/docs');
 const rel = (p) => path.relative(ROOT, p);
 const read = (p) => fs.readFileSync(p, 'utf8');
 
@@ -92,18 +93,6 @@ const routePattern = (routePath) => new RegExp(`^${routePath.replace(/\[[^\]]+\]
       });
     }
   }
-  // docs-site is a second Next app with its own metadata, but it is part of what this repo shipped
-  // 2026-09-19 and it is exactly the kind of page a rename silently un-canonicalises.
-  const docsPage = path.join(ROOT, 'docs-site/app/docs/[[...slug]]/page.tsx');
-  if (fs.existsSync(docsPage)) {
-    const src = read(docsPage);
-    if (!/alternates:\s*\{\s*canonical:/.test(src)) {
-      f.fail('seo-no-canonical', 'docs-site/app/docs/[[...slug]]/page.tsx sets no alternates.canonical', {
-        at: rel(docsPage),
-        fix: 'set alternates.canonical from the docs source\'s own URL, as generateMetadata already does for title/description',
-      });
-    }
-  }
 }
 
 // ===== 2. every detail route has its own opengraph-image =======================================
@@ -147,7 +136,7 @@ for (const p of pageFiles) {
     }
   }
 
-  // 3b. docs: the same slugs site-pages.mjs computes from docs-site/content/docs, compared against
+  // 3b. docs: the same slugs site-pages.mjs computes from the docs checkout's content/docs, compared against
   // what site-pages.json actually holds (catches a stale, un-regenerated commit of the file itself).
   const docSlugs = fs.existsSync(DOCS_DIR)
     ? fs.readdirSync(DOCS_DIR).filter((n) => n.endsWith('.mdx')).map((n) => n.replace(/\.mdx$/, ''))
@@ -155,7 +144,7 @@ for (const p of pageFiles) {
   if (docSlugs === null) {
     f.warn('seo-sitemap-docs-unreadable', `${rel(DOCS_DIR)} does not exist here, so docs sitemap coverage cannot be checked`, {
       at: rel(DOCS_DIR),
-      fix: 'run this gate from a checkout that has docs-site/content/docs (a fresh clone always does)',
+      fix: 'check out vawe-hq/vawe-docs next to this repo, or set DOCS_DIR to it',
     });
   } else {
     const expectedDocPaths = new Set(docSlugs.map((s) => (s === 'index' ? '/docs' : `/docs/${s}`)));

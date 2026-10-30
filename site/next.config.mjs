@@ -1,14 +1,11 @@
 /** @type {import('next').NextConfig} */
+import { DOCS_ORIGIN } from "./lib/docs-origin.mjs";
 import { ALIAS_HOST_REDIRECT, LEGACY_REDIRECTS } from "./lib/redirects.mjs";
 
-// The docs are a separate Next app (docs-site/) pinned to Next 16 + fumadocs 16, while this site
-// is on Next 15. Rather than force a framework upgrade on one of them so they can share a codebase,
-// this app proxies /docs/* to it. docs-site sets basePath:"/docs", so its own links and assets
-// already carry the prefix and pass straight through untouched.
-//
-//   dev  : docs-site on :3001 (npm run dev inside docs-site) — the default below
-//   prod : set DOCS_ORIGIN to the docs service's origin, e.g. http://docs:3000
-const DOCS_ORIGIN = process.env.DOCS_ORIGIN || "http://127.0.0.1:3001";
+// The docs are a separate Next app (vawe-hq/vawe-docs) pinned to Next 16 + fumadocs 16, while this site
+// is on Next 15. This app proxies /docs/* to it. The docs app sets basePath:"/docs", so its own links and
+// assets already carry the prefix and pass straight through untouched. The origin is in
+// lib/docs-origin.mjs; the rewrites below are fixed at build time.
 
 // A PRODUCTION BUILD MUST NOT WRITE INTO THE DEV SERVER'S .next.
 // `next build` against the same directory a dev server is serving leaves dev reading half-written
@@ -76,7 +73,7 @@ const nextConfig = {
       // the docs pages (fumadocs already routes these at /docs in its own app)
       { source: "/docs", destination: `${DOCS_ORIGIN}/docs` },
       { source: "/docs/:path*", destination: `${DOCS_ORIGIN}/docs/:path*` },
-      // its assets, which docs-site emits under assetPrefix "/docs-static" precisely so they do
+      // its assets, which the docs app emits under assetPrefix "/docs-static" precisely so they do
       // not collide with this app's own /_next/*
       { source: "/docs-static/:path*", destination: `${DOCS_ORIGIN}/docs-static/:path*` },
       // fumadocs' search endpoint

@@ -9,8 +9,8 @@
 # absent from the context until somebody says otherwise, and the failure mode of forgetting is a build
 # that stops with "not found" instead of one that quietly grows.
 #
-#   Dockerfile      (the site + docs apps): scripts generators core harness/media/fonts.lock.json
-#                   site (site/docker-start.sh included) docs-site NOTICE package.json
+#   Dockerfile      (the site): scripts generators core harness/media/fonts.lock.json
+#                   site (site/docker-start.sh included) NOTICE package.json
 #
 # EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `quality/gates/site-build-check.mjs` builds
 # the context and prints what is in it.
@@ -27,11 +27,8 @@
 !generators
 !core
 
-# ── the two web apps ─────────────────────────────────────────────────────────────────────────────
-# docs-site runs on 3001 inside the SAME image and the site rewrites /docs to it. Its .source must
-# stay out so the image regenerates it from content/ rather than shipping a stale copy.
+# ── the web app ─────────────────────────────────────────────────────────────────────────────
 !site
-!docs-site
 !NOTICE
 # The engine's own package.json: site/lib/schema.ts imports it for the real description, version and
 # licence in the SoftwareApplication JSON-LD. This is an allowlist (`**` then negations), so a file

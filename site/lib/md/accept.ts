@@ -1,4 +1,4 @@
-// Edge-safe and import-free. docs-site/lib/accept.ts is a copy; tests/lib/prefers-markdown.test.mjs requires both to answer alike.
+// Edge-safe and import-free. vawe-hq/vawe-docs vendors this file byte for byte (.github/workflows/sync-docs-vendor.yml).
 //
 // Markdown wins only when the client names text/markdown with a higher q than text/html. A wildcard
 // never selects it: curl, link previews and browsers send */* or nothing and must get HTML.

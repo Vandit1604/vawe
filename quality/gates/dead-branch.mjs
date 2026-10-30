@@ -44,7 +44,6 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const EXCLUDED_DIRS = [
   ['node_modules/', 'vendored'],
   ['assets/vendor/', 'vendored third-party bundles, minified and not ours to edit'],
-  ['docs-site/', 'a separate Next app with its own lint'],
   ['out/', 'render output'],
 ];
 

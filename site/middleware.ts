@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { logBotRequest } from "./lib/bots";
 import { DESCRIBEDBY_LINK, prefersMarkdown } from "./lib/md/http";
+import { DOCS_ORIGIN } from "./lib/docs-origin.mjs";
 import { isExcluded, isRendered, pathOfMdUrl } from "./lib/md/routes.mjs";
 import { absoluteUrl } from "./lib/site";
 
@@ -12,7 +13,6 @@ import { absoluteUrl } from "./lib/site";
 // docs too; the markdown rewrite never applies to them (isExcluded).
 
 const MOVE_FILE = /^\/moves\/([a-z0-9-]+)\.md$/;
-const DOCS_ORIGIN = process.env.DOCS_ORIGIN || "http://127.0.0.1:3001";
 
 export const config = {
   runtime: "nodejs",

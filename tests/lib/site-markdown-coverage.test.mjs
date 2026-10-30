@@ -43,9 +43,7 @@ test('every rendered pattern names a page that exists', () => {
   for (const p of RENDERED) assert.ok(routes.has(p), `${p} has no app page.tsx`);
 });
 
-test('docs are covered by the docs app, which serves markdown and lists its pages', () => {
-  const docs = path.resolve(import.meta.dirname, '../../docs-site');
-  for (const f of ['app/docs-md/[[...slug]]/route.ts', 'app/docs/llms-index.json/route.ts', 'proxy.ts']) assert.ok(fs.existsSync(path.join(docs, f)), f);
+test('docs belong to the docs app, which serves markdown and lists its pages', () => {
   for (const r of pages.docs.map((d) => d.path)) assert.ok(isDocsApp(r) && !isRendered(r), `${r} belongs to the docs app only`);
   assert.deepEqual(DOCS_APP, ['/docs', '/docs/[slug]']);
 });

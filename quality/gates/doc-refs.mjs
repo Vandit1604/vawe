@@ -43,7 +43,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // Excluded BY REASON. Each of these describes a tree that is not this repo's Makefile or layout, so a
 // path inside it is not a claim about this repo and cannot be checked here.
 const EXCLUDED = [
-  ['docs-site/', 'a separate Next app; its paths are its own and its own build checks them'],
   ['node_modules/', 'vendored'],
   ['out/', 'render output, not authored prose'],
   ['.claude/plans/', 'a dated record of what was planned, not an instruction. It describes a tree that was proposed and may never have been built'],

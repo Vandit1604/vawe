@@ -17,7 +17,7 @@ const NAV = [
   { href: "/blog", label: "Blog", key: "blog" },
 ];
 
-// The docs are a separate fumadocs app (docs-site/) served at /docs via a rewrite in
+// The docs are a separate fumadocs app (vawe-hq/vawe-docs) served at /docs via a rewrite in
 // next.config.mjs, so this is just a path, no origin to configure, and nothing to get wrong in
 // production. It used to fall back to a localhost URL, which shipped a dead link to every visitor.
 // Exported so Footer.tsx points at the same two URLs instead of re-typing them.

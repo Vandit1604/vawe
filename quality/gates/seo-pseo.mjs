@@ -20,12 +20,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { docsDir } from '../../scripts/site/docs-dir.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { MAX_HTML_BYTES, copyShare, hubProse, inbound, internalLinks, mainOf, markdownLinks, mdBody, repeats, textOf } from '../../harness/lib/pseo.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SITE_LIB = path.join(ROOT, 'site/lib');
-const DOCS_DIR = path.join(ROOT, 'docs-site/content/docs');
+const DOCS_DIR = path.join(docsDir(ROOT), 'content/docs');
 const json = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 const argv = process.argv.slice(2);
 const flag = (name) => argv.includes(name);

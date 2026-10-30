@@ -5,7 +5,7 @@
 //
 // A static read, like seo-surface: it cannot see a rendered line length or a computed size (that is
 // scripts/site/typography-audit.mjs, run against a live server). It catches what rots in a diff:
-//   1. an em dash (U+2014) anywhere in site/, docs-site/ source or the site generators (house rule)
+//   1. an em dash (U+2014) anywhere in site/ source or the site generators (house rule)
 //   2. UI copy with a straight quote or apostrophe, three dots, or a number and its unit on a plain space
 //      (copy = JSX text, string literals in site/app and site/lib, string values of site/lib/*.json;
 //      lib/typo.mjs is the one transform that writes the curly form)
@@ -22,7 +22,7 @@ const f = gateFindings();
 const rel = (p) => path.relative(ROOT, p);
 
 const SKIP_DIRS = new Set(['node_modules', '.next', '.next-build', '.next-typo', '.source', 'out']);
-const SOURCE_ROOTS = ['site/app', 'site/lib', 'site/content', 'site/og', 'scripts/site', 'docs-site/app', 'docs-site/content', 'docs-site/components', 'docs-site/lib'];
+const SOURCE_ROOTS = ['site/app', 'site/lib', 'site/content', 'site/og', 'scripts/site'];
 const SOURCE_EXT = /\.(tsx?|mjs|js|css|json|md|mdx|html)$/;
 const SELF = /scripts\/site\/typography-audit/;
 

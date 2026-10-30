@@ -5,7 +5,7 @@ import { planChecks, e2eKey, renderEntries } from '../../harness/lib/pre-push-pl
 const checksOf = (files) => planChecks(files).checks;
 
 test('site-only changes run the site checks and no film e2e', () => {
-  assert.deepEqual(checksOf(['site/app/page.tsx', 'site/content/blog/x.md', 'docs-site/app/layout.tsx', 'scripts/site/typo-copy.mjs']), ['site']);
+  assert.deepEqual(checksOf(['site/app/page.tsx', 'site/content/blog/x.md', 'scripts/site/typo-copy.mjs']), ['site']);
 });
 
 test('docs-only changes run no optional check', () => {
@@ -52,6 +52,6 @@ test('the e2e key ignores directories no render reads and follows every other on
 });
 
 test('renderEntries drops the doc entries by name', () => {
-  const names = renderEntries(tree([['site', '1'], ['docs-site', '2'], ['guides', '3'], ['harness', '4'], ['AGENTS.md', '5'], ['package.json', '6']])).map((e) => e.name);
+  const names = renderEntries(tree([['site', '1'], ['guides', '3'], ['harness', '4'], ['AGENTS.md', '5'], ['package.json', '6']])).map((e) => e.name);
   assert.deepEqual(names, ['harness', 'package.json']);
 });

@@ -28,7 +28,7 @@ export const RENDERED = [
   "/vs/[slug]",
 ];
 
-// The docs are a separate app (docs-site/). It serves its own .md and negotiated markdown, and
+// The docs are a separate app (vawe-hq/vawe-docs). It serves its own .md and negotiated markdown, and
 // lists its pages at /docs/llms-index.json, so the site neither renders nor skips them.
 export const DOCS_APP = ["/docs", "/docs/[slug]"];
 

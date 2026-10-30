@@ -3,7 +3,8 @@
 //
 // The site serves /docs by rewriting to the docs app (see site/next.config.mjs). With only the
 // site running, /docs returns a 500 that looks like a code bug and is not one, it is just nothing
-// listening on the other end. Rather than document that trap, remove it: one command, both apps.
+// listening on the other end. The docs app lives in vawe-hq/vawe-docs: a sibling checkout at
+// ../vawe-docs, or the folder in DOCS_DIR. Without it only the site starts.
 //
 //   npm --prefix site run dev:all
 //
@@ -11,14 +12,16 @@
 // install lean.
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import fs from "node:fs";
 import path from "node:path";
+import { docsDir } from "./docs-dir.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-const APPS = [
-  { name: "site", cwd: path.join(ROOT, "site"), args: ["next", "dev", "-p", "3080"], color: "\x1b[36m" },
-  { name: "docs", cwd: path.join(ROOT, "docs-site"), args: ["next", "dev", "-p", "3001"], color: "\x1b[35m" },
-];
+const DOCS = docsDir(ROOT);
+const APPS = [{ name: "site", cwd: path.join(ROOT, "site"), args: ["next", "dev", "-p", "3080"], color: "\x1b[36m" }];
+if (fs.existsSync(DOCS)) APPS.push({ name: "docs", cwd: DOCS, args: ["next", "dev", "-p", "3001"], color: "\x1b[35m" });
+else process.stdout.write(`~ no docs checkout at ${DOCS} (set DOCS_DIR); /docs will not answer\n`);
 
 const kids = [];
 let shuttingDown = false;

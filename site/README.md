@@ -1,7 +1,7 @@
 # site/
 
 The vawe.dev marketing site: a Next.js app with its own design system, separate from the engine and
-from `docs-site/`.
+from the docs app (`vawe-hq/vawe-docs`).
 
 Read by: a human or agent working on the marketing site. Not read by the render engine.
 
