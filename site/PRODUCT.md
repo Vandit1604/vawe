@@ -63,6 +63,6 @@ Don't apologize for having no timeline UI. No-timeline is *why* an agent can dri
 
 **WCAG 2.2 AA**, held site-wide.
 
-- Contrast: body text ≥4.5:1, large text ≥3:1. The committed tokens already pass (`--ink` #0f1620 ≈ 17:1, `--ink-2` #454f5e ≈ 8:1, `--muted` #697182 ≈ 5:1, `--accent` #2563eb ≈ 5.17:1 on white). Any new colour must be checked before it lands, not after.
+- Contrast: body text ≥4.5:1, large text ≥3:1. The committed tokens already pass (`--ink` #0f1620 ≈ 17:1, `--ink-2` #454f5e ≈ 8:1, `--muted` #697182 ≈ 5:1, `--accent` #3291ff ≈ 6.6:1 on black (the site is black only)). Any new colour must be checked before it lands, not after.
 - Full keyboard reach on every interactive surface. Visible focus states, never `outline:none` without a replacement.
 - **Reduced motion is not optional.** Every animation needs a `prefers-reduced-motion: reduce` alternative, typically a crossfade or an instant state. This includes autoplaying showcase video, which should respect the preference rather than claim an exemption. A motion engine that ignores a user's stated motion preference is making an argument against itself.

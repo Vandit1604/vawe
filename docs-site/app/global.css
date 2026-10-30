@@ -4,13 +4,13 @@
 
 @source '../node_modules/fumadocs-ui/dist/**/*.js';
 
-/* Vawe brand: cobalt primary, matching the marketing site accent (#2563eb). */
+/* The site accent #3291ff measures 3.2:1 on white, so light mode takes the same hue darkened to 4.9:1. */
 :root {
-  --color-fd-primary: #2563eb;
+  --color-fd-primary: #1a6fd6;
 }
 
 .dark {
-  --color-fd-primary: #6ab8ff;
+  --color-fd-primary: #3291ff;
 }
 
 /* Typography rules (site/DESIGN.md "Typography rules"): the same values as the site's tokens. */
