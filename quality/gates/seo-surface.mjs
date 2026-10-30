@@ -35,6 +35,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { DOCS_ORIGIN } from '../../site/lib/docs-origin.mjs';
 import { docsDir } from '../../scripts/site/docs-dir.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
@@ -167,6 +168,22 @@ for (const p of pageFiles) {
     }
   }
 
+  // 3c. the docs app's own page list, when a docs origin answers: a page it serves that the sitemap lacks is a warning.
+  try {
+    const res = await fetch(`${DOCS_ORIGIN}/docs/llms-index.json`, { signal: AbortSignal.timeout(3000) });
+    const served = res.ok ? (await res.json()).map((d) => new URL(d.url).pathname.replace(/\.md$/, '').replace(/\/+$/, '')) : [];
+    const listed = new Set((pagesJson.docs || []).map((d) => d.path));
+    for (const p of served) {
+      if (!listed.has(p)) {
+        f.warn('seo-sitemap-docs-missing', `${p} is served by the docs app at ${DOCS_ORIGIN} but missing from site-pages.json`, {
+          at: 'site/lib/site-pages.json',
+          fix: 'add it to the docs list in site/lib/site-pages.json',
+        });
+      }
+    }
+  } catch {
+    // no docs origin answers: nothing to compare
+  }
 }
 
 // ===== 4. every JSON-LD builder parses and carries its required fields =========================

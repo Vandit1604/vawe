@@ -70,6 +70,7 @@ COPY site/ ./
 # Next bakes rewrites into the build, so the docs origin (site/lib/docs-origin.mjs) must be here at build time.
 ARG DOCS_ORIGIN=
 ENV DOCS_ORIGIN=$DOCS_ORIGIN
+RUN test -n "$DOCS_ORIGIN" || { echo "✗ DOCS_ORIGIN is empty. Pass --build-arg DOCS_ORIGIN=<docs app origin>; without it the build bakes the dev default and /docs fails in production."; exit 1; }
 RUN npm run prebuild && npx next build
 RUN test -d .next/static && test -d .next/standalone || { echo "✗ the site build wrote no .next/static or .next/standalone. Something re-applied NEXT_DIST_DIR; the runner COPYs below name .next."; exit 1; }
 
