@@ -5,10 +5,19 @@
 export const PARAMS_ENV = 'VAWE_PARAMS';
 export const ASPECT_ENV = 'VAWE_ASPECT';
 
-/** The VAWE_ASPECT value for a `--aspect` flag: '' for none or `all` (render-page.mjs loops over the named aspects itself). Throws on anything but a W:H integer ratio. */
+export const isAspect = (name) => /^[1-9]\d*:[1-9]\d*$/.test(name);
+
+/** The reason `name` is not an aspect (a W:H ratio of whole numbers), or null. */
+export const aspectProblem = (name) => (isAspect(name) ? null : `"${name}" is not a W:H ratio of whole numbers such as 16:9 or 1200:630`);
+
+/** `2:1` as it appears in a file name. */
+export const aspectSlug = (name) => name.replace(':', 'x');
+
+/** The VAWE_ASPECT value for a `--aspect` flag: '' for none or `all` (render-page.mjs loops over the named aspects itself). Throws on anything but a W:H ratio of whole numbers. */
 export function aspectValue(flag) {
   if (flag === undefined || flag === 'all') return '';
-  if (!/^[1-9]\d*:[1-9]\d*$/.test(flag)) throw new Error(`--aspect needs W:H whole numbers such as 16:9 or 1200:630, got "${flag}"`);
+  const problem = aspectProblem(flag);
+  if (problem) throw new Error(`--aspect ${problem}`);
   return flag;
 }
 
@@ -18,7 +27,6 @@ export function renderEnv({ param, aspect }) {
   return Object.fromEntries(Object.entries(env).filter(([, v]) => v));
 }
 
-/** The aspect `--aspect` set for this process, or ''. */
 export const aspectOverride = (env = process.env) => env[ASPECT_ENV] ?? '';
 
 // A repeated key is refused: the page reads one value per key, so the second would be dropped without a word.
@@ -41,7 +49,7 @@ export function pageQuery(env = process.env) {
 
 export function paramsSlug(env = process.env) {
   const params = [...new URLSearchParams(env[PARAMS_ENV] ?? '')].map(([k, v]) => `${k}-${v}`).join('_').replace(/[^A-Za-z0-9._-]+/g, '-');
-  return [params, aspectOverride(env).replace(':', 'x')].filter(Boolean).join('_');
+  return [params, aspectSlug(aspectOverride(env))].filter(Boolean).join('_');
 }
 
 /** The name every per-film file under out/ is built from: the film, then the params and the aspect override, so two looks or two aspects of one page never share a file. */

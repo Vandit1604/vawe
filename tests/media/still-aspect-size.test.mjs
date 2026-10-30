@@ -5,7 +5,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { aspectValue, renderEnv, paramsFilm, paramsFlags, ASPECT_ENV } from '../../harness/lib/page-params.mjs';
+import { VERBS } from '../../harness/cli/verbs.mjs';
+import { UsageError } from '../../harness/cli/parse.mjs';
+import { isAspect, aspectProblem, aspectSlug, aspectValue, renderEnv, paramsFilm, paramsFlags, ASPECT_ENV } from '../../harness/lib/page-params.mjs';
 import { resolveFrame, defaultOut } from '../../harness/media/render-page.mjs';
 import { stillPath, stillProblem, sizeProblem } from '../../harness/media/see/still-math.mjs';
 
@@ -20,7 +22,7 @@ test('an aspect is a W:H ratio of whole numbers; all and none set nothing', () =
   assert.equal(aspectValue('1200:630'), '1200:630');
   assert.equal(aspectValue('all'), '');
   assert.equal(aspectValue(undefined), '');
-  for (const bad of ['0:1', '16-9', '16:', '1.5:1', '2:0']) assert.throws(() => aspectValue(bad), /--aspect needs W:H whole numbers/, bad);
+  for (const bad of ['0:1', '16-9', '16:', '1.5:1', '2:0']) assert.throws(() => aspectValue(bad), /--aspect "[^"]*" is not a W:H ratio of whole numbers/, bad);
   assert.deepEqual(renderEnv({ aspect: '2:1' }), { [ASPECT_ENV]: '2:1' });
   assert.deepEqual(renderEnv({}), {});
 });
@@ -96,5 +98,44 @@ test('vawe still --size with another ratio than the page is refused with the siz
 test('a bad --aspect is a usage error before any render', () => {
   const r = vawe('--aspect', '0:1');
   assert.notEqual(r.status, 0);
-  assert.match(r.stdout + r.stderr, /--aspect needs W:H whole numbers/);
+  assert.match(r.stdout + r.stderr, /--aspect "0:1" is not a W:H ratio of whole numbers/);
+});
+
+test('one owner decides what an aspect is and how its file name reads', () => {
+  assert.equal(isAspect('1200:630'), true);
+  assert.equal(isAspect('all'), false);
+  assert.equal(aspectProblem('wide'), '"wide" is not a W:H ratio of whole numbers such as 16:9 or 1200:630');
+  assert.equal(aspectSlug('1200:630'), '1200x630');
+  assert.throws(() => resolveFrame(PAGE, { aspect: 'wide' }), /unknown aspect "wide" is not a W:H ratio/);
+});
+
+test('--out of a page still must be a PNG: a .jpg would hold PNG bytes under the wrong name', () => {
+  const out = path.resolve('out/still/aspect-probe-jpg.jpg');
+  fs.rmSync(out, { force: true });
+  const r = vawe('--out', out);
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /a page still is a PNG: --out aspect-probe-jpg\.jpg must end in \.png/);
+  assert.equal(fs.existsSync(out), false);
+});
+
+const build = (name, v, input) => VERBS.find((x) => x.name === name).build(v, [input]);
+
+test('--aspect all is a dev and ship batch: still, sheet and approve refuse it', () => {
+  for (const name of ['still', 'sheet', 'approve']) {
+    const v = name === 'still' ? { at: '0', aspect: 'all' } : { aspect: 'all' };
+    assert.throws(() => build(name, v, PAGE), (e) => e instanceof UsageError && /--aspect all renders every aspect: dev and ship take it/.test(e.message), name);
+  }
+  assert.doesNotThrow(() => build('ship', { aspect: 'all' }, PAGE));
+});
+
+test('a page-only option on an mp4 is refused once, for --param, --aspect and --size', () => {
+  for (const [name, v] of [['sheet', { aspect: '2:1' }], ['sheet', { param: ['a=b'] }], ['still', { at: '1', size: '10x10' }], ['still', { at: '1', aspect: '2:1' }]]) {
+    assert.throws(() => build(name, v, 'x.mp4'), /goes to a page: /, JSON.stringify(v));
+  }
+});
+
+test('new --aspect help is about the brief, not the render override', () => {
+  const help = VERBS.find((x) => x.name === 'new').flags.find((f) => f.name === 'aspect').help;
+  assert.match(help, /written to brief\.md/);
+  assert.doesNotMatch(help, /overrides|output name/);
 });

@@ -66,7 +66,9 @@ const readFresh = (file, sinceMs) => (fs.existsSync(file) && fs.statSync(file).m
 const critiqueFindingsFile = (page) => path.join(scratch('critique', filmKey(page)), 'findings.json');
 const paramEnv = (v) => renderEnv(v);
 const needsPage = (v, input, verbName) => {
-  if (v.param && !String(input).endsWith('.html')) throw new UsageError(`--param goes to a page: ${verbName} was given ${input}`);
+  if (v.aspect === 'all') throw new UsageError(`--aspect all renders every aspect: dev and ship take it, ${verbName} does not`);
+  const given = ['param', 'aspect', 'size'].find((k) => v[k]);
+  if (given && !String(input).endsWith('.html')) throw new UsageError(`--${given} goes to a page: ${verbName} was given ${input}`);
 };
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
 
@@ -99,7 +101,7 @@ export const VERBS = [
       { name: 'questions-json', type: 'bool', help: 'print the open details as AskUserQuestion calls (JSON, at most 4 questions each) and write nothing' },
       { name: 'ref', type: 'path', help: 'recreate this reference mp4: writes films/recreations/<name> with SPEC.md', kind: 'file' },
       { name: 'length', type: 'number', help: 'film length in seconds: written to brief.md and the page duration meta' },
-      { name: 'aspect', type: 'string', help: `${ASPECT}: written to brief.md and the page aspect meta` },
+      { name: 'aspect', type: 'string', help: 'a W:H ratio of whole numbers (16:9 9:16 1:1 4:5 4:3 are the common ones): written to brief.md and the page aspect meta' },
       { name: 'title', type: 'string', help: 'the starter headline: written to brief.md and the page' },
       { name: 'score', type: 'bool', help: 'with --ref: also render the starter and score it against the reference (slow)' },
     ],
@@ -281,7 +283,7 @@ export const VERBS = [
       { name: 'note', type: 'string', default: 'none', help: 'the owner\'s reason, kept in the run log' },
     ],
     example: 'vawe approve films/my-launch/page.html   (after vawe dev without --from and --to)',
-    build: (v, [page]) => [{ script: 'harness/live/approve.mjs', args: [page, ...(v.reject ? ['--reject'] : []), ...opt('--note', v.note)] }],
+    build: (v, [page]) => (needsPage(v, page, 'approve'), [{ script: 'harness/live/approve.mjs', args: [page, ...(v.reject ? ['--reject'] : []), ...opt('--note', v.note)] }]),
     next: (v, [page]) => `bin/vawe ship ${page}${paramsFlags(paramEnv(v))}`,
   },
   {
@@ -415,7 +417,6 @@ export const VERBS = [
       const problem = stillProblem({ source: input, at: v.at, size: v.size });
       if (problem) throw new UsageError(problem);
       needsPage(v, input, 'still');
-      if ((v.size || v.aspect) && !input.endsWith('.html')) throw new UsageError(`--size and --aspect go to a page: still was given ${input}`);
       return [{ script: 'harness/media/still.mjs', args: [input, '--at', v.at, ...opt('--size', v.size), ...opt('--out', v.out)] }];
     },
     next: () => 'Read the PNG at full size; vawe zoom <page|mp4> --at <s> --box x,y,w,h enlarges one region',

@@ -58,9 +58,9 @@ async function main(argv) {
   const size = flag('--size');
   const problem = stillProblem({ source, at, size });
   if (problem) die(problem);
-  if (size && !source.endsWith('.html')) die(`--size goes to a page: still was given ${source}`);
   if (!isUrl(source) && !fs.existsSync(source)) die(`no such file: ${source}`);
   const out = path.resolve(flag('--out') || stillPath(source, at, size));
+  if (source.endsWith('.html') && path.extname(out) !== '.png') die(`a page still is a PNG: --out ${path.basename(out)} must end in .png`);
   fs.mkdirSync(path.dirname(out), { recursive: true });
   let got;
   try { got = source.endsWith('.html') ? await pageStill(source, Number(at), out, { size }) : videoStill(source, Number(at), out); } catch (e) { die(e.message); }

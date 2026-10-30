@@ -11,7 +11,7 @@ import { UsageError } from './parse.mjs';
 import { ensureFonts } from '../lib/ensure-fonts.mjs';
 import { pickTemplate, beatSheetLength, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES, STARTERS, starterWorlds, starterSpectacle, starterType } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
-import { ASPECTS } from '../../core/layout/aspects.js';
+import { isAspect, aspectProblem } from '../lib/page-params.mjs';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { SAY } from '../live/stage-say.mjs';
@@ -391,7 +391,7 @@ function briefText(name, templateRel, questions, sections, answers, measured, re
 
 function readAnswers({ length, aspect }) {
   if (length !== undefined && !(length > 0)) throw new UsageError(`--length must be a number of seconds above 0, got ${length}`);
-  if (aspect !== undefined && !ASPECTS[aspect] && !/^\d+:\d+$/.test(aspect)) throw new UsageError(`--aspect "${aspect}" must be one of ${Object.keys(ASPECTS).join(' ')} or a W:H ratio`);
+  if (aspect !== undefined && aspectProblem(aspect)) throw new UsageError(`--aspect ${aspectProblem(aspect)}`);
 }
 
 const DETAIL_LINE = /^\s*(?:[-*]\s+|\d+\.\s+)?([a-z]+)\s*:\s*(.+?)\s*$/;
@@ -422,7 +422,7 @@ export function readDetails({ answers, detail = [] }) {
 function formatFrom(text = '') {
   const s = text.match(/(\d+(?:\.\d+)?)\s*(?:s|sec|secs|seconds?)\b/);
   const a = text.match(/\b(\d+:\d+)\b/);
-  return { length: s ? Number(s[1]) : undefined, aspect: a && (ASPECTS[a[1]] || /^\d+:\d+$/.test(a[1])) ? a[1] : undefined };
+  return { length: s ? Number(s[1]) : undefined, aspect: a && isAspect(a[1]) ? a[1] : undefined };
 }
 
 /** The seconds the template's Length (or Platform) question names as its default, or undefined. */

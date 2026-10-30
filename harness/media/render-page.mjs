@@ -57,7 +57,7 @@ import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-sta
 import { devEvent, devFailedEvent, shipEvent } from '../lib/run-events.mjs';
 import { REPO_ROOT, serveRepo, trackBrowser, pageArgs, insideRoot, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
-import { pageQuery, paramsFilm, paramsFlags, aspectOverride } from '../lib/page-params.mjs';
+import { pageQuery, paramsFilm, paramsFlags, aspectOverride, aspectProblem, aspectSlug } from '../lib/page-params.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
 import { sampleTail } from './tail-sample.mjs';
@@ -781,7 +781,8 @@ export function briefProblems(pagePath) {
 // rounded to an even number because libx264 with yuv420p refuses an odd side (a 4:5 draft is 540x675 before rounding).
 export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
   const name = aspect || aspectOverride() || readPageMeta(pagePath, 'aspect') || '16:9';
-  if (!ASPECTS[name] && !/^\d+:\d+$/.test(name)) throw new RenderError(`${pagePath}: unknown aspect "${name}" (use ${Object.keys(ASPECTS).join(' ')} or a W:H ratio)`);
+  const problem = aspectProblem(name);
+  if (problem) throw new RenderError(`${pagePath}: unknown aspect ${problem}`);
   const [fw, fh] = aspectDims(name);
   const scale = w ? w / fw : h ? h / fh : final ? 1 : 0.5;
   const outW = w || Math.round(fw * scale), outH = h || Math.round(fh * scale);
@@ -988,7 +989,7 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   const base = path.basename(abs, '.html');
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
   const range = !final && (from > 0 || to != null) ? `-${from}-${to ?? 'end'}` : '';
-  return path.join('out', `${paramsFilm(name)}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
+  return path.join('out', `${paramsFilm(name)}${suffixAspect ? `-${aspectSlug(aspect)}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
 const motionRecords = (motion) => sightedRecords(motion) ?? motion.records;
