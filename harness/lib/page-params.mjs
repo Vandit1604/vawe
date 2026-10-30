@@ -1,7 +1,33 @@
 // Options a render verb hands to the page: `--param look=riso` reaches the page as `?look=riso`.
-// bin/vawe turns the flag into VAWE_PARAMS for every step it runs. The loaders and every per-film file name read it through this file.
+// `--aspect 1200:630` overrides the page's aspect meta; it is not a page option, but it is part of the render key and of the file names like one.
+// bin/vawe turns the flags into VAWE_PARAMS and VAWE_ASPECT for every step it runs. The loaders and every per-film file name read them through this file.
 
 export const PARAMS_ENV = 'VAWE_PARAMS';
+export const ASPECT_ENV = 'VAWE_ASPECT';
+
+export const isAspect = (name) => /^[1-9]\d*:[1-9]\d*$/.test(name);
+
+/** The reason `name` is not an aspect (a W:H ratio of whole numbers), or null. */
+export const aspectProblem = (name) => (isAspect(name) ? null : `"${name}" is not a W:H ratio of whole numbers such as 16:9 or 1200:630`);
+
+/** `2:1` as it appears in a file name. */
+export const aspectSlug = (name) => name.replace(':', 'x');
+
+/** The VAWE_ASPECT value for a `--aspect` flag: '' for none or `all` (render-page.mjs loops over the named aspects itself). Throws on anything but a W:H ratio of whole numbers. */
+export function aspectValue(flag) {
+  if (flag === undefined || flag === 'all') return '';
+  const problem = aspectProblem(flag);
+  if (problem) throw new Error(`--aspect ${problem}`);
+  return flag;
+}
+
+/** The env the flags set for a step; a flag left out sets nothing, so the caller's own env stays. */
+export function renderEnv({ param, aspect }) {
+  const env = { [PARAMS_ENV]: paramsQuery(param), [ASPECT_ENV]: aspectValue(aspect) };
+  return Object.fromEntries(Object.entries(env).filter(([, v]) => v));
+}
+
+export const aspectOverride = (env = process.env) => env[ASPECT_ENV] ?? '';
 
 // A repeated key is refused: the page reads one value per key, so the second would be dropped without a word.
 export function paramsQuery(list) {
@@ -22,16 +48,18 @@ export function pageQuery(env = process.env) {
 }
 
 export function paramsSlug(env = process.env) {
-  return [...new URLSearchParams(env[PARAMS_ENV] ?? '')].map(([k, v]) => `${k}-${v}`).join('_').replace(/[^A-Za-z0-9._-]+/g, '-');
+  const params = [...new URLSearchParams(env[PARAMS_ENV] ?? '')].map(([k, v]) => `${k}-${v}`).join('_').replace(/[^A-Za-z0-9._-]+/g, '-');
+  return [params, aspectSlug(aspectOverride(env))].filter(Boolean).join('_');
 }
 
-/** The name every per-film file under out/ is built from: the film, then the params, so two looks of one page never share a file. */
+/** The name every per-film file under out/ is built from: the film, then the params and the aspect override, so two looks or two aspects of one page never share a file. */
 export function paramsFilm(film, env = process.env) {
   const slug = paramsSlug(env);
   return slug ? `${film}-${slug}` : film;
 }
 
-/** The `--param k=v` words that put these params back on a printed command, or ''. */
+/** The `--param k=v` and `--aspect W:H` words that put these options back on a printed command, or ''. */
 export function paramsFlags(env = process.env) {
-  return [...new URLSearchParams(env[PARAMS_ENV] ?? '')].map(([k, v]) => ` --param ${k}=${v}`).join('');
+  const aspect = aspectOverride(env);
+  return [...new URLSearchParams(env[PARAMS_ENV] ?? '')].map(([k, v]) => ` --param ${k}=${v}`).join('') + (aspect ? ` --aspect ${aspect}` : '');
 }

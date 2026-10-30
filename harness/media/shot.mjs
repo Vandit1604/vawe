@@ -25,7 +25,7 @@ async function gotoChecked(page, url) {
   if (problem) throw new ShotError(problem);
 }
 
-/** A static server over the checkout the html file lives in (its own folder when it is in none): { url, close }. */
+/** A static server over the checkout the html file lives in (its own folder when it is in none): { url, close }. Unlike still and dev, which serve this checkout's core/. */
 async function serveFile(file) {
   const abs = path.resolve(file);
   const root = pageRoot(abs);

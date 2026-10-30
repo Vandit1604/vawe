@@ -21,17 +21,32 @@ export function insideRoot(root, p) {
   return rel === '' || (!rel.startsWith('..' + path.sep) && rel !== '..' && !path.isAbsolute(rel));
 }
 
+const isFile = (p) => fs.existsSync(p) && !fs.statSync(p).isDirectory();
+
+/** The file a request path is served from, or null: a mount's folder first when the path is under its prefix, then `root`. */
+export function servedFile(root, mounts, rel) {
+  for (const { prefix, dir } of mounts) {
+    const inner = prefix === '' ? rel : rel.startsWith(`${prefix}/`) ? rel.slice(prefix.length + 1) : null;
+    const p = inner === null ? null : path.join(dir, inner);
+    if (p && insideRoot(dir, p) && isFile(p)) return p;
+  }
+  const p = path.join(root, rel);
+  return insideRoot(root, p) && isFile(p) ? p : null;
+}
+
 /**
- * serveRepo({ root, port, route }) → { server, port, close }
+ * serveRepo({ root, port, route, mounts }) → { server, port, close }
  * A static file server over `root`, bound to 127.0.0.1. `port` 0 (the default) takes any free port.
  * `route(req, res)` is the hook for a virtual path a caller serves from memory: return true when it
  * answered the request, anything falsy to fall through to the static handler.
+ * `mounts` is a list of { prefix, dir }: a path under `prefix` (any path when it is '') is read from `dir` when the file is there,
+ * so a page outside `root` keeps its own files beside root's core/ and assets/.
  */
-export async function serveRepo({ root = REPO_ROOT, port = 0, route = null } = {}) {
+export async function serveRepo({ root = REPO_ROOT, port = 0, route = null, mounts = [] } = {}) {
   const server = http.createServer((req, res) => {
     if (route && route(req, res)) return;
-    const p = path.join(root, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
-    if (!insideRoot(root, p) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
+    const p = servedFile(root, mounts, decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, ''));
+    if (!p) { res.writeHead(404); return res.end(); }
     res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });
     fs.createReadStream(p).pipe(res);
   });

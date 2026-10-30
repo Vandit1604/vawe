@@ -1,7 +1,7 @@
 // harness/media/render-page.mjs: render a bare HTML page (seeked CSS/Web Animations motion) to an
 // mp4, with an optional N-subframe motion blur blended into each output frame.
 //
-//   node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N]
+//   node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect W:H|all] [--fps N]
 //     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--silent] [--profile]
 //
 // Default is a DRAFT: half size, 30 fps, no blur, the page's <audio> mixed in (--silent for a picture-only draft), and --from/--to windows the render to one
@@ -57,7 +57,7 @@ import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-sta
 import { devEvent, devFailedEvent, shipEvent } from '../lib/run-events.mjs';
 import { REPO_ROOT, serveRepo, trackBrowser, pageArgs, insideRoot, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
-import { pageQuery, paramsFilm, paramsFlags } from '../lib/page-params.mjs';
+import { pageQuery, paramsFilm, paramsFlags, aspectOverride, aspectProblem, aspectSlug } from '../lib/page-params.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
 import { sampleTail } from './tail-sample.mjs';
@@ -189,7 +189,7 @@ export async function gotoLoaded(page, url, pagePath = url) {
 }
 
 export async function openPage(pagePath, frame, { warm = false, final = true, lane = null, measure = false } = {}) {
-  const opened = lane ? await openLanePage(lane, pagePath, frame) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm });
+  const opened = lane ? await openLanePage(lane, pagePath, frame) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm, frameKey: `${frame.aspect}@${frame.width}x${frame.height}` });
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
   // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
@@ -773,15 +773,16 @@ export function briefProblems(pagePath) {
   return [`brief: ${wantLength > 0 ? wantLength : haveLength} s ${wantAspect || haveAspect}; page: ${haveLength} s ${haveAspect}`];
 }
 
-// The canvas a page renders at: --aspect, else the page's own <meta name="aspect">, else 16:9. width and
+// The canvas a page renders at: an `aspect` option, else --aspect (VAWE_ASPECT), else the page's own <meta name="aspect">, else 16:9. width and
 // height are the CSS viewport, always the aspect's full size from core/layout/aspects.js, so px values lay
 // out the same in a draft and a final; scale is the device scale of the capture (0.5 draft, 1 final).
 // w/h set the output size: scale = w / full width (else h / full height), CSS size = output / scale.
 // Returns { aspect, width, height, scale, outWidth, outHeight }: the output is outWidth x outHeight, each side
 // rounded to an even number because libx264 with yuv420p refuses an odd side (a 4:5 draft is 540x675 before rounding).
 export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
-  const name = aspect || readPageMeta(pagePath, 'aspect') || '16:9';
-  if (!ASPECTS[name] && !/^\d+:\d+$/.test(name)) throw new RenderError(`${pagePath}: unknown aspect "${name}" (use ${Object.keys(ASPECTS).join(' ')} or a W:H ratio)`);
+  const name = aspect || aspectOverride() || readPageMeta(pagePath, 'aspect') || '16:9';
+  const problem = aspectProblem(name);
+  if (problem) throw new RenderError(`${pagePath}: unknown aspect ${problem}`);
   const [fw, fh] = aspectDims(name);
   const scale = w ? w / fw : h ? h / fh : final ? 1 : 0.5;
   const outW = w || Math.round(fw * scale), outH = h || Math.round(fh * scale);
@@ -988,7 +989,7 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   const base = path.basename(abs, '.html');
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
   const range = !final && (from > 0 || to != null) ? `-${from}-${to ?? 'end'}` : '';
-  return path.join('out', `${paramsFilm(name)}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
+  return path.join('out', `${paramsFilm(name)}${suffixAspect ? `-${aspectSlug(aspect)}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
 const motionRecords = (motion) => sightedRecords(motion) ?? motion.records;
@@ -1202,7 +1203,7 @@ async function main() {
   const positional = argv.filter((a, i) => !a.startsWith('--') && !valueFlags.has(argv[i - 1]));
   const [pagePath, outArg] = positional;
   if (!pagePath) {
-    die('usage: node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N] '
+    die('usage: node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect W:H|all] [--fps N] '
       + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--silent] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
@@ -1221,7 +1222,7 @@ async function main() {
   if (!final) for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { logDevFailure(`killed by ${signal}`); process.exit(130); });
   const aspectFlag = flag('--aspect', null);
   const all = aspectFlag === 'all';
-  const aspects = all ? Object.keys(ASPECTS) : [aspectFlag || readPageMeta(pagePath, 'aspect') || '16:9'];
+  const aspects = all ? Object.keys(ASPECTS) : [aspectFlag || aspectOverride() || readPageMeta(pagePath, 'aspect') || '16:9'];
   if (all && outArg) die('--aspect all writes one file per aspect: leave out the output path', 2);
   for (const aspect of aspects) {
     const opts = {

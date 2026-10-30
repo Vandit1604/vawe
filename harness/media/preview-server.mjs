@@ -84,13 +84,26 @@ async function connectShared(final) {
   } catch { return null; }
 }
 
-// A page's `../../core/...` imports and assets resolve against its own checkout, so serve from that
-// checkout's top level; only a page in no repo is served from its own folder.
+// The top level of the checkout a page lives in (its own folder when it is in none). Only `vawe shot` serves from it,
+// so a shot sees the page's own core/; still and dev serve the page with pageMount, so they see this checkout's.
 export function pageRoot(abs) {
   const dir = path.dirname(abs);
   try {
     return execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || dir;
   } catch { return dir; }
+}
+
+/**
+ * How a page outside this checkout is served: { prefix, dir, url }, the URL folder the page keeps, the real folder behind it and the page's URL path.
+ * A page in a git checkout keeps its path in that checkout, so its `../../core/` is this checkout's core/; a page in no repo is served at the root of its own folder.
+ */
+export function pageMount(abs) {
+  const real = fs.realpathSync(abs);
+  const dir = path.dirname(real);
+  let top = null;
+  try { top = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || null; } catch { /* no repo */ }
+  const prefix = top ? path.relative(top, dir).split(path.sep).join('/') : '';
+  return { prefix, dir, url: `${prefix ? `${prefix}/` : ''}${path.basename(real)}` };
 }
 
 // Size and mtime of every file under the dirs (any edit to the page folder or to core/ changes it), or with
@@ -132,11 +145,14 @@ async function claimWarm(page) {
   } catch { return false; }
 }
 
+// A tab that is still loading throws on url(): it is not reusable yet.
+const urlOf = (page) => { try { return page.url(); } catch { return null; } };
+
 export async function takeWarmPage(browser, url, sig) {
   const tabs = browser.targets().filter((t) => t.type() === 'page' && t.url().endsWith(WARM_HASH));
   const warm = (await Promise.all(tabs.map((t) => t.page().catch(() => null)))).filter(Boolean);
-  for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (p.url() !== url && await claimWarm(p)) await p.close().catch(() => {});
-  for (const p of warm.filter((w) => !w.isClosed() && w.url() === url)) {
+  for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (urlOf(p) !== url && await claimWarm(p)) await p.close().catch(() => {});
+  for (const p of warm.filter((w) => !w.isClosed() && urlOf(w) === url)) {
     if (!(await claimWarm(p))) continue;
     if ((await p.evaluate(() => window.__warmSig).catch(() => null)) === sig) return { page: p, reused: true };
     await p.close().catch(() => {});
@@ -155,13 +171,13 @@ export async function takeWarmPage(browser, url, sig) {
  * THIS call opened: its own page when persistent, the whole server+browser otherwise. `final` (default
  * true) picks the browser flags (pageArgs) and the daemon: a draft render passes false.
  */
-export async function openPreview(pagePath, { width = 1920, height = 1080, scale = 1, final = true, warm = false } = {}) {
+export async function openPreview(pagePath, { width = 1920, height = 1080, scale = 1, final = true, warm = false, frameKey = '' } = {}) {
   const abs = path.resolve(pagePath);
   if (insideRoot(REPO_ROOT, abs)) {
     const shared = await connectShared(final);
     if (shared) {
       const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}${pageQuery()}${warm ? WARM_HASH : ''}`;
-      const sig = warm ? treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core')]) : '';
+      const sig = warm ? treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core')]) + frameKey : '';
       const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
       await page.setViewport({ width, height, deviceScaleFactor: scale });
       const release = holdAlive(final);
@@ -182,10 +198,10 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
       return { page, url, persistent: true, chrome: shared.started ? 'launched' : 'reused', close: async () => { release(); await page.close().catch(() => {}); shared.browser.disconnect(); } };
     }
   }
-  const root = pageRoot(abs);
-  const { close: closeServer, port } = await serveRepo({ root });
+  const mount = pageMount(abs);
+  const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT, mounts: [mount] });
   const { page, close: closePage } = await launchPage({ width, height, scale, args: pageArgs(final) });
-  const url = `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}${pageQuery()}`;
+  const url = `http://127.0.0.1:${port}/${mount.url}${pageQuery()}`;
   return { page, url, persistent: false, chrome: 'launched', close: async () => { await closePage(); closeServer(); } };
 }
 
