@@ -16,7 +16,8 @@ export const jobLogPath = (id) => path.join(SHIP_JOBS_DIR, `${id}.log`);
 
 export const samePage = (a, b) => path.resolve(a) === path.resolve(b);
 
-export const sameRender = (job, page, query) => samePage(job.page, page) && (job.query ?? '') === query;
+/** `film` is the per-film name of the render (page-params.mjs paramsFilm): the page with its params and aspect. */
+export const sameRender = (job, page, film) => samePage(job.page, page) && job.film === film;
 
 /** The line a failed final prints last; the ship job reads it back from the render's log. */
 export const finalFailedLine = (pct, reason) => `final failed at ${pct}% (${reason})`;

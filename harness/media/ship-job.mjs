@@ -13,7 +13,7 @@
 // judge on the final (harness/media/judge-fresh.mjs, about 30 s; VAWE_SHIP_JUDGE=0 skips it). The mp4 is final
 // and listed as `rendered` (status judging) before the judge and the acceptance run; `done` adds the verdict. The job writes the
 // `ship` event of out/<film>.runs.jsonl when it ends, so the render runs with --job and logs nothing itself.
-// A new job for a page cancels the running job for the same page. `status <page>` reports that page's newest job.
+// A new job cancels the running job for the same page, params and aspect. `status <page>` reports the newest job of that render.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -23,7 +23,7 @@ import { pageQuery } from '../lib/page-params.mjs';
 import { videoProblems, readVideo } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { WAIT_WORK } from '../live/stage-say.mjs';
-import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs, waitCallsLeft, sameRender } from '../lib/ship-status.mjs';
+import { doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs, waitCallsLeft, sameRender } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { waitForFilm, WAIT_CAP_DEFAULT_MS, stillRunningLine, waitExitCode } from '../lib/render-wait.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
@@ -49,23 +49,25 @@ function allJobs() {
   return fs.readdirSync(jobsDir()).filter((f) => f.endsWith('.json')).map((f) => readJob(f.slice(0, -5)));
 }
 
-function cancelRunning(page, query) {
+const jobFilm = (page) => path.basename(defaultOut(page, { aspect: '16:9', final: true }), '.mp4');
+
+function cancelRunning(page) {
   for (const old of allJobs()) {
-    if (!['starting', 'running'].includes(old.status) || !sameRender(old, page, query)) continue;
+    if (!['starting', 'running'].includes(old.status) || !sameRender(old, page, jobFilm(page))) continue;
     if (old.pid && pidAlive(old.pid)) process.kill(-old.pid, 'SIGTERM');
     writeJob({ ...old, status: 'cancelled', endedAt: Date.now() });
-    console.log(`cancelled the running job ${old.id} for the same page${query ? ' and params' : ''}`);
+    console.log(`cancelled the running job ${old.id} for the same render`);
   }
 }
 
 function startJob(page, renderArgs) {
   if (!fs.existsSync(page)) die(`no such page: ${page}`);
   const query = pageQuery().slice(1);
-  cancelRunning(page, query);
-  const name = path.basename(defaultOut(page, { aspect: '16:9', final: true }), '.mp4');
+  cancelRunning(page);
+  const name = jobFilm(page);
   const id = `${name}-${Date.now().toString(36)}`;
   const log = path.resolve(jobLogPath(id));
-  writeJob({ id, page, query, args: renderArgs, log, status: 'starting', startedAt: Date.now(), judge: process.env.VAWE_SHIP_JUDGE !== '0' });
+  writeJob({ id, page, film: name, query, args: renderArgs, log, status: 'starting', startedAt: Date.now(), judge: process.env.VAWE_SHIP_JUDGE !== '0' });
   spawn(process.execPath, [SELF, 'run', id], { detached: true, stdio: 'ignore' }).unref();
   console.log(`job ${id} started: final render of ${page} in the background`);
   console.log(`log: ${log}`);
@@ -192,7 +194,7 @@ function failedLine(job, text, fallback) {
 }
 
 function newestJobFor(page) {
-  const jobs = allJobs().filter((j) => samePage(j.page, page)).sort((a, b) => b.startedAt - a.startedAt);
+  const jobs = allJobs().filter((j) => sameRender(j, page, jobFilm(page))).sort((a, b) => b.startedAt - a.startedAt);
   return jobs[0]?.id;
 }
 
