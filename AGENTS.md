@@ -52,7 +52,7 @@ Report each path. Without all four the film is not done.
 1. The draft: `out/<name>-draft.mp4`, newer than `page.html`.
 2. The storyboard: `out/<name>-storyboard.html`.
 3. The motion pass: one row per cut in `films/<name>/brief.md` "Motion pass".
-4. The critique: a `critique` line in `bin/vawe runs <name>` from another `VAWE_AGENT`, and the seconds it named fixed.
+4. The critique: a `critique` line in `bin/vawe runs <name>` from another session (a separate terminal or agent), and the seconds it named fixed.
 
 Set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell: every verb logs to `out/<film>.runs.jsonl`.
 

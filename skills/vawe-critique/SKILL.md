@@ -51,8 +51,8 @@ the site's links: `vawe check links`. A field of many small moving parts (rain, 
 
 ## The judge
 
-Score the seven dimensions of `guides/judge.md` (readability, hierarchy, composition, brand
-fidelity, asset fidelity, produced-not-generated, value), 1 to 10. Threshold 7 on every one. Two
+Score the film axes of `guides/judge.md` (hook, motion, scenes, type, colour, sound, pace,
+expensive), 1 to 10. A score under 8 needs a fix. Two
 runs, A and B, before a beat closes; one judge is an opinion: `bin/vawe judge <page> --struct --runs A,B`. A
 PASS is never self-recorded.
 
@@ -94,7 +94,7 @@ decides.
 
 ## The critic prompt, and the panel
 
-Hand a fresh agent this and nothing else about the authoring: "You are the critic. You have not seen how this film was made. Film: <page>, rendered at <mp4>. Reference: <ref or none>. Brief: <brief.md>. Default verdict is REJECT; do not fill in what the film meant. Look at the four views in order, one line per finding; frame-locked against the reference at five shared timestamps if there is one; score the seven dimensions; name every default you recognise; end with the REJECT or PASS line." Ask the author five things first, each with a default: the mp4 (the last draft), the brief (`brief.md`), the reference (none), the previous critique (none; the critic checks findings were fixed, not moved), the judges (two, A and B).
+Hand a fresh agent this and nothing else about the authoring: "You are the critic. You have not seen how this film was made. Film: <page>, rendered at <mp4>. Reference: <ref or none>. Brief: <brief.md>. Default verdict is REJECT; do not fill in what the film meant. Look at the four views in order, one line per finding; frame-locked against the reference at five shared timestamps if there is one; score the film axes of guides/judge.md; name every default you recognise; end with the REJECT or PASS line." Ask the author five things first, each with a default: the mp4 (the last draft), the brief (`brief.md`), the reference (none), the previous critique (none; the critic checks findings were fixed, not moved), the judges (two, A and B).
 
 A fresh critic matters because the thread that wrote the page has anchored on its own easing, crop and headline. Its value is independent evidence: judge by what artifact it sees that the author did not (a render, a strip, a reference), not by a fresh pair of eyes. For a panel, hand each critic one artifact and demand a fixed verdict shape:
 

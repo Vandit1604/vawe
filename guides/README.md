@@ -12,7 +12,7 @@ about how to run a film or change the engine, not about how a film should look.
 | [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn and copy why, or you recreate a reference or reflect a site | how to sample a reference, the premium habits, the recreation loop, reflecting a site, the honest 1:1 ceiling |
 | [SUBAGENTS.md](SUBAGENTS.md) | about to fan work out to subagents | what a fan-out costs; the brief lines and worktree contract every subagent brief needs (the critics: `skills/vawe-critique`) |
 | [ENGINE-CHANGES.md](ENGINE-CHANGES.md) | you are changing the ENGINE rather than authoring a film, or writing a command that reports something | why a gate is the last resort, why sugar must fail loudly, the three extension primitives, how to price a change that touches the capture path, the framework harvest, the one output contract of a reporting command |
-| [judge.md](judge.md) | you score a film or read a verdict | what the vision judge does, the seven dimensions, the verdict contract, why a PASS is never the author's |
+| [judge.md](judge.md) | you score a film or read a verdict | what the vision judge does, the film axes, the verdict contract, why a PASS is never the author's |
 | [WRITING-FOR-AGENTS.md](WRITING-FOR-AGENTS.md) | you are writing AGENTS.md, a SKILL.md, or a brief an agent will read | six patterns that keep a rule readable by an agent, and the SKILL.md frontmatter and size contract |
 
 ## How these relate to the rest of the docs
