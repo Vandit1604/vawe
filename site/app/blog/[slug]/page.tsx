@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Header, DOCS_URL, REPO_URL, WaveGlyph } from "../../components/Header";
+import { Header, DOCS_URL, REPO_URL, VaweMark } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { pageMetadata } from "../../components/seo";
 import { blogPostingSchema, breadcrumbSchema, jsonLdScript } from "../../../lib/schema";
@@ -127,7 +127,7 @@ export default async function PostPage({ params }: Params) {
             </section>
           ) : null}
           <aside className="panel bp-made" aria-labelledby="bp-made">
-            <WaveGlyph className="bp-made-glyph" />
+            <VaweMark className="bp-made-glyph" />
             <div className="bp-made-text">
               <h2 id="bp-made">Made with vawe</h2>
               <p>

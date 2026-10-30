@@ -142,7 +142,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{o
    ========================================================= */
 .bar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);height:60px;position:relative;z-index:var(--z-sticky)}
 .mark{display:flex;align-items:center;gap:var(--sp-2);font-family:var(--font-title);font-weight:600;font-size:var(--fs-lead);letter-spacing:-.02em;color:var(--ink)}
-.glyph{width:24px;height:13px;color:var(--ink)}
+.glyph{width:24px;height:26px;color:var(--ink)}
 .nav{display:flex;align-items:center;gap:var(--sp-1);font-size:var(--fs-ui);font-weight:500}
 .nav a,.nav [aria-current="page"]{display:inline-flex;align-items:center;min-height:var(--hit);padding:0 var(--sp-3);border-radius:var(--r-ctl)}
 .nav a{color:var(--ink-2);transition:background-color var(--dur-hover) var(--ease-out),color var(--dur-hover) var(--ease-out)}

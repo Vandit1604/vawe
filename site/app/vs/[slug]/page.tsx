@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Header, WaveGlyph } from "../../components/Header";
+import { Header, VaweMark } from "../../components/Header";
 import { Icon } from "../../components/Icon";
 import { PageTop, Sources, Toc } from "../../components/Xp";
 import { NextView } from "../../components/RichText";
@@ -101,7 +101,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
                       {r.name}
                     </th>
                     <th scope="col" className="is-vawe">
-                      <WaveGlyph className="glyph-sm" />
+                      <VaweMark className="glyph-sm" />
                       vawe
                     </th>
                   </tr>

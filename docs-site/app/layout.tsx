@@ -19,7 +19,10 @@ export const metadata: Metadata = {
   // origin would bake in a domain (the site answers on vawe.dev, and answered on vawe.upsurge.cc
   // before that), and a second copy in this app's public/ would be a duplicate free to drift.
   // Declaring any icon is also what stops the browser probing /favicon.ico, which 404s.
-  icons: { icon: '/assets/favicon.svg' },
+  icons: {
+    icon: [{ url: '/assets/favicon.svg', type: 'image/svg+xml' }, { url: '/assets/favicon-96.png', type: 'image/png', sizes: '96x96' }],
+    apple: [{ url: '/assets/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

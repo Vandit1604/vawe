@@ -154,7 +154,7 @@ assets/vawe-flow-2/
 assets/icons/*
 !assets/icons/ui/
 !assets/icons/markdown*.svg
-!assets/icons/vawe-wave.svg
+!assets/icons/vawe-mark.svg
 !assets/icons/ledgerline-mark.svg
 assets/icons/ui/brew-logo.svg
 assets/icons/ui/cursor.svg

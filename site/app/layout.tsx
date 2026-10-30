@@ -31,14 +31,17 @@ export const metadata: Metadata = {
     "programmatic video", "Remotion alternative", "vibe coding", "deterministic rendering",
   ],
   // Google Search's favicon crawler does not support SVG (its documented formats are BMP, GIF,
-  // ICO, PNG, JPEG, PPM and TIFF), so the SVG mark ships first for browsers that do, and a real
-  // 96x96 PNG rendered from the same mark (public/assets/favicon-96.png) covers Search itself.
+  // ICO, PNG, JPEG, PPM and TIFF), so the SVG mark ships for browsers that read it, and the ICO
+  // and a 96x96 PNG (public/assets/favicon-96.png) cover Search itself.
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
       { url: "/assets/favicon.svg", type: "image/svg+xml" },
       { url: "/assets/favicon-96.png", type: "image/png", sizes: "96x96" },
     ],
+    apple: [{ url: "/assets/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  manifest: "/assets/site.webmanifest",
   openGraph: {
     title: TITLE,
     description: BLURB,

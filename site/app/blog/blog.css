@@ -225,7 +225,7 @@
 
 /* ===== POST: end ===== */
 .bp-made{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--sp-5);align-items:center;margin-top:var(--sp-8);padding:var(--sp-6)}
-.bp-made-glyph{width:58px;height:30px;color:var(--ink)}
+.bp-made-glyph{width:48px;height:52px;color:var(--ink)}
 .bp-made h2{font-size:var(--fs-card);font-weight:var(--fw-head);letter-spacing:var(--track-sub)}
 .bp-made p{margin-top:var(--sp-2);max-width:var(--measure);color:var(--ink-2);font-size:var(--fs-body);line-height:var(--lh-read)}
 .bp-made-act{display:flex;flex-wrap:wrap;gap:var(--sp-3)}

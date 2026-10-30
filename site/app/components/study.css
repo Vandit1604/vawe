@@ -75,7 +75,7 @@
 .mk{display:inline-flex;margin-right:var(--sp-2);vertical-align:-2px;color:var(--ink)}
 .mk-no{color:var(--muted)}
 .mk-partial{color:var(--ink-2)}
-.itable th .glyph-sm{width:20px;height:11px;margin-right:var(--sp-2);vertical-align:-1px}
+.itable th .glyph-sm{width:12px;height:13px;margin-right:var(--sp-2);vertical-align:-2px}
 
 .prob-side{display:grid;gap:var(--sp-3);align-content:start}
 .prob-media{border-radius:var(--r-in);overflow:hidden;box-shadow:var(--ring);background:var(--bg)}

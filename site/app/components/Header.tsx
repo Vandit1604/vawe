@@ -1,9 +1,10 @@
 import Link from "next/link";
 
-export function WaveGlyph({ className = "glyph" }: { className?: string }) {
+// The small cut of the mark (films/logo-lab/final/vawe-mark-small.svg) cropped to its ink box. For sizes below 64 px.
+export function VaweMark({ className = "glyph" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 46 24" fill="none" aria-hidden="true">
-      <path d="M1 12 Q7 1 12 12 T23 12 T34 12 T46 4" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+    <svg className={className} viewBox="8 4 48 52" fill="currentColor" aria-hidden="true">
+      <path d="M8 20h24v8h-24zM44 20h12v8h-12zM20 32h12v8h-12zM44 32h12v8h-12zM8 44h24v8h-24zM44 44h12v8h-12zM28 4H48V12H44V16H40V56H36V16H32V12H28z" />
     </svg>
   );
 }
@@ -31,7 +32,7 @@ export function Header({ active, overlay = false }: { active?: string; overlay?:
     <div className={overlay ? "wrap bar-overlay" : "wrap"}>
       <header className="bar">
         <Link className="mark" href="/">
-          <WaveGlyph />
+          <VaweMark />
           vawe
         </Link>
         {/* The current page is a <span aria-current="page">, never a link to itself (Footer.tsx
