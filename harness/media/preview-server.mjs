@@ -84,8 +84,8 @@ async function connectShared(final) {
   } catch { return null; }
 }
 
-// A page's `../../core/...` imports and assets resolve against its own checkout, so serve from that
-// checkout's top level; only a page in no repo is served from its own folder.
+// The top level of the checkout a page lives in (its own folder when it is in none). Only `vawe shot` serves from it,
+// so a shot sees the page's own core/; still and dev serve the page with pageMount, so they see this checkout's.
 export function pageRoot(abs) {
   const dir = path.dirname(abs);
   try {
@@ -145,11 +145,14 @@ async function claimWarm(page) {
   } catch { return false; }
 }
 
+// A tab that is still loading throws on url(): it is not reusable yet.
+const urlOf = (page) => { try { return page.url(); } catch { return null; } };
+
 export async function takeWarmPage(browser, url, sig) {
   const tabs = browser.targets().filter((t) => t.type() === 'page' && t.url().endsWith(WARM_HASH));
   const warm = (await Promise.all(tabs.map((t) => t.page().catch(() => null)))).filter(Boolean);
-  for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (p.url() !== url && await claimWarm(p)) await p.close().catch(() => {});
-  for (const p of warm.filter((w) => !w.isClosed() && w.url() === url)) {
+  for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (urlOf(p) !== url && await claimWarm(p)) await p.close().catch(() => {});
+  for (const p of warm.filter((w) => !w.isClosed() && urlOf(w) === url)) {
     if (!(await claimWarm(p))) continue;
     if ((await p.evaluate(() => window.__warmSig).catch(() => null)) === sig) return { page: p, reused: true };
     await p.close().catch(() => {});
