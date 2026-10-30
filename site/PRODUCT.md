@@ -30,6 +30,8 @@ Success is a visitor who understands three things without reading a paragraph: i
 
 Vawe is a motion engine. A site that whispers about a motion engine is a site that doesn't believe its own pitch. The output is loud, the range is the argument, and the site should feel like something that enjoys being looked at.
 
+The mark is a playhead over three lanes, in one colour (white on black or black on white), never the accent blue. Rules: DESIGN.md "Logo".
+
 Voice: direct, lowercase-comfortable, technically literal. Claims are specific and checkable ("39 easings", "byte-identical") because vague enthusiasm is exactly what this audience discounts. Never salesy, never breathless. Confident enough to state a fact and stop.
 
 ## Anti-references
