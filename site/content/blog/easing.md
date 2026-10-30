@@ -4,6 +4,7 @@ description: "Twelve rules of easing for motion video, each with a reason, a num
 date: 2026-10-07
 updated: 2026-10-19
 section: motion-sound
+topic: motion
 tags: "easing, css, motion, cubic-bezier, after effects"
 keywords: "easing rules, css easing functions, motion design easing, ease out vs ease in, cubic-bezier easing, css linear() easing, after effects easing in css"
 hero: /blog/easing/hero.webp

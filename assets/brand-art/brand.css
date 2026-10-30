@@ -19,7 +19,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 h1 { margin: 0; font-weight: 600; font-size: var(--h1); line-height: 1.0; letter-spacing: -0.02em; }
 .sub { margin: calc(var(--h1) * 0.32) 0 0; font-weight: 400; font-size: var(--sub); line-height: 1.25; letter-spacing: -0.01em; max-width: 24em; }
 .mono { margin: calc(var(--sub) * 1.1) 0 0; font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: var(--mono); }
-.mono span { display: inline-block; padding: 0.28em 0.6em; }
+.mono span { display: inline-block; padding: 0.28em 0.6em; white-space: nowrap; }
 
 [data-ink="a"] .copy { color: var(--paper); }
 [data-ink="a"] .mono span { background: var(--paper); color: var(--deep); }

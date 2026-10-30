@@ -4,6 +4,7 @@ description: "Capture a site, read its palette and type, and build a launch film
 date: 2026-10-19
 updated: 2026-10-19
 section: how-to
+topic: how-to
 tags: "product launch video, saas promo video, website to video, brand kit, vawe"
 keywords: "product launch video from website, saas promo video generator, create launch video for github project, website to video, launch video from url"
 ---

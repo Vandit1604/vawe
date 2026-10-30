@@ -4,6 +4,7 @@ description: "A judge that starts from reject, caps scores against two reference
 date: 2026-10-11
 updated: 2026-10-16
 section: agents
+topic: watching
 tags: "llm as a judge, evaluation, ai agents, motion graphics, rubric"
 keywords: "llm as a judge, llm judge rubric, llm judge reference comparison, llm judge ledger, evaluate generated video"
 hero: /blog/judge-design/hero.webp

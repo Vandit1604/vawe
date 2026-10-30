@@ -4,6 +4,7 @@ description: "Eleven single UI skills all built cluttered heroes. In a blind tes
 date: 2026-10-11
 updated: 2026-10-16
 section: agents
+topic: agents
 tags: "ui skills, ai agents, blind test, design systems, taste"
 keywords: "ui skills for ai agents, frontend design skill claude code, ai design skills, best ui skills for claude, blind design test"
 hero: /blog/skill-combos/hero.webp

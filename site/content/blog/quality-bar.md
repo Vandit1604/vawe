@@ -4,6 +4,7 @@ description: "Median eye jump 0.185 frame heights and 30.5% of arrivals overshoo
 date: 2026-10-07
 updated: 2026-10-16
 section: motion-sound
+topic: motion
 tags: "motion graphics, quality metrics, benchmark, video analysis, agents"
 keywords: "motion graphics benchmark, measure motion design, average shot length motion graphics, shot cut analysis, reference film measurement"
 hero: /blog/quality-bar/hero.webp

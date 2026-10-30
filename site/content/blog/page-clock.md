@@ -4,6 +4,7 @@ description: "A 75-line virtual clock makes Date.now, timers, requestAnimationFr
 date: 2026-10-08
 updated: 2026-10-16
 section: rendering
+topic: determinism
 tags: "virtual clock, math.random seed, deterministic rendering, headless chrome, javascript"
 keywords: "mock date.now puppeteer, math random seed javascript, virtual clock javascript, fake requestanimationframe, deterministic video rendering"
 hero: /blog/page-clock/hero.webp

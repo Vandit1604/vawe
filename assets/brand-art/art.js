@@ -113,9 +113,11 @@ function figure(ctx, x, y, h, v, { page = false, step = 1 } = {}) {
 }
 
 // Timeline lanes on a tower face: floors along z, each floor a row of clips cut around one playhead column.
-function laneFace(ctx, c, R, O, U, zn, zf, E, base, clipV) {
+// play (0..1), when given, sweeps the playhead from the tower's corner to its outer edge; each clip then draws one ink.
+function laneFace(ctx, c, R, O, U, zn, zf, E, base, clipV, play) {
   const V = [0, 0, 1];
-  const ph = 0.25 + R() * 0.6 * E;
+  const ph0 = 0.25 + R() * 0.6 * E;
+  const ph = play == null ? ph0 : 0.03 + play * E;
   const dz = 0.034;
   for (let z = zn; z < zf; z += dz) {
     const t = (z - zn) / (zf - zn);
@@ -129,7 +131,8 @@ function laneFace(ctx, c, R, O, U, zn, zf, E, base, clipV) {
       const u1 = Math.min(E, u + len);
       const cut = [[u, u1]];
       if (u < ph + 0.03 && u1 > ph - 0.03) cut.splice(0, 1, [u, ph - 0.03], [ph + 0.03, u1]);
-      for (const [a, e] of cut) if (e - a > 0.01) fill(ctx, quad(c, O, U, V, a, top, e, bot), clipV * (0.7 + 0.6 * R()));
+      const one = play == null ? null : clipV * (0.7 + 0.6 * R());
+      for (const [a, e] of cut) if (e - a > 0.01) fill(ctx, quad(c, O, U, V, a, top, e, bot), one ?? clipV * (0.7 + 0.6 * R()));
       u = u1 + 0.018 + R() * 0.03;
     }
   }
@@ -142,17 +145,17 @@ function sceneLanes(ctx, W, H, lay, R) {
   const sky = 0.1;
   ctx.fillStyle = gray(sky);
   ctx.fillRect(0, 0, W, H);
-  const yb = 0.5, wb = 0.06, zb = 9;
+  const yb = 0.5, wb = lay.road ?? 0.06, zb = 9;
   const sx = cx, sy = cy + (f * yb) / zb - H * 0.05;
   glow(ctx, sx, sy, H * 0.6, 0.3);
   const towers = lay.towers;
   for (const t of towers) {
     const xi = (t.o[0] * H * t.zn) / f, yi = (t.o[1] * H * t.zn) / f;
     const O = [xi, yi, 0];
-    laneFace(ctx, c, R, O, [0, t.q[1], 0], t.zn, t.zf, 3, 0.62, 0.12);
-    laneFace(ctx, c, R, O, [t.q[0], 0, 0], t.zn, t.zf, 3, 0.88, 0.22);
+    laneFace(ctx, c, R, O, [0, t.q[1], 0], t.zn, t.zf, 3, 0.62, 0.12, lay.play);
+    laneFace(ctx, c, R, O, [t.q[0], 0, 0], t.zn, t.zf, 3, 0.88, 0.22, lay.play);
   }
-  star(ctx, sx, sy, H * 0.012);
+  star(ctx, sx, sy, lay.twinkle ? H * 0.012 * lay.twinkle : H * 0.012);
   for (let z = 0.3; z < zb; z *= 1.04) {
     const t = Math.min(1, (z - 0.3) / 3.2);
     fill(ctx, quad(c, [-wb, yb, 0], [1, 0, 0], [0, 0, 1], 0, z, 2 * wb, z * 1.042), 0.55 + 0.42 * t);
@@ -267,7 +270,7 @@ function sceneStrip(ctx, W, H, lay, R) {
   const flat = (x0, z0, x1, z1, v) => fill(ctx, [c.pr(P(x0, z0)), c.pr(P(x1, z0)), c.pr(P(x1, z1)), c.pr(P(x0, z1))], v);
   const zPage = lay.pageEnd, hw = 0.5;
   flat(-hw, zPage, hw, zFar, 0.12);
-  let z = zPage + 0.05;
+  let z = lay.run == null ? zPage + 0.05 : zPage + 0.05 + (lay.run - 1) * 0.5;
   for (let k = 0; z < zFar; k++) {
     const len = 0.5, t = Math.min(1, Math.log(z / zPage) / Math.log(zFar / zPage));
     flat(-hw * 0.7, z, hw * 0.7, z + len * 0.86, 0.62 + 0.36 * t);
@@ -307,7 +310,7 @@ function sceneStrip(ctx, W, H, lay, R) {
   fill(ctx, [c.pr([-0.005, yb, zf * 0.76]), c.pr([0.05, yb, zf * 0.76]), c.pr([0.04, yb, zf]), c.pr([0, yb, zf])], 0.3);
   const [fx, fy] = c.pr(P(0.02, zf));
   figure(ctx, fx, fy, H * lay.figH, 0.04, { page: true });
-  star(ctx, cx, cy - H * 0.04, H * 0.017);
+  star(ctx, cx, cy - H * 0.04, lay.twinkle ? H * 0.017 * lay.twinkle : H * 0.017);
 }
 
 // Adds a cone of light from point a to the segment b0-b1, fading from `near` to `far` opacity.
@@ -326,16 +329,17 @@ function beam(ctx, a, b0, b1, near, far) {
 }
 
 // Text lines of a document on the plane O + u*U + v*V, inside u 0..w, v 0..h: a title bar, then ragged lines.
-function docLines(ctx, c, R, { O, U, V, w, h }, ink, rows) {
+// `shown` (a count of body lines, fractional) types the lines in: the line it ends in is cut at that fraction.
+function docLines(ctx, c, R, { O, U, V, w, h, shown = Infinity }, ink, rows) {
   const m = w * 0.1, lh = (h - 2 * m) / rows;
   fill(ctx, quad(c, O, U, V, m, m, m + w * 0.42, m + lh * 0.9), ink);
   for (let k = 2; k < rows; k++) {
-    const y = m + k * lh;
+    const y = m + k * lh, typed = shown - (k - 2), end = typed >= 1 ? Infinity : m + (w - 2 * m) * typed;
     let x = m + (R() < 0.3 ? w * 0.06 : 0);
     const n = 1 + Math.floor(R() * 3);
     for (let i = 0; i < n && x < w - m; i++) {
       const len = Math.min(w - m - x, w * (0.08 + R() * 0.32));
-      fill(ctx, quad(c, O, U, V, x, y, x + len, y + lh * 0.45), ink);
+      if (x < end) fill(ctx, quad(c, O, U, V, x, y, Math.min(x + len, end), y + lh * 0.45), ink);
       x += len + w * 0.04;
     }
   }
@@ -362,15 +366,21 @@ function sceneStair(ctx, W, H, lay, R) {
     const face = 0.8 + 0.16 * t;
     fill(ctx, quad(c, [x0, y0, z0], [1, 0, 0], [0, 1, 0], 0, 0, 2 * w, h), face);
     fill(ctx, quad(c, [x0, y0, z0], [1, 0, 0], [0, 1, 0], 0, 0, 2 * w, h * 0.035), 1);
-    docLines(ctx, c, R, { O: [x0, y0, z0], U: [1, 0, 0], V: [0, 1, 0], w: 2 * w, h }, 0.16, 11);
+    const typed = lay.type == null ? Infinity : typedLines((lay.type + s.i / steps.length) % 1, 9);
+    docLines(ctx, c, R, { O: [x0, y0, z0], U: [1, 0, 0], V: [0, 1, 0], w: 2 * w, h, shown: typed }, 0.16, 11);
     if (s.i === lay.figStep) {
       const fz = z0 + d * 0.55, xf = s.x + w * lay.figU;
       fill(ctx, [c.pr([xf - 0.01, y0, fz]), c.pr([xf + 0.05, y0, fz]), c.pr([xf + 0.04, y0, z0 + 0.02]), c.pr([xf - 0.02, y0, z0 + 0.02])], 0.55);
       const [fx, fy] = c.pr([xf, y0, fz]);
-      figure(ctx, fx, fy, H * lay.figH, 0.04);
+      figure(ctx, fx, fy, H * lay.figH, 0.04, { page: Boolean(lay.figPage) });
     }
   }
-  star(ctx, sx, sy, H * 0.015);
+  star(ctx, sx, sy, lay.twinkle ? H * 0.015 * lay.twinkle : H * 0.015);
+}
+
+// A card's lines at phase q of its cycle: typed in over 85% of it, then cleared.
+function typedLines(q, lines) {
+  return q < 0.85 ? (lines * q) / 0.85 : 0;
 }
 
 // The towers of the search city, nearest last, with none in front of the cited page; cA and cB box the cited face on screen.
@@ -435,9 +445,9 @@ function sceneSearch(ctx, W, H, lay, R) {
   const { towers, cA, cB } = searchTowers(c, W, lay, R);
   searchGround(ctx, c, lay);
   for (const t of towers) pageTower(ctx, c, R, lay, t);
-  for (const b of lay.beams) {
-    const a = c.pr([b.x, yg - b.y, b.z]), len = H * 2.4;
-    beam(ctx, a, [a[0] + Math.cos(b.a - b.w) * len, a[1] + Math.sin(b.a - b.w) * len], [a[0] + Math.cos(b.a + b.w) * len, a[1] + Math.sin(b.a + b.w) * len], 0.5, 0.05);
+  for (const [i, b] of lay.beams.entries()) {
+    const a = c.pr([b.x, yg - b.y, b.z]), len = H * 2.4, ang = b.a + (lay.swing?.[i] ?? 0);
+    beam(ctx, a, [a[0] + Math.cos(ang - b.w) * len, a[1] + Math.sin(ang - b.w) * len], [a[0] + Math.cos(ang + b.w) * len, a[1] + Math.sin(ang + b.w) * len], 0.5, 0.05);
     glow(ctx, a[0], a[1], H * 0.025, 0.9);
   }
   const src = c.pr(lay.citedFrom);
@@ -504,7 +514,7 @@ function sceneCatalog(ctx, W, H, lay, R) {
   const cards = lay.cards;
   for (let i = cards - 1; i >= 0; i--) {
     const xc = xo + 0.06 + (i * (P - 0.1)) / cards;
-    const up = rh * (0.45 + 0.15 * R()), tab = R();
+    const up = rh * (0.45 + 0.15 * R()) + (i === lay.liftCard ? lay.lift : 0), tab = R();
     const O = [xc, yTop - up, za + 0.015];
     fill(ctx, quad(c, O, [0, 0, 1], [0, 1, 0], 0, 0, zb - za - 0.03, up + rh * 0.4), 0.97 - 0.1 * R());
     fill(ctx, quad(c, O, [0, 0, 1], [0, 1, 0], (zb - za) * (0.1 + 0.6 * tab), -rh * 0.07, (zb - za) * (0.28 + 0.6 * tab), 0.002), 0.97);
@@ -580,15 +590,16 @@ function sceneCinema(ctx, W, H, lay, R) {
   cone.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
   ctx.closePath();
   const g = ctx.createLinearGradient(lens[0], lens[1], mx, my);
-  g.addColorStop(0, 'rgba(255,255,255,0.6)');
-  g.addColorStop(1, 'rgba(255,255,255,0.12)');
+  g.addColorStop(0, lay.flicker == null ? 'rgba(255,255,255,0.6)' : `rgba(255,255,255,${0.6 * lay.flicker})`);
+  g.addColorStop(1, lay.flicker == null ? 'rgba(255,255,255,0.12)' : `rgba(255,255,255,${0.12 * lay.flicker})`);
   ctx.fillStyle = g;
   ctx.fill();
   ctx.clip();
   for (let k = 0; k < 60; k++) {
-    const t = R(), u = R(), v = R();
+    const t0 = R(), u = R(), v = R();
+    const t = lay.drift == null ? t0 : (t0 + lay.drift) % 1;
     const [ex, ey] = at(u, v);
-    glow(ctx, lens[0] + (ex - lens[0]) * t, lens[1] + (ey - lens[1]) * t, H * (0.04 + 0.12 * t), 0.12);
+    glow(ctx, lens[0] + (ex - lens[0]) * t, lens[1] + (ey - lens[1]) * t, H * (0.04 + 0.12 * t), lay.drift == null ? 0.12 : 0.12 * Math.sin(Math.PI * t));
   }
   ctx.restore();
   const [sx, sy] = at(lay.starUV[0], lay.starUV[1]);
@@ -665,6 +676,12 @@ function sceneEase(ctx, W, H, lay, R) {
   for (let i = 0; i < n; i++) {
     const u = ease(i / (n - 1)), d = 0.006;
     fill(ctx, [Q(u - d), Q(u + d), c.pr([ox + tx * (u + d), yb, oz + tz * (u + d) - lay.track - 0.12]), c.pr([ox + tx * (u - d), yb, oz + tz * (u - d) - lay.track - 0.12])], 1);
+  }
+  if (lay.run != null) {
+    const u = lay.run, e = ease(u), [dx, dy] = P(u, e), [qx, qy] = Q(e);
+    glow(ctx, qx, qy, H * 0.07, 0.8);
+    glow(ctx, dx, dy, H * 0.08, 0.7);
+    knob([dx, dy], H * 0.016, 1);
   }
   const [fx, fy] = c.pr([ox + tx * lay.figU, yb, oz + tz * lay.figU - lay.track - 0.06]);
   glow(ctx, fx, fy - H * lay.figH * 0.4, H * lay.figH * 2.4, 0.75);

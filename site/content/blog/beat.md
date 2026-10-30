@@ -4,6 +4,7 @@ description: "Read a music track as a beat grid, check that each cut lands withi
 date: 2026-10-11
 updated: 2026-10-16
 section: motion-sound
+topic: audio
 tags: "cut to the beat, beat detection, audio onsets, beat grid, agents"
 keywords: "cut video to the beat, beat sync video editing, beat detection python, audio onset detection, edit video to music"
 hero: /blog/beat/hero.webp

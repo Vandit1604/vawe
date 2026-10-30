@@ -4,6 +4,7 @@ description: "Capture frames with Puppeteer, pipe them into ffmpeg and get an MP
 date: 2026-10-19
 updated: 2026-10-19
 section: how-to
+topic: rendering
 tags: "puppeteer, ffmpeg, screenshots to video, headless chrome, mp4"
 keywords: "puppeteer screenshots to mp4, puppeteer record animation to mp4, headless chrome render video frames, ffmpeg image2pipe, ffmpeg width not divisible by 2"
 ---

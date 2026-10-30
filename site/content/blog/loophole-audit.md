@@ -4,6 +4,7 @@ description: "18 of 36 films passed a live-hold check with a slow camera drift. 
 date: 2026-10-10
 updated: 2026-10-16
 section: agents
+topic: agents
 tags: "ai agents, reward hacking, automated checks, testing, harness design"
 keywords: "reward hacking ai agents, agents gaming checks, goodhart's law agents, acceptance criteria for ai agents, test fixtures for checks"
 hero: /blog/loophole-audit/hero.webp

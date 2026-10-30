@@ -4,6 +4,7 @@ description: "A render died at 97% and left 3.7 GB of frames. Slice markers, ret
 date: 2026-10-10
 updated: 2026-10-16
 section: rendering
+topic: rendering
 tags: "resumable rendering, puppeteer hangs, watchdog, headless chrome, retries"
 keywords: "resume failed render, puppeteer hangs, puppeteer timeout, render checkpoint, document.fonts.ready hang"
 hero: /blog/resumable-finals/hero.webp

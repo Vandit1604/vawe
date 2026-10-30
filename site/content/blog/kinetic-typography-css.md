@@ -4,6 +4,7 @@ description: "Five kinetic text effects in plain CSS, each with code and a 2 s c
 date: 2026-10-19
 updated: 2026-10-19
 section: how-to
+topic: motion
 tags: "kinetic typography, css animation, text animation, motion graphics"
 keywords: "kinetic typography css, kinetic typography javascript, text animation css, css letter animation, text animation video"
 ---

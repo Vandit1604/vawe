@@ -30,3 +30,13 @@ Add `--size 1280x640` to a banner for a GitHub social preview.
 | `vawe-hq/awesome-agent-video` `assets/banner.png` | cinema, night print, `cinema` |
 | `site/app/opengraph-image.png` (vawe.dev default card) | strip, night print |
 | `site/public/assets/og.png` (docs card) | strip, blue print |
+
+## Share cards and loops (vawe.dev)
+
+`cards.js` gives each main page of vawe.dev a scene, ink, composition, copy and loop motion (`PAGES`), and each
+blog topic a scene and a `vary()` that a seed from the post's slug draws a composition from (`TOPICS`; a post names
+its topic in its `topic` front matter). `card.html` paints a still (`?route=/easing`, or `?post=<slug>&title=&section=&topic=`),
+`loop.html` a seamless 5 s loop of a page. `node scripts/site/og-cards.mjs` writes the cards to `site/public/og/`;
+`--loops` also renders each page's loop with `bin/vawe dev --small` (960x504, 30 fps). A loop key is absent from a
+still, and every scene draws a still exactly as before the loop keys existed.
+

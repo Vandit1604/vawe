@@ -4,6 +4,7 @@ description: "Render an HTML page to MP4 with a 20-line Puppeteer script or with
 date: 2026-10-16
 updated: 2026-10-16
 section: how-to
+topic: rendering
 featured: true
 featuredOrder: 1
 tags: "html to mp4, puppeteer, headless chrome, css animation to video, ffmpeg"

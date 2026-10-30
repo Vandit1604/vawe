@@ -4,6 +4,7 @@ description: "Weight pixels by luma and edges, draw seeded points, light them by
 date: 2026-10-11
 updated: 2026-10-16
 section: motion-sound
+topic: motion
 tags: "image to particles, point cloud, three.js, seeded random, particles"
 keywords: "image to particles three.js, photo to point cloud, convert image to particles, three.js particles from image, deterministic particles"
 hero: /blog/image-points/hero.webp

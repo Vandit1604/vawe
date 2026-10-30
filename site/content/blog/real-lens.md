@@ -4,6 +4,7 @@ description: "CSS blur and text-shadow against one WebGL lens that films the pag
 date: 2026-10-11
 updated: 2026-10-16
 section: motion-sound
+topic: motion
 tags: "depth of field, bloom, webgl, html to video, lens"
 keywords: "depth of field in the browser, css depth of field, webgl depth of field, bloom effect css, halation shader"
 hero: /blog/real-lens/hero.webp

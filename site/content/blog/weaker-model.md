@@ -4,6 +4,7 @@ description: "Six films by a weaker model: median 13 drafts, 0 of 6 passed the j
 date: 2026-10-11
 updated: 2026-10-16
 section: agents
+topic: agents
 tags: "ai agent harness, weaker model, advice, judge, agents"
 keywords: "ai agent harness, agent harness engineering, design for weaker model, llm agent tooling, make agents succeed"
 hero: /blog/weaker-model/symptoms.webp

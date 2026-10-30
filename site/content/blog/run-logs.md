@@ -4,6 +4,7 @@ description: "One JSONL line per command with stage, seconds and exit code. An a
 date: 2026-10-10
 updated: 2026-10-16
 section: agents
+topic: agents
 tags: "observability, run logs, ai agents, jsonl, agent traces"
 keywords: "ai agent observability, agent run logs, jsonl log, debugging ai agents, long-running commands for ai agents"
 hero: /blog/run-logs/hero.webp

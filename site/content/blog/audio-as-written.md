@@ -4,6 +4,7 @@ description: "Our example film measured -28.8 LUFS against a -20 target. A plain
 date: 2026-10-10
 updated: 2026-10-16
 section: motion-sound
+topic: audio
 tags: "lufs, video loudness, audio mixing, true peak, background music"
 keywords: "lufs for video, video loudness target, measure loudness ffmpeg, true peak limiter, background music for generated video"
 hero: /blog/audio-as-written/hero.webp

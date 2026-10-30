@@ -4,6 +4,7 @@ description: "The vawe page format in one page: a duration meta, data-world beat
 date: 2026-10-07
 updated: 2026-10-16
 section: rendering
+topic: determinism
 tags: "html to video, html video format, data attributes, page contract"
 keywords: "html to video format, render html to video, html video format, data attribute contract, responsive video layout"
 hero: /blog/page-contract/hero.webp

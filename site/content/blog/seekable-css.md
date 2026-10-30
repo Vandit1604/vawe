@@ -4,6 +4,7 @@ description: "Seek CSS animations and Web Animations forward and back in Puppete
 date: 2026-10-09
 updated: 2026-10-16
 section: rendering
+topic: determinism
 tags: "seek css animation, web animations api, css keyframes, headless chrome, rendering"
 keywords: "seek css animation, web animations api currenttime, document.getanimations, puppeteer css animation screenshot, svg smil seek"
 hero: /blog/seekable-css/hero.webp

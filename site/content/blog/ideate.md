@@ -4,6 +4,7 @@ description: "Verbalized sampling asks a model for several ideas with a typicali
 date: 2026-10-11
 updated: 2026-10-16
 section: agents
+topic: agents
 tags: "verbalized sampling, mode collapse, creative agents, ideation, motion graphics"
 keywords: "verbalized sampling, verbalized sampling prompt, mode collapse llm, how to get diverse ideas from llm, agent ideation method"
 hero: /blog/ideate/hero.webp

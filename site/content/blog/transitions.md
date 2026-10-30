@@ -4,6 +4,7 @@ description: "Name what carries the eye over each cut. 12 handoff families and t
 date: 2026-10-11
 updated: 2026-10-16
 section: motion-sound
+topic: motion
 tags: "video transitions, match cut, handoffs, slideshow, motion design"
 keywords: "motion graphics transitions, match cut, scene transitions in motion graphics, video transition types, cut on action"
 hero: /blog/transitions/hero.webp

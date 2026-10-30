@@ -4,6 +4,7 @@ description: "JPEG quality 92, GPU compositing, one Chrome per lane (140 s to 47
 date: 2026-10-10
 updated: 2026-10-16
 section: rendering
+topic: rendering
 tags: "headless chrome, puppeteer, screenshots, jpeg, gpu compositing, performance"
 keywords: "puppeteer screenshot speed, speed up puppeteer screenshots, headless chrome parallel screenshots, too many chrome processes, puppeteer concurrency"
 hero: /blog/fast-drafts/hero.webp

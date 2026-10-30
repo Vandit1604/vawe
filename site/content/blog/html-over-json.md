@@ -4,6 +4,7 @@ description: "A JSON video format lost a blind A/B test to one HTML page: 10.75 
 date: 2026-10-07
 updated: 2026-10-16
 section: rendering
+topic: determinism
 featured: true
 featuredOrder: 1
 tags: "json video format, html to video, agents, web animations, architecture"

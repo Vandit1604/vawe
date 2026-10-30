@@ -23,6 +23,10 @@ Add `featured: true` to up to three posts. `featuredOrder: 1` puts a post first.
 
 `section` is one of `how-to`, `rendering`, `agents`, `motion-sound` (`SECTIONS` in `lib/blog.ts`, `[data-s]` in `blog.css`).
 
+## Share card
+
+`topic` picks the scene of the post's share card: one of the keys of `TOPICS` in `assets/brand-art/cards.js` (`agents`, `determinism`, `rendering`, `audio`, `motion`, `watching`, `how-to`, `site`). Run `node scripts/site/og-cards.mjs` and commit `site/public/og/blog/<slug>.png`; the post's `opengraph-image` serves that file.
+
 ## Agents
 
 `/llms.txt` lists every live post and `/blog/<slug>.md` serves its Markdown. Both follow the `date` rule above, with no deploy. A removed post needs a line in `BLOG_MOVED` in `lib/redirects.mjs`.

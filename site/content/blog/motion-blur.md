@@ -4,6 +4,7 @@ description: "Add motion blur to an HTML animation by blending 1 to 32 subframes
 date: 2026-10-09
 updated: 2026-10-16
 section: motion-sound
+topic: motion
 tags: "motion blur, subframes, ffmpeg, headless chrome, rendering"
 keywords: "css motion blur video, motion blur html animation, subframe motion blur, 180 degree shutter, ffmpeg frame blend"
 hero: /blog/motion-blur/hero.webp

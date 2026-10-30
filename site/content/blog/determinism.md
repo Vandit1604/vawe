@@ -4,6 +4,7 @@ description: "Two renders of one page gave 70 of 216 different frames. Six cause
 date: 2026-10-10
 updated: 2026-10-16
 section: rendering
+topic: determinism
 featured: true
 featuredOrder: 3
 tags: "determinism, headless chrome, puppeteer, svg filter, gpu compositing"
