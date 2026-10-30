@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 // `vawe still <page|mp4> --at <s> [--out file.png]`: one PNG at the full render size.
 //   node harness/media/still.mjs films/my-launch/page.html --at 4.2
-// A page renders that one frame at its final size (1920x1080 for 16:9); an mp4 gives the exact frame at its own size.
+// A page renders that one frame at its final size (1920x1080 for 16:9), or at --size WxH when that has the page's aspect; an mp4 gives the exact frame at its own size.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { openPage, seekAll, resolveFrame, settle, readPageMeta } from './render-page.mjs';
 import { clampToLastFrame, probe } from './see-views.mjs';
 import { isUrl } from '../lib/url.mjs';
-import { stillArgs, stillPath, stillProblem } from './see/still-math.mjs';
+import { stillArgs, stillPath, stillProblem, sizeProblem } from './see/still-math.mjs';
 import { resolveDuration } from './page-duration.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 
-export async function pageStill(pagePath, at, out, { final = true } = {}) {
+export async function pageStill(pagePath, at, out, { final = true, size } = {}) {
   const dur = await resolveDuration(pagePath);
   if (!(dur > 0)) die(`${pagePath} has no <meta name="duration">`);
   const last = clampToLastFrame(at, dur, Number(readPageMeta(pagePath, 'fps')) || 30);
-  const frame = resolveFrame(pagePath, { final: true });
+  const [w] = size ? size.split('x').map(Number) : [];
+  const frame = resolveFrame(pagePath, { final: true, w });
+  const wrongSize = size && sizeProblem(size, frame.aspect);
+  if (wrongSize) die(wrongSize);
   const opened = await openPage(pagePath, frame, { warm: true, final });
   try {
     if (!opened.reused) {
@@ -30,7 +33,10 @@ export async function pageStill(pagePath, at, out, { final = true } = {}) {
   } finally {
     await opened.close();
   }
-  return { ...last, size: `${frame.width}x${frame.height}` };
+  const png = fs.readFileSync(out);
+  const got = `${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`;
+  if (size && got !== size) { fs.rmSync(out, { force: true }); die(`the screenshot is ${got}, not the ${size} asked for`); }
+  return { ...last, size: got };
 }
 
 export function videoStill(mp4, at, out) {
@@ -46,16 +52,18 @@ export function videoStill(mp4, at, out) {
 
 async function main(argv) {
   const flag = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
-  const valued = new Set(['--at', '--out']);
+  const valued = new Set(['--at', '--out', '--size']);
   const source = argv.find((a, i) => !a.startsWith('--') && !valued.has(argv[i - 1]));
   const at = flag('--at');
-  const problem = stillProblem({ source, at });
+  const size = flag('--size');
+  const problem = stillProblem({ source, at, size });
   if (problem) die(problem);
+  if (size && !source.endsWith('.html')) die(`--size goes to a page: still was given ${source}`);
   if (!isUrl(source) && !fs.existsSync(source)) die(`no such file: ${source}`);
-  const out = path.resolve(flag('--out') || stillPath(source, at));
+  const out = path.resolve(flag('--out') || stillPath(source, at, size));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   let got;
-  try { got = source.endsWith('.html') ? await pageStill(source, Number(at), out) : videoStill(source, Number(at), out); } catch (e) { die(e.message); }
+  try { got = source.endsWith('.html') ? await pageStill(source, Number(at), out, { size }) : videoStill(source, Number(at), out); } catch (e) { die(e.message); }
   if (got.clamped) console.log(`note: ${at}s is past the last frame; the still is the last frame (${got.t}s)`);
   console.log(`✓ ${out}: ${got.size}, the frame at ${got.t}s`);
 }

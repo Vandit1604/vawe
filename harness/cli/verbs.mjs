@@ -14,7 +14,7 @@ import { parseTargets, shotProblem } from '../media/shot-math.mjs';
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { looksProblem } from '../lib/looks.mjs';
-import { PARAMS_ENV, paramsQuery, paramsFilm, paramsFlags } from '../lib/page-params.mjs';
+import { renderEnv, paramsFilm, paramsFlags } from '../lib/page-params.mjs';
 import { seeProblem } from '../media/see/one-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
 import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs';
@@ -64,7 +64,7 @@ const devNext = (v, [page]) => {
 };
 const readFresh = (file, sinceMs) => (fs.existsSync(file) && fs.statSync(file).mtimeMs >= sinceMs ? readFindings(file) || [] : []);
 const critiqueFindingsFile = (page) => path.join(scratch('critique', filmKey(page)), 'findings.json');
-const paramEnv = (v) => ({ [PARAMS_ENV]: paramsQuery(v.param) });
+const paramEnv = (v) => renderEnv(v);
 const needsPage = (v, input, verbName) => {
   if (v.param && !String(input).endsWith('.html')) throw new UsageError(`--param goes to a page: ${verbName} was given ${input}`);
 };
@@ -81,7 +81,8 @@ function versus(v, input) {
 }
 
 const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
-const ASPECT = 'one of 16:9 9:16 1:1 4:5 4:3';
+const ASPECT = 'a W:H ratio of whole numbers (16:9 9:16 1:1 4:5 4:3 are the common ones, 1200:630 and 2:1 work too): overrides the page aspect meta, the page sees it as it sees the meta, and the default output name gets it (-2x1), so two aspects do not overwrite each other';
+const ASPECT_FLAG = { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT };
 const PARAM = { name: 'param', type: 'string', repeat: true, help: 'a page option key=value, repeatable: the page reads it with new URLSearchParams(location.search), for example --param look=riso. A page only; part of the render key; the default output name gets it (-look-riso), so renders of two looks do not overwrite each other' };
 
 export const VERBS = [
@@ -203,7 +204,7 @@ export const VERBS = [
     flags: [
       { name: 'from', type: 'number', help: 'start second' },
       { name: 'to', type: 'number', help: 'end second' },
-      { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT },
+      ASPECT_FLAG,
       { name: 'lock-length', type: 'bool', help: 'write the found length of a duration="auto" page into its meta, so a cut to music can fix it' },
       { name: 'silent', type: 'bool', help: 'picture-only draft: leave the audio tags out of the mix (faster)' },
       PARAM,
@@ -274,6 +275,7 @@ export const VERBS = [
     name: 'approve', summary: 'use when the owner signs off the full draft of a page: vawe ship needs it; a film session never runs this',
     positional: [PAGE],
     flags: [
+      ASPECT_FLAG,
       PARAM,
       { name: 'reject', type: 'bool', help: 'record that the owner rejects the draft, and withdraw any approval' },
       { name: 'note', type: 'string', default: 'none', help: 'the owner\'s reason, kept in the run log' },
@@ -367,6 +369,7 @@ export const VERBS = [
       { name: 'from', type: 'number', default: 0, help: 'an mp4 only: the film second where the file starts (a --from/--to draft); --at stays in film seconds' },
       { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page, or an mp4 named after its film: the worlds come from films/<name>/page.html)' },
       { name: 'cols', type: 'number', default: 'by count, at most 3', help: 'tiles per row' },
+      ASPECT_FLAG,
       { name: 'ref', type: 'path', help: 'a reference mp4 (a page or an mp4, never a folder): each row is the reference left, yours right, at the same second; --at may be \`cuts\` for the middle of each world change of the last full draft', kind: 'file' },
       PARAM,
       { name: 'out', type: 'path', default: 'out/sheet-<name>.png (--ref: out/compare-<name>.png)', help: 'the PNG path' },
@@ -402,15 +405,18 @@ export const VERBS = [
     positional: [{ name: 'page|mp4', required: true, kind: 'file', remote: true, help: 'films/<name>/page.html, an mp4, or an https mp4 URL (read with one range request)' }],
     flags: [
       { name: 'at', type: 'string', help: 'the film second to write; past the last frame it is moved to the last frame and the output says so' },
+      { name: 'size', type: 'string', default: 'the aspect at 1920 on the long edge', help: 'a page only: the PNG size as WxH, for example 1200x630; refused when its ratio is not the aspect of the page (--aspect 1200:630 sets the aspect)' },
+      ASPECT_FLAG,
       PARAM,
       { name: 'out', type: 'path', default: 'out/still/<name>-<s>s.png', help: 'the PNG path' },
     ],
-    example: 'vawe still films/my-launch/page.html --at 4.2   |   vawe still out/my-launch.mp4 --at 4.2 --out /tmp/f.png',
+    example: 'vawe still films/my-launch/page.html --at 4.2   |   vawe still films/card/page.html --at 0 --aspect 1200:630 --size 1200x630   |   vawe still out/my-launch.mp4 --at 4.2 --out /tmp/f.png',
     build: (v, [input]) => {
-      const problem = stillProblem({ source: input, at: v.at });
+      const problem = stillProblem({ source: input, at: v.at, size: v.size });
       if (problem) throw new UsageError(problem);
       needsPage(v, input, 'still');
-      return [{ script: 'harness/media/still.mjs', args: [input, '--at', v.at, ...opt('--out', v.out)] }];
+      if ((v.size || v.aspect) && !input.endsWith('.html')) throw new UsageError(`--size and --aspect go to a page: still was given ${input}`);
+      return [{ script: 'harness/media/still.mjs', args: [input, '--at', v.at, ...opt('--size', v.size), ...opt('--out', v.out)] }];
     },
     next: () => 'Read the PNG at full size; vawe zoom <page|mp4> --at <s> --box x,y,w,h enlarges one region',
   },
