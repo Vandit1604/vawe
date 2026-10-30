@@ -7,7 +7,6 @@ on:
   push:
     branches: [main]
     paths:
-      - "core/motion/**"
       - "site/lib/typo.mjs"
       - "site/lib/md/accept.ts"
       - ".github/workflows/sync-docs-vendor.yml"
@@ -28,7 +27,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            core/motion
             site/lib/typo.mjs
             site/lib/md/accept.ts
           sparse-checkout-cone-mode: false
@@ -44,8 +42,7 @@ jobs:
           export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/docs -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
           git clone --depth 1 git@github.com:vawe-hq/vawe-docs.git out 2>/dev/null \
             || { git init -q -b main out && git -C out remote add origin git@github.com:vawe-hq/vawe-docs.git; }
-          mkdir -p out/vendor/vawe/core/motion out/vendor/vawe/site/lib/md
-          rsync -a --delete core/motion/ out/vendor/vawe/core/motion/
+          mkdir -p out/vendor/vawe/site/lib/md
           cp site/lib/typo.mjs out/vendor/vawe/site/lib/typo.mjs
           cp site/lib/md/accept.ts out/vendor/vawe/site/lib/md/accept.ts
           cd out
