@@ -2,7 +2,7 @@
 // mp4, with an optional N-subframe motion blur blended into each output frame.
 //
 //   node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect W:H|all] [--fps N]
-//     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--silent] [--profile]
+//     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--silent] [--small] [--profile]
 //
 // Default is a DRAFT: half size, 30 fps, no blur, the page's <audio> mixed in (--silent for a picture-only draft), and --from/--to windows the render to one
 // slice instead of the whole page; a window is silent, because the mix has no offset. --final renders the way `vawe ship` does: full size, 60 fps, the
@@ -574,9 +574,12 @@ function pinnedSliceFrames(dir, wanted) {
 // encode.go), except CRF 16 where encode.go uses 20: a page is captured lossless and CRF 16 keeps thin
 // type and gradients clean. The final uses preset fast: against medium it encodes 25% faster for a 15% larger file, 49 dB PSNR apart
 // (preset faster is 2x quicker but leaves a 54 px flat run on the dark ramp of render-banding.test.mjs). Draft is ultrafast. aq-mode=3 spends bits on dark flat areas, where 8-bit bands.
-function x264Args(final) {
-  return final
-    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'fast', '-crf', '16', '-x264-params', 'aq-mode=3', '-movflags', '+faststart']
+// A small draft (dev --small) is a file to post, such as a share loop: preset fast at CRF 24 measured 1.0 MB against
+// 4.7 MB for the plain draft on a 5 s print-grain loop at 960x504, 37.6 dB PSNR.
+function x264Args(final, small = false) {
+  if (final) return ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'fast', '-crf', '16', '-x264-params', 'aq-mode=3', '-movflags', '+faststart'];
+  return small
+    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'fast', '-crf', '24', '-movflags', '+faststart']
     : ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'ultrafast', '-crf', '20', '-movflags', '+faststart'];
 }
 
@@ -625,9 +628,9 @@ function blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, codecArgs, o
 
 // One ffmpeg pass over the blended frames: the master (x264).
 // `size` is the output [width, height] when the capture is larger: the browser's own downscale gave different pixels run to run.
-export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, size = null }) {
+export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, size = null, small = false }) {
   const tail = size ? `scale=${size[0]}:${size[1]}:flags=area` : `null${final ? `,${DITHER}` : ''}`;
-  return blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, x264Args(final), tmpOut);
+  return blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, x264Args(final, small), tmpOut);
 }
 
 // The web copy is its own pass, run after the master is delivered.
@@ -890,7 +893,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const webPath = final ? webOut(outPath) : null;
     const tmpWeb = webPath && `${webPath}.tmp-${process.pid}.mp4`;
     const t1 = Date.now();
-    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, size: final && frame.outWidth === Math.round(frame.width * frame.scale) && frame.outHeight === Math.round(frame.height * frame.scale) ? null : [frame.outWidth, frame.outHeight] });
+    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, small: opts.small, size: final && frame.outWidth === Math.round(frame.width * frame.scale) && frame.outHeight === Math.round(frame.height * frame.scale) ? null : [frame.outWidth, frame.outHeight] });
     const encodeMs = Date.now() - t1;
     if (res.status !== 0 || res.error) {
       fs.rmSync(tmpOut, { force: true });
@@ -1204,7 +1207,7 @@ async function main() {
   const [pagePath, outArg] = positional;
   if (!pagePath) {
     die('usage: node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect W:H|all] [--fps N] '
-      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--silent] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
+      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--silent] [--small] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
   ensurePageFonts(pagePath);
@@ -1232,6 +1235,7 @@ async function main() {
       blur: Number(flag('--blur', final ? 32 : 1)), from, durArg, progress: argv.includes('--progress') || (final && Boolean(process.stdout.isTTY)),
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--silent') ? false : argv.includes('--audio') ? true : undefined,
+      small: argv.includes('--small'),
       sliceFault: faultFromEnv(process.env.VAWE_TEST_SLICE_FAULT),
       muxFault: process.env.VAWE_TEST_MUX_FAULT ? () => { throw new Error('mux failed (VAWE_TEST_MUX_FAULT)'); } : undefined,
       checks: final ? undefined : createChecks({ pagePath, mode: argv.includes('--full') ? 'full' : argv.includes('--fast') ? 'fast' : 'draft' }),
