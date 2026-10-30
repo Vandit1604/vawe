@@ -1,0 +1,33 @@
+@font-face { font-family: 'Geist'; font-weight: 400 800; font-display: block; src: url('../fonts/Geist.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; font-display: block; src: url('../fonts/IBMPlexMono-500.woff2') format('woff2'); }
+
+:root {
+  --paper: #f1eadb;
+  --deep: #0a52ff;
+  --blue: #3291ff;
+  --pad: 120px;
+  --mark: 60px;
+  --h1: 92px;
+  --sub: 38px;
+  --mono: 32px;
+  --measure: 820px;
+}
+html, body { margin: 0; height: 100%; overflow: clip; background: #000; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.copy { position: absolute; left: var(--pad); top: 50%; transform: translateY(-50%); max-width: var(--measure); font-family: 'Geist', sans-serif; }
+.lockup svg { height: var(--mark); display: block; margin-bottom: calc(var(--mark) * 0.75); }
+h1 { margin: 0; font-weight: 600; font-size: var(--h1); line-height: 1.0; letter-spacing: -0.02em; }
+.sub { margin: calc(var(--h1) * 0.32) 0 0; font-weight: 400; font-size: var(--sub); line-height: 1.25; letter-spacing: -0.01em; max-width: 24em; }
+.mono { margin: calc(var(--sub) * 1.1) 0 0; font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: var(--mono); }
+.mono span { display: inline-block; padding: 0.28em 0.6em; }
+
+[data-ink="a"] .copy { color: var(--paper); }
+[data-ink="a"] .mono span { background: var(--paper); color: var(--deep); }
+[data-ink="b"] .copy { color: #fff; }
+[data-ink="b"] .sub { color: #b4b4b4; }
+[data-ink="b"] .mono span { color: var(--blue); border: 2px solid var(--blue); }
+
+body[data-format="square"] .copy { top: 72px; left: 72px; transform: none; }
+body[data-format="square"] { --mark: 48px; --h1: 80px; --sub: 32px; --mono: 28px; }
+body[data-format="og"] { --h1: 92px; --sub: 40px; --mono: 34px; --mark: 64px; --measure: 940px; }
+body[data-format="post"] { --h1: 80px; --measure: 980px; --sub: 34px; --mono: 32px; --mark: 60px; }

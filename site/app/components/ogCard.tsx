@@ -228,34 +228,3 @@ export async function staticOgImage(opts: { tag: string; title: string; descript
   const fonts = await loadOgFonts();
   return new ImageResponse(renderOgCard({ ...opts, panel: null }), { ...OG_SIZE, fonts });
 }
-
-// The site-wide default card: the lockup and one plain line.
-export async function brandOgImage(line: string) {
-  const fonts = await loadOgFonts();
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: OG_SIZE.width,
-          height: OG_SIZE.height,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          padding: "0 96px",
-          background: TOKENS.bg,
-          fontFamily: "Geist",
-          color: TOKENS.ink,
-        }}
-      >
-        <Lockup height={200} />
-        <div style={{ display: "flex", marginTop: 32, maxWidth: 880, fontSize: 36, lineHeight: 1.35, color: TOKENS.ink2, fontWeight: 400 }}>
-          {line}
-        </div>
-        <div style={{ display: "flex", marginTop: 48, fontFamily: "IBM Plex Mono", fontSize: 22, color: TOKENS.muted, letterSpacing: "0.02em" }}>
-          vawe.dev
-        </div>
-      </div>
-    ),
-    { ...OG_SIZE, fonts },
-  );
-}
