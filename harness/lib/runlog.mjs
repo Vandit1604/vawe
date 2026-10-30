@@ -72,6 +72,12 @@ export function readRuns(film, root = '.') {
   return fs.existsSync(p) ? parseRuns(fs.readFileSync(p, 'utf8')) : [];
 }
 
+/** The mp4 the last successful `vawe dev` of a film wrote, wherever --out put it, or null when none is logged or the file is gone. */
+export function lastDraft(film, root = '.') {
+  const file = readRuns(film, root).findLast((r) => r.cmd === 'dev' && !r.failed && r.file)?.file;
+  return file && fs.existsSync(file) ? file : null;
+}
+
 /** readAllRuns(dir) -> [{ film, runs }] for every <film>.runs.jsonl in dir, by film name. */
 export function readAllRuns(dir = 'out') {
   if (!fs.existsSync(dir)) return [];

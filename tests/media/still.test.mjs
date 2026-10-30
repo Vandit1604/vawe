@@ -67,3 +67,16 @@ test("stillArgs puts -ss before -i for a URL and after it for a local file", () 
 test("stillPath names a URL by its file, without the query", () => {
   assert.match(stillPath("https://x.test/d/clip.mp4?sig=1", "2"), /out\/still\/clip-2s\.png$/);
 });
+
+test('still --at 0 of a page with no duration is one frame; a later --at still refuses', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-still-nodur-'));
+  const page = path.join(dir, 'kit.html');
+  fs.writeFileSync(page, '<!doctype html><html data-aspect="16:9"><head><meta charset="utf-8"><style>html,body{margin:0;background:#123456}</style></head><body></body></html>');
+  const ok = run(page, '--at', '0', '--out', path.join(dir, 'k.png'));
+  assert.equal(ok.status, 0, ok.stderr);
+  assert.match(ok.stdout, /1920x1080, the frame at 0s/);
+  const late = run(page, '--at', '1', '--out', path.join(dir, 'k1.png'));
+  assert.notEqual(late.status, 0);
+  assert.match(late.stderr, /no <meta name="duration">/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

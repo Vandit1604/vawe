@@ -33,8 +33,8 @@ const SHAPE = { chrome: 'reused', frames: 150, reused: 10, fps: 30, width: 960, 
 test('event shapes: new, dev, judge, ship carry only their own fields', () => {
   assert.deepEqual(newEvent({ template: 'prompts/a.md', length: 5, answered: new Set(['show']), guessed: ['words'] }),
     { cmd: 'new', template: 'prompts/a.md', length: 5, answered: ['show'], guessed: ['words'], signature: { offered: {}, chosen: {} } });
-  assert.deepEqual(devEvent({ tier: 'draft', wallS: 31.44, phases: PHASES, shape: SHAPE, checks: [['contrast', 3.14], ['spec', 2], ['sheet', 1]], cache: { hit: 1, miss: 2 }, rows: ROWS }),
-    { cmd: 'dev', tier: 'draft', wallS: 31.4, startS: 0.5, slotS: 0, chromeS: 0.3, loadS: 1.2, prepassS: 0, captureS: 18, verifyS: 0.4, encodeS: 0.3, audioS: 0.6, checksTotalS: 5.1, sheetS: 1, otherS: 4,
+  assert.deepEqual(devEvent({ file: '/o/f-draft.mp4', tier: 'draft', wallS: 31.44, phases: PHASES, shape: SHAPE, checks: [['contrast', 3.14], ['spec', 2], ['sheet', 1]], cache: { hit: 1, miss: 2 }, rows: ROWS }),
+    { cmd: 'dev', file: '/o/f-draft.mp4', tier: 'draft', wallS: 31.4, startS: 0.5, slotS: 0, chromeS: 0.3, loadS: 1.2, prepassS: 0, captureS: 18, verifyS: 0.4, encodeS: 0.3, audioS: 0.6, checksTotalS: 5.1, sheetS: 1, otherS: 4,
       chrome: 'reused', frames: 150, reusedFrames: 10, fps: 30, width: 960, height: 540, workers: 2, slices: 3, durS: 5,
       checksS: { contrast: 3.1, spec: 2, sheet: 1 }, cache: { hit: 1, miss: 2 }, acceptance: { green: 1, measured: 2, red: ['b'] }, signature: {}, measured: {}, rules_fired: [], worlds: null });
   const worlds = [{ id: 'a', start: 0, end: 2, ground: '#112233' }];

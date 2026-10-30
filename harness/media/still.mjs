@@ -15,8 +15,9 @@ const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 
 export async function pageStill(pagePath, at, out, { final = true, size } = {}) {
   const dur = await resolveDuration(pagePath);
-  if (!(dur > 0)) die(`${pagePath} has no <meta name="duration">`);
-  const last = clampToLastFrame(at, dur, Number(readPageMeta(pagePath, 'fps')) || 30);
+  const fps = Number(readPageMeta(pagePath, 'fps')) || 30;
+  if (!(dur > 0) && at > 0) die(`${pagePath} has no <meta name="duration">`);
+  const last = dur > 0 ? clampToLastFrame(at, dur, fps) : { t: 0, clamped: false }; // no length: a one-frame page
   const [w] = size ? size.split('x').map(Number) : [];
   const frame = resolveFrame(pagePath, { final: true, w });
   const wrongSize = size && sizeProblem(size, frame.aspect);

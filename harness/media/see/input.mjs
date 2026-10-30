@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { refsDir, refSharpVideo, refShots, refTransitions } from '../../lib/refs.mjs';
+import { lastDraft } from '../../lib/runlog.mjs';
 import { die } from './core.mjs';
 import { filmNameOf, shotCuts, withTransitions, worldCuts } from './strip-math.mjs';
 import { videoTransitions } from './transitions.mjs';
@@ -18,8 +19,9 @@ async function locate(input) {
   if (input.endsWith('.html')) {
     if (!fs.existsSync(input)) die(`no such page: ${input}`);
     const { defaultOut } = await import('../render-page.mjs');
-    const video = defaultOut(input, { aspect: '16:9', suffixAspect: false, final: false });
-    const name = filmNameOf(video);
+    const standard = defaultOut(input, { aspect: '16:9', suffixAspect: false, final: false });
+    const video = lastDraft(input) ?? standard;
+    const name = filmNameOf(standard);
     return { video, name, page: input, cuts: () => filmCuts(name, input), draftMissing: !fs.existsSync(video), draftOld: fs.existsSync(video) && fs.statSync(video).mtimeMs < fs.statSync(input).mtimeMs };
   }
   if (fs.existsSync(input)) {

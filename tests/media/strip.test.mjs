@@ -215,3 +215,26 @@ test('withTransitions gives a shot change to its nearest cut, so a hard cut 0.4 
   assert.equal(b.kind, 'wipe');
   assert.equal(b.start, 1.4);
 });
+
+test('a page input reads the draft the last dev wrote, wherever --out put it', async () => {
+  const { resolveInput } = await import('../../harness/media/see/input.mjs');
+  const { appendRun } = await import('../../harness/lib/runlog.mjs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'strip-lastdraft-'));
+  const cwd = process.cwd();
+  process.chdir(root);
+  try {
+    fs.mkdirSync('films/f', { recursive: true });
+    fs.writeFileSync('films/f/page.html', '<html></html>');
+    assert.equal((await resolveInput('films/f/page.html')).draftMissing, true);
+    fs.mkdirSync('elsewhere');
+    fs.writeFileSync('elsewhere/draft.mp4', '');
+    const draft = path.resolve('elsewhere/draft.mp4');
+    appendRun('films/f/page.html', { cmd: 'dev', file: draft });
+    const found = await resolveInput('films/f/page.html');
+    assert.equal(found.video, draft);
+    assert.equal(found.draftMissing, false);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

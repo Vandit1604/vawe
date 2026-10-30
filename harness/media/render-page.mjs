@@ -1176,7 +1176,7 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds(), capture: frameFormat(false).label });
   const notes = writeDevNotes(mp4, { timing, ...report.notes });
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
-  appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), phases: r.phases, shape: r.shape, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired, worlds: r.probe?.worlds }));
+  appendRun(pagePath, devEvent({ file: path.resolve(mp4), tier: checks.mode, wallS: process.uptime(), phases: r.phases, shape: r.shape, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired, worlds: r.probe?.worlds }));
   const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
   console.log([timing, look, ...lensLines(r.probe?.lens, r.probe?.worlds), report.signature.line, soundSummary(r.level), ...report.red, ...range, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
