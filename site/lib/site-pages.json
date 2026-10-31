@@ -148,6 +148,11 @@
       "changeFrequency": "monthly"
     },
     {
+      "path": "/docs/agents",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
       "path": "/docs/aspect-ratios",
       "priority": 0.8,
       "changeFrequency": "monthly"
@@ -168,7 +173,22 @@
       "changeFrequency": "monthly"
     },
     {
+      "path": "/docs/brief",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
       "path": "/docs/cli",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/critique",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/design-kit",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
@@ -178,12 +198,42 @@
       "changeFrequency": "monthly"
     },
     {
+      "path": "/docs/draft",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/glossary",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/html-to-mp4-with-claude-code",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/install",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/key-frames",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/match-a-reference",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
       "path": "/docs/motion",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
     {
-      "path": "/docs/prompting",
+      "path": "/docs/motion-pass",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
@@ -198,12 +248,27 @@
       "changeFrequency": "monthly"
     },
     {
-      "path": "/docs/reading-your-film",
+      "path": "/docs/recipes",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
     {
-      "path": "/docs/recipes",
+      "path": "/docs/references",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/ship",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/style-guide",
+      "priority": 0.3,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/text-and-fonts",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
@@ -213,12 +278,12 @@
       "changeFrequency": "monthly"
     },
     {
-      "path": "/docs/troubleshooting",
+      "path": "/docs/time-and-seek",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
     {
-      "path": "/docs/html-to-mp4-with-claude-code",
+      "path": "/docs/troubleshooting",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
@@ -226,10 +291,20 @@
       "path": "/docs/video-from-code",
       "priority": 0.8,
       "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/waivers",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/worlds",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
     }
   ],
   "counts": {
     "routes": 10,
-    "docs": 16
+    "docs": 32
   }
 }
