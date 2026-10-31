@@ -74,7 +74,7 @@ Six pairs give a signal and not a proof, and the plan says so. If the method fai
 
 We publish a method and a plan, not a result. The typicality number is a self-estimate. The paper's diversity gain comes from another domain. Until the blind test runs, the honest claim is narrow. The typical idea is now written down where an agent and a reviewer can see it.
 
-The method is in the [vawe repo](https://github.com/vawe-hq/vawe) at `guides/IDEATE.md`. For the tools around it, see [the prompting guide](/docs/prompting) and [the quality gates](/docs/quality-gates). For another case where a plan and a film disagreed, read [can AI agents watch video?](/blog/watch-a-film). The craft posts on looks, curves and cuts start at [the CSS animation library](/blog/site-after-json).
+The method is in the [vawe repo](https://github.com/vawe-hq/vawe) at `guides/IDEATE.md`. For the tools around it, see [the brief page](/docs/brief) and [the checks](/docs/quality-gates). For another case where a plan and a film disagreed, read [can AI agents watch video?](/blog/watch-a-film). The craft posts on looks, curves and cuts start at [the CSS animation library](/blog/site-after-json).
 
 ## FAQ
 

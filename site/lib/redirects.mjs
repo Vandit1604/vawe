@@ -73,14 +73,14 @@ export const FAMILY_DESTINATIONS = {
   easings: "/docs/motion",
   "group-clock-loop-shapes": "/docs/motion",
   "time-remaps-the-layer-s-own-clock": move("speed-ramp-freeze"),
-  "film-energy": "/docs/prompting",
+  "film-energy": "/docs/brief",
   "scene-cuts": move("iris-wipe"),
   "seams-2-scene-blends": move("luma-matte-dissolve"),
   "shader-stings": move("liquid-wipe"),
   "transition-relationships": move("chain-beats"),
   "per-frame-accent-layers": move("marker-highlight"),
   "vector-layer-logos-icons": move("shape-trace-morph"),
-  "plain-words-feel-duration-camera-comparative": "/docs/prompting",
+  "plain-words-feel-duration-camera-comparative": "/docs/brief",
 };
 
 // One effect with a nearer page than its family's. Keys are the old stem (<family>--<name>).
@@ -221,7 +221,7 @@ export const LEGACY_REDIRECTS = [
   permanent("/playground/:path*", MOVES),
   permanent("/deck", "/docs/motion"),
   permanent("/deck.html", "/docs/motion"),
-  permanent("/vawe-rules.md", "/docs/prompting"),
+  permanent("/vawe-rules.md", "/docs/brief"),
   ...REMOVED_MOVE_RULES,
   // The gallery was /moves until 2026-10-19. The clip, markdown and index.json files keep that path, so :name stops at a dot.
   permanent("/moves", MOVES),

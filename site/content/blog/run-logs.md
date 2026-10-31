@@ -94,7 +94,7 @@ We did not rerun the reviews after the fixes, so we have before numbers and no c
 - A queue wait inside a duration looks like a slow tool. Give it its own field.
 - The log lacks intent. It tells you which call took 38 seconds. The transcript beside it tells you what the agent tried to do.
 
-The [troubleshooting page](/docs/troubleshooting) covers the failure causes the log groups, and [reading your film](/docs/reading-your-film) applies the same idea to the film itself. For the rest of the harness, read [AI agent harness design for the weaker model](/blog/weaker-model).
+The [troubleshooting page](/docs/troubleshooting) covers the failure causes the log groups, and [the critique page](/docs/critique) applies the same idea to the film itself. For the rest of the harness, read [AI agent harness design for the weaker model](/blog/weaker-model).
 
 ## FAQ
 

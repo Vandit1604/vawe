@@ -82,7 +82,7 @@ We ran the command a second time with an `answers.txt` that held the three requi
 
 We did not A/B test asking against guessing, and we have not scored films made each way. This is a design decision with a changed default. A bare `vawe new` can no longer write a brief from guesses without `--defaults`. The cost is one extra round trip for an agent that does not know the answers. An agent that passes `--answers` the first time pays nothing.
 
-The code is in `harness/cli/new.mjs` (the questions and the `--defaults` path) and `harness/lib/measured-brief.mjs` (the detail list, the `required` flags and the guess mark). Next, read [CLI design for AI agents](/blog/one-binary) for the loop after the first command. For the full set of rules, read [AI agent harness design for the weaker model](/blog/weaker-model). The [quickstart](/docs/quickstart) and the [prompting guide](/docs/prompting) show `vawe new` from the user's side.
+The code is in `harness/cli/new.mjs` (the questions and the `--defaults` path) and `harness/lib/measured-brief.mjs` (the detail list, the `required` flags and the guess mark). Next, read [CLI design for AI agents](/blog/one-binary) for the loop after the first command. For the full set of rules, read [AI agent harness design for the weaker model](/blog/weaker-model). The [quickstart](/docs/quickstart) and the [brief page](/docs/brief) show `vawe new` from the user's side.
 
 ## FAQ
 
